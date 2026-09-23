@@ -1,0 +1,24 @@
+name: Feedback
+description: Share what felt useful, confusing or missing.
+title: "[Feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying Annotator. This issue is public.
+        Do not include private screenshots, drawings or account details.
+  - type: input
+    id: version
+    attributes:
+      label: App version and build
+  - type: textarea
+    id: experience
+    attributes:
+      label: How did it go?
+      description: What were you trying to do? What helped, and what got in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: What would you change?
