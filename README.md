@@ -1,101 +1,108 @@
 # Annotator
 
-Draw on your Mac desktop while keeping your apps open. Mark up a design,
-explain a diagram or point out a detail during a call. Your drawings stay
-editable.
+## Draw on your Mac.
 
-**All tools are free.** No paid tiers, account or subscription.
+Circle a detail, connect ideas with arrows, or sketch over the app you're using.
+Keep your drawings editable on the live desktop.
 
-[Website](https://dorlugasigal.github.io/annotator/) |
-[Watch the demo](https://dorlugasigal.github.io/annotator/#native-demo) |
-[Field guide](https://dorlugasigal.github.io/annotator/docs/) |
-[Releases](https://github.com/dorlugasigal/annotator/releases)
+**All tools are free.** No account, paid tiers or subscription.
+**[Buy me a coffee](https://buymeacoffee.com/dorlugasigal)** if you'd like to
+support the person making Annotator. It's optional and doesn't unlock anything.
+
+[Download alpha.2](https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-arm64.zip) ·
+[Website](https://dorlugasigal.github.io/annotator/) ·
+[Field guide](https://dorlugasigal.github.io/annotator/docs/) ·
+[AI skill](https://dorlugasigal.github.io/annotator/ai/)
+
+macOS 14 or later · Apple Silicon · Public alpha.2, build 10
 
 [![Annotator's native toolbar and an editable diagram over a Mac desktop window](https://dorlugasigal.github.io/annotator/demo/annotator-ad-poster.jpg)](https://dorlugasigal.github.io/annotator/#native-demo)
 
-Real Mac app footage, with scripted actions and fictional data. Click the image
-to watch the demo.
+**[Watch the desktop demo](https://dorlugasigal.github.io/annotator/#native-demo)**
+with playback controls, chapters and a text description.
+Real Mac app footage with scripted, sped-up actions and fictional data.
+Music: ["Chrome Funk" by Punch Deck](https://punchdeck.bandcamp.com/track/chrome-funk),
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), edited excerpt.
 
-## What you can do
+## Keep your app open
 
-- Sketch with the pen and Smart Draw, then edit shapes, arrows and text labels.
-- Highlight a line, zoom into a detail, or add Blur and Pixelate effects.
-- Move, resize and group annotations. Save a board and return to it later.
-- Switch between drawing and using the apps underneath. Hide or restore your
-  drawings and toolbar together.
-
-Annotator works over the live desktop. It is not a screen recorder or a
-standalone image editor.
-
-## Download and install
-
-Annotator is in **alpha**. Start with the
-[published releases](https://github.com/dorlugasigal/annotator/releases) and
-read the notes for the build you choose. If no app ZIP is listed under Assets,
-there is no public installer yet. The website being live does not mean an app
-release is available.
-
-Download the `annotator-...-arm64.zip` asset, not either **Source code** archive.
-Quit any running Annotator or Annotator Dev instance, extract the ZIP, and move
-**Annotator.app** to **Applications**. Save your work before replacing an
-existing installation.
-
-If macOS cannot verify the app, says it is damaged, or your organization blocks
-it, stop and [report the exact message](https://github.com/dorlugasigal/annotator/issues/new?template=bug-report.yml).
-Do not remove quarantine or disable Gatekeeper.
-
-### Homebrew
-
-After a signed alpha release and its preview cask have been published:
-
-```bash
-brew tap dorlugasigal/annotator https://github.com/dorlugasigal/annotator
-brew install --cask dorlugasigal/annotator/annotator-preview
-```
-
-For later preview updates:
-
-```bash
-brew update
-brew upgrade --cask dorlugasigal/annotator/annotator-preview
-```
-
-The alpha uses `annotator-preview`. The stable `annotator` cask is a separate
-track; do not install both.
-
-## Requirements and current limits
-
-| Requirement | Details |
+| What you want to do | Tools |
 | --- | --- |
-| Mac | Apple Silicon |
-| macOS | 14 or later; compatibility across supported versions is still being tested |
-| Screen Recording permission | Needed for live pixel effects |
-| Accessibility permission | Needed for live zoom gestures |
+| Explain an idea | Pen, Smart Draw, shapes, arrows and text labels |
+| Point out a detail | Highlighter, spotlight and live screen zoom |
+| Refine a drawing | Move, resize, group and Undo; save an editable board |
+| Get back to work | Switch between drawing and using the app underneath; hide or restore the drawings and toolbar together |
 
-VoiceOver support is incomplete. Multi-monitor compatibility and long-session
-performance still need wider testing. During screen sharing, check what the
-other person sees: app/window-only sharing may omit desktop annotations.
+Annotator works on the live desktop. It does not record video or provide a
+standalone image editor or OCR reader.
 
-Blur and Pixelate are visual effects, **not secure redaction**. Use fictional
-data for tests and demonstrations.
+## Install the public alpha
 
-See the [field guide](https://dorlugasigal.github.io/annotator/docs/) for
-permissions, controls and capture limits, and the
-[privacy page](https://dorlugasigal.github.io/annotator/privacy/) for data handling.
+**[Download alpha.2, build 10 for Apple Silicon](https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-arm64.zip)**
+and read the [release notes](https://github.com/dorlugasigal/annotator/releases/tag/v0.1.0-alpha.2)
+before installing. This is a testing release with known limits, not a stable
+release. [All releases](https://github.com/dorlugasigal/annotator/releases).
 
-## Feedback and support
+Save your drawings and quit other Annotator copies. Unzip the download, move
+**Annotator.app** to **Applications**, then open it normally. Use the app ZIP,
+not GitHub's **Source code** archives.
 
-[Report a problem](https://github.com/dorlugasigal/annotator/issues/new?template=bug-report.yml)
-or [share feedback](https://github.com/dorlugasigal/annotator/issues/new?template=feedback.yml).
-Include the app version, macOS version and steps to reproduce the problem.
-Issues are public: do not attach private desktop screenshots, credentials or
-unrelated documents.
+If macOS blocks the app, stop and [report the exact message](https://github.com/dorlugasigal/annotator/issues/new/choose).
+Do not remove quarantine or disable security checks.
 
-If Annotator helps you, you can [buy me a beer](https://buymeacoffee.com/dorlugasigal).
-Support is optional and does not unlock features.
+### Homebrew install name
+
+The intended Homebrew name is `annotator`, including for alpha releases.
+Availability under this name has not yet been verified. Use the ZIP above
+for now. Once the renamed cask is published, the install commands will be:
+
+```sh
+brew tap dorlugasigal/annotator https://github.com/dorlugasigal/annotator
+brew install --cask dorlugasigal/annotator/annotator
+```
+
+After that change, save your work and quit Annotator before updating:
+
+```sh
+brew update
+brew upgrade --cask dorlugasigal/annotator/annotator
+```
+
+If you already installed through Homebrew, wait for migration instructions
+before changing install names. Do not install a second copy alongside it.
+The shorter name does not change this build's alpha status.
+
+## Privacy and alpha limits
+
+Drawing and live screen effects run locally. Drawing needs no screen access;
+live zoom and pixel effects need **Screen Recording** permission. Zoom gestures
+over other apps also need **Accessibility** permission. An AI app controlling
+Annotator may send screenshots to its model provider; check that app's settings.
+
+VoiceOver support is incomplete. Other hardware, multiple displays, long
+sessions and screen-sharing apps still need wider testing. App/window-only
+sharing may omit annotations. Check what the other person sees before sharing
+private content.
+
+Blur, Pixelate and Distort are visual effects, not secure redaction. Hiding or
+quitting Annotator, or an app crash, removes visible covers. Remove private
+details from the material you plan to share.
+
+[Capture and compatibility limits](https://dorlugasigal.github.io/annotator/docs/#limitations) ·
+[Privacy](https://dorlugasigal.github.io/annotator/privacy/)
+
+## Feedback and optional support
+
+[Report a problem or share feedback](https://github.com/dorlugasigal/annotator/issues/new/choose).
+Include your app version/build, macOS version and the steps to reproduce it.
+Issues are public. Use fictional data; never attach credentials, private
+desktop screenshots or unrelated documents.
+
+**[Buy me a coffee](https://buymeacoffee.com/dorlugasigal)** if Annotator helps
+you. All tools stay free whether you contribute or not.
 
 ## About this repository
 
-Annotator is proprietary software, free to use. This repository contains its
-generated website, public release assets, Homebrew casks when published, and
-issue forms. Application and website authoring source are maintained privately.
+Annotator is proprietary software, free to use. This public repository hosts
+the generated website, app releases, release notes, Homebrew casks and issue
+forms. The application and website authoring source are maintained privately.
