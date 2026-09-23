@@ -1,0 +1,48 @@
+name: Bug report
+description: Tell us what went wrong while using Annotator.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is public. Use fictional content; remove private details from screenshots.
+        The app does not attach drawings, screen captures or logs automatically.
+  - type: input
+    id: version
+    attributes:
+      label: App version and build
+      description: Find this in Settings or Help.
+      placeholder: 0.1.0-alpha.2 (10)
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac chip
+      description: Do not include a serial number.
+    validations:
+      required: true
+  - type: input
+    id: displays
+    attributes:
+      label: Displays
+      description: Number of monitors and their scaling, if relevant.
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you try?
+      description: List the steps, what you expected and what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: sharing
+    attributes:
+      label: Screen sharing or installation details
+      description: Name the sharing app/mode and receiver result, or paste the exact macOS installation message.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked that this public report contains no private data or credentials.
+          required: true
