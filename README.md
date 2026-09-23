@@ -6,8 +6,6 @@ Circle a detail, connect ideas with arrows, or sketch over the app you're using.
 Keep your drawings editable on the live desktop.
 
 **All tools are free.** No account, paid tiers or subscription.
-**[Buy me a coffee](https://buymeacoffee.com/dorlugasigal)** if you'd like to
-support the person making Annotator. It's optional and doesn't unlock anything.
 
 [Download alpha.2](https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-arm64.zip) ·
 [Website](https://dorlugasigal.github.io/annotator/) ·
