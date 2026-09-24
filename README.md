@@ -7,16 +7,19 @@ Keep your drawings editable on the live desktop.
 
 **All tools are free.** No account, paid tiers or subscription.
 
-[Download alpha.2](https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-arm64.zip) ·
-[Website](https://dorlugasigal.github.io/annotator/) ·
-[Field guide](https://dorlugasigal.github.io/annotator/docs/) ·
-[AI skill](https://dorlugasigal.github.io/annotator/ai/)
+[Download Annotator](https://annotator-desktop.netlify.app/downloads/) ·
+[Website](https://annotator-desktop.netlify.app/) ·
+[Help](https://annotator-desktop.netlify.app/docs/) ·
+[AI skill](https://annotator-desktop.netlify.app/ai/)
 
-macOS 14 or later · Apple Silicon · Public alpha.2, build 10
+macOS 14 or later · Apple Silicon (M-series) · Public alpha
 
-[![Annotator's native toolbar and an editable diagram over a Mac desktop window](https://dorlugasigal.github.io/annotator/demo/annotator-ad-poster.jpg)](https://dorlugasigal.github.io/annotator/#native-demo)
+An alpha is an early test release. The Downloads page lists the current version
+and known limits. Check Apple menu > About This Mac for your chip and macOS version.
 
-**[Watch the desktop demo](https://dorlugasigal.github.io/annotator/#native-demo)**
+[![Annotator's native toolbar and an editable diagram over a Mac desktop window](https://annotator-desktop.netlify.app/demo/annotator-ad-poster.jpg)](https://annotator-desktop.netlify.app/#native-demo)
+
+**[Watch the desktop demo](https://annotator-desktop.netlify.app/#native-demo)**
 with playback controls, chapters and a text description.
 Real Mac app footage with scripted, sped-up actions and fictional data.
 Music: ["Chrome Funk" by Punch Deck](https://punchdeck.bandcamp.com/track/chrome-funk),
@@ -36,46 +39,64 @@ standalone image editor or OCR reader.
 
 ## Install the public alpha
 
-**[Download alpha.2, build 10 for Apple Silicon](https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-arm64.zip)**
-and read the [release notes](https://github.com/dorlugasigal/annotator/releases/tag/v0.1.0-alpha.2)
+**[Choose the current download for Apple Silicon](https://annotator-desktop.netlify.app/downloads/)**
+and read its [release notes](https://github.com/dorlugasigal/annotator/releases)
 before installing. This is a testing release with known limits, not a stable
 release. [All releases](https://github.com/dorlugasigal/annotator/releases).
 
-Save your drawings and quit other Annotator copies. Unzip the download, move
+Keep a backup of your boards. Stop screen sharing before quitting Annotator:
+quitting removes covers. Save your drawings and quit other Annotator copies.
+Unzip the download, move
 **Annotator.app** to **Applications**, then open it normally. Use the app ZIP,
 not GitHub's **Source code** archives.
 
 If macOS blocks the app, stop and [report the exact message](https://github.com/dorlugasigal/annotator/issues/new/choose).
 Do not remove quarantine or disable security checks.
 
-### Homebrew install name
+### Install with Homebrew
 
-The intended Homebrew name is `annotator`, including for alpha releases.
-Availability under this name has not yet been verified. Use the ZIP above
-for now. Once the renamed cask is published, the install commands will be:
+The published cask is `annotator`, including for alpha releases. Installation
+and migration on another Mac still need verification.
 
 ```sh
 brew tap dorlugasigal/annotator https://github.com/dorlugasigal/annotator
 brew install --cask dorlugasigal/annotator/annotator
 ```
 
-After that change, save your work and quit Annotator before updating:
+Save your work, stop screen sharing and quit Annotator before updating:
 
 ```sh
 brew update
 brew upgrade --cask dorlugasigal/annotator/annotator
 ```
 
-If you already installed through Homebrew, wait for migration instructions
-before changing install names. Do not install a second copy alongside it.
-The shorter name does not change this build's alpha status.
+If you installed the older `annotator-preview` cask, do not install a second
+copy alongside it. Save your boards, stop sharing and quit Annotator, then
+replace only the old cask:
+
+```sh
+brew uninstall --cask dorlugasigal/annotator/annotator-preview
+brew install --cask dorlugasigal/annotator/annotator
+```
+
+Do not add `--zap`; keep your boards and preferences. The install name does
+not change the release's alpha status. If macOS blocks installation, report
+the message rather than bypassing its security checks.
+
+## First use
+
+Choose a tool in the floating toolbar. With Pen, drag on your screen.
+Click **Use apps** to work in the app underneath while drawings stay visible.
+Press **Control-Shift-2** to draw again; change this shortcut in Settings >
+Shortcuts. **Control-2** shows or hides drawings and tools together, including
+covers. Find Settings and Help in Annotator's menu-bar menu.
 
 ## Privacy and alpha limits
 
 Drawing and live screen effects run locally. Drawing needs no screen access;
 live zoom and pixel effects need **Screen Recording** permission. Zoom gestures
 over other apps also need **Accessibility** permission. An AI app controlling
-Annotator may send screenshots to its model provider; check that app's settings.
+Annotator may send screenshots and text to its model provider; check that app's settings.
 
 VoiceOver support is incomplete. Other hardware, multiple displays, long
 sessions and screen-sharing apps still need wider testing. App/window-only
@@ -86,13 +107,19 @@ Blur, Pixelate and Distort are visual effects, not secure redaction. Hiding or
 quitting Annotator, or an app crash, removes visible covers. Remove private
 details from the material you plan to share.
 
-[Capture and compatibility limits](https://dorlugasigal.github.io/annotator/docs/#limitations) ·
-[Privacy](https://dorlugasigal.github.io/annotator/privacy/)
+Editable boards keep original pasted images, including parts hidden by covers.
+Do not share a board containing private details. Check any exported PNG before
+sharing it; blur can still leave details readable.
+
+[Capture and compatibility limits](https://annotator-desktop.netlify.app/docs/#limitations) ·
+[Privacy](https://annotator-desktop.netlify.app/privacy/)
 
 ## Feedback and optional support
 
 [Report a problem or share feedback](https://github.com/dorlugasigal/annotator/issues/new/choose).
 Include your app version/build, macOS version and the steps to reproduce it.
+Settings > About > Copy support info gathers app and system details without
+drawings or screenshots. Review it before sharing.
 Issues are public. Use fictional data; never attach credentials, private
 desktop screenshots or unrelated documents.
 
