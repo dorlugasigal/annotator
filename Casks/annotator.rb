@@ -1,8 +1,8 @@
 cask "annotator" do
-  version "0.1.0-alpha.4,12"
-  sha256 "b38e76e931d2b2798c644bbe355ca04271acbda7fcf2840fbfe060deeee7f8a1"
+  version "0.1.0-alpha.5,13"
+  sha256 "ba757c72134fb599f6c10a07bb21a3ff7146828731862d18a3fb0c7f34961b86"
 
-  url "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.4/annotator-0.1.0-alpha.4-12-arm64.zip"
+  url "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-alpha.5/annotator-0.1.0-alpha.5-13-arm64.zip"
   name "Annotator"
   desc "Native live desktop annotation"
   homepage "https://annotator-desktop.netlify.app"
