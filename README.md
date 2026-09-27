@@ -107,22 +107,6 @@ brew update
 brew upgrade --cask dorlugasigal/annotator/annotator
 ```
 
-<details>
-<summary>Moving from the older <code>annotator-preview</code> cask</summary>
-<br>
-
-Don't install a second copy next to it. Save your boards, stop screen sharing
-and quit Annotator, then replace the old cask:
-
-```sh
-brew uninstall --cask dorlugasigal/annotator/annotator-preview
-brew install --cask dorlugasigal/annotator/annotator
-```
-
-Don't add `--zap`. Keep your boards and preferences.
-
-</details>
-
 If macOS blocks Annotator, [report the exact message](https://github.com/dorlugasigal/annotator/issues/new?template=bug-report.yml).
 Don't remove the quarantine attribute or turn off security checks.
 
