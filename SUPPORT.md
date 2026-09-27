@@ -1,6 +1,6 @@
 # Getting help
 
-- [Help](https://annotator-desktop.netlify.app/docs/) covers first steps, shortcuts, permissions, screen sharing and saving boards.
+- [Help](https://getannotator.app/docs/) covers first steps, shortcuts, permissions, screen sharing and saving boards.
 - The [release notes](https://github.com/dorlugasigal/annotator/releases) list what changed and the known limits of each version.
 - [Report a problem](https://github.com/dorlugasigal/annotator/issues/new?template=bug-report.yml) if something doesn't work, or [share feedback](https://github.com/dorlugasigal/annotator/issues/new?template=feedback.yml) if something is confusing or missing.
 

@@ -7,9 +7,9 @@
 **Draw on your screen as you explain.**<br>
 Use it in demos, reviews and lessons. Every mark stays editable.
 
-[**Download for Mac**](https://annotator-desktop.netlify.app/downloads/) &nbsp;·&nbsp;
-[Website](https://annotator-desktop.netlify.app/) &nbsp;·&nbsp;
-[Help](https://annotator-desktop.netlify.app/docs/) &nbsp;·&nbsp;
+[**Download for Mac**](https://getannotator.app/downloads/) &nbsp;·&nbsp;
+[Website](https://getannotator.app/) &nbsp;·&nbsp;
+[Help](https://getannotator.app/docs/) &nbsp;·&nbsp;
 [Release notes](https://github.com/dorlugasigal/annotator/releases)
 
 [![Latest release](https://img.shields.io/github/v/release/dorlugasigal/annotator?include_prereleases&label=release&color=ffb58c&labelColor=111928)](https://github.com/dorlugasigal/annotator/releases)
@@ -73,10 +73,10 @@ Annotator has more than 40 tools. Open the tool library with <kbd>⌘L</kbd> or 
 toolbar button for shapes, diagram icons, Screen zoom, Pointer lens, Pixelate,
 a numbered counter, a pixel ruler, pasted images and your own saved shapes.
 Style any mark with fills, gradients, dashed or sketchy lines, or draw on a
-whiteboard or blackboard. [Watch each tool on the website.](https://annotator-desktop.netlify.app/#workspace)
+whiteboard or blackboard. [Watch each tool on the website.](https://getannotator.app/#workspace)
 
 An AI assistant with computer-use tools can also drive Annotator through its
-normal interface. [Set up the Annotator skill.](https://annotator-desktop.netlify.app/ai/)
+normal interface. [Set up the Annotator skill.](https://getannotator.app/ai/)
 
 ## Install
 
@@ -86,7 +86,7 @@ a public alpha, so read the known limits in the
 
 ### Disk image
 
-1. [Download Annotator](https://annotator-desktop.netlify.app/downloads/) and open the disk image.
+1. [Download Annotator](https://getannotator.app/downloads/) and open the disk image.
 2. Drag Annotator into Applications.
 3. Open Annotator from Applications. It runs from the menu bar, not the Dock.
 
@@ -133,8 +133,8 @@ Annotator's menu-bar menu.
 - Saved boards keep pasted images whole, even the parts under covers. Don't share a board with private details.
 - An AI app that controls Annotator may send screenshots and text to its provider. Check that app's privacy settings.
 
-[Privacy](https://annotator-desktop.netlify.app/privacy/) ·
-[Screen-sharing and capture limits](https://annotator-desktop.netlify.app/docs/#limitations)
+[Privacy](https://getannotator.app/privacy/) ·
+[Screen-sharing and capture limits](https://getannotator.app/docs/#limitations)
 
 ## Feedback and support
 
@@ -148,4 +148,4 @@ Annotator's menu-bar menu.
 Annotator is proprietary and free to use. Its source code is private. This
 repository holds the app releases and their notes, the Homebrew cask, the issue
 forms and the redirect from the old GitHub Pages address to the
-[current website](https://annotator-desktop.netlify.app/).
+[current website](https://getannotator.app/).

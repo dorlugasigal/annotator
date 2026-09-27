@@ -25,4 +25,4 @@ fixes, so update before you report.
 Some limits are documented and aren't security problems. Blur, Pixelate and
 Distort are visual effects, not secure redaction. App or window sharing may
 leave drawings out. Hiding or quitting Annotator removes covers. See
-[Screen-sharing and capture limits](https://annotator-desktop.netlify.app/docs/#limitations).
+[Screen-sharing and capture limits](https://getannotator.app/docs/#limitations).

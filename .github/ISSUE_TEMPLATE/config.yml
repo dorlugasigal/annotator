@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Help and first steps
-    url: https://annotator-desktop.netlify.app/docs/
+    url: https://getannotator.app/docs/
     about: Shortcuts, permissions, screen sharing and saving boards.
   - name: Report a security problem
     url: https://github.com/dorlugasigal/annotator/security/advisories/new
