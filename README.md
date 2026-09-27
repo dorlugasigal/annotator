@@ -96,11 +96,11 @@ from anywhere else, it offers to show it in Finder so you can move it.
 ### Homebrew
 
 ```sh
-brew tap dorlugasigal/annotator https://github.com/dorlugasigal/annotator
 brew install --cask dorlugasigal/annotator/annotator
 ```
 
-To update, save your boards and quit Annotator, then run:
+Homebrew adds the [Annotator tap](https://github.com/dorlugasigal/homebrew-annotator)
+the first time. To update, save your boards and quit Annotator, then run:
 
 ```sh
 brew update
