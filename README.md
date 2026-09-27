@@ -14,7 +14,7 @@ Use it in demos, reviews and lessons. Every mark stays editable.
 
 [![Latest release](https://img.shields.io/github/v/release/dorlugasigal/annotator?include_prereleases&label=release&color=ffb58c&labelColor=111928)](https://github.com/dorlugasigal/annotator/releases)
 [![macOS 14 or later](https://img.shields.io/badge/macOS-14%2B-e8eef9?labelColor=111928)](#install)
-[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-M--series-e8eef9?labelColor=111928)](#install)
+[![Apple Silicon and Intel](https://img.shields.io/badge/Mac-Apple%20Silicon%20%7C%20Intel-e8eef9?labelColor=111928)](#install)
 [![All tools are free](https://img.shields.io/badge/price-free-e8eef9?labelColor=111928)](#about-this-repository)
 
 </div>
@@ -80,8 +80,8 @@ normal interface. [Set up the Annotator skill.](https://getannotator.app/ai/)
 
 ## Install
 
-Annotator needs macOS 14 or later and a Mac with an Apple M-series chip. It is
-a public alpha, so read the known limits in the
+Annotator needs macOS 14 or later, on a Mac with Apple Silicon or an Intel
+processor. It is a public alpha, so read the known limits in the
 [release notes](https://github.com/dorlugasigal/annotator/releases) first.
 
 ### Disk image
