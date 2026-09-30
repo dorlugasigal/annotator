@@ -119,7 +119,7 @@ Don't remove the quarantine attribute or turn off security checks.
 | Show or hide your drawings and the toolbar | <kbd>⌃2</kbd> (Control-2) |
 | Open the tool library while drawing | <kbd>⌘L</kbd> |
 
-These are the default keys. Change them in Settings > Shortcuts. Esc first
+These are the default keys. Change them in Settings > Toolbar & Shortcuts. Esc first
 finishes the text or shape you are drawing. Settings and Help are in
 Annotator's menu-bar menu.
 
