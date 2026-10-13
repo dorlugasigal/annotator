@@ -1,8 +1,8 @@
 cask "annotator" do
-  version "0.1.0-beta.2,20"
-  sha256 "0e636c6e7a1b5e94aee0ddc46d05f393a575f583a49ff264abe24dbf6820957e"
+  version "0.1.0-beta.3,21"
+  sha256 "1e4b09a6dee20d791fc229a106bc85c655d189a25df8fa6525daf4a6ed3e15ec"
 
-  url "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-beta.2/annotator-0.1.0-beta.2-20-universal.zip"
+  url "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-beta.3/annotator-0.1.0-beta.3-21-universal.zip"
   name "Annotator"
   desc "Native live desktop annotation"
   homepage "https://getannotator.app"
