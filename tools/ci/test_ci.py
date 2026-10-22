@@ -308,6 +308,11 @@ class WorkflowStructureTests(unittest.TestCase):
                     self.assertEqual(body["permissions"], {"contents": "read", "actions": "read",
                                                            "security-events": "write", "id-token": "write"})
                     continue
+                if (name, job_name) == ("store-submission.yml", "submit"):
+                    # Reads the chosen Release run and downloads its windows-bundle artifact.
+                    self.assertEqual(body["permissions"], {"contents": "read", "actions": "read"})
+                    self.assertEqual(body["environment"], "windows-store")
+                    continue
                 if (name, job_name) == ("release.yml", "publish"):
                     # Publishing creates the release in this repository with the workflow token,
                     # behind the release-publishing environment.
@@ -352,6 +357,24 @@ class WorkflowStructureTests(unittest.TestCase):
         self.assertNotIn("secrets.", yaml.safe_dump(data))
         for body in data["jobs"].values():
             self.assertLessEqual(body["timeout-minutes"], 10)
+
+    def test_resume_store_submission_is_owner_only_and_never_builds(self):
+        data = dict(self.workflows())["store-submission.yml"]
+        self.assertEqual(set(data["on"]), {"workflow_dispatch"})
+        self.assertEqual(data["on"]["workflow_dispatch"]["inputs"]["windows_store"]["options"], ["testers", "public"])
+        self.assertEqual(data["concurrency"], {"group": "annotator-release", "cancel-in-progress": False})
+        job = data["jobs"]["submit"]
+        for clause in ("github.ref == 'refs/heads/main'", "github.event_name == 'workflow_dispatch'",
+                       "github.triggering_actor == github.repository_owner", "vars.STORE_SUBMISSION_ENABLED == 'true'"):
+            self.assertIn(clause, job["if"])
+        self.assertNotIn("||", job["if"])
+        text = yaml.safe_dump(job, width=10**6)
+        for step in ("hosted_release.py resume", "hosted_release.py verify", "hosted_release.py cli", "hosted_release.py submit"):
+            self.assertIn(step, text)
+        for forbidden in ("package.ps1", "dotnet", "setup-dotnet", "upload-artifact"):
+            self.assertNotIn(forbidden, text)
+        names = [step.get("name", step.get("uses", "")) for step in job["steps"]]
+        self.assertLess(names.index("Check the bundle's SHA-256"), names.index("Send the bundle to the Store"))
 
     def test_release_runs_one_at_a_time_without_cancelling(self):
         data = dict(self.workflows())["release.yml"]

@@ -64,6 +64,16 @@ Nothing goes to the Store unless all of these hold:
 
 Certification can take up to three business days.
 
+### Sending a published build later
+
+When a Release run left the Store out (`windows_store` was `none`) or its Store
+job failed, run **Actions > Resume Store submission** on `main` instead of a
+new release. Give it the Release run's ID (the number at the end of its URL)
+and `testers` or `public`. It sends the `windows-bundle` artifact that run
+built, after checking that the run succeeded on `main` and that the published
+`v<version>` tag points at the same commit. It builds nothing and has the same
+gate as above. The artifact is kept for 14 days.
+
 ## When something fails
 
 - **Mac job failed before Apple**: fix the cause and run again with the same

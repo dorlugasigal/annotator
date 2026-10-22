@@ -1,0 +1,100 @@
+name: Resume Store submission
+
+# Sends the Windows bundle of an earlier, successful Release run to the Microsoft Store: for a run that left the
+# Store out, or whose Store job failed. It never builds anything; the bundle is the one that run built and published.
+on:
+  workflow_dispatch:
+    inputs:
+      release_run_id:
+        description: ID of the successful Release run whose windows-bundle artifact to send (its URL ends with it)
+        required: true
+        type: string
+      windows_store:
+        description: Where to send it (testers = the package flight or the private audience; public only after the launch decision)
+        required: true
+        default: testers
+        type: choice
+        options: [testers, public]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: annotator-release
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    name: Microsoft Store submission
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && github.triggering_actor == github.repository_owner && vars.STORE_SUBMISSION_ENABLED == 'true' }}
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    environment: windows-store
+    # Reads the chosen Release run and downloads its artifact with the workflow token.
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check that the run is a successful Release run on main
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.release_run_id }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if ($env:RUN_ID -notmatch '^[0-9]+$') { throw "release_run_id must be the number at the end of the Release run's URL." }
+          $run = gh api "repos/$env:REPOSITORY/actions/runs/$env:RUN_ID" | ConvertFrom-Json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          if ($run.path -ne '.github/workflows/release.yml' -or $run.head_branch -ne 'main' -or $run.conclusion -ne 'success') {
+            throw "Run $env:RUN_ID is not a successful Release run on main."
+          }
+          "sha=$($run.head_sha)" >> $env:GITHUB_OUTPUT
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: windows-bundle
+          path: ${{ runner.temp }}/windows-bundle
+          run-id: ${{ inputs.release_run_id }}
+          github-token: ${{ github.token }}
+      - name: Check the bundle against the run and the published tag
+        id: bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_RUN_ID: ${{ inputs.release_run_id }}
+          SOURCE_RUN_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          $receipt = Get-Content "$env:RUNNER_TEMP/windows-bundle/windows-release.json" -Raw | ConvertFrom-Json
+          if ($receipt.releaseVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$') { throw "The receipt names no release version." }
+          $env:TAG_SHA = gh api "repos/$env:REPOSITORY/commits/v$($receipt.releaseVersion)" --jq .sha
+          python tools/windows/hosted_release.py resume --folder "$env:RUNNER_TEMP/windows-bundle"
+      - name: Check the bundle's SHA-256
+        env:
+          CANDIDATE_SHA: ${{ steps.bundle.outputs.candidate }}
+          MSIX: ${{ steps.bundle.outputs.msix }}
+          BUNDLE_SHA256: ${{ steps.bundle.outputs.sha256 }}
+          BUNDLE_RUN_ID: ${{ inputs.release_run_id }}
+        run: python tools/windows/hosted_release.py verify --folder "$env:RUNNER_TEMP/windows-bundle"
+      - name: Install the pinned Microsoft Store Developer CLI
+        run: python tools/windows/hosted_release.py cli --folder "$env:RUNNER_TEMP/msstore"
+      - name: Send the bundle to the Store
+        env:
+          STORE_TARGET: ${{ inputs.windows_store }}
+          CANDIDATE_SHA: ${{ steps.bundle.outputs.candidate }}
+          MSIX: ${{ steps.bundle.outputs.msix }}
+          BUNDLE_SHA256: ${{ steps.bundle.outputs.sha256 }}
+          BUNDLE_RUN_ID: ${{ inputs.release_run_id }}
+          WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
+          WINDOWS_STORE_FLIGHT_ID: ${{ vars.WINDOWS_STORE_FLIGHT_ID }}
+          PARTNER_CENTER_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          PARTNER_CENTER_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          PARTNER_CENTER_CLIENT_SECRET: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+        run: python tools/windows/hosted_release.py submit --folder "$env:RUNNER_TEMP/windows-bundle" --cli "$env:RUNNER_TEMP/msstore"
