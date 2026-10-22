@@ -290,9 +290,7 @@ class WorkflowStructureTests(unittest.TestCase):
 
     def test_permissions_stay_read_only_except_explicit_dispatch_rights(self):
         for name, data in self.workflows():
-            self.assertEqual(data["permissions"]["contents"], "read", name)
-            extra = {key: value for key, value in data["permissions"].items() if key != "contents"}
-            self.assertEqual(extra, {"actions": "write"} if name == "distribution-sync.yml" else {}, name)
+            self.assertEqual(data["permissions"], {"contents": "read"}, name)
             for job_name, body in data["jobs"].items():
                 if (name, job_name) in (("pages.yml", "deploy"), ("website.yml", "bridge")):
                     # The Pages feed-bridge deploy is the only job that writes, and only to GitHub Pages.
@@ -317,6 +315,11 @@ class WorkflowStructureTests(unittest.TestCase):
                     # Publishing creates the release in this repository with the workflow token,
                     # behind the release-publishing environment.
                     self.assertEqual(body["permissions"], {"contents": "write"})
+                    self.assertEqual(body["environment"], "release-publishing")
+                    continue
+                if (name, job_name) == ("distribution-sync.yml", "sync"):
+                    # Starts a fresh website build with the workflow token after repairing the tap.
+                    self.assertEqual(body["permissions"], {"contents": "read", "actions": "write"})
                     self.assertEqual(body["environment"], "release-publishing")
                     continue
                 if (name, job_name) == ("release.yml", "windows-sign"):

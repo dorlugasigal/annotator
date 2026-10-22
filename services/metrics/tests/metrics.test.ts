@@ -171,7 +171,7 @@ test("raw records older than 45 days are removed but summaries remain", async ()
 test("daily run snapshots GitHub and Homebrew and reports source failures", async () => {
   const store = new MemoryStore();
   const fetcher = async (url: string) => {
-    if (url.includes("api.github.com")) return Response.json([
+    if (new URL(url).hostname === "api.github.com") return Response.json([
       { tag_name: "v0.1.0-alpha.3", assets: [{ name: "Annotator.zip", download_count: 12 }, { name: "appcast.xml", download_count: 99 }] },
       { tag_name: "v0.1.0-alpha.2", assets: [{ name: "Annotator.zip", download_count: 5 }] },
     ]);

@@ -178,6 +178,31 @@ class DistributionTests(unittest.TestCase):
                     "https://example.com//path", "https://example.com:444/path"]:
             with self.assertRaises(ValueError):
                 d.website_url(url)
+        self.assertEqual(d.website_url("https://example.com/a_b-1/c"), "https://example.com/a_b-1/c")
+        with self.assertRaises(ValueError):
+            d.website_url("https://example.com/a//b")
+        # A long path that almost matches fails at once instead of backtracking exponentially.
+        with self.assertRaises(ValueError):
+            d.website_url("https://example.com/" + "-" * 64 + "!")
+
+    def test_signing_material_is_owner_only_from_creation_and_never_reused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "AuthKey.p8"
+            previous = os.umask(0)
+            try:
+                d.private_file(path, b"key")
+            finally:
+                os.umask(previous)
+            self.assertEqual(path.read_bytes(), b"key")
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+            with self.assertRaises(FileExistsError):
+                d.private_file(path, b"other")
+            self.assertEqual(path.read_bytes(), b"key")
+            link = Path(folder) / "link"
+            link.symlink_to(Path(folder) / "elsewhere")
+            with self.assertRaises(FileExistsError):
+                d.private_file(link, b"key")
+            self.assertFalse((Path(folder) / "elsewhere").exists())
 
     def test_manifest_fails_closed_and_appcast_uses_build_order(self):
         data = manifest()
