@@ -49,6 +49,7 @@ jobs:
           python3 tools/demo/test_render_product_takes.py
           python3 tools/ci/test_ci.py
           python3 tools/ci/test_ci_scope.py
+          python3 tools/ci/test_pr_policy.py
           python3 tools/ci/test_validate_local.py
           python3 tools/windows/test_publish_windows.py
           python3 tools/windows/test_hosted_release.py

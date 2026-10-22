@@ -16,7 +16,10 @@ Native apps for macOS and Windows.
 [![Latest release](https://img.shields.io/github/v/release/dorlugasigal/annotator?include_prereleases&label=release&color=ffb58c&labelColor=111928)](https://github.com/dorlugasigal/annotator/releases)
 [![macOS 14 or later](https://img.shields.io/badge/macOS-14%2B-e8eef9?labelColor=111928)](#install)
 [![Windows 11](https://img.shields.io/badge/Windows-11-e8eef9?labelColor=111928)](#install)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-e8eef9?labelColor=111928)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-e8eef9?labelColor=111928)](LICENSE)<br>
+[![CI](https://img.shields.io/github/actions/workflow/status/dorlugasigal/annotator/validate.yml?branch=main&label=CI&labelColor=111928)](https://github.com/dorlugasigal/annotator/actions/workflows/validate.yml)
+[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/dorlugasigal/annotator?label=OpenSSF%20Scorecard&labelColor=111928)](https://scorecard.dev/viewer/?uri=github.com/dorlugasigal/annotator)
+[![Discussions](https://img.shields.io/github/discussions/dorlugasigal/annotator?label=discussions&color=e8eef9&labelColor=111928)](https://github.com/dorlugasigal/annotator/discussions)
 
 </div>
 
@@ -24,6 +27,10 @@ https://github.com/user-attachments/assets/b87f25bf-7f11-4e36-8000-47584de43221
 
 <p align="center"><sub>Recorded in the real Mac app, with a scripted pointer and made-up sample apps.<br>
 Music: “Product Launch Advertising Commercial Music” by lNPLUSMUSIC, from Pixabay.</sub></p>
+
+> [!NOTE]
+> Annotator is in public beta. Expect rough edges, and please
+> [report them](https://github.com/dorlugasigal/annotator/issues/new/choose).
 
 ## What you can do
 
@@ -157,15 +164,33 @@ npm --prefix website ci && npm --prefix website run build && npm --prefix websit
 ```
 
 Development builds are named **Annotator Dev** and never replace a release.
-Start with [docs/architecture.md](docs/architecture.md); the repository layout
-is in [docs/README.md](docs/README.md) and [tools/README.md](tools/README.md).
+
+### Where things are
+
+| Path | What's there |
+| --- | --- |
+| [`apps/macos`](apps/macos) | The Mac app in Swift, its `AnnotationCore` library and tests |
+| [`apps/windows`](apps/windows) | The Windows app in C# (.NET 10, WinUI 3, Native AOT), its libraries and tests |
+| [`reference`](reference) | The conformance corpus and UX reference the Mac generates, so Windows can match it |
+| [`website`](website) | getannotator.app |
+| [`services/metrics`](services/metrics) | The opt-in usage counts service |
+| [`tools`](tools/README.md) | Build, CI, release and demo scripts |
+| [`docs`](docs/README.md) | Architecture, parity, releasing and maintainer guides |
+| [`releases`](releases) | Release notes and release settings |
+
+Start with [docs/architecture.md](docs/architecture.md).
 
 ## Contributing
 
 Bug reports, feature ideas and pull requests are welcome. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) first: every user-visible change ships on
-both Mac and Windows. Report security problems privately ([SECURITY.md](SECURITY.md)).
-For help, see [SUPPORT.md](SUPPORT.md).
+both Mac and Windows, and every pull request names its issue.
+
+- To start small, pick a [good first issue](https://github.com/dorlugasigal/annotator/labels/good%20first%20issue)
+  or one marked [help wanted](https://github.com/dorlugasigal/annotator/labels/help%20wanted).
+- Questions and ideas go to [Discussions](https://github.com/dorlugasigal/annotator/discussions).
+- Report security problems privately ([SECURITY.md](SECURITY.md)).
+- For help with the app, see [SUPPORT.md](SUPPORT.md).
 
 If Annotator helps you, you can [buy me a coffee](https://buymeacoffee.com/dorlugasigal).
 All tools stay free either way.

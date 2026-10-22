@@ -1,6 +1,8 @@
 ## What and why
 
-<!-- What changes for the person using Annotator, and why. Link the issue: Fixes #123 -->
+<!-- What changes for the person using Annotator, and why. -->
+
+Fixes #<!-- issue number. Use "Part of #123" if this doesn't finish the issue. -->
 
 ## Platforms
 
