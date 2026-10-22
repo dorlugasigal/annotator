@@ -7,7 +7,7 @@
   "packages": {
     "Microsoft.WindowsAppSDK.WinUI": "2.3.9",
     "Microsoft.WindowsAppSDK.InteractiveExperiences": "2.1.9",
-    "Microsoft.Windows.CsWin32": "0.3.363",
+    "Microsoft.Windows.CsWin32": "0.3.367",
     "xunit.v3": "4.0.2",
     "xunit.runner.visualstudio": "4.0.1",
     "Microsoft.NET.Test.Sdk": "18.11.0"
