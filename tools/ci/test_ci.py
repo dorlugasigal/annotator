@@ -355,6 +355,9 @@ class WorkflowStructureTests(unittest.TestCase):
         self.assertEqual({job["name"] for job in data["jobs"].values()}, {"Linked issue", "Release note"})
         self.assertNotIn("pull_request_target", data["on"])
         self.assertNotIn("secrets.", yaml.safe_dump(data))
+        # Opening a labelled pull request fires two events at once. Cancelling
+        # one run leaves a cancelled check that blocks the merge.
+        self.assertNotIn("concurrency", data)
         for body in data["jobs"].values():
             self.assertLessEqual(body["timeout-minutes"], 10)
 

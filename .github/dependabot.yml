@@ -25,3 +25,7 @@ updates:
     groups:
       windows:
         patterns: ["*"]
+  - package-ecosystem: pip
+    directory: /tools/release
+    schedule:
+      interval: weekly

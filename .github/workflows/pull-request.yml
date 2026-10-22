@@ -7,10 +7,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: pull-request-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
   issue:
     name: Linked issue
