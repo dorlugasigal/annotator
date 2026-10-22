@@ -159,6 +159,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: release-publishing
+    # The workflow token creates the release in this repository; nothing else in the run can write.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -174,7 +177,7 @@ jobs:
           path: build/distribution/windows-portable
       - name: Publish immutable binary release
         env:
-          GH_TOKEN: ${{ secrets.DISTRIBUTION_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           PUBLICATION_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
           CANDIDATE_SHA: ${{ needs.preflight.outputs.candidate }}
           DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
@@ -185,11 +188,11 @@ jobs:
           windows=()
           if [ "$WINDOWS" = true ]; then windows=(--windows-folder build/distribution/windows-portable); fi
           python3 tools/release/distribution.py publish --folder build/distribution/verified --disk-image-folder build/distribution/verified/disk-image "${windows[@]}"
-      # The release token can't write the dedicated tap yet; until it can, the owner's Mac runs distribution.py tap.
+      # TAP_TOKEN is a fine-grained token that can write only the tap's contents.
       - name: Update the Homebrew tap
         if: ${{ vars.TAP_FROM_ACTIONS == 'true' }}
         env:
-          GH_TOKEN: ${{ secrets.DISTRIBUTION_TOKEN }}
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
           PUBLICATION_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
           DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
           HOMEBREW_TAP_REPOSITORY: ${{ vars.HOMEBREW_TAP_REPOSITORY }}

@@ -50,7 +50,7 @@ Add the owner as a required reviewer on each environment and allow only the
 | `NOTARY_KEY_ID`, `NOTARY_ISSUER_ID` | Variable | `release-signing` | The notary key's IDs |
 | `SPARKLE_PUBLIC_KEY` | Variable | `release-signing` | Matching Sparkle public key |
 | `SUPPORT_URL` | Variable | `release-signing` | Optional support link shown in the app |
-| `DISTRIBUTION_TOKEN` | Secret | `release-publishing` | Fine-grained token: contents write on the release and tap repositories |
+| `TAP_TOKEN` | Secret | `release-publishing` | Fine-grained token with contents write on `dorlugasigal/homebrew-annotator` only. The release itself uses the workflow's own token |
 | `NETLIFY_AUTH_TOKEN` | Secret | `website-publishing` | Netlify personal access token for the website deploy |
 | `NETLIFY_SITE_ID` | Variable | Repository | The Netlify site's ID; the deploy job runs only when it is set |
 | `PARTNER_CENTER_TENANT_ID`, `PARTNER_CENTER_CLIENT_ID`, `PARTNER_CENTER_CLIENT_SECRET`, `PARTNER_CENTER_SELLER_ID` | Secret | `windows-store` | Partner Center app ([windows-store.md, 6.1](windows-store.md#61-a-microsoft-entra-app-for-partner-center)) |
@@ -61,13 +61,10 @@ Add the owner as a required reviewer on each environment and allow only the
 | `WINDOWS_STORE_ID` | Variable | Repository | `9NMZ345ZJ6JK` |
 | `RELEASE_AUTOMATION_ENABLED`, `PUBLICATION_ENABLED`, `WEBSITE_DEPLOY_ENABLED`, `STORE_SUBMISSION_ENABLED`, `TAP_FROM_ACTIONS` | Variable | Repository | `true` to switch each stage on |
 
-While the source still lives in the private `dorlugasigal/annotator-code`,
-these variables and secrets are set there and name the public
-`dorlugasigal/annotator` as the release and website destination.
-`tools/release/distribution.py` and `tools/release/pages.py` refuse to publish
-into the repository the workflow runs in; that guard changes to "the
-destination must be public" when the source moves into
-`dorlugasigal/annotator`.
+The release, the website and the feed bridge all come from
+`dorlugasigal/annotator`. `tools/release/distribution.py` writes casks only to
+the dedicated tap, never to the repository the workflow runs in, and
+`tools/release/pages.py` refuses to commit into it.
 
 ### Still done by hand
 
@@ -84,7 +81,7 @@ pull request ([winget.md](winget.md)) is still a maintainer step.
 | Notary API key | When revoked | New team key in App Store Connect; update the secret and both IDs |
 | Sparkle key | Never; losing it breaks updates | Keep an offline backup. Rotating needs a release signed with the old key that ships the new public key |
 | Partner Center client secret | Up to 2 years | New secret in Microsoft Entra; update `PARTNER_CENTER_CLIENT_SECRET` |
-| GitHub tokens | Set at creation | New fine-grained token with the same scope |
-| Netlify token | Set at creation | User settings > Applications > Personal access tokens; update `NETLIFY_AUTH_TOKEN` |
+| `TAP_TOKEN` | Never (owner's choice) | New fine-grained token with contents write on the tap only; revoke the old one |
+| Netlify token | Never (owner's choice) | User settings > Applications > Personal access tokens; update `NETLIFY_AUTH_TOKEN`; revoke the old one |
 
-Set a calendar reminder for each expiry date when you create the credential.
+Set a calendar reminder for each expiry date when you create the credential. Rotate a token with no expiry whenever a maintainer with access leaves.
