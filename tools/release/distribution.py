@@ -49,7 +49,7 @@ def repository(value):
 
 def website_url(value):
     raw = urlsplit(value)
-    if raw.port or not re.fullmatch(r"/(?:[A-Za-z0-9_-]+/?)*", raw.path or "/"):
+    if raw.port or not re.fullmatch(r"/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]*", raw.path or "/"):
         raise DistributionError("Use an HTTPS website URL with a simple optional site path.")
     value = packager.https_url(value)
     return value.rstrip("/")
@@ -86,8 +86,13 @@ def preflight(expected, candidate):
 
 
 def private_file(path, data):
-    path.write_bytes(data)
-    path.chmod(0o600)
+    # codesign, notarytool and sign_update read keys from files. Create each one owner-only before
+    # writing, never reuse or follow an existing path, and keep it in the removed signing folder.
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags, 0o600)
+    with os.fdopen(descriptor, "wb") as handle:
+        os.fchmod(handle.fileno(), 0o600)
+        handle.write(data)
 
 
 def secret(name):

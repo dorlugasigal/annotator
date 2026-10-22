@@ -5,7 +5,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: annotator-release
@@ -16,6 +15,10 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' && vars.PUBLICATION_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     environment: release-publishing
+    # The workflow token only starts the website workflow; the tap uses its own token.
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:

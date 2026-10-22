@@ -17,6 +17,16 @@ test("site URLs allow the selected Pages subpath and future root domain", () => 
                        "https://example.com/a%2fb", "https://example.com:444/a", "https://example.com/a/../b"]) {
     assert.throws(() => siteConfig(value));
   }
+  for (const [value, base] of [["https://example.com/", "/"], ["https://example.com/a/b", "/a/b/"], ["https://example.com/a_b-1/c/", "/a_b-1/c/"]]) {
+    assert.equal(siteConfig(value).base, base);
+  }
+  for (const value of ["https://example.com//a", "https://example.com/a//b", "https://example.com/a.b"]) {
+    assert.throws(() => siteConfig(value));
+  }
+  // A long path that almost matches is rejected at once, without exponential backtracking.
+  const started = performance.now();
+  assert.throws(() => siteConfig(`https://example.com/${"-".repeat(64)}!`));
+  assert.ok(performance.now() - started < 1000);
 });
 
 test("browser test port override is bounded and preserves the default", async () => {
@@ -225,6 +235,12 @@ test("the privacy page's Windows usage counts follow the app's switch", async ()
 // Astro escapes some characters in text; compare the words people read.
 const decodeHTML = html => html.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<")
   .replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+// Removing a tag can join the text around it into a new tag, so repeat until none is left.
+const textContent = html => {
+  let text = html;
+  while (/<[^>]+>/.test(text)) text = text.replace(/<[^>]+>/g, "");
+  return text;
+};
 // Anything that offers, describes or names Windows. Spec 013 (WIN-DST-08) allows it only with a published listing.
 const windowsClaim = /\bWindows\b|winget|msstore|Microsoft Store|apps\.microsoft\.com|Partner Center|Snipping Tool|22H2|ARM64|Ctrl\+/;
 
@@ -275,7 +291,7 @@ test("Windows appears only with a published Microsoft Store listing", async () =
   assert.match(home, /Microsoft Store · Windows 11, version 22H2 or later · x64 and ARM64/);
   assert.match(home, /<p class="hero-availability">Free · macOS 14\+ · [^<]* · Windows 11<\/p>/);
   // Each install command stays with its system's download: Homebrew with the Mac, winget with Windows.
-  const commands = [...home.matchAll(/<code data-copy-command>([\s\S]*?)<\/code>/g)].map(match => match[1].replace(/<[^>]+>/g, ""));
+  const commands = [...home.matchAll(/<code data-copy-command>([\s\S]*?)<\/code>/g)].map(match => textContent(match[1]));
   assert.deepEqual(commands, ["brew install --cask dorlugasigal/annotator/annotator", listing.wingetCommand]);
   assert.match(home.slice(macChoice, windowsChoice), /<section class="brew" id="homebrew"/);
   assert.ok(home.indexOf('class="store-command"') > windowsChoice);
