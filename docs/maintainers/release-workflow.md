@@ -30,12 +30,19 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
    `tools/windows/toolchain.json`, builds the x64 and ARM64 Native AOT
    packages, the MSIX bundle and the portable ZIPs, and checks the version
    `(Major + 1).Minor.Build.0`, label and checksums.
-5. **Publish** (Linux, `release-publishing`) uses the workflow's own token to
+5. **Windows signing** (Windows, `windows-signing`) runs only when the run
+   publishes and `SIGNPATH_ENABLED` is `true`. It sends the portable ZIPs to
+   SignPath, waits up to 30 minutes for the owner to approve the request,
+   checks the signature of `Annotator.exe` in each ZIP, and only then writes
+   the checksums in `annotator-windows.json`
+   ([signpath.md](signpath.md)). While signing is off, the Windows packages
+   job does this last part with the unsigned ZIPs.
+6. **Publish** (Linux, `release-publishing`) uses the workflow's own token to
    upload the Mac files, the disk image and the Windows ZIPs to the GitHub
    release. With `TAP_FROM_ACTIONS` on, it also updates the Homebrew tap with
    `TAP_TOKEN`; otherwise run `python3 tools/release/distribution.py tap` with
    a maintainer's login.
-6. **Microsoft Store** (Windows, `windows-store`) sends the bundle the run
+7. **Microsoft Store** (Windows, `windows-store`) sends the bundle the run
    built.
 
 After each Release run, the Website workflow deploys https://getannotator.app,
@@ -65,6 +72,10 @@ Certification can take up to three business days.
   submission ID first. Don't send the same build twice.
 - **Windows job failed after the Mac release was published**: fix the cause
   and run **Re-run failed jobs**. The Mac release stays as it is.
+- **Windows signing failed**: nothing was published. Open the signing
+  request linked in the run summary. If it was denied or timed out, run
+  **Re-run failed jobs** and approve the new request. To release without
+  signing, set `SIGNPATH_ENABLED` to `false` and start a new run.
 - **Store job failed**: **Re-run failed jobs** sends the same bundle again;
   `msstore publish` replaces a waiting draft.
 

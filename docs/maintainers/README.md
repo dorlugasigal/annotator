@@ -33,6 +33,7 @@ validation workflow.
 | `website-publishing` | Website: Netlify deploy | The Netlify token |
 | `github-pages` | Website: feed bridge | Nothing; GitHub's own Pages deploy |
 | `windows-store` | Release: Store job | Partner Center app credentials |
+| `windows-signing` | Release: Windows signing job | The SignPath token and project settings |
 
 Add the owner as a required reviewer on each environment and allow only the
 `main` branch.
@@ -55,11 +56,13 @@ Add the owner as a required reviewer on each environment and allow only the
 | `NETLIFY_SITE_ID` | Variable | Repository | The Netlify site's ID; the deploy job runs only when it is set |
 | `PARTNER_CENTER_TENANT_ID`, `PARTNER_CENTER_CLIENT_ID`, `PARTNER_CENTER_CLIENT_SECRET`, `PARTNER_CENTER_SELLER_ID` | Secret | `windows-store` | Partner Center app ([windows-store.md, 6.1](windows-store.md#61-a-microsoft-entra-app-for-partner-center)) |
 | `WINDOWS_STORE_FLIGHT_ID` | Variable | `windows-store` | Optional tester flight |
+| `SIGNPATH_API_TOKEN` | Secret | `windows-signing` | SignPath API token of a user who can submit signing requests ([signpath.md](signpath.md)) |
+| `SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG`, `SIGNPATH_SIGNING_POLICY_SLUG` | Variable | `windows-signing` | The SignPath organization ID, project and signing policy |
 | `DISTRIBUTION_REPOSITORY` | Variable | Repository | `dorlugasigal/annotator` (see the note below) |
 | `HOMEBREW_TAP_REPOSITORY` | Variable | Repository | `dorlugasigal/homebrew-annotator` |
 | `WEBSITE_URL`, `METRICS_URL` | Variable | Repository | `https://getannotator.app` |
 | `WINDOWS_STORE_ID` | Variable | Repository | `9NMZ345ZJ6JK` |
-| `RELEASE_AUTOMATION_ENABLED`, `PUBLICATION_ENABLED`, `WEBSITE_DEPLOY_ENABLED`, `STORE_SUBMISSION_ENABLED`, `TAP_FROM_ACTIONS` | Variable | Repository | `true` to switch each stage on |
+| `RELEASE_AUTOMATION_ENABLED`, `PUBLICATION_ENABLED`, `WEBSITE_DEPLOY_ENABLED`, `STORE_SUBMISSION_ENABLED`, `TAP_FROM_ACTIONS`, `SIGNPATH_ENABLED` | Variable | Repository | `true` to switch each stage on |
 
 The release, the website and the feed bridge all come from
 `dorlugasigal/annotator`. `tools/release/distribution.py` writes casks only to
@@ -83,6 +86,7 @@ pull request ([winget.md](winget.md)) is still a maintainer step.
 | Partner Center client secret | Up to 2 years | New secret in Microsoft Entra; update `PARTNER_CENTER_CLIENT_SECRET` |
 | `TAP_TOKEN` | Never (owner's choice) | New fine-grained token with contents write on the tap only; revoke the old one |
 | Netlify token | Never (owner's choice) | User settings > Applications > Personal access tokens; update `NETLIFY_AUTH_TOKEN`; revoke the old one |
+| SignPath API token | When revoked | New API token for the submitter user in SignPath; update `SIGNPATH_API_TOKEN`; revoke the old one |
 
 Set a calendar reminder for each expiry date when you create the credential. Rotate a token with no expiry whenever a maintainer with access leaves.
 
