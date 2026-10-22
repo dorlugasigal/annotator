@@ -5,7 +5,7 @@
 The separately deployed metrics functions use Netlify Blobs 11.1.0 and
 Functions 6.0.0 under MIT licenses, with the retained Netlify notice in
 `services/metrics/NETLIFY-LICENSE.txt`. The local build/publisher uses
-Netlify CLI 27.8.0, also MIT, with its installed package license. These are
+Netlify CLI 27.12.1, also MIT, with its installed package license. These are
 not bundled in the native app. Dependency versions and notices remain in the
 service lockfile/packages and prepared function artifacts.
 

@@ -25,7 +25,7 @@ The pinned Netlify CLI also bundles functions locally:
   --src netlify/functions --functions ../../build/metrics-functions
 ```
 
-This service uses TypeScript 5.9.3 because Netlify CLI 27.8.0's parser calls the
+This service uses TypeScript 5.9.3 because Netlify CLI 27.12.1's parser calls the
 TypeScript JavaScript compiler API, which the repository's TypeScript 7 binary
 does not provide. Website typechecking remains on its existing TypeScript 7 pin.
 The local bundle manifest retains custom routes, rate limits and the schedule.
