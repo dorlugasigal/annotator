@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
       - name: Repair tap from published manifests without rebuilding or replacing ZIPs
         env:
-          GH_TOKEN: ${{ secrets.DISTRIBUTION_TOKEN }}
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
           PUBLICATION_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
           DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
           HOMEBREW_TAP_REPOSITORY: ${{ vars.HOMEBREW_TAP_REPOSITORY }}

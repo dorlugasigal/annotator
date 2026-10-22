@@ -248,6 +248,12 @@ class WorkflowStructureTests(unittest.TestCase):
                     self.assertEqual(body["permissions"], {"contents": "read", "pages": "write", "id-token": "write"})
                     self.assertEqual(body["environment"]["name"], "github-pages")
                     continue
+                if (name, job_name) == ("release.yml", "publish"):
+                    # Publishing creates the release in this repository with the workflow token,
+                    # behind the release-publishing environment.
+                    self.assertEqual(body["permissions"], {"contents": "write"})
+                    self.assertEqual(body["environment"], "release-publishing")
+                    continue
                 self.assertNotIn("permissions", body, f"{name}: {job_name}")
 
     def test_website_deploys_only_sealed_main_builds(self):

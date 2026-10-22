@@ -30,10 +30,11 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
    `tools/windows/toolchain.json`, builds the x64 and ARM64 Native AOT
    packages, the MSIX bundle and the portable ZIPs, and checks the version
    `(Major + 1).Minor.Build.0`, label and checksums.
-5. **Publish** (Linux, `release-publishing`) uploads the Mac files, the disk
-   image and the Windows ZIPs to the GitHub release. With `TAP_FROM_ACTIONS`
-   on, it also updates the Homebrew tap; otherwise run
-   `python3 tools/release/distribution.py tap` with a maintainer's login.
+5. **Publish** (Linux, `release-publishing`) uses the workflow's own token to
+   upload the Mac files, the disk image and the Windows ZIPs to the GitHub
+   release. With `TAP_FROM_ACTIONS` on, it also updates the Homebrew tap with
+   `TAP_TOKEN`; otherwise run `python3 tools/release/distribution.py tap` with
+   a maintainer's login.
 6. **Microsoft Store** (Windows, `windows-store`) sends the bundle the run
    built.
 
