@@ -152,10 +152,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
   publish:
-    needs: [preflight, sign, windows-package]
+    needs: [preflight, sign, windows-package, windows-sign]
     # The Windows ZIPs join the release when releases/windows.json makes Windows part of releases.
-    # windows-package is skipped when Windows is not part of releases; a failed or cancelled one stops publishing.
-    if: ${{ always() && inputs.publish && vars.PUBLICATION_ENABLED == 'true' && needs.sign.result == 'success' && needs.windows-package.result != 'failure' && needs.windows-package.result != 'cancelled' }}
+    # windows-package is skipped when Windows is not part of releases, and windows-sign while SignPath signing is off;
+    # a failed or cancelled one stops publishing.
+    if: ${{ always() && inputs.publish && vars.PUBLICATION_ENABLED == 'true' && needs.sign.result == 'success' && needs.windows-package.result != 'failure' && needs.windows-package.result != 'cancelled' && needs.windows-sign.result != 'failure' && needs.windows-sign.result != 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: release-publishing
@@ -207,6 +208,7 @@ jobs:
     outputs:
       bundle: ${{ steps.receipt.outputs.bundle }}
       sha256: ${{ steps.receipt.outputs.sha256 }}
+      unsigned-portable: ${{ steps.upload-unsigned.outputs.artifact-id }}
     defaults:
       run:
         shell: pwsh
@@ -215,6 +217,8 @@ jobs:
       EXPECTED_VERSION: ${{ needs.preflight.outputs.version }}
       MSIX: ${{ needs.preflight.outputs.msix }}
       STORE_READY_REQUIRED: ${{ needs.preflight.outputs.windows-store-ready }}
+      # SignPath signs the portable ZIPs only in a run that publishes them, and only once the owner turns it on.
+      SIGN_PORTABLE: ${{ inputs.publish && vars.SIGNPATH_ENABLED == 'true' }}
       DOTNET_CLI_TELEMETRY_OPTOUT: "1"
       DOTNET_NOLOGO: "1"
       PYTHONUTF8: "1"
@@ -267,10 +271,109 @@ jobs:
           path: ${{ runner.temp }}/windows-bundle/
           if-no-files-found: error
           retention-days: 14
-      - name: Describe the portable ZIPs for the public release and winget
+      - name: Collect the portable ZIPs
         run: |
           New-Item -ItemType Directory -Force "$env:RUNNER_TEMP/windows-portable" | Out-Null
           Copy-Item "$env:RUNNER_TEMP/windows-packages/$env:MSIX/Annotator-*-windows-*.zip" "$env:RUNNER_TEMP/windows-portable/"
+      # With signing on, the windows-sign job describes and uploads the signed ZIPs instead.
+      - name: Describe the portable ZIPs for the public release and winget
+        if: ${{ env.SIGN_PORTABLE != 'true' }}
+        run: |
+          python tools/windows/winget.py describe --folder "$env:RUNNER_TEMP/windows-portable" --source $env:CANDIDATE_SHA
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/windows/winget.py verify --folder "$env:RUNNER_TEMP/windows-portable" --source $env:CANDIDATE_SHA
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        id: upload-portable
+        if: ${{ env.SIGN_PORTABLE != 'true' }}
+        with:
+          name: windows-portable
+          path: ${{ runner.temp }}/windows-portable/
+          if-no-files-found: error
+          retention-days: 30
+      # SignPath signs only files that a workflow uploaded as an artifact.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        id: upload-unsigned
+        if: ${{ env.SIGN_PORTABLE == 'true' }}
+        with:
+          name: windows-portable-unsigned
+          path: ${{ runner.temp }}/windows-portable/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Record the artifact digest
+        env:
+          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+          PORTABLE_DIGEST: ${{ steps.upload-portable.outputs.artifact-digest }}
+          UNSIGNED_DIGEST: ${{ steps.upload-unsigned.outputs.artifact-digest }}
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-bundle, SHA-256 of its zip: ``$env:ARTIFACT_DIGEST``"
+          if ($env:PORTABLE_DIGEST) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-portable, SHA-256 of its zip: ``$env:PORTABLE_DIGEST``" }
+          if ($env:UNSIGNED_DIGEST) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-portable-unsigned (sent to SignPath), SHA-256 of its zip: ``$env:UNSIGNED_DIGEST``" }
+  windows-sign:
+    name: Windows code signing
+    needs: [preflight, windows-package]
+    # Off until the owner sets the repository variable SIGNPATH_ENABLED to true (docs/maintainers/signpath.md).
+    if: ${{ inputs.publish && vars.SIGNPATH_ENABLED == 'true' }}
+    runs-on: windows-2025-vs2026
+    # SignPath Foundation waits for the owner to approve each request; see wait-for-completion-timeout-in-seconds.
+    timeout-minutes: 45
+    environment: windows-signing
+    # SignPath reads this run's jobs and downloads the unsigned artifact with the workflow token.
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CANDIDATE_SHA: ${{ needs.preflight.outputs.candidate }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check the SignPath settings
+        env:
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          UNSIGNED_ARTIFACT: ${{ needs.windows-package.outputs.unsigned-portable }}
+        run: |
+          $missing = @('SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG' | Where-Object { -not [Environment]::GetEnvironmentVariable($_) })
+          if ($missing) { throw "Add the variables $($missing -join ', ') to the windows-signing environment (docs/maintainers/signpath.md), or set SIGNPATH_ENABLED to false." }
+          if (-not $env:UNSIGNED_ARTIFACT) { throw "The Windows packages job uploaded no windows-portable-unsigned artifact. Run Release again." }
+      - name: Sign Annotator.exe in the portable ZIPs with SignPath
+        id: signpath
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+        with:
+          api-token: ${{ env.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.windows-package.outputs.unsigned-portable }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 1800
+          output-artifact-directory: ${{ runner.temp }}/windows-portable
+      - name: Check the signatures
+        env:
+          SIGNING_REQUEST: ${{ steps.signpath.outputs.signing-request-web-url }}
+        run: |
+          $zips = @(Get-ChildItem "$env:RUNNER_TEMP/windows-portable" -File)
+          if ($zips.Count -ne 2 -or @($zips | Where-Object Name -notlike 'Annotator-*-windows-*.zip').Count) {
+            throw "SignPath returned $($zips.Name -join ', '). Expected only the x64 and ARM64 ZIPs."
+          }
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- SignPath signing request: $env:SIGNING_REQUEST"
+          foreach ($zip in $zips) {
+            $folder = Join-Path $env:RUNNER_TEMP "signature-check/$($zip.BaseName)"
+            Expand-Archive -LiteralPath $zip.FullName -DestinationPath $folder
+            $signature = Get-AuthenticodeSignature (Join-Path $folder 'Annotator.exe')
+            if ($signature.Status -ne 'Valid') { throw "Annotator.exe in $($zip.Name) has no valid signature: $($signature.Status). $($signature.StatusMessage)" }
+            if (-not $signature.TimeStamperCertificate) { throw "Annotator.exe in $($zip.Name) has no timestamp, so its signature would end when the certificate expires." }
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- $($zip.Name): Annotator.exe signed by $($signature.SignerCertificate.Subject)"
+          }
+      - name: Describe the signed ZIPs for the public release and winget
+        run: |
           python tools/windows/winget.py describe --folder "$env:RUNNER_TEMP/windows-portable" --source $env:CANDIDATE_SHA
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python tools/windows/winget.py verify --folder "$env:RUNNER_TEMP/windows-portable" --source $env:CANDIDATE_SHA
@@ -283,11 +386,9 @@ jobs:
           retention-days: 30
       - name: Record the artifact digest
         env:
-          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
           PORTABLE_DIGEST: ${{ steps.upload-portable.outputs.artifact-digest }}
         run: |
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-bundle, SHA-256 of its zip: ``$env:ARTIFACT_DIGEST``"
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-portable, SHA-256 of its zip: ``$env:PORTABLE_DIGEST``"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-portable (signed), SHA-256 of its zip: ``$env:PORTABLE_DIGEST``"
   windows-store:
     name: Microsoft Store submission
     needs: [preflight, windows-package]

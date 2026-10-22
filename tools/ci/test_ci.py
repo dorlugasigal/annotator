@@ -51,13 +51,18 @@ class ValidationWorkflowTests(unittest.TestCase):
                 values = {"inputs.notarize": requested, "vars.RELEASE_AUTOMATION_ENABLED": flag}
                 self.assertEqual(condition(job(RELEASE, "sign"), values), requested and name)
                 for windows in ("success", "skipped"):
-                    values = {"inputs.publish": requested, "vars.PUBLICATION_ENABLED": flag,
-                              "needs.sign.result": "success", "needs.windows-package.result": windows}
-                    self.assertEqual(condition(job(RELEASE, "publish"), values), requested and name)
+                    for signing in ("success", "skipped"):
+                        values = {"inputs.publish": requested, "vars.PUBLICATION_ENABLED": flag,
+                                  "needs.sign.result": "success", "needs.windows-package.result": windows,
+                                  "needs.windows-sign.result": signing}
+                        self.assertEqual(condition(job(RELEASE, "publish"), values), requested and name)
                 for blocked in ({"needs.sign.result": "failure", "needs.windows-package.result": "success"},
                                 {"needs.sign.result": "success", "needs.windows-package.result": "failure"},
-                                {"needs.sign.result": "success", "needs.windows-package.result": "cancelled"}):
-                    values = {"inputs.publish": True, "vars.PUBLICATION_ENABLED": "true", **blocked}
+                                {"needs.sign.result": "success", "needs.windows-package.result": "cancelled"},
+                                {"needs.sign.result": "success", "needs.windows-sign.result": "failure"},
+                                {"needs.sign.result": "success", "needs.windows-sign.result": "cancelled"}):
+                    values = {"inputs.publish": True, "vars.PUBLICATION_ENABLED": "true",
+                              "needs.windows-package.result": "success", "needs.windows-sign.result": "success", **blocked}
                     self.assertFalse(condition(job(RELEASE, "publish"), values))
 
     def test_hosted_validation_scope(self):
@@ -203,8 +208,54 @@ class WindowsReleaseTests(unittest.TestCase):
         self.assertIn("METRICS_URL: ${{ vars.METRICS_URL }}", sign)
 
     def test_every_release_job_has_a_time_limit(self):
-        for name in ("preflight", "sign", "publish", "windows-package", "windows-store"):
+        for name in ("preflight", "sign", "publish", "windows-package", "windows-sign", "windows-store"):
             self.assertRegex(job(RELEASE, name), r"timeout-minutes: \d+", name)
+
+    def test_signpath_signing_stays_off_until_the_owner_turns_it_on(self):
+        gate = "inputs.publish && vars.SIGNPATH_ENABLED == 'true'"
+        signing = job(RELEASE, "windows-sign")
+        self.assertIn("needs: [preflight, windows-package]", signing)
+        self.assertIn(f"if: ${{{{ {gate} }}}}", signing)
+        expression = re.search(r"if: \$\{\{ (.+) \}\}", signing).group(1)
+        for override in ("always(", "cancelled(", "failure(", "!success(", "||"):
+            self.assertNotIn(override, expression)
+        for publish, flag, runs in ((True, "true", True), (True, "", False), (True, "false", False),
+                                    (False, "true", False), (False, "", False)):
+            self.assertEqual(condition(signing, {"inputs.publish": publish, "vars.SIGNPATH_ENABLED": flag}), runs)
+        self.assertIn("environment: windows-signing", signing)
+        self.assertIn("runs-on: windows-2025-vs2026", signing)
+        self.assertIn("persist-credentials: false", signing)
+        # The build job decides with the same gate which path its ZIPs take; it never sees the SignPath token.
+        build = job(RELEASE, "windows-package")
+        self.assertIn(f"SIGN_PORTABLE: ${{{{ {gate} }}}}", build)
+        self.assertNotIn("SIGNPATH_API_TOKEN", build)
+        self.assertIn("unsigned-portable: ${{ steps.upload-unsigned.outputs.artifact-id }}", build)
+        steps = build.split("\n      - ")
+        def step(marker):
+            return next(text for text in steps if marker in text)
+        for marker in ("name: Describe the portable ZIPs", "id: upload-portable"):
+            self.assertIn("if: ${{ env.SIGN_PORTABLE != 'true' }}", step(marker))
+        unsigned = step("id: upload-unsigned")
+        self.assertIn("if: ${{ env.SIGN_PORTABLE == 'true' }}", unsigned)
+        self.assertIn("name: windows-portable-unsigned", unsigned)
+        self.assertNotIn("if:", step("name: Collect the portable ZIPs"))
+        # The SignPath action is pinned and gets the token only through its step's env.
+        self.assertEqual(RELEASE.count("signpath/github-action-submit-signing-request@"), 1)
+        self.assertRegex(signing, r"uses: signpath/github-action-submit-signing-request@[a-f0-9]{40}\n")
+        self.assertEqual(RELEASE.count("secrets.SIGNPATH_API_TOKEN"), 1)
+        submit = signing.split("uses: signpath/github-action-submit-signing-request@")[1].split("\n      - ")[0]
+        for value in ("SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}", "api-token: ${{ env.SIGNPATH_API_TOKEN }}",
+                      "organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}", "project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}",
+                      "signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}",
+                      "github-artifact-id: ${{ needs.windows-package.outputs.unsigned-portable }}",
+                      "wait-for-completion: true", "output-artifact-directory: ${{ runner.temp }}/windows-portable"):
+            self.assertIn(value, submit)
+        # The signed ZIPs are checked and described before upload, so annotator-windows.json lists what ships.
+        order = [signing.index(text) for text in ("github-action-submit-signing-request@", "Get-AuthenticodeSignature",
+                                                  "TimeStamperCertificate", "winget.py describe", "winget.py verify",
+                                                  "name: windows-portable\n")]
+        self.assertEqual(order, sorted(order))
+        self.assertIn("needs: [preflight, sign, windows-package, windows-sign]", job(RELEASE, "publish"))
 
 
 @unittest.skipUnless(yaml, "PyYAML is not installed")
@@ -262,6 +313,11 @@ class WorkflowStructureTests(unittest.TestCase):
                     # behind the release-publishing environment.
                     self.assertEqual(body["permissions"], {"contents": "write"})
                     self.assertEqual(body["environment"], "release-publishing")
+                    continue
+                if (name, job_name) == ("release.yml", "windows-sign"):
+                    # SignPath reads the run's jobs and downloads the unsigned artifact with the workflow token.
+                    self.assertEqual(body["permissions"], {"contents": "read", "actions": "read"})
+                    self.assertEqual(body["environment"], "windows-signing")
                     continue
                 self.assertNotIn("permissions", body, f"{name}: {job_name}")
 
