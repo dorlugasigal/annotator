@@ -6,7 +6,7 @@
       "version": "0.1.0-beta.12",
       "build": 30,
       "date": "2026-10-23",
-      "source": "pending",
+      "source": "d79cbe06ea081f7ccd0180c54472816539516a60",
       "changes": {
         "Changed": [
           "Annotator is now open source under the Apache License 2.0. The code for the Mac and Windows apps is on GitHub at github.com/dorlugasigal/annotator. Settings > About shows the license on both platforms."
