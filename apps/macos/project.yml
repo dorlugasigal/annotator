@@ -17,9 +17,9 @@ settings:
     ARCHS: "$(ARCHS_STANDARD)"
     ENABLE_HARDENED_RUNTIME: YES
     CODE_SIGN_STYLE: Automatic
-    CURRENT_PROJECT_VERSION: 29
+    CURRENT_PROJECT_VERSION: 30
     MARKETING_VERSION: 0.1.0
-    ANNOTATOR_PRERELEASE: beta.11
+    ANNOTATOR_PRERELEASE: beta.12
     ANNOTATOR_SUPPORT_URL: https://buymeacoffee.com/dorlugasigal
     ANNOTATOR_ISSUES_URL: https://github.com/dorlugasigal/annotator/issues/new
     ANNOTATOR_WEBSITE_URL: https://dorlugasigal.github.io/annotator
