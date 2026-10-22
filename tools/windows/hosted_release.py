@@ -330,7 +330,8 @@ def verify(folder, environ):
         problems.append("the build job gave no SHA-256")
     if data.get("schema") != 1 or data.get("source") != environ.get("CANDIDATE_SHA") or data.get("msixVersion") != environ.get("MSIX"):
         problems.append("the receipt is for another candidate or package version")
-    if (data.get("run") or {}).get("id") != environ.get("GITHUB_RUN_ID"):
+    # Resume Store submission sends a bundle from an earlier Release run; resume() checked that run first.
+    if (data.get("run") or {}).get("id") != (environ.get("BUNDLE_RUN_ID") or environ.get("GITHUB_RUN_ID")):
         problems.append("the bundle was built in another run")
     if data.get("storeReady") is not True:
         problems.append("the bundle was built as a test build, not for the Store")
@@ -347,6 +348,32 @@ def verify(folder, environ):
     if problems:
         raise Stop("The Store job will not send this artifact: " + "; ".join(problems) + ".")
     return folder / name
+
+
+def resume(folder, environ):
+    """Resume Store submission's check of an earlier Release run's bundle: it was built in that run, from the commit
+    that the run and the published v<version> tag both point at. Returns what verify() and submit() then expect."""
+    data = read_json(Path(folder) / RECEIPT, RECEIPT)
+    run_id = environ.get("SOURCE_RUN_ID", "")
+    run_sha = environ.get("SOURCE_RUN_SHA", "")
+    tag_sha = environ.get("TAG_SHA", "")
+    bundle = data.get("bundle") or {}
+    problems = []
+    if not re.fullmatch(r"[0-9]+", run_id) or (data.get("run") or {}).get("id") != run_id:
+        problems.append("it was not built in the chosen Release run")
+    if not re.fullmatch(r"[0-9a-f]{40}", run_sha) or data.get("source") != run_sha:
+        problems.append("it was built from another commit than the chosen run")
+    if tag_sha != run_sha:
+        problems.append(f"tag v{data.get('releaseVersion')} does not point at the run's commit, so that run did not "
+                        "publish this version")
+    if data.get("storeReady") is not True:
+        problems.append("it was built as a test build, not for the Store")
+    if not DIGEST.fullmatch(bundle.get("sha256") or ""):
+        problems.append("the receipt has no SHA-256 for it")
+    if problems:
+        raise Stop("Resume Store submission will not send this bundle: " + "; ".join(problems) + ".")
+    return {"candidate": run_sha, "msix": data.get("msixVersion", ""), "sha256": bundle["sha256"],
+            "version": data.get("releaseVersion", "")}
 
 
 # Microsoft Store Developer CLI -----------------------------------------------------------------------------------------
@@ -473,7 +500,7 @@ def main(argv=None, environ=None):
     make.add_argument("--packages", type=Path, required=True, help="package.ps1's folder for this package version.")
     make.add_argument("--output", type=Path, required=True, help="A new folder for the artifact.")
     make.add_argument("--toolchain", type=Path, help="The toolchain step's report.")
-    for name in ("verify", "submit"):
+    for name in ("verify", "submit", "resume"):
         command = commands.add_parser(name)
         command.add_argument("--folder", type=Path, required=True, help="The downloaded windows-bundle artifact.")
         if name == "submit":
@@ -505,6 +532,11 @@ def main(argv=None, environ=None):
                      f"- SHA-256: `{data['bundle']['sha256']}`",
                      f"- {data['releaseVersion']} ({data['build']}) from `{data['source']}`",
                      "- For the Store: " + ("yes" if data["storeReady"] else "no, a test build")], environ)
+        elif args.command == "resume":
+            values = resume(args.folder, environ)
+            outputs(values, environ)
+            print(f"The bundle of Release run {environ.get('SOURCE_RUN_ID')} is {values['version']}, "
+                  f"package {values['msix']}, built from {values['candidate']}.")
         elif args.command == "verify":
             print(f"Checked {verify(args.folder, environ)}.")
         elif args.command == "cli":

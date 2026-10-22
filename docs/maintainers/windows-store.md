@@ -673,6 +673,10 @@ sends the same bundle again; `msstore publish` replaces a draft that is
 waiting. The CLI version and its SHA-256 are pinned in
 `tools/windows/toolchain.json` (`msstoreCli`); update both together.
 
+To send a build that a finished Release run made, for example one that left
+the Store out, use **Actions > Resume Store submission** with that run's ID
+([release-workflow.md](release-workflow.md#sending-a-published-build-later)).
+
 ## Still open
 
 - The Release workflow's Windows jobs haven't run on GitHub yet. A local dry

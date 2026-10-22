@@ -359,6 +359,28 @@ class StoreTests(BundleFixture):
         with self.assertRaisesRegex(hosted.Stop, "SHA-256"):
             hosted.verify(self.artifact, self.store)
 
+    def test_resume_accepts_only_the_bundle_that_the_chosen_run_published(self):
+        source = {"SOURCE_RUN_ID": "42", "SOURCE_RUN_SHA": SOURCE, "TAG_SHA": SOURCE}
+        values = hosted.resume(self.artifact, source)
+        self.assertEqual(values, {"candidate": SOURCE, "msix": "1.1.26.0", "sha256": hashlib.sha256(BUNDLE).hexdigest(),
+                                  "version": "0.1.0-beta.8"})
+        # The later Store job runs with another run ID; BUNDLE_RUN_ID names the run that built the bundle.
+        store = {**self.store, "GITHUB_RUN_ID": "99", "BUNDLE_RUN_ID": "42"}
+        self.assertEqual(hosted.verify(self.artifact, store), self.artifact / "Annotator_1.1.26.0.msixbundle")
+        with self.assertRaisesRegex(hosted.Stop, "another run"):
+            hosted.verify(self.artifact, {**store, "BUNDLE_RUN_ID": "41"})
+        for change, message in [({"SOURCE_RUN_ID": "43"}, "not built in the chosen"),
+                                ({"SOURCE_RUN_ID": "42; rm"}, "not built in the chosen"),
+                                ({"SOURCE_RUN_SHA": "f" * 40, "TAG_SHA": "f" * 40}, "another commit"),
+                                ({"TAG_SHA": "e" * 40}, "did not publish"), ({"TAG_SHA": ""}, "did not publish")]:
+            with self.subTest(change=change), self.assertRaisesRegex(hosted.Stop, message):
+                hosted.resume(self.artifact, {**source, **change})
+        data = json.loads((self.artifact / "windows-release.json").read_text(encoding="utf-8"))
+        data["storeReady"] = False
+        (self.artifact / "windows-release.json").write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaisesRegex(hosted.Stop, "test build"):
+            hosted.resume(self.artifact, source)
+
     def test_verify_refuses_a_test_build(self):
         data = json.loads((self.artifact / "windows-release.json").read_text(encoding="utf-8"))
         data["storeReady"] = False
