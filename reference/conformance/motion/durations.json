@@ -1,0 +1,100 @@
+{
+  "eraseFadeDuration" : 0.12,
+  "hintFadeInDuration" : 0.16,
+  "hintFadeOutDuration" : 0.12,
+  "hintTextCrossfadeDuration" : 0.14,
+  "minimumReversalShare" : 0.35,
+  "notes" : [
+    "Visibility durations apply to the toolbar and to each shape (WorkspaceLayerMotion in ToolbarSlideMotion.swift). Reversals take max(minimumReversalShare, distance left) of the duration and use the standard curve.",
+    "Pop, Drop and Focus drive a pose from VisibilityPose.hidden (timelines.jsonl). The other styles move the layer with enter when appearing and exit when hiding (Slide and Corners along a bent keyframe path). Their opacity uses the fade curve when appearing and linear time when hiding; when the layer also moves, opacity reaches full at 20% of the time when appearing and holds until 72% when hiding (Magic: 15% and 82% with its own flight curve). Port these rules from WorkspaceLayerMotion.",
+    "The spotlight scales its fade duration by the share of the change still to go, at least 0.001.",
+    "Magic flights and Dissolve particles keep their own art-directed curves in the app and are not part of this export.",
+    "SwiftUI springs use the published spring model, not SwiftUI's implementation; compare with a tolerance."
+  ],
+  "pointerClickDuration" : 0.45,
+  "snapMorphDuration" : 0.22,
+  "spotlightFadeInDuration" : 0.18,
+  "spotlightFadeOutDuration" : 0.14,
+  "spotlightResizeDuration" : 0.12,
+  "toolbarHideDuration" : 0.28,
+  "toolbarShowDuration" : 0.36,
+  "visibility" : {
+    "corners" : {
+      "hide" : 0.3,
+      "resolvedStyle" : "corners",
+      "show" : 0.38
+    },
+    "curtain" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "fade",
+      "show" : 0.36
+    },
+    "dissolve" : {
+      "hide" : 0.55,
+      "resolvedStyle" : "dissolve",
+      "show" : 0.65
+    },
+    "drop" : {
+      "hide" : 0.32,
+      "resolvedStyle" : "drop",
+      "show" : 0.4
+    },
+    "fade" : {
+      "hide" : 0.16,
+      "resolvedStyle" : "fade",
+      "show" : 0.2
+    },
+    "fluid" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "slide",
+      "show" : 0.36
+    },
+    "focus" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "focus",
+      "show" : 0.36
+    },
+    "fold" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "fade",
+      "show" : 0.36
+    },
+    "magic" : {
+      "hide" : 0.54,
+      "resolvedStyle" : "magic",
+      "show" : 0.62
+    },
+    "none" : {
+      "hide" : 0,
+      "resolvedStyle" : "none",
+      "show" : 0
+    },
+    "pop" : {
+      "hide" : 0.26,
+      "resolvedStyle" : "pop",
+      "show" : 0.34
+    },
+    "quick" : {
+      "hide" : 0.14,
+      "resolvedStyle" : "slide",
+      "show" : 0.18
+    },
+    "reveal" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "fade",
+      "show" : 0.36
+    },
+    "rise" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "fade",
+      "show" : 0.36
+    },
+    "slide" : {
+      "hide" : 0.28,
+      "resolvedStyle" : "slide",
+      "show" : 0.36
+    }
+  },
+  "zoomInDuration" : 0.26,
+  "zoomOutDuration" : 0.2
+}

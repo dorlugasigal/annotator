@@ -1,0 +1,146 @@
+---
+import Page from "../layouts/Page.astro";
+import ProductStage from "../components/ProductStage.astro";
+import NativeFeature from "../components/NativeFeature.astro";
+import NativeDemo from "../components/NativeDemo.astro";
+import HeroReel from "../components/HeroReel.astro";
+import InstallScene from "../components/InstallScene.astro";
+import RegionSharing from "../components/RegionSharing.astro";
+import Scribble from "../components/Scribble.astro";
+import SiteIcon from "../components/SiteIcon.astro";
+import { distribution, preferredDownloadURL, releasePageURL, releaseStageLabel, runsOnIntel } from "../lib/distribution";
+import { windowsListing as windows } from "../lib/windows";
+import { heroReel, phoneMedia } from "../lib/hero-reel";
+import { sitePath } from "../lib/paths";
+import PlatformSwitch from "../components/PlatformSwitch.astro";
+import HomebrewCommand from "../components/HomebrewCommand.astro";
+const release = distribution.stable || distribution.preview;
+const download = release ? preferredDownloadURL(release) : "https://github.com/dorlugasigal/annotator/releases";
+const intel = runsOnIntel(release);
+const reel = heroReel();
+---
+<Page title="Draw on any app">
+  <Fragment slot="head">
+    {reel.phone && <link rel="preload" as="image" href={reel.phone.posterURL} media={phoneMedia} fetchpriority="high"/>}
+    <link rel="preload" as="image" href={reel.desktop.posterURL} media={reel.phone ? `not all and ${phoneMedia}` : undefined} fetchpriority="high"/>
+  </Fragment>
+  {/* The reel carries the slogan in its own type, so the page says what the app is for and offers the download. */}
+  <section class="home-hero wrap" aria-labelledby="product-heading">
+    <div class="hero-rail">
+      <h1 id="product-heading" class="hero-title">Draw on your screen as you explain.</h1>
+      <p class="hero-lede">For demos, reviews and lessons. Every mark stays editable.</p>
+      <div class="hero-cta">
+        <a class="button get-annotator" href="#install">
+          Get Annotator <SiteIcon name="down"/><Scribble kind="ring" class="button-ring"/>
+        </a>
+        <p class="hero-availability">Free · macOS 14+ · {intel ? "Apple Silicon and Intel" : "Apple Silicon"}{release?.track === "preview" && <> · {releaseStageLabel(release)}</>}{windows && <> · Windows 11</>}</p>
+      </div>
+    </div>
+    <HeroReel />
+  </section>
+  <ProductStage>
+    <Fragment slot="intro">
+      <h2 id="workspace-title">See how each tool works.</h2>
+      <p>Each clip is a recording of the real app.</p>
+    </Fragment>
+  </ProductStage>
+  <section class="settings-story wrap" aria-labelledby="settings-title">
+    <div class="section-heading">
+      <h2 id="settings-title">Change the pointer, keys and toolbar.</h2>
+    </div>
+    <div class="settings-pair">
+      <NativeFeature take="pointer" title="Pointer." caption="Choose a shape, color and glow."/>
+      <NativeFeature take="shortcuts" title="Toolbar." caption="Drag tools in and change keys."/>
+    </div>
+    <div class="shortcut-strip">
+      <h3 id="return-title">Switch between drawing and your app.</h3>
+      <dl class="shortcut-pair">
+        {/* Draw is Control-Shift-2 on a Mac and Ctrl+Shift+2 on Windows: the same keys, so a Windows listing shows them as text. */}
+        <div><dt>Draw</dt><dd><span class="keycaps" role="img" aria-label="Control Shift 2">{windows
+          ? <><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>2</kbd></>
+          : <><kbd>⌃</kbd><kbd>⇧</kbd><kbd>2</kbd></>}</span></dd></div>
+        <div><dt>Use apps</dt><dd><span class="keycaps" role="img" aria-label="Escape"><kbd>esc</kbd></span></dd></div>
+      </dl>
+      <p>Default keys. Esc finishes an edit first. Drawings stay visible.</p>
+    </div>
+  </section>
+  <RegionSharing/>
+  <section class="simple-install wrap" id="install" aria-labelledby="install-title">
+    <span id="pricing" class="screen-reader-only" aria-hidden="true"></span>
+    <div class="install-copy" data-reveal="mark" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
+      <p class="eyebrow">All tools are free and open source.</p>
+      <h2 id="install-title">Make your <span class="install-mark">first mark.<Scribble kind="ellipse" class="install-ellipse"/></span></h2>
+      {/* With a published Microsoft Store listing (spec 013, WIN-DST-02 and WIN-DST-08), both systems are offered, the
+          visitor's own by default, with a switch for the other (scripts/platform.ts). */}
+      {windows && <PlatformSwitch label="Install on"/>}
+      <div class="install-choices">
+        <div class="install-choice" data-platform-part={windows ? "mac" : undefined}>
+          <a class="button download-action" href={download} data-download-track={release?.track}>
+            <SiteIcon name="download"/>{release ? "Download for Mac" : "View downloads"}<Scribble kind="ring" class="button-ring"/>
+          </a>
+          <p class="install-needs">{intel
+            ? <>Needs macOS 14 or later, on an <span class="nowrap">Apple Silicon or Intel Mac.</span></>
+            : <>Needs macOS 14 or later and an <span class="nowrap">Apple M-series chip.</span></>}</p>
+          {release && <p class="install-version">{releaseStageLabel(release)} {release.releaseVersion} · <a href={releasePageURL(release)}>Release notes</a></p>}
+          {/* Homebrew is for Macs only, so with both systems it stays with the Mac download, as winget does with Windows. */}
+          {windows && <HomebrewCommand/>}
+        </div>
+        {windows && (
+          <div class="install-choice" data-platform-part="windows">
+            {/* The availability line with its Store link counts as a release label (spec 007's reading budget). A text-only
+                Store link: no Microsoft badge artwork, and no download count (the counting service takes only Mac tracks). */}
+            <div class="windows-availability">
+              <a class="button store-action" href={windows.listingURL}>Get it for Windows<span aria-hidden="true">↗</span><Scribble kind="ring" class="button-ring"/></a>
+              <p>Microsoft Store · Windows 11, version 22H2 or later · x64 and ARM64</p>
+            </div>
+            <div class="store-command" data-command-copy data-copied-message="Copied. Paste into Terminal and press Enter.">
+              <div class="store-command-row">
+                <div class="brew-code">
+                  {/* The ">" is drawn by CSS, so it is never copied. */}
+                  <pre><code data-copy-command><span>winget install --id <span class="brew-arg">{windows.storeId}</span> <span class="brew-arg">--source msstore</span></span></code></pre>
+                  <span class="copy-swipe" data-copy-swipe aria-hidden="true"></span>
+                </div>
+                <button type="button" data-copy-button hidden><Scribble kind="check" class="copy-check"/>Copy<span class="screen-reader-only"> winget command</span></button>
+              </div>
+              <p class="brew-status" data-copy-status role="status" hidden></p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+    <div class="install-guide" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
+      <div data-platform-part={windows ? "mac" : undefined} data-install-guide="mac">
+        <InstallScene/>
+        <ol class="install-steps">
+          <li><span>{release?.diskImage ? "Download and open the disk image." : "Download and unzip."}</span></li>
+          <li><span>Drag Annotator to Applications.</span></li>
+          <li><span>Open it. Pick a tool. Draw. <small>It runs from the menu bar.</small></span></li>
+        </ol>
+      </div>
+      {windows && (
+        <div data-platform-part="windows" data-install-guide="windows">
+          <ol class="install-steps">
+            <li><span>Get it from the Microsoft Store or with winget.</span></li>
+            <li><span>Open Annotator from Start.</span></li>
+            <li><span>Pick a tool. Draw. <small>It runs from the system tray.</small></span></li>
+          </ol>
+        </div>
+      )}
+    </div>
+    {!windows && <HomebrewCommand/>}
+    <details class="install-more">
+      <summary>Screen sharing and updates</summary>
+      <p>Drawing needs no permissions. Zoom and live effects ask for screen access.</p>
+      <p>App or window sharing may miss overlays, so ask someone on the call what they see. Hiding or quitting Annotator removes covers, and blur isn’t secure redaction. Remove private details before you share.</p>
+      <p>Updating? Save your board and quit Annotator first. With Homebrew, run <code>brew update</code>, then <code>brew upgrade --cask dorlugasigal/annotator/annotator</code>.</p>
+      <p>Not sure which Mac you have? Choose Apple menu &gt; About This Mac.</p>
+      {windows && <p>On Windows, updates come from the Microsoft Store. To check your version of Windows, open Settings &gt; System &gt; About.</p>}
+      <a href={sitePath("/downloads/")}>Download details &amp; compatibility</a>
+    </details>
+  </section>
+  <details class="long-demo wrap">
+    <summary>See a longer walkthrough</summary>
+    <NativeDemo />
+  </details>
+</Page>
+<script>import "../scripts/install";</script>

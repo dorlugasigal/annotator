@@ -1,0 +1,94 @@
+---
+import FeatureClip from "./FeatureClip.astro";
+import SiteIcon from "./SiteIcon.astro";
+import demos from "../data/stage-demos.json";
+import settings from "../data/showcase-takes.json";
+import region from "../data/region-sharing.json";
+import { heroReel } from "../lib/hero-reel";
+import { sitePath } from "../lib/paths";
+import { windowsListing } from "../lib/windows";
+const reel = heroReel();
+const features = [
+  { id: "circle", title: "Circle", label: "Choose Ellipse, then circle a number with a rough teal ellipse",
+    caption: "Choose Ellipse and circle a number. The Sketchy style keeps it hand-drawn." },
+  { id: "arrow", title: "Arrow", label: "Choose Arrow and Blue, click three points, press Return, then drag the middle point to bend the arrow",
+    caption: windowsListing ? "Click to place points and press Return (Enter on Windows). Drag a point to bend the arrow."
+      : "Click to place points and press Return. Drag a point to bend the arrow." },
+  { id: "highlight", title: "Highlight", label: "Choose Highlighter, then drag across a note",
+    caption: "Drag the highlighter across a line of text." },
+  { id: "smart", title: "Smart Draw", label: "With Smart Draw, a rough box and a rough arrow become clean shapes, then a label is typed",
+    caption: "Sketch a box or an arrow, and Smart Draw makes it neat. Then type a label." },
+  { id: "shapes", title: "Shapes", label: "Open the tool library, scroll through the shapes, look at the Focus and Extras tools, then draw a blue Database shape",
+    caption: "The tool library has shapes, diagram icons, rulers and more. Pick one and drag to draw it." },
+  { id: "spotlight", title: "Spotlight", label: "Turn on the cursor halo and Spotlight from the tool library, then click three pictures",
+    caption: "Turn on the cursor halo and Spotlight. The light follows your pointer." },
+  { id: "zoom", title: "Zoom", label: "Choose Screen zoom in the tool library, move the pointer around the zoomed screen, zoom in further with the plus button, then stop the zoom",
+    caption: "Screen zoom follows your pointer. Use + and − to change how close it gets." },
+  { id: "blur", title: "Blur", label: "Choose Effects, then drag a blur region over a busy picture",
+    caption: "Drag over a busy picture to blur it. Blur isn’t secure redaction." },
+] as const satisfies readonly { id: keyof typeof demos.demos; title: string; label: string; caption: string }[];
+const day = (date: string) => new Date(`${date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+// The tools the clips above do not show, grouped like the tabs of the tool library. Names match the app.
+const toolGroups = [
+  { name: "Draw", tools: ["Select", "Line", "Eraser"] },
+  { name: "Shapes", tools: ["Rectangle", "Diamond", "Triangle", "Hexagon", "Star", "Person", "Cylinder", "Queue", "Grid", "Axes"] },
+  { name: "Diagram icons", tools: ["Server", "Database", "Messaging", "Web", "Mobile phone", "Desktop", "Laptop", "Document",
+    "Configuration", "Load balancer", "API gateway", "Envelope", "Cart", "Bell"] },
+  { name: "Focus", tools: ["Pointer lens", "Pixelate", "Distort", "Solid cover"] },
+  { name: "Extras", tools: ["Pixel ruler", "Numbered counter", "Paste image", "Insert image", "My shapes"] },
+  { name: "Style", tools: ["Fill", "Gradients", "Dashed lines", "Sketchy lines", "Whiteboard", "Blackboard"] },
+];
+const recordedOn = day(demos.recorded);
+const pointerOn = day(settings.takes.pointer.recorded ?? settings.recorded);
+const toolbarOn = day(settings.takes.shortcuts.recorded ?? settings.recorded);
+const fastest = Math.max(...Object.values(demos.demos).map(demo => demo.speed.moving[1])).toFixed(1);
+---
+<section class="product-stage wrap" id="workspace" data-product-stage aria-labelledby="workspace-title"
+  style={`--tab-count:${features.length}`}>
+  <div class="stage-intro"><slot name="intro"/></div>
+  <div class="stage-set" data-stage-set="mac">
+    <div class="stage-tabs" data-stage-tabs role="tablist" aria-label="Annotator tools" hidden>
+      <span class="stage-indicator" aria-hidden="true"></span>
+      {features.map((feature, index) => <button id={`feature-tab-${feature.id}`} type="button" role="tab"
+        data-stage-tab={feature.id} aria-controls={`feature-${feature.id}`} aria-selected={String(index === 0)}
+        tabindex={index === 0 ? 0 : -1}>
+        <span class="feature-glyph" aria-hidden="true"><SiteIcon name={feature.id}/></span>
+        <span class="feature-name">{feature.title}</span>
+      </button>)}
+    </div>
+    <div class="stage-screen">
+      {features.map((feature, index) => <section id={`feature-${feature.id}`} data-stage-panel={feature.id}>
+        <details name="product-examples" open={index === 0}>
+          <summary>{feature.title}</summary>
+          <FeatureClip demo={feature.id} label={feature.label} caption={feature.caption} first={index === 0}
+            captionId={feature.id === "blur" ? "blur-title" : undefined}/>
+        </details>
+      </section>)}
+    </div>
+  </div>
+  <section class="stage-more" aria-labelledby="more-tools-title">
+    <div class="stage-more-intro">
+      <h3 id="more-tools-title">And much more.</h3>
+      <p>Annotator has more than 40 tools. Open the tool library with <kbd>⌘L</kbd>{windowsListing && <>/<kbd>Ctrl+L</kbd></>} or its toolbar button.</p>
+    </div>
+    <div class="tool-groups">
+      {toolGroups.map(group => (
+        <div class="tool-group">
+          <h4>{group.name}</h4>
+          <ul>{group.tools.map(tool => <li>{tool}</li>)}</ul>
+        </div>
+      ))}
+    </div>
+    <a class="stage-more-link" href={sitePath("/docs/#shapes")}>Read about the tools in Help</a>
+  </section>
+  <details class="recording-details">
+    <summary>How these videos were made</summary>
+    <p id="reel-provenance">{reel.provenance}</p>
+    {reel.music && <p>The reel starts muted. Its music is <a href={reel.music.url}>“{reel.music.title}”</a> by {reel.music.artist}, from {reel.music.source}.</p>}
+    <p>The tool clips were recorded the same way, on {recordedOn}. They zoom in on each action and play at up to {fastest}× speed. Each clip fades back to its start before it repeats.</p>
+    <p>The Settings clips show real clicks, drags and typing in Annotator’s Settings. The pointer clip was recorded on {pointerOn} and the toolbar clip on {toolbarOn}. Both play at 1.25× speed.</p>
+    <p>The region-sharing clip shows the real chooser on {day(region.take.recorded)}, at recorded speed. Its pointer and preset clicks follow a script. It captures only recorder-owned windows, not a meeting or anyone else's desktop.</p>
+    <p>The toolbar, drawings and effects are recorded from the real Mac app. The pointer follows a script, and the apps under the drawings are made-up samples.{windowsListing && <> The Windows app has the same tools and looks the same.</>}</p>
+  </details>
+</section>
+<script>import "../scripts/product-stage";</script>

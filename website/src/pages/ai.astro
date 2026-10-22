@@ -1,0 +1,38 @@
+---
+import Page from "../layouts/Page.astro";
+import { sitePath } from "../lib/paths";
+import { windowsListing as windows } from "../lib/windows";
+// A Windows listing adds the Windows app and its system tools beside the Mac's (spec 013, WIN-AI-01).
+const apps = windows ? "Mac and Windows apps" : "Mac app";
+const system = windows ? "macOS or Windows" : "macOS";
+---
+<Page title="Use Annotator with your AI assistant">
+  <article class="prose wrap skill-guide">
+    <p class="eyebrow">AI CONTROL</p>
+    <h1>Let your AI use Annotator.</h1>
+    <p>The skill tells an AI assistant how to click the tools, draw and edit in the {apps}. It also shows the assistant how to make annotated screenshots, short demo clips and diagrams you can share. Your AI app must already have computer-use tools. This download does not add those tools or grant {system} permissions.</p>
+    <p>Your AI app may send screenshots and text to its model provider. Check its privacy settings before using private information. Its computer-use tools need their own {system} permissions, separate from Annotator's.</p>
+    <p><a class="button" href={sitePath("/downloads/annotator-skill.zip")} download="annotator-skill.zip">Download the AI skill</a></p>
+    <p>Unzip the download. You will get an <code>annotator</code> folder with a <code>SKILL.md</code> file inside. In Annotator, open <strong>Settings &gt; Help</strong>, expand <strong>Use an AI assistant</strong>, then choose <strong>Save AI skill...</strong>.</p>
+    <h2>Install in Copilot CLI</h2>
+    <p>Move the <code>annotator</code> folder into <code>~/.copilot/skills/</code>. Create the skills folder if it does not exist.</p>
+    <p>Or, in Copilot CLI, type <code>/skills add /path/to/annotator</code>. Replace the path with the folder you unzipped. Then run <code>/skills reload</code> and <code>/skills info annotator</code> to check it.</p>
+    <h2>Install in Claude Code</h2>
+    <p>Move the <code>annotator</code> folder into <code>~/.claude/skills/</code>. Start a new session. You can then ask Claude Code to use the <code>/annotator</code> skill.</p>
+    <h2>Use another AI app</h2>
+    <p>Follow that app's instructions for adding a skill folder. An AI app that cannot control your {windows ? "computer" : "Mac"} will not gain that ability from this skill.</p>
+    <h2>Try it</h2>
+    <p>Open Annotator and the thing you want to explain. Ask your AI assistant:</p>
+    <blockquote><p>Use Annotator to circle the wrong date and add “Check this date”.</p></blockquote>
+    <p>The assistant should make the changes in the app and check the result. It should keep your existing work and ask before sharing or deleting anything outside your request.</p>
+    <p>Or ask for something to share:</p>
+    <blockquote><p>Use Annotator to make a 20-second clip of the signup form. Number the three fields and circle the Sign up button.</p></blockquote>
+    <p>The assistant should plan the steps, set up the screen, draw, and check the result before it gives you the file. Annotator has no screen recorder, so the assistant uses the macOS Screenshot tool (Shift-Command-5) or asks you to start and stop the recording.{windows && " On Windows, it uses Snipping Tool (Win+Shift+S) and its recorder instead."} It should also ask you to turn on Do Not Disturb and to close windows you don't want in the shot.</p>
+    <p>Annotator's usual permissions still apply. Drawing needs no screen access; screen zoom and live effects need Screen Recording{windows && " on a Mac and screen access on Windows"}. All tools are free. <a href={sitePath("/docs/#permissions")}>Read the permission guide.</a></p>
+    <p><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills">Copilot's skill instructions</a> · <a href="https://code.claude.com/docs/en/skills">Claude Code's skill instructions</a></p>
+  </article>
+</Page>
+<style>
+  .skill-guide code { overflow-wrap: anywhere; }
+  .skill-guide blockquote { margin: 24px 0; padding-left: 20px; border-left: 3px solid currentColor; }
+</style>

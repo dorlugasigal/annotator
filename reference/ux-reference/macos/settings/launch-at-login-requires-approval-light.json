@@ -1,0 +1,74 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    119.5,
+    16,
+    113.5,
+    16.5
+   ],
+   "help": "Start Annotator for this Mac account without opening the drawing toolbar.",
+   "identifier": "launch-at-login",
+   "label": "Launch at login",
+   "role": "AXCheckBox",
+   "value": 1
+  },
+  {
+   "enabled": true,
+   "frame": [
+    119.5,
+    38.5,
+    381,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Approval is needed. Allow Annotator in macOS Login Items to finish enabling it."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    119.5,
+    57.5,
+    142,
+    24
+   ],
+   "label": "Open Login Items...",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    119.5,
+    87.5,
+    350,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Managed by macOS for this account. Not included in exported profiles."
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "settings/launch-at-login-requires-approval-light.png",
+ "kind": "view",
+ "notes": "Launch at login, requires-approval. Windows maps these to the startup task states (WIN-SYS-01).",
+ "pixels": [
+  1240,
+  233
+ ],
+ "scale": 2,
+ "size": [
+  620,
+  116.5
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03",
+  "005 launch-at-login.md",
+  "WIN-SYS-01"
+ ],
+ "state": "launch-at-login-requires-approval",
+ "surface": "settings"
+}

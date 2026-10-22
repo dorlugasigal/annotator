@@ -1,0 +1,83 @@
+{
+  "b" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.88,
+      "green" : 0.45,
+      "red" : 0.17
+    },
+    "name" : "Blue"
+  },
+  "c" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.7,
+      "green" : 0.6,
+      "red" : 0
+    },
+    "name" : "Cyan"
+  },
+  "g" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.4,
+      "green" : 0.69,
+      "red" : 0.28
+    },
+    "name" : "Green"
+  },
+  "k" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0,
+      "green" : 0,
+      "red" : 0
+    },
+    "name" : "Black"
+  },
+  "o" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.23,
+      "green" : 0.66,
+      "red" : 1
+    },
+    "name" : "Orange"
+  },
+  "p" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.4,
+      "green" : 0.26,
+      "red" : 0.89
+    },
+    "name" : "Pink"
+  },
+  "r" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.22,
+      "green" : 0.27,
+      "red" : 0.94
+    },
+    "name" : "Red"
+  },
+  "w" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 1,
+      "green" : 1,
+      "red" : 1
+    },
+    "name" : "White"
+  },
+  "y" : {
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.22,
+      "green" : 0.89,
+      "red" : 0.96
+    },
+    "name" : "Yellow"
+  }
+}

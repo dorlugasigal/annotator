@@ -1,0 +1,11 @@
+{
+  "stable": null,
+  "preview": {
+    "releaseVersion": "0.1.0-beta.2",
+    "build": "20",
+    "downloadURL": "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-beta.2/annotator-0.1.0-beta.2-20-universal.zip",
+    "sha256": "eb9dd90e177d00a543dea770507e227f42d6031dbc241dbc84889f02e34b3604",
+    "track": "preview",
+    "architecture": "arm64 x86_64"
+  }
+}

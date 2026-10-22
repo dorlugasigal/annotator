@@ -1,0 +1,278 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    8,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 1",
+   "label": "Select",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    51,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 2",
+   "label": "Rectangle",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    87,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 3",
+   "label": "Diamond",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    123,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 4",
+   "label": "Ellipse",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    159,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 5",
+   "label": "Arrow",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    195,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 6",
+   "label": "Line",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    238,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 7",
+   "label": "Pen",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    274,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 8",
+   "label": "Text",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    310,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 9",
+   "label": "Highlighter",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    353,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut 0",
+   "label": "Eraser",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    396,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut S",
+   "label": "Effects",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    434,
+    8,
+    34,
+    36
+   ],
+   "help": "More shapes and tools (⌘L)",
+   "identifier": "square.grid.2x2",
+   "label": "Tool library",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    485.5,
+    18.5,
+    17.5,
+    15
+   ],
+   "help": "Cycle Desktop, Whiteboard and Blackboard on this drawing display. Control-W: whiteboard. Control-B: blackboard.",
+   "identifier": "desktopcomputer",
+   "label": "Board background",
+   "role": "AXButton",
+   "value": "Desktop"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    515,
+    8,
+    46,
+    36
+   ],
+   "help": "Drawing is active. Click Use apps to pass clicks through. Escape finishes text or cancels an unfinished drawing first. ⌃⇧2 returns to drawing.",
+   "label": "Use apps",
+   "role": "AXButton",
+   "value": "Drawing is active"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    570,
+    20,
+    12,
+    12
+   ],
+   "help": "Undo",
+   "identifier": "arrow.uturn.backward",
+   "label": "Undo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    596,
+    20,
+    12,
+    12
+   ],
+   "help": "Redo",
+   "identifier": "arrow.uturn.forward",
+   "label": "Redo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    622,
+    19,
+    12.5,
+    14.5
+   ],
+   "help": "Clear all drawings — undoable",
+   "identifier": "trash",
+   "label": "Clear all drawings — undoable",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    647.5,
+    20.5,
+    13,
+    11
+   ],
+   "help": "Show quick controls",
+   "identifier": "toolbar-properties",
+   "label": "Properties",
+   "role": "AXButton",
+   "value": "Tools only"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    673,
+    19,
+    14,
+    14
+   ],
+   "help": "Settings and shortcuts",
+   "identifier": "gearshape",
+   "label": "Settings and shortcuts",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    701,
+    21,
+    10.5,
+    10.5
+   ],
+   "help": "Hide drawings and tools",
+   "identifier": "xmark",
+   "label": "Hide drawings and tools",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "toolbar/minimal-horizontal-tools-only-dark.png",
+ "kind": "view",
+ "notes": "Minimal toolbar, horizontal, tools only. Pen selected.",
+ "pixels": [
+  1476,
+  104
+ ],
+ "scale": 2,
+ "size": [
+  738,
+  52
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "minimal-horizontal-tools-only",
+ "surface": "toolbar"
+}

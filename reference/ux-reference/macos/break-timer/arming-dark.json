@@ -1,0 +1,59 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    193,
+    44.5,
+    94,
+    19
+   ],
+   "role": "AXStaticText",
+   "value": "Coffee break"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    148.5,
+    74,
+    183,
+    183
+   ],
+   "identifier": "break-countdown",
+   "label": "Break timer",
+   "role": "AXUnknown"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    172,
+    266.5,
+    136,
+    15.5
+   ],
+   "identifier": "break-lock-status",
+   "role": "AXStaticText",
+   "value": "Locking in 3 s. Press Esc to cancel."
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "break-timer/arming-dark.png",
+ "kind": "view",
+ "notes": "Just started, with locking on: the lock arms after 3 seconds; Escape cancels. Shown full screen on each display; always dark. Every size scales with the display's shorter side, so this 480 by 300 capture keeps the layout of a full screen.",
+ "pixels": [
+  960,
+  600
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  300
+ ],
+ "spec": [
+  "014",
+  "WIN-PAR-03"
+ ],
+ "state": "arming",
+ "surface": "break-timer"
+}

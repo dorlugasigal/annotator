@@ -1,0 +1,16 @@
+---
+import Scribble from "./Scribble.astro";
+---
+<section class="brew" id="homebrew" data-command-copy data-copied-message="Copied. Paste into Terminal and press Return." aria-labelledby="brew-title">
+  <div class="brew-bar">
+    <span class="brew-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <h3 id="brew-title">Or use Homebrew</h3>
+    <button type="button" data-copy-button hidden><Scribble kind="check" class="copy-check"/>Copy<span class="screen-reader-only"> Homebrew command</span></button>
+  </div>
+  <div class="brew-code">
+    {/* The "$" is drawn by CSS, so it is never copied. The cask name breaks only when it cannot fit on its own line. */}
+    <pre><code data-copy-command><span>brew install --cask <span class="brew-arg brew-cask">dorlugasigal/<span>annotator/annotator</span></span></span></code></pre>
+    <span class="copy-swipe" data-copy-swipe aria-hidden="true"></span>
+  </div>
+  <p class="brew-status" data-copy-status role="status" hidden></p>
+</section>

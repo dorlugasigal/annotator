@@ -1,0 +1,97 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    82.5,
+    16.5,
+    120,
+    20
+   ],
+   "identifier": "cover-mode",
+   "role": "AXPopUpButton",
+   "value": "Blur"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    210.5,
+    20,
+    19.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Blur"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      301,
+      19.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    236,
+    19.5,
+    90,
+    14
+   ],
+   "label": "Blur",
+   "role": "AXSlider",
+   "value": 18
+  },
+  {
+   "enabled": true,
+   "frame": [
+    332,
+    16,
+    48,
+    21
+   ],
+   "help": "Blur: 0–100 ",
+   "label": "Precise blur",
+   "placeholder": "Blur",
+   "role": "AXTextField",
+   "value": "18"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    82.5,
+    47,
+    483,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Blur, pixelation and distortion can leave details readable. Remove private information before sharing."
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "properties/blur-light.png",
+ "kind": "view",
+ "notes": "Full properties for Blur region, 648 points wide.",
+ "pixels": [
+  1296,
+  152
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  76
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "blur",
+ "surface": "properties"
+}

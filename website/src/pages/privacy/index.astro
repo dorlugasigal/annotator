@@ -1,0 +1,54 @@
+---
+import Page from "../../layouts/Page.astro";
+import { sitePath } from "../../lib/paths";
+import { distribution, supportsRegionSharing } from "../../lib/distribution";
+import { windowsListing as windows } from "../../lib/windows";
+const countsEnabled = Boolean(import.meta.env.PUBLIC_METRICS_URL);
+const netlifySite = process.env.ANNOTATOR_SITE_PROVIDER === "netlify";
+const regionSharing = supportsRegionSharing(distribution.stable ?? distribution.preview);
+const computer = windows ? "computer" : "Mac";
+---
+<Page title="Privacy">
+  <article class="prose wrap"><p class="eyebrow">PRIVACY</p><h1>What stays on your {computer}.</h1>
+    <p>Annotator processes drawings, screen pixels and typed text on your {computer}. It does not upload them to a cloud service.</p>
+    <h2>If an AI app controls Annotator</h2>
+    <p>The AI app may send screenshots and text to its model provider. That app has its own permissions and privacy settings. Check them before using private information. <a href={sitePath("/ai/")}>Read the AI setup guide.</a></p>
+    <h2>Files you save</h2>
+    <p>A board keeps your drawings editable, including original pasted images under covers. Do not share a board containing private details. PNG export saves an image on your {computer}. Open the exported file and check it before sharing; blur can still leave details readable.</p>
+    <p>Drawing needs no screen access. {regionSharing ? "Zoom, live pixel effects and region sharing" : "Screen zoom and live pixel effects"} need Screen Recording permission, but Annotator does not record or save a video.{windows && " On Windows, the matching setting is Screenshots and screen recording."}</p>
+    {regionSharing && <p>Region sharing composes a chosen desktop area into a local window. Your meeting app sends it only when you choose to share that window. Anything inside the area can appear, including notifications. Pausing replaces the output with an opaque view; the region is not restored automatically on your next launch.</p>}
+    <h2>Feedback you choose to share</h2>
+    <p>You can write a report in Annotator without sending it. Open GitHub draft sends your title, details and app version to GitHub in a browser link. Submitting it there makes the issue public. Remove private details before opening GitHub. No drawings, screenshots or logs are attached automatically.</p>
+    <p>Copy support info includes app and {windows ? "macOS or Windows" : "macOS"} versions, number of screens, permissions, update and login settings, and current app state. It does not include drawings, screenshots or document names. Copying or saving this information does not upload it; review the text before sharing it.</p>
+    <h2>Updates and diagnostics</h2>
+    <p>{windows ? "On a Mac, update checks contact the release server." : "Update checks contact the release server."} Its host receives connection information, including your IP address. Annotator does not send drawings or screenshots in update checks. Automatic checks are optional, and Sparkle system-profile sharing is off. What's changed reads notes included with the app, without an update request.</p>
+    <h2>Optional app usage counts</h2>
+    <p>Share usage counts is off by default. If you turn it on, Annotator sends at most one request a day with app version, macOS major version, chip type, opt-in date and broad feature-use counts. A random installation ID links daily records. Counts use ranges, not exact event times. No drawings, screenshots, text, file names or hardware IDs are included.</p>
+    <p>The server stores a keyed hash of that random ID, not the original ID. Raw daily records are removed after 45 days; totals without identifiers are kept. Turning sharing off deletes the local ID and unsent counts. Re-enabling creates a new ID. An already sent request cannot be recalled.</p>
+    {/* WIN-PRV-01: the counting service accepts Windows records, but the Windows app's switch (UsageMetrics.ServiceAcceptsWindows) is off, so it sends nothing. */}
+    {windows && <p>Annotator for Windows doesn't send usage counts yet. Share usage counts stays off and says counts aren't available.</p>}
+    {windows
+      ? <p>On a Mac, app errors use local system logs, with error details marked private, and no automatic crash reports are sent to us. macOS may handle its own diagnostics according to your system settings.</p>
+      : <p>App errors use local system logs, with error details marked private. No automatic crash reports are sent to us. macOS may handle its own diagnostics according to your system settings.</p>}
+    {windows && (
+      <>
+        <h2 id="microsoft-store">Microsoft Store and Windows</h2>
+        <p>If you get Annotator for Windows, the Microsoft Store and Windows collect some information outside Annotator, under Microsoft's own terms. Annotator doesn't control this. Updates also come from the Store, so those connections go to Microsoft.</p>
+        <p>In Microsoft's Partner Center, we can see how many people got and installed Annotator from the Store. These are totals and broad groups, such as country and Windows version.</p>
+        <p>Windows sends its own diagnostic data to Microsoft, as set in Settings &gt; Privacy &amp; security &gt; Diagnostics &amp; feedback. From that data, Partner Center can show us usage totals and crash reports for Annotator. A crash report can include part of Annotator's memory from the moment it crashed. Annotator for Windows sends no crash reports of its own.</p>
+        <p>Store and Partner Center totals are separate from Annotator's usage counts and this website's counts. Read <a href="https://www.microsoft.com/en-us/privacy/privacystatement">Microsoft's privacy statement</a>.</p>
+      </>
+    )}
+    <h2>Coffee reminders and contributions</h2>
+    <p>All tools are free. To time coffee reminders, Annotator counts days when you draw. Those counts stay on your {computer}. Not now snoozes a reminder for at least 30 days; another reminder also requires further active use.</p>
+    <p>The Buy me a coffee link opens Buy Me a Coffee only when you click it. That service and its payment providers handle contributions under their own terms and privacy policies. This website does not collect card details or load a payment widget.</p>
+    <h2>Website hosting</h2>
+    {netlifySite ? <p>Netlify hosts this website and the usage-count service. It receives normal connection information, including IP addresses. The collector does not read or store IP addresses or user-agent strings. Hosting logs are separate from our count records; we have not confirmed their retention period. Read <a href="https://www.netlify.com/privacy/">Netlify's privacy policy</a>.</p> :
+      <><p>GitHub Pages hosts this website. GitHub's General Privacy Statement says it collects information about service use, including IP addresses and website interactions.</p><p>We have not confirmed how long GitHub keeps this site's hosting logs or whether the site owner can access them. Read <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's General Privacy Statement</a> for its policies.</p></>}
+    {countsEnabled ? <p>This site counts one visit per browser tab and download clicks. It uses a random ID in sessionStorage, not cookies or localStorage. Events contain only a page category and a broad source category, never the full URL or referrer. Global Privacy Control and Do Not Track stop these counts. Raw records are removed after 45 days.</p> :
+      <p>Website usage counts are off on this page. No advertising pixels or email signup are loaded.</p>}
+    <p>GitHub release-download totals and Homebrew's public install totals are separate from app and website counts. They are not a count of unique people. The private owner dashboard uses a secure, eight-hour sign-in cookie; ordinary site visitors do not get that cookie.</p>
+    <h2>Before sharing your screen</h2>
+    <p>App or window sharing may leave out Annotator's drawings and covers. Hiding, quitting or an app crash removes visible covers. Remove private details from your material and ask someone on the call to check their view. Read the <a href={sitePath("/docs/#limitations")}>screen-sharing limits</a>.</p>
+  </article>
+</Page>

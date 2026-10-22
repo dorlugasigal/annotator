@@ -1,0 +1,4 @@
+{
+  "$comment": "Set partOfReleases to true when Windows joins the shared version (specification 013, D-8). Then every release that the Release workflow signs also builds the Windows bundle and the portable ZIPs from the same frozen commit. See docs/releasing.md.",
+  "partOfReleases": true
+}

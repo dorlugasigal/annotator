@@ -1,0 +1,2475 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          61,
+          81,
+          87.5,
+          19
+         ],
+         "role": "AXStaticText",
+         "value": "Your toolbar"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          61,
+          103,
+          492,
+          15
+         ],
+         "role": "AXStaticText",
+         "value": "Drag tools and buttons to arrange them. Click the key under one, then press a new key."
+        },
+        {
+         "enabled": true,
+         "frame": [
+          708,
+          83,
+          54,
+          16
+         ],
+         "identifier": "reset-toolbar-menu",
+         "label": "Reset",
+         "role": "AXMenuButton",
+         "title": "Reset"
+        },
+        {
+         "children": [
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              73,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Select key",
+             "role": "AXButton",
+             "value": "1"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            73,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-select",
+           "label": "Select",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              133,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Rectangle key",
+             "role": "AXButton",
+             "value": "2"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            133,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-rectangle",
+           "label": "Rectangle",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              184,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Diamond key",
+             "role": "AXButton",
+             "value": "3"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            184,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-diamond",
+           "label": "Diamond",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              235,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Ellipse key",
+             "role": "AXButton",
+             "value": "4"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            235,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-ellipse",
+           "label": "Ellipse",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              286,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Arrow key",
+             "role": "AXButton",
+             "value": "5"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            286,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-arrow",
+           "label": "Arrow",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              337,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Line key",
+             "role": "AXButton",
+             "value": "6"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            337,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-line",
+           "label": "Line",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              397,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Pen key",
+             "role": "AXButton",
+             "value": "7"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            397,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-pen",
+           "label": "Pen",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              448,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Text key",
+             "role": "AXButton",
+             "value": "8"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            448,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-text",
+           "label": "Text",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              499,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Highlighter key",
+             "role": "AXButton",
+             "value": "9"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            499,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-highlighter",
+           "label": "Highlighter",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              559,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Eraser key",
+             "role": "AXButton",
+             "value": "0"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            559,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-eraser",
+           "label": "Eraser",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              619,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Effects key",
+             "role": "AXButton",
+             "value": "S"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            619,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-cover",
+           "label": "Effects",
+           "role": "AXGroup"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          61,
+          132,
+          701,
+          84
+         ],
+         "identifier": "toolbar-arrangement",
+         "label": "Your toolbar",
+         "role": "AXGroup"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          61,
+          230,
+          68.5,
+          16
+         ],
+         "role": "AXStaticText",
+         "value": "More tools"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          137.5,
+          231.5,
+          218.5,
+          13
+         ],
+         "role": "AXStaticText",
+         "value": "Drag one up to add it, or click its plus button."
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            69,
+            268,
+            41.5,
+            13
+           ],
+           "label": "Drawing",
+           "role": "AXHeading"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              83.5,
+              326,
+              49.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Pixel ruler"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              97,
+              349.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Pixel ruler key",
+             "role": "AXButton",
+             "value": "M"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            69,
+            287,
+            78,
+            84
+           ],
+           "identifier": "more-tool-ruler",
+           "label": "Pixel ruler",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              165,
+              319.5,
+              54.5,
+              26
+             ],
+             "role": "AXStaticText",
+             "value": "Numbered counter"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              181,
+              349.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Numbered counter key",
+             "role": "AXButton",
+             "value": "N"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            153,
+            287,
+            78,
+            84
+           ],
+           "identifier": "more-tool-counter",
+           "label": "Numbered counter",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              246,
+              326,
+              60.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Paste image"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              265,
+              349.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Paste image key",
+             "role": "AXButton",
+             "value": "I"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            237,
+            287,
+            78,
+            84
+           ],
+           "identifier": "more-tool-image",
+           "label": "Paste image",
+           "role": "AXGroup"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            69,
+            381,
+            36,
+            13
+           ],
+           "label": "Effects",
+           "role": "AXHeading"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              81,
+              439,
+              54,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Blur region"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              97,
+              462.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Blur region key",
+             "role": "AXButton",
+             "value": "U"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            69,
+            400,
+            78,
+            84
+           ],
+           "identifier": "more-tool-blur",
+           "label": "Blur region",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              155.5,
+              439,
+              73.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Pixelate region"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              181,
+              462.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Pixelate region key",
+             "role": "AXButton",
+             "value": "X"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            153,
+            400,
+            78,
+            84
+           ],
+           "identifier": "more-tool-pixelate",
+           "label": "Pixelate region",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              242,
+              439,
+              68,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Distort region"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              265,
+              462.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Distort region key",
+             "role": "AXButton",
+             "value": "T"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            237,
+            400,
+            78,
+            84
+           ],
+           "identifier": "more-tool-distort",
+           "label": "Distort region",
+           "role": "AXGroup"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            69,
+            494,
+            54.5,
+            13
+           ],
+           "label": "Presenting",
+           "role": "AXHeading"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              85.5,
+              552,
+              45.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Spotlight"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              95.5,
+              575.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Spotlight key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            69,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-spotlight",
+           "label": "Spotlight",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              163.5,
+              552,
+              57,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Cursor halo"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              179.5,
+              575.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Cursor halo key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            153,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-cursorHalo",
+           "label": "Cursor halo",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              246.5,
+              552,
+              59,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Pointer lens"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              263.5,
+              575.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Pointer lens key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            237,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-pointerLens",
+           "label": "Pointer lens",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              331.5,
+              552,
+              57,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Smart draw"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              347.5,
+              575.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Smart draw key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            321,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-smartDraw",
+           "label": "Smart draw",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              412.5,
+              552,
+              63,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Share region"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              431.5,
+              575.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Share region key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            405,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-shareRegion",
+           "label": "Share region",
+           "role": "AXGroup"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            69,
+            607,
+            37,
+            13
+           ],
+           "label": "Shapes",
+           "role": "AXHeading"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              87.5,
+              665,
+              41.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Cylinder"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              97,
+              688.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Cylinder key",
+             "role": "AXButton",
+             "value": "D"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            69,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-database",
+           "label": "Cylinder",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              176,
+              665,
+              32,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Queue"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              181,
+              688.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Queue key",
+             "role": "AXButton",
+             "value": "Q"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            153,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-queue",
+           "label": "Queue",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              259,
+              665,
+              34.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Person"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              265,
+              688.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Person key",
+             "role": "AXButton",
+             "value": "H"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            237,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-person",
+           "label": "Person",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              349.5,
+              665,
+              21,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Grid"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              349,
+              688.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Grid key",
+             "role": "AXButton",
+             "value": "F"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            321,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-grid",
+           "label": "Grid",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              432,
+              665,
+              24,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Axes"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              433,
+              688.5,
+              22,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Axes key",
+             "role": "AXButton",
+             "value": "A"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            405,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-axes",
+           "label": "Axes",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              508,
+              665,
+              40,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Triangle"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              515.5,
+              688.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Triangle key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            489,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-triangle",
+           "label": "Triangle",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              590.5,
+              665,
+              43.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Hexagon"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              599.5,
+              688.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Hexagon key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            573,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-hexagon",
+           "label": "Hexagon",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              686,
+              665,
+              20.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Star"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              683.5,
+              688.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Star key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            657,
+            626,
+            78,
+            84
+           ],
+           "identifier": "more-tool-star",
+           "label": "Star",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              84.5,
+              755,
+              47,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Database"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              95.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Database key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            69,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-databaseStack",
+           "label": "Database",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              176,
+              755,
+              32.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Server"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              179.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Server key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            153,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-server",
+           "label": "Server",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              249.5,
+              755,
+              53.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Messaging"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              263.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Messaging key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            237,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-messaging",
+           "label": "Messaging",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              349,
+              755,
+              22,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Web"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              347.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Web key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            321,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-web",
+           "label": "Web",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              410.5,
+              755,
+              67,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Mobile phone"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              431.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Mobile phone key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            405,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-mobile",
+           "label": "Mobile phone",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              507.5,
+              755,
+              41,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Desktop"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              515.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Desktop key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            489,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-desktop",
+           "label": "Desktop",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              595,
+              755,
+              34.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Laptop"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              599.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Laptop key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            573,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-laptop",
+           "label": "Laptop",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              670.5,
+              755,
+              51,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Document"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              683.5,
+              778.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Document key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            657,
+            716,
+            78,
+            84
+           ],
+           "identifier": "more-tool-document",
+           "label": "Document",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              74.5,
+              845,
+              67.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Configuration"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              95.5,
+              868.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Configuration key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            69,
+            806,
+            78,
+            84
+           ],
+           "identifier": "more-tool-configuration",
+           "label": "Configuration",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              157,
+              845,
+              70,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Load balancer"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              179.5,
+              868.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Load balancer key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            153,
+            806,
+            78,
+            84
+           ],
+           "identifier": "more-tool-loadBalancer",
+           "label": "Load balancer",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              245.5,
+              845,
+              61,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "API gateway"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              263.5,
+              868.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "API gateway key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            237,
+            806,
+            78,
+            84
+           ],
+           "identifier": "more-tool-apiGateway",
+           "label": "API gateway",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              337.5,
+              845,
+              45,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Envelope"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              347.5,
+              868.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Envelope key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            321,
+            806,
+            78,
+            84
+           ],
+           "identifier": "more-tool-envelope",
+           "label": "Envelope",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              433.5,
+              845,
+              21.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Cart"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              431.5,
+              868.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Cart key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            405,
+            806,
+            78,
+            84
+           ],
+           "identifier": "more-tool-cart",
+           "label": "Cart",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              519,
+              845,
+              18.5,
+              13
+             ],
+             "role": "AXStaticText",
+             "value": "Bell"
+            },
+            {
+             "enabled": true,
+             "frame": [
+              515.5,
+              868.5,
+              25,
+              17
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Bell key",
+             "role": "AXButton",
+             "value": "None"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            489,
+            806,
+            78,
+            84
+           ],
+           "identifier": "more-tool-bell",
+           "label": "Bell",
+           "role": "AXGroup"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          61,
+          260,
+          701,
+          638
+         ],
+         "label": "More tools",
+         "role": "AXGroup"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        45,
+        65,
+        733,
+        849
+       ],
+       "identifier": "tool-shortcuts-list",
+       "role": "AXGroup"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        942,
+        122,
+        19
+       ],
+       "role": "AXStaticText",
+       "value": "Size and position"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        964,
+        281,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Choose how big the toolbar is and where it starts."
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          45,
+          993,
+          250,
+          128
+         ],
+         "identifier": "toolbar-size-expanded",
+         "label": "Expanded toolbar",
+         "role": "AXButton",
+         "selected": true
+        },
+        {
+         "enabled": true,
+         "frame": [
+          307,
+          993,
+          250,
+          128
+         ],
+         "identifier": "toolbar-size-minimal",
+         "label": "Minimal toolbar",
+         "role": "AXButton"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        45,
+        993,
+        512,
+        128
+       ],
+       "label": "Toolbar size",
+       "role": "AXGroup"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        53,
+        1139,
+        55,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Direction"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          168,
+          1135,
+          86,
+          24
+         ],
+         "identifier": "rectangle.split.3x1",
+         "label": "Horizontal",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 1
+        },
+        {
+         "enabled": true,
+         "frame": [
+          254,
+          1135,
+          86,
+          24
+         ],
+         "identifier": "rectangle.split.1x3",
+         "label": "Vertical",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 0
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        168,
+        1135,
+        172,
+        24
+       ],
+       "label": "Direction",
+       "role": "AXRadioGroup"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        63,
+        1175,
+        45,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Start at"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        124,
+        1171,
+        126,
+        24
+       ],
+       "label": "Start at",
+       "role": "AXPopUpButton",
+       "value": "Automatic"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1211,
+        63,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Properties"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        124,
+        1207,
+        135.5,
+        24
+       ],
+       "label": "Properties",
+       "role": "AXPopUpButton",
+       "value": "Quick controls"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        46,
+        1245,
+        577.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1286.5,
+        209.5,
+        19
+       ],
+       "role": "AXStaticText",
+       "value": "Buttons that are always there"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1308.5,
+        521,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "These buttons are always in the toolbar. Their keys work while you draw, like the keys above."
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          91,
+          1344.5,
+          64.5,
+          16
+         ],
+         "role": "AXStaticText",
+         "value": "Properties"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          91,
+          1362.5,
+          245,
+          26
+         ],
+         "role": "AXStaticText",
+         "value": "Switch between quick controls, full properties and tools only."
+        },
+        {
+         "enabled": true,
+         "frame": [
+          363.5,
+          1355.5,
+          31,
+          22
+         ],
+         "help": "Press, then type a letter or number.",
+         "label": "Properties key",
+         "role": "AXButton",
+         "value": "None"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          462.5,
+          1344.5,
+          37,
+          16
+         ],
+         "role": "AXStaticText",
+         "value": "Board"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          462.5,
+          1362.5,
+          202,
+          26
+         ],
+         "role": "AXStaticText",
+         "value": "Switch between desktop, whiteboard and blackboard."
+        },
+        {
+         "enabled": true,
+         "frame": [
+          735,
+          1355.5,
+          31,
+          22
+         ],
+         "help": "Press, then type a letter or number.",
+         "label": "Board key",
+         "role": "AXButton",
+         "value": "None"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          91,
+          1416.5,
+          50.5,
+          16
+         ],
+         "role": "AXStaticText",
+         "value": "Clear all"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          91,
+          1434.5,
+          236.5,
+          26
+         ],
+         "role": "AXStaticText",
+         "value": "Remove all drawings from every display. You can undo it."
+        },
+        {
+         "enabled": true,
+         "frame": [
+          363.5,
+          1427.5,
+          31,
+          22
+         ],
+         "help": "Press, then type a letter or number.",
+         "label": "Clear all key",
+         "role": "AXButton",
+         "value": "None"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        45,
+        1335.5,
+        733,
+        134
+       ],
+       "identifier": "toolbar-button-keys",
+       "role": "AXGroup"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1497.5,
+        182.5,
+        19
+       ],
+       "role": "AXStaticText",
+       "value": "Keys that work in any app"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1519.5,
+        359,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Hold Control, Option or Command and press a letter or number."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1555.5,
+        32,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Draw"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1573.5,
+        255,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Start drawing, or go back to drawing from your apps."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        646,
+        1557,
+        120,
+        28
+       ],
+       "help": "Press, then hold Control, Option or Command and type a letter or number.",
+       "identifier": "global-shortcut-draw",
+       "label": "Draw shortcut",
+       "role": "AXButton",
+       "value": "Control + Shift + 2"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1612.5,
+        72,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show / hide"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1630.5,
+        212.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Show or hide your drawings and the toolbar."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        646,
+        1614,
+        120,
+        28
+       ],
+       "help": "Press, then hold Control, Option or Command and type a letter or number.",
+       "identifier": "global-shortcut-showHide",
+       "label": "Show / hide shortcut",
+       "role": "AXButton",
+       "value": "Control + 2"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1669.5,
+        58.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Hide only"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1687.5,
+        229.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Hide drawings and the toolbar. Covers hide too."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        646,
+        1671,
+        120,
+        28
+       ],
+       "help": "Press, then hold Control, Option or Command and type a letter or number.",
+       "identifier": "global-shortcut-hideOnly",
+       "label": "Hide only shortcut",
+       "role": "AXButton",
+       "value": "Control + Option + 2"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1726.5,
+        63,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Live zoom"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1744.5,
+        148.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Start or stop full-screen zoom."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        646,
+        1728,
+        120,
+        28
+       ],
+       "help": "Press, then hold Control, Option or Command and type a letter or number.",
+       "identifier": "global-shortcut-liveZoom",
+       "label": "Live zoom shortcut",
+       "role": "AXButton",
+       "value": "Control + 1"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1783.5,
+        71.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Break timer"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        93,
+        1801.5,
+        155.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Start or end a break countdown."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        646,
+        1785,
+        120,
+        28
+       ],
+       "help": "Press, then hold Control, Option or Command and type a letter or number.",
+       "identifier": "global-shortcut-breakTimer",
+       "label": "Break timer shortcut",
+       "role": "AXButton",
+       "value": "Control + 3"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1851.5,
+        154,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Keys that stay the same"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          45,
+          1877.5,
+          161.5,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "R G B Y O P C W K, ink colors"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          214.5,
+          1877.5,
+          93.5,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⌃W, whiteboard"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          316,
+          1877.5,
+          90,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⌃B, blackboard"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          414,
+          1877.5,
+          52,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⌘Z, undo"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          483,
+          1877.5,
+          70,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⇧⌘Z, redo"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          561,
+          1877.5,
+          87,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⌘L, more tools"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          656,
+          1877.5,
+          98.5,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⌥ + scroll, zoom"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          45,
+          1905.5,
+          81,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "Esc, use apps"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          134,
+          1905.5,
+          107,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "⌫, delete selection"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          249,
+          1905.5,
+          179.5,
+          20
+         ],
+         "role": "AXStaticText",
+         "value": "← ↑ → ↓, nudge; add ⇧ for 10 px"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        45,
+        1877.5,
+        709.5,
+        48
+       ],
+       "label": "Keys that stay the same",
+       "role": "AXGroup"
+      },
+      {
+       "children": [
+        {
+         "enabled": false,
+         "frame": [
+          803,
+          50,
+          11,
+          178.5
+         ],
+         "role": "AXValueIndicator",
+         "value": 0
+        },
+        {
+         "enabled": false,
+         "role": "AXButton",
+         "subrole": "AXIncrementArrow"
+        },
+        {
+         "enabled": false,
+         "role": "AXButton",
+         "subrole": "AXDecrementArrow"
+        },
+        {
+         "enabled": false,
+         "frame": [
+          803,
+          229,
+          11,
+          407
+         ],
+         "role": "AXButton",
+         "subrole": "AXIncrementPage"
+        },
+        {
+         "enabled": false,
+         "role": "AXButton",
+         "subrole": "AXDecrementPage"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        799,
+        46,
+        19,
+        594
+       ],
+       "role": "AXScrollBar",
+       "value": 0
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      592
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    622
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    656,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "settings/tab-toolbar-light.png",
+ "kind": "view",
+ "notes": "Settings, toolbar tab, at its default size. Content below the fold scrolls.",
+ "pixels": [
+  1680,
+  1400
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  700
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-toolbar",
+ "surface": "settings"
+}

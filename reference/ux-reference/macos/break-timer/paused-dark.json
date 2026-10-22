@@ -1,0 +1,108 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    193,
+    44.5,
+    94,
+    19
+   ],
+   "role": "AXStaticText",
+   "value": "Coffee break"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    148.5,
+    74,
+    183,
+    183
+   ],
+   "identifier": "break-countdown",
+   "label": "Break timer",
+   "role": "AXUnknown"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      147.5,
+      264,
+      37,
+      15
+     ],
+     "identifier": "break-remove-minute",
+     "label": "Remove a minute",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      187.5,
+      264,
+      45.5,
+      15
+     ],
+     "identifier": "break-pause",
+     "label": "Resume",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      236,
+      264,
+      37,
+      15
+     ],
+     "identifier": "break-add-minute",
+     "label": "Add a minute",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      280.5,
+      264,
+      52,
+      15
+     ],
+     "identifier": "break-end",
+     "label": "End break",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    144.5,
+    261.5,
+    191,
+    20.5
+   ],
+   "label": "Break controls",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "break-timer/paused-dark.png",
+ "kind": "view",
+ "notes": "Paused: the countdown dims and the ring stands still. Shown full screen on each display; always dark. Every size scales with the display's shorter side, so this 480 by 300 capture keeps the layout of a full screen.",
+ "pixels": [
+  960,
+  600
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  300
+ ],
+ "spec": [
+  "014",
+  "WIN-PAR-03"
+ ],
+ "state": "paused",
+ "surface": "break-timer"
+}

@@ -1,0 +1,409 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    20,
+    54,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Fill color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    176.5,
+    18,
+    91.5,
+    20
+   ],
+   "label": "Match outline",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    48,
+    74.5,
+    16
+   ],
+   "help": "Start with the outline's color or gradient at 40%. You can change it afterwards.",
+   "label": "Fill shape",
+   "role": "AXCheckBox",
+   "value": 1
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      72,
+      76.5,
+      24
+     ],
+     "label": "Solid",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 1
+    },
+    {
+     "enabled": true,
+     "frame": [
+      92.5,
+      72,
+      76.5,
+      24
+     ],
+     "label": "Gradient",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    72,
+    153,
+    24
+   ],
+   "label": "Color options",
+   "role": "AXRadioGroup"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      106,
+      38,
+      38
+     ],
+     "label": "None, no fill",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      106,
+      38,
+      38
+     ],
+     "label": "Dark ink, hex #1F2629FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      106,
+      38,
+      38
+     ],
+     "label": "Slate gray, hex #545E63FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      106,
+      38,
+      38
+     ],
+     "label": "White, hex #FFFFFFFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      106,
+      38,
+      38
+     ],
+     "label": "Brown, hex #87665CFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      160,
+      38,
+      38
+     ],
+     "label": "Teal, hex #00969EFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      160,
+      38,
+      38
+     ],
+     "label": "Blue, hex #2B73E0FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      160,
+      38,
+      38
+     ],
+     "label": "Purple, hex #7D54B8FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      160,
+      38,
+      38
+     ],
+     "label": "Mauve, hex #B052A8FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      160,
+      38,
+      38
+     ],
+     "label": "Rose, hex #E34266FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      214,
+      38,
+      38
+     ],
+     "label": "Green, hex #389E59FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      214,
+      38,
+      38
+     ],
+     "label": "Emerald, hex #009E82FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      214,
+      38,
+      38
+     ],
+     "label": "Yellow, hex #F5E338FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      214,
+      38,
+      38
+     ],
+     "label": "Orange, hex #F29121FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      221,
+      212,
+      42,
+      42
+     ],
+     "label": "Coral, hex #F04538FF",
+     "role": "AXButton",
+     "selected": true
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    23,
+    106,
+    240,
+    148
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    -6.5,
+    270,
+    70,
+    13
+   ],
+   "label": "Shades",
+   "role": "AXDisclosureTriangle",
+   "value": false
+  },
+  {
+   "enabled": true,
+   "frame": [
+    18,
+    299,
+    81.5,
+    15
+   ],
+   "identifier": "inline-color-wheel",
+   "label": "Color wheel",
+   "role": "AXButton",
+   "value": "Collapsed"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    326,
+    50,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Hex color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    26,
+    362,
+    8.5,
+    16
+   ],
+   "help": "Six RGB or eight RGBA digits. Entering a hex color switches to solid paint.",
+   "role": "AXStaticText",
+   "value": "#"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    42.5,
+    362.5,
+    215.5,
+    15
+   ],
+   "help": "Six RGB or eight RGBA digits. Entering a hex color switches to solid paint.",
+   "label": "Fill hex color and alpha",
+   "placeholder": "RRGGBB or RRGGBBAA",
+   "role": "AXTextField",
+   "value": "F0453866"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    406,
+    57,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Fill opacity"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      131,
+      405,
+      20,
+      16
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    81,
+    405,
+    145,
+    16
+   ],
+   "label": "Fill opacity",
+   "role": "AXSlider",
+   "value": 0.4
+  },
+  {
+   "enabled": true,
+   "frame": [
+    239,
+    406,
+    24.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "40%"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    429,
+    252,
+    38
+   ],
+   "help": "Choose a color anywhere on the screen. Escape cancels.",
+   "label": "Pick from screen",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    220.5,
+    475,
+    47.5,
+    20
+   ],
+   "label": "Done",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "popover",
+ "image": "pickers/color-fill-light.png",
+ "kind": "view",
+ "notes": "Fill color popover.",
+ "pixels": [
+  568,
+  1022
+ ],
+ "scale": 2,
+ "size": [
+  284,
+  511
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "color-fill",
+ "surface": "pickers"
+}

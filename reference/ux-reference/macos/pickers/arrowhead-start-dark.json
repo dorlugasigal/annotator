@@ -1,0 +1,277 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    14,
+    14,
+    105.5,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Start arrowhead"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      42,
+      36,
+      36
+     ],
+     "help": "Start: None",
+     "label": "Start: None",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      42,
+      36,
+      36
+     ],
+     "help": "Start: Arrow",
+     "label": "Start: Arrow",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      100,
+      42,
+      36,
+      36
+     ],
+     "help": "Start: Filled triangle",
+     "label": "Start: Filled triangle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143,
+      42,
+      36,
+      36
+     ],
+     "help": "Start: Outlined triangle",
+     "label": "Start: Outlined triangle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      85,
+      36,
+      36
+     ],
+     "help": "Start: Filled circle",
+     "label": "Start: Filled circle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      85,
+      36,
+      36
+     ],
+     "help": "Start: Outlined circle",
+     "label": "Start: Outlined circle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      100,
+      85,
+      36,
+      36
+     ],
+     "help": "Start: Filled diamond",
+     "label": "Start: Filled diamond",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143,
+      85,
+      36,
+      36
+     ],
+     "help": "Start: Outlined diamond",
+     "label": "Start: Outlined diamond",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      128,
+      36,
+      36
+     ],
+     "help": "Start: Bar",
+     "label": "Start: Bar",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      128,
+      36,
+      36
+     ],
+     "help": "Start: Square",
+     "label": "Start: Square",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    14,
+    42,
+    165,
+    122
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    14,
+    176,
+    64.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Relationships"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      201,
+      36,
+      36
+     ],
+     "help": "Start: One",
+     "label": "Start: One",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      201,
+      36,
+      36
+     ],
+     "help": "Start: Many",
+     "label": "Start: Many",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      100,
+      201,
+      36,
+      36
+     ],
+     "help": "Start: One or many",
+     "label": "Start: One or many",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143,
+      201,
+      36,
+      36
+     ],
+     "help": "Start: Exactly one",
+     "label": "Start: Exactly one",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      244,
+      36,
+      36
+     ],
+     "help": "Start: Zero or one",
+     "label": "Start: Zero or one",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      244,
+      36,
+      36
+     ],
+     "help": "Start: Zero or many",
+     "label": "Start: Zero or many",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    14,
+    201,
+    165,
+    79
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    14,
+    292,
+    25.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "None"
+  }
+ ],
+ "appearance": "dark",
+ "background": "popover",
+ "image": "pickers/arrowhead-start-dark.png",
+ "kind": "view",
+ "notes": "Arrowhead choices for the start.",
+ "pixels": [
+  386,
+  638
+ ],
+ "scale": 2,
+ "size": [
+  193,
+  319
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "arrowhead-start",
+ "surface": "pickers"
+}

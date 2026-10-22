@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="color-scheme" content="dark" />
+  <title>Annotator metrics</title>
+  <link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/admin/admin.css" />
+  <script type="module" src="/admin/admin.js"></script>
+</head>
+<body data-view="loading">
+  <p class="boot" id="boot" role="status">Loading metrics…</p>
+
+  <main class="gate" id="gate" hidden>
+    <div class="gate-inner">
+      <p class="brand"><span class="brand-mark" aria-hidden="true">a<span>.</span></span>annotator</p>
+      <h1 class="gate-title">Owner
+        <span class="inked">metrics<svg class="ink-ellipse" viewBox="0 0 300 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path pathLength="1" d="M62 20C124 4 232 6 272 28C299 45 290 82 236 95C170 110 72 106 30 86C3 72 9 38 52 24C92 12 152 8 206 14" /></svg></span>
+      </h1>
+      <p class="gate-lede">App use from copies that share counts, website visits and downloads, in one private place.</p>
+      <form id="login" class="gate-form" novalidate>
+        <label for="password">Passphrase</label>
+        <div class="gate-field">
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+          <button type="submit" class="button" id="login-button">Sign in</button>
+        </div>
+        <p id="login-error" class="form-error" role="alert"></p>
+      </form>
+    </div>
+  </main>
+
+  <div class="shell" id="dashboard" hidden>
+    <header class="topbar">
+      <p class="brand"><span class="brand-mark" aria-hidden="true">a<span>.</span></span>annotator<span class="crumb">metrics</span></p>
+      <p class="freshness" id="freshness"></p>
+      <div class="actions">
+        <button id="refresh" type="button" class="button"><span class="spinner" aria-hidden="true"></span><span id="refresh-label">Refresh</span></button>
+        <button id="logout" type="button" class="button ghost">Sign out</button>
+      </div>
+    </header>
+    <p id="status" class="status" role="status" hidden></p>
+
+    <main class="board">
+      <section class="panel hero reveal" aria-labelledby="people-title">
+        <div class="hero-figures">
+          <p class="eyebrow" id="people-title">People using the app</p>
+          <p class="hero-number"><span class="inked" id="mau">–</span></p>
+          <p class="hero-caption" id="mau-caption">opted-in copies used Annotator in the last 30 days</p>
+          <dl class="hero-stats">
+            <div><dt>Last 7 days</dt><dd id="wau">–</dd></div>
+            <div><dt id="active-label">Latest day</dt><dd id="active">–</dd></div>
+            <div><dt>New opt-ins, 7 days</dt><dd id="new-installs">–</dd></div>
+          </dl>
+        </div>
+        <figure class="chart-figure">
+          <figcaption class="chart-caption"><span>Copies active each day</span><span class="chart-range" id="chart-range"></span></figcaption>
+          <div class="chart" id="active-chart" tabindex="0" role="group" aria-roledescription="chart"
+            aria-label="Opted-in copies active each day, last 30 days. Use the arrow keys to read each day.">
+            <svg class="chart-svg" id="active-svg" aria-hidden="true" focusable="false"></svg>
+            <div class="chart-tip" id="chart-tip" hidden></div>
+          </div>
+          <p class="sr-only" id="chart-live" aria-live="polite"></p>
+          <table class="sr-only" id="chart-table"><caption>Opted-in copies active each day</caption></table>
+        </figure>
+        <p class="definition hero-definition">Counts only copies that turned on Share usage counts. A copy counts once on each day it
+          sends a summary. Copies that never opt in are not counted anywhere.</p>
+      </section>
+
+      <section class="tiles reveal" aria-label="Last 7 days">
+        <article class="tile" id="tile-new"><h2>New opt-ins</h2><p class="tile-number" data-value>–</p><p class="definition">Copies that first shared counts, last 7 days.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
+        <article class="tile" id="tile-visits"><h2>Website visits</h2><p class="tile-number" data-value>–</p><p class="definition">Browser tabs that opened the site, last 7 days. No cookies.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
+        <article class="tile" id="tile-clicks"><h2>Download clicks</h2><p class="tile-number" data-value>–</p><p class="definition">Clicks on a Download button, last 7 days. Not finished downloads.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
+        <article class="tile" id="tile-github"><h2>GitHub downloads</h2><p class="tile-number" data-value>–</p><p class="definition" data-detail>All release files, all time.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
+      </section>
+
+      <div class="stacks">
+        <div class="stack">
+        <section class="panel reveal" aria-labelledby="downloads-title">
+          <header class="panel-head"><h2 id="downloads-title">Downloads</h2><p class="panel-note" id="downloads-note"></p></header>
+          <div class="split" id="download-kinds"></div>
+          <h3>By release</h3>
+          <ol class="bars" id="releases"></ol>
+          <div class="homebrew" id="homebrew"></div>
+        </section>
+        <section class="panel reveal" aria-labelledby="app-title">
+          <header class="panel-head"><h2 id="app-title">App versions and computers</h2><p class="panel-note" id="app-note">Latest day</p></header>
+          <h3>Versions</h3><ol class="bars" id="versions"></ol>
+          <div class="columns">
+            <div><h3>System</h3><ol class="bars" id="os"></ol></div>
+            <div><h3>Chip</h3><ol class="bars" id="chips"></ol></div>
+          </div>
+        </section>
+        </div>
+        <div class="stack">
+        <section class="panel reveal" aria-labelledby="website-title">
+          <header class="panel-head"><h2 id="website-title">Website</h2><p class="panel-note">Last 7 days</p></header>
+          <div class="columns">
+            <div><h3>Pages people opened first</h3><ol class="bars" id="routes"></ol></div>
+            <div><h3>Where they came from</h3><ol class="bars" id="referrers"></ol></div>
+          </div>
+          <h3>Download clicks by release track</h3>
+          <ol class="bars" id="tracks"></ol>
+          <p class="definition">One visit is one browser tab. Sources are broad groups from the referrer, never full addresses.</p>
+        </section>
+        <section class="panel reveal" aria-labelledby="features-title">
+          <header class="panel-head"><h2 id="features-title">Features used</h2><p class="panel-note">Last 7 days</p></header>
+          <ol class="bars" id="features"></ol>
+          <p class="definition" id="features-definition">Share of active install-days on which a copy used the feature. One install-day is one copy on one day.</p>
+        </section>
+        <section class="panel reveal" aria-labelledby="retention-title">
+          <header class="panel-head"><h2 id="retention-title">Coming back</h2><p class="panel-note">Day 7 and day 30</p></header>
+          <ol class="cohorts" id="retention"></ol>
+          <p class="definition">Of the copies that first shared counts on a day, how many were active again 7 or 30 days later.</p>
+        </section>
+        </div>
+      </div>
+
+      <section class="panel health reveal" aria-labelledby="health-title">
+        <header class="panel-head"><h2 id="health-title">Nightly count</h2><p class="panel-note">Runs at 00:15 UTC</p></header>
+        <div id="health"></div>
+        <details class="raw"><summary>Raw health record</summary><pre id="health-raw"></pre></details>
+      </section>
+    </main>
+
+    <footer class="footnote">
+      <p>App numbers come only from copies that share counts. Downloads, Homebrew installs and website visits are separate
+        measurements, so don't add them together. All numbers are directional, not billing or security truth.</p>
+    </footer>
+  </div>
+</body>
+</html>

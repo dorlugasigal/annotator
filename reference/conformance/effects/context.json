@@ -1,0 +1,15 @@
+{
+  "filters" : {
+    "blur" : "CIGaussianBlur, inputRadius = amount × pixelsPerPoint, on the scene clamped to its extent, cropped to the region",
+    "defaultAmount" : 18,
+    "distort" : "CITwirlDistortion, inputCenter = region center, inputRadius = max(region width, region height), inputAngle = amount / 100 × 2π",
+    "pixelate" : "CIPixellate, inputScale = amount × pixelsPerPoint, inputCenter = region center in pixels",
+    "zeroAmount" : "An amount of 0 leaves the pixels unchanged."
+  },
+  "input" : "CIImage(cgImage:) from the sRGB input PNG; Core Image converts it to the working space before any filter",
+  "options" : "CIContext(options: [.cacheIntermediates: false]), as SnapshotExporter uses",
+  "order" : "Image layers, then the drawing layer, then the privacy crop (outside turns black), then covers blacken their pixels, then each pixel effect samples the scene, then covers are drawn again on top. Regions are pixelRect: integral rectangles clipped to the image, with y flipped.",
+  "outputFormat" : "RGBA8 premultiplied, sRGB",
+  "workingColorSpace" : "kCGColorSpaceExtendedLinearSRGB",
+  "workingFormat" : "RGBAh (16-bit float per channel)"
+}

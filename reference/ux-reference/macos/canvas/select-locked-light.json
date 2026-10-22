@@ -1,0 +1,127 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      15,
+      13,
+      152,
+      30
+     ],
+     "role": "AXButton",
+     "title": "Use apps · Esc"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    0,
+    0,
+    900,
+    568
+   ],
+   "help": "Select an object, then use arrow keys to move it. Hold Shift for ten-point steps. Escape releases drawing input.",
+   "label": "Annotation canvas",
+   "role": "AXGroup",
+   "value": "6 objects, 1 selected. Drawing."
+  }
+ ],
+ "appearance": "light",
+ "backdrop": "Fictional test backdrop drawn by the capture test, not a real desktop.",
+ "elements": [
+  {
+   "frame": [
+    120,
+    110,
+    220,
+    130
+   ],
+   "locked": false,
+   "rotation": 0,
+   "selected": false,
+   "tool": "rectangle"
+  },
+  {
+   "frame": [
+    420,
+    120,
+    190,
+    110
+   ],
+   "locked": false,
+   "rotation": 0,
+   "selected": false,
+   "tool": "ellipse"
+  },
+  {
+   "frame": [
+    345,
+    175,
+    70,
+    0
+   ],
+   "locked": false,
+   "rotation": 0,
+   "selected": false,
+   "tool": "arrow"
+  },
+  {
+   "frame": [
+    120,
+    300,
+    220,
+    40
+   ],
+   "locked": false,
+   "rotation": 0,
+   "selected": false,
+   "tool": "text"
+  },
+  {
+   "frame": [
+    130,
+    378,
+    240,
+    44
+   ],
+   "locked": false,
+   "rotation": 0,
+   "selected": false,
+   "tool": "pen"
+  },
+  {
+   "frame": [
+    650,
+    300,
+    120,
+    110
+   ],
+   "locked": true,
+   "rotation": 0,
+   "selected": true,
+   "tool": "diamond"
+  }
+ ],
+ "image": "canvas/select-locked-light.png",
+ "kind": "image",
+ "notes": "A locked shape selected: outline only. The Use apps button in the corner uses a system material that offscreen rendering leaves out.",
+ "pixels": [
+  1800,
+  1136
+ ],
+ "scale": 2,
+ "size": [
+  900,
+  568
+ ],
+ "spec": [
+  "001",
+  "002",
+  "009",
+  "WIN-OVR"
+ ],
+ "state": "select-locked",
+ "surface": "canvas",
+ "tool": "select"
+}

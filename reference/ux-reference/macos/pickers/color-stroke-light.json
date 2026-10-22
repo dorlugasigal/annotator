@@ -1,0 +1,385 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    20,
+    77,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      48,
+      76.5,
+      24
+     ],
+     "label": "Solid",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 1
+    },
+    {
+     "enabled": true,
+     "frame": [
+      92.5,
+      48,
+      76.5,
+      24
+     ],
+     "label": "Gradient",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    48,
+    153,
+    24
+   ],
+   "label": "Color options",
+   "role": "AXRadioGroup"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      82,
+      38,
+      38
+     ],
+     "label": "Transparent stroke, hex #00000000",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      82,
+      38,
+      38
+     ],
+     "label": "Dark ink, hex #1F2629FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      82,
+      38,
+      38
+     ],
+     "label": "Slate gray, hex #545E63FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      82,
+      38,
+      38
+     ],
+     "label": "White, hex #FFFFFFFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      82,
+      38,
+      38
+     ],
+     "label": "Brown, hex #87665CFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      136,
+      38,
+      38
+     ],
+     "label": "Teal, hex #00969EFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      136,
+      38,
+      38
+     ],
+     "label": "Blue, hex #2B73E0FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      136,
+      38,
+      38
+     ],
+     "label": "Purple, hex #7D54B8FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      136,
+      38,
+      38
+     ],
+     "label": "Mauve, hex #B052A8FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      136,
+      38,
+      38
+     ],
+     "label": "Rose, hex #E34266FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      190,
+      38,
+      38
+     ],
+     "label": "Green, hex #389E59FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      190,
+      38,
+      38
+     ],
+     "label": "Emerald, hex #009E82FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      190,
+      38,
+      38
+     ],
+     "label": "Yellow, hex #F5E338FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      190,
+      38,
+      38
+     ],
+     "label": "Orange, hex #F29121FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      221,
+      188,
+      42,
+      42
+     ],
+     "label": "Coral, hex #F04538FF",
+     "role": "AXButton",
+     "selected": true
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    23,
+    82,
+    240,
+    148
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    -6.5,
+    246,
+    70,
+    13
+   ],
+   "label": "Shades",
+   "role": "AXDisclosureTriangle",
+   "value": false
+  },
+  {
+   "enabled": true,
+   "frame": [
+    18,
+    275,
+    81.5,
+    15
+   ],
+   "identifier": "inline-color-wheel",
+   "label": "Color wheel",
+   "role": "AXButton",
+   "value": "Collapsed"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    302,
+    50,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Hex color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    26,
+    338,
+    8.5,
+    16
+   ],
+   "help": "Six RGB or eight RGBA digits. Entering a hex color switches to solid paint.",
+   "role": "AXStaticText",
+   "value": "#"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    42.5,
+    338.5,
+    215.5,
+    15
+   ],
+   "help": "Six RGB or eight RGBA digits. Entering a hex color switches to solid paint.",
+   "label": "Stroke hex color and alpha",
+   "placeholder": "RRGGBB or RRGGBBAA",
+   "role": "AXTextField",
+   "value": "F04538FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    382,
+    76,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke opacity"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      206,
+      381,
+      20,
+      16
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    100,
+    381,
+    126,
+    16
+   ],
+   "label": "Stroke opacity",
+   "role": "AXSlider",
+   "value": 1
+  },
+  {
+   "enabled": true,
+   "frame": [
+    235.5,
+    382,
+    31.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "100%"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    405,
+    252,
+    38
+   ],
+   "help": "Choose a color anywhere on the screen. Escape cancels.",
+   "label": "Pick from screen",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    220.5,
+    451,
+    47.5,
+    20
+   ],
+   "label": "Done",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "popover",
+ "image": "pickers/color-stroke-light.png",
+ "kind": "view",
+ "notes": "Stroke color popover, 284 points wide. Shown in a system popover.",
+ "pixels": [
+  568,
+  974
+ ],
+ "scale": 2,
+ "size": [
+  284,
+  487
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "color-stroke",
+ "surface": "pickers"
+}

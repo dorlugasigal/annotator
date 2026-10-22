@@ -1,0 +1,243 @@
+{
+  "clickDuration" : 0.45,
+  "clickEffects" : [
+    {
+      "clickEffect" : null,
+      "resolved" : "pulse",
+      "showClicks" : true
+    },
+    {
+      "clickEffect" : "off",
+      "resolved" : "off",
+      "showClicks" : true
+    },
+    {
+      "clickEffect" : "pulse",
+      "resolved" : "pulse",
+      "showClicks" : true
+    },
+    {
+      "clickEffect" : "ripple",
+      "resolved" : "ripple",
+      "showClicks" : true
+    },
+    {
+      "clickEffect" : "turn",
+      "resolved" : "turn",
+      "showClicks" : true
+    },
+    {
+      "clickEffect" : null,
+      "resolved" : "off",
+      "showClicks" : false
+    },
+    {
+      "clickEffect" : "off",
+      "resolved" : "off",
+      "showClicks" : false
+    },
+    {
+      "clickEffect" : "pulse",
+      "resolved" : "off",
+      "showClicks" : false
+    },
+    {
+      "clickEffect" : "ripple",
+      "resolved" : "off",
+      "showClicks" : false
+    },
+    {
+      "clickEffect" : "turn",
+      "resolved" : "off",
+      "showClicks" : false
+    }
+  ],
+  "defaults" : {
+    "borderWidth" : 3,
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0,
+      "green" : 0.82,
+      "red" : 1
+    },
+    "diameter" : 36,
+    "shape" : "ring",
+    "showClicks" : true,
+    "visibility" : "always"
+  },
+  "spotlightFeather" : [
+    {
+      "feather" : 12.5,
+      "radius" : 50
+    },
+    {
+      "feather" : 25,
+      "radius" : 100
+    },
+    {
+      "feather" : 32.5,
+      "radius" : 130
+    },
+    {
+      "feather" : 50,
+      "radius" : 200
+    },
+    {
+      "feather" : 64,
+      "radius" : 256
+    },
+    {
+      "feather" : 64,
+      "radius" : 350
+    }
+  ],
+  "visibility" : [
+    {
+      "lastClick" : null,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 9.3,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 9.25,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : 9.6,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : 9.55,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 10.5,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : 9,
+      "lastMovement" : 9.9,
+      "now" : 10,
+      "visibility" : "always",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : false
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 9.3,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 9.25,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : false
+    },
+    {
+      "lastClick" : 9.6,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : true
+    },
+    {
+      "lastClick" : 9.55,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 10.5,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : false
+    },
+    {
+      "lastClick" : 9,
+      "lastMovement" : 9.9,
+      "now" : 10,
+      "visibility" : "moving",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : false
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 9.3,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : false
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 9.25,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : false
+    },
+    {
+      "lastClick" : 9.6,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : true
+    },
+    {
+      "lastClick" : 9.55,
+      "lastMovement" : null,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : true
+    },
+    {
+      "lastClick" : null,
+      "lastMovement" : 10.5,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : false
+    },
+    {
+      "lastClick" : 9,
+      "lastMovement" : 9.9,
+      "now" : 10,
+      "visibility" : "clicks",
+      "visible" : false
+    }
+  ]
+}

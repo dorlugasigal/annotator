@@ -1,0 +1,49 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      25,
+      169,
+      670,
+      102
+     ],
+     "role": "AXStaticText",
+     "value": "Starting the region..."
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    0,
+    0,
+    720,
+    440
+   ],
+   "label": "Shared region. View only.",
+   "role": "AXImage",
+   "value": "Starting the region..."
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "region-sharing/output-covered-light.png",
+ "kind": "view",
+ "notes": "Annotator - Shared Region output while it starts: opaque until the first frame.",
+ "pixels": [
+  1440,
+  880
+ ],
+ "scale": 2,
+ "size": [
+  720,
+  440
+ ],
+ "spec": [
+  "012",
+  "WIN-CAP-08"
+ ],
+ "state": "output-covered",
+ "surface": "region-sharing"
+}

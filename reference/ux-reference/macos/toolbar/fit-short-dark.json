@@ -1,0 +1,277 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    12,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 1",
+   "label": "Select",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    67,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 2",
+   "label": "Rectangle",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    113,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 3",
+   "label": "Diamond",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    159,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 4",
+   "label": "Ellipse",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    205,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 5",
+   "label": "Arrow",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    251,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 6",
+   "label": "Line",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    306,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 7",
+   "label": "Pen",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    352,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 8",
+   "label": "Text",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    398,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 9",
+   "label": "Highlighter",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    448,
+    12,
+    44,
+    48
+   ],
+   "help": "More shapes and tools (⌘L)",
+   "label": "Tool library",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    516,
+    20.5,
+    22.5,
+    32.5
+   ],
+   "help": "Cycle Desktop, Whiteboard and Blackboard on this drawing display. Control-W: whiteboard. Control-B: blackboard.",
+   "label": "Board background",
+   "role": "AXButton",
+   "value": "Desktop"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    555,
+    12,
+    60,
+    48
+   ],
+   "help": "Drawing is active. Click Use apps to pass clicks through. Escape finishes text or cancels an unfinished drawing first. ⌃⇧2 returns to drawing.",
+   "label": "Use apps",
+   "role": "AXButton",
+   "value": "Drawing is active"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    12,
+    79.5,
+    48,
+    21
+   ],
+   "help": "Width: 1–40 pt",
+   "label": "Precise width",
+   "placeholder": "Width",
+   "role": "AXTextField",
+   "value": "3"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    66,
+    83.5,
+    10,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "pt"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    468,
+    84,
+    12,
+    12
+   ],
+   "help": "Undo",
+   "identifier": "arrow.uturn.backward",
+   "label": "Undo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    498,
+    84,
+    12,
+    12
+   ],
+   "help": "Redo",
+   "identifier": "arrow.uturn.forward",
+   "label": "Redo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    528,
+    83,
+    12.5,
+    14.5
+   ],
+   "help": "Clear all drawings — undoable",
+   "identifier": "trash",
+   "label": "Clear all drawings — undoable",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    557.5,
+    84.5,
+    13,
+    11
+   ],
+   "help": "Show full properties",
+   "identifier": "toolbar-properties",
+   "label": "Properties",
+   "role": "AXButton",
+   "value": "Quick controls"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    587,
+    83,
+    14,
+    14
+   ],
+   "help": "Settings and shortcuts",
+   "identifier": "gearshape",
+   "label": "Settings and shortcuts",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    619,
+    85,
+    10.5,
+    10.5
+   ],
+   "help": "Hide drawings and tools",
+   "identifier": "xmark",
+   "label": "Hide drawings and tools",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "toolbar/fit-short-dark.png",
+ "kind": "view",
+ "notes": "Toolbar fitted into 648 x 230 points.",
+ "pixels": [
+  1296,
+  230
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  115
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "fit-short",
+ "surface": "toolbar"
+}

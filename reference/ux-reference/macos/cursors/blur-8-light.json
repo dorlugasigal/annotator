@@ -1,0 +1,25 @@
+{
+ "appearance": "light",
+ "hotSpot": [
+  11,
+  11
+ ],
+ "image": "cursors/blur-8-light.png",
+ "kind": "image",
+ "notes": "Cursor image with its hot spot in points.",
+ "pixels": [
+  48,
+  48
+ ],
+ "scale": 2,
+ "size": [
+  24,
+  24
+ ],
+ "spec": [
+  "009 drawing cursors",
+  "WIN-OVR-11"
+ ],
+ "state": "blur-8",
+ "surface": "cursors"
+}

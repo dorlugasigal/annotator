@@ -1,0 +1,120 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    65.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    95.5,
+    20,
+    37.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Opacity"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      211,
+      19.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    139,
+    19.5,
+    90,
+    14
+   ],
+   "label": "Opacity",
+   "role": "AXSlider",
+   "value": 100
+  },
+  {
+   "enabled": true,
+   "frame": [
+    235,
+    16,
+    48,
+    21
+   ],
+   "help": "Opacity: 0–100 %",
+   "label": "Precise opacity",
+   "placeholder": "Opacity",
+   "role": "AXTextField",
+   "value": "100"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    289,
+    20,
+    9.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "%"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    312.5,
+    16,
+    206.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Click to add sequential numbered markers."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "properties/counter-dark.png",
+ "kind": "view",
+ "notes": "Full properties for Numbered counter, 648 points wide.",
+ "pixels": [
+  1296,
+  176
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  88
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "counter",
+ "surface": "properties"
+}

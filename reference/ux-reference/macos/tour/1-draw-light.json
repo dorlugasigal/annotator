@@ -1,0 +1,353 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    24,
+    10,
+    112,
+    16
+   ],
+   "help": "Make a point",
+   "label": "Make a point",
+   "role": "AXButton",
+   "selected": true,
+   "value": "Step 1 of 4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    144,
+    10,
+    112,
+    16
+   ],
+   "help": "Make it yours",
+   "label": "Make it yours",
+   "role": "AXButton",
+   "value": "Step 2 of 4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    264,
+    10,
+    112,
+    16
+   ],
+   "help": "Lead the way",
+   "label": "Lead the way",
+   "role": "AXButton",
+   "value": "Step 3 of 4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    384,
+    10,
+    112,
+    16
+   ],
+   "help": "A little setup",
+   "label": "A little setup",
+   "role": "AXButton",
+   "value": "Step 4 of 4"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      38,
+      472,
+      120
+     ],
+     "identifier": "introduction-illustration",
+     "label": "A pen circles a bar on a chart. The pointer clicks a button, and the circle stays. Then the drawing hides and comes back.",
+     "role": "AXImage"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      172,
+      192,
+      26
+     ],
+     "role": "AXStaticText",
+     "value": "Let's make a point."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      202,
+      390.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Pick a tool and draw over your screen. Try these three shortcuts."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      33.5,
+      239,
+      9.5,
+      14
+     ],
+     "identifier": "pencil.tip",
+     "label": "Pencil Tip",
+     "role": "AXImage"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      64,
+      230,
+      33.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Draw"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      64,
+      247,
+      140,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Start or resume drawing."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      401.5,
+      231.5,
+      95,
+      29
+     ],
+     "help": "Control + Shift + 2",
+     "label": "Control + Shift + 2",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      34,
+      280.5,
+      9,
+      15.5
+     ],
+     "identifier": "cursorarrow",
+     "label": "Cursor Arrow Pointer",
+     "role": "AXImage"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      64,
+      272,
+      60,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Use apps"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      64,
+      289,
+      150,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Your drawings stay visible."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      455,
+      273.5,
+      41.5,
+      29
+     ],
+     "role": "AXStaticText",
+     "value": "Escape"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      64,
+      314,
+      74.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Show / hide"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      28,
+      323.5,
+      20.5,
+      13
+     ],
+     "identifier": "eye",
+     "label": "Show",
+     "role": "AXImage"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      64,
+      331,
+      92.5,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Covers hide too."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      434.5,
+      315.5,
+      62,
+      29
+     ],
+     "help": "Control + 2",
+     "label": "Control + 2",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      356,
+      417,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Esc finishes text or cancels a drawing first. Press again to use apps. It also exits zoom."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      1.5,
+      381,
+      136.5,
+      16
+     ],
+     "identifier": "introduction-sharing",
+     "label": "Before you share",
+     "role": "AXDisclosureTriangle",
+     "value": false
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    0,
+    26,
+    520,
+    405.5
+   ],
+   "role": "AXScrollArea"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    446.5,
+    141,
+    16.5
+   ],
+   "help": "Optional daily counts: version, macOS, chip and feature categories. No drawings, screenshots, text or file names. Change this in General.",
+   "label": "Share usage counts",
+   "role": "AXCheckBox",
+   "value": 0
+  },
+  {
+   "enabled": true,
+   "frame": [
+    171,
+    448.5,
+    183.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Optional. Never your drawings or text."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    475,
+    116.5,
+    16
+   ],
+   "label": "Show on launch",
+   "role": "AXCheckBox",
+   "value": 1
+  },
+  {
+   "enabled": true,
+   "frame": [
+    382,
+    471,
+    52.5,
+    24
+   ],
+   "label": "Next",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    442.5,
+    471,
+    57.5,
+    24
+   ],
+   "label": "Got it",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    503,
+    162.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Find this again in Settings > Help."
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "tour/1-draw-light.png",
+ "kind": "view",
+ "notes": "Introduction page 1, final illustration state.",
+ "pixels": [
+  1040,
+  1060
+ ],
+ "scale": 2,
+ "size": [
+  520,
+  530
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "1-draw",
+ "surface": "tour"
+}

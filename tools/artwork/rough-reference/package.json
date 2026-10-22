@@ -1,0 +1,7 @@
+{
+  "name": "annotator-rough-reference",
+  "private": true,
+  "type": "module",
+  "scripts": { "fixtures": "node generate.mjs" },
+  "devDependencies": { "roughjs": "4.6.6" }
+}

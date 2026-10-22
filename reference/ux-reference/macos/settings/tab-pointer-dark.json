@@ -1,0 +1,681 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        71.5,
+        126,
+        20.5
+       ],
+       "role": "AXStaticText",
+       "value": "Follow my lead."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        668.5,
+        75,
+        62.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show halo"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        738,
+        70,
+        56,
+        26
+       ],
+       "help": "Show or hide the highlight around your real pointer.",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        98,
+        187.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Easy to spot. Easy on the eyes."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        128,
+        40.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Shape"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          47,
+          160,
+          124.5,
+          49
+         ],
+         "help": "Ring",
+         "label": "Ring",
+         "role": "AXButton",
+         "selected": true
+        },
+        {
+         "enabled": true,
+         "frame": [
+          179.5,
+          160,
+          124.5,
+          49
+         ],
+         "help": "Disc",
+         "label": "Disc",
+         "role": "AXButton"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          312,
+          160,
+          124.5,
+          49
+         ],
+         "help": "Squircle",
+         "label": "Squircle",
+         "role": "AXButton"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          444.5,
+          160,
+          124.5,
+          49
+         ],
+         "help": "Square",
+         "label": "Square",
+         "role": "AXButton"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          47,
+          217,
+          124.5,
+          49
+         ],
+         "help": "Diamond",
+         "label": "Diamond",
+         "role": "AXButton"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          179.5,
+          217,
+          124.5,
+          49
+         ],
+         "help": "Hexagon",
+         "label": "Hexagon",
+         "role": "AXButton"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          312,
+          217,
+          124.5,
+          49
+         ],
+         "help": "Crosshair",
+         "label": "Crosshair",
+         "role": "AXButton"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        47,
+        160,
+        522,
+        106
+       ],
+       "role": "AXOpaqueProviderGroup",
+       "subrole": "AXOpaqueProviderGrid"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        286,
+        43.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Outline"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        98.5,
+        282,
+        94,
+        24
+       ],
+       "role": "AXPopUpButton",
+       "value": "Solid"
+      },
+      {
+       "enabled": false,
+       "frame": [
+        593,
+        128,
+        200,
+        200
+       ],
+       "help": "Move here to try the highlight. Click, right-click or press Space to preview a click.",
+       "label": "Preview click animation",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        322,
+        23,
+        23
+       ],
+       "label": "Yellow",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        322,
+        23,
+        23
+       ],
+       "label": "Cyan",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        109,
+        322,
+        23,
+        23
+       ],
+       "label": "Blue",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        140,
+        322,
+        23,
+        23
+       ],
+       "label": "Purple",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171,
+        322,
+        23,
+        23
+       ],
+       "label": "Pink",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        202,
+        322,
+        23,
+        23
+       ],
+       "label": "Coral",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        233,
+        322,
+        23,
+        23
+       ],
+       "label": "Green",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        264,
+        322,
+        23,
+        23
+       ],
+       "label": "White",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        619,
+        338,
+        148,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Move here. Give it a click."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        49.5,
+        361,
+        96.5,
+        16
+       ],
+       "label": "Custom color",
+       "role": "AXButton",
+       "value": "Collapsed"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        596,
+        363,
+        194.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "This preview won't draw on your screen."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        406.5,
+        24,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Size"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          201.5,
+          406,
+          20,
+          16
+         ],
+         "role": "AXValueIndicator"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        120,
+        406,
+        607,
+        16
+       ],
+       "label": "Cursor size",
+       "role": "AXSlider",
+       "value": 36
+      },
+      {
+       "enabled": true,
+       "frame": [
+        762.5,
+        406.5,
+        30.5,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "36 pt"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        434.5,
+        38.5,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Border"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          226.5,
+          434,
+          20,
+          16
+         ],
+         "role": "AXValueIndicator"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        120,
+        434,
+        607,
+        16
+       ],
+       "label": "Cursor border",
+       "role": "AXSlider",
+       "value": 3
+      },
+      {
+       "enabled": true,
+       "frame": [
+        770,
+        434.5,
+        23,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "3 pt"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        462.5,
+        44,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Opacity"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          707,
+          462,
+          20,
+          16
+         ],
+         "role": "AXValueIndicator"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        120,
+        462,
+        607,
+        16
+       ],
+       "label": "Cursor opacity",
+       "role": "AXSlider",
+       "value": 100
+      },
+      {
+       "enabled": true,
+       "frame": [
+        759,
+        462.5,
+        34,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "100%"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        490.5,
+        28.5,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Glow"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          120,
+          490,
+          20,
+          16
+         ],
+         "role": "AXValueIndicator"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        120,
+        490,
+        607,
+        16
+       ],
+       "label": "Cursor glow",
+       "role": "AXSlider",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        770,
+        490.5,
+        23,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "0 pt"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        539,
+        49,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "On click"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          104,
+          535,
+          62,
+          24
+         ],
+         "label": "Off",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 0
+        },
+        {
+         "enabled": true,
+         "frame": [
+          166,
+          535,
+          62,
+          24
+         ],
+         "label": "Pulse",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 1
+        },
+        {
+         "enabled": true,
+         "frame": [
+          228,
+          535,
+          62,
+          24
+         ],
+         "label": "Ripple",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 0
+        },
+        {
+         "enabled": true,
+         "frame": [
+          290,
+          535,
+          62,
+          24
+         ],
+         "label": "Turn",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 0
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        104,
+        535,
+        248,
+        24
+       ],
+       "role": "AXRadioGroup"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        47,
+        577,
+        89.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show highlight"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        144.5,
+        573,
+        143.5,
+        24
+       ],
+       "help": "Clicks animate once, then settle. Reduce Motion uses a quiet, static emphasis.",
+       "role": "AXPopUpButton",
+       "value": "While turned on"
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      592
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    622
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    656,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "settings/tab-pointer-dark.png",
+ "kind": "view",
+ "notes": "Settings, pointer tab, at its default size. Content below the fold scrolls.",
+ "pixels": [
+  1680,
+  1400
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  700
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-pointer",
+ "surface": "settings"
+}

@@ -1,0 +1,22 @@
+{
+  "$comment": "Windows toolchain pinned after Gate 0 S-12 (2026-10-18). Update deliberately; record the reason in the commit.",
+  "dotnetSdk": "10.0.402",
+  "dotnetRuntime": "10.0.13",
+  "windowsSdk": "10.0.26100.7705",
+  "visualStudio": "18.5.1 with Desktop development with C++ (x64 tools; ARM64 tools needed for ARM64 Native AOT)",
+  "packages": {
+    "Microsoft.WindowsAppSDK.WinUI": "2.3.9",
+    "Microsoft.WindowsAppSDK.InteractiveExperiences": "2.1.9",
+    "Microsoft.Windows.CsWin32": "0.3.363",
+    "xunit.v3": "4.0.2",
+    "xunit.runner.visualstudio": "4.0.1",
+    "Microsoft.NET.Test.Sdk": "18.11.0"
+  },
+  "minimumWindows": "10.0.22621.0",
+  "msstoreCli": {
+    "$comment": "Microsoft Store Developer CLI for the Release workflow's Store job, from https://github.com/microsoft/msstore-cli/releases. The job checks the download against sha256.",
+    "version": "0.4.3",
+    "asset": "MSStoreCLI-win-x64.zip",
+    "sha256": "c5fb008b616f96b1b55f1d52e4e0a5dd8f6c156129b5f52f9b97ec0eed11bd57"
+  }
+}

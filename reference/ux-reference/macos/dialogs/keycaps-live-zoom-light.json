@@ -1,0 +1,36 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    7.5,
+    7.5,
+    62,
+    29
+   ],
+   "help": "Control + 1",
+   "label": "Control + 1",
+   "role": "AXUnknown"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/keycaps-live-zoom-light.png",
+ "kind": "view",
+ "notes": "Keycaps for the default live-zoom shortcut. Windows shows Ctrl, Alt, Shift and Win as text.",
+ "pixels": [
+  154,
+  88
+ ],
+ "scale": 2,
+ "size": [
+  77,
+  44
+ ],
+ "spec": [
+  "005",
+  "WIN-INP-05"
+ ],
+ "state": "keycaps-live-zoom",
+ "surface": "dialogs"
+}

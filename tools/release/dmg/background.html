@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../../../website/public/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  font-display: block;
+}
+:root { color-scheme: dark; }
+html, body { margin: 0; width: 640px; height: 420px; overflow: hidden; }
+body {
+  font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  background:
+    radial-gradient(circle at 34% 27%, rgba(65, 89, 135, 0.38), transparent 36%),
+    radial-gradient(circle at 74% 48%, rgba(255, 181, 140, 0.16), transparent 30%),
+    linear-gradient(145deg, #0d1321 0%, #172339 100%);
+  color: #f1f4fc;
+}
+.title {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+.note {
+  position: absolute;
+  top: 292px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #b8c3d8;
+  font-size: 13px;
+  font-weight: 500;
+}
+.icon-hint {
+  position: absolute;
+  top: 102px;
+  width: 148px;
+  height: 148px;
+  border-radius: 34px;
+  background: radial-gradient(circle, rgba(241,244,252,0.065), rgba(241,244,252,0.015) 62%, transparent 70%);
+}
+.icon-hint.left { left: 96px; }
+.icon-hint.right { left: 396px; }
+.arrow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 640px;
+  height: 420px;
+  pointer-events: none;
+}
+.arrow path {
+  fill: none;
+  stroke: #ffb58c;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 3px 8px rgba(255, 181, 140, 0.23));
+}
+</style>
+</head>
+<body>
+<!-- Icon centres must match tools/release/disk_image.py ICON_LOCATIONS: (170, 176) and (470, 176) in a 640x420 window.
+     Finder draws each label about 70 pt below the centre, and may cover the bottom 58 pt with its path and
+     status bars, so keep text clear of 240-265 and above 330. -->
+<div class="title">Drag Annotator to Applications</div>
+<div class="icon-hint left"></div>
+<div class="icon-hint right"></div>
+<svg class="arrow" viewBox="0 0 640 420" aria-hidden="true">
+  <path d="M 248 162 C 288 134 348 134 390 164" />
+  <path d="M 371 148 L 392 165 L 376 186" />
+</svg>
+<div class="note">Then open it from Applications. It runs from the menu bar.</div>
+</body>
+</html>

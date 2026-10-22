@@ -1,0 +1,124 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "zoom-lens.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "lens on +0 ms",
+   "time": 0.9333333333333333
+  },
+  {
+   "label": "lens on +76 ms",
+   "time": 1.0166666666666666
+  },
+  {
+   "label": "lens on +152 ms",
+   "time": 1.0833333333333333
+  },
+  {
+   "label": "lens on +229 ms",
+   "time": 1.1666666666666667
+  },
+  {
+   "label": "lens on +305 ms",
+   "time": 1.2333333333333334
+  },
+  {
+   "label": "lens follows the pointer +0 ms",
+   "time": 1.2333333333333334
+  },
+  {
+   "label": "lens follows the pointer +807 ms",
+   "time": 2.05
+  },
+  {
+   "label": "lens follows the pointer +1613 ms",
+   "time": 2.85
+  },
+  {
+   "label": "lens follows the pointer +2420 ms",
+   "time": 3.6666666666666665
+  },
+  {
+   "label": "lens follows the pointer +3227 ms",
+   "time": 4.466666666666667
+  },
+  {
+   "label": "lens off +0 ms",
+   "time": 4.866666666666666
+  },
+  {
+   "label": "lens off +104 ms",
+   "time": 4.983333333333333
+  },
+  {
+   "label": "lens off +208 ms",
+   "time": 5.083333333333333
+  },
+  {
+   "label": "lens off +312 ms",
+   "time": 5.183333333333334
+  },
+  {
+   "label": "lens off +416 ms",
+   "time": 5.283333333333333
+  },
+  {
+   "label": "end",
+   "time": 5.833333333333333
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 5.873333333333333,
+ "events": [],
+ "fps": 60,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "The pointer lens turns on, follows the pointer across fine detail and turns off.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 1.2393775000236928,
+   "label": "lens on",
+   "start": 0.9346135416999459
+  },
+  {
+   "end": 4.466240833397023,
+   "label": "lens follows the pointer",
+   "start": 1.2393834583926946
+  },
+  {
+   "end": 5.28770516673103,
+   "label": "lens off",
+   "start": 4.871459624962881
+  }
+ ],
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "take": "zoom-lens",
+ "title": "Live zoom: pointer lens",
+ "video": "zoom-lens.mp4"
+}

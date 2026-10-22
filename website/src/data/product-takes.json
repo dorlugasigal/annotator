@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "recorded": "2026-09-24",
+  "takes": {
+    "draw": {
+      "file": "/demo/fresh-draw.mp4",
+      "poster": "/demo/fresh-draw.jpg",
+      "width": 1500,
+      "height": 1106,
+      "duration": 17.433333,
+      "sha256": "117e9e26b2ee01abaf10645e0909b819033867dc5813214fa376609604074071",
+      "sourceSHA256": "b2ce47ea7e4b905b8f8e40025515bbca65124825c86518642aa530bea7f45234",
+      "sourceFile": "draw-2A4ACF4A-BDA8-42AD-AFC0-9F467E0C6A81.mp4",
+      "imageWorkspace": false,
+      "toolbarAppearance": "dark",
+      "ink": "teal",
+      "crop": [
+        1810,
+        214,
+        1500,
+        1106
+      ],
+      "speed": 1,
+      "toolbarClearance": 64,
+      "actions": [
+        {
+          "control": "Ellipse",
+          "rect": {
+            "height": 48,
+            "width": 44,
+            "x": 2253,
+            "y": 1073
+          },
+          "time": 1.5364420000114478
+        },
+        {
+          "control": "Width 7",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2314,
+            "y": 1158
+          },
+          "time": 2.761437624983955
+        },
+        {
+          "control": "Sketchy",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2569,
+            "y": 1159
+          },
+          "time": 3.7703183333505876
+        },
+        {
+          "control": "Stroke color",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2106,
+            "y": 1158
+          },
+          "time": 5.0158653749967925
+        },
+        {
+          "control": "Teal",
+          "rect": {
+            "height": 38,
+            "width": 38,
+            "x": 2002,
+            "y": 634
+          },
+          "time": 6.343260208319407
+        },
+        {
+          "gesture": "drag",
+          "seconds": 1.4333333333333333,
+          "time": 9.020622333337087
+        },
+        {
+          "control": "Highlighter",
+          "rect": {
+            "height": 48,
+            "width": 44,
+            "x": 2492,
+            "y": 1073
+          },
+          "time": 10.320683375000954
+        },
+        {
+          "gesture": "drag",
+          "seconds": 1.1166666666666667,
+          "time": 12.702854666684289
+        },
+        {
+          "control": "Use apps",
+          "rect": {
+            "height": 48,
+            "width": 60,
+            "x": 2759,
+            "y": 1073
+          },
+          "time": 15.222854458319489
+        }
+      ],
+      "input": "Timed native UI actions and canvas events, with a deterministic scripted pointer. Not a human or computer-use-provider recording."
+    },
+    "arrow": {
+      "file": "/demo/fresh-arrow.mp4",
+      "poster": "/demo/fresh-arrow.jpg",
+      "width": 1500,
+      "height": 1106,
+      "duration": 20.516667,
+      "sha256": "2b93a09ff214c13d42fb3bfe1247bbe8f4101ca453bbac9a08b1a498044a6af5",
+      "sourceSHA256": "5b50911ab388d273d354c02646c109729ccccb089949a465c0922201b07245fd",
+      "sourceFile": "arrow-1BF140EA-56A9-451A-9D1E-7B89E6798833.mp4",
+      "imageWorkspace": false,
+      "toolbarAppearance": "dark",
+      "ink": "blue",
+      "crop": [
+        1810,
+        214,
+        1500,
+        1106
+      ],
+      "speed": 1,
+      "toolbarClearance": 64,
+      "actions": [
+        {
+          "control": "Arrow",
+          "rect": {
+            "height": 48,
+            "width": 44,
+            "x": 2299,
+            "y": 1073
+          },
+          "time": 1.403391208325047
+        },
+        {
+          "control": "Width 7",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2268,
+            "y": 1072
+          },
+          "time": 2.593030625022948
+        },
+        {
+          "control": "Sketchy",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2523,
+            "y": 1073
+          },
+          "time": 3.7249912083498202
+        },
+        {
+          "control": "Curved arrow",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2316,
+            "y": 1165
+          },
+          "time": 4.8703269166871905
+        },
+        {
+          "control": "Stroke color",
+          "rect": {
+            "height": 36,
+            "width": 36,
+            "x": 2106,
+            "y": 1072
+          },
+          "time": 6.079367833328433
+        },
+        {
+          "control": "Blue",
+          "rect": {
+            "height": 38,
+            "width": 38,
+            "x": 2052,
+            "y": 548
+          },
+          "time": 7.47019324998837
+        },
+        {
+          "gesture": "arrow-point",
+          "time": 8.639048249984626
+        },
+        {
+          "gesture": "arrow-point",
+          "time": 9.85237920837244
+        },
+        {
+          "gesture": "arrow-point",
+          "time": 11.002779333328363
+        },
+        {
+          "gesture": "arrow-point",
+          "time": 12.20011637499556
+        },
+        {
+          "gesture": "drag",
+          "seconds": 1.3166666666666667,
+          "time": 15.627794791653287
+        },
+        {
+          "gesture": "edit-arrow-point",
+          "time": 16.143212374998257
+        },
+        {
+          "control": "Use apps",
+          "rect": {
+            "height": 48,
+            "width": 60,
+            "x": 2759,
+            "y": 963
+          },
+          "time": 18.334206666680984
+        }
+      ],
+      "input": "Timed native UI actions and canvas events, with a deterministic scripted pointer. Not a human or computer-use-provider recording."
+    },
+    "blur": {
+      "file": "/demo/fresh-blur.mp4",
+      "poster": "/demo/fresh-blur.jpg",
+      "width": 1500,
+      "height": 1106,
+      "duration": 9.233008,
+      "sha256": "76718c4c65d83502788d1a397deab035a5dda87781b74fa80e92c7016b7560d0",
+      "sourceSHA256": "dc9957ce61fad0fc12abbf1533f9bbe1c4f1f69c65ad60e2f99f0d9622fe5134",
+      "sourceFile": "blur-83979187-E85A-46A5-B69E-62A75C461347.mp4",
+      "imageWorkspace": false,
+      "toolbarAppearance": "dark",
+      "ink": "native blur",
+      "crop": [
+        1810,
+        214,
+        1500,
+        1106
+      ],
+      "speed": 1,
+      "toolbarClearance": 64,
+      "actions": [
+        {
+          "control": "Effects",
+          "rect": {
+            "height": 48,
+            "width": 44,
+            "x": 2602,
+            "y": 1073
+          },
+          "time": 1.5006890416843817
+        },
+        {
+          "gesture": "drag",
+          "seconds": 1.2666666666666666,
+          "time": 4.297573791700415
+        },
+        {
+          "control": "Use apps",
+          "rect": {
+            "height": 48,
+            "width": 60,
+            "x": 2759,
+            "y": 1088
+          },
+          "time": 6.945291833369993
+        }
+      ],
+      "input": "Timed native UI actions and canvas events, with a deterministic scripted pointer. Not a human or computer-use-provider recording."
+    }
+  }
+}

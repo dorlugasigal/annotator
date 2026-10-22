@@ -6,16 +6,17 @@
 
 **Draw on your screen as you explain.**<br>
 Use it in demos, reviews and lessons. Every mark stays editable.
+Native apps for macOS and Windows.
 
-[**Download for Mac**](https://getannotator.app/downloads/) &nbsp;·&nbsp;
+[**Download**](https://getannotator.app/downloads/) &nbsp;·&nbsp;
 [Website](https://getannotator.app/) &nbsp;·&nbsp;
 [Help](https://getannotator.app/docs/) &nbsp;·&nbsp;
 [Release notes](https://github.com/dorlugasigal/annotator/releases)
 
 [![Latest release](https://img.shields.io/github/v/release/dorlugasigal/annotator?include_prereleases&label=release&color=ffb58c&labelColor=111928)](https://github.com/dorlugasigal/annotator/releases)
 [![macOS 14 or later](https://img.shields.io/badge/macOS-14%2B-e8eef9?labelColor=111928)](#install)
-[![Apple Silicon and Intel](https://img.shields.io/badge/Mac-Apple%20Silicon%20%7C%20Intel-e8eef9?labelColor=111928)](#install)
-[![All tools are free](https://img.shields.io/badge/price-free-e8eef9?labelColor=111928)](#about-this-repository)
+[![Windows 11](https://img.shields.io/badge/Windows-11-e8eef9?labelColor=111928)](#install)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-e8eef9?labelColor=111928)](LICENSE)
 
 </div>
 
@@ -69,83 +70,108 @@ Drag over a busy picture to blur it. Blur isn't secure redaction.
 </tr>
 </table>
 
-Annotator has more than 40 tools. Open the tool library with <kbd>⌘L</kbd> or its
-toolbar button for shapes, diagram icons, Screen zoom, Pointer lens, Pixelate,
-a numbered counter, a pixel ruler, pasted images and your own saved shapes.
-Style any mark with fills, gradients, dashed or sketchy lines, or draw on a
-whiteboard or blackboard. [Watch each tool on the website.](https://getannotator.app/#workspace)
-
-An AI assistant with computer-use tools can also drive Annotator through its
-normal interface. [Set up the Annotator skill.](https://getannotator.app/ai/)
+There are more than 40 tools: shapes, diagram icons, screen zoom, a pointer
+lens, Pixelate, numbered counters, a pixel ruler, pasted images and your own
+saved shapes. Share part of a display in its own window, or start a break
+timer before you leave the room. An AI app with computer-use tools can drive
+Annotator through its normal interface ([AI control](docs/ai-control.md)).
 
 ## Install
 
-Annotator needs macOS 14 or later, on a Mac with Apple Silicon or an Intel
-processor. It is a public alpha, so read the known limits in the
-[release notes](https://github.com/dorlugasigal/annotator/releases) first.
+### Mac
 
-### Disk image
+macOS 14 or later, on Apple Silicon or Intel.
 
-1. [Download Annotator](https://getannotator.app/downloads/) and open the disk image.
-2. Drag Annotator into Applications.
-3. Open Annotator from Applications. It runs from the menu bar, not the Dock.
+- **Homebrew**: `brew install --cask dorlugasigal/annotator/annotator`
+- **Disk image**: [download it](https://getannotator.app/downloads/), drag
+  Annotator into Applications and open it. It runs from the menu bar.
 
-Annotator can update itself only from the Applications folder. If you open it
-from anywhere else, it offers to show it in Finder so you can move it.
+Annotator updates itself from the Applications folder. With Homebrew, run
+`brew upgrade --cask dorlugasigal/annotator/annotator`.
 
-### Homebrew
+### Windows
 
-```sh
-brew install --cask dorlugasigal/annotator/annotator
-```
+Windows 11, version 22H2 or later, on x64 or ARM64.
 
-Homebrew adds the [Annotator tap](https://github.com/dorlugasigal/homebrew-annotator)
-the first time. To update, save your boards and quit Annotator, then run:
+- **Microsoft Store**: [Annotator – Screen Annotation](https://apps.microsoft.com/detail/9NMZ345ZJ6JK),
+  or `winget install --id 9NMZ345ZJ6JK --source msstore`. The Store keeps it
+  up to date.
+- **winget, without the Store**: `winget install DorLugasiGal.Annotator`, once
+  the package is accepted into winget's catalog.
+- **ZIP**: download `Annotator-<version>-windows-x64.zip` or `-arm64.zip`
+  from the [latest release](https://github.com/dorlugasigal/annotator/releases).
+  The ZIPs aren't code-signed yet, so Windows may show a SmartScreen warning.
 
-```sh
-brew update
-brew upgrade --cask dorlugasigal/annotator/annotator
-```
-
-If macOS blocks Annotator, [report the exact message](https://github.com/dorlugasigal/annotator/issues/new?template=bug-report.yml).
-Don't remove the quarantine attribute or turn off security checks.
+Annotator runs from the system tray, near the clock.
 
 ## Get started
 
-| To | Press |
-| --- | --- |
-| Draw on the screen | <kbd>⌃⇧2</kbd> (Control-Shift-2) |
-| Use the app underneath, with your drawings still on screen | <kbd>Esc</kbd> |
-| Show or hide your drawings and the toolbar | <kbd>⌃2</kbd> (Control-2) |
-| Open the tool library while drawing | <kbd>⌘L</kbd> |
+| To | Mac | Windows |
+| --- | --- | --- |
+| Draw on the screen | <kbd>⌃⇧2</kbd> | <kbd>Ctrl+Shift+2</kbd> |
+| Use the app underneath, drawings still on screen | <kbd>Esc</kbd> | <kbd>Esc</kbd> |
+| Show or hide drawings and the toolbar | <kbd>⌃2</kbd> | <kbd>Ctrl+2</kbd> |
+| Zoom around the pointer | <kbd>⌃1</kbd> | <kbd>Ctrl+1</kbd> |
+| Open the tool library while drawing | <kbd>⌘L</kbd> | <kbd>Ctrl+L</kbd> |
 
-These are the default keys. Change them in Settings > Toolbar & Shortcuts. Esc first
-finishes the text or shape you are drawing. Settings and Help are in
-Annotator's menu-bar menu.
+Change the keys in Settings > Toolbar & Shortcuts.
 
 ## Privacy and screen sharing
 
-- Annotator has no account. Your drawings, screen pixels and keystrokes stay on your Mac.
-- Drawing needs no permissions. Screen zoom and live effects need Screen Recording, but Annotator doesn't record or save video. Option-scroll zoom over other apps needs Accessibility.
+- There is no account. Your drawings, screen pixels and keystrokes stay on your computer.
+- Drawing needs no permissions. Screen zoom and live effects read the screen while they run; Annotator doesn't record or save video.
 - Usage counts are off unless you turn them on. Even then, they never include drawings, screenshots or text.
 - If you share your whole screen, others see your drawings. App or window sharing may leave them out, so ask someone on the call what they see.
 - Blur, Pixelate and Distort can leave details readable. Hiding or quitting Annotator removes covers.
-- Saved boards keep pasted images whole, even the parts under covers. Don't share a board with private details.
-- An AI app that controls Annotator may send screenshots and text to its provider. Check that app's privacy settings.
 
 [Privacy](https://getannotator.app/privacy/) ·
-[Screen-sharing and capture limits](https://getannotator.app/docs/#limitations)
+[Screen-sharing limits](docs/compatibility.md)
 
-## Feedback and support
+## Build from source
 
-- [Report a problem](https://github.com/dorlugasigal/annotator/issues/new?template=bug-report.yml) or [share feedback](https://github.com/dorlugasigal/annotator/issues/new?template=feedback.yml). Issues are public, so use made-up data and never attach credentials or private screenshots.
-- Say which version and build you use, your macOS version and the steps. In Annotator, Settings > About > Copy support info gathers app and system details without drawings or screenshots.
-- Report security problems privately. See [SECURITY.md](SECURITY.md).
-- If Annotator helps you, you can [buy me a coffee](https://buymeacoffee.com/dorlugasigal). All tools stay free either way.
+Both apps live in this repository. The Mac app is the behavioral reference; the
+Windows app matches it ([parity](docs/parity.md)).
 
-## About this repository
+**Mac** (Xcode 26.6, XcodeGen; see `tools/macos/toolchain.json`):
 
-Annotator is proprietary and free to use. Its source code is private. This
-repository holds the app releases and their notes, the Homebrew cask, the issue
-forms and the redirect from the old GitHub Pages address to the
-[current website](https://getannotator.app/).
+```sh
+brew bundle                       # installs XcodeGen
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+make test                         # Swift package tests
+make app                          # unsigned development app
+open "build/UnsignedDerivedData/Build/Products/Debug/Annotator Dev.app"
+```
+
+**Windows** (.NET 10 SDK, Visual Studio with C++ tools and Windows SDK 10.0.26100;
+see `tools/windows/toolchain.json`):
+
+```powershell
+pwsh -NoProfile -File tools/windows/validate.ps1 core
+pwsh -NoProfile -File tools/windows/validate.ps1 all
+```
+
+**Website** (Node 26.8.1, as in CI):
+
+```sh
+npm --prefix website ci && npm --prefix website run build && npm --prefix website test
+```
+
+Development builds are named **Annotator Dev** and never replace a release.
+Start with [docs/architecture.md](docs/architecture.md); the repository layout
+is in [docs/README.md](docs/README.md) and [tools/README.md](tools/README.md).
+
+## Contributing
+
+Bug reports, feature ideas and pull requests are welcome. Read
+[CONTRIBUTING.md](CONTRIBUTING.md) first: every user-visible change ships on
+both Mac and Windows. Report security problems privately ([SECURITY.md](SECURITY.md)).
+For help, see [SUPPORT.md](SUPPORT.md).
+
+If Annotator helps you, you can [buy me a coffee](https://buymeacoffee.com/dorlugasigal).
+All tools stay free either way.
+
+## License
+
+Annotator is open source under the [Apache License 2.0](LICENSE).
+Third-party components keep their own licenses ([notices](THIRD_PARTY_NOTICES.md)).
+The name and icon are covered by [TRADEMARK.md](TRADEMARK.md).

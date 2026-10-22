@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "final",
+  "note": "Rendered from videos/annotator-reel (native takes from apps/macos/Tests/NativeAppTests/ReelRecordingTests.swift, tools/camera.py and HyperFrames). The reel carries its music and quiet foley; the page starts it muted.",
+  "description": "A 30-second Annotator reel. Large type says “Draw over any app.” Then real app clips tour the toolbar and show how to circle a number, pick a color, draw and bend an arrow, highlight a note, sketch a rough box that snaps clean, add a label, turn on the pointer halo and spotlight, and blur an image.",
+  "provenance": "Real Annotator footage with scripted input and sample content. We changed the speed of the clips and added zooms, titles, drawn marks, music and the sounds of the clicks and keys.",
+  "loop": true,
+  "audio": true,
+  "music": {
+    "title": "Product Launch Advertising Commercial Music",
+    "artist": "lNPLUSMUSIC",
+    "source": "Pixabay",
+    "url": "https://pixabay.com/music/future-bass-product-launch-advertising-commercial-music-306038/",
+    "license": "Pixabay Content License"
+  },
+  "desktop": {
+    "file": "/demo/annotator-reel.mp4",
+    "poster": "/demo/annotator-reel.jpg",
+    "width": 1920,
+    "height": 1080,
+    "duration": 29.533,
+    "fps": 60.0,
+    "sha256": "c851ccb55594b30278509c22d0fa667be5324acaf84ce18003238e8affacbd66",
+    "bytes": 9364873
+  },
+  "phone": {
+    "file": "/demo/annotator-reel-phone.mp4",
+    "poster": "/demo/annotator-reel-phone.jpg",
+    "width": 1080,
+    "height": 1350,
+    "duration": 29.533,
+    "fps": 60.0,
+    "sha256": "627d026f92413bcb1b53369858b4bf0e551c5f36428c86f715e6bf1419328568",
+    "bytes": 6962795
+  }
+}

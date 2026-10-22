@@ -1,0 +1,52 @@
+---
+import recordings from "../data/showcase-takes.json";
+import { sitePath } from "../lib/paths";
+import SiteIcon from "./SiteIcon.astro";
+import { displayHeight as croppedHeight } from "../lib/takes";
+interface Props { take: "draw" | "arrow" | "blur" | "style" | "tools" | "pointer" | "shortcuts"; title: string; caption: string }
+const { take, title, caption } = Astro.props;
+const recording = recordings.takes[take];
+const displayHeight = croppedHeight(recording);
+const version = recording.sha256.slice(0, 12);
+const videoURL = `${sitePath(recording.file)}?v=${version}`;
+const labels = {
+  draw: "Circle a date with a rough teal ellipse, then highlight a line",
+  arrow: "Build a blue curved arrow point by point, then adjust one point",
+  blur: "Draw a native blur region over a colorful image",
+  style: "Draw a gradient shape with a softer fill and add a matching editable label",
+  tools: "Navigate the tool library, scroll its shapes, draw a grid and explore more categories",
+  pointer: "Change pointer settings, scroll custom colors and try the native click preview",
+  shortcuts: "In Settings, drag Spotlight into the toolbar, give it the L key, then drag Line back to More tools"
+};
+const label = labels[take];
+---
+<figure class="player native-feature" data-native-take={take} style={`--take-ratio:${recording.width} / ${displayHeight}`}>
+  <div class="player-screen take-frame">
+    <picture class="take-poster" data-take-poster>
+      <img src={sitePath(recording.poster)} width={recording.width} height={recording.height} alt=""
+        decoding="async" loading="lazy"/>
+    </picture>
+    {/* iPhone WebKit refused every source on videos with a <track> child, so these silent clips have none. */}
+    <video src={videoURL} crossorigin="anonymous" controls muted playsinline preload="none"
+      width={recording.width} height={displayHeight} aria-label={label} data-take-video data-playback-rate="1.25">
+      <p>Your browser cannot play this recording. <a href={videoURL}>Open the video.</a></p>
+    </video>
+    <p class="player-status" data-take-status role="status" hidden></p>
+  </div>
+  <figcaption class="player-chin">
+    <div class="player-chin-row">
+      <p class="player-caption"><strong>{title}</strong> {caption}</p>
+      <button type="button" class="player-toggle" data-take-toggle hidden aria-label={`Play ${label}`}>
+        <span class="player-toggle-symbol" data-take-symbol="Play" aria-hidden="true">
+          <span data-action="Play"><SiteIcon name="play"/></span>
+          <span data-action="Pause" hidden><SiteIcon name="pause"/></span>
+          <span data-action="Replay" hidden><SiteIcon name="replay"/></span>
+        </span><span data-take-label>Play</span>
+      </button>
+    </div>
+    <p class="take-error" data-take-error role="status" hidden>
+      <span data-take-error-reason>The recording could not play.</span> Try Play again. You can also <a href={videoURL}>open the video</a>.
+    </p>
+  </figcaption>
+</figure>
+<script>import "../scripts/product-takes";</script>

@@ -1,0 +1,97 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    82.5,
+    16.5,
+    120,
+    20
+   ],
+   "identifier": "cover-mode",
+   "role": "AXPopUpButton",
+   "value": "Pixelate"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    210.5,
+    20,
+    45,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Pixel size"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      294,
+      19.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    261.5,
+    19.5,
+    90,
+    14
+   ],
+   "label": "Pixel size",
+   "role": "AXSlider",
+   "value": 18
+  },
+  {
+   "enabled": true,
+   "frame": [
+    357.5,
+    16,
+    48,
+    21
+   ],
+   "help": "Pixel size: 0–100 ",
+   "label": "Precise pixel size",
+   "placeholder": "Pixel size",
+   "role": "AXTextField",
+   "value": "18"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    82.5,
+    47,
+    483,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Blur, pixelation and distortion can leave details readable. Remove private information before sharing."
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "properties/pixelate-light.png",
+ "kind": "view",
+ "notes": "Full properties for Pixelate region, 648 points wide.",
+ "pixels": [
+  1296,
+  152
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  76
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "pixelate",
+ "surface": "properties"
+}

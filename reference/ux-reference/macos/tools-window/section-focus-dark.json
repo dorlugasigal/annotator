@@ -1,0 +1,329 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    18,
+    34.5,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Tools"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    243.5,
+    16,
+    108.5,
+    20
+   ],
+   "label": "Paste image",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      15,
+      48,
+      57,
+      24
+     ],
+     "label": "Draw",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      72,
+      48,
+      69,
+      24
+     ],
+     "label": "Shapes",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      141,
+      48,
+      60.5,
+      24
+     ],
+     "label": "Focus",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 1
+    },
+    {
+     "enabled": true,
+     "frame": [
+      201.5,
+      48,
+      62,
+      24
+     ],
+     "label": "Extras",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      263.5,
+      48,
+      89.5,
+      24
+     ],
+     "label": "My shapes",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    15,
+    48,
+    338,
+    24
+   ],
+   "label": "Tool category",
+   "role": "AXRadioGroup"
+  },
+  {
+   "children": [
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        84,
+        74,
+        76
+       ],
+       "help": "Effects",
+       "label": "Effects",
+       "role": "AXButton",
+       "selected": true
+      },
+      {
+       "enabled": true,
+       "frame": [
+        98,
+        84,
+        74,
+        76
+       ],
+       "help": "Pointer lens",
+       "label": "Pointer lens",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        180,
+        84,
+        74,
+        76
+       ],
+       "help": "Screen zoom",
+       "label": "Screen zoom",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        262,
+        84,
+        74,
+        76
+       ],
+       "help": "Spotlight",
+       "label": "Spotlight",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        168,
+        74,
+        76
+       ],
+       "help": "Cursor halo",
+       "label": "Cursor halo",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        98,
+        168,
+        74,
+        76
+       ],
+       "help": "Share region",
+       "label": "Share region",
+       "role": "AXButton"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      16,
+      84,
+      320,
+      160
+     ],
+     "role": "AXOpaqueProviderGroup",
+     "subrole": "AXOpaqueProviderGrid"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    16,
+    84,
+    336,
+    160
+   ],
+   "identifier": "tool-library-scroll",
+   "role": "AXScrollArea"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    257.5,
+    66,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Spotlight size"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      122.5,
+      256,
+      20,
+      16
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    92,
+    256,
+    133.5,
+    16
+   ],
+   "label": "Spotlight size",
+   "role": "AXSlider",
+   "value": 130
+  },
+  {
+   "enabled": true,
+   "frame": [
+    241,
+    257.5,
+    19.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "130"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    275.5,
+    257.5,
+    76.5,
+    13
+   ],
+   "label": "Pointer settings",
+   "role": "AXLink"
+  },
+  {
+   "children": [
+    {
+     "enabled": false,
+     "frame": [
+      74,
+      309,
+      76,
+      16
+     ],
+     "label": "Selection",
+     "role": "AXMenuButton",
+     "title": "Selection"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      158,
+      309,
+      41,
+      16
+     ],
+     "label": "File",
+     "role": "AXMenuButton",
+     "title": "File"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      207,
+      309,
+      87,
+      16
+     ],
+     "label": "Workspace",
+     "role": "AXMenuButton",
+     "title": "Workspace"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    74,
+    309,
+    220,
+    16
+   ],
+   "identifier": "tool-library-footer",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "tools-window/section-focus-dark.png",
+ "kind": "view",
+ "notes": "Tools window, Focus, default 368-point width.",
+ "pixels": [
+  736,
+  682
+ ],
+ "scale": 2,
+ "size": [
+  368,
+  341
+ ],
+ "spec": [
+  "005 shape-labels-and-library.md",
+  "WIN-UI-05"
+ ],
+ "state": "section-focus",
+ "surface": "tools-window"
+}

@@ -1,0 +1,102 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "show-hide-corners.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "hide +0 ms",
+   "time": 0.6333333333333333
+  },
+  {
+   "label": "hide +233 ms",
+   "time": 0.8666666666666667
+  },
+  {
+   "label": "hide +466 ms",
+   "time": 1.1
+  },
+  {
+   "label": "hide +698 ms",
+   "time": 1.3333333333333333
+  },
+  {
+   "label": "hide +931 ms",
+   "time": 1.5666666666666667
+  },
+  {
+   "label": "show +0 ms",
+   "time": 2.1666666666666665
+  },
+  {
+   "label": "show +263 ms",
+   "time": 2.433333333333333
+  },
+  {
+   "label": "show +526 ms",
+   "time": 2.7
+  },
+  {
+   "label": "show +788 ms",
+   "time": 2.966666666666667
+  },
+  {
+   "label": "show +1051 ms",
+   "time": 3.216666666666667
+  },
+  {
+   "label": "end",
+   "time": 3.9833333333333334
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 4.015,
+ "events": [],
+ "fps": 60,
+ "hideDuration": 0.3,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "Hide tools (Control-Option-2 path), then show them again (Control-Shift-2 path), with seven drawings on the canvas.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 1.5642240417655557,
+   "label": "hide",
+   "start": 0.6330791250802577
+  },
+  {
+   "end": 3.223467166768387,
+   "label": "show",
+   "start": 2.1722453334368765
+  }
+ ],
+ "showDuration": 0.38,
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "style": "corners",
+ "take": "show-hide-corners",
+ "title": "Show and hide: corners",
+ "video": "show-hide-corners.mp4"
+}

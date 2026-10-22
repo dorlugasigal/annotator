@@ -1,0 +1,598 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    12,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 1",
+   "label": "Select",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    67,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 2",
+   "label": "Rectangle",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    113,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 3",
+   "label": "Diamond",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    159,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 4",
+   "label": "Ellipse",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    205,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 5",
+   "label": "Arrow",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    251,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 6",
+   "label": "Line",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    306,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 7",
+   "label": "Pen",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    352,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 8",
+   "label": "Text",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    398,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 9",
+   "label": "Highlighter",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    453,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 0",
+   "label": "Eraser",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    508,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut S",
+   "label": "Effects",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    558,
+    12,
+    44,
+    48
+   ],
+   "help": "More shapes and tools (⌘L)",
+   "label": "Tool library",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    626,
+    20.5,
+    22.5,
+    32.5
+   ],
+   "help": "Cycle Desktop, Whiteboard and Blackboard on this drawing display. Control-W: whiteboard. Control-B: blackboard.",
+   "label": "Board background",
+   "role": "AXButton",
+   "value": "Desktop"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    665,
+    12,
+    60,
+    48
+   ],
+   "help": "Drawing is active. Click Use apps to pass clicks through. Escape finishes text or cancels an unfinished drawing first. ⌃⇧2 returns to drawing.",
+   "label": "Use apps",
+   "role": "AXButton",
+   "value": "Drawing is active"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    737,
+    30,
+    12,
+    12
+   ],
+   "help": "Undo",
+   "identifier": "arrow.uturn.backward",
+   "label": "Undo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    767,
+    30,
+    12,
+    12
+   ],
+   "help": "Redo",
+   "identifier": "arrow.uturn.forward",
+   "label": "Redo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    797,
+    29,
+    12.5,
+    14.5
+   ],
+   "help": "Clear all drawings — undoable",
+   "identifier": "trash",
+   "label": "Clear all drawings — undoable",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    826.5,
+    30.5,
+    13,
+    11
+   ],
+   "help": "Show tools only",
+   "identifier": "toolbar-properties",
+   "label": "Properties",
+   "role": "AXButton",
+   "value": "Full properties"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    856,
+    29,
+    14,
+    14
+   ],
+   "help": "Settings and shortcuts",
+   "identifier": "gearshape",
+   "label": "Settings and shortcuts",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    888,
+    31,
+    10.5,
+    10.5
+   ],
+   "help": "Hide drawings and tools",
+   "identifier": "xmark",
+   "label": "Hide drawings and tools",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      77,
+      65.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Stroke color"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      93,
+      77,
+      51,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Width"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      257,
+      77,
+      60.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pattern"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      388.5,
+      77,
+      80,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Roughness"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      520.5,
+      77,
+      64,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pressure"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      630.5,
+      77,
+      83.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Smart Draw"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      97,
+      36,
+      36
+     ],
+     "help": "Stroke color",
+     "label": "Stroke color",
+     "role": "AXButton",
+     "value": "#F04538FF"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      91.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Width 2",
+     "label": "Width 2",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      132.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Width 4",
+     "label": "Width 4",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Width 7",
+     "label": "Width 7",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      255.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Solid",
+     "label": "Solid",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      296.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Dashed",
+     "label": "Dashed",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      337.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Dotted",
+     "label": "Dotted",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      387.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Clean",
+     "label": "Clean",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      428.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Sketchy",
+     "label": "Sketchy",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      469.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Wild",
+     "label": "Wild",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      523.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Constant pressure",
+     "label": "Constant pressure",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      579.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Tablet pressure",
+     "label": "Tablet pressure",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      629.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
+     "identifier": "wand.and.stars",
+     "label": "Smart Draw",
+     "role": "AXButton",
+     "value": "Off"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        94.5,
+        142.5,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      91.5,
+      142.5,
+      80,
+      14
+     ],
+     "label": "Width",
+     "role": "AXSlider",
+     "value": 3
+    },
+    {
+     "enabled": true,
+     "frame": [
+      177.5,
+      139,
+      48,
+      21
+     ],
+     "help": "Width: 1–40 pt",
+     "label": "Precise width",
+     "placeholder": "Width",
+     "role": "AXTextField",
+     "value": "3"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      231.5,
+      143,
+      10,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "pt"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      519.5,
+      137,
+      44,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Constant"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      582.5,
+      137,
+      30,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Tablet"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      906,
+      76,
+      15,
+      85
+     ],
+     "role": "AXScrollBar",
+     "value": 0
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    12,
+    77,
+    908,
+    83
+   ],
+   "role": "AXScrollArea"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "toolbar/full-properties-pen-dark.png",
+ "kind": "view",
+ "notes": "Full properties open inside the toolbar panel, below the rail.",
+ "pixels": [
+  1864,
+  344
+ ],
+ "scale": 2,
+ "size": [
+  932,
+  172
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "full-properties-pen",
+ "surface": "toolbar"
+}

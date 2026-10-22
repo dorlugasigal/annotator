@@ -1,0 +1,102 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "show-hide-pop.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "hide +0 ms",
+   "time": 0.6333333333333333
+  },
+  {
+   "label": "hide +170 ms",
+   "time": 0.8
+  },
+  {
+   "label": "hide +341 ms",
+   "time": 0.9666666666666667
+  },
+  {
+   "label": "hide +511 ms",
+   "time": 1.1333333333333333
+  },
+  {
+   "label": "hide +682 ms",
+   "time": 1.3166666666666667
+  },
+  {
+   "label": "show +0 ms",
+   "time": 1.95
+  },
+  {
+   "label": "show +184 ms",
+   "time": 2.1333333333333333
+  },
+  {
+   "label": "show +367 ms",
+   "time": 2.316666666666667
+  },
+  {
+   "label": "show +551 ms",
+   "time": 2.5
+  },
+  {
+   "label": "show +734 ms",
+   "time": 2.683333333333333
+  },
+  {
+   "label": "end",
+   "time": 3.45
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 3.48,
+ "events": [],
+ "fps": 60,
+ "hideDuration": 0.26,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "Hide tools (Control-Option-2 path), then show them again (Control-Shift-2 path), with seven drawings on the canvas.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 1.310666958335787,
+   "label": "hide",
+   "start": 0.6287849167129025
+  },
+  {
+   "end": 2.6779089167248458,
+   "label": "show",
+   "start": 1.9435468750307336
+  }
+ ],
+ "showDuration": 0.34,
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "style": "pop",
+ "take": "show-hide-pop",
+ "title": "Show and hide: pop",
+ "video": "show-hide-pop.mp4"
+}

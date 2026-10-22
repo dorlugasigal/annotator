@@ -1,0 +1,7 @@
+{
+  "xcode": "26.6",
+  "swift": "6.3.3",
+  "minimumMacOS": "14.0",
+  "architecture": "arm64",
+  "xcodegen": "2.46.0"
+}

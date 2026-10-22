@@ -1,0 +1,477 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    92,
+    28,
+    155.5,
+    28
+   ],
+   "role": "AXStaticText",
+   "value": "Share a region"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    871,
+    28,
+    61,
+    31
+   ],
+   "label": "Region sharing is off",
+   "role": "AXUnknown"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    92,
+    61,
+    372,
+    15
+   ],
+   "role": "AXStaticText",
+   "value": "Give the call a clear view. Keep the rest of your screen to yourself."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    104,
+    44.5,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Display"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    80.5,
+    100,
+    147,
+    24
+   ],
+   "identifier": "region-display",
+   "role": "AXPopUpButton",
+   "value": "Odyssey G95SD"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    100,
+    33.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Halves"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    140,
+    438,
+    224
+   ],
+   "label": "Region preview",
+   "role": "AXUnknown"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    493.5,
+    119.5,
+    105.5,
+    49
+   ],
+   "label": "Left half",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    605.5,
+    120,
+    104,
+    48
+   ],
+   "label": "Right half",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    716.5,
+    120,
+    104.5,
+    48
+   ],
+   "label": "Top half",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    828,
+    120,
+    104,
+    48
+   ],
+   "label": "Bottom half",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    182,
+    31.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Thirds"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    202,
+    141.5,
+    48
+   ],
+   "label": "Left third",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    642.5,
+    202,
+    141,
+    48
+   ],
+   "label": "Center third",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    790.5,
+    202,
+    141.5,
+    48
+   ],
+   "label": "Right third",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    264,
+    39.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Corners"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    284,
+    104.5,
+    48
+   ],
+   "label": "Top left",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    605.5,
+    284,
+    104,
+    48
+   ],
+   "label": "Top right",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    716.5,
+    284,
+    104.5,
+    48
+   ],
+   "label": "Bottom left",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    828,
+    284,
+    104,
+    48
+   ],
+   "label": "Bottom right",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    364,
+    77.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Your own area"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    775.5,
+    361,
+    156.5,
+    20
+   ],
+   "identifier": "region-draw-custom",
+   "label": "Draw a custom region",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    380,
+    54,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Left half"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    331.5,
+    383,
+    134.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Outlined on your screen"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    400,
+    100.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "2,560 × 1,440 pixels"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    395,
+    7.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "X"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    606,
+    395,
+    7,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Y"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    718,
+    395,
+    29.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Width"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    830,
+    395,
+    33,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Height"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    412,
+    102,
+    24
+   ],
+   "label": "Region x in points",
+   "placeholder": "X",
+   "role": "AXTextField",
+   "value": "0"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    606,
+    412,
+    102,
+    24
+   ],
+   "label": "Region y in points",
+   "placeholder": "Y",
+   "role": "AXTextField",
+   "value": "0"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    718,
+    412,
+    102,
+    24
+   ],
+   "label": "Region width in points",
+   "placeholder": "Width",
+   "role": "AXTextField",
+   "value": "2560"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    830,
+    412,
+    102,
+    24
+   ],
+   "label": "Region height in points",
+   "placeholder": "Height",
+   "role": "AXTextField",
+   "value": "1440"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    429,
+    438,
+    26
+   ],
+   "role": "AXStaticText",
+   "value": "Anything inside this area can appear, including notifications. Keep private windows outside it. Blur is not secure redaction."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    494,
+    453.5,
+    201,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Points from the display's top-left corner."
+  },
+  {
+   "enabled": false,
+   "frame": [
+    858,
+    450,
+    74,
+    20
+   ],
+   "label": "Apply size",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    579,
+    239.5,
+    15
+   ],
+   "role": "AXStaticText",
+   "value": "In your meeting, choose Share > Window."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    600,
+    503,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Select Annotator Dev - Shared Region. Hiding drawings removes them from the call; the region stays on."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    784,
+    591.5,
+    148,
+    28
+   ],
+   "identifier": "region-start-stop",
+   "label": "Start region sharing",
+   "role": "AXButton",
+   "value": "Off"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    28,
+    619,
+    53.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Local build"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "region-sharing/chooser-leftHalf-light.png",
+ "kind": "view",
+ "notes": "Share a region window at its default 960 x 660 size. The display list shows this Mac's display.",
+ "pixels": [
+  1920,
+  1320
+ ],
+ "scale": 2,
+ "size": [
+  960,
+  660
+ ],
+ "spec": [
+  "012",
+  "WIN-CAP-08"
+ ],
+ "state": "chooser-leftHalf",
+ "surface": "region-sharing"
+}

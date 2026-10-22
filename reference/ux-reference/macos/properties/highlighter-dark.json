@@ -1,0 +1,146 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    65.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    97,
+    16,
+    51,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Width"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#EDFF0DFF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    95.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 2",
+   "label": "Width 2",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    136.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 4",
+   "label": "Width 4",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    177.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 7",
+   "label": "Width 7",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      100.5,
+      81.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    95.5,
+    81.5,
+    80,
+    14
+   ],
+   "label": "Width",
+   "role": "AXSlider",
+   "value": 4
+  },
+  {
+   "enabled": true,
+   "frame": [
+    181.5,
+    78,
+    48,
+    21
+   ],
+   "help": "Width: 1–40 pt",
+   "label": "Precise width",
+   "placeholder": "Width",
+   "role": "AXTextField",
+   "value": "4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    235.5,
+    82,
+    10,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "pt"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "properties/highlighter-dark.png",
+ "kind": "view",
+ "notes": "Full properties for Highlighter, 648 points wide.",
+ "pixels": [
+  1296,
+  230
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  115
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "highlighter",
+ "surface": "properties"
+}

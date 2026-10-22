@@ -1,0 +1,88 @@
+{"bits":"0","kind":"Double","written":{"ok":"[0]"}}
+{"bits":"8000000000000000","kind":"Double","written":{"ok":"[-0]"}}
+{"bits":"3ff0000000000000","kind":"Double","written":{"ok":"[1]"}}
+{"bits":"bff0000000000000","kind":"Double","written":{"ok":"[-1]"}}
+{"bits":"4000000000000000","kind":"Double","written":{"ok":"[2]"}}
+{"bits":"3fb999999999999a","kind":"Double","written":{"ok":"[0.1]"}}
+{"bits":"3fc999999999999a","kind":"Double","written":{"ok":"[0.2]"}}
+{"bits":"3fe0000000000000","kind":"Double","written":{"ok":"[0.5]"}}
+{"bits":"3ff8000000000000","kind":"Double","written":{"ok":"[1.5]"}}
+{"bits":"bff8000000000000","kind":"Double","written":{"ok":"[-1.5]"}}
+{"bits":"3fd5555555555555","kind":"Double","written":{"ok":"[0.3333333333333333]"}}
+{"bits":"3fe5555555555555","kind":"Double","written":{"ok":"[0.6666666666666666]"}}
+{"bits":"3fd3333333333334","kind":"Double","written":{"ok":"[0.30000000000000004]"}}
+{"bits":"4059000000000000","kind":"Double","written":{"ok":"[100]"}}
+{"bits":"3e7ad7f29abcaf48","kind":"Double","written":{"ok":"[1e-07]"}}
+{"bits":"3eb0c6f7a0b5ed8d","kind":"Double","written":{"ok":"[1e-06]"}}
+{"bits":"3ee4f8b588e368f1","kind":"Double","written":{"ok":"[1e-05]"}}
+{"bits":"3f201f31f46ed246","kind":"Double","written":{"ok":"[0.000123]"}}
+{"bits":"40fe240c9fbe76c9","kind":"Double","written":{"ok":"[123456.789]"}}
+{"bits":"430c6bf526340000","kind":"Double","written":{"ok":"[1000000000000000]"}}
+{"bits":"4341c37937e08000","kind":"Double","written":{"ok":"[1e+16]"}}
+{"bits":"4376345785d8a000","kind":"Double","written":{"ok":"[1e+17]"}}
+{"bits":"437b69b4ba630f35","kind":"Double","written":{"ok":"[1.2345678901234568e+17]"}}
+{"bits":"444b1ae4d6e2ef50","kind":"Double","written":{"ok":"[1e+21]"}}
+{"bits":"4480f0cf064dd592","kind":"Double","written":{"ok":"[1e+22]"}}
+{"bits":"54b249ad2594c37d","kind":"Double","written":{"ok":"[1e+100]"}}
+{"bits":"1","kind":"Double","written":{"ok":"[5e-324]"}}
+{"bits":"10000000000000","kind":"Double","written":{"ok":"[2.2250738585072014e-308]"}}
+{"bits":"7fefffffffffffff","kind":"Double","written":{"ok":"[1.7976931348623157e+308]"}}
+{"bits":"3fb99999a0000000","kind":"Double","written":{"ok":"[0.10000000149011612]"}}
+{"bits":"3fd5555560000000","kind":"Double","written":{"ok":"[0.3333333432674408]"}}
+{"bits":"4008000000000001","kind":"Double","written":{"ok":"[3.0000000000000004]"}}
+{"bits":"3fe8000000000000","kind":"Double","written":{"ok":"[0.75]"}}
+{"bits":"4028ae147ae147ae","kind":"Double","written":{"ok":"[12.34]"}}
+{"bits":"40934a0000000000","kind":"Double","written":{"ok":"[1234.5]"}}
+{"bits":"4340000000000000","kind":"Double","written":{"ok":"[9007199254740992]"}}
+{"bits":"4340000000000001","kind":"Double","written":{"ok":"[9.007199254740994e+15]"}}
+{"bits":"4011666666666666","kind":"Double","written":{"ok":"[4.35]"}}
+{"bits":"4005666666666666","kind":"Double","written":{"ok":"[2.675]"}}
+{"bits":"1a56e1fc2f8f359","kind":"Double","written":{"ok":"[1e-300]"}}
+{"bits":"44dfe185ca57c517","kind":"Double","written":{"ok":"[6.02214076e+23]"}}
+{"bits":"400921fb54442d18","kind":"Double","written":{"ok":"[3.141592653589793]"}}
+{"bits":"bff921fb54442d18","kind":"Double","written":{"ok":"[-1.5707963267948966]"}}
+{"bits":"7ff8000000000000","kind":"Double","written":{"error":{"code":4866,"domain":"NSCocoaErrorDomain","message":"The data couldn’t be written because it isn’t in the correct format.","type":"EncodingError"}}}
+{"bits":"7ff0000000000000","kind":"Double","written":{"error":{"code":4866,"domain":"NSCocoaErrorDomain","message":"The data couldn’t be written because it isn’t in the correct format.","type":"EncodingError"}}}
+{"bits":"fff0000000000000","kind":"Double","written":{"error":{"code":4866,"domain":"NSCocoaErrorDomain","message":"The data couldn’t be written because it isn’t in the correct format.","type":"EncodingError"}}}
+{"kind":"Int","value":0,"written":{"ok":"[0]"}}
+{"kind":"Int","value":-1,"written":{"ok":"[-1]"}}
+{"kind":"Int","value":9223372036854775807,"written":{"ok":"[9223372036854775807]"}}
+{"kind":"Int","value":-9223372036854775808,"written":{"ok":"[-9223372036854775808]"}}
+{"kind":"UInt64","value":0,"written":{"ok":"[0]"}}
+{"kind":"UInt64","value":18446744073709551615,"written":{"ok":"[18446744073709551615]"}}
+{"kind":"UInt64","value":5381,"written":{"ok":"[5381]"}}
+{"kind":"Bool","written":{"ok":"[true]"}}
+{"kind":"Bool","written":{"ok":"[false]"}}
+{"kind":"String","utf8Hex":"","value":"","written":{"ok":"[\"\"]"}}
+{"kind":"String","utf8Hex":"706c61696e","value":"plain","written":{"ok":"[\"plain\"]"}}
+{"kind":"String","utf8Hex":"612f62","value":"a/b","written":{"ok":"[\"a\\/b\"]"}}
+{"kind":"String","utf8Hex":"687474703a2f2f6578616d706c652e636f6d2f613f623d6326643d65","value":"http://example.com/a?b=c&d=e","written":{"ok":"[\"http:\\/\\/example.com\\/a?b=c&d=e\"]"}}
+{"kind":"String","utf8Hex":"71756f746520222068657265","value":"quote \" here","written":{"ok":"[\"quote \\\" here\"]"}}
+{"kind":"String","utf8Hex":"6261636b5c736c617368","value":"back\\slash","written":{"ok":"[\"back\\\\slash\"]"}}
+{"kind":"String","utf8Hex":"6c696e650a627265616b","value":"line\nbreak","written":{"ok":"[\"line\\nbreak\"]"}}
+{"kind":"String","utf8Hex":"7461620968657265","value":"tab\there","written":{"ok":"[\"tab\\there\"]"}}
+{"kind":"String","utf8Hex":"0d0a","value":"\r\n","written":{"ok":"[\"\\r\\n\"]"}}
+{"kind":"String","utf8Hex":"00","value":"\u0000","written":{"ok":"[\"\\u0000\"]"}}
+{"kind":"String","utf8Hex":"011f","value":"\u0001\u001f","written":{"ok":"[\"\\u0001\\u001f\"]"}}
+{"kind":"String","utf8Hex":"7f","value":"","written":{"ok":"[\"\"]"}}
+{"kind":"String","utf8Hex":"c3a9","value":"é","written":{"ok":"[\"é\"]"}}
+{"kind":"String","utf8Hex":"65cc81","value":"é","written":{"ok":"[\"é\"]"}}
+{"kind":"String","utf8Hex":"f09f9880","value":"😀","written":{"ok":"[\"😀\"]"}}
+{"kind":"String","utf8Hex":"f09f91a9f09f8fbde2808df09f92bb","value":"👩🏽‍💻","written":{"ok":"[\"👩🏽‍💻\"]"}}
+{"kind":"String","utf8Hex":"e280a8e280a9","value":"  ","written":{"ok":"[\"  \"]"}}
+{"kind":"String","utf8Hex":"3c7363726970743e2627","value":"<script>&'","written":{"ok":"[\"<script>&'\"]"}}
+{"kind":"String","utf8Hex":"efbbbf","value":"﻿","written":{"ok":"[\"﻿\"]"}}
+{"kind":"String","utf8Hex":"e2808e","value":"‎","written":{"ok":"[\"‎\"]"}}
+{"kind":"String","utf8Hex":"c39f","value":"ß","written":{"ok":"[\"ß\"]"}}
+{"kind":"String","utf8Hex":"f48fbfbf","value":"􏿿","written":{"ok":"[\"􏿿\"]"}}
+{"kind":"String","utf8Hex":"efbfbd","value":"�","written":{"ok":"[\"�\"]"}}
+{"kind":"UUID","value":"00000000-0000-4000-8000-000000000001","written":{"ok":"[\"00000000-0000-4000-8000-000000000001\"]"}}
+{"kind":"UUID","value":"A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D","written":{"ok":"[\"A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D\"]"}}
+{"hex":"","kind":"Data","written":{"ok":"[\"\"]"}}
+{"hex":"fa","kind":"Data","written":{"ok":"[\"+g==\"]"}}
+{"hex":"fad2","kind":"Data","written":{"ok":"[\"+tI=\"]"}}
+{"hex":"fad2aa","kind":"Data","written":{"ok":"[\"+tKq\"]"}}
+{"hex":"fad2aa82","kind":"Data","written":{"ok":"[\"+tKqgg==\"]"}}
+{"hex":"fad2aa825a","kind":"Data","written":{"ok":"[\"+tKqglo=\"]"}}
+{"keys":["b","a","B","A","_","a10","a9","a1","é","e","z","Z","1","10","9","ß","ss","aa","a-b","a_b","Ä","🙂","~"],"kind":"sorted keys","written":{"ok":"{\"1\":12,\"10\":13,\"9\":14,\"A\":3,\"B\":2,\"Z\":11,\"_\":4,\"a\":1,\"a-b\":18,\"a1\":7,\"a10\":5,\"a9\":6,\"a_b\":19,\"aa\":17,\"b\":0,\"e\":9,\"ss\":16,\"z\":10,\"~\":22,\"Ä\":20,\"ß\":15,\"é\":8,\"🙂\":21}"}}
+{"kind":"nil optionals are omitted","written":{"ok":"{\"alignment\":\"left\",\"bold\":false,\"color\":{\"alpha\":1,\"blue\":0.22,\"green\":0.27,\"red\":0.94},\"cornerRadius\":0,\"curved\":false,\"endHead\":\"open\",\"fillPattern\":\"solid\",\"fontName\":\"system\",\"fontSize\":28,\"opacity\":1,\"pattern\":\"solid\",\"pressure\":false,\"roughness\":0,\"startHead\":\"none\",\"width\":3}"}}

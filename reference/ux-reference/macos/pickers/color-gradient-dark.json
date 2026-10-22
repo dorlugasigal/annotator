@@ -1,0 +1,278 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    20,
+    77,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      48,
+      77,
+      24
+     ],
+     "label": "Solid",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      93,
+      48,
+      77,
+      24
+     ],
+     "label": "Gradient",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 1
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    48,
+    154,
+    24
+   ],
+   "label": "Color options",
+   "role": "AXRadioGroup"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      82,
+      38,
+      38
+     ],
+     "help": "Sunset",
+     "label": "Sunset gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      82,
+      38,
+      38
+     ],
+     "help": "Lagoon",
+     "label": "Lagoon gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      82,
+      38,
+      38
+     ],
+     "help": "Ember",
+     "label": "Ember gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      171,
+      80,
+      42,
+      42
+     ],
+     "help": "Spectrum",
+     "label": "Spectrum gradient",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      82,
+      38,
+      38
+     ],
+     "help": "Dusk",
+     "label": "Dusk gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      136,
+      38,
+      38
+     ],
+     "help": "Citrus",
+     "label": "Citrus gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      136,
+      38,
+      38
+     ],
+     "help": "Ocean",
+     "label": "Ocean gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      136,
+      38,
+      38
+     ],
+     "help": "Orchid",
+     "label": "Orchid gradient",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    23,
+    80,
+    238,
+    94
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    188,
+    162,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "A blend across your whole shape."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    18,
+    213,
+    81.5,
+    15
+   ],
+   "identifier": "inline-color-wheel",
+   "label": "Color wheel",
+   "role": "AXButton",
+   "value": "Collapsed"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    246,
+    76,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke opacity"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      206,
+      245,
+      20,
+      16
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    100,
+    245,
+    126,
+    16
+   ],
+   "label": "Stroke opacity",
+   "role": "AXSlider",
+   "value": 1
+  },
+  {
+   "enabled": true,
+   "frame": [
+    235.5,
+    246,
+    31.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "100%"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    269,
+    252,
+    38
+   ],
+   "help": "Choose a color anywhere on the screen. Escape cancels.",
+   "label": "Pick from screen",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    220.5,
+    315,
+    47.5,
+    20
+   ],
+   "label": "Done",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "popover",
+ "image": "pickers/color-gradient-dark.png",
+ "kind": "view",
+ "notes": "Stroke with the spectrum gradient preset.",
+ "pixels": [
+  568,
+  702
+ ],
+ "scale": 2,
+ "size": [
+  284,
+  351
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "color-gradient",
+ "surface": "pickers"
+}

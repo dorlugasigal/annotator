@@ -1,0 +1,20 @@
+name: Question
+description: Ask how to do something with Annotator.
+title: "[Question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [Help](https://getannotator.app/docs/) first. This issue is public; use made-up data.
+  - type: input
+    id: version
+    attributes:
+      label: App version and platform
+      placeholder: 0.1.0-beta.11 (29), Windows 11
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true

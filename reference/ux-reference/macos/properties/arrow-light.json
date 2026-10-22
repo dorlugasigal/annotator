@@ -1,0 +1,443 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    65.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    97,
+    16,
+    51,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Width"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    261,
+    16,
+    60.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Pattern"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    392.5,
+    16,
+    80,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Roughness"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    95.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 2",
+   "label": "Width 2",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    136.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 4",
+   "label": "Width 4",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    177.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 7",
+   "label": "Width 7",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    259.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Solid",
+   "label": "Solid",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    300.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Dashed",
+   "label": "Dashed",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    341.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Dotted",
+   "label": "Dotted",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    391.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Clean",
+   "label": "Clean",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    432.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Sketchy",
+   "label": "Sketchy",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    473.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Wild",
+   "label": "Wild",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      98.5,
+      81.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    95.5,
+    81.5,
+    80,
+    14
+   ],
+   "label": "Width",
+   "role": "AXSlider",
+   "value": 3
+  },
+  {
+   "enabled": true,
+   "frame": [
+    181.5,
+    78,
+    48,
+    21
+   ],
+   "help": "Width: 1–40 pt",
+   "label": "Precise width",
+   "placeholder": "Width",
+   "role": "AXTextField",
+   "value": "3"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    235.5,
+    82,
+    10,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "pt"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      17.5,
+      109,
+      47,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Start"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      129,
+      68,
+      36
+     ],
+     "help": "Start arrowhead",
+     "label": "Start arrowhead",
+     "role": "AXButton",
+     "value": "None"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      99.5,
+      109,
+      40.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "End"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      98,
+      129,
+      68,
+      36
+     ],
+     "help": "End arrowhead",
+     "label": "End arrowhead",
+     "role": "AXButton",
+     "value": "Arrow"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      181.5,
+      109,
+      77,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Arrow type"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      181.5,
+      129,
+      36,
+      36
+     ],
+     "help": "Straight arrow",
+     "label": "Straight arrow",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      180,
+      169,
+      38.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Straight"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      225.5,
+      129,
+      36,
+      36
+     ],
+     "help": "Curved arrow",
+     "label": "Curved arrow",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      226,
+      169,
+      35,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Curved"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      277,
+      109,
+      73,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Head size"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      275.5,
+      129,
+      36,
+      36
+     ],
+     "help": "50% arrowhead",
+     "label": "50% arrowhead",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      316.5,
+      129,
+      36,
+      36
+     ],
+     "help": "75% arrowhead",
+     "label": "75% arrowhead",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      357.5,
+      129,
+      36,
+      36
+     ],
+     "help": "100% arrowhead",
+     "label": "100% arrowhead",
+     "role": "AXButton"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        287,
+        171,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      275.5,
+      171,
+      86,
+      14
+     ],
+     "label": "Arrowhead size",
+     "role": "AXSlider",
+     "value": 0.75
+    },
+    {
+     "enabled": true,
+     "frame": [
+      377,
+      171.5,
+      22.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "75%"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    109,
+    383.5,
+    76
+   ],
+   "label": "Arrow properties",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "properties/arrow-light.png",
+ "kind": "view",
+ "notes": "Full properties for Arrow, 648 points wide.",
+ "pixels": [
+  1296,
+  402
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  201
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "arrow",
+ "surface": "properties"
+}

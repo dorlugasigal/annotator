@@ -1,0 +1,261 @@
+{
+  "keypad" : [
+    {
+      "character" : "0",
+      "keyCode" : 82
+    },
+    {
+      "character" : "1",
+      "keyCode" : 83
+    },
+    {
+      "character" : "2",
+      "keyCode" : 84
+    },
+    {
+      "character" : "3",
+      "keyCode" : 85
+    },
+    {
+      "character" : "4",
+      "keyCode" : 86
+    },
+    {
+      "character" : "5",
+      "keyCode" : 87
+    },
+    {
+      "character" : "6",
+      "keyCode" : 88
+    },
+    {
+      "character" : "7",
+      "keyCode" : 89
+    },
+    {
+      "character" : "8",
+      "keyCode" : 91
+    },
+    {
+      "character" : "9",
+      "keyCode" : 92
+    }
+  ],
+  "letters" : [
+    {
+      "character" : "a",
+      "keyCode" : 0
+    },
+    {
+      "character" : "b",
+      "keyCode" : 11
+    },
+    {
+      "character" : "c",
+      "keyCode" : 8
+    },
+    {
+      "character" : "d",
+      "keyCode" : 2
+    },
+    {
+      "character" : "e",
+      "keyCode" : 14
+    },
+    {
+      "character" : "f",
+      "keyCode" : 3
+    },
+    {
+      "character" : "g",
+      "keyCode" : 5
+    },
+    {
+      "character" : "h",
+      "keyCode" : 4
+    },
+    {
+      "character" : "i",
+      "keyCode" : 34
+    },
+    {
+      "character" : "j",
+      "keyCode" : 38
+    },
+    {
+      "character" : "k",
+      "keyCode" : 40
+    },
+    {
+      "character" : "l",
+      "keyCode" : 37
+    },
+    {
+      "character" : "m",
+      "keyCode" : 46
+    },
+    {
+      "character" : "n",
+      "keyCode" : 45
+    },
+    {
+      "character" : "o",
+      "keyCode" : 31
+    },
+    {
+      "character" : "p",
+      "keyCode" : 35
+    },
+    {
+      "character" : "q",
+      "keyCode" : 12
+    },
+    {
+      "character" : "r",
+      "keyCode" : 15
+    },
+    {
+      "character" : "s",
+      "keyCode" : 1
+    },
+    {
+      "character" : "t",
+      "keyCode" : 17
+    },
+    {
+      "character" : "u",
+      "keyCode" : 32
+    },
+    {
+      "character" : "v",
+      "keyCode" : 9
+    },
+    {
+      "character" : "w",
+      "keyCode" : 13
+    },
+    {
+      "character" : "x",
+      "keyCode" : 7
+    },
+    {
+      "character" : "y",
+      "keyCode" : 16
+    },
+    {
+      "character" : "z",
+      "keyCode" : 6
+    },
+    {
+      "character" : "0",
+      "keyCode" : 29
+    },
+    {
+      "character" : "1",
+      "keyCode" : 18
+    },
+    {
+      "character" : "2",
+      "keyCode" : 19
+    },
+    {
+      "character" : "3",
+      "keyCode" : 20
+    },
+    {
+      "character" : "4",
+      "keyCode" : 21
+    },
+    {
+      "character" : "5",
+      "keyCode" : 23
+    },
+    {
+      "character" : "6",
+      "keyCode" : 22
+    },
+    {
+      "character" : "7",
+      "keyCode" : 26
+    },
+    {
+      "character" : "8",
+      "keyCode" : 28
+    },
+    {
+      "character" : "9",
+      "keyCode" : 25
+    }
+  ],
+  "note" : "Carbon virtual key codes (kVK_*) for the US ANSI layout. ActivationShortcut.keyCode stores these codes in profiles; the character is stored next to it. When Settings records a global shortcut, the digit keys use the digits map and other keys their unmodified character in lowercase.",
+  "settingsDigitMap" : {
+    "18" : "1",
+    "19" : "2",
+    "20" : "3",
+    "21" : "4",
+    "22" : "6",
+    "23" : "5",
+    "25" : "9",
+    "26" : "7",
+    "28" : "8",
+    "29" : "0"
+  },
+  "special" : [
+    {
+      "appUse" : "Finishes a line or arrow drawn point by point; plays the pointer preview in Settings.",
+      "keyCode" : 36,
+      "name" : "Return"
+    },
+    {
+      "appUse" : "Plays the pointer preview in Settings.",
+      "keyCode" : 49,
+      "name" : "Space"
+    },
+    {
+      "appUse" : "Deletes the current selection on the canvas.",
+      "keyCode" : 51,
+      "name" : "Delete"
+    },
+    {
+      "appUse" : "Deletes the current selection on the canvas.",
+      "keyCode" : 117,
+      "name" : "ForwardDelete"
+    },
+    {
+      "appUse" : "Checked by the canvas, the menu bar flyout, the region guide, the tour, image pasting and shortcut recording.",
+      "keyCode" : 53,
+      "name" : "Escape"
+    },
+    {
+      "appUse" : "Nudges the selection by 1 point, or 10 with Shift.",
+      "keyCode" : 123,
+      "name" : "LeftArrow"
+    },
+    {
+      "appUse" : "Nudges the selection by 1 point, or 10 with Shift.",
+      "keyCode" : 124,
+      "name" : "RightArrow"
+    },
+    {
+      "appUse" : "Nudges the selection by 1 point, or 10 with Shift.",
+      "keyCode" : 125,
+      "name" : "DownArrow"
+    },
+    {
+      "appUse" : "Nudges the selection by 1 point, or 10 with Shift.",
+      "keyCode" : 126,
+      "name" : "UpArrow"
+    }
+  ],
+  "toolLibrary" : {
+    "rule" : "Command-L opens the Tools window unless a global shortcut uses the same keys.",
+    "shortcut" : {
+      "character" : "l",
+      "command" : true,
+      "control" : false,
+      "keyCode" : 37,
+      "option" : false,
+      "shift" : false
+    }
+  }
+}

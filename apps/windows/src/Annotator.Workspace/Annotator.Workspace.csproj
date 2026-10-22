@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Annotator.Workspace: the platform-neutral workspace model (displays, modes, tools, history across displays,
+       snapshots and canvas edits) and app logic with no Windows dependency. Builds on Windows, macOS and Linux. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Annotator.Workspace</RootNamespace>
+    <AssemblyName>Annotator.Workspace</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Annotator.Core\Annotator.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Annotator.Workspace.Tests" />
+    <InternalsVisibleTo Include="Annotator.Conformance.Tests" />
+  </ItemGroup>
+</Project>

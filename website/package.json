@@ -1,0 +1,30 @@
+{
+  "name": "annotator-website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "build:netlify": "node scripts/build-netlify.mjs",
+    "preview": "node scripts/preview.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:distribution": "node scripts/test-distribution.mjs",
+    "test:published-alpha": "node scripts/test-distribution.mjs published-alpha",
+    "test:pages": "node scripts/test-pages.mjs",
+    "test:windows": "node scripts/test-windows.mjs"
+  },
+  "dependencies": {
+    "astro": "7.3.1",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.6.1",
+    "@types/three": "0.185.4",
+    "typescript": "7.0.2"
+  }
+}

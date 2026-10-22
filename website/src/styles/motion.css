@@ -1,0 +1,178 @@
+/*
+ * Motion. One tempo with the hero reel: 130 BPM, so a beat is 461.538ms. Every duration is a
+ * beat or a simple fraction of one, and there are three kinds of movement, all taken from the app:
+ * - Controls move like the app's toolbar: short, exact and without bounce (a quarter or half beat).
+ * - Recordings change like a camera: a wipe or a dissolve over one beat.
+ * - Ink is drawn like a pen stroke, once, where it marks something (one to two beats).
+ * The page itself does not perform entrances; the reel, the recordings and the install picture carry the motion.
+ * Rules: resting styles are the finished state, so reduced motion and no-JavaScript visits see it at
+ * once. An undrawn starting state exists only under html.js-motion. Animate transform, translate,
+ * scale, rotate, opacity, clip-path and SVG strokes only. No infinite animation, no script frame
+ * loop and nothing tied to scrolling. Scripts read these tokens through motion-tokens.ts.
+ */
+:root {
+  --beat: 461.538ms;
+  --beat-half: 230.769ms;
+  --beat-quarter: 115.385ms;
+  --beat-eighth: 57.692ms;
+  --beat-double: 923.077ms;
+  --ease-ui: cubic-bezier(.2, 0, 0, 1);
+  --ease-move: cubic-bezier(.65, 0, .35, 1);
+  --ease-ink: cubic-bezier(.55, .1, .2, 1);
+  /* Marks use pathLength="1": an offset of 1 is undrawn and 0 is drawn. Just past 1 avoids a round-cap dot. */
+  --undrawn: 1.05;
+}
+
+/* Hand-drawn marks. The base rules have zero specificity, so component sizes always win. */
+:where(.scribble) { display: block; overflow: visible; fill: none; }
+:where(.scribble) path { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 0; }
+
+/* Header: clear over the hero, glass once the page has scrolled. */
+html.js-motion:not([data-scrolled]) .site-header::before { opacity: 0; }
+.site-header::before { transition: opacity var(--beat-half) var(--ease-ui); }
+.site-header nav a { position: relative; text-decoration: none; }
+.site-header nav a:hover, .site-header nav [aria-current] { text-decoration: none; }
+.site-header nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 9px; height: 1.5px; border-radius: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform var(--beat-half) var(--ease-ui); }
+.site-header nav a:hover::after, .site-header nav a[aria-current]::after { transform: scaleX(1); transform-origin: left; }
+.wordmark .mark { transition: rotate var(--beat-half) var(--ease-ui); }
+.wordmark:hover .mark { rotate: -8deg; }
+
+/* Buttons lift a little on hover and press on click. A pen ring is drawn round the primary actions. */
+.button { transition: background-color var(--beat-quarter) var(--ease-ui), translate var(--beat-half) var(--ease-ui), scale var(--beat-quarter) var(--ease-ui); }
+.button:hover { translate: 0 -2px; }
+.button:active { translate: 0 1px; scale: .98; }
+.button svg:not(.scribble) { transition: translate var(--beat-half) var(--ease-ui); }
+.get-annotator:hover svg:not(.scribble) { translate: 0 3px; }
+.download-action:hover svg:not(.scribble) { translate: 0 2px; }
+.button-ring { position: absolute; left: -20px; top: -15px; width: calc(100% + 40px); height: calc(100% + 30px); color: var(--accent); pointer-events: none; }
+.button-ring path { stroke-width: 2.2; stroke-dashoffset: var(--undrawn); transition: stroke-dashoffset var(--beat-half) var(--ease-ui); }
+.button:hover .button-ring path, .button:focus-visible .button-ring path { stroke-dashoffset: 0; transition-duration: var(--beat); transition-timing-function: var(--ease-ink); }
+
+/* Controls press like toolbar buttons. */
+.stage-tabs button, .player-toggle, .reel-chapter button, .brew-bar button, .store-command button, .platform-switch button, .native-demo-chapters button {
+  transition: color var(--beat-quarter) var(--ease-ui), background-color var(--beat-quarter) var(--ease-ui),
+    border-color var(--beat-quarter) var(--ease-ui), scale var(--beat-quarter) var(--ease-ui);
+}
+.stage-tabs button:active, .player-toggle:active, .reel-chapter button:active, .brew-bar button:active, .store-command button:active, .platform-switch button:active, .native-demo-chapters button:active { scale: .96; }
+.reel-chapter-bar { transition: background-color var(--beat-quarter) var(--ease-ui); }
+
+/* The stage: the selection glides to the chosen tool, and its icon is drawn as it arrives.
+   Scripts wipe the new recording in over the old one (product-stage.ts). */
+.stage-indicator { transition: transform var(--beat) var(--ease-ui); }
+.stage-tabs button[aria-selected="true"] { transition-delay: var(--beat-quarter), 0s, 0s, 0s; }
+.stage-tabs [aria-selected="true"] .feature-glyph path { stroke-dasharray: 1 2; animation: ink-draw var(--beat) var(--ease-ink) var(--beat-eighth) backwards; }
+@keyframes ink-draw { from { stroke-dashoffset: var(--undrawn); } to { stroke-dashoffset: 0; } }
+
+/* Recordings: the poster stays until playback shows a frame, then the video fades in over it. */
+[data-ready] .take-frame > video { opacity: 0; }
+[data-ready][data-presented] .take-frame > video { opacity: 1; transition: opacity var(--beat-half) var(--ease-ui); }
+[data-playback="error"] .take-frame > video { opacity: 1; }
+
+/* Keycaps sink under a precise pointer. */
+.keycaps kbd { transition: transform var(--beat-quarter) var(--ease-ui), --key-depth var(--beat-quarter) var(--ease-ui); }
+@media (hover: hover) and (pointer: fine) {
+  .keycaps kbd:hover { transform: translateY(3px); --key-depth: 1px; }
+}
+@property --key-depth { syntax: "<length>"; inherits: false; initial-value: 4px; }
+
+/* Copy: a check is drawn beside the button and the command is swept (install.ts). */
+.copy-check path { stroke-dashoffset: var(--undrawn); transition: stroke-dashoffset var(--beat-half) var(--ease-ink); }
+[data-copied] .copy-check path { stroke-dashoffset: 0; }
+
+/* Smooth scrolling applies only while a same-page link is followed (html[data-smooth-scroll], see site-motion.ts). */
+html[data-smooth-scroll] { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The page's one drawn mark: when the install section arrives, "first mark." is circled the way
+     the reel circles "any app.", in the same apricot. It is drawn once and stays. */
+  .js-motion [data-reveal="mark"].is-revealed .install-ellipse path { transition: stroke-dashoffset var(--beat-double) var(--ease-ink) var(--beat-half); }
+  /* No transition here: js-motion arrives after the first paint, and the mark must not visibly erase itself. */
+  .js-motion [data-reveal="mark"]:not(.is-revealed) .install-ellipse path { stroke-dashoffset: var(--undrawn); }
+
+  /* The install picture shows its steps once, as it scrolls in (.is-arriving): the pointer drags
+     Annotator into Applications while arrow 2 is drawn, then clicks the menu bar icon and circle 3
+     is drawn. It starts a beat and a half after arrival and lasts 5.4 beats. A picture already on
+     screen at load, reduced motion and print keep the finished drawing. */
+  .js-motion .install-scene:not(.is-revealed) .scene-ink { stroke-dashoffset: var(--undrawn); }
+  .js-motion .install-scene.is-arriving :is(.scene-pointer, .scene-px, .scene-py, .scene-press, .scene-ghost,
+    .scene-select, .scene-drop, .scene-ripple, .scene-arrow, .scene-arrowhead, .scene-circle) {
+    animation-duration: calc(var(--beat) * 5.4); animation-delay: calc(var(--beat) * 1.5);
+    animation-timing-function: linear; animation-fill-mode: both; animation-iteration-count: 1;
+  }
+  .js-motion .install-scene.is-arriving .scene-pointer { animation-name: scene-pointer; }
+  .js-motion .install-scene.is-arriving .scene-px { animation-name: scene-px; }
+  .js-motion .install-scene.is-arriving .scene-py { animation-name: scene-py; }
+  .js-motion .install-scene.is-arriving .scene-press { animation-name: scene-press; }
+  .js-motion .install-scene.is-arriving .scene-ghost { animation-name: scene-ghost; }
+  .js-motion .install-scene.is-arriving .scene-select { animation-name: scene-select; }
+  .js-motion .install-scene.is-arriving .scene-drop { animation-name: scene-drop; }
+  .js-motion .install-scene.is-arriving .scene-ripple { animation-name: scene-ripple; }
+  .js-motion .install-scene.is-arriving .scene-arrow { animation-name: scene-arrow; }
+  .js-motion .install-scene.is-arriving .scene-arrowhead { animation-name: scene-arrowhead; }
+  .js-motion .install-scene.is-arriving .scene-circle { animation-name: scene-circle; }
+
+  /* Page changes cross-fade where browsers support cross-document view transitions; the header holds still. */
+  @view-transition { navigation: auto; }
+  .site-header { view-transition-name: site-header; }
+  ::view-transition-old(root) { animation: fade-out var(--beat-half) var(--ease-ui) both; }
+  ::view-transition-new(root) { animation: fade-in var(--beat-half) var(--ease-ui) both; }
+}
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes fade-out { to { opacity: 0; } }
+
+/* Install picture keyframes, in percent of 5.4 beats: 0.5 beat = 9.26%, 0.75 = 13.89%, 2.25 = 41.67%,
+   2.7 = 50%, 3.75 = 69.44%, 3.9 = 72.22%, 4.9 = 90.74%. Positions are the picture's own units. */
+@keyframes scene-pointer { 0% { opacity: 0; } 6.5%, 90.74% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes scene-px {
+  0% { transform: translateX(198px); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+  9.26% { transform: translateX(172px); }
+  13.89% { transform: translateX(172px); animation-timing-function: cubic-bezier(.45, 0, .4, 1); }
+  41.67% { transform: translateX(392px); }
+  50% { transform: translateX(392px); animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
+  69.44%, 100% { transform: translateX(444px); }
+}
+@keyframes scene-py {
+  0% { transform: translateY(212px); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+  9.26% { transform: translateY(176px); }
+  13.89% { transform: translateY(176px); animation-timing-function: cubic-bezier(.25, .6, .45, 1); }
+  27.78% { transform: translateY(146px); animation-timing-function: cubic-bezier(.55, 0, .75, .4); }
+  41.67% { transform: translateY(176px); }
+  50% { transform: translateY(176px); animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
+  69.44%, 100% { transform: translateY(12px); }
+}
+@keyframes scene-press {
+  0%, 9.26% { transform: scale(1); }
+  12.04%, 41.67% { transform: scale(.9); }
+  44.44%, 69.44% { transform: scale(1); }
+  71.3% { transform: scale(.86); }
+  74.07%, 100% { transform: scale(1); }
+}
+@keyframes scene-ghost {
+  0%, 13.89% { opacity: 0; transform: scale(.92); }
+  16.67%, 41.67% { opacity: 1; transform: scale(1); }
+  47.22%, 100% { opacity: 0; transform: scale(.5); }
+}
+@keyframes scene-select { 0%, 9.26% { opacity: 0; } 13.89%, 44.44% { opacity: 1; } 54.63%, 100% { opacity: 0; } }
+@keyframes scene-drop { 0%, 34% { opacity: 0; } 41.67%, 47.22% { opacity: 1; } 60%, 100% { opacity: 0; } }
+@keyframes scene-ripple { 0%, 69.44% { opacity: 0; transform: scale(.4); } 71.3% { opacity: .9; } 83.33%, 100% { opacity: 0; transform: scale(2.6); } }
+@keyframes scene-arrow {
+  0%, 13.89% { stroke-dashoffset: var(--undrawn); animation-timing-function: cubic-bezier(.55, .1, .2, 1); }
+  41.67%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes scene-arrowhead { 0%, 41.67% { stroke-dashoffset: var(--undrawn); } 47.22%, 100% { stroke-dashoffset: 0; } }
+@keyframes scene-circle {
+  0%, 72.22% { stroke-dashoffset: var(--undrawn); animation-timing-function: cubic-bezier(.55, .1, .2, 1); }
+  90.74%, 100% { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-tabs [aria-selected="true"] .feature-glyph path { animation: none; }
+  /* Without animated progress, the parts already played show as full bars and the current part is named. */
+  .reel-chapter[data-done] .reel-chapter-fill { transform: scaleX(1); opacity: .5; }
+}
+/* Printing shows finished states even if the beforeprint reveal in site-motion.ts did not run. */
+@media print {
+  .js-motion [data-reveal] .scribble:not(.copy-check) path, .js-motion .install-scene .scene-ink { stroke-dashoffset: 0 !important; }
+  .install-scene * { animation: none !important; }
+  .take-frame > video { opacity: 1 !important; }
+}

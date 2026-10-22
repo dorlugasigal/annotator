@@ -1,0 +1,36 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    -2.5,
+    312,
+    132.5,
+    16
+   ],
+   "identifier": "release-notes",
+   "label": "What's changed",
+   "role": "AXDisclosureTriangle",
+   "value": false
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "dialogs/whats-changed-dark.png",
+ "kind": "view",
+ "notes": "What's changed, bundled with the app.",
+ "pixels": [
+  1120,
+  1280
+ ],
+ "scale": 2,
+ "size": [
+  560,
+  640
+ ],
+ "spec": [
+  "WIN-UI-05"
+ ],
+ "state": "whats-changed",
+ "surface": "dialogs"
+}

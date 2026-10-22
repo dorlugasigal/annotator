@@ -1,0 +1,25 @@
+{
+ "appearance": "light",
+ "hotSpot": [
+  65,
+  65
+ ],
+ "image": "cursors/highlighter-24-light.png",
+ "kind": "image",
+ "notes": "Cursor image with its hot spot in points.",
+ "pixels": [
+  260,
+  260
+ ],
+ "scale": 2,
+ "size": [
+  130,
+  130
+ ],
+ "spec": [
+  "009 drawing cursors",
+  "WIN-OVR-11"
+ ],
+ "state": "highlighter-24",
+ "surface": "cursors"
+}

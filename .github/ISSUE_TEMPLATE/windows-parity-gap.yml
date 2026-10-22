@@ -1,0 +1,37 @@
+name: Mac and Windows difference
+description: The Mac and Windows apps behave or look different.
+title: "[Parity] "
+labels: ["parity"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The Mac app is the reference, and the two apps should match (docs/parity.md).
+        Report any difference that isn't listed there as a documented deviation.
+  - type: input
+    id: version
+    attributes:
+      label: App version and build on each platform
+    validations:
+      required: true
+  - type: textarea
+    id: mac
+    attributes:
+      label: What the Mac app does
+    validations:
+      required: true
+  - type: textarea
+    id: windows
+    attributes:
+      label: What the Windows app does
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see it
+  - type: input
+    id: requirement
+    attributes:
+      label: Requirement or reference state, if you know it
+      placeholder: WIN-UI-03, or reference/ux-reference/macos/settings/tab-about-light.png

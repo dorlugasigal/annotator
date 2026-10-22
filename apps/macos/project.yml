@@ -1,0 +1,109 @@
+name: Annotator
+options:
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "26.6"
+  createIntermediateGroups: true
+packages:
+  Sparkle:
+    path: Packages/SparkleDistribution
+  AnnotatorLibraries:
+    path: .
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    # One universal app: Apple Silicon and Intel. Debug builds only the running Mac's architecture.
+    ARCHS: "$(ARCHS_STANDARD)"
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Automatic
+    CURRENT_PROJECT_VERSION: 29
+    MARKETING_VERSION: 0.1.0
+    ANNOTATOR_PRERELEASE: beta.11
+    ANNOTATOR_SUPPORT_URL: https://buymeacoffee.com/dorlugasigal
+    ANNOTATOR_ISSUES_URL: https://github.com/dorlugasigal/annotator/issues/new
+    ANNOTATOR_WEBSITE_URL: https://dorlugasigal.github.io/annotator
+    ANNOTATOR_METRICS_URL: ""
+targets:
+  Annotator:
+    type: application
+    platform: macOS
+    sources:
+      - path: Annotator
+      - path: Packages/SparkleDistribution/LICENSE
+        buildPhase: resources
+      - path: ../../integrations/computer-use/annotator
+        type: folder
+        buildPhase: resources
+      - path: ../../releases/notes.json
+        buildPhase: resources
+    dependencies:
+      - package: Sparkle
+        product: Sparkle
+      - package: AnnotatorLibraries
+        product: AnnotationCore
+      - package: AnnotatorLibraries
+        product: MotionCore
+      - package: AnnotatorLibraries
+        product: PresentationRendering
+      - package: AnnotatorLibraries
+        product: NativePlatform
+    info:
+      path: Annotator/Info.plist
+      properties:
+        CFBundleDisplayName: $(PRODUCT_NAME)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        AnnotatorPrerelease: $(ANNOTATOR_PRERELEASE)
+        AnnotatorIssuesURL: $(ANNOTATOR_ISSUES_URL)
+        AnnotatorSupportURL: $(ANNOTATOR_SUPPORT_URL)
+        AnnotatorWebsiteURL: $(ANNOTATOR_WEBSITE_URL)
+        AnnotatorMetricsURL: $(ANNOTATOR_METRICS_URL)
+        AnnotatorBuildStamp: $(ANNOTATOR_BUILD_STAMP)
+        LSUIElement: true
+        NSHighResolutionCapable: true
+        NSScreenCaptureUsageDescription: Annotator reads screen pixels for requested zoom, live effects and region sharing. It does not record video.
+        SUFeedURL: $(ANNOTATOR_UPDATE_FEED_URL)
+        SUPublicEDKey: $(ANNOTATOR_UPDATE_PUBLIC_KEY)
+        SUEnableAutomaticChecks: false
+        SUAutomaticallyUpdate: false
+        SUSendProfileInfo: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dorlugasigal.annotator.dev
+        PRODUCT_NAME: Annotator Dev
+        PRODUCT_MODULE_NAME: AnnotatorApp
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: Annotator/Annotator.entitlements
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+        Release:
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+          PRODUCT_BUNDLE_IDENTIFIER: com.dorlugasigal.annotator
+          PRODUCT_NAME: Annotator
+  NativeAppTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/NativeAppTests
+    dependencies:
+      - target: Annotator
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dorlugasigal.annotator.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Annotator Dev.app/Contents/MacOS/Annotator Dev
+        BUNDLE_LOADER: $(TEST_HOST)
+schemes:
+  Annotator:
+    build:
+      targets:
+        Annotator: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - NativeAppTests

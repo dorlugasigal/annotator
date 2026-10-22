@@ -1,0 +1,50 @@
+{
+  "schemaVersion" : 1,
+  "elements" : [
+    {
+      "id" : "00000000-0000-4000-8000-000000000061",
+      "style" : {
+        "bold" : false,
+        "roughness" : 0,
+        "width" : 3,
+        "endHead" : "open",
+        "fillPattern" : "solid",
+        "color" : {
+          "red" : 0.93999999999999995,
+          "alpha" : 1,
+          "blue" : 0.22,
+          "green" : 0.27000000000000002
+        },
+        "alignment" : "left",
+        "opacity" : 1,
+        "pattern" : "solid",
+        "curved" : false,
+        "fontSize" : 28,
+        "fontName" : "system",
+        "cornerRadius" : 0,
+        "pressure" : false,
+        "startHead" : "none"
+      },
+      "rotation" : 0,
+      "points" : [
+
+      ],
+      "frame" : {
+        "y" : 5,
+        "height" : 30,
+        "width" : 40,
+        "x" : 5
+      },
+      "appendEpoch" : "00000000-0000-4000-8000-000200000061",
+      "revision" : 0,
+      "seed" : 10826633683844172876,
+      "tool" : "ellipse",
+      "pressures" : [
+
+      ],
+      "locked" : false,
+      "text" : "",
+      "geometryToken" : "00000000-0000-4000-8000-000100000061"
+    }
+  ]
+}

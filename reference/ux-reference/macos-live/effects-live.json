@@ -1,0 +1,199 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "effects-live.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "blur +0 ms",
+   "time": 0.9333333333333333
+  },
+  {
+   "label": "blur +339 ms",
+   "time": 1.2833333333333334
+  },
+  {
+   "label": "blur +678 ms",
+   "time": 1.6166666666666667
+  },
+  {
+   "label": "blur +1018 ms",
+   "time": 1.95
+  },
+  {
+   "label": "blur +1357 ms",
+   "time": 2.3
+  },
+  {
+   "label": "pixelate +0 ms",
+   "time": 3.6
+  },
+  {
+   "label": "pixelate +350 ms",
+   "time": 3.95
+  },
+  {
+   "label": "pixelate +701 ms",
+   "time": 4.3
+  },
+  {
+   "label": "pixelate +1051 ms",
+   "time": 4.65
+  },
+  {
+   "label": "pixelate +1401 ms",
+   "time": 5.0
+  },
+  {
+   "label": "distort +0 ms",
+   "time": 6.316666666666666
+  },
+  {
+   "label": "distort +320 ms",
+   "time": 6.633333333333334
+  },
+  {
+   "label": "distort +641 ms",
+   "time": 6.95
+  },
+  {
+   "label": "distort +961 ms",
+   "time": 7.266666666666667
+  },
+  {
+   "label": "distort +1281 ms",
+   "time": 7.6
+  },
+  {
+   "label": "blur strength 18 to 60 to 4 +0 ms",
+   "time": 9.0
+  },
+  {
+   "label": "blur strength 18 to 60 to 4 +404 ms",
+   "time": 9.4
+  },
+  {
+   "label": "blur strength 18 to 60 to 4 +809 ms",
+   "time": 9.816666666666666
+  },
+  {
+   "label": "blur strength 18 to 60 to 4 +1213 ms",
+   "time": 10.216666666666667
+  },
+  {
+   "label": "blur strength 18 to 60 to 4 +1618 ms",
+   "time": 10.616666666666667
+  },
+  {
+   "label": "existing solid cover over the blur +0 ms",
+   "time": 11.416666666666666
+  },
+  {
+   "label": "existing solid cover over the blur +102 ms",
+   "time": 11.533333333333333
+  },
+  {
+   "label": "existing solid cover over the blur +204 ms",
+   "time": 11.633333333333333
+  },
+  {
+   "label": "existing solid cover over the blur +306 ms",
+   "time": 11.733333333333333
+  },
+  {
+   "label": "existing solid cover over the blur +408 ms",
+   "time": 11.833333333333334
+  },
+  {
+   "label": "use apps +0 ms",
+   "time": 12.833333333333334
+  },
+  {
+   "label": "use apps +301 ms",
+   "time": 13.133333333333333
+  },
+  {
+   "label": "use apps +602 ms",
+   "time": 13.433333333333334
+  },
+  {
+   "label": "use apps +903 ms",
+   "time": 13.733333333333333
+  },
+  {
+   "label": "use apps +1204 ms",
+   "time": 14.0
+  },
+  {
+   "label": "end",
+   "time": 14.0
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 14.03,
+ "events": [],
+ "fps": 60,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "Blur, pixelate and distort are dragged over owned sample content. Then the blur strength changes, a solid cover from an existing board overlaps the blur (the toolbar no longer creates solid covers), and Use apps keeps the effects on the desktop.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 2.2944879583083093,
+   "label": "blur",
+   "start": 0.9375617916230112
+  },
+  {
+   "end": 5.001202333252877,
+   "label": "pixelate",
+   "start": 3.599923166562803
+  },
+  {
+   "end": 7.59292379161343,
+   "label": "distort",
+   "start": 6.31182245828677
+  },
+  {
+   "end": 10.619249249924906,
+   "label": "blur strength 18 to 60 to 4",
+   "start": 9.001597750000656
+  },
+  {
+   "end": 11.832207416649908,
+   "label": "existing solid cover over the blur",
+   "start": 11.424010999966413
+  },
+  {
+   "end": 14.03988524992019,
+   "label": "use apps",
+   "start": 12.835761750000529
+  }
+ ],
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "take": "effects-live",
+ "title": "Live effects over the desktop",
+ "video": "effects-live.mp4"
+}

@@ -1,0 +1,74 @@
+---
+import "../styles/site.css";
+import "../styles/editorial.css";
+import "../styles/motion.css";
+import { sitePath } from "../lib/paths";
+import { supportURL } from "../data/support";
+import { distribution, githubURL, runsOnIntel } from "../lib/distribution";
+import { windowsListing } from "../lib/windows";
+import { metricsEndpoint } from "../scripts/metrics";
+import { siteConfig } from "../../site-config.mjs";
+interface Props { title: string; description?: string }
+const macs = runsOnIntel(distribution.stable ?? distribution.preview) ? "Apple Silicon and Intel Macs" : "Apple Silicon";
+const desktop = windowsListing ? "Mac or Windows desktop" : "Mac desktop";
+const { title, description = `Draw on your live ${desktop} with editable arrows, shapes and highlights. All tools are free. For macOS 14 and later on ${macs}.${windowsListing ? " Also for Windows 11." : ""}` } = Astro.props;
+const path = Astro.url.pathname;
+const metricsURL = import.meta.env.PUBLIC_METRICS_URL;
+const configuredSite = siteConfig().site;
+const canonical = configuredSite ? new URL(Astro.url.pathname, configuredSite).href : undefined;
+const socialImage = configuredSite ? new URL(sitePath("/social-card.png"), configuredSite).href : undefined;
+if (metricsURL && (!metricsEndpoint(metricsURL) || new URL(metricsURL).origin !== siteConfig().site)) {
+  throw new Error("PUBLIC_METRICS_URL must be the HTTPS SITE_URL origin without a path.");
+}
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#0b101a" />
+    {canonical && <link rel="canonical" href={canonical}/>}
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Annotator"/>
+    <meta property="og:title" content={`${title} — Annotator`}/>
+    <meta property="og:description" content={description}/>
+    {canonical && <meta property="og:url" content={canonical}/>}
+    {socialImage && <meta property="og:image" content={socialImage}/>}
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Annotator. Draw over any app. Keep the whole thing editable."/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content={`${title} — Annotator`}/>
+    <meta name="twitter:description" content={description}/>
+    {socialImage && <meta name="twitter:image" content={socialImage}/>}
+    <title>{title} — Annotator</title>
+    <link rel="icon" type="image/svg+xml" href={sitePath("/mark.svg")} />
+    <slot name="head" />
+  </head>
+  <body data-metrics-endpoint={metricsURL || undefined} data-site-base={import.meta.env.BASE_URL}>
+    <div class="scroll-sentinel" data-scroll-sentinel aria-hidden="true"></div>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header wrap">
+      <a class="wordmark" href={sitePath("/")} aria-label="Annotator home"><span class="mark" aria-hidden="true">a<span>.</span></span>annotator</a>
+      <nav aria-label="Main navigation">
+        <a href={sitePath("/#workspace")}>Features</a>
+        <a href={sitePath("/docs/")} aria-current={path.startsWith(sitePath("/docs/")) ? "page" : undefined}>Help</a>
+        <a href={sitePath("/#install")}>Install</a>
+      </nav>
+      {/* GitHub's mark, from the MIT-licensed Octicons. The footer link covers phones too narrow for it. */}
+      <a class="header-github" href={githubURL} aria-label="Annotator on GitHub">
+        <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+      </a>
+    </header>
+    <main id="main" tabindex="-1"><slot /></main>
+    <footer class="wrap footer">
+      <a class="wordmark" href={sitePath("/")}>annotator<span class="coral">.</span></a>
+      <div><a href={sitePath("/privacy/")} aria-current={path.startsWith(sitePath("/privacy/")) ? "page" : undefined}>Privacy</a><a href={sitePath("/support/")} aria-current={path.startsWith(sitePath("/support/")) ? "page" : undefined}>Report a problem</a><a href={githubURL} target="_blank" rel="noopener noreferrer">Source code <span aria-hidden="true">↗</span></a><a href={supportURL} target="_blank" rel="noopener noreferrer">Buy me a coffee <span aria-hidden="true">↗</span></a></div>
+      <small>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</small>
+    </footer>
+    <script>import { start } from "../scripts/metrics"; start();</script>
+    <script>import "../scripts/site-motion";</script>
+  </body>
+</html>

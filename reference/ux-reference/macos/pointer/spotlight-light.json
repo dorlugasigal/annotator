@@ -1,0 +1,22 @@
+{
+ "appearance": "light",
+ "image": "pointer/spotlight-light.png",
+ "kind": "image",
+ "notes": "Spotlight at the default 130-point radius with its radial feather.",
+ "pixels": [
+  1800,
+  1120
+ ],
+ "scale": 2,
+ "size": [
+  900,
+  560
+ ],
+ "spec": [
+  "003",
+  "005 pointer controls",
+  "WIN-CAP-09"
+ ],
+ "state": "spotlight",
+ "surface": "pointer"
+}

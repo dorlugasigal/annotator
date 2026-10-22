@@ -1,0 +1,160 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "zoom-screen.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "zoom in +0 ms",
+   "time": 1.0833333333333333
+  },
+  {
+   "label": "zoom in +117 ms",
+   "time": 1.2
+  },
+  {
+   "label": "zoom in +233 ms",
+   "time": 1.3166666666666667
+  },
+  {
+   "label": "zoom in +350 ms",
+   "time": 1.4333333333333333
+  },
+  {
+   "label": "zoom in +466 ms",
+   "time": 1.55
+  },
+  {
+   "label": "pointer moves while zoomed +0 ms",
+   "time": 2.35
+  },
+  {
+   "label": "pointer moves while zoomed +590 ms",
+   "time": 2.95
+  },
+  {
+   "label": "pointer moves while zoomed +1180 ms",
+   "time": 3.533333333333333
+  },
+  {
+   "label": "pointer moves while zoomed +1770 ms",
+   "time": 4.133333333333334
+  },
+  {
+   "label": "pointer moves while zoomed +2360 ms",
+   "time": 4.716666666666667
+  },
+  {
+   "label": "zoom further +0 ms",
+   "time": 5.116666666666666
+  },
+  {
+   "label": "zoom further +223 ms",
+   "time": 5.333333333333333
+  },
+  {
+   "label": "zoom further +445 ms",
+   "time": 5.566666666666666
+  },
+  {
+   "label": "zoom further +668 ms",
+   "time": 5.783333333333333
+  },
+  {
+   "label": "zoom further +891 ms",
+   "time": 6.016666666666667
+  },
+  {
+   "label": "zoom out +0 ms",
+   "time": 6.816666666666666
+  },
+  {
+   "label": "zoom out +58 ms",
+   "time": 6.866666666666666
+  },
+  {
+   "label": "zoom out +117 ms",
+   "time": 6.933333333333334
+  },
+  {
+   "label": "zoom out +175 ms",
+   "time": 6.983333333333333
+  },
+  {
+   "label": "zoom out +233 ms",
+   "time": 7.05
+  },
+  {
+   "label": "end",
+   "time": 7.816666666666666
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 7.846666666666667,
+ "events": [
+  {
+   "label": "magnification 1.50",
+   "time": 1.557198208407499
+  },
+  {
+   "label": "magnification 2.67",
+   "time": 6.008872041711584
+  }
+ ],
+ "fps": 60,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "Control-1 path from drawing: zoom ramps in around the pointer, follows it, zooms further, then ramps out.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 1.55716825008858,
+   "label": "zoom in",
+   "start": 1.0909953333903104
+  },
+  {
+   "end": 4.717736833379604,
+   "label": "pointer moves while zoomed",
+   "start": 2.357911541708745
+  },
+  {
+   "end": 6.00879858341068,
+   "label": "zoom further",
+   "start": 5.1182049583876505
+  },
+  {
+   "end": 7.045426083379425,
+   "label": "zoom out",
+   "start": 6.812189124990255
+  }
+ ],
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "take": "zoom-screen",
+ "title": "Live zoom: screen",
+ "video": "zoom-screen.mp4",
+ "zoomInDuration": 0.26,
+ "zoomOutDuration": 0.2
+}

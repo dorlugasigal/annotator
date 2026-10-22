@@ -1,0 +1,184 @@
+{
+  "$comment": "Maps every SF Symbol name the Mac app uses (systemName, systemImage, symbol and ShortcutAction.symbol, scanned 2026-10-18) to the Lucide icon that reads the same (decision D-6, WIN-UI-06): a Lucide name, { lucide, fill } to fill its closed shapes with the stroke color where the Mac symbol is solid, or { glyph } for an original drawing in glyphs where no Lucide icon reads like the Mac symbol (reviewed side by side with reference/ux-reference/macos on 2026-10-19). tools/windows/update-lucide-icons.mjs reads this file and the pinned lucide-static package and writes Icons/LucideIcons.g.cs. Tool glyphs drawn on the Mac with SystemDiagramGeometry (system-design shapes) use that geometry on Windows too (Glyphs.ForTool).",
+  "lucide": {
+    "package": "lucide-static",
+    "version": "1.59.0",
+    "license": "ISC; Feather-derived icons MIT (see THIRD_PARTY_NOTICES.md)"
+  },
+  "symbols": {
+    "1.circle": { "glyph": "circle-one" },
+    "aqi.medium": { "glyph": "dot-disc" },
+    "arrow.clockwise": "rotate-cw",
+    "arrow.counterclockwise": "rotate-ccw",
+    "arrow.left": "arrow-left",
+    "arrow.right": "arrow-right",
+    "arrow.right.square": "square-arrow-right",
+    "arrow.triangle.2.circlepath": "refresh-cw",
+    "arrow.triangle.branch": "split",
+    "arrow.up.left.and.arrow.down.right": { "glyph": "arrows-diagonal" },
+    "arrow.up.right": "move-up-right",
+    "arrow.uturn.backward": "undo-2",
+    "arrow.uturn.forward": "redo-2",
+    "bell": "bell",
+    "bold": { "glyph": "bold-b" },
+    "book": "book-open",
+    "bubble.left.and.bubble.right": "messages-square",
+    "camera.filters": { "glyph": "three-circles" },
+    "cart": "shopping-cart",
+    "chart.xyaxis.line": "chart-line",
+    "checkmark.circle.fill": "circle-check",
+    "chevron.down": "chevron-down",
+    "chevron.right": "chevron-right",
+    "chevron.up": "chevron-up",
+    "chevron.up.chevron.down": "chevrons-up-down",
+    "circle": "circle",
+    "circle.dotted": { "glyph": "circle-dotted" },
+    "cup.and.saucer": "coffee",
+    "cup.and.saucer.fill": "coffee",
+    "cursorarrow": { "glyph": "cursor-arrow" },
+    "cursorarrow.rays": "mouse-pointer-click",
+    "cylinder": "cylinder",
+    "cylinder.split.1x2": "database",
+    "desktopcomputer": { "lucide": "monitor", "fill": true },
+    "diamond": "diamond",
+    "display": "monitor",
+    "doc.text": "file-text",
+    "envelope": "mail",
+    "eraser": "eraser",
+    "exclamationmark.circle": "circle-alert",
+    "exclamationmark.circle.fill": "circle-alert",
+    "exclamationmark.shield": "shield-alert",
+    "exclamationmark.triangle.fill": "triangle-alert",
+    "eye": "eye",
+    "eye.slash": "eye-off",
+    "eye.trianglebadge.exclamationmark": "eye-off",
+    "eyedropper": { "glyph": "eyedropper" },
+    "flashlight.on.fill": { "lucide": "flashlight", "fill": true },
+    "folder": "folder",
+    "gearshape": "settings",
+    "globe": "globe",
+    "grid": "grid-3x3",
+    "hand.draw": "hand",
+    "hand.point.up.left": "pointer",
+    "hexagon": "hexagon",
+    "highlighter": "pen-line",
+    "hourglass": "hourglass",
+    "info.circle": "info",
+    "info.circle.fill": "info",
+    "iphone": "smartphone",
+    "keyboard": "keyboard",
+    "laptopcomputer": "laptop",
+    "light.beacon.max": "siren",
+    "line.3.horizontal": "menu",
+    "line.diagonal": { "glyph": "line-diagonal" },
+    "lineweight": "align-justify",
+    "link": "link",
+    "lock.fill": "lock",
+    "lock.shield": "shield",
+    "minus": "minus",
+    "minus.circle.fill": "circle-minus",
+    "minus.magnifyingglass": "zoom-out",
+    "pencil": "pencil",
+    "pencil.tip": { "glyph": "pencil-tip" },
+    "pencil.tip.crop.circle": "pen-line",
+    "person": "user",
+    "photo": "image",
+    "photo.on.rectangle": "images",
+    "play.rectangle": "square-play",
+    "plus": "plus",
+    "plus.circle.fill": "circle-plus",
+    "plus.magnifyingglass": "zoom-in",
+    "power": "power",
+    "questionmark.circle": "circle-help",
+    "rectangle": { "glyph": "rectangle" },
+    "rectangle.fill": { "glyph": "rectangle" },
+    "rectangle.inset.filled": "presentation",
+    "rectangle.on.rectangle": { "glyph": "rectangle-on-rectangle" },
+    "rectangle.split.1x3": "rows-3",
+    "rectangle.split.3x1": "columns-3",
+    "rectangle.stack": "gallery-vertical-end",
+    "ruler": "ruler",
+    "scribble": { "glyph": "scribble" },
+    "server.rack": "server",
+    "slider.horizontal.3": "sliders-horizontal",
+    "square.and.arrow.down": "download",
+    "square.and.arrow.up": "share",
+    "square.dashed": "square-dashed",
+    "square.grid.2x2": "layout-grid",
+    "square.grid.3x3.fill": { "glyph": "square-grid-filled" },
+    "square.lefthalf.filled": "panel-left",
+    "square.on.square": "copy",
+    "square.stack": "gallery-vertical-end",
+    "star": "star",
+    "stop.circle": "circle-stop",
+    "text.alignleft": "align-left",
+    "text.aligncenter": "align-center",
+    "text.alignright": "align-right",
+    "textformat": "case-sensitive",
+    "textformat.size": "a-large-small",
+    "timer": "hourglass",
+    "tornado": "tornado",
+    "trash": "trash-2",
+    "triangle": "triangle",
+    "video": "square-play",
+    "viewfinder": "scan",
+    "wand.and.stars": "wand-sparkles",
+    "xmark": "x",
+    "xmark.circle": "circle-x"
+  },
+  "glyphs": {
+    "$comment": "Original drawings for Annotator on Lucide's 24-unit grid (stroke 2, round caps and joins), for Mac symbols no Lucide icon reads like. Each part is SVG path data; fill marks a part filled with the stroke color, and shapes inside it that wind the other way stay open (nonzero fill), as the counters of a letter do. They draw the same meaning with plain geometry and copy no SF Symbol artwork.",
+    "arrows-diagonal": [
+      { "d": "M4 10V4H10" },
+      { "d": "M4 4L10.5 10.5" },
+      { "d": "M20 14V20H14" },
+      { "d": "M20 20L13.5 13.5" }
+    ],
+    "bold-b": [
+      { "d": "M6 5H12.5A3.375 3.375 0 0 1 12.5 11.75H13.5A3.625 3.625 0 0 1 13.5 19H6ZM7.5 5.75V11.5H12A2.875 2.875 0 0 0 12 5.75ZM7.5 12V18.25H13A3.125 3.125 0 0 0 13 12Z", "fill": true }
+    ],
+    "circle-dotted": [
+      { "d": "M12 2.5h.01M15.64 3.22h.01M18.72 5.28h.01M20.78 8.36h.01M21.5 12h.01M20.78 15.64h.01M18.72 18.72h.01M15.64 20.78h.01M12 21.5h.01M8.36 20.78h.01M5.28 18.72h.01M3.22 15.64h.01M2.5 12h.01M3.22 8.36h.01M5.28 5.28h.01M8.36 3.22h.01" }
+    ],
+    "circle-one": [
+      { "d": "M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0" },
+      { "d": "M10 9l2.5-2v10" }
+    ],
+    "cursor-arrow": [
+      { "d": "M7.2 2.8v12.35l2.67-2.29 3.82 8.47 1.04-.4-3.51-8.55 4.4-.15z", "fill": true }
+    ],
+    "dot-disc": [
+      { "d": "M8 5h.01M12 5h.01M16 5h.01M6 8.5h.01M10 8.5h.01M14 8.5h.01M18 8.5h.01M4 12h.01M8 12h.01M12 12h.01M16 12h.01M20 12h.01M6 15.5h.01M10 15.5h.01M14 15.5h.01M18 15.5h.01M8 19h.01M12 19h.01M16 19h.01" }
+    ],
+    "eyedropper": [
+      { "d": "M15.6 5.7a2.7 2.7 0 1 0 5.4 0a2.7 2.7 0 1 0-5.4 0z", "fill": true },
+      { "d": "M15.9 11.79L16.89 10.8L13.21 7.12L12.22 8.11Z", "fill": true },
+      { "d": "M13.35 9.95L3.2 20.8L14.05 10.65Z", "fill": true }
+    ],
+    "line-diagonal": [
+      { "d": "M5 19 19 5" }
+    ],
+    "pencil-tip": [
+      { "d": "M6.7 21L8.9 11.5H15.1L17.3 21" },
+      { "d": "M12 3L8.9 11.5H15.1Z", "fill": true }
+    ],
+    "rectangle": [
+      { "d": "M4.5 4.5h15A2.5 2.5 0 0 1 22 7v10a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 17V7a2.5 2.5 0 0 1 2.5-2.5z" }
+    ],
+    "rectangle-on-rectangle": [
+      { "d": "M7 15H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3" },
+      { "d": "M9 9h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z" }
+    ],
+    "scribble": [
+      { "d": "M2.5 14L11.8 4.3C13.4 2.6 15.6 4.3 14.4 6.2L9.6 14.3C8.4 16.4 10.2 18.6 12 16.9C13.6 15.3 15 12.6 16.3 11.3C17.6 10 19.4 11.3 18.4 13.1C17.6 14.7 16.4 16.6 17.4 17.8C18.4 19 20.2 17.8 21.5 16.3" }
+    ],
+    "square-grid-filled": [
+      { "d": "M4 4h3v3H4zM10.5 4h3v3h-3zM17 4h3v3h-3zM4 10.5h3v3H4zM10.5 10.5h3v3h-3zM17 10.5h3v3h-3zM4 17h3v3H4zM10.5 17h3v3h-3zM17 17h3v3h-3z", "fill": true }
+    ],
+    "three-circles": [
+      { "d": "M7 7.5a5 5 0 1 0 10 0a5 5 0 1 0-10 0" },
+      { "d": "M3 15a5 5 0 1 0 10 0a5 5 0 1 0-10 0" },
+      { "d": "M11 15a5 5 0 1 0 10 0a5 5 0 1 0-10 0" }
+    ]
+  }
+}

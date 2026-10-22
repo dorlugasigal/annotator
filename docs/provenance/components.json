@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "policy": "Original implementation and explicitly approved permissive dependencies only.",
+  "components": [
+    {
+      "name": "Unicode Character Database tables (Windows edition)",
+      "origin": "https://www.unicode.org/Public/16.0.0/ucd/ (via Python 3.14 unicodedata)",
+      "version": "16.0.0",
+      "license": "Unicode-3.0",
+      "disposition": "imported-generated-runtime-data",
+      "approval": "Owner, 2026-10-19 (docs/parity.md, Recorded owner decisions)",
+      "notice": "apps/windows/src/Annotator.Core/Text/Unicode-LICENSE.txt",
+      "reason": "Generated tables (canonical decompositions, combining classes, composites, full case mappings) so Annotator.Core reproduces Swift string equality, ordering and case mapping under invariant globalization (spec 013, conformance corpus platform/strings). Generator: tools/windows/generate-unicode-tables.py. The notice ships next to the Windows app."
+    },
+    {
+      "name": "Netlify metrics storage and functions",
+      "origin": "https://github.com/netlify/primitives",
+      "version": "@netlify/blobs 11.1.0; @netlify/functions 6.0.0",
+      "license": "MIT",
+      "disposition": "service-runtime-and-build-dependency",
+      "notice": "services/metrics/NETLIFY-LICENSE.txt",
+      "reason": "Pinned serverless storage SDK and typed function configuration from the owner-requested telemetry PR. No SDK is bundled in the native app. Notices accompany the service artifacts."
+    },
+    {
+      "name": "Netlify local publisher",
+      "origin": "https://github.com/netlify/cli",
+      "version": "27.8.0",
+      "license": "MIT",
+      "disposition": "development-build-dependency",
+      "notice": "services/metrics/node_modules/netlify-cli/LICENSE",
+      "reason": "Pinned CLI bundles and publishes only owner-authorized website/function artifacts. Installed package retains its license; the native app does not include the CLI."
+    },
+    {
+      "name": "Rough.js native shape geometry",
+      "origin": "https://github.com/rough-stuff/rough",
+      "rendererBlob": "23712dc0cd0f3ab7379bd6ebea12cdcf619bda56",
+      "randomBlob": "e740815622b8e36675ffe3d9e348b2be0bffd2f9",
+      "referencePackage": "roughjs@4.6.6",
+      "license": "MIT",
+      "disposition": "imported-adapted-runtime",
+      "notice": "apps/macos/Annotator/RoughJS-LICENSE.txt",
+      "reason": "Native port of seeded RNG, paired cubic strokes, Bezier offsets and sampled ellipses. Verified actual rectangle/ellipse renderer paths against upstream fixtures. No GPL-derived implementation or JavaScript runtime imported."
+    },
+    {
+      "name": "Astro static website build",
+      "origin": "https://github.com/withastro/astro",
+      "version": "7.3.1",
+      "license": "MIT",
+      "disposition": "development-build-dependency",
+      "notice": "website/node_modules/astro/LICENSE",
+      "reason": "Pinned in website/package-lock.json. Retain dependency licenses when distributing dependencies or runtime output."
+    },
+    {
+      "name": "Vorssaint annotation contribution",
+      "origin": "https://github.com/vorssaint/vorssaint-utils/pull/1526",
+      "revision": "5aa80fce3250b163dbb766569fbb731c3c71a52d",
+      "license": "GPL-3.0-or-later",
+      "disposition": "excluded-reference-only",
+      "reason": "Combined GPL-derived source, tests and assets are not imported or translated."
+    },
+    {
+      "name": "Original ZoomIt drawing contribution",
+      "origin": "https://github.com/microsoft/ZoomitForMac/pull/64",
+      "revision": "2f1e523eaca97efba8cb037307ba406fbb971f6d",
+      "license": "MIT",
+      "disposition": "audited-candidate-not-imported",
+      "reason": "License verified; large AppKit/settings-coupled controller is not the independent model boundary. No source or fixtures imported."
+    }
+  ]
+}

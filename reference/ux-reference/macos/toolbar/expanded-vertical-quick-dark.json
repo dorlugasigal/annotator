@@ -1,0 +1,289 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      12,
+      44,
+      48
+     ],
+     "help": "Shortcut 4",
+     "label": "Ellipse",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      63,
+      44,
+      48
+     ],
+     "help": "Shortcut 5",
+     "label": "Arrow",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      114,
+      44,
+      48
+     ],
+     "help": "Shortcut 6",
+     "label": "Line",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      165,
+      44,
+      48
+     ],
+     "help": "Shortcut 7",
+     "label": "Pen",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      27.5,
+      231.5,
+      13,
+      11
+     ],
+     "help": "Show full properties",
+     "identifier": "toolbar-properties",
+     "label": "Properties",
+     "role": "AXButton",
+     "value": "Quick controls"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      257.5,
+      22.5,
+      32.5
+     ],
+     "help": "Cycle Desktop, Whiteboard and Blackboard on this drawing display. Control-W: whiteboard. Control-B: blackboard.",
+     "label": "Board background",
+     "role": "AXButton",
+     "value": "Desktop"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      296,
+      44,
+      36
+     ],
+     "help": "Drawing is active. Click Use apps to pass clicks through. Escape finishes text or cancels an unfinished drawing first. ⌃⇧2 returns to drawing.",
+     "label": "Use apps",
+     "role": "AXButton",
+     "value": "Drawing is active"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23.5,
+      337,
+      21,
+      15
+     ],
+     "help": "Lens and full-screen zoom",
+     "label": "Zoom tools",
+     "role": "AXMenuButton"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      16,
+      364,
+      12,
+      12
+     ],
+     "help": "Undo",
+     "identifier": "arrow.uturn.backward",
+     "label": "Undo",
+     "role": "AXButton"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      40,
+      364,
+      12,
+      12
+     ],
+     "help": "Redo",
+     "identifier": "arrow.uturn.forward",
+     "label": "Redo",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      388,
+      44,
+      48
+     ],
+     "help": "More shapes and tools (⌘L)",
+     "label": "Tool library",
+     "role": "AXButton"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      28,
+      447,
+      12.5,
+      14.5
+     ],
+     "help": "Clear all drawings — undoable",
+     "identifier": "trash",
+     "label": "Clear all drawings — undoable",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      27,
+      478,
+      14,
+      14
+     ],
+     "help": "Settings and shortcuts",
+     "identifier": "gearshape",
+     "label": "Settings and shortcuts",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      29,
+      511,
+      10.5,
+      10.5
+     ],
+     "help": "Hide drawings and tools",
+     "identifier": "xmark",
+     "label": "Hide drawings and tools",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    0,
+    0,
+    68,
+    541
+   ],
+   "label": "Drawing tool rail",
+   "role": "AXGroup"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      88,
+      12,
+      20.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pen"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      88,
+      44,
+      20.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pen"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      265.5,
+      44.5,
+      28.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Width"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      300,
+      40.5,
+      48,
+      21
+     ],
+     "help": "Width: 1–40 pt",
+     "label": "Precise width",
+     "placeholder": "Width",
+     "role": "AXTextField",
+     "value": "3"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      354,
+      44.5,
+      10,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "pt"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    76,
+    0,
+    300,
+    80
+   ],
+   "identifier": "attached-tool-properties",
+   "label": "Attached tool properties",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "toolbar/expanded-vertical-quick-dark.png",
+ "kind": "view",
+ "notes": "Expanded toolbar, vertical, quick properties. Pen selected.",
+ "pixels": [
+  752,
+  1082
+ ],
+ "scale": 2,
+ "size": [
+  376,
+  541
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "expanded-vertical-quick",
+ "surface": "toolbar"
+}

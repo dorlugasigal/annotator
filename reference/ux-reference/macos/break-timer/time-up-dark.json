@@ -1,0 +1,47 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    205,
+    44.5,
+    70,
+    19
+   ],
+   "role": "AXStaticText",
+   "value": "Time's up"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    148.5,
+    74,
+    183,
+    183
+   ],
+   "identifier": "break-countdown",
+   "label": "Break timer",
+   "role": "AXUnknown"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "break-timer/time-up-dark.png",
+ "kind": "view",
+ "notes": "Time is up and counting over. The title reads Time's up and the ring is full and amber. Shown full screen on each display; always dark. Every size scales with the display's shorter side, so this 480 by 300 capture keeps the layout of a full screen.",
+ "pixels": [
+  960,
+  600
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  300
+ ],
+ "spec": [
+  "014",
+  "WIN-PAR-03"
+ ],
+ "state": "time-up",
+ "surface": "break-timer"
+}

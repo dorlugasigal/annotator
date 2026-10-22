@@ -1,48 +1,59 @@
 name: Bug report
-description: Tell us what went wrong while using Annotator.
+description: Something in Annotator doesn't work as expected.
 title: "[Bug] "
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        This issue is public. Use fictional content; remove private details from screenshots.
-        The app does not attach drawings, screen captures or logs automatically.
+        This issue is public. Use made-up content and remove private details from screenshots.
+        The app doesn't attach drawings, screen captures or logs on its own.
   - type: input
     id: version
     attributes:
       label: App version and build
-      description: Find this in Settings or Help.
-      placeholder: 0.1.0-alpha.2 (10)
+      description: Settings > About shows it.
+      placeholder: 0.1.0-beta.11 (29)
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Mac
+        - Windows
+        - Both
     validations:
       required: true
   - type: input
-    id: macos
+    id: os
     attributes:
-      label: macOS version and Mac chip
-      description: Do not include a serial number.
+      label: OS version and computer
+      description: For example "macOS 15.5, MacBook Air M2" or "Windows 11 24H2, ARM64". No serial numbers.
     validations:
       required: true
   - type: input
     id: displays
     attributes:
       label: Displays
-      description: Number of monitors and their scaling, if relevant.
+      description: Number of displays and their scaling, if it matters.
   - type: textarea
     id: steps
     attributes:
       label: What did you try?
-      description: List the steps, what you expected and what happened.
+      description: The steps, what you expected and what happened.
     validations:
       required: true
   - type: textarea
     id: sharing
     attributes:
       label: Screen sharing or installation details
-      description: Name the sharing app/mode and receiver result, or paste the exact macOS installation message.
+      description: The meeting app and sharing mode and what viewers saw, or the exact installation message.
   - type: checkboxes
     id: privacy
     attributes:
-      label: Before submitting
+      label: Before you submit
       options:
-        - label: I checked that this public report contains no private data or credentials.
+        - label: This public report has no private data or credentials.
           required: true

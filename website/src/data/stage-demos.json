@@ -1,0 +1,791 @@
+{
+  "schemaVersion": 1,
+  "recorded": "2026-09-27",
+  "shotList": "tools/demo/website_demo_shots.py",
+  "encoder": "tools/demo/encode_website_demos.py",
+  "renderer": "videos/annotator-reel/tools/camera.py",
+  "input": "Timed native UI actions and canvas events with a scripted pointer, recorded by apps/macos/Tests/NativeAppTests/ReelRecordingTests.swift (circle, arrow, highlight, smart, spotlight, blur) and apps/macos/Tests/NativeAppTests/WebsiteDemoRecordingTests.swift (shapes, zoom). Not a human or computer-use-provider recording.",
+  "source": "Real-time ScreenCaptureKit recordings of the live Annotator overlay and toolbar on a 3840x2160 HiDPI virtual display. Test-owned windows and fictional sample apps only.",
+  "edits": "Virtual-camera framing, shortened pointer travel and waits, and a dissolve back to the first frame at the end of each loop. The zoom clip steps over the two black frames that Screen zoom shows while it starts. Nothing is drawn over the recording.",
+  "dissolve": 0.4,
+  "audio": false,
+  "demos": {
+    "circle": {
+      "desktop": {
+        "file": "/demo/stage-circle.mp4",
+        "poster": "/demo/stage-circle.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 3.9,
+        "fps": 60,
+        "posterTime": 3.45,
+        "sha256": "f25194e6bf7d79862a2fbaba4589e14ee2456052e260d3774a5909a41cc8ce41",
+        "bytes": 1035954,
+        "loopSeam": 0.818,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "dashboard",
+      "sourceFile": "dashboard-5B160B77-FC08-4141-ADB5-6923110D8136.mp4",
+      "sourceSHA256": "6fa9a1d6d13f2b156e09186126e46b40f78ad10c343575c0810f4ce6c73cd67e",
+      "source": [
+        1.0,
+        3.55
+      ],
+      "speed": {
+        "slowest": 0.08,
+        "fastest": 1.24,
+        "moving": [
+          0.91,
+          1.24
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Ellipse",
+          "sourceTime": 1.685,
+          "clipTime": 0.616
+        },
+        {
+          "gesture": "ellipse",
+          "sourceTime": 3.121,
+          "clipTime": 1.887
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-circle-phone.mp4",
+        "poster": "/demo/stage-circle-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 3.9,
+        "fps": 60,
+        "posterTime": 3.45,
+        "sha256": "fc554a8c58323afdf38c6f37d001896712ae0019f6ce284c587d16e4ef6f4011",
+        "bytes": 627516,
+        "loopSeam": 0.677,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "arrow": {
+      "desktop": {
+        "file": "/demo/stage-arrow.mp4",
+        "poster": "/demo/stage-arrow.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 6.1,
+        "fps": 60,
+        "posterTime": 5.65,
+        "sha256": "0b327dff79c0d10e13e968424f9f250d0ccb47a81b16dad3c7cbd13879bb17d4",
+        "bytes": 1944148,
+        "loopSeam": 0.717,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "dashboard",
+      "sourceFile": "dashboard-5B160B77-FC08-4141-ADB5-6923110D8136.mp4",
+      "sourceSHA256": "6fa9a1d6d13f2b156e09186126e46b40f78ad10c343575c0810f4ce6c73cd67e",
+      "source": [
+        3.4,
+        9.62
+      ],
+      "speed": {
+        "slowest": 0.14,
+        "fastest": 1.4,
+        "moving": [
+          0.5,
+          1.4
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Arrow",
+          "sourceTime": 3.853,
+          "clipTime": 0.369
+        },
+        {
+          "control": "Stroke color",
+          "sourceTime": 4.626,
+          "clipTime": 1.023
+        },
+        {
+          "control": "Blue",
+          "sourceTime": 5.952,
+          "clipTime": 2.008
+        },
+        {
+          "gesture": "arrow-point",
+          "sourceTime": 6.626,
+          "clipTime": 2.553
+        },
+        {
+          "gesture": "arrow-point",
+          "sourceTime": 7.137,
+          "clipTime": 3.005
+        },
+        {
+          "gesture": "arrow-point",
+          "sourceTime": 7.714,
+          "clipTime": 3.49
+        },
+        {
+          "gesture": "edit-arrow-point",
+          "sourceTime": 9.132,
+          "clipTime": 4.631
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-arrow-phone.mp4",
+        "poster": "/demo/stage-arrow-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 6.1,
+        "fps": 60,
+        "posterTime": 5.65,
+        "sha256": "0d9b2718a2a18253df784bb9bac0a99ec715ee8058ec4071d930c44c25176357",
+        "bytes": 1237246,
+        "loopSeam": 0.567,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "highlight": {
+      "desktop": {
+        "file": "/demo/stage-highlight.mp4",
+        "poster": "/demo/stage-highlight.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 3.65,
+        "fps": 60,
+        "posterTime": 3.2,
+        "sha256": "6dffc71bab41600d30206c674f40463024f3e3e9252e9284e4e70e4515817d98",
+        "bytes": 975411,
+        "loopSeam": 0.904,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "dashboard",
+      "sourceFile": "dashboard-5B160B77-FC08-4141-ADB5-6923110D8136.mp4",
+      "sourceSHA256": "6fa9a1d6d13f2b156e09186126e46b40f78ad10c343575c0810f4ce6c73cd67e",
+      "source": [
+        9.6,
+        12.62
+      ],
+      "speed": {
+        "slowest": 0.36,
+        "fastest": 1.28,
+        "moving": [
+          0.96,
+          1.28
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Highlighter",
+          "sourceTime": 10.437,
+          "clipTime": 0.644
+        },
+        {
+          "gesture": "highlight",
+          "sourceTime": 11.83,
+          "clipTime": 1.867
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-highlight-phone.mp4",
+        "poster": "/demo/stage-highlight-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 3.65,
+        "fps": 60,
+        "posterTime": 3.2,
+        "sha256": "88a613cde339f805c8c989040f4f225f9624624a435fe6cf5131480cf16c606b",
+        "bytes": 804489,
+        "loopSeam": 0.785,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "smart": {
+      "desktop": {
+        "file": "/demo/stage-smart.mp4",
+        "poster": "/demo/stage-smart.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 7.05,
+        "fps": 60,
+        "posterTime": 6.6,
+        "sha256": "4238b6615215f5848edd88b74e70e5d2b3b31b11ceba39b4e87e88740c687c5c",
+        "bytes": 1921913,
+        "loopSeam": 0.886,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "smart",
+      "sourceFile": "smart-C925C933-6739-4BC7-9272-C9FB95E6BEC0.mp4",
+      "sourceSHA256": "ed9fb8607aec7f07fe6bc00b6b5edff3570b45f1813122339fb6bb49f233a1fc",
+      "source": [
+        0.2,
+        7.3
+      ],
+      "speed": {
+        "slowest": 0.57,
+        "fastest": 1.39,
+        "moving": [
+          0.57,
+          1.39
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Pen",
+          "sourceTime": 0.696,
+          "clipTime": 0.494
+        },
+        {
+          "gesture": "smart-rectangle",
+          "sourceTime": 3.071,
+          "clipTime": 2.564
+        },
+        {
+          "gesture": "smart-arrow",
+          "sourceTime": 4.395,
+          "clipTime": 3.761
+        },
+        {
+          "control": "Text",
+          "sourceTime": 5.067,
+          "clipTime": 4.424
+        },
+        {
+          "gesture": "type-character",
+          "text": "M",
+          "sourceTime": 5.856,
+          "clipTime": 5.069
+        },
+        {
+          "gesture": "type-character",
+          "text": "a",
+          "sourceTime": 5.906,
+          "clipTime": 5.114
+        },
+        {
+          "gesture": "type-character",
+          "text": "k",
+          "sourceTime": 5.956,
+          "clipTime": 5.159
+        },
+        {
+          "gesture": "type-character",
+          "text": "e",
+          "sourceTime": 6.006,
+          "clipTime": 5.205
+        },
+        {
+          "gesture": "type-character",
+          "text": " ",
+          "sourceTime": 6.053,
+          "clipTime": 5.249
+        },
+        {
+          "gesture": "type-character",
+          "text": "i",
+          "sourceTime": 6.104,
+          "clipTime": 5.297
+        },
+        {
+          "gesture": "type-character",
+          "text": "t",
+          "sourceTime": 6.153,
+          "clipTime": 5.346
+        },
+        {
+          "gesture": "type-character",
+          "text": " ",
+          "sourceTime": 6.2,
+          "clipTime": 5.392
+        },
+        {
+          "gesture": "type-character",
+          "text": "b",
+          "sourceTime": 6.249,
+          "clipTime": 5.443
+        },
+        {
+          "gesture": "type-character",
+          "text": "i",
+          "sourceTime": 6.296,
+          "clipTime": 5.493
+        },
+        {
+          "gesture": "type-character",
+          "text": "g",
+          "sourceTime": 6.344,
+          "clipTime": 5.546
+        },
+        {
+          "gesture": "type-character",
+          "text": "g",
+          "sourceTime": 6.394,
+          "clipTime": 5.604
+        },
+        {
+          "gesture": "type-character",
+          "text": "e",
+          "sourceTime": 6.444,
+          "clipTime": 5.665
+        },
+        {
+          "gesture": "type-character",
+          "text": "r",
+          "sourceTime": 6.491,
+          "clipTime": 5.728
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-smart-phone.mp4",
+        "poster": "/demo/stage-smart-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 7.05,
+        "fps": 60,
+        "posterTime": 6.6,
+        "sha256": "5c101c82c4d5a1dde150fa2da88c50cf5895825e5e0884f6e229837fe9ca1ba5",
+        "bytes": 1558546,
+        "loopSeam": 0.948,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "shapes": {
+      "desktop": {
+        "file": "/demo/stage-shapes.mp4",
+        "poster": "/demo/stage-shapes.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 7.5,
+        "fps": 60,
+        "posterTime": 7.05,
+        "sha256": "50819400fc8cb24b4607728927c5f9b23f4b17b0df966fd99630932f37d85d1e",
+        "bytes": 2236196,
+        "loopSeam": 0.922,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "library",
+      "sourceFile": "library-3D716176-8748-444E-8D88-CF716EC8129B.mp4",
+      "sourceSHA256": "26348f671d595b30af2fe7088dd77c9d7ead2cef5fd5ef1c8d93d7283614334b",
+      "source": [
+        0.45,
+        9.38
+      ],
+      "speed": {
+        "slowest": 0.79,
+        "fastest": 1.37,
+        "moving": [
+          0.79,
+          1.37
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Tool library",
+          "sourceTime": 0.806,
+          "clipTime": 0.266
+        },
+        {
+          "control": "Shapes",
+          "sourceTime": 1.545,
+          "clipTime": 0.867
+        },
+        {
+          "gesture": "scroll-tools",
+          "sourceTime": 2.513,
+          "clipTime": 1.669
+        },
+        {
+          "control": "Focus",
+          "sourceTime": 3.15,
+          "clipTime": 2.187
+        },
+        {
+          "control": "Extras",
+          "sourceTime": 4.293,
+          "clipTime": 3.019
+        },
+        {
+          "control": "Shapes",
+          "sourceTime": 5.374,
+          "clipTime": 3.82
+        },
+        {
+          "gesture": "scroll-tools",
+          "sourceTime": 6.261,
+          "clipTime": 4.518
+        },
+        {
+          "control": "Database",
+          "sourceTime": 7.072,
+          "clipTime": 5.118
+        },
+        {
+          "gesture": "draw-shape",
+          "sourceTime": 8.296,
+          "clipTime": 6.163
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-shapes-phone.mp4",
+        "poster": "/demo/stage-shapes-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 7.5,
+        "fps": 60,
+        "posterTime": 7.05,
+        "sha256": "367ff4659a848f5460425084d76227d03843b5c93214732372da81f778082db8",
+        "bytes": 2081158,
+        "loopSeam": 0.824,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "spotlight": {
+      "desktop": {
+        "file": "/demo/stage-spotlight.mp4",
+        "poster": "/demo/stage-spotlight.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 5.55,
+        "fps": 60,
+        "posterTime": 5.1,
+        "sha256": "463ef9875dbb2724201f74fc940ceac31234014735f5fa6e20d0f906b61ef612",
+        "bytes": 1859638,
+        "loopSeam": 1.137,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "focus",
+      "sourceFile": "focus-75E5A28F-57C8-4D59-8CD7-E70E5E73A056.mp4",
+      "sourceSHA256": "081ee40dc3dfc7106619451b90bf19c44814ac2746e1d3433ba84f00a0533119",
+      "source": [
+        0.2,
+        6.25
+      ],
+      "speed": {
+        "slowest": 0.6,
+        "fastest": 1.25,
+        "moving": [
+          0.6,
+          1.25
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Tool library",
+          "sourceTime": 0.727,
+          "clipTime": 0.494
+        },
+        {
+          "control": "Cursor halo",
+          "sourceTime": 1.452,
+          "clipTime": 1.079
+        },
+        {
+          "control": "Spotlight",
+          "sourceTime": 2.051,
+          "clipTime": 1.558
+        },
+        {
+          "control": "Close tool library",
+          "sourceTime": 2.63,
+          "clipTime": 2.037
+        },
+        {
+          "gesture": "spotlight-click",
+          "target": "img0",
+          "sourceTime": 3.377,
+          "clipTime": 2.674
+        },
+        {
+          "gesture": "spotlight-click",
+          "target": "img1",
+          "sourceTime": 4.613,
+          "clipTime": 3.729
+        },
+        {
+          "gesture": "spotlight-click",
+          "target": "hero",
+          "sourceTime": 5.738,
+          "clipTime": 4.694
+        },
+        {
+          "gesture": "spotlight-walk",
+          "sourceTime": 6.248,
+          "clipTime": 5.514
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-spotlight-phone.mp4",
+        "poster": "/demo/stage-spotlight-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 5.55,
+        "fps": 60,
+        "posterTime": 5.1,
+        "sha256": "c3188df03123a3546141cfd327a38bfada9555d910fb0cd76e6f68aa4ab243cf",
+        "bytes": 1445020,
+        "loopSeam": 0.959,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "zoom": {
+      "desktop": {
+        "file": "/demo/stage-zoom.mp4",
+        "poster": "/demo/stage-zoom.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 9.65,
+        "fps": 60,
+        "posterTime": 9.2,
+        "sha256": "6a55d3037f8eacb936ecdf38fd933cc80ec403bd16c21d856860d8a894599057",
+        "bytes": 3226331,
+        "loopSeam": 0.686,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "zoom",
+      "sourceFile": "zoom-561AEB25-8734-4AF2-9DDA-6A2165CDC2E1.mp4",
+      "sourceSHA256": "f6adb8557b63558e3a475fc045424e286857cbb2df3ca557cb11afcf4dccc513",
+      "source": [
+        0.4,
+        13.0
+      ],
+      "speed": {
+        "slowest": 0.46,
+        "fastest": 1.5,
+        "moving": [
+          1.0,
+          1.5
+        ]
+      },
+      "skipped": [
+        {
+          "source": [
+            1.59,
+            1.66
+          ],
+          "reason": "the black cover that Screen zoom shows while it starts"
+        }
+      ],
+      "actions": [
+        {
+          "control": "Tool library",
+          "sourceTime": 0.759,
+          "clipTime": 0.296
+        },
+        {
+          "control": "Screen zoom",
+          "sourceTime": 1.47,
+          "clipTime": 0.942
+        },
+        {
+          "gesture": "zoom-started",
+          "sourceTime": 1.637,
+          "clipTime": 1.073
+        },
+        {
+          "gesture": "zoom-follow",
+          "target": "kpi",
+          "sourceTime": 3.161,
+          "clipTime": 2.079
+        },
+        {
+          "gesture": "zoom-follow",
+          "target": "dip",
+          "sourceTime": 5.469,
+          "clipTime": 3.618
+        },
+        {
+          "control": "Increase live zoom",
+          "sourceTime": 6.41,
+          "clipTime": 4.359
+        },
+        {
+          "control": "Increase live zoom",
+          "sourceTime": 7.333,
+          "clipTime": 5.097
+        },
+        {
+          "gesture": "zoom-follow",
+          "target": "note",
+          "sourceTime": 9.695,
+          "clipTime": 6.724
+        },
+        {
+          "control": "Stop screen zoom",
+          "sourceTime": 12.751,
+          "clipTime": 9.07
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-zoom-phone.mp4",
+        "poster": "/demo/stage-zoom-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 9.65,
+        "fps": 60,
+        "posterTime": 9.2,
+        "sha256": "bab55abd5bc6847c72a6c15bfdad3153ab4dc38d4d47ae307e24a45851e30dc7",
+        "bytes": 2186541,
+        "loopSeam": 0.56,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    },
+    "blur": {
+      "desktop": {
+        "file": "/demo/stage-blur.mp4",
+        "poster": "/demo/stage-blur.jpg",
+        "width": 1728,
+        "height": 1080,
+        "duration": 3.75,
+        "fps": 60,
+        "posterTime": 3.3,
+        "sha256": "00cbf7a7d8c3992284cbdf0688217c0f3aa01fa0c3e6a9c22afd4a09cdef1720",
+        "bytes": 1091851,
+        "loopSeam": 1.027,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      },
+      "take": "focus",
+      "sourceFile": "focus-75E5A28F-57C8-4D59-8CD7-E70E5E73A056.mp4",
+      "sourceSHA256": "081ee40dc3dfc7106619451b90bf19c44814ac2746e1d3433ba84f00a0533119",
+      "source": [
+        6.9,
+        10.19
+      ],
+      "speed": {
+        "slowest": 0.26,
+        "fastest": 1.16,
+        "moving": [
+          0.77,
+          1.16
+        ]
+      },
+      "skipped": [],
+      "actions": [
+        {
+          "control": "Effects",
+          "sourceTime": 7.361,
+          "clipTime": 0.418
+        },
+        {
+          "gesture": "blur",
+          "sourceTime": 9.437,
+          "clipTime": 2.177
+        }
+      ],
+      "phone": {
+        "file": "/demo/stage-blur-phone.mp4",
+        "poster": "/demo/stage-blur-phone.jpg",
+        "width": 1080,
+        "height": 1350,
+        "duration": 3.75,
+        "fps": 60,
+        "posterTime": 3.3,
+        "sha256": "c5ae90d220f9d94566bdb64f2e94a14e75477f2acc0ca377639b47632e828a01",
+        "bytes": 973910,
+        "loopSeam": 0.951,
+        "encoding": {
+          "codec": "h264",
+          "profile": "High",
+          "level": 42,
+          "pixelFormat": "yuv420p",
+          "frameRate": 60
+        }
+      }
+    }
+  }
+}

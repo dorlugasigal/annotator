@@ -1,0 +1,349 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    65.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    91.5,
+    16,
+    15.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Fill"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    143,
+    16,
+    51,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Width"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    307,
+    16,
+    60.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Pattern"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    438.5,
+    16,
+    80,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Roughness"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    91.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Fill color",
+   "label": "Fill color",
+   "role": "AXButton",
+   "value": "#F0453866"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    141.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 2",
+   "label": "Width 2",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    182.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 4",
+   "label": "Width 4",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    223.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Width 7",
+   "label": "Width 7",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    305.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Solid",
+   "label": "Solid",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    346.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Dashed",
+   "label": "Dashed",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    387.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Dotted",
+   "label": "Dotted",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    437.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Clean",
+   "label": "Clean",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    478.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Sketchy",
+   "label": "Sketchy",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    519.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Wild",
+   "label": "Wild",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      144.5,
+      81.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    141.5,
+    81.5,
+    80,
+    14
+   ],
+   "label": "Width",
+   "role": "AXSlider",
+   "value": 3
+  },
+  {
+   "enabled": true,
+   "frame": [
+    227.5,
+    78,
+    48,
+    21
+   ],
+   "help": "Width: 1–40 pt",
+   "label": "Precise width",
+   "placeholder": "Width",
+   "role": "AXTextField",
+   "value": "3"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    281.5,
+    82,
+    10,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "pt"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    17.5,
+    113,
+    64.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Fill style"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    149.5,
+    113,
+    56,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Edges"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    133,
+    36,
+    36
+   ],
+   "help": "Solid",
+   "label": "Solid",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    57,
+    133,
+    36,
+    36
+   ],
+   "help": "Hatch",
+   "label": "Hatch",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    98,
+    133,
+    36,
+    36
+   ],
+   "help": "Crosshatch",
+   "label": "Crosshatch",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    148,
+    133,
+    36,
+    36
+   ],
+   "help": "Sharp corners",
+   "label": "Sharp corners",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    189,
+    133,
+    36,
+    36
+   ],
+   "help": "Rounded corners",
+   "label": "Rounded corners",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "properties/rectangle-filled-light.png",
+ "kind": "view",
+ "notes": "Fill on: fill pattern and opacity appear.",
+ "pixels": [
+  1296,
+  370
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  185
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "rectangle-filled",
+ "surface": "properties"
+}

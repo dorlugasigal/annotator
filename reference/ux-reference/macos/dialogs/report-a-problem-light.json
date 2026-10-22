@@ -1,0 +1,192 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      20,
+      141,
+      20.5
+     ],
+     "role": "AXStaticText",
+     "value": "Report a problem"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      52.5,
+      125.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Version 0.1.0-beta.10 (28)"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      77.5,
+      26.5,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Title"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      104.5,
+      420,
+      24
+     ],
+     "label": "Feedback title",
+     "placeholder": "Short title",
+     "role": "AXTextField"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      140.5,
+      41,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Details"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      167.5,
+      338,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "What did you try, what did you expect, and what happened?"
+    },
+    {
+     "children": [
+      {
+       "enabled": false,
+       "frame": [
+        19.5,
+        194,
+        421,
+        141
+       ],
+       "label": "Feedback details",
+       "role": "AXTextArea"
+      },
+      {
+       "enabled": false,
+       "frame": [
+        422,
+        193.5,
+        19,
+        142
+       ],
+       "role": "AXScrollBar",
+       "value": 0
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      20,
+      194.5,
+      420,
+      140
+     ],
+     "role": "AXScrollArea"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      346.5,
+      419.5,
+      52
+     ],
+     "role": "AXStaticText",
+     "value": "Remove private details before opening GitHub. Open GitHub draft sends your title, details and app version to GitHub in a browser link. Submitting it there makes it public. GitHub may ask you to sign in. No drawings, screenshots or logs are attached automatically."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      410.5,
+      355,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Copy feedback copies the report without opening GitHub or submitting it."
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    0,
+    0,
+    460,
+    615
+   ],
+   "role": "AXScrollArea"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    636,
+    115.5,
+    24
+   ],
+   "label": "Copy feedback",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    143.5,
+    636,
+    135.5,
+    24
+   ],
+   "label": "Open GitHub draft",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    381.5,
+    636,
+    58.5,
+    24
+   ],
+   "label": "Close",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/report-a-problem-light.png",
+ "kind": "view",
+ "notes": "Report a problem window.",
+ "pixels": [
+  920,
+  1360
+ ],
+ "scale": 2,
+ "size": [
+  460,
+  680
+ ],
+ "spec": [
+  "005 words review",
+  "WIN-UI-05"
+ ],
+ "state": "report-a-problem",
+ "surface": "dialogs"
+}

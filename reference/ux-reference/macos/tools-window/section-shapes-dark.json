@@ -1,0 +1,538 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    18,
+    34.5,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Tools"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    243.5,
+    16,
+    108.5,
+    20
+   ],
+   "label": "Paste image",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      15,
+      48,
+      57,
+      24
+     ],
+     "label": "Draw",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      72,
+      48,
+      69,
+      24
+     ],
+     "label": "Shapes",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 1
+    },
+    {
+     "enabled": true,
+     "frame": [
+      141,
+      48,
+      60.5,
+      24
+     ],
+     "label": "Focus",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      201.5,
+      48,
+      62,
+      24
+     ],
+     "label": "Extras",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      263.5,
+      48,
+      89.5,
+      24
+     ],
+     "label": "My shapes",
+     "role": "AXRadioButton",
+     "subrole": "AXSegment",
+     "value": 0
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    15,
+    48,
+    338,
+    24
+   ],
+   "label": "Tool category",
+   "role": "AXRadioGroup"
+  },
+  {
+   "children": [
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        84,
+        70,
+        76
+       ],
+       "help": "Rectangle",
+       "label": "Rectangle",
+       "role": "AXButton",
+       "selected": true
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        84,
+        69.5,
+        76
+       ],
+       "help": "Ellipse",
+       "label": "Ellipse",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171.5,
+        84,
+        70,
+        76
+       ],
+       "help": "Diamond",
+       "label": "Diamond",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        249.5,
+        84,
+        69.5,
+        76
+       ],
+       "help": "Triangle",
+       "label": "Triangle",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        168,
+        70,
+        76
+       ],
+       "help": "Hexagon",
+       "label": "Hexagon",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        168,
+        69.5,
+        76
+       ],
+       "help": "Star",
+       "label": "Star",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171.5,
+        168,
+        70,
+        76
+       ],
+       "help": "Person",
+       "label": "Person",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        249.5,
+        168,
+        69.5,
+        76
+       ],
+       "help": "Database",
+       "label": "Database",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        252,
+        70,
+        76
+       ],
+       "help": "Server",
+       "label": "Server",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        252,
+        69.5,
+        76
+       ],
+       "help": "Messaging",
+       "label": "Messaging",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171.5,
+        252,
+        70,
+        76
+       ],
+       "help": "Web",
+       "label": "Web",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        249.5,
+        252,
+        69.5,
+        76
+       ],
+       "help": "Mobile phone",
+       "label": "Mobile phone",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        1092,
+        70,
+        76
+       ],
+       "help": "Desktop",
+       "label": "Desktop",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        1092,
+        69.5,
+        76
+       ],
+       "help": "Laptop",
+       "label": "Laptop",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171.5,
+        1092,
+        70,
+        76
+       ],
+       "help": "Document",
+       "label": "Document",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        249.5,
+        1092,
+        69.5,
+        76
+       ],
+       "help": "Configuration",
+       "label": "Configuration",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        1092,
+        70,
+        76
+       ],
+       "help": "Load balancer",
+       "label": "Load balancer",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        1092,
+        69.5,
+        76
+       ],
+       "help": "API gateway",
+       "label": "API gateway",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171.5,
+        1092,
+        70,
+        76
+       ],
+       "help": "Envelope",
+       "label": "Envelope",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        249.5,
+        1092,
+        69.5,
+        76
+       ],
+       "help": "Cart",
+       "label": "Cart",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        16,
+        1092,
+        70,
+        76
+       ],
+       "help": "Bell",
+       "label": "Bell",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        1092,
+        69.5,
+        76
+       ],
+       "help": "Cylinder",
+       "label": "Cylinder",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        171.5,
+        1092,
+        70,
+        76
+       ],
+       "help": "Queue",
+       "label": "Queue",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        249.5,
+        1092,
+        69.5,
+        76
+       ],
+       "help": "Grid",
+       "label": "Grid",
+       "role": "AXButton"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      16,
+      84,
+      303,
+      1084
+     ],
+     "role": "AXOpaqueProviderGroup",
+     "subrole": "AXOpaqueProviderGrid"
+    },
+    {
+     "children": [
+      {
+       "enabled": false,
+       "frame": [
+        338,
+        87,
+        11,
+        106.5
+       ],
+       "role": "AXValueIndicator",
+       "value": 0
+      },
+      {
+       "enabled": false,
+       "role": "AXButton",
+       "subrole": "AXIncrementArrow"
+      },
+      {
+       "enabled": false,
+       "role": "AXButton",
+       "subrole": "AXDecrementArrow"
+      },
+      {
+       "enabled": false,
+       "frame": [
+        338,
+        194,
+        11,
+        139
+       ],
+       "role": "AXButton",
+       "subrole": "AXIncrementPage"
+      },
+      {
+       "enabled": false,
+       "role": "AXButton",
+       "subrole": "AXDecrementPage"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      334,
+      83,
+      19,
+      254
+     ],
+     "role": "AXScrollBar",
+     "value": 0
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    16,
+    84,
+    336,
+    252
+   ],
+   "identifier": "tool-library-scroll",
+   "role": "AXScrollArea"
+  },
+  {
+   "children": [
+    {
+     "enabled": false,
+     "frame": [
+      74,
+      373,
+      76,
+      16
+     ],
+     "label": "Selection",
+     "role": "AXMenuButton",
+     "title": "Selection"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      158,
+      373,
+      41,
+      16
+     ],
+     "label": "File",
+     "role": "AXMenuButton",
+     "title": "File"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      207,
+      373,
+      87,
+      16
+     ],
+     "label": "Workspace",
+     "role": "AXMenuButton",
+     "title": "Workspace"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    74,
+    373,
+    220,
+    16
+   ],
+   "identifier": "tool-library-footer",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "tools-window/section-shapes-dark.png",
+ "kind": "view",
+ "notes": "Tools window, Shapes, default 368-point width.",
+ "pixels": [
+  736,
+  810
+ ],
+ "scale": 2,
+ "size": [
+  368,
+  405
+ ],
+ "spec": [
+  "005 shape-labels-and-library.md",
+  "WIN-UI-05"
+ ],
+ "state": "section-shapes",
+ "surface": "tools-window"
+}

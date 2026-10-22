@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- UI Automation checks of Annotator's app windows (WIN-A11Y-01 to WIN-A11Y-04, plan: Annotator.App.Tests). The fast
+       tests read the app's sources; the explicit ones start the development build of Annotator.exe in its UX reference
+       mode, off screen and never activated, and read its windows as Narrator does. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Annotator.App.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <!-- WPF projects leave System.IO out of the implicit usings; the checks only need UI Automation from WPF. -->
+    <Using Include="System.IO" />
+  </ItemGroup>
+</Project>

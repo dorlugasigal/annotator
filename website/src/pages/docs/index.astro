@@ -1,0 +1,151 @@
+---
+import Page from "../../layouts/Page.astro";
+import { distribution, runsOnIntel, supportsRegionSharing } from "../../lib/distribution";
+import { windowsListing as windows } from "../../lib/windows";
+import { sitePath } from "../../lib/paths";
+const release = distribution.stable ?? distribution.preview;
+const hasDiskImage = Boolean(release?.diskImage);
+const intel = runsOnIntel(release);
+const regionSharing = supportsRegionSharing(release);
+const refinedRegionSharing = Boolean(release && BigInt(release.build) >= 20n);
+---
+<Page title="How to use Annotator">
+  <article class="prose wrap">
+    <p class="eyebrow">HELP</p><h1>How to use Annotator.</h1>
+    <p>Draw over the app you're explaining, then use that app again without hiding your drawings. All tools are free.</p>
+    {windows && <p>Annotator for Windows has the same tools as the Mac app. Where Windows uses other keys, menus or settings, this guide gives both. To install it, see <a href="#windows">Use Annotator on Windows</a>.</p>}
+    <nav class="guide-nav" aria-label="On this page">
+      <a href="#preview">Get started</a><a href="#limitations">Screen sharing</a>
+      <a href="#region-sharing">Share a region</a>
+      <a href="#permissions">Permissions</a><a href="#save">Save and share</a>
+      <a href="#shortcuts">Shortcuts</a><a href="#settings">Settings</a>
+      <a href="#compatibility">Compatibility</a>{windows && <a href="#windows">Windows</a>}<a href="#ai">AI setup</a>
+    </nav>
+    <h2 id="preview">Make your first drawing</h2>
+    <ol class="start-steps">
+      <li>Open Annotator and the app you want to explain. Choose a drawing tool in the floating toolbar. For example, choose Pen and drag on your screen.</li>
+      <li>Click <strong>Use apps</strong> to work in the app underneath. Your drawings stay visible.</li>
+      <li>Press <strong>Control-Shift-2</strong>{windows && <> (<strong>Ctrl+Shift+2</strong> on Windows)</>} to draw again. This is the default Draw shortcut; you can change it in Settings &gt; Toolbar &amp; Shortcuts.</li>
+    </ol>
+    <p>Escape finishes text or cancels an unfinished drawing first. Press it again to use apps. Escape also exits zoom.</p>
+    <p><strong>Control-2</strong> shows or hides drawings and tools together. <strong>Control-Option-2</strong> only hides them.{windows && <> On Windows, these are <strong>Ctrl+2</strong> and <strong>Ctrl+Alt+Shift+2</strong>.</>} Hiding also hides covers. Your drawings are kept.</p>
+    <p>If the tools are hidden, click Annotator's menu-bar icon and choose <strong>Show drawings and tools</strong>.{windows && " On Windows, the icon is in the system tray, near the clock."} The same menu opens Settings and Help. Reopen the introduction from Settings &gt; Help.</p>
+    <h2 id="limitations">Check what others can see</h2>
+    <p>If you share your whole screen, others may see your drawings and covers. If you share just one app or window, they may not. Ask someone on the call to check before showing private information. Quitting Annotator, or an app crash, removes its covers. Hiding drawings also hides covers.</p>
+    <p>Covers stay where you place them. They do not follow moving windows or scrolling content. Moving or resizing a window, scrolling or changing a page can uncover private details. System windows and windows kept above other apps may appear above covers.</p>
+    <p>Blur, Pixelate and Distort can leave details readable. Filled rectangles and covers do not remove the content underneath. They are not secure redaction. Remove private details from the material you plan to share.</p>
+    <h2 id="region-sharing">Share part of your screen</h2>
+    {regionSharing ? (
+      <>
+        <p>Open Annotator's menu and choose Configure region, or find Share region in Tools &gt; Focus. Choose a display and a preset. A faint fill and click-through outline show the area on your desktop without starting capture, even when the toolbar is hidden.</p>
+        {refinedRegionSharing && <p>For a quick start, choose Share left half or Share right half from the menu. These actions start sharing on your selected display. The faint fill clears when sharing starts; the outline stays.</p>}
+        <p>For a custom area, choose Draw a custom region and drag a rectangle. Escape cancels. Enter a size provides position and size fields in points. The region must stay inside the display and be at least 32 points wide and high.</p>
+        <p>Click Start region sharing, in the chooser or menu. Allow Screen Recording if macOS asks{windows && ", or allow screen access if Windows asks"}. In Teams, Meet or Zoom, choose Share &gt; Window &gt; Annotator - Shared Region. Move any apps you want to show into the outlined area. Work in those original apps; the shared window is view-only.</p>
+        <p>Drawings, labels, image layers, effects, Spotlight and pointer highlights appear in the output. Screen zoom uses the same view as your desktop. The small floating pointer lens stays local. {refinedRegionSharing ? "The visible toolbar appears when it is inside the region. Selection handles and the region outline stay local." : "The toolbar, selection handles and region outline stay out of the output."}</p>
+        <p>On and Off show whether the region is running. {refinedRegionSharing && "A red dot beside Annotator's menu-bar icon also shows that sharing is on. "}{refinedRegionSharing && windows && "On Windows, the dot is on the tray icon. "}Stop region sharing blanks its content. {refinedRegionSharing ? <>Control-2{windows && " (Ctrl+2 on Windows)"} hides drawings, covers and tools in the shared view too. The region keeps running. Showing drawings restores them.</> : "Hiding the toolbar keeps the region on, including your drawings and covers."} Choosing a different area in configuration, locking {windows ? "your computer" : "the Mac"} or changing the display setup turns sharing off; check the outline before starting again. Closing the output also stops it.</p>
+        <p>{refinedRegionSharing && "The shared window opens behind your other apps and keeps updating when covered. "}Keep that window open while your meeting app shares it. {refinedRegionSharing && "Do not minimize it or close it to hide the preview."}</p>
+        <p>Anything inside the region can appear, including notifications. Remove private details first. Annotator does not start the meeting's share, send screen pixels itself, record video or install a camera driver. Ask someone on the call to confirm what they see.</p>
+      </>
+    ) : <p>Region sharing needs build 19 or later. Check the release notes for your download. It lets you choose an outlined part of your desktop and share one window showing the apps inside it.</p>}
+    <h2 id="permissions">Choose the permissions you need</h2>
+    <p>Drawing and pasted image layers need neither Screen Recording nor Accessibility. Annotator does not use your microphone or camera.</p>
+    <dl>
+      <dt>Screen Recording</dt><dd>{regionSharing ? "Zoom, live pixel effects and region sharing" : "Screen zoom and live pixel effects"} need to see your screen. macOS calls this Screen Recording, but Annotator does not record or save a video.</dd>
+      <dt>Accessibility</dt><dd>Option-scroll over other apps needs this permission. The zoom buttons do not need Accessibility, but they still need Screen Recording.</dd>
+    </dl>
+    <p>Open Annotator Settings &gt; Permissions to check access and open the matching macOS System Settings page. A permission being on does not prove screen access is working; start zoom to check it.</p>
+    <p>If Option-scroll works only over Annotator, check that the Accessibility entry belongs to the app copy you use. Replace only an older Annotator entry; leave other apps unchanged. Before quitting and reopening, stop screen sharing and save your board: quitting removes covers. Then try your Live zoom shortcut from Settings &gt; Toolbar &amp; Shortcuts.</p>
+    {windows && <p id="windows-permissions">On Windows, drawing, global shortcuts and Alt+scroll over other apps need no permission. Zoom, live effects and region sharing need screen access. The first time, Annotator explains why, then Windows asks. Settings &gt; Permissions shows whether access works and can open Windows Settings &gt; Privacy &amp; security &gt; Screenshots and screen recording. If effect regions stay covered, check that page.</p>}
+    <h2 id="focus">Help people follow along</h2>
+    <p>Open Tools &gt; Focus for Cursor halo, Spotlight, Pointer lens and Screen zoom. A halo makes your pointer easier to spot. Spotlight dims the surrounding area. The lens and screen zoom make small details easier to read.</p>
+    <p>In Settings &gt; Pointer, choose the halo's shape, color, size, outline, opacity and glow. Click the preview to try Pulse, Ripple or Turn. Keep it visible while turned on, or show it only when you move or click. Custom color expands right there in Settings. Drawing and pointer highlights don't need Screen Recording{windows && " (screen access on Windows)"}; zoom and live effects do.</p>
+
+    <h2 id="colors">Make the color yours</h2>
+    <p>Stroke and Fill each have their own opacity control. New strokes start at 100%. Shapes start without a fill. Turn on Fill shape to use the outline's color or gradient at 40%, or choose a different fill. Changing the color keeps the opacity you've chosen.</p>
+    <p>Choose a solid swatch, a gradient, or Pick from screen. Expand Color wheel to choose a custom color without leaving the palette. Gradients stretch across your drawing rather than changing with time. New shape labels follow the outline's color or gradient. Choose a separate text color if you want the label to stand on its own.</p>
+
+    <h2 id="save">Save and share your work</h2>
+    <p>Save a board to edit your drawings later, or export a PNG to share an image. A board keeps original pasted images, including parts hidden under covers. Do not share a board that contains private details. Open an exported PNG and check it before sharing; blur can still leave details readable.</p>
+    <p>Exported PNGs leave out the live desktop but include images you pasted or inserted. To show your drawings over the desktop, use the macOS Screenshot tool (Shift-Command-5){windows && " or, on Windows, Snipping Tool (Win+Shift+S)"} and capture a selected portion or the entire screen. A single-window capture leaves your drawings out.</p>
+    <h2 id="shapes">Choose a shape</h2>
+    <p>Tools opens in a resizable window. Drag an edge or corner to show more columns and rows, or scroll through the grid. Choosing a shape hides the window; Command-L{windows && " (Ctrl+L on Windows)"} opens it again.</p>
+    <p>Web is a globe. API gateway and Load balancer are separate symbols. Database uses stacked disks; Cylinder preserves the older simple shape. System symbols keep their proportions and use the same artwork in the library and on the desktop.</p>
+    <h2 id="labels">Add labels to shapes</h2>
+    <p>With Select, double-click anywhere inside a shape, even when it has no fill. Or choose Text and click inside it. Type a label and press Escape or Command-Return{windows && " (Ctrl+Enter on Windows)"} to finish. The label is centered and follows the shape when you move, resize, rotate, copy or save it. Double-click again to edit the label.</p>
+    <p>Shift-click objects or drag a selection box to select several. Drag a selected object to move them together. Use the shared corner handles to resize them proportionally, or the top handle to rotate them. Locked objects stay fixed. A selection containing an unlocked cover cannot rotate. Undo reverses the whole move or transform.</p>
+    <p>Use Properties to change the selected shapes together. Fill color is also available in quick properties on a narrow or vertical toolbar. Locked shapes keep their settings. Changing fill leaves each shape’s stroke color and width unchanged.</p>
+    <p>Long labels can expand the shape around its center. While editing, text properties change the label rather than the shape’s outline. Boards containing these labels use a newer file format; older builds reject them instead of dropping the labels.</p>
+    <h2 id="my-shapes">Save your own shapes</h2>
+    <p>Select a drawing or group, then open Tool library &gt; My shapes. Give it a name and click Save selection. Click a saved shape to add an editable copy in the center of your view. Move it where you need it. Deleting a saved shape does not delete copies you already placed.</p>
+    <p>You can save drawings and text. Images, covers and live effects cannot be saved as shapes.</p>
+    <h2 id="settings">Change app settings</h2>
+    <h3>Start when you log in</h3>
+    <p>Open Settings &gt; General and turn on Launch at login. If approval is needed, click Open Login Items and allow Annotator in macOS System Settings. The app starts quietly at login; use its menu-bar icon or drawing shortcut when you need it. Turn the switch off to stop future login launches.</p>
+    <p>This setting belongs to your Mac account and is not included in exported profiles. Keep the app in a stable location, preferably Applications. Registration errors are shown rather than silently enabling a setting that does not work.</p>
+    {windows && <p>On Windows, the switch in Settings &gt; General is Launch at sign-in. Annotator then starts when you sign in, without opening the drawing toolbar. If you turned Annotator off in Windows Settings &gt; Apps &gt; Startup, turn it on there; Open Startup apps takes you to that page. The setting belongs to your Windows account and is not included in exported profiles.</p>}
+    <h3>Choose how the app looks</h3>
+    <p>In Settings, choose System, Light or Dark under Theme. This changes the app controls, not the colors of your drawings.</p>
+    <p>Under Workspace animation, choose how drawings and tools hide and return. Choose Off for no animation. macOS Reduce Motion also turns animations off.{windows && " On Windows, when animation effects are off, a short fade replaces any movement."} Hiding also hides covers.</p>
+    <h3>Arrange your toolbar</h3>
+    <p>Open Settings &gt; Toolbar &amp; Shortcuts. Drag tools to change their order, drag one in from More tools to add it, or drag one out to remove it. You can also add Spotlight, Cursor halo, Pointer lens, Smart draw, and Blur, Pixelate or Distort as their own buttons. Choose Minimal for smaller buttons without key labels, or Expanded for the larger toolbar.</p>
+    <p>To use one color, fill, width and line style for all drawing tools, turn on Share style between tools in Settings &gt; General. It is off at first. The tips in the top-left corner can be turned off there too, with Show tips on screen.</p>
+    <h3>Coffee reminders and settings files</h3>
+    <p>Coffee reminders appear after continued use. Choose Not now to snooze them for at least 30 days. Annotator counts drawing-use days on this {windows ? "computer" : "Mac"} to time them; those counts stay local.</p>
+    <p>Export profile saves tool settings, appearance and shortcuts. Import profile replaces those settings. It does not replace boards or change Launch at login.</p>
+    <h2 id="shortcuts">Default keyboard shortcuts</h2>
+    <p>Change keys in Settings &gt; Toolbar &amp; Shortcuts. Click the key under a tool or button, then press the new key. Tools and buttons can use a letter or a number, and Shift with a letter works too. If another tool already has that key, it moves to the new one and Settings offers to give it back. The table below lists the defaults. Symbols mean ⌃ Control, ⌥ Option, ⇧ Shift and ⌘ Command. Press the shown keys together.{windows && " Where Windows uses other keys, the table shows them under the Mac keys."}</p>
+    <dl>
+      <dt>Control-1{windows && <span class="windows-key">Windows: Ctrl+1</span>}</dt><dd>Turn screen zoom on or off. Screen Recording is required. Option-scroll over other apps also needs Accessibility; the − / + buttons do not.{windows && " On Windows, zoom needs screen access, and Alt+scroll needs no permission."}</dd>
+      <dt>Control-2{windows && <span class="windows-key">Windows: Ctrl+2</span>}</dt><dd>Hide or restore drawings and toolbar together, including covers.</dd>
+      <dt>Control-Shift-2{windows && <span class="windows-key">Windows: Ctrl+Shift+2</span>}</dt><dd>Resume drawing after using other apps. Shows hidden tools and never hides them. Change this in Settings &gt; Toolbar &amp; Shortcuts.</dd>
+      <dt>Control-Option-2{windows && <span class="windows-key">Windows: Ctrl+Alt+Shift+2</span>}</dt><dd>Always hide drawings and toolbar.</dd>
+      <dt>Escape</dt><dd>Finish text or cancel an unfinished drawing. If no edit is active, stop zoom or return to using the app underneath. Press Control-Shift-2{windows && " (Ctrl+Shift+2 on Windows)"} or click Resume drawing to draw again.</dd>
+      <dt>1 2 3 4 5 6 7 8 9 0</dt><dd>Select, rectangle, diamond, ellipse, arrow, line, pen, text, highlighter, eraser.</dd>
+      <dt>R G B Y O P C W K</dt><dd>Red, green, blue, yellow, orange, pink, cyan, white, black ink.</dd>
+      <dt>Control-W / Control-B{windows && <span class="windows-key">Windows: Ctrl+W / Ctrl+B</span>}</dt><dd>Toggle whiteboard / blackboard.</dd>
+      <dt>Delete{windows && <span class="windows-key">Windows: Backspace or Delete</span>}</dt><dd>Delete the selection; clear drawings on all displays when nothing is selected.</dd>
+      <dt>Toolbar trash</dt><dd>Clear drawings and effects on all displays and stop zoom, in one coordinated Undo step.</dd>
+      <dt>Command-V{windows && <span class="windows-key">Windows: Ctrl+V</span>}</dt><dd>Paste an image as an editable layer. Native text fields retain normal paste behavior.</dd>
+      <dt>Command-Return{windows && <span class="windows-key">Windows: Ctrl+Enter</span>}</dt><dd>Finish editing a text label.</dd>
+      <dt>Command-L{windows && <span class="windows-key">Windows: Ctrl+L</span>}</dt><dd>Open the resizable Tools window while Annotator receives keyboard input.</dd>
+      <dt>Command-Z / Shift-Command-Z{windows && <span class="windows-key">Windows: Ctrl+Z / Ctrl+Shift+Z or Ctrl+Y</span>}</dt><dd>Undo and redo.</dd>
+    </dl>
+    <p>Properties cycles quick controls, full properties and tools only. Background, mode, history and window actions remain on the toolbar in each layout. Drag empty toolbar space to move it; buttons, fields and sliders keep their normal actions. Open the tool library for more tools and file actions. The app follows macOS Reduce Motion{windows && " and, on Windows, the animation effects setting"}.</p>
+    <h2 id="displays">Drawing on more than one screen</h2>
+    <p>Draw on a connected screen without moving the toolbar. Click that screen to edit its drawings. Desk/White/Black changes that screen's background; other screens keep their own backgrounds. Control-W toggles Whiteboard and Control-B toggles Blackboard{windows && " (Ctrl+W and Ctrl+B on Windows)"}.</p>
+    <p>Command-A{windows && " (Ctrl+A on Windows)"} selects drawings across screens. Properties, Delete and arrow keys apply to that selection together. Click a screen to select its drawings for dragging or resizing.</p>
+    <p>Drag the toolbar until the pointer touches a screen edge. A preview shows where it will sit. Top and bottom use a horizontal layout; left and right use a vertical layout. Move away from the edge to place it freely.</p>
+    <h2 id="drawing">Drawing details</h2>
+    <p>Pen, Highlighter and Eraser cursors show their size. Hold Shift while highlighting for a straight line. Release Shift to draw freely. Undo removes the whole stroke.</p>
+    <p>Effects offers Blur, Pixelate and Distort. Zero Blur or Pixelate strength turns off the effect. Use Rectangle with a fill for an ordinary solid block. Older solid covers remain opaque. Hold Shift while resizing to keep the same proportions.</p>
+    <p>The eraser can remove unlocked covers, and toolbar trash clears drawings and effects. Undo restores removed objects. Clear drawings (keep effects) preserves covers.</p>
+    <h2 id="compatibility">Compatibility</h2>
+    {intel
+      ? <p>Requires macOS 14 or later, on a Mac with Apple Silicon or an Intel processor. Check Apple menu &gt; About This Mac. Intel support is new, so please report anything that doesn't work. VoiceOver support and testing on other hardware are incomplete. Older supported Macs, multiple screens, more keyboard languages and screen-sharing apps still need physical checks. An App Store release is not promised.</p>
+      : <p>Requires macOS 14 or later and Apple Silicon (an Apple M-series chip). Check Apple menu &gt; About This Mac. VoiceOver support and testing on other hardware are incomplete. Older supported Macs, multiple screens, more keyboard languages and screen-sharing apps still need physical checks. Intel support and an App Store release are not promised.</p>}
+    {windows && <p>Annotator for Windows requires Windows 11, version 22H2 or later, on an x64 or ARM64 PC. Narrator support and testing on other PCs are incomplete. Multiple screens and screen-sharing apps still need physical checks.</p>}
+    {/* The disk image and the Applications offer arrive in the same release, so describe them only once it is published. */}
+    {hasDiskImage ? (
+      <p id="install">{windows ? "On a Mac, keep" : "Keep"} Annotator in the Applications folder: it can update itself only from there. Open the disk image and drag Annotator into Applications, or move it there from the ZIP in Finder. If you open Annotator from anywhere else, it offers to show it in Finder so you can drag it into Applications. It never moves itself or changes macOS security checks.</p>
+    ) : (
+      <p id="install">{windows ? "On a Mac, keep" : "Keep"} Annotator in the Applications folder: it can update itself only from there. After you unzip it, drag Annotator into Applications in Finder, then open it from there.</p>
+    )}
+    {windows && <p>On Windows, the Microsoft Store installs Annotator and its updates, so there is no folder to choose.</p>}
+    <p>Annotator works on the live desktop. It does not have a separate image editor or a built-in video recorder. <a href={sitePath("/downloads/")}>See available releases and known limits.</a></p>
+    {windows && (
+      <>
+        <h2 id="windows">Use Annotator on Windows</h2>
+        <p>Requires Windows 11, version 22H2 or later, on an x64 or ARM64 PC. To check, open Settings &gt; System &gt; About.</p>
+        <p><a href={windows.listingURL}>Get Annotator from the Microsoft Store</a>. Updates come from the Store too.</p>
+        <p>Or run this in Terminal. winget installs the same app from the Microsoft Store.</p>
+        <pre class="command-block" tabindex="0" role="region" aria-label="winget install command"><code>{windows.wingetCommand}</code></pre>
+        <p>On Windows, use Ctrl for Command and Control, Alt for Option, and Enter for Return. The one exception is Control-Option-2, which becomes Ctrl+Alt+Shift+2. <a href="#shortcuts">Default keyboard shortcuts</a> lists every Windows key. Where this guide says menu-bar icon, use Annotator's icon in the system tray, near the clock. Windows can keep the icon in the hidden icons menu; your Show / hide shortcut still shows the tools.</p>
+        <p>Windows needs no permission for Annotator's shortcuts or Alt+scroll over other apps. Zoom, live effects and region sharing read the screen, so they need <a href="#windows-permissions">screen access</a>.</p>
+      </>
+    )}
+    <h2 id="ai">Use an AI assistant (optional)</h2>
+    <p>An AI app with computer-use tools can use Annotator's normal interface. That app needs its own {windows ? "macOS or Windows" : "macOS"} permissions and may send screenshots and text to its provider. Check its privacy settings before using private information. <a href={sitePath("/ai/")}>Read the setup steps and download the skill.</a></p>
+    <h2 id="feedback">Report a problem</h2>
+    <p>Open Settings &gt; Help &gt; Report a problem, or <a href={sitePath("/support/")}>use the support page</a>. You write the draft first. Opening a GitHub draft sends its text and app version to GitHub; submitting it there makes it public. Remove private details before opening GitHub.</p>
+  </article>
+</Page>

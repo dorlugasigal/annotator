@@ -1,0 +1,138 @@
+{
+ "accessibility": {
+  "increaseContrast": false,
+  "reduceMotion": false
+ },
+ "colors": {
+  "dark": {
+   "controlAccentColor": "#007AFFFF",
+   "controlBackgroundColor": "#1E1E1EFF",
+   "controlColor": "#FFFFFF3F",
+   "controlTextColor": "#FFFFFFD8",
+   "disabledControlTextColor": "#FFFFFF3F",
+   "gridColor": "#1A1A1AFF",
+   "keyboardFocusIndicatorColor": "#1AA9FF7F",
+   "labelColor": "#FFFFFFD8",
+   "linkColor": "#419CFFFF",
+   "quaternaryLabelColor": "#FFFFFF19",
+   "secondaryLabelColor": "#FFFFFF8C",
+   "selectedContentBackgroundColor": "#0059D1FF",
+   "separatorColor": "#FFFFFF19",
+   "systemBlue": "#0091FFFF",
+   "systemGray": "#98989DFF",
+   "systemGreen": "#30D158FF",
+   "systemOrange": "#FF9230FF",
+   "systemPink": "#FF375FFF",
+   "systemPurple": "#DB34F2FF",
+   "systemRed": "#FF4245FF",
+   "systemTeal": "#00D2E0FF",
+   "systemYellow": "#FFD600FF",
+   "tertiaryLabelColor": "#FFFFFF3F",
+   "textBackgroundColor": "#1E1E1EFF",
+   "underPageBackgroundColor": "#282828FF",
+   "unemphasizedSelectedContentBackgroundColor": "#464646FF",
+   "windowBackgroundColor": "#1E1E1EFF"
+  },
+  "light": {
+   "controlAccentColor": "#007AFFFF",
+   "controlBackgroundColor": "#FFFFFFFF",
+   "controlColor": "#FFFFFFFF",
+   "controlTextColor": "#000000D8",
+   "disabledControlTextColor": "#0000003F",
+   "gridColor": "#E6E6E6FF",
+   "keyboardFocusIndicatorColor": "#0067F47F",
+   "labelColor": "#000000D8",
+   "linkColor": "#0068DAFF",
+   "quaternaryLabelColor": "#00000019",
+   "secondaryLabelColor": "#0000007F",
+   "selectedContentBackgroundColor": "#0064E1FF",
+   "separatorColor": "#00000019",
+   "systemBlue": "#0088FFFF",
+   "systemGray": "#8E8E93FF",
+   "systemGreen": "#34C759FF",
+   "systemOrange": "#FF8D28FF",
+   "systemPink": "#FF2D55FF",
+   "systemPurple": "#CB30E0FF",
+   "systemRed": "#FF383CFF",
+   "systemTeal": "#00C3D0FF",
+   "systemYellow": "#FFCC00FF",
+   "tertiaryLabelColor": "#00000042",
+   "textBackgroundColor": "#FFFFFFFF",
+   "underPageBackgroundColor": "#F6F6F6FF",
+   "unemphasizedSelectedContentBackgroundColor": "#DCDCDCFF",
+   "windowBackgroundColor": "#FFFFFFFF"
+  }
+ },
+ "labelFontSize": 10,
+ "note": "Resolved on this Mac. controlAccentColor follows the Mac's accent setting. One macOS point is one Windows DIP. SwiftUI .caption is caption1; .title is title1.",
+ "smallSystemFontSize": 11,
+ "systemFontSize": 13,
+ "textStyles": [
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 26,
+   "style": "largeTitle",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 22,
+   "style": "title1",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 17,
+   "style": "title2",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 15,
+   "style": "title3",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 13,
+   "style": "headline",
+   "weight": 0.4000000059604645
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 11,
+   "style": "subheadline",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 13,
+   "style": "body",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 12,
+   "style": "callout",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 10,
+   "style": "footnote",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 10,
+   "style": "caption1",
+   "weight": 0
+  },
+  {
+   "family": ".AppleSystemUIFont",
+   "size": 10,
+   "style": "caption2",
+   "weight": 0
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+  "description": "Homebrew tap for Annotator, the free Mac app for drawing on your screen as you explain. Install: brew install --cask dorlugasigal/annotator/annotator",
+  "topics": [
+    "annotation",
+    "homebrew",
+    "homebrew-cask",
+    "homebrew-tap",
+    "macos",
+    "macos-app",
+    "screen-annotation"
+  ]
+}

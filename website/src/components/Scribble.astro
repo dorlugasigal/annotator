@@ -1,0 +1,24 @@
+---
+// Original hand-drawn marks that echo Annotator's rough ellipse, curved arrow and check.
+// Each stroke has pathLength="1" so CSS can draw it with stroke-dashoffset.
+interface Props { kind: "ring" | "ellipse" | "arrow" | "check"; class?: string }
+const { kind, class: className } = Astro.props;
+const marks = {
+  ring: { viewBox: "0 0 240 80", fit: "none", strokes: [
+    "M44 13C96 3 178 4 213 19C239 31 236 58 197 69C150 81 66 80 27 65C3 55 4 30 34 19C64 9 121 5 171 9",
+  ] },
+  ellipse: { viewBox: "0 0 300 110", fit: "none", strokes: [
+    "M62 20C124 4 232 6 272 28C299 45 290 82 236 95C170 110 72 106 30 86C3 72 9 38 52 24C92 12 152 8 206 14",
+  ] },
+  arrow: { viewBox: "0 0 150 110", fit: "xMidYMid meet", strokes: [
+    "M10 12C56 1 112 16 128 82",
+    "M109 66L129 85L141 59",
+  ] },
+  check: { viewBox: "0 0 24 24", fit: "xMidYMid meet", strokes: ["M5 12.5 10 17.5 19.5 6.5"] },
+} as const;
+const mark = marks[kind];
+---
+<svg class:list={["scribble", `scribble--${kind}`, className]} viewBox={mark.viewBox} preserveAspectRatio={mark.fit}
+  aria-hidden="true" focusable="false">
+  {mark.strokes.map((d, index) => <path d={d} pathLength="1" style={`--stroke-index:${index}`}/>)}
+</svg>

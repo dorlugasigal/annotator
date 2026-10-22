@@ -1,0 +1,35 @@
+<Project>
+  <!--
+    Compiles the effect shaders at build time with fxc.exe from the installed Windows SDK (see
+    tools/windows/toolchain.json) and embeds the bytecode. One item per entry point:
+      <EffectShader Include="Effects/Shaders/effects.hlsl" Entry="ps_blur" Profile="ps_5_0" />
+    The resource name is the entry point with a .cso extension.
+  -->
+  <PropertyGroup>
+    <AnnotatorKitsRoot Condition="'$(AnnotatorKitsRoot)' == ''">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Kits\Installed Roots', 'KitsRoot10', null, RegistryView.Registry32))</AnnotatorKitsRoot>
+    <AnnotatorKitsRoot Condition="'$(AnnotatorKitsRoot)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.ProgramFilesX86))\Windows Kits\10\</AnnotatorKitsRoot>
+    <AnnotatorFxcVersion Condition="'$(AnnotatorFxcVersion)' == ''">10.0.26100.0</AnnotatorFxcVersion>
+    <AnnotatorFxc Condition="'$(AnnotatorFxc)' == ''">$(AnnotatorKitsRoot)bin\$(AnnotatorFxcVersion)\x64\fxc.exe</AnnotatorFxc>
+    <!-- Imported from the project body, before the SDK defines IntermediateOutputPath. -->
+    <AnnotatorShaderDir>$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory), $(BaseIntermediateOutputPath), $(Configuration), $(TargetFramework), shaders))</AnnotatorShaderDir>
+  </PropertyGroup>
+
+  <Target Name="AnnotatorCompileShaders"
+          BeforeTargets="BeforeBuild"
+          Condition="'@(EffectShader)' != ''"
+          Inputs="@(EffectShader);$(MSBuildThisFileFullPath)"
+          Outputs="@(EffectShader->'$(AnnotatorShaderDir)%(Entry).cso')">
+    <Error Condition="!Exists('$(AnnotatorFxc)')" Text="fxc.exe was not found at $(AnnotatorFxc). Install Windows SDK $(AnnotatorFxcVersion) (tools/windows/toolchain.json)." />
+    <MakeDir Directories="$(AnnotatorShaderDir)" />
+    <Exec Command="&quot;$(AnnotatorFxc)&quot; /nologo /WX /O3 /Qstrip_reflect /Qstrip_debug /T %(EffectShader.Profile) /E %(EffectShader.Entry) /Fo &quot;$(AnnotatorShaderDir)%(EffectShader.Entry).cso&quot; &quot;%(EffectShader.FullPath)&quot;" />
+  </Target>
+
+  <Target Name="AnnotatorEmbedShaders"
+          BeforeTargets="PrepareResourceNames;AssignTargetPaths"
+          DependsOnTargets="AnnotatorCompileShaders"
+          Condition="'@(EffectShader)' != ''">
+    <ItemGroup>
+      <EmbeddedResource Include="@(EffectShader->'$(AnnotatorShaderDir)%(Entry).cso')" LogicalName="%(Entry).cso" WithCulture="false" />
+    </ItemGroup>
+  </Target>
+</Project>

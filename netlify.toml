@@ -1,0 +1,31 @@
+[build]
+  command = "npm --prefix website ci --no-audit --no-fund && npm --prefix services/metrics ci --no-audit --no-fund && npm --prefix services/metrics run typecheck && npm --prefix website run build:netlify"
+  publish = "website/dist"
+
+[build.environment]
+  NODE_VERSION = "26.8.1"
+
+[functions]
+  directory = "services/metrics/netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["services/metrics/NETLIFY-LICENSE.txt"]
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+    Referrer-Policy = "no-referrer"
+    Content-Security-Policy = "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+
+[[headers]]
+  for = "/updates/*"
+  [headers.values]
+    Cache-Control = "no-cache"

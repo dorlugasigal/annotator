@@ -1,0 +1,49 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 472,
+  "width": 720,
+  "x": 1816,
+  "y": 54
+ },
+ "contactSheet": "sharing-output.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "end",
+   "time": 15.9
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 15.928333333333333,
+ "events": [],
+ "fps": 60,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "The output window people share in a call, recorded with the sharing-live take. Its clock starts 0.160 s before sharing-live.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  720,
+  472
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [],
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "startsBeforeSharingLive": 0.15994625014718622,
+ "take": "sharing-output",
+ "title": "Region sharing: the output window",
+ "video": "sharing-output.mp4"
+}

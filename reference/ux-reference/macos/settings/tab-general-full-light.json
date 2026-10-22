@@ -1,0 +1,499 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        67,
+        48,
+        16
+       ],
+       "label": "Startup",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        103,
+        92.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Launch at login"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        102.5,
+        38,
+        18
+       ],
+       "help": "Start Annotator for this Mac account without opening the drawing toolbar.",
+       "identifier": "launch-at-login",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        125.5,
+        180.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Annotator will not start automatically."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        144.5,
+        142,
+        24
+       ],
+       "label": "Open Login Items...",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        174.5,
+        350,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Managed by macOS for this account. Not included in exported profiles."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        208.5,
+        125.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show menu-bar icon"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        208,
+        38,
+        18
+       ],
+       "help": "If the menu bar is full, macOS may hide the icon. You can still show the tools with your Show / hide shortcut.",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        246,
+        134,
+        24
+       ],
+       "label": "Show introduction",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        310,
+        52,
+        16
+       ],
+       "label": "Drawing",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        346,
+        156.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Share style between tools"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        345.5,
+        38,
+        18
+       ],
+       "identifier": "share-tool-styles",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        383.5,
+        681,
+        26
+       ],
+       "role": "AXStaticText",
+       "value": "When this is on, changing the color, fill, opacity, width or line style of one tool changes it for all drawing tools. Effects, the eraser and images keep their own settings. Text size and arrowheads stay separate."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        449.5,
+        76.5,
+        16
+       ],
+       "label": "Appearance",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        485.5,
+        42,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Theme"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        669.5,
+        482,
+        92.5,
+        24
+       ],
+       "help": "Changes app controls and windows, not your drawings.",
+       "role": "AXPopUpButton",
+       "value": "System"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        524,
+        122.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show tips on screen"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        523.5,
+        38,
+        18
+       ],
+       "help": "Tips in the top-left corner show your keys and what to do next while you draw.",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        561.5,
+        130,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Workspace animation"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        673,
+        557.5,
+        89,
+        24
+       ],
+       "help": "Choose how drawings and tools hide and return. Off turns animation off. When macOS Reduce Motion is on, a short fade replaces any movement.",
+       "role": "AXPopUpButton",
+       "value": "Gather"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        79.5,
+        601,
+        239,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Hiding drawings and tools also hides covers."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        655.5,
+        53.5,
+        16
+       ],
+       "label": "Updates",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": false,
+       "frame": [
+        78,
+        691.5,
+        147,
+        24
+       ],
+       "label": "Check for updates...",
+       "role": "AXButton"
+      },
+      {
+       "enabled": false,
+       "frame": [
+        78,
+        736.5,
+        195,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Automatically check for updates"
+      },
+      {
+       "enabled": false,
+       "frame": [
+        725,
+        736,
+        38,
+        18
+       ],
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        775.5,
+        354.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Updates aren't set up in this build. Find new versions in Settings > About."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        55.5,
+        815,
+        210,
+        16
+       ],
+       "label": "What an update check sends",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        865,
+        47,
+        16
+       ],
+       "label": "Privacy",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        902,
+        120,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Share usage counts"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        901.5,
+        38,
+        18
+       ],
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        941,
+        103.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Usage counts are off."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        55.5,
+        980.5,
+        128,
+        16
+       ],
+       "label": "What's shared?",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        1021.5,
+        88,
+        16
+       ],
+       "label": "Privacy details",
+       "role": "AXLink"
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      1288
+     ],
+     "role": "AXScrollArea"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      112,
+      1369,
+      131.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Enjoying Annotator?"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      112,
+      1390,
+      253.5,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Coffee is always welcome. All tools stay free."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      661,
+      1375,
+      122,
+      24
+     ],
+     "label": "Buy me a coffee",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    1422
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    1456,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "settings/tab-general-full-light.png",
+ "kind": "view",
+ "notes": "Settings, general tab, stretched to 1500 points so the whole scrolling content shows.",
+ "pixels": [
+  1680,
+  3000
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  1500
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-general-full",
+ "surface": "settings"
+}

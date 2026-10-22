@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Annotator.Rendering: executes Annotator.Core display lists with Direct2D, DirectWrite and WIC, exports PNGs and presents scenes on the overlay. Windows only. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+    <RootNamespace>Annotator.Rendering</RootNamespace>
+    <AssemblyName>Annotator.Rendering</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.363" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Annotator.Core\Annotator.Core.csproj" />
+    <ProjectReference Include="..\Annotator.Platform\Annotator.Platform.csproj" />
+    <ProjectReference Include="..\Annotator.Workspace\Annotator.Workspace.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Annotator.Rendering.Tests" />
+    <InternalsVisibleTo Include="Annotator.RenderHarness" />
+    <InternalsVisibleTo Include="Annotator.Benchmarks" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Pixel effect shaders, compiled with fxc at build time and embedded (Effects/Shaders/Shaders.targets). -->
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="vs_main" Profile="vs_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_down" Profile="ps_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_blur" Profile="ps_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_up" Profile="ps_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_pixelate" Profile="ps_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_twirl" Profile="ps_5_0" />
+    <!-- Dissolve's particle bursts (Motion/ParticleBursts.cs). -->
+    <EffectShader Include="Motion\Shaders\particles.hlsl" Entry="image_vs" Profile="vs_5_0" />
+    <EffectShader Include="Motion\Shaders\particles.hlsl" Entry="image_ps" Profile="ps_5_0" />
+    <EffectShader Include="Motion\Shaders\particles.hlsl" Entry="particle_vs" Profile="vs_5_0" />
+    <EffectShader Include="Motion\Shaders\particles.hlsl" Entry="particle_ps" Profile="ps_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_image" Profile="ps_5_0" />
+    <!-- Screen zoom, the pointer lens and the effect layer under zoom (Effects/EffectPipeline.cs, RenderView). -->
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_zoom" Profile="ps_5_0" />
+    <EffectShader Include="Effects\Shaders\effects.hlsl" Entry="ps_project" Profile="ps_5_0" />
+    <!-- Capture frame comparison, so frames that change nothing are skipped (Effects/CaptureFrameComparer.cs). -->
+    <EffectShader Include="Effects\Shaders\compare.hlsl" Entry="cs_compare" Profile="cs_5_0" />
+  </ItemGroup>
+  <Import Project="Effects\Shaders\Shaders.targets" />
+</Project>
