@@ -456,11 +456,12 @@ def submit(folder, executable, environ, run=None, out=print):
     if missing:
         raise Stop("The windows-store environment lacks the secrets " + ", ".join(missing) + ".")
     run = run or StoreCLI(executable, out)
-    run("settings", "--enableTelemetry", "false", timeout=5 * MINUTES, label="settings")
     tenant, seller, client, secret = credentials
     try:
+        # A fresh CLI refuses every other command, settings included, until reconfigure has signed it in.
         run("reconfigure", "--tenantId", tenant, "--sellerId", seller, "--clientId", client, "--clientSecret", secret,
             timeout=10 * MINUTES, label="reconfigure")
+        run("settings", "--enableTelemetry", "false", timeout=5 * MINUTES, label="settings")
         if target == "testers" and flight:
             run("publish", str(bundle), "-id", store_id, "-f", flight, timeout=45 * MINUTES, label="publish")
             result = {"target": "package flight", "flight": flight, "committed": True}

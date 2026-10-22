@@ -394,13 +394,13 @@ class StoreTests(BundleFixture):
         publish = self.calls[2]
         self.assertEqual(publish[:4], ["publish", str(self.artifact / "Annotator_1.1.26.0.msixbundle"), "-id", STORE_ID])
         self.assertEqual(publish[4:], ["-f", FLIGHT])
-        self.assertEqual(self.commands(), ["settings", "reconfigure", "publish", "reconfigure"])
+        self.assertEqual(self.commands(), ["reconfigure", "settings", "publish", "reconfigure"])
         self.assertEqual(self.calls[-1], ["reconfigure", "--reset"])
 
     def test_without_a_flight_testers_get_the_private_audience_only(self):
         result, _ = self.submit()
         self.assertEqual(result["target"], "private audience")
-        self.assertEqual(self.commands(), ["settings", "reconfigure", "publish", "submission get", "submission publish",
+        self.assertEqual(self.commands(), ["reconfigure", "settings", "publish", "submission get", "submission publish",
                                            "reconfigure"])
         self.assertIn("--noCommit", self.calls[2])
         for visibility in ("Public", "Hidden", "NotSet"):
@@ -424,10 +424,11 @@ class StoreTests(BundleFixture):
         hosted.submit(self.artifact, Path("msstore.exe"), environ, run=self.run_cli, out=lambda line: None)
         for name in SECRETS:
             self.assertNotIn(name, environ)
-        sign_in = self.calls[1]
+        # The CLI is signed in first: a fresh install refuses every other command until then.
+        sign_in = self.calls[0]
         self.assertEqual(sign_in, ["reconfigure", "--tenantId", "tenant-secret", "--sellerId", "seller-secret",
                                    "--clientId", "client-secret-id", "--clientSecret", "very-secret-value"])
-        for call in self.calls[2:]:
+        for call in self.calls[1:]:
             self.assertFalse(set(call) & set(SECRETS.values()))
 
     def test_missing_secrets_or_ids_stop_before_the_cli_runs(self):
