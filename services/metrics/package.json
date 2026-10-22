@@ -15,8 +15,12 @@
   },
   "devDependencies": {
     "@netlify/functions": "6.0.0",
-    "netlify-cli": "27.8.0",
+    "netlify-cli": "27.12.1",
     "@types/node": "26.4.1",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "sharp": "0.35.5",
+    "toml": "5.0.1"
   }
 }
