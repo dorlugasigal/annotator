@@ -27,7 +27,7 @@ jobs:
       macos: ${{ steps.scope.outputs.macos }}
       windows: ${{ steps.scope.outputs.windows }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 2
           persist-credentials: false
@@ -53,7 +53,7 @@ jobs:
           python3 tools/windows/test_publish_windows.py
           python3 tools/windows/test_hosted_release.py
           git diff --check
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         if: steps.scope.outputs.website == 'true' || steps.scope.outputs.metrics == 'true'
         with:
           node-version: "26.8.1"
@@ -79,7 +79,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - name: Select pinned Xcode
@@ -109,7 +109,7 @@ jobs:
       DOTNET_NOLOGO: "1"
       PYTHONUTF8: "1"
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - name: Read the pinned toolchain
