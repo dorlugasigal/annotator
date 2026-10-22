@@ -17,7 +17,7 @@
     "test:windows": "node scripts/test-windows.mjs"
   },
   "dependencies": {
-    "astro": "7.3.1",
+    "astro": "7.3.8",
     "three": "0.185.1"
   },
   "devDependencies": {

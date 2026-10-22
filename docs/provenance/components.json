@@ -24,7 +24,7 @@
     {
       "name": "Netlify local publisher",
       "origin": "https://github.com/netlify/cli",
-      "version": "27.8.0",
+      "version": "27.12.1",
       "license": "MIT",
       "disposition": "development-build-dependency",
       "notice": "services/metrics/node_modules/netlify-cli/LICENSE",
@@ -44,7 +44,7 @@
     {
       "name": "Astro static website build",
       "origin": "https://github.com/withastro/astro",
-      "version": "7.3.1",
+      "version": "7.3.8",
       "license": "MIT",
       "disposition": "development-build-dependency",
       "notice": "website/node_modules/astro/LICENSE",
