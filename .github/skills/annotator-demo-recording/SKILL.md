@@ -1,6 +1,6 @@
 ---
 name: annotator-demo-recording
-description: Record and refine real Annotator product demonstrations from this source repository, on macOS and Windows. Use for fresh website clips, the Windows app's website screenshots, Windows replays of the Mac's live recordings, visible toolbar interactions, point-by-point curved arrows, rough shapes, native blur, pacing changes and recording quality checks. Reuse the isolated native recorders, preserve the user's workspace and distinguish scripted footage from human or computer-use acceptance.
+description: Record and refine real Annotator product demonstrations from this source repository, on macOS and Windows. Use for fresh website clips, Windows replays of the Mac's live recordings, visible toolbar interactions, point-by-point curved arrows, rough shapes, native blur, pacing changes and recording quality checks. Reuse the isolated native recorders, preserve the user's workspace and distinguish scripted footage from human or computer-use acceptance.
 ---
 
 # Record Annotator demos
@@ -165,38 +165,6 @@ UX reference sheets and render harness comparisons are parity evidence, not
 marketing footage. Follow the on-screen rules in the Windows section of
 `.github/skills/annotator-local-validation/SKILL.md`: display on, one
 Annotator per session, bounded processes, evidence outside the repository.
-
-### Website screenshots
-
-`tools/windows/website-shots.ps1` takes the six pictures (`draw`, `properties`,
-`color`, `blur`, `zoom`, `settings`; choose with `-Shots`). Read its header
-first. It opens the sample window of `tools/windows/website-backdrop.ps1` over
-an area at the top of the primary display, starts the development app with
-`--live-check` (in-memory profile, no tray icon, global shortcut or saved
-setting), drives the real toolbar, canvas, color popover, effects, zoom and
-Settings, and saves the area with the render harness's Windows.Graphics.Capture
-`shot` mode, without the system pointer:
-
-```powershell
-dotnet build apps/windows/src/Annotator.App/Annotator.App.csproj -c Debug -p:Platform=x64
-dotnet build apps/windows/tools/Annotator.RenderHarness -c Release
-pwsh -NoProfile -File tools/windows/website-shots.ps1 -Out <folder outside the repository>
-python tools/windows/encode_website_shots.py <that folder> --commit <source SHA>
-```
-
-- It refuses to start while another Annotator or render harness runs, while
-  the PC had input in the last `-IdleSeconds` (60) or while the display is
-  off. It skips a shot when another app's window lies over the sample window
-  in the area. It takes the keyboard focus for about a minute; run it only
-  when nobody is using the PC.
-- The encoder crops each shot to 16:10, writes `website/media/windows/` and
-  `website/src/data/windows-shots.json` (sizes, checksums, crops and how each
-  shot was made). The site uses them only while
-  `website/src/data/windows-listing.json` names a published Store listing.
-  Run the website checks afterwards, including `test:windows`.
-- The pictures show a development build at the display's scale and the PC's
-  theme. Say so in the pull request, and take them again when the
-  toolbar or Settings change.
 
 ### Replays of the Mac's live recordings
 
