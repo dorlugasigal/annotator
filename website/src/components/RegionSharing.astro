@@ -1,0 +1,67 @@
+---
+import recording from "../data/region-sharing.json";
+import { sitePath } from "../lib/paths";
+import SiteIcon from "./SiteIcon.astro";
+const take = recording.take;
+const version = take.sha256.slice(0, 12);
+const videoURL = `${sitePath(take.file)}?v=${version}`;
+const label = "Choose Right half, Center third, Top left and Left half in Annotator";
+---
+<section class="region-sharing wrap" id="region-sharing" aria-labelledby="region-sharing-title">
+  <div class="region-copy">
+    <h2 id="region-sharing-title">Share your ultrawide clearly.</h2>
+    <p>Show half, a third or any area, so text stays readable.</p>
+    <details>
+      <summary>How to share</summary>
+      <p>Open Configure region from Annotator's menu. Choose a preset, or draw a rectangle on your desktop. The outline shows what you chose.</p>
+      <p>Start region sharing, then choose Share &gt; Window &gt; <strong>Annotator - Shared Region</strong> in your meeting app. Move apps into that area. Hiding the toolbar keeps the region on.</p>
+      <p>Needs screen access. Anything inside the region can appear, including notifications. Remove private details and ask someone on the call to check their view.</p>
+      <a href={sitePath("/docs/#region-sharing")}>Region-sharing guide <span aria-hidden="true">↗</span></a>
+    </details>
+  </div>
+  <figure class="player region-film" data-native-take="region" style={`--take-ratio:${take.width} / ${take.height}`}>
+    <div class="player-screen take-frame">
+      <picture class="take-poster" data-take-poster>
+        <img src={`${sitePath(take.poster)}?v=${version}`} width={take.width} height={take.height}
+             alt="" decoding="async" loading="lazy"/>
+      </picture>
+      <video src={videoURL} crossorigin="anonymous" controls muted playsinline preload="none"
+             width={take.width} height={take.height} aria-label={label} data-take-video data-playback-rate="1">
+        <p>Your browser cannot play this recording. <a href={videoURL}>Open the video.</a></p>
+      </video>
+      <p class="player-status" data-take-status role="status" hidden></p>
+    </div>
+    <figcaption class="player-chin">
+      <div class="player-chin-row">
+        <p class="player-caption">Region presets.</p>
+        <button type="button" class="player-toggle" data-take-toggle hidden aria-label={`Play ${label}`}>
+          <span class="player-toggle-symbol" data-take-symbol="Play" aria-hidden="true">
+            <span data-action="Play"><SiteIcon name="play"/></span>
+            <span data-action="Pause" hidden><SiteIcon name="pause"/></span>
+            <span data-action="Replay" hidden><SiteIcon name="replay"/></span>
+          </span><span data-take-label>Play</span>
+        </button>
+      </div>
+      <p class="take-error" data-take-error role="status" hidden>
+        <span data-take-error-reason>The recording could not play.</span> Try Play again. You can also <a href={videoURL}>open the video</a>.
+      </p>
+    </figcaption>
+  </figure>
+</section>
+<script>import "../scripts/product-takes";</script>
+
+<style>
+  .region-sharing { display: grid; grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr); gap: 48px; align-items: center; padding-block: 72px; border-top: 1px solid var(--line); }
+  .region-copy h2 { margin: 0; font-size: var(--text-h2); line-height: 1.06; font-weight: 520; letter-spacing: -.03em; text-wrap: balance; }
+  .region-copy > p:not(.eyebrow) { margin: 18px 0 0; color: var(--muted); font-size: var(--text-body); line-height: 1.55; }
+  .region-copy strong { color: var(--ink); font-weight: 600; }
+  .region-copy details { margin-top: 16px; }
+  .region-copy summary { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); font-size: var(--text-small); cursor: pointer; }
+  .region-copy details p { color: var(--muted); font-size: var(--text-small); line-height: 1.55; }
+  .region-copy a { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; margin-top: 12px; color: var(--ink); font-size: var(--text-small); }
+  .region-film { min-width: 0; }
+  .region-film .player-chin { padding-left: 16px; }
+  @media (max-width: 760px) {
+    .region-sharing { grid-template-columns: 1fr; gap: 28px; padding-block: 48px; }
+  }
+</style>

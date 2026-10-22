@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "take": {
+    "file": "/demo/showcase-region.mp4",
+    "poster": "/demo/showcase-region.jpg",
+    "width": 960,
+    "height": 708,
+    "duration": 7.833333,
+    "sha256": "8144085fbaed158afb93046980edca22f5193afcb0e303f926d1b72b52a313fd",
+    "sourceSHA256": "c703a2fee0c4755820666f8cf871000613b8a4f9418751fad55af2be8d32d310",
+    "sourceFile": "region-0A502AD0-8DF4-49B8-B72D-FC4A43F20F97.mp4",
+    "imageWorkspace": false,
+    "toolbarAppearance": "dark",
+    "ink": "native accent",
+    "crop": [
+      24,
+      24,
+      960,
+      708
+    ],
+    "speed": 1,
+    "encoding": {
+      "codec": "h264",
+      "profile": "Main",
+      "level": 32,
+      "pixelFormat": "yuv420p",
+      "frameRate": 30
+    },
+    "toolbarClearance": 16,
+    "actions": [
+      {
+        "control": "Right half",
+        "rect": {
+          "height": 48,
+          "width": 105,
+          "x": 629,
+          "y": 176
+        },
+        "time": 1.2323719166597584
+      },
+      {
+        "control": "Center third",
+        "rect": {
+          "height": 48,
+          "width": 142,
+          "x": 666,
+          "y": 258
+        },
+        "time": 2.800055916668498
+      },
+      {
+        "control": "Top left",
+        "rect": {
+          "height": 48,
+          "width": 104,
+          "x": 518,
+          "y": 340
+        },
+        "time": 4.422801749999053
+      },
+      {
+        "control": "Left half",
+        "rect": {
+          "height": 48,
+          "width": 104,
+          "x": 518,
+          "y": 176
+        },
+        "time": 6.023293125006603
+      }
+    ],
+    "input": "Scripted native accessibility presses with an owned pointer; not human or computer-use acceptance.",
+    "preparedControls": [
+      "Region sharing chooser",
+      "Hidden drawing toolbar"
+    ],
+    "toolbarAnchorStable": false,
+    "toolbarPropertiesMode": null,
+    "toolbarBottomInset": null,
+    "toolbarSamples": [],
+    "recorded": "2026-10-12"
+  }
+}

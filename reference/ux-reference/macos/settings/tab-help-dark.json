@@ -1,0 +1,215 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        51,
+        75,
+        116.5,
+        24
+       ],
+       "label": "Quick start",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        175.5,
+        75,
+        126,
+        24
+       ],
+       "label": "Online guide",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        309.5,
+        75,
+        110,
+        24
+       ],
+       "label": "Shortcuts",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        28.5,
+        148,
+        154.5,
+        15
+       ],
+       "identifier": "help-sharing",
+       "label": "Screen-sharing limits",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        28.5,
+        193,
+        120.5,
+        15
+       ],
+       "identifier": "help-saving",
+       "label": "Save and share",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        28.5,
+        238,
+        142,
+        15
+       ],
+       "identifier": "help-ai",
+       "label": "Use an AI assistant",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        51,
+        302,
+        181,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Something we can improve?"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        51,
+        328,
+        140.5,
+        24
+       ],
+       "label": "Report a problem...",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        199.5,
+        328,
+        130,
+        24
+       ],
+       "label": "Share feedback...",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        51,
+        362,
+        479.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "You'll write a draft first. Remove private details before opening GitHub; submitted issues are public."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        51,
+        397,
+        122.5,
+        24
+       ],
+       "help": "App and system details, not drawings or screenshots. Review before sharing.",
+       "role": "AXMenuButton"
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      592
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    622
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    656,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "settings/tab-help-dark.png",
+ "kind": "view",
+ "notes": "Settings, help tab, at its default size. Content below the fold scrolls.",
+ "pixels": [
+  1680,
+  1400
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  700
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-help",
+ "surface": "settings"
+}

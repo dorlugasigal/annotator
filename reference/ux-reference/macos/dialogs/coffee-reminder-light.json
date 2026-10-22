@@ -1,0 +1,81 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      96,
+      32,
+      131.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Enjoying Annotator?"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      96,
+      58,
+      268,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Buy me a coffee if you'd like. All tools stay free."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      96,
+      83,
+      105,
+      20
+     ],
+     "label": "Buy me a coffee",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      209,
+      83,
+      63.5,
+      20
+     ],
+     "help": "Wait at least 30 days and more active use before asking again.",
+     "label": "Not now",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    96,
+    32,
+    268,
+    71
+   ],
+   "identifier": "optional-support-reminder",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/coffee-reminder-light.png",
+ "kind": "view",
+ "notes": "Coffee reminder.",
+ "pixels": [
+  920,
+  270
+ ],
+ "scale": 2,
+ "size": [
+  460,
+  135
+ ],
+ "spec": [
+  "005"
+ ],
+ "state": "coffee-reminder",
+ "surface": "dialogs"
+}

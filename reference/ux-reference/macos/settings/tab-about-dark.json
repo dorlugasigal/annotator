@@ -1,0 +1,213 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        372,
+        75,
+        96,
+        96
+       ],
+       "identifier": "about-app-icon",
+       "label": "Annotator app icon",
+       "role": "AXImage"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        358.5,
+        187,
+        123,
+        31
+       ],
+       "role": "AXStaticText",
+       "value": "Annotator"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        341.5,
+        224,
+        157,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Version 0.1.0-beta.10 (28)"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        393.5,
+        250,
+        53.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Local build"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        296.5,
+        283,
+        247.5,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Draw on your desktop. Keep your app open."
+      },
+      {
+       "enabled": false,
+       "frame": [
+        276.5,
+        314,
+        147,
+        24
+       ],
+       "label": "Check for updates...",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        431.5,
+        314,
+        132.5,
+        24
+       ],
+       "label": "Copy support info",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        243,
+        354,
+        354.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Updates aren't set up in this build. Find new versions in Settings > About."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        346,
+        383,
+        148.5,
+        16
+       ],
+       "label": "Open Downloads page...",
+       "role": "AXLink"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        157.5,
+        436,
+        132.5,
+        16
+       ],
+       "identifier": "release-notes",
+       "label": "What's changed",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        157.5,
+        476,
+        171.5,
+        16
+       ],
+       "label": "Build & support details",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      592
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    622
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    656,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "settings/tab-about-dark.png",
+ "kind": "view",
+ "notes": "Settings, about tab, at its default size. Content below the fold scrolls.",
+ "pixels": [
+  1680,
+  1400
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  700
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-about",
+ "surface": "settings"
+}

@@ -1,0 +1,312 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      74,
+      16.5,
+      93.5,
+      27
+     ],
+     "role": "AXStaticText",
+     "value": "Annotator"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      74,
+      46.5,
+      129,
+      15
+     ],
+     "role": "AXStaticText",
+     "value": "Version 0.1.0-beta.10 (28)"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      26,
+      72,
+      50.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Local build"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      102,
+      288,
+      46
+     ],
+     "identifier": "menu-show-tools",
+     "label": "Show drawings and tools",
+     "role": "AXButton",
+     "value": "⌃2"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      156,
+      288,
+      36
+     ],
+     "identifier": "menu-toggleRegionSharing",
+     "label": "Start region sharing",
+     "role": "AXButton",
+     "value": "Off"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      197,
+      140,
+      34
+     ],
+     "identifier": "menu-shareLeftHalf",
+     "label": "Share left half",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      164,
+      197,
+      140,
+      34
+     ],
+     "identifier": "menu-shareRightHalf",
+     "label": "Share right half",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      236,
+      288,
+      36
+     ],
+     "identifier": "menu-shareRegion",
+     "label": "Configure region...",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      272,
+      288,
+      36
+     ],
+     "help": "Open, save or export a board.",
+     "identifier": "menu-board",
+     "label": "Board",
+     "role": "AXButton",
+     "value": "Collapsed"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      327,
+      288,
+      36
+     ],
+     "identifier": "menu-startBreak",
+     "label": "Start break timer",
+     "role": "AXButton",
+     "value": "10 minutes"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      368,
+      67.5,
+      30
+     ],
+     "identifier": "menu-breakFive",
+     "label": "Start a 5-minute break",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      89.5,
+      368,
+      67.5,
+      30
+     ],
+     "identifier": "menu-breakTen",
+     "label": "Start a 10-minute break",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      163,
+      368,
+      67.5,
+      30
+     ],
+     "identifier": "menu-breakFifteen",
+     "label": "Start a 15-minute break",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      236.5,
+      368,
+      67.5,
+      30
+     ],
+     "identifier": "menu-breakThirty",
+     "label": "Start a 30-minute break",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      26,
+      403,
+      183,
+      13
+     ],
+     "identifier": "menu-break-caption",
+     "role": "AXStaticText",
+     "value": "Your Mac locks if someone touches it."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      441,
+      288,
+      36
+     ],
+     "identifier": "menu-settings",
+     "label": "Settings…",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      477,
+      288,
+      36
+     ],
+     "identifier": "menu-help",
+     "label": "Help",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      513,
+      288,
+      36
+     ],
+     "identifier": "menu-about",
+     "label": "About Annotator",
+     "role": "AXButton"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      16,
+      549,
+      288,
+      36
+     ],
+     "identifier": "menu-checkForUpdates",
+     "label": "Check for updates…",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      26,
+      585,
+      268,
+      26
+     ],
+     "role": "AXStaticText",
+     "value": "Updates aren't set up in this build. Find new versions in Settings > About."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      619,
+      288,
+      36
+     ],
+     "identifier": "menu-support",
+     "label": "Buy me a coffee…",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      26,
+      655,
+      182,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Coffee is welcome. All tools stay free."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      687,
+      288,
+      36
+     ],
+     "identifier": "menu-quit",
+     "label": "Quit Annotator",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    0,
+    0,
+    320,
+    739
+   ],
+   "role": "AXScrollArea"
+  }
+ ],
+ "appearance": "dark",
+ "background": "popover",
+ "image": "menu/updates-unavailable-dark.png",
+ "kind": "view",
+ "notes": "Update checks unavailable: the reason shows under the button.",
+ "pixels": [
+  640,
+  1478
+ ],
+ "scale": 2,
+ "size": [
+  320,
+  739
+ ],
+ "spec": [
+  "000 product spec (menu-bar popover)",
+  "WIN-UI-01"
+ ],
+ "state": "updates-unavailable",
+ "surface": "menu"
+}

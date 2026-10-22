@@ -1,0 +1,258 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    65.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    97,
+    16,
+    47,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Font"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    188,
+    16,
+    45.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Size"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    352,
+    16,
+    54.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Weight"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    422,
+    16,
+    76,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Alignment"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    95.5,
+    36,
+    36,
+    36
+   ],
+   "help": "System font",
+   "label": "System font",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    136.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Mono font",
+   "label": "Mono font",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    186.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Font size 18",
+   "label": "Font size 18",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    226.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Font size 28",
+   "label": "Font size 28",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    266.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Font size 44",
+   "label": "Font size 44",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    350.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Bold",
+   "identifier": "bold",
+   "label": "Bold",
+   "role": "AXButton",
+   "value": "Off"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    420.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Align left",
+   "identifier": "text.alignleft",
+   "label": "Align left",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    461.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Align center",
+   "identifier": "text.aligncenter",
+   "label": "Align center",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    502.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Align right",
+   "identifier": "text.alignright",
+   "label": "Align right",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      197.5,
+      81.5,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    186.5,
+    81.5,
+    80,
+    14
+   ],
+   "label": "Text size",
+   "role": "AXSlider",
+   "value": 28
+  },
+  {
+   "enabled": true,
+   "frame": [
+    272.5,
+    78,
+    48,
+    21
+   ],
+   "help": "Text size: 8–120 pt",
+   "label": "Precise text size",
+   "placeholder": "Text size",
+   "role": "AXTextField",
+   "value": "28"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    326.5,
+    82,
+    10,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "pt"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "properties/text-dark.png",
+ "kind": "view",
+ "notes": "Full properties for Text, 648 points wide.",
+ "pixels": [
+  1296,
+  230
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  115
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "text",
+ "surface": "properties"
+}

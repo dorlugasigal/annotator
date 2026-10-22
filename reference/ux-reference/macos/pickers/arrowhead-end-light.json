@@ -1,0 +1,277 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    14,
+    14,
+    97,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "End arrowhead"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      42,
+      36,
+      36
+     ],
+     "help": "End: None",
+     "label": "End: None",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      42,
+      36,
+      36
+     ],
+     "help": "End: Arrow",
+     "label": "End: Arrow",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      100,
+      42,
+      36,
+      36
+     ],
+     "help": "End: Filled triangle",
+     "label": "End: Filled triangle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143,
+      42,
+      36,
+      36
+     ],
+     "help": "End: Outlined triangle",
+     "label": "End: Outlined triangle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      85,
+      36,
+      36
+     ],
+     "help": "End: Filled circle",
+     "label": "End: Filled circle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      85,
+      36,
+      36
+     ],
+     "help": "End: Outlined circle",
+     "label": "End: Outlined circle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      100,
+      85,
+      36,
+      36
+     ],
+     "help": "End: Filled diamond",
+     "label": "End: Filled diamond",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143,
+      85,
+      36,
+      36
+     ],
+     "help": "End: Outlined diamond",
+     "label": "End: Outlined diamond",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      128,
+      36,
+      36
+     ],
+     "help": "End: Bar",
+     "label": "End: Bar",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      128,
+      36,
+      36
+     ],
+     "help": "End: Square",
+     "label": "End: Square",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    14,
+    42,
+    165,
+    122
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    14,
+    176,
+    64.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Relationships"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      201,
+      36,
+      36
+     ],
+     "help": "End: One",
+     "label": "End: One",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      201,
+      36,
+      36
+     ],
+     "help": "End: Many",
+     "label": "End: Many",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      100,
+      201,
+      36,
+      36
+     ],
+     "help": "End: One or many",
+     "label": "End: One or many",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143,
+      201,
+      36,
+      36
+     ],
+     "help": "End: Exactly one",
+     "label": "End: Exactly one",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      244,
+      36,
+      36
+     ],
+     "help": "End: Zero or one",
+     "label": "End: Zero or one",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      57,
+      244,
+      36,
+      36
+     ],
+     "help": "End: Zero or many",
+     "label": "End: Zero or many",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    14,
+    201,
+    165,
+    79
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    14,
+    292,
+    28.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Arrow"
+  }
+ ],
+ "appearance": "light",
+ "background": "popover",
+ "image": "pickers/arrowhead-end-light.png",
+ "kind": "view",
+ "notes": "Arrowhead choices for the end.",
+ "pixels": [
+  386,
+  638
+ ],
+ "scale": 2,
+ "size": [
+  193,
+  319
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "arrowhead-end",
+ "surface": "pickers"
+}

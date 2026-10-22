@@ -1,0 +1,130 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      release-validation:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guards:
+    name: Lightweight source guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      macos: ${{ steps.scope.outputs.macos }}
+      windows: ${{ steps.scope.outputs.windows }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Select cheap source checks
+        id: scope
+        env:
+          RELEASE_VALIDATION: ${{ inputs.release-validation }}
+        run: python3 tools/ci/ci_scope.py
+      - name: Release, packaging and CI guards
+        run: |
+          python3 tools/release/test_package_app.py
+          python3 tools/release/test_release.py
+          python3 tools/release/release.py check
+          python3 tools/release/test_distribution.py
+          python3 tools/release/test_pages.py
+          python3 tools/release/test_netlify_release.py
+          python3 tools/release/test_publish_website.py
+          python3 tools/release/test_hosted_website.py
+          python3 tools/demo/test_render_product_takes.py
+          python3 tools/ci/test_ci.py
+          python3 tools/ci/test_ci_scope.py
+          python3 tools/ci/test_validate_local.py
+          python3 tools/windows/test_publish_windows.py
+          python3 tools/windows/test_hosted_release.py
+          git diff --check
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        if: steps.scope.outputs.website == 'true' || steps.scope.outputs.metrics == 'true'
+        with:
+          node-version: "26.8.1"
+          cache: npm
+          cache-dependency-path: |
+            website/package-lock.json
+            services/metrics/package-lock.json
+      - name: Website source and static checks
+        if: steps.scope.outputs.website == 'true'
+        working-directory: website
+        run: npm ci --no-audit --no-fund && npm run typecheck && npm run build && npm test && node --test scripts/test-ci.test.mjs
+      - name: Metrics source checks
+        if: steps.scope.outputs.metrics == 'true'
+        working-directory: services/metrics
+        run: npm ci --no-audit --no-fund && npm run typecheck && npm test
+
+  # Public repositories only, where hosted minutes are free. Pull requests from forks run these jobs
+  # with a read-only token and no credentials.
+  macos:
+    name: Mac tests
+    needs: guards
+    if: ${{ needs.guards.outputs.macos == 'true' && !github.event.repository.private }}
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Select pinned Xcode
+        run: |
+          test -d /Applications/Xcode_26.6.app/Contents/Developer
+          echo "DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer" >> "$GITHUB_ENV"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Swift package tests
+        run: make test
+      - name: Conformance data matches the Mac sources
+        run: make conformance-check-data
+      - name: Build the development app
+        run: make app
+
+  windows:
+    name: Windows tests
+    needs: guards
+    if: ${{ needs.guards.outputs.windows == 'true' && !github.event.repository.private }}
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Read the pinned toolchain
+        id: pins
+        run: python tools/windows/hosted_release.py pins
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+        with:
+          dotnet-version: ${{ steps.pins.outputs.dotnet }}
+      - name: Core, workspace and conformance tests
+        run: |
+          foreach ($suite in 'core', 'workspace', 'conformance') {
+            pwsh -NoProfile -File tools/windows/validate.ps1 $suite
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+      - name: Native AOT app build with no warnings
+        run: pwsh -NoProfile -File tools/windows/validate.ps1 app

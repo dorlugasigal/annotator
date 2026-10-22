@@ -1,0 +1,25 @@
+{
+ "appearance": "light",
+ "hotSpot": [
+  16,
+  16
+ ],
+ "image": "cursors/rotate-light.png",
+ "kind": "image",
+ "notes": "Cursor image with its hot spot in points.",
+ "pixels": [
+  64,
+  64
+ ],
+ "scale": 2,
+ "size": [
+  32,
+  32
+ ],
+ "spec": [
+  "009 drawing cursors",
+  "WIN-OVR-11"
+ ],
+ "state": "rotate",
+ "surface": "cursors"
+}

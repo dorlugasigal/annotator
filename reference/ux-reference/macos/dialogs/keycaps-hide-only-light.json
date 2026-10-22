@@ -1,0 +1,36 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    7.5,
+    7.5,
+    95,
+    29
+   ],
+   "help": "Control + Option + 2",
+   "label": "Control + Option + 2",
+   "role": "AXUnknown"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/keycaps-hide-only-light.png",
+ "kind": "view",
+ "notes": "Keycaps for the default hide-only shortcut. Windows shows Ctrl, Alt, Shift and Win as text.",
+ "pixels": [
+  220,
+  88
+ ],
+ "scale": 2,
+ "size": [
+  110,
+  44
+ ],
+ "spec": [
+  "005",
+  "WIN-INP-05"
+ ],
+ "state": "keycaps-hide-only",
+ "surface": "dialogs"
+}

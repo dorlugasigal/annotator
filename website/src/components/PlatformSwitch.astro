@@ -1,0 +1,11 @@
+---
+// A Mac and Windows switch for its [data-platform-scope] (scripts/platform.ts). Rendered only with a published Microsoft
+// Store listing; without scripts it stays hidden and both systems' parts show.
+interface Props { label: string }
+const { label } = Astro.props;
+---
+<div class="platform-switch" role="group" aria-label={label} data-platform-switch hidden>
+  <button type="button" data-platform="mac" aria-pressed="true">Mac</button>
+  <button type="button" data-platform="windows" aria-pressed="false">Windows</button>
+</div>
+<script>import "../scripts/platform";</script>

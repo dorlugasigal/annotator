@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#17243b"/><stop offset="1" stop-color="#0b101a"/>
+    </linearGradient>
+    <linearGradient id="ink" x2="1" y2=".3">
+      <stop stop-color="#84b9ff"/><stop offset=".5" stop-color="#72d6d0"/><stop offset="1" stop-color="#b3e5bb"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <rect x="64" y="53" width="44" height="44" rx="9" fill="#ffb58c"/>
+  <text x="72" y="88" fill="#232026" font-family="Georgia, serif" font-style="italic" font-size="44">a.</text>
+  <text x="125" y="86" fill="#f1f4fc" font-family="sans-serif" font-weight="600" font-size="29">annotator</text>
+  <text x="64" y="241" fill="#f1f4fc" font-family="sans-serif" font-weight="600" font-size="91" letter-spacing="-5">Draw over</text>
+  <text x="64" y="341" fill="url(#ink)" font-family="sans-serif" font-weight="600" font-size="91" letter-spacing="-5">any app.</text>
+  <path d="M68 365 Q265 344 512 359" fill="none" stroke="#abc7ff" stroke-width="3" stroke-linecap="round"/>
+  <text x="68" y="440" fill="#c5d0e3" font-family="sans-serif" font-size="27">Keep the whole thing editable.</text>
+  <text x="68" y="552" fill="#ffb58c" font-family="sans-serif" font-size="23">Native Mac app  ·  All tools are free</text>
+  <path d="M723 392 C618 188 868 150 967 275 S1078 463 1051 197 M1022 235 L1051 197 L1080 235"
+        fill="none" stroke="url(#ink)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="723" cy="392" r="9" fill="#0b101a" stroke="#84b9ff" stroke-width="3"/>
+</svg>

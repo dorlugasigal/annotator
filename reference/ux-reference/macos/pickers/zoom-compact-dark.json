@@ -1,0 +1,74 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      18,
+      24.5,
+      10.5,
+      1.5
+     ],
+     "identifier": "minus",
+     "label": "Decrease live zoom",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      40,
+      20,
+      10.5,
+      10.5
+     ],
+     "identifier": "plus",
+     "label": "Increase live zoom",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      42,
+      22.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "2.0×"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    18,
+    20,
+    32.5,
+    35
+   ],
+   "label": "Live zoom level",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "pickers/zoom-compact-dark.png",
+ "kind": "view",
+ "notes": "Compact zoom controls from the toolbar.",
+ "pixels": [
+  136,
+  134
+ ],
+ "scale": 2,
+ "size": [
+  68,
+  67
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02",
+  "009"
+ ],
+ "state": "zoom-compact",
+ "surface": "pickers"
+}

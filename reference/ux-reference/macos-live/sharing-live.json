@@ -1,0 +1,224 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "sharing-live.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "draw again +0 ms",
+   "time": 1.0333333333333334
+  },
+  {
+   "label": "draw again +128 ms",
+   "time": 1.15
+  },
+  {
+   "label": "draw again +256 ms",
+   "time": 1.2833333333333334
+  },
+  {
+   "label": "draw again +384 ms",
+   "time": 1.4166666666666667
+  },
+  {
+   "label": "draw again +512 ms",
+   "time": 1.5333333333333334
+  },
+  {
+   "label": "pen stroke in the region +0 ms",
+   "time": 1.55
+  },
+  {
+   "label": "pen stroke in the region +649 ms",
+   "time": 2.2
+  },
+  {
+   "label": "pen stroke in the region +1299 ms",
+   "time": 2.85
+  },
+  {
+   "label": "pen stroke in the region +1948 ms",
+   "time": 3.5
+  },
+  {
+   "label": "pen stroke in the region +2597 ms",
+   "time": 4.133333333333334
+  },
+  {
+   "label": "arrow in the region +0 ms",
+   "time": 4.95
+  },
+  {
+   "label": "arrow in the region +438 ms",
+   "time": 5.4
+  },
+  {
+   "label": "arrow in the region +875 ms",
+   "time": 5.833333333333333
+  },
+  {
+   "label": "arrow in the region +1313 ms",
+   "time": 6.266666666666667
+  },
+  {
+   "label": "arrow in the region +1750 ms",
+   "time": 6.7
+  },
+  {
+   "label": "blur in the region +0 ms",
+   "time": 7.533333333333333
+  },
+  {
+   "label": "blur in the region +524 ms",
+   "time": 8.05
+  },
+  {
+   "label": "blur in the region +1049 ms",
+   "time": 8.583333333333334
+  },
+  {
+   "label": "blur in the region +1573 ms",
+   "time": 9.1
+  },
+  {
+   "label": "blur in the region +2098 ms",
+   "time": 9.633333333333333
+  },
+  {
+   "label": "hide +0 ms",
+   "time": 10.633333333333333
+  },
+  {
+   "label": "hide +252 ms",
+   "time": 10.883333333333333
+  },
+  {
+   "label": "hide +503 ms",
+   "time": 11.133333333333333
+  },
+  {
+   "label": "hide +755 ms",
+   "time": 11.383333333333333
+  },
+  {
+   "label": "hide +1007 ms",
+   "time": 11.633333333333333
+  },
+  {
+   "label": "show +0 ms",
+   "time": 12.25
+  },
+  {
+   "label": "show +348 ms",
+   "time": 12.583333333333334
+  },
+  {
+   "label": "show +695 ms",
+   "time": 12.933333333333334
+  },
+  {
+   "label": "show +1043 ms",
+   "time": 13.283333333333333
+  },
+  {
+   "label": "show +1390 ms",
+   "time": 13.633333333333333
+  },
+  {
+   "label": "stop sharing +0 ms",
+   "time": 14.433333333333334
+  },
+  {
+   "label": "stop sharing +302 ms",
+   "time": 14.733333333333333
+  },
+  {
+   "label": "stop sharing +605 ms",
+   "time": 15.033333333333333
+  },
+  {
+   "label": "stop sharing +907 ms",
+   "time": 15.35
+  },
+  {
+   "label": "stop sharing +1209 ms",
+   "time": 15.583333333333334
+  },
+  {
+   "label": "end",
+   "time": 15.583333333333334
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 15.621666666666666,
+ "events": [],
+ "fps": 60,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "The shared region outline on the desktop while the owner draws, adds a blur, hides and shows the workspace, then stops sharing. sharing-output records the output window at the same time.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 1.5400018750224262,
+   "label": "draw again",
+   "start": 1.0276754166698083
+  },
+  {
+   "end": 4.141110041644424,
+   "label": "pen stroke in the region",
+   "start": 1.5438533750129864
+  },
+  {
+   "end": 6.707467749947682,
+   "label": "arrow in the region",
+   "start": 4.957380083273165
+  },
+  {
+   "end": 9.625387541600503,
+   "label": "blur in the region",
+   "start": 7.527414916665293
+  },
+  {
+   "end": 11.634608166641556,
+   "label": "hide",
+   "start": 10.628013916662894
+  },
+  {
+   "end": 13.633236499968916,
+   "label": "show",
+   "start": 12.24278216669336
+  },
+  {
+   "end": 15.645847083302215,
+   "label": "stop sharing",
+   "start": 14.436648583272472
+  }
+ ],
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "take": "sharing-live",
+ "title": "Region sharing: the desktop while sharing",
+ "video": "sharing-live.mp4"
+}

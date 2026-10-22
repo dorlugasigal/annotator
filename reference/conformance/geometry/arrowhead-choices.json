@@ -1,0 +1,22 @@
+{
+  "relationshipChoices" : [
+    "cardinalityOne",
+    "cardinalityMany",
+    "cardinalityOneOrMany",
+    "cardinalityExactlyOne",
+    "cardinalityZeroOrOne",
+    "cardinalityZeroOrMany"
+  ],
+  "shapeChoices" : [
+    "none",
+    "open",
+    "filled",
+    "triangleOutline",
+    "circle",
+    "circleOutline",
+    "diamond",
+    "diamondOutline",
+    "bar",
+    "square"
+  ]
+}

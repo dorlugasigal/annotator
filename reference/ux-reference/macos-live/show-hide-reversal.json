@@ -1,0 +1,81 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "show-hide-reversal.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "hide, reversed mid-way +0 ms",
+   "time": 0.6333333333333333
+  },
+  {
+   "label": "hide, reversed mid-way +137 ms",
+   "time": 0.7666666666666667
+  },
+  {
+   "label": "hide, reversed mid-way +274 ms",
+   "time": 0.9
+  },
+  {
+   "label": "hide, reversed mid-way +412 ms",
+   "time": 1.05
+  },
+  {
+   "label": "hide, reversed mid-way +549 ms",
+   "time": 1.1833333333333333
+  },
+  {
+   "label": "end",
+   "time": 1.9333333333333333
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 1.9633333333333334,
+ "events": [
+  {
+   "label": "show while hiding",
+   "time": 0.8375879999948665
+  }
+ ],
+ "fps": 60,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "Slide style. Showing again at 45% of the hide reverses from the current position.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "reverseAfter": 0.12600000000000003,
+ "scale": 1,
+ "segments": [
+  {
+   "end": 1.1804771666647866,
+   "label": "hide, reversed mid-way",
+   "start": 0.6317385833244771
+  }
+ ],
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "style": "slide",
+ "take": "show-hide-reversal",
+ "title": "Show and hide: reversal",
+ "video": "show-hide-reversal.mp4"
+}

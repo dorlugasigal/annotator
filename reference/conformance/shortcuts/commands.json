@@ -1,0 +1,528 @@
+{
+  "actions" : [
+    {
+      "canBeInToolbar" : false,
+      "detail" : "Switch between quick controls, full properties and tools only.",
+      "id" : "action.properties",
+      "label" : "Properties",
+      "symbol" : "slider.horizontal.3"
+    },
+    {
+      "canBeInToolbar" : false,
+      "detail" : "Switch between desktop, whiteboard and blackboard.",
+      "id" : "action.board",
+      "label" : "Board",
+      "symbol" : "rectangle.inset.filled"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Turn the spotlight on or off.",
+      "id" : "action.spotlight",
+      "label" : "Spotlight",
+      "symbol" : "flashlight.on.fill"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Turn the ring around your pointer on or off.",
+      "id" : "action.cursorHalo",
+      "label" : "Cursor halo",
+      "symbol" : "circle.dotted"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Turn the zoom lens under your pointer on or off.",
+      "id" : "action.pointerLens",
+      "label" : "Pointer lens",
+      "symbol" : "plus.magnifyingglass"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Turn shape recognition for the pen on or off.",
+      "id" : "action.smartDraw",
+      "label" : "Smart draw",
+      "symbol" : "wand.and.stars"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Choose part of a display and open a window to share in your call.",
+      "id" : "action.shareRegion",
+      "label" : "Share region",
+      "symbol" : "rectangle.on.rectangle"
+    },
+    {
+      "canBeInToolbar" : false,
+      "detail" : "Remove all drawings from every display. You can undo it.",
+      "id" : "action.clearAll",
+      "label" : "Clear all",
+      "symbol" : "trash"
+    }
+  ],
+  "parsing" : [
+    {
+      "id" : "tool.pen",
+      "result" : {
+        "id" : "tool.pen",
+        "label" : "Pen"
+      }
+    },
+    {
+      "id" : "tool.select",
+      "result" : {
+        "id" : "tool.select",
+        "label" : "Select"
+      }
+    },
+    {
+      "id" : "tool.cover",
+      "result" : {
+        "id" : "tool.cover",
+        "label" : "Effects"
+      }
+    },
+    {
+      "id" : "tool.",
+      "result" : null
+    },
+    {
+      "id" : "tool.Pen",
+      "result" : null
+    },
+    {
+      "id" : "tool.pen ",
+      "result" : null
+    },
+    {
+      "id" : "pen",
+      "result" : null
+    },
+    {
+      "id" : "action.spotlight",
+      "result" : {
+        "id" : "action.spotlight",
+        "label" : "Spotlight"
+      }
+    },
+    {
+      "id" : "action.clearAll",
+      "result" : {
+        "id" : "action.clearAll",
+        "label" : "Clear all"
+      }
+    },
+    {
+      "id" : "action.",
+      "result" : null
+    },
+    {
+      "id" : "action.dance",
+      "result" : null
+    },
+    {
+      "id" : "Action.board",
+      "result" : null
+    },
+    {
+      "id" : "tool.action.board",
+      "result" : null
+    }
+  ],
+  "toolbarChoices" : [
+    "spotlight",
+    "cursorHalo",
+    "pointerLens",
+    "smartDraw",
+    "shareRegion"
+  ],
+  "tools" : [
+    {
+      "id" : "tool.select",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Select",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Select"
+    },
+    {
+      "id" : "tool.pen",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Pen",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Pen"
+    },
+    {
+      "id" : "tool.highlighter",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Highlighter",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Highlighter"
+    },
+    {
+      "id" : "tool.line",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Line",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Line"
+    },
+    {
+      "id" : "tool.arrow",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Arrow",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Arrow"
+    },
+    {
+      "id" : "tool.rectangle",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Rectangle",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Rectangle"
+    },
+    {
+      "id" : "tool.ellipse",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Ellipse",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Ellipse"
+    },
+    {
+      "id" : "tool.diamond",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Diamond",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Diamond"
+    },
+    {
+      "id" : "tool.text",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Text",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Text"
+    },
+    {
+      "id" : "tool.eraser",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Eraser",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Eraser"
+    },
+    {
+      "id" : "tool.cover",
+      "isProtection" : true,
+      "isShape" : false,
+      "label" : "Effects",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Censor (solid)"
+    },
+    {
+      "id" : "tool.blur",
+      "isProtection" : true,
+      "isShape" : false,
+      "label" : "Blur region",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Blur region"
+    },
+    {
+      "id" : "tool.pixelate",
+      "isProtection" : true,
+      "isShape" : false,
+      "label" : "Pixelate region",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Pixelate region"
+    },
+    {
+      "id" : "tool.distort",
+      "isProtection" : true,
+      "isShape" : false,
+      "label" : "Distort region",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Distort region"
+    },
+    {
+      "id" : "tool.ruler",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Pixel ruler",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Pixel ruler"
+    },
+    {
+      "id" : "tool.counter",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Numbered counter",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Numbered counter"
+    },
+    {
+      "id" : "tool.image",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Paste image",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Paste image"
+    },
+    {
+      "id" : "tool.database",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Cylinder",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Cylinder"
+    },
+    {
+      "id" : "tool.queue",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Queue",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Queue"
+    },
+    {
+      "id" : "tool.person",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Person",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Person"
+    },
+    {
+      "id" : "tool.grid",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Grid",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Grid"
+    },
+    {
+      "id" : "tool.axes",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Axes",
+      "sharesStyle" : true,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Axes"
+    },
+    {
+      "id" : "tool.triangle",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Triangle",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Triangle"
+    },
+    {
+      "id" : "tool.hexagon",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Hexagon",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Hexagon"
+    },
+    {
+      "id" : "tool.star",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Star",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Star"
+    },
+    {
+      "id" : "tool.databaseStack",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Database",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 0.9,
+      "toolLabel" : "Database"
+    },
+    {
+      "id" : "tool.server",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Server",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1,
+      "toolLabel" : "Server"
+    },
+    {
+      "id" : "tool.messaging",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Messaging",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1.0002036,
+      "toolLabel" : "Messaging"
+    },
+    {
+      "id" : "tool.web",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Web",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1,
+      "toolLabel" : "Web"
+    },
+    {
+      "id" : "tool.mobile",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Mobile phone",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 0.7,
+      "toolLabel" : "Mobile phone"
+    },
+    {
+      "id" : "tool.desktop",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Desktop",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1.1111111,
+      "toolLabel" : "Desktop"
+    },
+    {
+      "id" : "tool.laptop",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Laptop",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1.2515959,
+      "toolLabel" : "Laptop"
+    },
+    {
+      "id" : "tool.document",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Document",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 0.80000003,
+      "toolLabel" : "Document"
+    },
+    {
+      "id" : "tool.configuration",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Configuration",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 0.89726505,
+      "toolLabel" : "Configuration"
+    },
+    {
+      "id" : "tool.loadBalancer",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Load balancer",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1,
+      "toolLabel" : "Load balancer"
+    },
+    {
+      "id" : "tool.apiGateway",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "API gateway",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1,
+      "toolLabel" : "API gateway"
+    },
+    {
+      "id" : "tool.envelope",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Envelope",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 1.25,
+      "toolLabel" : "Envelope"
+    },
+    {
+      "id" : "tool.cart",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Cart",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 0.9985843,
+      "toolLabel" : "Cart"
+    },
+    {
+      "id" : "tool.bell",
+      "isProtection" : false,
+      "isShape" : true,
+      "label" : "Bell",
+      "sharesStyle" : true,
+      "supportsFill" : true,
+      "systemShapeAspectRatio" : 0.89998725,
+      "toolLabel" : "Bell"
+    }
+  ]
+}

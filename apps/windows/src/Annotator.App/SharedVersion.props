@@ -1,0 +1,46 @@
+<Project>
+  <!-- The version and build the Mac and Windows apps share (WIN-DST-04): MARKETING_VERSION, ANNOTATOR_PRERELEASE and
+       CURRENT_PROJECT_VERSION in the base settings of apps/macos/project.yml, read as tools/release/release.py reads them and
+       checked like Annotator.Workspace's SharedVersion. The assembly version is version.build (0.1.0.25), About shows the
+       Mac's label (0.1.0-beta.7 (25)) and the MSIX package version is (Major + 1).Minor.Build.0 (1.1.25.0). -->
+  <PropertyGroup>
+    <AnnotatorProjectYml Condition="'$(AnnotatorProjectYml)' == ''">$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..\..\..\macos\project.yml'))</AnnotatorProjectYml>
+    <_AnnotatorProjectYmlText Condition="Exists('$(AnnotatorProjectYml)')">$([System.IO.File]::ReadAllText('$(AnnotatorProjectYml)'))</_AnnotatorProjectYmlText>
+    <_AnnotatorVersionCount>$([System.Text.RegularExpressions.Regex]::Matches('$(_AnnotatorProjectYmlText)', '(?m)^    MARKETING_VERSION:').Count)</_AnnotatorVersionCount>
+    <_AnnotatorPrereleaseCount>$([System.Text.RegularExpressions.Regex]::Matches('$(_AnnotatorProjectYmlText)', '(?m)^    ANNOTATOR_PRERELEASE:').Count)</_AnnotatorPrereleaseCount>
+    <_AnnotatorBuildCount>$([System.Text.RegularExpressions.Regex]::Matches('$(_AnnotatorProjectYmlText)', '(?m)^    CURRENT_PROJECT_VERSION:').Count)</_AnnotatorBuildCount>
+    <_AnnotatorVersionRaw>$([System.Text.RegularExpressions.Regex]::Match('$(_AnnotatorProjectYmlText)', '(?m)(?&lt;=^    MARKETING_VERSION: *)[^\r\n]*?(?= *\r?$)'))</_AnnotatorVersionRaw>
+    <_AnnotatorPrereleaseRaw>$([System.Text.RegularExpressions.Regex]::Match('$(_AnnotatorProjectYmlText)', '(?m)(?&lt;=^    ANNOTATOR_PRERELEASE: *)[^\r\n]*?(?= *\r?$)'))</_AnnotatorPrereleaseRaw>
+    <_AnnotatorBuildRaw>$([System.Text.RegularExpressions.Regex]::Match('$(_AnnotatorProjectYmlText)', '(?m)(?&lt;=^    CURRENT_PROJECT_VERSION: *)[^\r\n]*?(?= *\r?$)'))</_AnnotatorBuildRaw>
+    <AnnotatorSharedVersion>$(_AnnotatorVersionRaw.Trim().Replace('"', ''))</AnnotatorSharedVersion>
+    <AnnotatorPrerelease>$(_AnnotatorPrereleaseRaw.Trim().Replace('"', ''))</AnnotatorPrerelease>
+    <AnnotatorBuildNumber>$(_AnnotatorBuildRaw.Trim().Replace('"', ''))</AnnotatorBuildNumber>
+    <_AnnotatorVersionFormatValid>false</_AnnotatorVersionFormatValid>
+    <_AnnotatorVersionFormatValid Condition="'$(_AnnotatorVersionCount)' == '1' and '$(_AnnotatorPrereleaseCount)' == '1' and '$(_AnnotatorBuildCount)' == '1' and
+                                             $([System.Text.RegularExpressions.Regex]::IsMatch('$(AnnotatorSharedVersion)', '^(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})$')) and
+                                             $([System.Text.RegularExpressions.Regex]::IsMatch('$(AnnotatorPrerelease)', '^((alpha|beta|rc)\.[1-9][0-9]*)?$')) and
+                                             $([System.Text.RegularExpressions.Regex]::IsMatch('$(AnnotatorBuildNumber)', '^[1-9][0-9]{0,4}$'))">true</_AnnotatorVersionFormatValid>
+    <_AnnotatorVersionValid>false</_AnnotatorVersionValid>
+  </PropertyGroup>
+  <!-- MSIX and assembly version parts are 16-bit, and an assembly version part may be at most 65534. -->
+  <PropertyGroup Condition="'$(_AnnotatorVersionFormatValid)' == 'true'">
+    <_AnnotatorMajor>$(AnnotatorSharedVersion.Split('.')[0])</_AnnotatorMajor>
+    <_AnnotatorMinor>$(AnnotatorSharedVersion.Split('.')[1])</_AnnotatorMinor>
+    <_AnnotatorPatch>$(AnnotatorSharedVersion.Split('.')[2])</_AnnotatorPatch>
+    <_AnnotatorVersionValid Condition="$(_AnnotatorMajor) &lt;= 65533 and $(_AnnotatorMinor) &lt;= 65534 and $(_AnnotatorPatch) &lt;= 65534 and $(AnnotatorBuildNumber) &lt;= 65534">true</_AnnotatorVersionValid>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(_AnnotatorVersionValid)' == 'true'">
+    <Version>$(AnnotatorSharedVersion)</Version>
+    <AssemblyVersion>$(AnnotatorSharedVersion).$(AnnotatorBuildNumber)</AssemblyVersion>
+    <FileVersion>$(AnnotatorSharedVersion).$(AnnotatorBuildNumber)</FileVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <AnnotatorMsixVersion>$([MSBuild]::Add($(_AnnotatorMajor), 1)).$(_AnnotatorMinor).$(AnnotatorBuildNumber).0</AnnotatorMsixVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="AnnotatorPrerelease" Value="$(AnnotatorPrerelease)" />
+  </ItemGroup>
+  <Target Name="AnnotatorCheckSharedVersion" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(_AnnotatorVersionValid)' != 'true'"
+           Text="Could not read the shared version from $(AnnotatorProjectYml). It needs one base MARKETING_VERSION (three numbers), ANNOTATOR_PRERELEASE (empty, or alpha, beta or rc with a number) and CURRENT_PROJECT_VERSION (a positive build number), as tools/release/release.py reads them, each part at most 65534." />
+  </Target>
+</Project>

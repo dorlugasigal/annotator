@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Annotator.Benchmarks/Annotator.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Annotator.App/Annotator.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/Annotator.Core/Annotator.Core.csproj" />
+    <Project Path="src/Annotator.Platform/Annotator.Platform.csproj" />
+    <Project Path="src/Annotator.Rendering/Annotator.Rendering.csproj" />
+    <Project Path="src/Annotator.Workspace/Annotator.Workspace.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Annotator.App.Tests/Annotator.App.Tests.csproj" />
+    <Project Path="tests/Annotator.Conformance.Tests/Annotator.Conformance.Tests.csproj" />
+    <Project Path="tests/Annotator.Core.Tests/Annotator.Core.Tests.csproj" />
+    <Project Path="tests/Annotator.Platform.Tests/Annotator.Platform.Tests.csproj" />
+    <Project Path="tests/Annotator.Rendering.Tests/Annotator.Rendering.Tests.csproj" />
+    <Project Path="tests/Annotator.Workspace.Tests/Annotator.Workspace.Tests.csproj" />
+  </Folder>
+</Solution>

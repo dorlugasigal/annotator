@@ -1,0 +1,108 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    193,
+    44.5,
+    94,
+    19
+   ],
+   "role": "AXStaticText",
+   "value": "Coffee break"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    148.5,
+    74,
+    183,
+    183
+   ],
+   "identifier": "break-countdown",
+   "label": "Break timer",
+   "role": "AXUnknown"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      150.5,
+      264,
+      37.5,
+      15
+     ],
+     "identifier": "break-remove-minute",
+     "label": "Remove a minute",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      191,
+      264,
+      38.5,
+      15
+     ],
+     "identifier": "break-pause",
+     "label": "Pause",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      232.5,
+      264,
+      37.5,
+      15
+     ],
+     "identifier": "break-add-minute",
+     "label": "Add a minute",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      277,
+      264,
+      52.5,
+      15
+     ],
+     "identifier": "break-end",
+     "label": "End break",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    148,
+    261.5,
+    184,
+    20.5
+   ],
+   "label": "Break controls",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "break-timer/controls-dark.png",
+ "kind": "view",
+ "notes": "Locking off: moving the pointer shows the controls for 3 seconds. Shown full screen on each display; always dark. Every size scales with the display's shorter side, so this 480 by 300 capture keeps the layout of a full screen.",
+ "pixels": [
+  960,
+  600
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  300
+ ],
+ "spec": [
+  "014",
+  "WIN-PAR-03"
+ ],
+ "state": "controls",
+ "surface": "break-timer"
+}

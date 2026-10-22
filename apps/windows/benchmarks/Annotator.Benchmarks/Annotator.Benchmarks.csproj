@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The specification 003 workloads (WIN-PERF-01) with the Mac suite's names, fixtures and JSON shape
+       (tools/macos/benchmark.sh), plus the overlay presenter's frame work. Offscreen only; never shipped.
+       tools/windows/validate.ps1 benchmarks publishes it with Native AOT, like the app, and runs the suite. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+    <RootNamespace>Annotator.Benchmarks</RootNamespace>
+    <AssemblyName>Annotator.Benchmarks</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <IsPackable>false</IsPackable>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Annotator.Rendering\Annotator.Rendering.csproj" />
+  </ItemGroup>
+</Project>

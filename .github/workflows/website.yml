@@ -1,0 +1,142 @@
+name: Website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "services/metrics/**"
+      - "netlify.toml"
+      - "tools/release/distribution.py"
+      - "tools/release/netlify_release.py"
+      - "tools/release/hosted_website.py"
+      - "tools/release/pages.py"
+      - ".github/workflows/website.yml"
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: annotator-website
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Builds https://getannotator.app and the old GitHub Pages feed bridge from published releases only.
+    if: ${{ vars.WEBSITE_DEPLOY_ENABLED == 'true' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      source: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Record the source used for the website
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "26.8.1"
+      - name: Fetch only already published verified releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+        run: python3 tools/release/distribution.py website
+      - name: Install website and metrics dependencies
+        run: |
+          npm --prefix website ci --no-audit --no-fund
+          npm --prefix services/metrics ci --no-audit --no-fund
+      - name: Metrics checks
+        run: npm --prefix services/metrics run typecheck && npm --prefix services/metrics test
+      - name: Build and check the website with the dashboard
+        env:
+          SITE_URL: ${{ vars.WEBSITE_URL }}
+          CONTEXT: production
+          ANNOTATOR_WEB_METRICS_ENABLED: "true"
+        run: npm --prefix website run build:netlify && npm --prefix website test
+      - name: Seal the Netlify artifact and the feed bridge
+        env:
+          SITE_URL: ${{ vars.WEBSITE_URL }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: python3 tools/release/hosted_website.py build --folder build/website --site "$SITE_URL" --source "$SOURCE_SHA"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: netlify-website
+          path: build/website/netlify/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: feed-bridge
+          path: build/website/bridge/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
+        with:
+          path: build/website/bridge/site
+  deploy:
+    name: Deploy getannotator.app
+    needs: build
+    # Off until a maintainer adds the NETLIFY_AUTH_TOKEN secret and the NETLIFY_SITE_ID variable.
+    if: ${{ vars.NETLIFY_SITE_ID != '' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: website-publishing
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.build.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "26.8.1"
+      - name: Install the pinned Netlify CLI
+        run: npm --prefix services/metrics ci --no-audit --no-fund
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: netlify-website
+          path: build/website/netlify
+      - name: Deploy the sealed website and verify the live service
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          WEBSITE_DEPLOY_ENABLED: ${{ vars.WEBSITE_DEPLOY_ENABLED }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+          SITE_URL: ${{ vars.WEBSITE_URL }}
+          SOURCE_SHA: ${{ needs.build.outputs.source }}
+        run: python3 tools/release/hosted_website.py deploy --folder build/website --site "$SITE_URL" --source "$SOURCE_SHA" --site-id "$NETLIFY_SITE_ID"
+  bridge:
+    name: Deploy the old Pages feed bridge
+    needs: build
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.build.outputs.source }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: feed-bridge
+          path: build/website/bridge
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+        id: deployment
+      - name: Wait until the live bridge matches the sealed files
+        env:
+          SOURCE_SHA: ${{ needs.build.outputs.source }}
+        run: python3 tools/release/hosted_website.py verify --folder build/website --source "$SOURCE_SHA"

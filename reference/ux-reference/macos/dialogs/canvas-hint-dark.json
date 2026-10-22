@@ -1,0 +1,35 @@
+{
+ "accessibility": [
+  {
+   "enabled": false,
+   "frame": [
+    0,
+    0,
+    540,
+    130
+   ],
+   "role": "AXStaticText",
+   "value": "Drawing  ·  ⌃⇧2: draw\n⌃1: screen zoom  ·  Option-scroll starts zoom\nEscape: use apps\nTurn off these tips in Settings > General."
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "dialogs/canvas-hint-dark.png",
+ "kind": "view",
+ "notes": "On-screen tip in the canvas corner while drawing.",
+ "pixels": [
+  1080,
+  260
+ ],
+ "scale": 2,
+ "size": [
+  540,
+  130
+ ],
+ "spec": [
+  "003",
+  "WIN-OVR-03"
+ ],
+ "state": "canvas-hint",
+ "surface": "dialogs"
+}

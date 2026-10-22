@@ -1,0 +1,22 @@
+{
+ "appearance": "light",
+ "image": "pointer/halo-dotted-light.png",
+ "kind": "image",
+ "notes": "Cursor halo shapes left to right: Ring, Disc, Squircle, Square, Diamond, Hexagon, Crosshair. Default size 36, border 3, yellow.",
+ "pixels": [
+  1260,
+  180
+ ],
+ "scale": 2,
+ "size": [
+  630,
+  90
+ ],
+ "spec": [
+  "003",
+  "005 pointer controls",
+  "WIN-CAP-09"
+ ],
+ "state": "halo-dotted",
+ "surface": "pointer"
+}

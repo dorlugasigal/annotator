@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Development tool, outside the solution: shows UX reference states in Annotator.exe (WIN-PAR-06), dumps their
+       UI Automation trees, compares them with reference/ux-reference/macos and writes side-by-side sheets. Never shipped. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Annotator.UXReference</RootNamespace>
+    <AssemblyName>Annotator.UXReference</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The cursor comparison draws the Windows footprints with the app's own CursorArtwork. -->
+    <ProjectReference Include="..\..\src\Annotator.Workspace\Annotator.Workspace.csproj" />
+  </ItemGroup>
+</Project>

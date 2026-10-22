@@ -1,0 +1,74 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    121.5,
+    16,
+    113.5,
+    16.5
+   ],
+   "help": "Start Annotator for this Mac account without opening the drawing toolbar.",
+   "identifier": "launch-at-login",
+   "label": "Launch at login",
+   "role": "AXCheckBox",
+   "value": 0
+  },
+  {
+   "enabled": true,
+   "frame": [
+    121.5,
+    38.5,
+    377,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "macOS could not find a login item for this app. Turn this on to try setting it up."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    121.5,
+    57.5,
+    142,
+    24
+   ],
+   "label": "Open Login Items...",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    121.5,
+    87.5,
+    350,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Managed by macOS for this account. Not included in exported profiles."
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "settings/launch-at-login-not-found-light.png",
+ "kind": "view",
+ "notes": "Launch at login, not-found. Windows maps these to the startup task states (WIN-SYS-01).",
+ "pixels": [
+  1240,
+  233
+ ],
+ "scale": 2,
+ "size": [
+  620,
+  116.5
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03",
+  "005 launch-at-login.md",
+  "WIN-SYS-01"
+ ],
+ "state": "launch-at-login-not-found",
+ "surface": "settings"
+}

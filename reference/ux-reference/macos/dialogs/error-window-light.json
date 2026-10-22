@@ -1,0 +1,58 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    19,
+    19,
+    212.5,
+    19
+   ],
+   "role": "AXStaticText",
+   "value": "Could not complete this action"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    19,
+    52,
+    422,
+    18
+   ],
+   "role": "AXStaticText",
+   "value": "Drawing format 9 is not supported by this version."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    19,
+    84,
+    44.5,
+    26
+   ],
+   "label": "OK",
+   "role": "AXButton",
+   "title": "OK"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/error-window-light.png",
+ "kind": "view",
+ "notes": "Import error window, titled Annotator.",
+ "pixels": [
+  920,
+  320
+ ],
+ "scale": 2,
+ "size": [
+  460,
+  160
+ ],
+ "spec": [
+  "005",
+  "WIN-UI-05"
+ ],
+ "state": "error-window",
+ "surface": "dialogs"
+}

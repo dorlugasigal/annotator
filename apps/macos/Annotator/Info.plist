@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AnnotatorBuildStamp</key>
+	<string>$(ANNOTATOR_BUILD_STAMP)</string>
+	<key>AnnotatorIssuesURL</key>
+	<string>$(ANNOTATOR_ISSUES_URL)</string>
+	<key>AnnotatorMetricsURL</key>
+	<string>$(ANNOTATOR_METRICS_URL)</string>
+	<key>AnnotatorPrerelease</key>
+	<string>$(ANNOTATOR_PRERELEASE)</string>
+	<key>AnnotatorSupportURL</key>
+	<string>$(ANNOTATOR_SUPPORT_URL)</string>
+	<key>AnnotatorWebsiteURL</key>
+	<string>$(ANNOTATOR_WEBSITE_URL)</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>Annotator reads screen pixels for requested zoom, live effects and region sharing. It does not record video.</string>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>$(ANNOTATOR_UPDATE_FEED_URL)</string>
+	<key>SUPublicEDKey</key>
+	<string>$(ANNOTATOR_UPDATE_PUBLIC_KEY)</string>
+	<key>SUSendProfileInfo</key>
+	<false/>
+</dict>
+</plist>

@@ -1,0 +1,246 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        46,
+        69,
+        345.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Drawing needs no permissions. You're good to go."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        57,
+        128.5,
+        20,
+        17
+       ],
+       "identifier": "display",
+       "label": "Mac",
+       "role": "AXImage"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        101,
+        119.5,
+        114.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Screen Recording"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        101,
+        139.5,
+        358,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "For zoom, live effects and region sharing. No video is recorded."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        575,
+        125,
+        220,
+        24
+       ],
+       "label": "Open Screen Recording settings",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        46,
+        171,
+        167.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Allowed. Start zoom to check."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        58,
+        239,
+        18.5,
+        18
+       ],
+       "identifier": "cursorarrow.rays",
+       "label": "Click Cursor",
+       "role": "AXImage"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        101,
+        230.5,
+        82.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Accessibility"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        101,
+        250.5,
+        366.5,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "For Option-scroll over other apps. Zoom buttons don't need this."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        607,
+        236,
+        188,
+        24
+       ],
+       "label": "Open Accessibility settings",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        46,
+        282,
+        58.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Allowed"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        46,
+        325.5,
+        108,
+        16
+       ],
+       "label": "Refresh status",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        22.5,
+        363.5,
+        168.5,
+        16
+       ],
+       "identifier": "permission-recovery",
+       "label": "If access isn't working",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      },
+      {
+       "enabled": true,
+       "frame": [
+        46,
+        401.5,
+        373,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "Blur isn't secure redaction. App or window sharing may leave out covers."
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      592
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    622
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    656,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "settings/tab-permissions-light.png",
+ "kind": "view",
+ "notes": "Settings, permissions tab, at its default size. Content below the fold scrolls.",
+ "pixels": [
+  1680,
+  1400
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  700
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-permissions",
+ "surface": "settings"
+}

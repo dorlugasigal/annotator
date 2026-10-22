@@ -1,0 +1,8 @@
+bin/
+obj/
+out/
+publish/
+TestResults/
+*.binlog
+*.user
+.vs/

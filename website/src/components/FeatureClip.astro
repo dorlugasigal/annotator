@@ -1,0 +1,47 @@
+---
+import demos from "../data/stage-demos.json";
+import { sitePath } from "../lib/paths";
+import { phoneMedia } from "../lib/hero-reel";
+import SiteIcon from "./SiteIcon.astro";
+type DemoName = keyof typeof demos.demos;
+interface Props { demo: DemoName; label: string; caption: string; captionId?: string; first?: boolean }
+const { demo, label, caption, captionId, first = false } = Astro.props;
+const { desktop, phone } = demos.demos[demo];
+// The poster is a frame of the same encoding, so the video checksum versions both URLs.
+const versioned = (file: string, sha256: string) => `${sitePath(file)}?v=${sha256.slice(0, 12)}`;
+const videoURL = versioned(desktop.file, desktop.sha256);
+---
+<figure class="player feature-clip" data-native-take={demo}
+  style={`--take-ratio:${desktop.width} / ${desktop.height};--take-phone-ratio:${phone.width} / ${phone.height}`}>
+  <div class="player-screen take-frame">
+    <picture class="take-poster" data-take-poster>
+      <source media={phoneMedia} srcset={versioned(phone.poster, phone.sha256)} width={phone.width} height={phone.height}/>
+      <img src={versioned(desktop.poster, desktop.sha256)} width={desktop.width} height={desktop.height} alt=""
+        decoding="async" loading={first ? "eager" : "lazy"}/>
+    </picture>
+    {/* iPhone WebKit refused every source on videos with a <track> child, so these silent clips have none. */}
+    <video crossorigin="anonymous" controls muted playsinline preload={first ? "metadata" : "none"}
+      width={desktop.width} height={desktop.height} aria-label={label} data-take-video data-playback-rate="1">
+      <source media={phoneMedia} src={versioned(phone.file, phone.sha256)} type="video/mp4"/>
+      <source src={videoURL} type="video/mp4"/>
+      <p>Your browser cannot play this recording. <a href={videoURL}>Open the video.</a></p>
+    </video>
+    <p class="player-status" data-take-status role="status" hidden></p>
+  </div>
+  <figcaption class="player-chin">
+    <div class="player-chin-row">
+      <p class="player-caption" id={captionId}>{caption}</p>
+      <button type="button" class="player-toggle" data-take-toggle hidden aria-label={`Play ${label}`}>
+        <span class="player-toggle-symbol" data-take-symbol="Play" aria-hidden="true">
+          <span data-action="Play"><SiteIcon name="play"/></span>
+          <span data-action="Pause" hidden><SiteIcon name="pause"/></span>
+          <span data-action="Replay" hidden><SiteIcon name="replay"/></span>
+        </span><span data-take-label>Play</span>
+      </button>
+    </div>
+    <p class="take-error" data-take-error role="status" hidden>
+      <span data-take-error-reason>The recording could not play.</span> Try Play again. You can also <a href={videoURL}>open the video</a>.
+    </p>
+  </figcaption>
+</figure>
+<script>import "../scripts/product-takes";</script>

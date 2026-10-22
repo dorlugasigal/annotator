@@ -1,0 +1,33 @@
+---
+interface Props {
+  name: "tools" | "style" | "draw" | "circle" | "arrow" | "highlight" | "smart" | "shapes" | "spotlight" | "zoom" | "blur"
+    | "sliders" | "window" | "play" | "pause" | "replay" | "down" | "download" | "exchange" | "sound-on" | "sound-off";
+}
+const paths = {
+  tools: "M3 3h6v6H3z M15 3h6v6h-6z M3 15h6v6H3z M15 15h6v6h-6z",
+  style: "M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.4-3.4 1.5 1.5 0 0 1 1.1-2.6H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9 M7 10h.01 M10 6.5h.01 M15 7h.01 M18 11h.01",
+  draw: "M20.5 6.5c1.8 2.7-.7 7.3-5.5 10.3S5 20 3.5 17.5 4 10.2 9 7.2s9.8-3.4 11.5-.7Z",
+  circle: "M20.5 6.5c1.8 2.7-.7 7.3-5.5 10.3S5 20 3.5 17.5 4 10.2 9 7.2s9.8-3.4 11.5-.7Z",
+  arrow: "M4 19C5.5 11.5 10 6.5 18.5 5.5 M13.6 3.2l4.9 2.3-2.4 4.8",
+  highlight: "m14.5 4 5.5 5.5-8 8H6.5V12l8-8Z M4 21h16",
+  smart: "M3.5 8.5h11v11h-11z M18.5 2.5v5 M16 5h5 M19.5 11v3 M18 12.5h3",
+  spotlight: "M9 8.5 19 13l-4.3 1.2L13.5 18.5 9 8.5Z M5.5 5.5 3.8 3.8 M9 4V1.8 M5 9H2.8 M13 5.2l1.4-1.5",
+  shapes: "M3.5 3.5h7v7h-7z M17 3.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 1 1 0-7Z M7 13.5l3.8 7H3.2z M13.5 13.5h7v7h-7z",
+  zoom: "M10.5 3.5a7 7 0 1 1 0 14 7 7 0 0 1 0-14Z M15.5 15.5 21 21 M10.5 7.5v6 M7.5 10.5h6",
+  blur: "M5 8v8 M10 4v16 M15 6v12 M20 9v6",
+  sliders: "M3.5 7h9 M16.5 7h4 M14.5 4.5v5 M3.5 17h4 M11.5 17h9 M9.5 14.5v5",
+  window: "M3.5 5h17v14h-17z M3.5 9h17 M6.5 7h.01 M9 7h.01",
+  play: "m8 4 12 8-12 8Z",
+  pause: "M8 5v14 M16 5v14",
+  replay: "M4 10a8 8 0 1 1 1 7 M4 4v6h6",
+  down: "M12 4v16 M5 13l7 7 7-7",
+  download: "M12 3.5v11.5 M7 10.5l5 5 5-5 M4.5 20h15",
+  exchange: "M4 7h16l-4-4 M20 17H4l4 4",
+  "sound-on": "M3.5 9.5h4L12 5.5v13l-4.5-4h-4z M15.5 9.2a4 4 0 0 1 0 5.6 M18.3 6.5a7.8 7.8 0 0 1 0 11",
+  "sound-off": "M3.5 9.5h4L12 5.5v13l-4.5-4h-4z M16 9.5l5 5 M21 9.5l-5 5",
+};
+---
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d={paths[Astro.props.name]} pathLength="1"/>
+</svg>

@@ -1,0 +1,173 @@
+// Never list ICompositorDesktopInterop, ICompositorInterop or CreateDispatcherQueueController here: their
+// generated bindings are unsafe under Native AOT. Annotator.Platform has hand-written interop for them.
+
+// Windows and messages
+RegisterClassEx
+CreateWindowEx
+DestroyWindow
+DefWindowProc
+GetModuleHandle
+RegisterWindowMessage
+PostMessage
+SendMessageTimeout
+FindWindowEx
+FindWindow
+IsWindow
+ShowWindow
+SetWindowPos
+GetWindowLongPtr
+SetWindowLongPtr
+GetWindowRect
+GetForegroundWindow
+SetForegroundWindow
+AllowSetForegroundWindow
+GetWindowThreadProcessId
+GetCurrentThreadId
+GetCursorPos
+GetCurrentPackageFullName
+CREATESTRUCTW
+COPYDATASTRUCT
+HWND_MESSAGE
+HWND_TOPMOST
+WM_NCCREATE
+WM_NCDESTROY
+WM_COPYDATA
+WM_NULL
+WM_CONTEXTMENU
+WM_SETTINGCHANGE
+WM_DISPLAYCHANGE
+WM_DPICHANGED
+WM_SYSCOLORCHANGE
+WM_THEMECHANGED
+WM_LBUTTONUP
+WM_RBUTTONUP
+WM_APP
+WM_USER
+SYSTEM_PARAMETERS_INFO_ACTION
+SEND_MESSAGE_TIMEOUT_FLAGS
+
+// Notification area
+Shell_NotifyIcon
+Shell_NotifyIconGetRect
+NOTIFYICONDATAW
+NOTIFYICONIDENTIFIER
+NOTIFYICON_VERSION_4
+
+// Icons
+CreateIconIndirect
+DestroyIcon
+CreateDIBSection
+CreateBitmap
+DeleteObject
+ICONINFO
+BITMAPINFO
+BITMAPV5HEADER
+
+// Menus
+CreatePopupMenu
+AppendMenu
+TrackPopupMenuEx
+DestroyMenu
+TRACK_POPUP_MENU_FLAGS
+SetMenuItemInfo
+SetMenuInfo
+
+// Automation identifiers on native menu items (dynamic annotation)
+CoCreateInstance
+IAccPropServices
+AutomationId_Property_GUID
+MENU_ITEM_FLAGS
+
+// Displays, scale and theme
+GetDpiForWindow
+GetDpiForMonitor
+GetSystemMetricsForDpi
+MonitorFromRect
+MonitorFromPoint
+GetMonitorInfo
+MONITORINFO
+RegGetValue
+HKEY_CURRENT_USER
+SystemParametersInfo
+HIGHCONTRASTW
+GetSysColor
+SYS_COLOR_INDEX
+DwmSetWindowAttribute
+DWMWINDOWATTRIBUTE
+DWM_WINDOW_CORNER_PREFERENCE
+
+// Keyboard layouts (refusing chords that type characters, WIN-INP-04)
+GetKeyboardLayoutList
+GetKeyboardLayout
+MapVirtualKeyEx
+ToUnicodeEx
+VIRTUAL_KEY
+WM_CLOSE
+// Transparent window surfaces (toolbar and popovers)
+CallWindowProc
+DwmEnableBlurBehindWindow
+DWM_BB_ENABLE
+DWM_BB_BLURREGION
+CreateRectRgn
+FillRect
+GetStockObject
+GetClientRect
+WM_ERASEBKGND
+WM_NCCALCSIZE
+WM_DWMCOMPOSITIONCHANGED
+
+// Drawing canvases: clipboard, cursors, double-click metrics and frame pacing
+OpenClipboard
+CloseClipboard
+EmptyClipboard
+GetClipboardData
+SetClipboardData
+IsClipboardFormatAvailable
+RegisterClipboardFormat
+GetClipboardSequenceNumber
+GlobalAlloc
+GlobalFree
+GlobalLock
+GlobalUnlock
+GlobalSize
+DragQueryFile
+CLIPBOARD_FORMAT
+LoadCursor
+SetCursor
+IDC_ARROW
+IDC_IBEAM
+IDC_CROSS
+GetDoubleClickTime
+DCompositionWaitForCompositorClock
+// The text editor's caret
+GetCaretBlinkTime
+GetFocus
+
+// UX reference capture (development builds)
+GetSystemMetrics
+
+// File dialogs: Settings' profiles, support info and AI skill; Open board, Save board, Export PNG and Insert image (WIN-SYS-04)
+IFileOpenDialog
+IFileSaveDialog
+IFileDialogCustomize
+IShellItem
+COMDLG_FILTERSPEC
+FILEOPENDIALOGOPTIONS
+SIGDN
+CoTaskMemFree
+// Settings: the feedback window keeps Settings disabled while it is open, like the Mac's sheet
+EnableWindow
+// Settings reference states taller than the screen (UX reference capture, development builds)
+WM_GETMINMAXINFO
+MINMAXINFO
+// Region sharing: the shared region shows the toolbar only while its window is visible
+IsWindowVisible
+// The tray menu's Board submenu
+GetMenuItemCount
+
+// Break timer (specification 014): the lock, keeping the display awake, the sound at zero and hiding the pointer
+LockWorkStation
+SetThreadExecutionState
+PlaySound
+MessageBeep
+ShowCursor

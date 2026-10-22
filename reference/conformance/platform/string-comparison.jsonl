@@ -1,0 +1,19 @@
+{"equal":true,"greater":false,"left":"é","leftUTF8Hex":"c3a9","less":false,"right":"é","rightUTF8Hex":"65cc81"}
+{"equal":true,"greater":false,"left":"Å","leftUTF8Hex":"c385","less":false,"right":"Å","rightUTF8Hex":"e284ab"}
+{"equal":true,"greater":false,"left":"Å","leftUTF8Hex":"c385","less":false,"right":"Å","rightUTF8Hex":"41cc8a"}
+{"equal":true,"greater":false,"left":"Ω","leftUTF8Hex":"cea9","less":false,"right":"Ω","rightUTF8Hex":"e284a6"}
+{"equal":true,"greater":false,"left":"K","leftUTF8Hex":"4b","less":false,"right":"K","rightUTF8Hex":"e284aa"}
+{"equal":false,"greater":true,"left":"a","leftUTF8Hex":"61","less":false,"right":"A","rightUTF8Hex":"41"}
+{"equal":false,"greater":false,"left":"Z","leftUTF8Hex":"5a","less":true,"right":"a","rightUTF8Hex":"61"}
+{"equal":false,"greater":true,"left":"ä","leftUTF8Hex":"c3a4","less":false,"right":"z","rightUTF8Hex":"7a"}
+{"equal":false,"greater":false,"left":"Shape 10","leftUTF8Hex":"5368617065203130","less":true,"right":"Shape 9","rightUTF8Hex":"53686170652039"}
+{"equal":false,"greater":true,"left":"shape","leftUTF8Hex":"7368617065","less":false,"right":"Shape","rightUTF8Hex":"5368617065"}
+{"equal":false,"greater":true,"left":"ß","leftUTF8Hex":"c39f","less":false,"right":"ss","rightUTF8Hex":"7373"}
+{"equal":false,"greater":true,"left":"ﬁ","leftUTF8Hex":"efac81","less":false,"right":"fi","rightUTF8Hex":"6669"}
+{"equal":false,"greater":true,"left":"1️⃣","leftUTF8Hex":"31efb88fe283a3","less":false,"right":"1","rightUTF8Hex":"31"}
+{"equal":false,"greater":false,"left":"","leftUTF8Hex":"","less":true,"right":"a","rightUTF8Hex":"61"}
+{"equal":false,"greater":false,"left":"a","leftUTF8Hex":"61","less":true,"right":"a ","rightUTF8Hex":"6120"}
+{"equal":false,"greater":true,"left":"éx","leftUTF8Hex":"65cc8178","less":false,"right":"éa","rightUTF8Hex":"c3a961"}
+{"equal":false,"greater":true,"left":"😀","leftUTF8Hex":"f09f9880","less":false,"right":"￿","rightUTF8Hex":"efbfbf"}
+{"equal":false,"greater":true,"left":"𐀀","leftUTF8Hex":"f0908080","less":false,"right":"�","rightUTF8Hex":"efbfbd"}
+{"equal":false,"greater":true,"left":"ǅ","leftUTF8Hex":"c785","less":false,"right":"Dž","rightUTF8Hex":"44c5be"}

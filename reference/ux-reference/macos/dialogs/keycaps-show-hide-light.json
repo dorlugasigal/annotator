@@ -1,0 +1,36 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    7.5,
+    7.5,
+    62,
+    29
+   ],
+   "help": "Control + 2",
+   "label": "Control + 2",
+   "role": "AXUnknown"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/keycaps-show-hide-light.png",
+ "kind": "view",
+ "notes": "Keycaps for the default show-hide shortcut. Windows shows Ctrl, Alt, Shift and Win as text.",
+ "pixels": [
+  154,
+  88
+ ],
+ "scale": 2,
+ "size": [
+  77,
+  44
+ ],
+ "spec": [
+  "005",
+  "WIN-INP-05"
+ ],
+ "state": "keycaps-show-hide",
+ "surface": "dialogs"
+}

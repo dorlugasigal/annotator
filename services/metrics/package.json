@@ -1,0 +1,22 @@
+{
+  "name": "annotator-metrics",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test tests/*.test.ts tests/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "hash-password": "node scripts/hash-password.ts",
+    "set-admin-password": "node scripts/set-admin-password.ts"
+  },
+  "dependencies": {
+    "@netlify/blobs": "11.1.0"
+  },
+  "devDependencies": {
+    "@netlify/functions": "6.0.0",
+    "netlify-cli": "27.8.0",
+    "@types/node": "26.4.1",
+    "typescript": "5.9.3"
+  }
+}

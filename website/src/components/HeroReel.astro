@@ -1,0 +1,66 @@
+---
+import { heroReel, phoneMedia } from "../lib/hero-reel";
+import { reelChapters } from "../lib/reel-chapters";
+import SiteIcon from "./SiteIcon.astro";
+const reel = heroReel();
+const { desktop, phone } = reel;
+const chapters = reelChapters(desktop);
+const ratio = (encoding: { width: number; height: number }) => `${encoding.width} / ${encoding.height}`;
+---
+<div class:list={["hero-reel", "player", {"hero-reel--phone": phone}]} data-hero-reel data-phone-media={phone ? phoneMedia : undefined}
+  style={`--reel-ratio:${ratio(desktop)};--reel-phone-ratio:${ratio(phone ?? desktop)}`}>
+  <div class="reel-frame player-screen" data-reel-frame>
+    <picture class="reel-poster" data-reel-poster>
+      {phone && <source media={phoneMedia} srcset={phone.posterURL} width={phone.width} height={phone.height}/>}
+      <img src={desktop.posterURL} width={desktop.width} height={desktop.height} alt="" fetchpriority="high"/>
+    </picture>
+    {/* iPhone WebKit refused every source on videos with a <track> child, so this reel has none.
+        It always starts muted; only the Sound button turns its music on. */}
+    <video data-reel-video crossorigin="anonymous" controls muted playsinline preload="metadata"
+           width={desktop.width} height={desktop.height} aria-label={reel.description} aria-describedby="reel-provenance"
+           data-duration={desktop.duration}>
+      {phone && <source media={phoneMedia} src={phone.videoURL} type="video/mp4"/>}
+      <source src={desktop.videoURL} type="video/mp4"/>
+      <p>Your browser cannot play this video. <a href={desktop.videoURL}>Open the video.</a></p>
+    </video>
+    <p class="player-status reel-status" data-reel-status role="status" hidden></p>
+  </div>
+  <div class="player-chin reel-chin">
+    <button type="button" class="player-toggle reel-toggle" data-reel-toggle hidden aria-label="Play the reel">
+      <span class="player-toggle-symbol" data-reel-symbol aria-hidden="true">
+        <span data-action="Play"><SiteIcon name="play"/></span>
+        <span data-action="Pause" hidden><SiteIcon name="pause"/></span>
+        <span data-action="Replay" hidden><SiteIcon name="replay"/></span>
+      </span>
+      <span data-reel-label>Play</span>
+    </button>
+    {reel.audio && (
+      <button type="button" class="player-toggle reel-sound" data-reel-sound hidden aria-pressed="false">
+        <span class="player-toggle-symbol" aria-hidden="true">
+          <span data-sound="off"><SiteIcon name="sound-off"/></span>
+          <span data-sound="on" hidden><SiteIcon name="sound-on"/></span>
+        </span>
+        <span>Sound</span>
+      </button>
+    )}
+    {/* Chapters can only seek with scripts, so they stay hidden without them. */}
+    <ol class="reel-chapters" data-reel-chapters aria-label="Parts of the reel" hidden>
+      {chapters.map(chapter => (
+        <li class:list={["reel-chapter", `reel-chapter--${chapter.kind}`]} style={`--span:${(chapter.end - chapter.start).toFixed(3)}`}
+          data-chapter={chapter.id} data-start={chapter.start} data-end={chapter.end} aria-hidden={chapter.kind === "title" ? "true" : undefined}>
+          {chapter.kind === "part"
+            ? <button type="button" data-chapter-start={chapter.start} aria-label={`${chapter.label}, from ${chapter.clock}`}>
+                <span class="reel-chapter-label">{chapter.label}</span>
+                <span class="reel-chapter-bar"><span class="reel-chapter-fill"></span></span>
+              </button>
+            : <span class="reel-chapter-bar"><span class="reel-chapter-fill"></span></span>}
+        </li>
+      ))}
+    </ol>
+    <p class="reel-now" data-reel-now aria-hidden="true" hidden></p>
+  </div>
+  <p class="reel-error" data-reel-error role="status" hidden>
+    <span data-reel-error-reason>The reel could not play.</span> Try Play again. You can also <a href={desktop.videoURL} data-reel-link>open the video</a>.
+  </p>
+</div>
+<script>import "../scripts/hero-reel";</script>

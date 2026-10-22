@@ -1,0 +1,76 @@
+---
+import Page from "../layouts/Page.astro";
+import { distribution, githubURL, hasDownloads, releasePageURL, runsOnIntel } from "../lib/distribution";
+import { windowsListing as windows } from "../lib/windows";
+import { sitePath } from "../lib/paths";
+import PlatformSwitch from "../components/PlatformSwitch.astro";
+const entries = [distribution.stable, distribution.preview].filter(value => value !== null);
+// Claim Intel only when every release listed here runs on it.
+const intel = entries.length > 0 && entries.every(runsOnIntel);
+---
+<Page title="Downloads">
+  <article class="prose wrap" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
+    <p class="eyebrow">DOWNLOADS</p>
+    <h1>Get Annotator.</h1>
+    {windows
+      ? <p>On a Mac, download the app from GitHub or install it with Homebrew. On Windows, get it from the Microsoft Store or install it with winget.</p>
+      : <p>Download the app from GitHub, or install it with Homebrew.</p>}
+    {windows && <PlatformSwitch label="Downloads for"/>}
+    <div data-platform-part={windows ? "mac" : undefined}>
+    {intel
+      ? <p>{windows ? "The Mac app requires" : "Requires"} macOS 14 or later, on a Mac with Apple Silicon or an Intel processor. Check Apple menu &gt; About This Mac for your macOS version.</p>
+      : <p>{windows ? "The Mac app requires" : "Requires"} macOS 14 or later and Apple Silicon (an Apple M-series chip). Check Apple menu &gt; About This Mac for your chip and macOS version.</p>}
+    {hasDownloads ? (
+      <>
+        <p>Save your boards before updating. If you are screen sharing, stop before quitting Annotator: quitting removes covers.</p>
+        {entries.map(entry => (
+          <section>
+            <h2>{entry.track === "stable" ? "Stable" : "Testing preview"}: {entry.releaseVersion}</h2>
+            {entry.track === "preview" && <p>This is a prerelease for testing, with known limitations. Keep a backup of your boards.</p>}
+            {entry.diskImage ? (
+              <>
+                <p><a href={entry.diskImage.url} data-download-track={entry.track}>Download {entry.releaseVersion} (disk image)</a></p>
+                <p>Or get the <a href={entry.downloadURL}>ZIP archive</a> instead.</p>
+              </>
+            ) : <p><a href={entry.downloadURL} data-download-track={entry.track}>Download {entry.releaseVersion} from GitHub</a></p>}
+            <p><a href={releasePageURL(entry)}>Read release notes and known limits for {entry.releaseVersion}</a></p>
+            <p>Build {entry.build}. Developer ID signed and notarized. Your Mac or organization may still apply additional restrictions.</p>
+            <details><summary>SHA-256 {entry.diskImage ? "checksums" : "checksum"}</summary>
+              {entry.diskImage && <p>Disk image: <code style="overflow-wrap:anywhere">{entry.diskImage.sha256}</code></p>}
+              <p>{entry.diskImage && "ZIP archive: "}<code style="overflow-wrap:anywhere">{entry.sha256}</code></p>
+            </details>
+          </section>
+        ))}
+        <p>Open the disk image and drag Annotator into Applications, or unzip the ZIP and move Annotator to Applications. Then open it from Applications. Annotator can update itself only from there. If macOS blocks it, report the exact message rather than bypassing security checks.</p>
+      </>
+    ) : <p>This page has no verified download details. Check the <a href="https://github.com/dorlugasigal/annotator/releases">public releases</a> for current downloads.</p>}
+    <section id="homebrew" aria-labelledby="homebrew-title">
+      <h2 id="homebrew-title">Install with Homebrew</h2>
+      {hasDownloads ? (
+        <>
+          <p>Run this in Terminal. Homebrew adds the Annotator tap and downloads the app from GitHub too.</p>
+          <pre class="command-block" tabindex="0" role="region" aria-label="Homebrew install command"><code>brew install --cask dorlugasigal/annotator/annotator</code></pre>
+        </>
+      ) : <p>Check <a href="https://github.com/dorlugasigal/annotator/releases">GitHub releases</a> for availability. The install commands appear here when this page has verified release details.</p>}
+    </section>
+    </div>
+    {/* Only a published Microsoft Store listing adds Windows (spec 013, WIN-DST-02 and WIN-DST-08). */}
+    {windows && (
+      <section id="windows" aria-labelledby="windows-title" data-platform-part="windows">
+        <h2 id="windows-title">Annotator for Windows</h2>
+        <p>Requires Windows 11, version 22H2 or later, on an x64 or ARM64 PC. To check, open Settings &gt; System &gt; About.</p>
+        <p><a href={windows.listingURL}>Get Annotator from the Microsoft Store</a>. Updates come from the Store too.</p>
+        <p>Or run this in Terminal. winget installs the same app from the Microsoft Store.</p>
+        <pre class="command-block" tabindex="0" role="region" aria-label="winget install command"><code>{windows.wingetCommand}</code></pre>
+        <p>Without the Store, download the ZIP for your PC from the <a href="https://github.com/dorlugasigal/annotator/releases">latest GitHub release</a>, unzip it and open Annotator. The ZIPs aren't code-signed yet, so Windows may show a SmartScreen warning before it opens.</p>
+      </section>
+    )}
+    <section id="source" aria-labelledby="source-title">
+      <h2 id="source-title">Build from source</h2>
+      <p>Annotator is open source under the <a href={`${githubURL}/blob/main/LICENSE`}>Apache License 2.0</a>. To build it yourself, follow <a href={`${githubURL}#build-from-source`}>Build from source</a> on GitHub. Read the <a href={`${githubURL}/blob/main/CONTRIBUTING.md`}>contributing guide</a> before you send changes.</p>
+    </section>
+    <p>All tools are free. {windows ? "VoiceOver and Narrator support" : "VoiceOver support"} and testing on other hardware are incomplete. Multi-display and screen-sharing behavior still need physical checks.</p>
+    <p>Screen zoom and live effects need Screen Recording permission{windows && " on a Mac and screen access on Windows"}. Drawing does not. Read the <a href={sitePath("/docs/#limitations")}>screen-sharing limits</a> before using private content.</p>
+    <p><a href={sitePath("/docs/#preview")}>Start with the first-use guide.</a> If something goes wrong, <a href={sitePath("/support/")}>report a problem</a>.</p>
+  </article>
+</Page>

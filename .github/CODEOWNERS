@@ -1,0 +1,6 @@
+# Maintainers review every change. Release and signing paths need the owner.
+*                     @dorlugasigal
+/.github/workflows/   @dorlugasigal
+/tools/release/       @dorlugasigal
+/tools/windows/       @dorlugasigal
+/releases/            @dorlugasigal

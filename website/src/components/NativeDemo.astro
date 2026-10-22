@@ -1,0 +1,24 @@
+---
+import demo from "../data/native-demo.json";
+import { sitePath } from "../lib/paths";
+---
+<section class="native-demo wrap" id="native-demo" aria-labelledby="native-demo-title">
+  <h2 id="native-demo-title" class="screen-reader-only">Desktop diagram walkthrough</h2>
+  <video id="native-demo-video" crossorigin="anonymous" controls playsinline preload="none" width="1920" height="1080" data-duration={demo.duration}
+         poster={sitePath("/demo/annotator-ad-poster.jpg")} aria-label="Annotator product film with native desktop actions">
+    <source media="(max-width: 600px)" src={sitePath("/demo/annotator-ad-phone.mp4")} type="video/mp4"/>
+    <source src={sitePath("/demo/annotator-ad.mp4")} type="video/mp4"/>
+    <p>Your browser cannot play this video. <a href={sitePath("/demo/annotator-ad.mp4")}>Open the product film.</a></p>
+  </video>
+  <p class="native-demo-status" data-video-status role="status">The longer walkthrough. Sound is optional.</p>
+  <details class="native-demo-transcript">
+    <summary>Chapters &amp; recording details</summary>
+    <div class="native-demo-chapters" data-demo-chapters hidden role="group" aria-label="Video chapters">
+      {demo.chapters.map(chapter => <button type="button" data-video-time={chapter.time}>{chapter.label}</button>)}
+    </div>
+    <p class="native-demo-credit">Music: <a href="https://punchdeck.bandcamp.com/track/chrome-funk">“Chrome Funk” by Punch Deck</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Edited excerpt.</p>
+    <p>Sketch an API and cache using Smart Draw. Place labels inside their shapes. Open the resizable shape library, choose a person and database, then style and connect them. The dashed curve marks a cache miss. Highlight the API, move an annotation and Undo. In a separate browser window, native Blur softens a sample contact card.</p>
+    <p>This earlier app recording uses the display’s native pixel resolution. A scripted pointer drives it, and the camera follows the pointer’s recorded positions, with the tool choices kept in frame and a short motion trail during camera moves. The footage is sped up; it is not a human recording. The browser and notes contain fictional data. Only controlled windows are captured; no unrelated desktop content is included. Blur is produced by Annotator, not video editing, and is not secure redaction.</p>
+  </details>
+</section>
+<script>import "../scripts/native-demo";</script>

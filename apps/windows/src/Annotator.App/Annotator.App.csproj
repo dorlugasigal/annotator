@@ -1,0 +1,120 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Annotator.App: the WinUI 3 app host (tray icon, toolbar, overlays on their own thread, modes, global shortcuts).
+       Self-contained Windows App SDK and Native AOT, x64 today with ARM64-ready settings. Development builds are unpackaged
+       (WindowsPackageType None); -p:AnnotatorPackage=true builds the single-project MSIX (tools/windows/validate.ps1 package). -->
+  <!-- Version, prerelease suffix and build from apps/macos/project.yml (WIN-DST-04). -->
+  <Import Project="SharedVersion.props" />
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.22621.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+    <RootNamespace>Annotator.App</RootNamespace>
+    <AssemblyName>Annotator</AssemblyName>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- The executable's icon for File Explorer and the taskbar, drawn from the app icon artwork (Annotator.IconExport). -->
+    <ApplicationIcon>Assets\Annotator.ico</ApplicationIcon>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <!-- The optional support link of Buy me a coffee, as ANNOTATOR_SUPPORT_URL in apps/macos/project.yml. -->
+    <AnnotatorSupportUrl Condition="'$(AnnotatorSupportUrl)' == ''">https://buymeacoffee.com/dorlugasigal</AnnotatorSupportUrl>
+    <!-- Report a problem's GitHub form and the website of Help and About, as ANNOTATOR_ISSUES_URL and ANNOTATOR_WEBSITE_URL. -->
+    <AnnotatorIssuesUrl Condition="'$(AnnotatorIssuesUrl)' == ''">https://github.com/dorlugasigal/annotator/issues/new</AnnotatorIssuesUrl>
+    <AnnotatorWebsiteUrl Condition="'$(AnnotatorWebsiteUrl)' == ''">https://dorlugasigal.github.io/annotator</AnnotatorWebsiteUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(AnnotatorPackage)' != 'true'">
+    <WindowsPackageType>None</WindowsPackageType>
+    <EnableMsixTooling>false</EnableMsixTooling>
+  </PropertyGroup>
+  <!-- The single-project MSIX (WIN-DST-01, plan Phase 6). The package is unsigned: the Store signs it, and a local test
+       registers its unpacked layout in Developer Mode. MakeAppx bundles the architectures afterwards. -->
+  <PropertyGroup Condition="'$(AnnotatorPackage)' == 'true'">
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <AppxBundle>Never</AppxBundle>
+    <AppxSymbolPackageEnabled>false</AppxSymbolPackageEnabled>
+    <GenerateTestArtifacts>false</GenerateTestArtifacts>
+    <AppxPackageDir Condition="'$(AppxPackageDir)' == ''">$(MSBuildProjectDirectory)\..\..\out\package\msbuild\</AppxPackageDir>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(AnnotatorPackage)' == 'true'">
+    <!-- Package.appxmanifest with the shared version written into its Identity (AnnotatorPackageManifest below). -->
+    <AppxManifest Include="$(IntermediateOutputPath)Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="AnnotatorSupportURL" Value="$(AnnotatorSupportUrl)" />
+    <AssemblyMetadata Include="AnnotatorIssuesURL" Value="$(AnnotatorIssuesUrl)" />
+    <AssemblyMetadata Include="AnnotatorWebsiteURL" Value="$(AnnotatorWebsiteUrl)" />
+    <!-- A release build sets AnnotatorBuildStamp (ANNOTATOR_BUILD_STAMP); local builds say "Unstamped development build". -->
+    <AssemblyMetadata Include="AnnotatorBuildStamp" Value="$(AnnotatorBuildStamp)" />
+    <!-- The portable release ZIP sets AnnotatorDistribution=portable (tools/windows/package.ps1 -Portable). -->
+    <AssemblyMetadata Include="AnnotatorDistribution" Value="$(AnnotatorDistribution)" />
+    <!-- The usage-count service's origin (ANNOTATOR_METRICS_URL on the Mac). Source builds have none and send nothing; the
+         owner's release build sets it once UsageMetrics.ServiceAcceptsWindows is on (specification 011, WIN-PRV-01). -->
+    <AssemblyMetadata Include="AnnotatorMetricsURL" Value="$(AnnotatorMetricsUrl)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Component packages instead of the Microsoft.WindowsAppSDK metapackage, which adds about 58 MB of AI, ML and Search binaries (Gate 0 S-12). -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.363" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Annotator.Workspace\Annotator.Workspace.csproj" />
+    <ProjectReference Include="..\Annotator.Platform\Annotator.Platform.csproj" />
+    <ProjectReference Include="..\Annotator.Rendering\Annotator.Rendering.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The icon map is source data for tools/windows/update-lucide-icons.mjs; the app uses the generated Icons/LucideIcons.g.cs. -->
+    <None Include="Assets\icon-map.json" />
+    <!-- The Lucide ISC license and the Feather MIT notice ship next to the app, as on the Mac. -->
+    <Content Include="Assets\Lucide-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Rough.js's MIT notice covers Annotator.Core's RoughGeometry.cs; About shows it with the other notices. -->
+    <Content Include="..\..\..\macos\Annotator\RoughJS-LICENSE.txt" Link="RoughJS-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- What's changed reads the bundled release notes, and Save AI skill... copies the bundled skill (WIN-UI-05, WIN-AI-01). -->
+    <Content Include="..\..\..\..\releases\notes.json" Link="notes.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\..\..\integrations\computer-use\annotator\SKILL.md" Link="annotator\SKILL.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <!-- App.xaml lives in the app's resource index (Annotator.pri). Without the MSIX tooling, the .NET SDK builds the
+       index but does not publish it, and the published app then starts without its styles. A package has resources.pri. -->
+  <Target Name="PublishProjectPriFile" AfterTargets="ComputeResolvedFilesToPublishList" Condition="'$(ProjectPriFullPath)' != '' and '$(WindowsPackageType)' == 'None'">
+    <Error Condition="!Exists('$(ProjectPriFullPath)')" Text="The app resource index $(ProjectPriFullPath) was not built." />
+    <ItemGroup>
+      <ResolvedFileToPublish Include="$(ProjectPriFullPath)">
+        <RelativePath>$(ProjectPriFileName)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+  <!-- The package version is (Major + 1).Minor.Build.0 of the shared version (WIN-DST-04); the checked-in manifest keeps
+       0.0.0.0 and the owner's Store identity. -->
+  <Target Name="AnnotatorPackageManifest" BeforeTargets="PrepareForBuild" Condition="'$(AnnotatorPackage)' == 'true'">
+    <Error Condition="'$(AnnotatorMsixVersion)' == ''" Text="The package version could not be made from the shared version in $(AnnotatorProjectYml)." />
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <Copy SourceFiles="Package.appxmanifest" DestinationFiles="@(AppxManifest)" />
+    <XmlPoke XmlInputPath="@(AppxManifest)" Query="/m:Package/m:Identity/@Version" Value="$(AnnotatorMsixVersion)"
+             Namespaces="&lt;Namespace Prefix='m' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
+  </Target>
+  <!-- The package carries what the validated Native AOT publish has: no symbols, no .NET host files (the executable is
+       native), no WebView2 metadata, no icon-map source and no copy of the executable's icon. -->
+  <Target Name="AnnotatorTrimPackagePayload" AfterTargets="_ComputeAppxPackagePayload" Condition="'$(AnnotatorPackage)' == 'true'">
+    <ItemGroup>
+      <AppxPackagePayload Remove="@(AppxPackagePayload)" Condition="'%(AppxPackagePayload.Extension)' == '.pdb' or
+                                                                     '%(AppxPackagePayload.TargetPath)' == 'Annotator.deps.json' or
+                                                                     '%(AppxPackagePayload.TargetPath)' == 'Annotator.runtimeconfig.json' or
+                                                                     '%(AppxPackagePayload.TargetPath)' == 'Microsoft.Web.WebView2.Core.winmd' or
+                                                                     '%(AppxPackagePayload.TargetPath)' == 'Assets\icon-map.json' or
+                                                                     '%(AppxPackagePayload.TargetPath)' == 'Assets\Annotator.ico'" />
+    </ItemGroup>
+  </Target>
+</Project>

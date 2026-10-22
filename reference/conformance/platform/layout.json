@@ -1,0 +1,110 @@
+{
+  "estimatedBytes" : [
+    {
+      "estimatedBytes" : 528,
+      "imageBytes" : 0,
+      "labelEstimatedBytes" : null,
+      "name" : "empty rectangle",
+      "paintEstimatedBytes" : 0,
+      "points" : 0,
+      "pressures" : 0,
+      "textUTF8" : 0
+    },
+    {
+      "estimatedBytes" : 2928,
+      "imageBytes" : 0,
+      "labelEstimatedBytes" : null,
+      "name" : "pen with 100 points and pressures",
+      "paintEstimatedBytes" : 0,
+      "points" : 100,
+      "pressures" : 100,
+      "textUTF8" : 0
+    },
+    {
+      "estimatedBytes" : 545,
+      "imageBytes" : 0,
+      "labelEstimatedBytes" : null,
+      "name" : "text with multibyte characters",
+      "paintEstimatedBytes" : 0,
+      "points" : 0,
+      "pressures" : 0,
+      "textUTF8" : 17
+    },
+    {
+      "estimatedBytes" : 713,
+      "imageBytes" : 185,
+      "labelEstimatedBytes" : null,
+      "name" : "image",
+      "paintEstimatedBytes" : 0,
+      "points" : 0,
+      "pressures" : 0,
+      "textUTF8" : 0
+    },
+    {
+      "estimatedBytes" : 1502,
+      "imageBytes" : 0,
+      "labelEstimatedBytes" : 686,
+      "name" : "rectangle with gradient label",
+      "paintEstimatedBytes" : 288,
+      "points" : 0,
+      "pressures" : 0,
+      "textUTF8" : 0
+    }
+  ],
+  "historyBytesAfterEachAdd" : [
+    0,
+    64,
+    656,
+    4176,
+    8241,
+    13019
+  ],
+  "memoryLayout" : {
+    "Anchor" : {
+      "alignment" : 8,
+      "size" : 32,
+      "stride" : 32
+    },
+    "ColorGradient" : {
+      "alignment" : 8,
+      "size" : 16,
+      "stride" : 16
+    },
+    "Element" : {
+      "alignment" : 8,
+      "size" : 528,
+      "stride" : 528
+    },
+    "Point" : {
+      "alignment" : 8,
+      "size" : 16,
+      "stride" : 16
+    },
+    "RGBA" : {
+      "alignment" : 8,
+      "size" : 32,
+      "stride" : 32
+    },
+    "Rect" : {
+      "alignment" : 8,
+      "size" : 32,
+      "stride" : 32
+    },
+    "ShapeLabel" : {
+      "alignment" : 8,
+      "size" : 8,
+      "stride" : 8
+    },
+    "Style" : {
+      "alignment" : 8,
+      "size" : 256,
+      "stride" : 256
+    },
+    "UUID" : {
+      "alignment" : 1,
+      "size" : 16,
+      "stride" : 16
+    }
+  },
+  "note" : "Element.estimatedBytes uses max(512, MemoryLayout<Element>.stride). History snapshots cost 64 bytes plus the estimate of every element; historyBytes lists the total after each add, starting from an empty document."
+}

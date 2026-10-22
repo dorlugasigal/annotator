@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "beats": 64,
+  "checked": {
+    "reel": "c851ccb55594",
+    "bpm": 130,
+    "date": "2026-09-27"
+  },
+  "note": "Parts of the hero reel, placed on its beat grid: beat n starts at (n - 1) x duration / beats. The reel is cut to its music, so a new tempo keeps these beats. After any new reel encoding, check the cuts against these beats and update checked; a unit test fails until then.",
+  "chapters": [
+    {
+      "id": "intro",
+      "kind": "title",
+      "label": "Intro",
+      "beat": 1
+    },
+    {
+      "id": "toolbar",
+      "kind": "part",
+      "label": "Toolbar",
+      "beat": 6
+    },
+    {
+      "id": "draw",
+      "kind": "part",
+      "label": "Circle, point, highlight",
+      "beat": 12
+    },
+    {
+      "id": "smart",
+      "kind": "part",
+      "label": "Smart Draw",
+      "beat": 30
+    },
+    {
+      "id": "focus",
+      "kind": "part",
+      "label": "Spotlight and blur",
+      "beat": 42
+    },
+    {
+      "id": "end",
+      "kind": "title",
+      "label": "End",
+      "beat": 57
+    }
+  ]
+}

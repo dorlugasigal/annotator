@@ -1,0 +1,1296 @@
+{
+  "environment" : {
+    "build" : "26A434",
+    "cpu" : "Apple M4 Max",
+    "gpu" : "Apple M4 Max",
+    "macOS" : "27.0.1",
+    "machine" : "arm64"
+  },
+  "fileCount" : 251,
+  "files" : [
+    {
+      "bytes" : 1364,
+      "path" : "boards/invalid/anchor-on-rectangle.json",
+      "sha256" : "555425f6790bc6245915d087e86471b5cee3400ef6307d0662d337dbe07c0c9e"
+    },
+    {
+      "bytes" : 1408,
+      "path" : "boards/invalid/anchor-outside-shape.json",
+      "sha256" : "c9c97cda6a1bad7a057f9231dc2da15fce8bec5a47dfef5a509a532e85f2650e"
+    },
+    {
+      "bytes" : 665,
+      "path" : "boards/invalid/axis-ticks-25.json",
+      "sha256" : "604f18ca3551db25b56bf45fa7e06f206bce761b3fa6daba200d53f40fb297bb"
+    },
+    {
+      "bytes" : 665,
+      "path" : "boards/invalid/axis-ticks-negative.json",
+      "sha256" : "90aae33b000e39d7a2ab0825966446e714aca5c84f330f7bcc4ee6f620f85c03"
+    },
+    {
+      "bytes" : 650,
+      "path" : "boards/invalid/color-above-one.json",
+      "sha256" : "1c3b089a540d996ba86ba559598c32ea0943d1350ecf77e7b1ab8baae768ecae"
+    },
+    {
+      "bytes" : 655,
+      "path" : "boards/invalid/color-alpha-negative.json",
+      "sha256" : "adc888bde8b3c02f88839e3060811bb17886654a7d1b0da6dd12b28b1d9f093e"
+    },
+    {
+      "bytes" : 656,
+      "path" : "boards/invalid/corner-radius-too-large.json",
+      "sha256" : "72f2409c9ce03cddf5dc92db79c356d8938f15fe27b1738789348a77b4dcd3af"
+    },
+    {
+      "bytes" : 1270,
+      "path" : "boards/invalid/duplicate-ids.json",
+      "sha256" : "46339d3c6d643b40f81bb955d1cf3ba33689618de997cd0b0a6d8d7a76d1da7a"
+    },
+    {
+      "bytes" : 671,
+      "path" : "boards/invalid/effect-above-100.json",
+      "sha256" : "fa6a1703dcc2f10dfc0a74de1f0f705e63746c9cee8144b04549f8a4bc39b435"
+    },
+    {
+      "bytes" : 664,
+      "path" : "boards/invalid/effect-negative.json",
+      "sha256" : "ad112a55beeb05ef478f51b7108e777cb56584f521b4fa0e9f1942eaab825d38"
+    },
+    {
+      "bytes" : 648,
+      "path" : "boards/invalid/eraser-tool.json",
+      "sha256" : "0423962c766836e7ee1d27e8d5bf41931d3037ff30bf6e8cdd013ccfef2b3869"
+    },
+    {
+      "bytes" : 697,
+      "path" : "boards/invalid/fill-above-one.json",
+      "sha256" : "0243714fb1aeb88dcc4bf6c90b03986dbccf001f4c5ac1e7b00bf0f54a2bb6f0"
+    },
+    {
+      "bytes" : 829,
+      "path" : "boards/invalid/fill-gradient-without-fill.json",
+      "sha256" : "01905528e7d43019f418c5f63b9155acc6d2a5e4064c133e3ad918023c366e77"
+    },
+    {
+      "bytes" : 898,
+      "path" : "boards/invalid/font-name-too-long.json",
+      "sha256" : "2d00091327ecee5ec60f738c068aa0f449cf74c59d22a0b283c91e80047fd24c"
+    },
+    {
+      "bytes" : 648,
+      "path" : "boards/invalid/font-size-too-large.json",
+      "sha256" : "6e47f216d0533129b4183771141057c7849b054d3991b9ce587a69db94e2760c"
+    },
+    {
+      "bytes" : 647,
+      "path" : "boards/invalid/font-size-too-small.json",
+      "sha256" : "e2dd6b62c8e8e2c8efc7dd175fafb5b8e98475b5f8de824cdc8001ac2d78bf8f"
+    },
+    {
+      "bytes" : 659,
+      "path" : "boards/invalid/frame-too-far.json",
+      "sha256" : "f6f020972596caf2325af50a3a0e60b9154e4b70bf209b6a98fdced571d25406"
+    },
+    {
+      "bytes" : 658,
+      "path" : "boards/invalid/frame-too-wide.json",
+      "sha256" : "2c3882100c5d3a30d275937e6e285f1b26c0819283a632f25a34d85134dbd26d"
+    },
+    {
+      "bytes" : 773,
+      "path" : "boards/invalid/gradient-angle-361.json",
+      "sha256" : "6d8d06cc8e8c883457681e89a240e83ce56891de3576d655f5325f2c0007e23b"
+    },
+    {
+      "bytes" : 770,
+      "path" : "boards/invalid/gradient-angle-negative.json",
+      "sha256" : "281ed7114f4fe0d6dd4ec78ca27cf993edc595ace9e710c397e54bd274330da5"
+    },
+    {
+      "bytes" : 860,
+      "path" : "boards/invalid/gradient-in-schema-2.json",
+      "sha256" : "bdbe73a10e3f923fc381141982bb3d8f91ab37e1494699cd1485ba1b76c328ac"
+    },
+    {
+      "bytes" : 1042,
+      "path" : "boards/invalid/gradient-nine-colors.json",
+      "sha256" : "be27560acd80ce85d00748671847ab5570773dbef3e9676b08260d5f86981e16"
+    },
+    {
+      "bytes" : 730,
+      "path" : "boards/invalid/gradient-one-color.json",
+      "sha256" : "a2cc7374afcb703c696db5265abb919738437441e6de09527fd4aa4549500c32"
+    },
+    {
+      "bytes" : 772,
+      "path" : "boards/invalid/gradient-translucent.json",
+      "sha256" : "ca7ac6c3e5b990e79c93a026c3c08e61b449e2deae9ddb9c9119236f6f764a80"
+    },
+    {
+      "bytes" : 663,
+      "path" : "boards/invalid/grid-columns-25.json",
+      "sha256" : "000baf740ff2bde3628f33aae14598e2542c8bc13a2ac7fd765eabbf7b4c766a"
+    },
+    {
+      "bytes" : 659,
+      "path" : "boards/invalid/grid-rows-zero.json",
+      "sha256" : "149e9270b5e3c1919dcbf531a5f43c09a8a7810d2b75e1a8946afee987e7ae27"
+    },
+    {
+      "bytes" : 695,
+      "path" : "boards/invalid/head-scale-too-large.json",
+      "sha256" : "eff2f585198f1c4faf4c6b62c228fbcd00859cf086e52b892c715d415f5bc0e9"
+    },
+    {
+      "bytes" : 695,
+      "path" : "boards/invalid/head-scale-too-small.json",
+      "sha256" : "36731b44112cb815fc1a69e678cb3e85d1e004278ebfecdacf778f05990930b2"
+    },
+    {
+      "bytes" : 915,
+      "path" : "boards/invalid/image-data-on-rectangle.json",
+      "sha256" : "ee0b862eee42f293511f26c80819ba978f698a787b1abfdb033edb2c1b87d820"
+    },
+    {
+      "bytes" : 685,
+      "path" : "boards/invalid/image-not-png.json",
+      "sha256" : "c0d154e2babd7a46af03edd5698b706ca4b27c3ff5380507d175cc02568e83e5"
+    },
+    {
+      "bytes" : 647,
+      "path" : "boards/invalid/image-without-data.json",
+      "sha256" : "e908b34833e5b42cb41efe59941f2a6fdd8f30fc8d4900530a0c3b61df86d3f3"
+    },
+    {
+      "bytes" : 10014,
+      "path" : "boards/invalid/index.jsonl",
+      "sha256" : "5682e6f25a49f1e54f918697f9ebf942e82f1b5052a93f5399a929779bd3693c"
+    },
+    {
+      "bytes" : 967,
+      "path" : "boards/invalid/label-in-schema-1.json",
+      "sha256" : "f6f9de6fcf03180eefd19104177c802b84d9f59f9da888fddded0757789892c3"
+    },
+    {
+      "bytes" : 962,
+      "path" : "boards/invalid/label-on-text.json",
+      "sha256" : "3b5c1c7ec0b0b5c64f2a297db0eaf8fa3bea4ad4219382998c9bb4363ae51563"
+    },
+    {
+      "bytes" : 964,
+      "path" : "boards/invalid/label-style-invalid.json",
+      "sha256" : "a2dfa78e513a5dfb54e35672d0972a0f5d4b0e1594f33b7ca069912e2e29d0cc"
+    },
+    {
+      "bytes" : 988,
+      "path" : "boards/invalid/matching-label-in-schema-2.json",
+      "sha256" : "aa0cebcc9909bfe1f4c6cceeb8f5aeb666641d260bee2e69027452c4f8830fe8"
+    },
+    {
+      "bytes" : 651,
+      "path" : "boards/invalid/negative-width.json",
+      "sha256" : "7b04c30ecb81281ad551381fd12e7f0405c560cd512a6575f4bbb09d20f3e4a1"
+    },
+    {
+      "bytes" : 653,
+      "path" : "boards/invalid/opacity-above-one.json",
+      "sha256" : "94f895542dfc9e12a044f43576dea50c9ea7fd621b8d0f069a773691f01914e0"
+    },
+    {
+      "bytes" : 654,
+      "path" : "boards/invalid/opacity-negative.json",
+      "sha256" : "0dddef08814e98af81d2bfe664044859d73feafd237842646ce1d85a9d5c3713"
+    },
+    {
+      "bytes" : 683,
+      "path" : "boards/invalid/point-too-far.json",
+      "sha256" : "eac7310c02670e9207697ba83c39f1f107c61f91ddbbb036366ae4b055e43ea3"
+    },
+    {
+      "bytes" : 682,
+      "path" : "boards/invalid/pressure-above-one.json",
+      "sha256" : "85e406bdc498e85a952dff6329069713e9f319f79c017d58f777941a78449169"
+    },
+    {
+      "bytes" : 677,
+      "path" : "boards/invalid/pressure-count.json",
+      "sha256" : "9bc193604e1b17805c406b5c2d692683fe2fb2345a0b0106e4c2fa5f5118bd9e"
+    },
+    {
+      "bytes" : 649,
+      "path" : "boards/invalid/rotated-blur.json",
+      "sha256" : "07a1b34ed66a5d899518f429700ea64040255a3eaa38fc892d1bdc9e6ac67352"
+    },
+    {
+      "bytes" : 649,
+      "path" : "boards/invalid/rotated-cover.json",
+      "sha256" : "e43450d5b00bc031f2856c02a27cc05f542afffc65b571edddafab9b239be578"
+    },
+    {
+      "bytes" : 654,
+      "path" : "boards/invalid/roughness-too-large.json",
+      "sha256" : "8940b6f41a827dede6e2cf41c9bbfb345b3bb520d114617200aa3eccf425ef47"
+    },
+    {
+      "bytes" : 651,
+      "path" : "boards/invalid/schema-0.json",
+      "sha256" : "5a9a21d5bc20cbe4c3d5c2d8a168f96f5127b8d55e3639e96c595647d96d85a5"
+    },
+    {
+      "bytes" : 651,
+      "path" : "boards/invalid/schema-4.json",
+      "sha256" : "a425a374d0a4dc0c149ebe85f2d5392b3d657a024852ac0255054a6d1a09635b"
+    },
+    {
+      "bytes" : 648,
+      "path" : "boards/invalid/select-tool.json",
+      "sha256" : "7a977de15065f5756eae18ccc0ec0c387651c27d6b31561b365c0d4932f1e53c"
+    },
+    {
+      "bytes" : 655,
+      "path" : "boards/invalid/width-too-large.json",
+      "sha256" : "29280c2c379062cab08b1a46dffc15f93696bfd987e1ff33b47cd238f54887a4"
+    },
+    {
+      "bytes" : 653,
+      "path" : "boards/invalid/width-too-small.json",
+      "sha256" : "984cb49da25b8e6f7d5073435750547872175a67841a99cf724fa47beb08f850"
+    },
+    {
+      "bytes" : 26023,
+      "path" : "boards/valid/all-tools.json",
+      "sha256" : "47c0dba1cf3b40fc01fa8cc5d69a800979dc4488166179ec390d3d979920379e"
+    },
+    {
+      "bytes" : 26023,
+      "path" : "boards/valid/all-tools.written.json",
+      "sha256" : "47c0dba1cf3b40fc01fa8cc5d69a800979dc4488166179ec390d3d979920379e"
+    },
+    {
+      "bytes" : 7934,
+      "path" : "boards/valid/basic.json",
+      "sha256" : "7a262c3608b4c2a9b7ead670a9ecd183c3e9811145dfa0b50492d7b7f6c6a64f"
+    },
+    {
+      "bytes" : 7934,
+      "path" : "boards/valid/basic.written.json",
+      "sha256" : "7a262c3608b4c2a9b7ead670a9ecd183c3e9811145dfa0b50492d7b7f6c6a64f"
+    },
+    {
+      "bytes" : 2994,
+      "path" : "boards/valid/gradients.json",
+      "sha256" : "523917032b7d76e32041ddf74cd541b2718eed4e71fab1644e132f800c4a46a7"
+    },
+    {
+      "bytes" : 2994,
+      "path" : "boards/valid/gradients.written.json",
+      "sha256" : "523917032b7d76e32041ddf74cd541b2718eed4e71fab1644e132f800c4a46a7"
+    },
+    {
+      "bytes" : 651,
+      "path" : "boards/valid/higher-schema-than-needed.json",
+      "sha256" : "5a9aec27aacbd4ce8646bcf97568f1ccaedbe4b313e3a9481344549e62959350"
+    },
+    {
+      "bytes" : 651,
+      "path" : "boards/valid/higher-schema-than-needed.written.json",
+      "sha256" : "6654ff426412893d85eb875764dd913302de26f415125da4d42e1e5732a9e17d"
+    },
+    {
+      "bytes" : 916,
+      "path" : "boards/valid/image.json",
+      "sha256" : "08c6655daf57ae5dad1be915c1e07bd51c864cc60359137c733b4772587e6b21"
+    },
+    {
+      "bytes" : 916,
+      "path" : "boards/valid/image.written.json",
+      "sha256" : "08c6655daf57ae5dad1be915c1e07bd51c864cc60359137c733b4772587e6b21"
+    },
+    {
+      "bytes" : 2944,
+      "path" : "boards/valid/index.jsonl",
+      "sha256" : "052203fb7d56d6897f0557ebf86dc9d3e49f5192e44be43e785da554f5627a27"
+    },
+    {
+      "bytes" : 2905,
+      "path" : "boards/valid/labels.json",
+      "sha256" : "aa3966ab86d3ab3b8c84081bf7283f8ea343590d8238d5a2d11864878f8f2f36"
+    },
+    {
+      "bytes" : 2905,
+      "path" : "boards/valid/labels.written.json",
+      "sha256" : "aa3966ab86d3ab3b8c84081bf7283f8ea343590d8238d5a2d11864878f8f2f36"
+    },
+    {
+      "bytes" : 10106,
+      "path" : "boards/valid/limits.json",
+      "sha256" : "cd41a1614a67e8dd689323e01864862215818e5370c70ae73316750a4e8d3d4e"
+    },
+    {
+      "bytes" : 10106,
+      "path" : "boards/valid/limits.written.json",
+      "sha256" : "cd41a1614a67e8dd689323e01864862215818e5370c70ae73316750a4e8d3d4e"
+    },
+    {
+      "bytes" : 1118,
+      "path" : "boards/valid/pretty-printed.json",
+      "sha256" : "a99cbb310aaee79fe1e6345f92360e647e7b5e56e85b022e3688b1e2f10a5afb"
+    },
+    {
+      "bytes" : 647,
+      "path" : "boards/valid/pretty-printed.written.json",
+      "sha256" : "65a007ffd71590b7568ac5d7e95689662777ca371fd0deac9aa341a3fbcb0a24"
+    },
+    {
+      "bytes" : 2540,
+      "path" : "boards/valid/protection.json",
+      "sha256" : "0c0d5de4bb82dc2bc432de923fd43ff1a7ea1868dd61825570950dcb37243b99"
+    },
+    {
+      "bytes" : 2540,
+      "path" : "boards/valid/protection.written.json",
+      "sha256" : "0c0d5de4bb82dc2bc432de923fd43ff1a7ea1868dd61825570950dcb37243b99"
+    },
+    {
+      "bytes" : 2235,
+      "path" : "boards/valid/stale-bindings.json",
+      "sha256" : "968c24a4c11f5c808c29081e5e189e093cc0a254f46f30e7d38a965da99116cd"
+    },
+    {
+      "bytes" : 2147,
+      "path" : "boards/valid/stale-bindings.written.json",
+      "sha256" : "1f103b832ac556d0117b2e4501f3c02eca1eaaccbe103c0c5e9ae4088729c2c0"
+    },
+    {
+      "bytes" : 688,
+      "path" : "boards/valid/unknown-keys.json",
+      "sha256" : "cc5a4f77724bf5df6b1d3b0162271bbe2d497cd915e7a87051af71e15bfd2638"
+    },
+    {
+      "bytes" : 647,
+      "path" : "boards/valid/unknown-keys.written.json",
+      "sha256" : "65a007ffd71590b7568ac5d7e95689662777ca371fd0deac9aa341a3fbcb0a24"
+    },
+    {
+      "bytes" : 1296,
+      "path" : "boards/valid/utf16-little-endian.json",
+      "sha256" : "e0027b4df16bf68f05e22c570dca8ce111a534a24a2b426ec0ce0f059d8b34f2"
+    },
+    {
+      "bytes" : 647,
+      "path" : "boards/valid/utf16-little-endian.written.json",
+      "sha256" : "65a007ffd71590b7568ac5d7e95689662777ca371fd0deac9aa341a3fbcb0a24"
+    },
+    {
+      "bytes" : 52293,
+      "path" : "editing/history-limits.jsonl",
+      "sha256" : "a965bc75fccc2d3a5a201853cda09945663ce9fe689b8fdf7e9b1cbe04592515"
+    },
+    {
+      "bytes" : 34804,
+      "path" : "editing/refusals.jsonl",
+      "sha256" : "9b37ff692d3654bfec363770e8d53436705fe899871f773a469b0360643f77e6"
+    },
+    {
+      "bytes" : 211637,
+      "path" : "editing/session.jsonl",
+      "sha256" : "91de9c785618084e071268cd4f9d6ca68a30fd23789e5641b3e7ba7b4b99b8db"
+    },
+    {
+      "bytes" : 26621,
+      "path" : "effects/blur-0.png",
+      "sha256" : "0659f677e50e700fc03fbbf045994a736437dd6aeae3ff15c3166d223fcb55a0"
+    },
+    {
+      "bytes" : 23421,
+      "path" : "effects/blur-100.png",
+      "sha256" : "8ec25b8552b0d828aa45b222fe77a9c59e00bb01c3846dffc5377e4d910ccf79"
+    },
+    {
+      "bytes" : 26025,
+      "path" : "effects/blur-18-at-2x.png",
+      "sha256" : "fd6bfa108fdeaec8cf0a790a991bbfab56542cde65f43a208105cc5ed8d8ab29"
+    },
+    {
+      "bytes" : 26975,
+      "path" : "effects/blur-5.png",
+      "sha256" : "f2039a8da92ad2d02bc675619293ffef6b5248df799cfbef275f962de9341ee3"
+    },
+    {
+      "bytes" : 25055,
+      "path" : "effects/blur-50.png",
+      "sha256" : "8a3a1fd1981237b79feddf1dbbc04ae3e8249fa5539eb8c9a50e91e791fdfeea"
+    },
+    {
+      "bytes" : 27185,
+      "path" : "effects/blur-at-the-edge.png",
+      "sha256" : "43df84da02a8409f6d2abec6127404c552ad7ea0baff79f98d041f81da9f8f8c"
+    },
+    {
+      "bytes" : 27583,
+      "path" : "effects/blur-default-18.png",
+      "sha256" : "fe7732921322365ef015c422130417dbc3040ab7332f803c1386248b77332e67"
+    },
+    {
+      "bytes" : 7266,
+      "path" : "effects/blur-regions-only.png",
+      "sha256" : "33174ded3f011109df435795daf2aa0d2b134034f85eb7dfb415bb69e38bc1ed"
+    },
+    {
+      "bytes" : 1169,
+      "path" : "effects/context.json",
+      "sha256" : "d598dd088583ec18178f2a50bb157c0068447b613ad61a15804d1677aaeb9c55"
+    },
+    {
+      "bytes" : 25304,
+      "path" : "effects/cover-fractional.png",
+      "sha256" : "736f9a7f994ea085b75147f50d8de54fc2573a15336588354a2dd698e2e34764"
+    },
+    {
+      "bytes" : 25363,
+      "path" : "effects/cover-over-blur.png",
+      "sha256" : "e2d7094002838c2dcc20574d73dfcdc33e337fb2406a5082bac2819319fd0e76"
+    },
+    {
+      "bytes" : 30943,
+      "path" : "effects/distort-100.png",
+      "sha256" : "28d2ddd1772fa1b9b3e2ca2f9c1fcb6df57b616f0204e7eac85913d16f76b6b2"
+    },
+    {
+      "bytes" : 28386,
+      "path" : "effects/distort-2.png",
+      "sha256" : "873479e3f34472da165f5b34b35d7c41eb10619b0aa615bb82f6402de2302dab"
+    },
+    {
+      "bytes" : 29418,
+      "path" : "effects/distort-50-at-2x.png",
+      "sha256" : "9c773f3e3b11ca969ee263c113c6a1b8c48703d133f5445370d0e7c9e11a6992"
+    },
+    {
+      "bytes" : 29418,
+      "path" : "effects/distort-50.png",
+      "sha256" : "9c773f3e3b11ca969ee263c113c6a1b8c48703d133f5445370d0e7c9e11a6992"
+    },
+    {
+      "bytes" : 26040,
+      "path" : "effects/distort-beside-cover.png",
+      "sha256" : "5d23e4755c2f6d931af06812580d734744fd598fbd1b1860d04156357f2fb5f2"
+    },
+    {
+      "bytes" : 30972,
+      "path" : "effects/image-layer.png",
+      "sha256" : "0a85588632fb8f687624b512b9dcfd93fc39b40b7c3ce978b3328742bbc77761"
+    },
+    {
+      "bytes" : 25948,
+      "path" : "effects/index.jsonl",
+      "sha256" : "000886b12fcabad5c71e03da5aa5b248de3017b3e14cddb12b34f2bc863e9b69"
+    },
+    {
+      "bytes" : 21964,
+      "path" : "effects/inputs/noise.png",
+      "sha256" : "ac2f7aea7d767fceef50319a5b3e637cee07066f6bfec4ffc0b42d20072c34f5"
+    },
+    {
+      "bytes" : 26621,
+      "path" : "effects/inputs/pattern.png",
+      "sha256" : "0659f677e50e700fc03fbbf045994a736437dd6aeae3ff15c3166d223fcb55a0"
+    },
+    {
+      "bytes" : 17652,
+      "path" : "effects/noise-blur-3.png",
+      "sha256" : "4671b778fa78f3757382a7eae27c246f224c26797c79d0f1ce43d8b9a3d30596"
+    },
+    {
+      "bytes" : 13323,
+      "path" : "effects/noise-pixelate-8.png",
+      "sha256" : "1b6981d5077d5b8fd3fd0dcd4d51da8ab5f12b321154e730f450317645256c0a"
+    },
+    {
+      "bytes" : 4864,
+      "path" : "effects/pixel-rects.jsonl",
+      "sha256" : "3022a82ee1d97388e0355204acaf1689caa6c81067d0066b1fe22108e72bbfa9"
+    },
+    {
+      "bytes" : 21820,
+      "path" : "effects/pixelate-18-at-2x.png",
+      "sha256" : "0974b38398ae9bc6c84cbfd555e5d4a9e1c00a55e3861fc6fec93dec191211a7"
+    },
+    {
+      "bytes" : 21805,
+      "path" : "effects/pixelate-18.png",
+      "sha256" : "5a60c5e11cc6342a62ccc8e90958affe230023aec769713c9e0bfed9f0113df6"
+    },
+    {
+      "bytes" : 22597,
+      "path" : "effects/pixelate-4.png",
+      "sha256" : "5eee0f8bf4f8c9b4cba42d04640a00b2dce7d1d0112d9cefc223904194e10f40"
+    },
+    {
+      "bytes" : 21820,
+      "path" : "effects/pixelate-50.png",
+      "sha256" : "70ad3b0b805b9bdcdbabd5de87d8b992947a25f7f23457896ab47aa5e8e9fbc5"
+    },
+    {
+      "bytes" : 25613,
+      "path" : "effects/pixelate-fractional-region.png",
+      "sha256" : "4a7e602b6d21ad2ed5fd0b48b6fbed6d5bcfd435d2fbc338d10832bba7beeae3"
+    },
+    {
+      "bytes" : 14491,
+      "path" : "effects/privacy-region.png",
+      "sha256" : "720ed1400d467aa2baf688c0f546b125e7742f4e309bf8f6550f854ea5be8b21"
+    },
+    {
+      "bytes" : 18446,
+      "path" : "geometry/anchors.jsonl",
+      "sha256" : "2886c766d22ea45eebd9259c1235b9fa720266fefa972f391e22975372d72c21"
+    },
+    {
+      "bytes" : 377,
+      "path" : "geometry/arrowhead-choices.json",
+      "sha256" : "47a451dc135555c6376cf7a06548cdf3ef35d157989a7de595f9365c4e533626"
+    },
+    {
+      "bytes" : 214450,
+      "path" : "geometry/arrowheads.jsonl",
+      "sha256" : "9039f2c17d6d1827ac59faa63cd416beab3f884975c5a24c035e73cc611afed5"
+    },
+    {
+      "bytes" : 10022,
+      "path" : "geometry/axis-ticks.jsonl",
+      "sha256" : "21c4183e0451ae96f6f399d0241588d3690e71f758d6ad9aa3f9961d5f2c9d5c"
+    },
+    {
+      "bytes" : 8837,
+      "path" : "geometry/connectors.jsonl",
+      "sha256" : "ac6589b6b7a6432971676d537836772d8de2128077bff2af13fa4e2dd085cfb7"
+    },
+    {
+      "bytes" : 4577,
+      "path" : "geometry/pointer-rules.json",
+      "sha256" : "6d18eba20cc5b7088476956bc624863f230843887fed77ad8d1f89a4bae48fde"
+    },
+    {
+      "bytes" : 16729,
+      "path" : "geometry/pointer-shapes.jsonl",
+      "sha256" : "14ce1efc04f2b58cfdb0ee290a98f14a68ede4957626419aa99a1d340eee56a9"
+    },
+    {
+      "bytes" : 21192,
+      "path" : "geometry/polygons.jsonl",
+      "sha256" : "d861745634093eef54a61dd8a574195fd3dbfd804e3711f91a592fca2436c67f"
+    },
+    {
+      "bytes" : 410047,
+      "path" : "geometry/shapes.jsonl",
+      "sha256" : "06b1b3758d81576dc3500c7d4e21dd8f8498fe75d2802a811601789e8b122ad1"
+    },
+    {
+      "bytes" : 29656,
+      "path" : "geometry/snapping.jsonl",
+      "sha256" : "b545f95d22ffdcc064a7730237b853b04c03c2e0ed103b5ca18649ce40293dcc"
+    },
+    {
+      "bytes" : 19714,
+      "path" : "geometry/strokes.jsonl",
+      "sha256" : "fadda3996947a405dfa172242f10a290fe079daea76181bca1c928b398f989f5"
+    },
+    {
+      "bytes" : 10103,
+      "path" : "geometry/text.jsonl",
+      "sha256" : "1045cc1a36a1a4cdc1741360b6ed8db51f9d5c94b472c1e12d9c7be1f8fe355c"
+    },
+    {
+      "bytes" : 18241,
+      "path" : "geometry/transforms.jsonl",
+      "sha256" : "95d2cc4d2ab6b3e0fc70dae2af978501f90e97c8e733a16bda3a028b8351e5ad"
+    },
+    {
+      "bytes" : 47481,
+      "path" : "geometry/viewports.jsonl",
+      "sha256" : "2de8a7b1c8b12d044cf32042442cdab6ca57cd045b71f2fe2759bd1e0dd22ae0"
+    },
+    {
+      "bytes" : 237171,
+      "path" : "hittest/contains.jsonl",
+      "sha256" : "4000deccf89e79681fe8a53cbe5348f7d8ad16803b70e3a988f56029e5aa0cb7"
+    },
+    {
+      "bytes" : 28470,
+      "path" : "hittest/frontmost.jsonl",
+      "sha256" : "2e92e8e23826b3534955d57166219f771ca94787e2fcecce13794916d9708943"
+    },
+    {
+      "bytes" : 7969,
+      "path" : "library/creation.jsonl",
+      "sha256" : "4f86ecbda8630fa85b7ddeddec4a9e23beda18a4a8d7502e668aa7870d691ff4"
+    },
+    {
+      "bytes" : 872,
+      "path" : "library/invalid/connector-outside.json",
+      "sha256" : "2b5156432dbfd49f90fba024c5fca483abdaba2eb2634459eb8bd28c9e9c8cc9"
+    },
+    {
+      "bytes" : 734,
+      "path" : "library/invalid/cover.json",
+      "sha256" : "5c336ac44b12443c6395a0f3285b09980bfcf0c1b9bee247fe516779de3d84f1"
+    },
+    {
+      "bytes" : 736,
+      "path" : "library/invalid/drawing-schema-4.json",
+      "sha256" : "7400cac5ab85b19629b60543be6c220a60fd7b5a6f6ba4a3c0e13419643c79f9"
+    },
+    {
+      "bytes" : 2326,
+      "path" : "library/invalid/empty-name.json",
+      "sha256" : "a94c5b065d3c6f185651a12cf008978e0eab7ef04d804a64f527a5f97e3bd0b8"
+    },
+    {
+      "bytes" : 996,
+      "path" : "library/invalid/image.json",
+      "sha256" : "b23dc29b718f33592ffabfe2af1bf5fe7cdb30a9e4c87140f65dcba6a6945624"
+    },
+    {
+      "bytes" : 3559,
+      "path" : "library/invalid/index.jsonl",
+      "sha256" : "5b6cdca63460d58b94ac890c6f100516d16aa5fe523586e89f2da3f441421c69"
+    },
+    {
+      "bytes" : 2301,
+      "path" : "library/invalid/missing-id.json",
+      "sha256" : "b0b81dd30e6ee8b198008c5aeeb768b20995b1b275501e0d50d36bc697c8c370"
+    },
+    {
+      "bytes" : 2509,
+      "path" : "library/invalid/name-120-decomposed-letters.json",
+      "sha256" : "6d962d8afa6b7eb47ff4e17c0b4fe88998b4ba9a6aab8994ecdca8ac458e43a3"
+    },
+    {
+      "bytes" : 2447,
+      "path" : "library/invalid/name-121-characters.json",
+      "sha256" : "796f319cd5c0661459e8ee51efe21be7a3498e8826b6b5bd621815fc857cee14"
+    },
+    {
+      "bytes" : 2344,
+      "path" : "library/invalid/name-with-direction-mark.json",
+      "sha256" : "927c19a064a361b4d846f1542391885cfc050b373979e7c6c0a326b899cbfed9"
+    },
+    {
+      "bytes" : 2336,
+      "path" : "library/invalid/name-with-line-break.json",
+      "sha256" : "038ba2b53c5ef50faa18ceaca8b2518b37b4550cc24668ec5c552416e434c8c0"
+    },
+    {
+      "bytes" : 2335,
+      "path" : "library/invalid/name-with-tab.json",
+      "sha256" : "5b853c66f1d6f1bad10902458fdeb64b04e6f88f74edfe4c226df3991e653c76"
+    },
+    {
+      "bytes" : 122,
+      "path" : "library/invalid/no-elements.json",
+      "sha256" : "14468810f07631cca245926c9d4c430df2e8f457082dbc8f6a0db6322c7800e8"
+    },
+    {
+      "bytes" : 2333,
+      "path" : "library/invalid/padded-name.json",
+      "sha256" : "3d27fa5ed36bd55a9b6db506d3b884793b259c69b93a45f4a9a855f1b87fba73"
+    },
+    {
+      "bytes" : 2345,
+      "path" : "library/invalid/schema-2.json",
+      "sha256" : "af6b7081a1b66f4fdf697a828a5d89e2961ffb27b1a2acef76693fa22d328641"
+    },
+    {
+      "bytes" : 2329,
+      "path" : "library/invalid/spaces-only-name.json",
+      "sha256" : "5ea98a38dbae2eb32f1ffb4eb2b119b3f735696b826739c811063dd7737b9d48"
+    },
+    {
+      "bytes" : 203,
+      "path" : "library/limits.json",
+      "sha256" : "f71fdbdc24b84c10dff6eb0597cf4ddd364b557b9c02b1fa104a8f0187412e72"
+    },
+    {
+      "bytes" : 3703,
+      "path" : "library/store-script.jsonl",
+      "sha256" : "a9fb9f222a20965d3a835fd4eb9d569aa0e198669423e5f8e3718f3b6a87c578"
+    },
+    {
+      "bytes" : 2345,
+      "path" : "library/valid/arrow-between-boxes.json",
+      "sha256" : "f55915d50a1e3cdc47d57c1b6158e99d33037e7cf33568e9766cb0de9aaa906c"
+    },
+    {
+      "bytes" : 1574,
+      "path" : "library/valid/detached-connector.json",
+      "sha256" : "aaf6c4b5712d0f77bd3c0580dfdd7ed80bcbb67f550ecf81e7040fef57c40bf6"
+    },
+    {
+      "bytes" : 1445,
+      "path" : "library/valid/gradient-pen.json",
+      "sha256" : "adc90b9a61fa11c94a175f3393b2b993ffe0b512f6002fabe5bb44bcf02f154a"
+    },
+    {
+      "bytes" : 1783,
+      "path" : "library/valid/grouped-label.json",
+      "sha256" : "7edfcefb0a08df1b9a62a7229c2ca00c2608fee44d5b8368683a5fb55d5e4611"
+    },
+    {
+      "bytes" : 16822,
+      "path" : "library/valid/index.jsonl",
+      "sha256" : "a37f38d5da90352f27b755d1494b542c99e2c9535695119504643f72e512727b"
+    },
+    {
+      "bytes" : 816,
+      "path" : "library/valid/single-rectangle.json",
+      "sha256" : "b378bab47cc916d46a0ecc480513b4041ff8e5ec944b7dca3e0b2f88f15556b2"
+    },
+    {
+      "bytes" : 1970,
+      "path" : "library/valid/trimmed-name.json",
+      "sha256" : "b965fb23d0e6473f6458dc60ce83d1ebf36cef4a1ce36f86e2c17cb10ad694ac"
+    },
+    {
+      "bytes" : 209832,
+      "path" : "motion/curves.jsonl",
+      "sha256" : "133586b779d52c9e6115177f71fbb35e32c4d9a1ab14c15856e763bf200993ac"
+    },
+    {
+      "bytes" : 2993,
+      "path" : "motion/durations.json",
+      "sha256" : "9d94704114d71f72f4fabb76af28d606d22450b8c0043015aebad094193042e0"
+    },
+    {
+      "bytes" : 93195,
+      "path" : "motion/springs-and-fades.jsonl",
+      "sha256" : "481edbd2f011e002b6ba0cd0e99894ad4db76d87514bb4e82e4a1dcf94c14bf9"
+    },
+    {
+      "bytes" : 73398,
+      "path" : "motion/timelines.jsonl",
+      "sha256" : "ddaa42bc0e6954c1a8da7a5093123364b097662318f1da5d60090795e9e3846e"
+    },
+    {
+      "bytes" : 24563,
+      "path" : "platform/cgpath.jsonl",
+      "sha256" : "8dbfed9dd57213481a74f80af8aa54ce56bc15796a2609eada3182ac01bd0e9c"
+    },
+    {
+      "bytes" : 8685,
+      "path" : "platform/hatch.jsonl",
+      "sha256" : "321672caf360854de79fad5ccf85a55929659440882d93259fe622c579afa734"
+    },
+    {
+      "bytes" : 16328,
+      "path" : "platform/json-decoding-values.jsonl",
+      "sha256" : "e38d09262551d3c9a1d8ceb80bad6a204151e22f391b0fb1b6e79a05aa5c66e2"
+    },
+    {
+      "bytes" : 161594,
+      "path" : "platform/json-decoding.jsonl",
+      "sha256" : "501d20d01859abfc9828d680c72c54a6309f6a3d8f1c73b12905447a04a8d462"
+    },
+    {
+      "bytes" : 7959,
+      "path" : "platform/json-encoding.jsonl",
+      "sha256" : "96906f58c8bc7887c45fa1269e10d379b1c328fea1ac8970b8c40fd97ce5e42a"
+    },
+    {
+      "bytes" : 2372,
+      "path" : "platform/layout.json",
+      "sha256" : "6d97177cd322045b3f9cf9ed6d92e3d8e9fa980b4c458f273a2241e71bee6384"
+    },
+    {
+      "bytes" : 28527,
+      "path" : "platform/math.jsonl",
+      "sha256" : "3f6b2956b877ddac04f5a4e6d7573cc072d19e63c066a606bd1c8178f454b4ed"
+    },
+    {
+      "bytes" : 7660,
+      "path" : "platform/rect.jsonl",
+      "sha256" : "28dab05a5e94037b747509db8832b7aff2a6a9a82c96967921f0e676f29606db"
+    },
+    {
+      "bytes" : 2209,
+      "path" : "platform/string-comparison.jsonl",
+      "sha256" : "202b2c7032b87567b8d9041acf2e2c243937c80af78b7c4859b9cd8f8a8f5ffa"
+    },
+    {
+      "bytes" : 19043,
+      "path" : "platform/strings.jsonl",
+      "sha256" : "ca11a089e28386763cdbef56db5fd21357aad2c2aaa82818d5d41c7d65c3c9c3"
+    },
+    {
+      "bytes" : 553,
+      "path" : "profiles/command-key-collision.json",
+      "sha256" : "0a0fbb6303c5a7128237c00809aa66601bb8de283a707c89f1d9b6243f4abc71"
+    },
+    {
+      "bytes" : 552,
+      "path" : "profiles/command-key-ink-color.json",
+      "sha256" : "89ed32784f11e5bbe615f8936f1b49966fc744dd067be6714cac585387c2384f"
+    },
+    {
+      "bytes" : 535,
+      "path" : "profiles/command-key-plain-tool.json",
+      "sha256" : "8e9357d7ed900f966f458b1623045b45924251373c97990e7eca4b89f11010a6"
+    },
+    {
+      "bytes" : 556,
+      "path" : "profiles/command-key-shift-digit.json",
+      "sha256" : "4b49bfd059c4858256bc7a35486cbeffb9ced36b3b70686d6af2ce2293e5e87d"
+    },
+    {
+      "bytes" : 549,
+      "path" : "profiles/command-key-unknown.json",
+      "sha256" : "ba435d343b0460f80ace0f29dd4d8865ded2d1812d3fae456af6c6050cf6f90f"
+    },
+    {
+      "bytes" : 579,
+      "path" : "profiles/command-twice.json",
+      "sha256" : "58122466d96f31a10a15baa0f82cead9d6e6dcc6918382690d7bb4c3cac501a6"
+    },
+    {
+      "bytes" : 531,
+      "path" : "profiles/cover-mode-pen.json",
+      "sha256" : "fa1461c3a99d8a66210f0302175e95668c3d590192bc291f7346c834305b4eaf"
+    },
+    {
+      "bytes" : 664,
+      "path" : "profiles/cursor-highlight-invalid.json",
+      "sha256" : "5ca02e7fb771caebce4b19821a74278c6f42cd961d114c23be4d3e4ae6c091b5"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/default.json",
+      "sha256" : "be8b11d2021deaa38da2b1e8743a27239b2de25ecad574a74fd931d30abde50b"
+    },
+    {
+      "bytes" : 544,
+      "path" : "profiles/fluid-style.json",
+      "sha256" : "690dc03f33c50f6a452d052df779c4ad5088a3d2bb818254c8e6194acc235ec9"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/format-3.json",
+      "sha256" : "e9b40ac6fb670050487a430bd55f11a713da8f1e3d411d1c3d8d3e60e84b37f2"
+    },
+    {
+      "bytes" : 2208,
+      "path" : "profiles/full.json",
+      "sha256" : "24b0838bcb525fb07108dedfcd319424797529b0f7e9a8654cc78491bc2950e1"
+    },
+    {
+      "bytes" : 615,
+      "path" : "profiles/global-duplicate.json",
+      "sha256" : "a1bad40a07bf39f7f318c8e6dc61ebc832b98801baf24f8a08e063fc284f8a58"
+    },
+    {
+      "bytes" : 510,
+      "path" : "profiles/global-key-code-128.json",
+      "sha256" : "497b7197e8acf46d532ea3ababc2fc586bc5ad58e898a73434e983df5566e130"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/global-symbol.json",
+      "sha256" : "0d31c0a2b28fddc95ef8fa61fc9cc7323b5022dbd727b98e3db6c58be182c03c"
+    },
+    {
+      "bytes" : 510,
+      "path" : "profiles/global-two-characters.json",
+      "sha256" : "1a9ae95daff1299dfe5bc6ffc1b5e96826621c8c339794d0191253815607dc00"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/global-without-modifier.json",
+      "sha256" : "a0e1106ba328f0083196c913cc39cb1a64db102e9f5ca85cf32367d36a049d4d"
+    },
+    {
+      "bytes" : 1029,
+      "path" : "profiles/gradient-in-format-1.json",
+      "sha256" : "2fe77d4f29264c0e59c9315acf57b7d737d763fbccfb2f6737e0eca4bc0eab36"
+    },
+    {
+      "bytes" : 1126,
+      "path" : "profiles/gradient-styles.json",
+      "sha256" : "f005bcead897cee3f4c2e4ad593af243f96e11d2567817a4d2a71af5452a95f6"
+    },
+    {
+      "bytes" : 34281,
+      "path" : "profiles/index.jsonl",
+      "sha256" : "d4a5d9161e7835b5985a4492bae0ca8d9f5c2c54a5b3ccd47eb4a09468551102"
+    },
+    {
+      "bytes" : 359,
+      "path" : "profiles/legacy-custom.json",
+      "sha256" : "3f020f7c6e57da547e785643c1bbefb3758313f6443b57fd046b21c6814d4293"
+    },
+    {
+      "bytes" : 337,
+      "path" : "profiles/legacy-defaults.json",
+      "sha256" : "6c481176b87682d04bc3b99625852c0b915c3ebac03922f9a26f8ab570ffb0a6"
+    },
+    {
+      "bytes" : 368,
+      "path" : "profiles/legacy-ink-key.json",
+      "sha256" : "fd15165a752381e5e40481e2f64caccced6d12bf06d1ec47d2f910e61946e044"
+    },
+    {
+      "bytes" : 508,
+      "path" : "profiles/resume-conflict.json",
+      "sha256" : "6cdd7308eba175b8e44cde6c598a49d953fb00c42f0b3d5c0691c00045b59449"
+    },
+    {
+      "bytes" : 546,
+      "path" : "profiles/retired-styles.json",
+      "sha256" : "7f3c2f52cf4cf99aa777c7236d2c484231b6350515afa6e427811d0c41758248"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/shortcut-version-3.json",
+      "sha256" : "a2ff257189593366a49d3ba970a2f3ad2aa941aeaef4612dcb7e3ec8f9282af9"
+    },
+    {
+      "bytes" : 511,
+      "path" : "profiles/spotlight-351.json",
+      "sha256" : "cb2636afb48b63bb5baff6e0c50f4adbadde5a133c9c58035eb57b4251ff8244"
+    },
+    {
+      "bytes" : 510,
+      "path" : "profiles/spotlight-49.json",
+      "sha256" : "cde8c1246974687e7f9e44f3e4c08cdfad82d2d26c35a459eeae9620562edfd7"
+    },
+    {
+      "bytes" : 799,
+      "path" : "profiles/style-invalid.json",
+      "sha256" : "40ad8a9c8b8f045f530f93e255ca3b426ffc96f0acbeb9da367e9bf159154c9b"
+    },
+    {
+      "bytes" : 801,
+      "path" : "profiles/style-unknown-tool.json",
+      "sha256" : "16d48654186066ef63e0e2e4694f38c77a7f7496b9f6cf9b739451e0bdafa858"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/tool-key-ink-color.json",
+      "sha256" : "3cf3914a3e70702ef060abd79fb5b3bb670f4cbc390b44f1ae61e7e6a79597a8"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/tool-key-symbol.json",
+      "sha256" : "b2b18a15e68d595598519244922da826db027ffe0181f5660351d6c70b28fbe1"
+    },
+    {
+      "bytes" : 519,
+      "path" : "profiles/tool-key-twice.json",
+      "sha256" : "a57d13bc8fd3f4854bd8011e3463a9057a3366f408a60a6040d031fb72cd4be0"
+    },
+    {
+      "bytes" : 510,
+      "path" : "profiles/tool-key-two-characters.json",
+      "sha256" : "e289f3b6993dc59f8b607b87fa98e22634cb172a864fcd1dcd5f6c5f958ff271"
+    },
+    {
+      "bytes" : 521,
+      "path" : "profiles/tool-key-unknown-tool.json",
+      "sha256" : "cb383bf93e873cfc9688ae8b61e1e2d96287c93e0d0158745d5e8f5f69066083"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/tool-key-uppercase.json",
+      "sha256" : "0550aa0fab98f0e230f4425c09670b438dca83a59b4cc92cd09ba156e387541d"
+    },
+    {
+      "bytes" : 547,
+      "path" : "profiles/toolbar-duplicate.json",
+      "sha256" : "3bf8afd68e53b3860bdb2c8ec1923ed023dae654aeddcbb6f610da7c1c338580"
+    },
+    {
+      "bytes" : 527,
+      "path" : "profiles/toolbar-empty.json",
+      "sha256" : "bd9f18c38d34632c382484d0120774ed7b8c330e614fb34aa3efac1a0bab4c89"
+    },
+    {
+      "bytes" : 560,
+      "path" : "profiles/toolbar-items-fixed-button.json",
+      "sha256" : "722727b6d71425b372821bfdd8c03a45bd62067f83e47998fe580eccbe821a37"
+    },
+    {
+      "bytes" : 537,
+      "path" : "profiles/toolbar-items-without-select.json",
+      "sha256" : "7e6f6b1efe6c58c06cac2f04fb10919dd28bada0471c4ff429b11062ff02c1e9"
+    },
+    {
+      "bytes" : 543,
+      "path" : "profiles/toolbar-unknown-tool.json",
+      "sha256" : "96f772dea4b9cc5d78389a57f1518d48eb5a592dc895899d438400a0b39a9908"
+    },
+    {
+      "bytes" : 540,
+      "path" : "profiles/toolbar-without-select.json",
+      "sha256" : "44fb2089738c4447f80a655c3b19bcb22ed480636ff9e05df66c1a3f3f95a3f9"
+    },
+    {
+      "bytes" : 540,
+      "path" : "profiles/unknown-keys.json",
+      "sha256" : "1e260eb2975eefdf25debce1064fbbffdd459947437ba7ba728dce68983aef40"
+    },
+    {
+      "bytes" : 1392,
+      "path" : "profiles/visibility-styles.json",
+      "sha256" : "9292dcf78c51c884c2267513d9dd124246630ee0f4561739d6110b034a1dfc1e"
+    },
+    {
+      "bytes" : 614,
+      "path" : "profiles/zoom-conflict-twice.json",
+      "sha256" : "7763f0ce657ebc948c95befcf62b73ca5f99623921e6ab9391bb2f433bca7cf5"
+    },
+    {
+      "bytes" : 509,
+      "path" : "profiles/zoom-conflict.json",
+      "sha256" : "19262dc61546382a654827c350e8488a621de00f7e6fb211f6929f91ef2273f9"
+    },
+    {
+      "bytes" : 12951,
+      "path" : "recognition/preview-input.json",
+      "sha256" : "06b18c6cd79dbbf1d9ca791b9d9e1836438286513f143766c13f4792853a86ba"
+    },
+    {
+      "bytes" : 95797,
+      "path" : "recognition/strokes.jsonl",
+      "sha256" : "6c55305f2d7f5631bde2290d9005563e8b548229507da53ddad9cea80788d603"
+    },
+    {
+      "bytes" : 11602,
+      "path" : "render/arrowheads.board.json",
+      "sha256" : "f0e34723b572e4d7be6be88fe07bd55f78ce888aa4a307d8e52da5eb36ec41a7"
+    },
+    {
+      "bytes" : 29629,
+      "path" : "render/arrowheads@1x.png",
+      "sha256" : "91a280ed7fb4eaf79fec8cfae6da0d4e4e491e359d21dd30aff4c365f77dd5fb"
+    },
+    {
+      "bytes" : 68637,
+      "path" : "render/arrowheads@2x.png",
+      "sha256" : "6c824384e7136c240158ba1e5247cfc07765842144139c1eb48f71299f260bac"
+    },
+    {
+      "bytes" : 9959,
+      "path" : "render/fills.board.json",
+      "sha256" : "3271254b818ae3953f052420ee3fc4b415d0cea5d0dc41e036fc4d0936ebd887"
+    },
+    {
+      "bytes" : 44095,
+      "path" : "render/fills@1x.png",
+      "sha256" : "87d1f9e9db270aab60f4ba1054fd082178a3499cc63550ff9a8bf953101e9569"
+    },
+    {
+      "bytes" : 118795,
+      "path" : "render/fills@2x.png",
+      "sha256" : "42efee4079c9bf171d58111395cf0912a638e1e036cd1547c5723fdd8a881c9b"
+    },
+    {
+      "bytes" : 2675,
+      "path" : "render/image.board.json",
+      "sha256" : "b78a51453a2055f03b84b44101d9cae4702b4a21822864a18147d05d41e4d61d"
+    },
+    {
+      "bytes" : 13906,
+      "path" : "render/image@1x.png",
+      "sha256" : "c9ad136e4c754b469f244bfb93f7cf428b9651184085d53613ce5d6c96bf4381"
+    },
+    {
+      "bytes" : 29338,
+      "path" : "render/image@2x.png",
+      "sha256" : "20c5158fdc1d7c188f7c2fc9b0e7153bad48b42647ace919d0553e77e1bc7816"
+    },
+    {
+      "bytes" : 3119,
+      "path" : "render/index.jsonl",
+      "sha256" : "421c83b815d81aab07c765ae5b89e22d9d2582ecb2efcf97c1001b221e38ed6d"
+    },
+    {
+      "bytes" : 3320,
+      "path" : "render/opacity-rotation.board.json",
+      "sha256" : "ff8f320b8abbb2ae7a24bc63f68671aff1e832c6f04694b9aa78ed92887dbc05"
+    },
+    {
+      "bytes" : 21385,
+      "path" : "render/opacity-rotation@1x.png",
+      "sha256" : "ca0f9e1258c50c7260803545e20d9b42a6b4de5cff253833602d58083e4acaf3"
+    },
+    {
+      "bytes" : 49194,
+      "path" : "render/opacity-rotation@2x.png",
+      "sha256" : "d23449a775074d562e26b715edbb59fc597d5e4679c2ddff77f125c5d9b7ff95"
+    },
+    {
+      "bytes" : 2515,
+      "path" : "render/protection.board.json",
+      "sha256" : "a2357cf3580bdb9d78a412af056a736b592e7bb183d11b708ae1d8db19f777e9"
+    },
+    {
+      "bytes" : 1238,
+      "path" : "render/protection@1x.png",
+      "sha256" : "eb278a3f0e35c4fc3f5137d10c97359e6322ac4e761ecc3cd410d05d7ff041a7"
+    },
+    {
+      "bytes" : 3742,
+      "path" : "render/protection@2x.png",
+      "sha256" : "ce669b6ea87c9c04b578a78289b2db0b6f546d3504194b947175dc7925924385"
+    },
+    {
+      "bytes" : 11491,
+      "path" : "render/rough.board.json",
+      "sha256" : "996f27a09c4be02a98b346f13d9246594ff6bc1fd99cd669be828ddcc99a8521"
+    },
+    {
+      "bytes" : 59714,
+      "path" : "render/rough@1x.png",
+      "sha256" : "2ded71d5c236195d8313704abfb81e6b57aa197c0a128f02bbf3014398ce4f17"
+    },
+    {
+      "bytes" : 137624,
+      "path" : "render/rough@2x.png",
+      "sha256" : "50bd16b06ad61f90670bae04df073826b3ae776c8ecc15ce75cc2545c46d1b32"
+    },
+    {
+      "bytes" : 8760,
+      "path" : "render/shapes.board.json",
+      "sha256" : "ba19559009b55e246e7801afdb8470f8799b9d322126391420744807c6f257d9"
+    },
+    {
+      "bytes" : 23309,
+      "path" : "render/shapes@1x.png",
+      "sha256" : "95c1564213aec102f21166e64252b40232e95eb2451c6f087904e7d7d072e840"
+    },
+    {
+      "bytes" : 53877,
+      "path" : "render/shapes@2x.png",
+      "sha256" : "b899951c4c54d7c13007f09ecac074357000703d5613cbd2ea8931d00ad5d00e"
+    },
+    {
+      "bytes" : 10635,
+      "path" : "render/strokes.board.json",
+      "sha256" : "b10bf27e774a80ff0543246b0ea035e18a660c071ec3f41bd1e1ff0b73ded2ec"
+    },
+    {
+      "bytes" : 19291,
+      "path" : "render/strokes@1x.png",
+      "sha256" : "85bd44d7c6234cc0e19edb533542aa2853290b6f5f83422c36e3170b73d4be50"
+    },
+    {
+      "bytes" : 43434,
+      "path" : "render/strokes@2x.png",
+      "sha256" : "7d649f399932646581560d9bc539ccb756c60f502f8c06b05b3f2ddf8bf027ed"
+    },
+    {
+      "bytes" : 8691,
+      "path" : "render/system-shapes.board.json",
+      "sha256" : "126d901f76f17e01834d86a80f5ff8ccf45e8f378efd003f01ec2cfca8eff7d9"
+    },
+    {
+      "bytes" : 18269,
+      "path" : "render/system-shapes@1x.png",
+      "sha256" : "a679162e0ba23618753121cf8d17760b71b1219a51e403840fb87b2047c9fda4"
+    },
+    {
+      "bytes" : 41014,
+      "path" : "render/system-shapes@2x.png",
+      "sha256" : "e8a33f3eb64eb9f7b9caafddb53a85769c93b631641d4e6b9a040476225ffc61"
+    },
+    {
+      "bytes" : 36491,
+      "path" : "render/text-and-measurements-dark@1x.png",
+      "sha256" : "13018c5f6aeb52a7e4c5ddd589beeab4a45b6a268e86db681297c6faf5eca07e"
+    },
+    {
+      "bytes" : 84605,
+      "path" : "render/text-and-measurements-dark@2x.png",
+      "sha256" : "4a053997d0c18fd6859a42dc7e71e2738af7857edff0df3c185ad28e46bbb94b"
+    },
+    {
+      "bytes" : 8370,
+      "path" : "render/text-and-measurements.board.json",
+      "sha256" : "fdf76b9ceeac261b227ded19555c1beb3c3b4180cf90b1f0d2a5dff18045e952"
+    },
+    {
+      "bytes" : 36599,
+      "path" : "render/text-and-measurements@1x.png",
+      "sha256" : "8ad0548e00dbf36c2cb0469ad55055bf26ad1f47c3d74bd1bcdd524afa350fdd"
+    },
+    {
+      "bytes" : 84833,
+      "path" : "render/text-and-measurements@2x.png",
+      "sha256" : "aa82b26e7e9ff5cc51c469e55ac00aa1ae3b49bf5a34b4f0f5738b2df30b279d"
+    },
+    {
+      "bytes" : 16512,
+      "path" : "shortcuts/assign-script.jsonl",
+      "sha256" : "28eb06ac4643219395bea0a9ab1a29844560cdf6f911167d7b2f4b6bf5d4bd36"
+    },
+    {
+      "bytes" : 28571,
+      "path" : "shortcuts/bind-script.jsonl",
+      "sha256" : "07f2c608a45741e72949f0688da5413437dfdac69b7083d83cf574a34c0d620a"
+    },
+    {
+      "bytes" : 12847,
+      "path" : "shortcuts/commands.json",
+      "sha256" : "97f0d28b6bce846c47eddd65a2572053b85be3d4afaccdf312955df8ae59ffda"
+    },
+    {
+      "bytes" : 4645,
+      "path" : "shortcuts/global.jsonl",
+      "sha256" : "1f08f31f426e18875c7ee82b8f863c3415e8432f7aa73890219905c41b904c60"
+    },
+    {
+      "bytes" : 1232,
+      "path" : "shortcuts/ink-colors.json",
+      "sha256" : "638e6ab98104c22cb74223321f6e0777cf4177f9af42e6433221a617a0e26b0a"
+    },
+    {
+      "bytes" : 8537,
+      "path" : "shortcuts/local-keys.jsonl",
+      "sha256" : "440942d4c56372a999d8dd24a4a089dcc49fca5af82615261dad9be17b20ab85"
+    },
+    {
+      "bytes" : 4800,
+      "path" : "shortcuts/macos-key-codes.json",
+      "sha256" : "ea89d294d0f0ee84dde8c3c5a01aac059e675e35d549af5967ca99014892ee24"
+    }
+  ],
+  "format" : 1,
+  "generator" : "swift run --package-path apps/macos ConformanceExport (apps/macos/Tools/Conformance)",
+  "sections" : {
+    "boards" : "Board files. valid: the input and the bytes DrawingFile writes after reading it. invalid: the input and the error DrawingFile.read throws.",
+    "editing" : "Scripted CanvasDocument sessions. Each line is one step: its result or error, then the elements, selection, generation, undo state and history size after it.",
+    "effects" : "Input PNGs and CaptureCompositor.image output, rendered into sRGB RGBA8 by a Core Image context configured like the app's (Metal, default working space: extended linear sRGB in half float). See context.json.",
+    "geometry" : "Path elements from SceneRenderer for every shape and stroke (rough ones from the element seed), arrowheads, polygons, rounded diamonds, connector curves, anchors, drag constraints, viewports, sharing regions, transforms, axis ticks and pointer shapes. text.jsonl depends on macOS fonts.",
+    "hittest" : "contains.jsonl: per element, a grid of HitTesting.contains results ('#' hit, '.' miss). frontmost.jsonl: per scene, a grid of ElementStacking.frontmost results by element letter. Grid points are origin + (column, row) × step.",
+    "library" : "Saved-shape files with their read result and the document after inserting them, creation and naming refusals, invalid files, and a scripted ShapeLibraryStore session.",
+    "motion" : "MotionCore curves, springs, fades and timelines sampled every millisecond, the per-style show and hide durations, and the pointer click pulse.",
+    "platform" : "Swift memory layout, Foundation JSON and string behavior, Core Graphics paths, rectangle math, hatch positions and libm samples.",
+    "profiles" : "Preference files read with WorkspacePreferences.read: the model after migration, or the error, and the model after writing it with data() and reading it again.",
+    "recognition" : "Pen strokes from a seeded generator and the element ShapeRecognition.recognize returns, or null. The recognized element keeps the stroke's ID; its new geometry token and append epoch use stand-in IDs.",
+    "render" : "Scenes rendered with PNGExporter (SceneRenderer into an sRGB premultiplied RGBA bitmap, transparent background) at 1x and 2x in the light appearance, plus the board file with the same elements. Scenes marked fontDependent use macOS system fonts; interpolationDependent ones scale a bitmap.",
+    "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
+  },
+  "source" : {
+    "commit" : "7c43cd434bb0050ff7cde62395078e219f8f0868",
+    "date" : "2026-10-22",
+    "fingerprint" : "9177a4804eeecc27a84eeaff8111914b8b258f35366437bb4fc6896ceaed0a1e",
+    "paths" : [
+      "apps/macos/Package.swift",
+      "apps/macos/Sources/AnnotationCore",
+      "apps/macos/Sources/MotionCore",
+      "apps/macos/Sources/PresentationRendering",
+      "apps/macos/Tools/Conformance"
+    ],
+    "uncommittedChanges" : false
+  }
+}

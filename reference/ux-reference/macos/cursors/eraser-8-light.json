@@ -1,0 +1,25 @@
+{
+ "appearance": "light",
+ "hotSpot": [
+  13,
+  13
+ ],
+ "image": "cursors/eraser-8-light.png",
+ "kind": "image",
+ "notes": "Cursor image with its hot spot in points.",
+ "pixels": [
+  52,
+  52
+ ],
+ "scale": 2,
+ "size": [
+  26,
+  26
+ ],
+ "spec": [
+  "009 drawing cursors",
+  "WIN-OVR-11"
+ ],
+ "state": "eraser-8",
+ "surface": "cursors"
+}

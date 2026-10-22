@@ -1,0 +1,324 @@
+name: Release
+
+# Releases start only from Run workflow; a push to main never releases.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Approved full release label (for example 0.1.0-alpha.2)
+        required: true
+        type: string
+      candidate_sha:
+        description: Full SHA of the approved clean main-branch candidate
+        required: true
+        type: string
+      notarize:
+        description: Authorize sending this compiled candidate to Apple for signing checks
+        default: false
+        type: boolean
+      publish:
+        description: Publish verified binaries to the configured public repository
+        default: false
+        type: boolean
+      windows_packages:
+        description: Build the Windows packages of this candidate as a test artifact, even when releases/windows.json leaves Windows out
+        default: false
+        type: boolean
+      windows_store:
+        description: Send this run's Windows bundle to the Microsoft Store (testers = the package flight or the private audience; public only after the launch decision)
+        default: none
+        type: choice
+        options: [none, testers, public]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: annotator-release
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.target.outputs.version }}
+      candidate: ${{ steps.target.outputs.candidate }}
+      windows: ${{ steps.windows.outputs.windows }}
+      windows-store-ready: ${{ steps.windows.outputs.store-ready }}
+      windows-store: ${{ steps.windows.outputs.store }}
+      msix: ${{ steps.windows.outputs.msix }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the merged or explicitly requested candidate
+        id: target
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+          REQUEST_NOTARIZATION: ${{ inputs.notarize }}
+          REQUEST_PUBLICATION: ${{ inputs.publish }}
+          SIGNING_ENABLED: ${{ vars.RELEASE_AUTOMATION_ENABLED }}
+          PUBLISHING_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
+        run: |
+          if [[ "$REQUEST_PUBLICATION" == true && "$REQUEST_NOTARIZATION" != true ]]; then
+            echo "::error::Publication requires the verified signing/notarization job."
+            exit 1
+          fi
+          if [[ "$REQUEST_NOTARIZATION" == true && "$SIGNING_ENABLED" != true ]]; then
+            echo "::error::Signing has not been enabled by the owner."
+            exit 1
+          fi
+          if [[ "$REQUEST_PUBLICATION" == true && "$PUBLISHING_ENABLED" != true ]]; then
+            echo "::error::Publication has not been enabled by the owner."
+            exit 1
+          fi
+          python3 tools/release/distribution.py preflight --version "$EXPECTED_VERSION" --candidate "$CANDIDATE_SHA"
+          echo "version=$EXPECTED_VERSION" >> "$GITHUB_OUTPUT"
+          echo "candidate=$CANDIDATE_SHA" >> "$GITHUB_OUTPUT"
+      - name: Decide the Windows part of this run
+        id: windows
+        env:
+          RELEASE_PROCEEDS: ${{ inputs.notarize }}
+          BUILD_WINDOWS: ${{ inputs.windows_packages }}
+          STORE_TARGET: ${{ inputs.windows_store }}
+          STORE_SUBMISSION_ENABLED: ${{ vars.STORE_SUBMISSION_ENABLED }}
+          WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: python3 tools/windows/hosted_release.py plan
+  validate:
+    name: Lightweight exact-source validation
+    uses: ./.github/workflows/validate.yml
+    with:
+      release-validation: true
+  sign:
+    needs: [preflight, validate]
+    if: ${{ inputs.notarize && vars.RELEASE_AUTOMATION_ENABLED == 'true' }}
+    runs-on: macos-26
+    # macOS minutes cost ten times Linux ones. Two Apple waits normally take a few minutes each.
+    timeout-minutes: 45
+    environment: release-signing
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select pinned Xcode
+        run: |
+          test -d /Applications/Xcode_26.6.app/Contents/Developer
+          echo "DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer" >> "$GITHUB_ENV"
+      - name: Install the pinned disk image tool
+        run: |
+          python3 -m venv build/dmg-tools
+          build/dmg-tools/bin/pip install --quiet --disable-pip-version-check --require-hashes -r tools/release/dmg-requirements.txt
+      - name: Build, sign, notarize, staple and verify
+        env:
+          EXPECTED_VERSION: ${{ needs.preflight.outputs.version }}
+          CANDIDATE_SHA: ${{ needs.preflight.outputs.candidate }}
+          RELEASE_AUTOMATION_ENABLED: ${{ vars.RELEASE_AUTOMATION_ENABLED }}
+          DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          DEVELOPER_ID_IDENTITY: ${{ vars.DEVELOPER_ID_IDENTITY }}
+          DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
+          NOTARY_KEY_ID: ${{ vars.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ vars.NOTARY_ISSUER_ID }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          SPARKLE_PUBLIC_KEY: ${{ vars.SPARKLE_PUBLIC_KEY }}
+          SUPPORT_URL: ${{ vars.SUPPORT_URL }}
+          METRICS_URL: ${{ vars.METRICS_URL }}
+        run: python3 tools/release/distribution.py sign --version "$EXPECTED_VERSION" --candidate "$CANDIDATE_SHA" --output build/distribution/verified --recovery build/distribution/notarization-recovery
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: notarized-release
+          path: build/distribution/verified/
+          if-no-files-found: error
+          retention-days: 14
+          # The ZIP and disk image are already compressed; skip a second pass on the macOS clock.
+          compression-level: 0
+      - name: Keep the archive sent to Apple when signing stops
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: notarization-recovery
+          path: build/distribution/notarization-recovery/
+          if-no-files-found: ignore
+          retention-days: 30
+  publish:
+    needs: [preflight, sign, windows-package]
+    # The Windows ZIPs join the release when releases/windows.json makes Windows part of releases.
+    # windows-package is skipped when Windows is not part of releases; a failed or cancelled one stops publishing.
+    if: ${{ always() && inputs.publish && vars.PUBLICATION_ENABLED == 'true' && needs.sign.result == 'success' && needs.windows-package.result != 'failure' && needs.windows-package.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: release-publishing
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: notarized-release
+          path: build/distribution/verified
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        if: ${{ needs.preflight.outputs.windows == 'true' }}
+        with:
+          name: windows-portable
+          path: build/distribution/windows-portable
+      - name: Publish immutable binary release
+        env:
+          GH_TOKEN: ${{ secrets.DISTRIBUTION_TOKEN }}
+          PUBLICATION_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
+          CANDIDATE_SHA: ${{ needs.preflight.outputs.candidate }}
+          DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
+          HOMEBREW_TAP_REPOSITORY: ${{ vars.HOMEBREW_TAP_REPOSITORY }}
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+          WINDOWS: ${{ needs.preflight.outputs.windows }}
+        run: |
+          windows=()
+          if [ "$WINDOWS" = true ]; then windows=(--windows-folder build/distribution/windows-portable); fi
+          python3 tools/release/distribution.py publish --folder build/distribution/verified --disk-image-folder build/distribution/verified/disk-image "${windows[@]}"
+      # The release token can't write the dedicated tap yet; until it can, the owner's Mac runs distribution.py tap.
+      - name: Update the Homebrew tap
+        if: ${{ vars.TAP_FROM_ACTIONS == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.DISTRIBUTION_TOKEN }}
+          PUBLICATION_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
+          DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
+          HOMEBREW_TAP_REPOSITORY: ${{ vars.HOMEBREW_TAP_REPOSITORY }}
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+        run: python3 tools/release/distribution.py tap
+  windows-package:
+    name: Windows packages
+    needs: [preflight, validate]
+    if: ${{ needs.preflight.outputs.windows == 'true' }}
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    outputs:
+      bundle: ${{ steps.receipt.outputs.bundle }}
+      sha256: ${{ steps.receipt.outputs.sha256 }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CANDIDATE_SHA: ${{ needs.preflight.outputs.candidate }}
+      EXPECTED_VERSION: ${{ needs.preflight.outputs.version }}
+      MSIX: ${{ needs.preflight.outputs.msix }}
+      STORE_READY_REQUIRED: ${{ needs.preflight.outputs.windows-store-ready }}
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Read the pinned toolchain
+        id: pins
+        run: python tools/windows/hosted_release.py pins
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+        with:
+          dotnet-version: ${{ steps.pins.outputs.dotnet }}
+      - name: Check the runner against the pinned toolchain
+        run: python tools/windows/hosted_release.py toolchain --out "$env:RUNNER_TEMP/windows-toolchain.json"
+      - name: Windows release guards
+        id: guards
+        env:
+          WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
+          METRICS_URL: ${{ vars.METRICS_URL }}
+        run: |
+          python tools/windows/test_publish_windows.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/windows/test_hosted_release.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/windows/test_winget.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/windows/hosted_release.py guards
+      - name: Restore the app's packages
+        run: dotnet restore apps/windows/src/Annotator.App/Annotator.App.csproj -nologo
+      - name: Build the x64 and ARM64 packages and the bundle
+        env:
+          METRICS_URL: ${{ steps.guards.outputs.metrics-url }}
+        run: |
+          $arguments = @('-Output', "$env:RUNNER_TEMP/windows-packages", '-BuildStamp', "Release $($env:CANDIDATE_SHA.Substring(0, 12))", '-RequireArm64', '-Portable')
+          if ($env:METRICS_URL) { $arguments += @('-MetricsUrl', $env:METRICS_URL) }
+          pwsh -NoProfile -File tools/windows/package.ps1 @arguments
+      - name: Check the bundle and write its receipt
+        id: receipt
+        env:
+          STORE_IDENTITY: ${{ steps.guards.outputs.store-identity }}
+          METRICS_URL: ${{ steps.guards.outputs.metrics-url }}
+        run: python tools/windows/hosted_release.py receipt --packages "$env:RUNNER_TEMP/windows-packages/$env:MSIX" --toolchain "$env:RUNNER_TEMP/windows-toolchain.json" --output "$env:RUNNER_TEMP/windows-bundle"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        id: upload
+        with:
+          name: windows-bundle
+          path: ${{ runner.temp }}/windows-bundle/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Describe the portable ZIPs for the public release and winget
+        run: |
+          New-Item -ItemType Directory -Force "$env:RUNNER_TEMP/windows-portable" | Out-Null
+          Copy-Item "$env:RUNNER_TEMP/windows-packages/$env:MSIX/Annotator-*-windows-*.zip" "$env:RUNNER_TEMP/windows-portable/"
+          python tools/windows/winget.py describe --folder "$env:RUNNER_TEMP/windows-portable" --source $env:CANDIDATE_SHA
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/windows/winget.py verify --folder "$env:RUNNER_TEMP/windows-portable" --source $env:CANDIDATE_SHA
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        id: upload-portable
+        with:
+          name: windows-portable
+          path: ${{ runner.temp }}/windows-portable/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Record the artifact digest
+        env:
+          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+          PORTABLE_DIGEST: ${{ steps.upload-portable.outputs.artifact-digest }}
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-bundle, SHA-256 of its zip: ``$env:ARTIFACT_DIGEST``"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Artifact windows-portable, SHA-256 of its zip: ``$env:PORTABLE_DIGEST``"
+  windows-store:
+    name: Microsoft Store submission
+    needs: [preflight, windows-package]
+    if: ${{ needs.preflight.outputs.windows-store != 'none' && github.event_name == 'workflow_dispatch' && github.triggering_actor == github.repository_owner && vars.STORE_SUBMISSION_ENABLED == 'true' }}
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    environment: windows-store
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CANDIDATE_SHA: ${{ needs.preflight.outputs.candidate }}
+      MSIX: ${{ needs.preflight.outputs.msix }}
+      BUNDLE_SHA256: ${{ needs.windows-package.outputs.sha256 }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: windows-bundle
+          path: ${{ runner.temp }}/windows-bundle
+      - name: Check that this is the bundle the build job made
+        run: python tools/windows/hosted_release.py verify --folder "$env:RUNNER_TEMP/windows-bundle"
+      - name: Install the pinned Microsoft Store Developer CLI
+        run: python tools/windows/hosted_release.py cli --folder "$env:RUNNER_TEMP/msstore"
+      - name: Send the bundle to the Store
+        env:
+          STORE_TARGET: ${{ needs.preflight.outputs.windows-store }}
+          WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
+          WINDOWS_STORE_FLIGHT_ID: ${{ vars.WINDOWS_STORE_FLIGHT_ID }}
+          PARTNER_CENTER_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          PARTNER_CENTER_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          PARTNER_CENTER_CLIENT_SECRET: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+        run: python tools/windows/hosted_release.py submit --folder "$env:RUNNER_TEMP/windows-bundle" --cli "$env:RUNNER_TEMP/msstore"

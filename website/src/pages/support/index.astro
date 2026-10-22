@@ -1,0 +1,27 @@
+---
+import Page from "../../layouts/Page.astro";
+import { issuesURL } from "../../lib/distribution";
+import { supportURL } from "../../data/support";
+import { sitePath } from "../../lib/paths";
+import { windowsListing as windows } from "../../lib/windows";
+---
+<Page title="Support">
+  <article class="prose wrap">
+    <p class="eyebrow">SUPPORT</p><h1>Tell us what happened.</h1>
+    <aside class="help-notice" aria-labelledby="sharing-problem">
+      <h2 id="sharing-problem">If private details are visible</h2>
+      <p>Stop sharing first. Keep existing solid covers in place until you remove the private details from the material you were showing. <a href={sitePath("/docs/#limitations")}>Read the screen-sharing limits.</a></p>
+    </aside>
+    {issuesURL ? <p><a href={issuesURL}>Report a problem or share feedback on GitHub.</a> You can review the form before submitting it. A GitHub account may be required.</p> :
+      <p>The public issue tracker is unavailable here. You can write and copy a report in Annotator under Settings &gt; Help.</p>}
+    <h2>What to include</h2>
+    <p>In Annotator, open Settings &gt; About &gt; Copy support info. It includes app and {windows ? "macOS or Windows" : "macOS"} versions, number of screens, permissions and app settings, not drawings or screenshots. Review it before pasting it into a report.</p>
+    <p>Describe what you tried, what you expected and what happened. If you try again to check the problem, use sample information instead of private content.</p>
+    <p>Issues are public once you submit them. If you use Open GitHub draft in Annotator, your title, details and app version go to GitHub before submission. Remove private details first. No drawings, screenshots or logs are attached automatically. Never include passwords, private keys or unrelated documents.</p>
+    <p>For setup questions, start with <a href={sitePath("/docs/#permissions")}>permissions</a>, <a href={sitePath("/docs/#compatibility")}>{windows ? "Mac and Windows requirements" : "Mac requirements"}</a> or the <a href={sitePath("/docs/#preview")}>first-use guide</a>.</p>
+    <h2>Optional support</h2>
+    <p>All tools are free. If you'd like to say thanks, you can contribute through Buy Me a Coffee. It's optional and doesn't unlock any features.</p>
+    <p><a class="button coffee-action" href={supportURL} target="_blank" rel="noopener noreferrer">Buy me a coffee <span aria-hidden="true">↗</span></a></p>
+    <p>The support page opens only when you click the link. There is no embedded payment form on this website.</p>
+  </article>
+</Page>

@@ -1,0 +1,19 @@
+{"result":{"ok":[]},"step":"load a folder that does not exist"}
+{"result":{"ok":[["Arrow between boxes","00000000-0000-4000-8000-000000000301"]]},"step":"save Arrow between boxes"}
+{"result":{"ok":[["Arrow between boxes","00000000-0000-4000-8000-000000000301"],["Grouped label","00000000-0000-4000-8000-000000000303"]]},"step":"save Grouped label"}
+{"result":{"ok":[["Arrow between boxes","00000000-0000-4000-8000-000000000301"],["Grouped label","00000000-0000-4000-8000-000000000303"],["Ünïcödé 名前 ✓","00000000-0000-4000-8000-000000000306"]]},"step":"save Single rectangle"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. This shape is already saved.","type":"ShapeLibraryError"}},"step":"save Arrow between boxes again"}
+{"result":{"ok":[["Alpha","00000000-0000-4000-8000-000000000303"],["Arrow between boxes","00000000-0000-4000-8000-000000000301"],["Ünïcödé 名前 ✓","00000000-0000-4000-8000-000000000306"]]},"step":"rename Grouped label to Alpha"}
+{"result":{"error":{"case":"invalidName","message":"Enter a name with 1 to 120 characters and no line breaks or control characters.","type":"ShapeLibraryError"}},"step":"rename Single rectangle to an empty name"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. This shape is no longer saved. Reload My shapes.","type":"ShapeLibraryError"}},"step":"rename a shape that is not saved"}
+{"result":{"ok":[["Alpha","00000000-0000-4000-8000-000000000303"],["Ünïcödé 名前 ✓","00000000-0000-4000-8000-000000000306"]]},"step":"delete Arrow between boxes"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. This shape is no longer saved. Reload My shapes.","type":"ShapeLibraryError"}},"step":"delete it again"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. A saved file has an invalid ID.","type":"ShapeLibraryError"}},"step":"load with a file whose name is not an ID"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. A saved file has an invalid ID.","type":"ShapeLibraryError"}},"step":"load with a file whose name is a lowercase ID"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. A saved file has the wrong shape ID.","type":"ShapeLibraryError"}},"step":"load with a file whose name is another shape's ID"}
+{"result":{"error":{"case":"keyNotFound","codingPath":[],"debugDescription":"No value associated with key CodingKeys(stringValue: \"schemaVersion\", intValue: nil) (\"schemaVersion\").","key":"schemaVersion","message":"The data couldn’t be read because it is missing.","type":"DecodingError"}},"step":"load with a file that is not a saved shape"}
+{"result":{"ok":[["Alpha","00000000-0000-4000-8000-000000000303"],["Ünïcödé 名前 ✓","00000000-0000-4000-8000-000000000306"]]},"step":"load with a hidden file and a text file, which are ignored"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. A saved shape is not a regular file.","type":"ShapeLibraryError"}},"step":"load with a saved shape that is a link"}
+{"result":{"error":{"case":"invalidFile","message":"My shapes could not read a saved shape. The library folder must be a local folder, not a link.","type":"ShapeLibraryError"}},"step":"load a library folder that is a link"}
+{"result":{"ok":{"count":256}},"step":"save 256 shapes in a library kept in memory"}
+{"result":{"error":{"case":"libraryFull","message":"My shapes is full (256 shapes or 64 MB). Delete a saved shape, then try again.","type":"ShapeLibraryError"}},"step":"save a 257th shape"}

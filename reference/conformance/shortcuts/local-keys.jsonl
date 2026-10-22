@@ -1,0 +1,81 @@
+{"input":{"key":"a","shift":false},"result":{"isInkColor":false,"key":"a","label":"A","shift":false,"spokenLabel":"A","storageKey":"a"}}
+{"input":{"key":"a","shift":true},"result":{"isInkColor":false,"key":"a","label":"⇧A","shift":true,"spokenLabel":"Shift + A","storageKey":"⇧a"}}
+{"input":{"key":"z","shift":false},"result":{"isInkColor":false,"key":"z","label":"Z","shift":false,"spokenLabel":"Z","storageKey":"z"}}
+{"input":{"key":"z","shift":true},"result":{"isInkColor":false,"key":"z","label":"⇧Z","shift":true,"spokenLabel":"Shift + Z","storageKey":"⇧z"}}
+{"input":{"key":"A","shift":false},"result":{"isInkColor":false,"key":"a","label":"A","shift":false,"spokenLabel":"A","storageKey":"a"}}
+{"input":{"key":"A","shift":true},"result":{"isInkColor":false,"key":"a","label":"⇧A","shift":true,"spokenLabel":"Shift + A","storageKey":"⇧a"}}
+{"input":{"key":"Z","shift":false},"result":{"isInkColor":false,"key":"z","label":"Z","shift":false,"spokenLabel":"Z","storageKey":"z"}}
+{"input":{"key":"Z","shift":true},"result":{"isInkColor":false,"key":"z","label":"⇧Z","shift":true,"spokenLabel":"Shift + Z","storageKey":"⇧z"}}
+{"input":{"key":"0","shift":false},"result":{"isInkColor":false,"key":"0","label":"0","shift":false,"spokenLabel":"0","storageKey":"0"}}
+{"input":{"key":"0","shift":true},"result":null}
+{"input":{"key":"9","shift":false},"result":{"isInkColor":false,"key":"9","label":"9","shift":false,"spokenLabel":"9","storageKey":"9"}}
+{"input":{"key":"9","shift":true},"result":null}
+{"input":{"key":"ß","shift":false},"result":{"isInkColor":false,"key":"ß","label":"SS","shift":false,"spokenLabel":"SS","storageKey":"ß"}}
+{"input":{"key":"ß","shift":true},"result":{"isInkColor":false,"key":"ß","label":"⇧SS","shift":true,"spokenLabel":"Shift + SS","storageKey":"⇧ß"}}
+{"input":{"key":"é","shift":false},"result":{"isInkColor":false,"key":"é","label":"É","shift":false,"spokenLabel":"É","storageKey":"é"}}
+{"input":{"key":"é","shift":true},"result":{"isInkColor":false,"key":"é","label":"⇧É","shift":true,"spokenLabel":"Shift + É","storageKey":"⇧é"}}
+{"input":{"key":"É","shift":false},"result":{"isInkColor":false,"key":"é","label":"É","shift":false,"spokenLabel":"É","storageKey":"é"}}
+{"input":{"key":"É","shift":true},"result":{"isInkColor":false,"key":"é","label":"⇧É","shift":true,"spokenLabel":"Shift + É","storageKey":"⇧é"}}
+{"input":{"key":"é","shift":false},"result":null}
+{"input":{"key":"é","shift":true},"result":null}
+{"input":{"key":"ı","shift":false},"result":{"isInkColor":false,"key":"ı","label":"I","shift":false,"spokenLabel":"I","storageKey":"ı"}}
+{"input":{"key":"ı","shift":true},"result":{"isInkColor":false,"key":"ı","label":"⇧I","shift":true,"spokenLabel":"Shift + I","storageKey":"⇧ı"}}
+{"input":{"key":"İ","shift":false},"result":null}
+{"input":{"key":"İ","shift":true},"result":null}
+{"input":{"key":"ǅ","shift":false},"result":{"isInkColor":false,"key":"ǆ","label":"Ǆ","shift":false,"spokenLabel":"Ǆ","storageKey":"ǆ"}}
+{"input":{"key":"ǅ","shift":true},"result":{"isInkColor":false,"key":"ǆ","label":"⇧Ǆ","shift":true,"spokenLabel":"Shift + Ǆ","storageKey":"⇧ǆ"}}
+{"input":{"key":"Ａ","shift":false},"result":{"isInkColor":false,"key":"ａ","label":"Ａ","shift":false,"spokenLabel":"Ａ","storageKey":"ａ"}}
+{"input":{"key":"Ａ","shift":true},"result":{"isInkColor":false,"key":"ａ","label":"⇧Ａ","shift":true,"spokenLabel":"Shift + Ａ","storageKey":"⇧ａ"}}
+{"input":{"key":"٣","shift":false},"result":{"isInkColor":false,"key":"٣","label":"٣","shift":false,"spokenLabel":"٣","storageKey":"٣"}}
+{"input":{"key":"٣","shift":true},"result":null}
+{"input":{"key":"²","shift":false},"result":{"isInkColor":false,"key":"²","label":"²","shift":false,"spokenLabel":"²","storageKey":"²"}}
+{"input":{"key":"²","shift":true},"result":null}
+{"input":{"key":"Ⅻ","shift":false},"result":{"isInkColor":false,"key":"ⅻ","label":"Ⅻ","shift":false,"spokenLabel":"Ⅻ","storageKey":"ⅻ"}}
+{"input":{"key":"Ⅻ","shift":true},"result":null}
+{"input":{"key":"ω","shift":false},"result":{"isInkColor":false,"key":"ω","label":"Ω","shift":false,"spokenLabel":"Ω","storageKey":"ω"}}
+{"input":{"key":"ω","shift":true},"result":{"isInkColor":false,"key":"ω","label":"⇧Ω","shift":true,"spokenLabel":"Shift + Ω","storageKey":"⇧ω"}}
+{"input":{"key":"Ω","shift":false},"result":{"isInkColor":false,"key":"ω","label":"Ω","shift":false,"spokenLabel":"Ω","storageKey":"ω"}}
+{"input":{"key":"Ω","shift":true},"result":{"isInkColor":false,"key":"ω","label":"⇧Ω","shift":true,"spokenLabel":"Shift + Ω","storageKey":"⇧ω"}}
+{"input":{"key":"中","shift":false},"result":{"isInkColor":false,"key":"中","label":"中","shift":false,"spokenLabel":"中","storageKey":"中"}}
+{"input":{"key":"中","shift":true},"result":null}
+{"input":{"key":"ŉ","shift":false},"result":{"isInkColor":false,"key":"ŉ","label":"ʼN","shift":false,"spokenLabel":"ʼN","storageKey":"ŉ"}}
+{"input":{"key":"ŉ","shift":true},"result":{"isInkColor":false,"key":"ŉ","label":"⇧ʼN","shift":true,"spokenLabel":"Shift + ʼN","storageKey":"⇧ŉ"}}
+{"input":{"key":"ﬁ","shift":false},"result":{"isInkColor":false,"key":"ﬁ","label":"FI","shift":false,"spokenLabel":"FI","storageKey":"ﬁ"}}
+{"input":{"key":"ﬁ","shift":true},"result":{"isInkColor":false,"key":"ﬁ","label":"⇧FI","shift":true,"spokenLabel":"Shift + FI","storageKey":"⇧ﬁ"}}
+{"input":{"key":"!","shift":false},"result":null}
+{"input":{"key":"!","shift":true},"result":null}
+{"input":{"key":"-","shift":false},"result":null}
+{"input":{"key":"-","shift":true},"result":null}
+{"input":{"key":" ","shift":false},"result":null}
+{"input":{"key":" ","shift":true},"result":null}
+{"input":{"key":"","shift":false},"result":null}
+{"input":{"key":"","shift":true},"result":null}
+{"input":{"key":"ab","shift":false},"result":null}
+{"input":{"key":"ab","shift":true},"result":null}
+{"input":{"key":"⇧","shift":false},"result":null}
+{"input":{"key":"⇧","shift":true},"result":null}
+{"input":{"key":"⇧a","shift":false},"result":null}
+{"input":{"key":"⇧a","shift":true},"result":null}
+{"input":{"key":"\u0000","shift":false},"result":null}
+{"input":{"key":"\u0000","shift":true},"result":null}
+{"input":{"key":"r","shift":false},"result":{"isInkColor":true,"key":"r","label":"R","shift":false,"spokenLabel":"R","storageKey":"r"}}
+{"input":{"key":"r","shift":true},"result":{"isInkColor":true,"key":"r","label":"⇧R","shift":true,"spokenLabel":"Shift + R","storageKey":"⇧r"}}
+{"input":{"key":"k","shift":false},"result":{"isInkColor":true,"key":"k","label":"K","shift":false,"spokenLabel":"K","storageKey":"k"}}
+{"input":{"key":"k","shift":true},"result":{"isInkColor":true,"key":"k","label":"⇧K","shift":true,"spokenLabel":"Shift + K","storageKey":"⇧k"}}
+{"input":{"key":"1️⃣","shift":false},"result":null}
+{"input":{"key":"1️⃣","shift":true},"result":null}
+{"input":{"storageKey":"a"},"result":{"isInkColor":false,"key":"a","label":"A","shift":false,"spokenLabel":"A","storageKey":"a"}}
+{"input":{"storageKey":"A"},"result":null}
+{"input":{"storageKey":"⇧a"},"result":{"isInkColor":false,"key":"a","label":"⇧A","shift":true,"spokenLabel":"Shift + A","storageKey":"⇧a"}}
+{"input":{"storageKey":"⇧A"},"result":{"isInkColor":false,"key":"a","label":"⇧A","shift":true,"spokenLabel":"Shift + A","storageKey":"⇧a"}}
+{"input":{"storageKey":"⇧1"},"result":null}
+{"input":{"storageKey":"⇧"},"result":null}
+{"input":{"storageKey":"⇧⇧a"},"result":null}
+{"input":{"storageKey":"1"},"result":{"isInkColor":false,"key":"1","label":"1","shift":false,"spokenLabel":"1","storageKey":"1"}}
+{"input":{"storageKey":"é"},"result":{"isInkColor":false,"key":"é","label":"É","shift":false,"spokenLabel":"É","storageKey":"é"}}
+{"input":{"storageKey":"⇧é"},"result":{"isInkColor":false,"key":"é","label":"⇧É","shift":true,"spokenLabel":"Shift + É","storageKey":"⇧é"}}
+{"input":{"storageKey":"⇧ß"},"result":{"isInkColor":false,"key":"ß","label":"⇧SS","shift":true,"spokenLabel":"Shift + SS","storageKey":"⇧ß"}}
+{"input":{"storageKey":"⇧Ω"},"result":{"isInkColor":false,"key":"ω","label":"⇧Ω","shift":true,"spokenLabel":"Shift + Ω","storageKey":"⇧ω"}}
+{"input":{"storageKey":"⇧ω"},"result":{"isInkColor":false,"key":"ω","label":"⇧Ω","shift":true,"spokenLabel":"Shift + Ω","storageKey":"⇧ω"}}
+{"input":{"storageKey":"shift+a"},"result":null}
+{"input":{"storageKey":"⇧ a"},"result":null}

@@ -1,0 +1,595 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "identifier": "gearshape",
+     "label": "General"
+    },
+    {
+     "identifier": "keyboard",
+     "label": "Toolbar & Shortcuts"
+    },
+    {
+     "identifier": "cursorarrow.rays",
+     "label": "Pointer"
+    },
+    {
+     "identifier": "timer",
+     "label": "Break timer"
+    },
+    {
+     "identifier": "lock.shield",
+     "label": "Permissions"
+    },
+    {
+     "identifier": "questionmark.circle",
+     "label": "Help"
+    },
+    {
+     "identifier": "info.circle",
+     "label": "About"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        83,
+        320,
+        200
+       ],
+       "identifier": "break-preview",
+       "label": "Preview of the break screen",
+       "role": "AXUnknown"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        418,
+        128,
+        331,
+        30
+       ],
+       "role": "AXStaticText",
+       "value": "Show a big countdown during a break, so everyone knows when to come back."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        418,
+        170,
+        197,
+        28
+       ],
+       "identifier": "settings-start-break",
+       "label": "Start a 10-minute break",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        418,
+        209.5,
+        111.5,
+        29
+       ],
+       "help": "Change it in Toolbar & Shortcuts.",
+       "label": "Shortcut, Control + 3",
+       "role": "AXUnknown"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        329,
+        36.5,
+        16
+       ],
+       "label": "Timer",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        365,
+        42,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Length"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        629.5,
+        365.5,
+        52,
+        16
+       ],
+       "identifier": "break-length",
+       "label": "Length, Length in minutes",
+       "role": "AXTextField",
+       "value": "10"
+      },
+      {
+       "children": [
+        {
+         "enabled": false,
+         "frame": [
+          687.5,
+          361.5,
+          20,
+          12
+         ],
+         "role": "AXButton",
+         "subrole": "AXIncrementArrow"
+        },
+        {
+         "enabled": false,
+         "frame": [
+          687.5,
+          373.5,
+          20,
+          12
+         ],
+         "role": "AXButton",
+         "subrole": "AXDecrementArrow"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        687.5,
+        361.5,
+        20,
+        24
+       ],
+       "label": "Length",
+       "role": "AXIncrementor",
+       "value": 10
+      },
+      {
+       "enabled": true,
+       "frame": [
+        713.5,
+        365.5,
+        48.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "minutes"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        406.5,
+        26.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Title"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        112.5,
+        406.5,
+        649.5,
+        16
+       ],
+       "identifier": "break-title",
+       "placeholder": "No title",
+       "role": "AXTextField",
+       "value": "Coffee break"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        443.5,
+        163,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show when the break ends"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        443,
+        38,
+        18
+       ],
+       "help": "Shows the end time, such as Back at 12:45.",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        481,
+        149.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Keep counting after zero"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        480.5,
+        38,
+        18
+       ],
+       "help": "After zero, shows how long the break has run over, such as +1:23.",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        518.5,
+        122.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Play a sound at zero"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        518,
+        38,
+        18
+       ],
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        575,
+        30.5,
+        16
+       ],
+       "label": "Look",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        611,
+        72.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Background"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          399,
+          607,
+          121,
+          24
+         ],
+         "label": "Moving colors",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 1
+        },
+        {
+         "enabled": true,
+         "frame": [
+          520,
+          607,
+          121,
+          24
+         ],
+         "label": "Blurred desktop",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 0
+        },
+        {
+         "enabled": true,
+         "frame": [
+          641,
+          607,
+          121,
+          24
+         ],
+         "label": "Plain",
+         "role": "AXRadioButton",
+         "subrole": "AXSegment",
+         "value": 0
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        399,
+        607,
+        363,
+        24
+       ],
+       "identifier": "break-background",
+       "role": "AXRadioGroup"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        652,
+        39.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Colors"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        592,
+        647.5,
+        26,
+        26
+       ],
+       "help": "Forest",
+       "identifier": "break-palette-forest",
+       "label": "Forest",
+       "role": "AXButton",
+       "selected": true
+      },
+      {
+       "enabled": true,
+       "frame": [
+        628,
+        647.5,
+        26,
+        26
+       ],
+       "help": "Ocean",
+       "identifier": "break-palette-ocean",
+       "label": "Ocean",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        664,
+        647.5,
+        26,
+        26
+       ],
+       "help": "Sunset",
+       "identifier": "break-palette-sunset",
+       "label": "Sunset",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        700,
+        647.5,
+        26,
+        26
+       ],
+       "help": "Berry",
+       "identifier": "break-palette-berry",
+       "label": "Berry",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        736,
+        647.5,
+        26,
+        26
+       ],
+       "help": "Graphite",
+       "identifier": "break-palette-graphite",
+       "label": "Graphite",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        694.5,
+        135,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Show on every display"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        694,
+        38,
+        18
+       ],
+       "help": "When this is off, the timer shows on the display with the pointer.",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        751,
+        49.5,
+        16
+       ],
+       "label": "Locking",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        787,
+        187.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Lock when someone touches it"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        725,
+        786.5,
+        38,
+        18
+       ],
+       "identifier": "break-lock",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 1
+      },
+      {
+       "enabled": true,
+       "frame": [
+        78,
+        824.5,
+        684,
+        39
+       ],
+       "role": "AXStaticText",
+       "value": "macOS doesn't let apps show anything on the lock screen. So the timer stays on screen, and from 3 seconds after it starts, your Mac locks as soon as someone presses a key, clicks or moves the mouse. Until then, your Mac stays signed in behind the timer. While your Mac is locked, the timer keeps counting and plays its sound at zero. It comes back when you sign in. If Annotator quits, the timer goes away."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        80.5,
+        886,
+        628.5,
+        13
+       ],
+       "identifier": "break-meeting-note",
+       "role": "AXStaticText",
+       "value": "Sharing your screen in a meeting? Turn this off. Meeting apps can't show the lock screen, so people would see a frozen timer."
+      },
+      {
+       "children": [
+        {
+         "enabled": false,
+         "frame": [
+          803,
+          50,
+          11,
+          392.5
+         ],
+         "role": "AXValueIndicator",
+         "value": 0
+        },
+        {
+         "enabled": false,
+         "role": "AXButton",
+         "subrole": "AXIncrementArrow"
+        },
+        {
+         "enabled": false,
+         "role": "AXButton",
+         "subrole": "AXDecrementArrow"
+        },
+        {
+         "enabled": false,
+         "frame": [
+          803,
+          443,
+          11,
+          193
+         ],
+         "role": "AXButton",
+         "subrole": "AXIncrementPage"
+        },
+        {
+         "enabled": false,
+         "role": "AXButton",
+         "subrole": "AXDecrementPage"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        799,
+        46,
+        19,
+        594
+       ],
+       "role": "AXScrollBar",
+       "value": 0
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      23,
+      47,
+      794,
+      592
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    20,
+    20,
+    800,
+    622
+   ],
+   "role": "AXTabGroup"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    656,
+    93.5,
+    24
+   ],
+   "help": "Profiles save settings and shortcuts. Import replaces these, not boards.",
+   "role": "AXMenuButton"
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "settings/tab-breakTimer-dark.png",
+ "kind": "view",
+ "notes": "Settings, breakTimer tab, at its default size. Content below the fold scrolls.",
+ "pixels": [
+  1680,
+  1400
+ ],
+ "scale": 2,
+ "size": [
+  840,
+  700
+ ],
+ "spec": [
+  "005",
+  "ADR 0012",
+  "WIN-UI-03"
+ ],
+ "state": "tab-breakTimer",
+ "surface": "settings"
+}

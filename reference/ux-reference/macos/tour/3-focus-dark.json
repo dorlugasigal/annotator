@@ -1,0 +1,225 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    24,
+    10,
+    112,
+    16
+   ],
+   "help": "Make a point",
+   "label": "Make a point",
+   "role": "AXButton",
+   "value": "Step 1 of 4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    144,
+    10,
+    112,
+    16
+   ],
+   "help": "Make it yours",
+   "label": "Make it yours",
+   "role": "AXButton",
+   "value": "Step 2 of 4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    264,
+    10,
+    112,
+    16
+   ],
+   "help": "Lead the way",
+   "label": "Lead the way",
+   "role": "AXButton",
+   "selected": true,
+   "value": "Step 3 of 4"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    384,
+    10,
+    112,
+    16
+   ],
+   "help": "A little setup",
+   "label": "A little setup",
+   "role": "AXButton",
+   "value": "Step 4 of 4"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      38,
+      472,
+      120
+     ],
+     "identifier": "introduction-illustration",
+     "label": "The pointer moves to a small price. A ring appears around it, the rest of the screen dims and a zoom lens makes the price bigger.",
+     "role": "AXImage"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      172,
+      185,
+      26
+     ],
+     "role": "AXStaticText",
+     "value": "Right here. See it?"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      204,
+      452,
+      32
+     ],
+     "role": "AXStaticText",
+     "value": "Give your pointer a ring. Light up a detail with Spotlight. Zoom in when the small print matters."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      244,
+      439,
+      32
+     ],
+     "role": "AXStaticText",
+     "value": "Find these in Tools > Focus. In Settings > Pointer, choose the highlight's shape, color and size—or show it only when you move or click."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      24,
+      288,
+      464,
+      30
+     ],
+     "role": "AXStaticText",
+     "value": "Your drawings stay editable. Save a board to return to it, or keep a useful diagram in My shapes."
+    }
+   ],
+   "enabled": false,
+   "frame": [
+    0,
+    26,
+    520,
+    405.5
+   ],
+   "role": "AXScrollArea"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    446.5,
+    141,
+    16.5
+   ],
+   "help": "Optional daily counts: version, macOS, chip and feature categories. No drawings, screenshots, text or file names. Change this in General.",
+   "label": "Share usage counts",
+   "role": "AXCheckBox",
+   "value": 0
+  },
+  {
+   "enabled": true,
+   "frame": [
+    171,
+    448.5,
+    183.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Optional. Never your drawings or text."
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    475,
+    116.5,
+    16
+   ],
+   "label": "Show on launch",
+   "role": "AXCheckBox",
+   "value": 1
+  },
+  {
+   "enabled": true,
+   "frame": [
+    320,
+    471,
+    54,
+    24
+   ],
+   "label": "Back",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    382,
+    471,
+    52.5,
+    24
+   ],
+   "label": "Next",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    442.5,
+    471,
+    57.5,
+    24
+   ],
+   "label": "Got it",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    20,
+    503,
+    162.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Find this again in Settings > Help."
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "tour/3-focus-dark.png",
+ "kind": "view",
+ "notes": "Introduction page 3, final illustration state.",
+ "pixels": [
+  1040,
+  1060
+ ],
+ "scale": 2,
+ "size": [
+  520,
+  530
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "3-focus",
+ "surface": "tour"
+}

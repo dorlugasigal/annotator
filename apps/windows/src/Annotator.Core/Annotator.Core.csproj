@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Annotator.Core: the document model, files, history and geometry. No Windows or UI dependency; builds on Windows, macOS and Linux. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Annotator.Core</RootNamespace>
+    <AssemblyName>Annotator.Core</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Annotator.Core.Tests" />
+    <InternalsVisibleTo Include="Annotator.Conformance.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The Unicode License covers the generated tables in Text/SwiftUnicodeData.g.cs; it ships next to the app. -->
+    <Content Include="Text\Unicode-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

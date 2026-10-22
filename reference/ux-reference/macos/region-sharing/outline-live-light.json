@@ -1,0 +1,22 @@
+{
+ "accessibility": [],
+ "appearance": "light",
+ "background": "none",
+ "image": "region-sharing/outline-live-light.png",
+ "kind": "view",
+ "notes": "Outline while sharing: no fill.",
+ "pixels": [
+  960,
+  540
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  270
+ ],
+ "spec": [
+  "012"
+ ],
+ "state": "outline-live",
+ "surface": "region-sharing"
+}

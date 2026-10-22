@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Manual harness: shows scenes on the real overlay through OverlayPresenter and measures latency, memory and the WIN-PERF-01 workloads. Never shipped. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+    <RootNamespace>Annotator.RenderHarness</RootNamespace>
+    <AssemblyName>Annotator.RenderHarness</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Annotator.Rendering\Annotator.Rendering.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,102 @@
+{
+ "appearance": "dark",
+ "areaPoints": {
+  "height": 900,
+  "width": 1440,
+  "x": 560,
+  "y": 540
+ },
+ "contactSheet": "show-hide-fade.png",
+ "contactSheetFrames": [
+  {
+   "label": "start",
+   "time": 0.0
+  },
+  {
+   "label": "hide +0 ms",
+   "time": 0.6166666666666667
+  },
+  {
+   "label": "hide +68 ms",
+   "time": 0.6833333333333333
+  },
+  {
+   "label": "hide +136 ms",
+   "time": 0.75
+  },
+  {
+   "label": "hide +204 ms",
+   "time": 0.8166666666666667
+  },
+  {
+   "label": "hide +272 ms",
+   "time": 0.9
+  },
+  {
+   "label": "show +0 ms",
+   "time": 1.5333333333333334
+  },
+  {
+   "label": "show +94 ms",
+   "time": 1.6166666666666667
+  },
+  {
+   "label": "show +189 ms",
+   "time": 1.7166666666666666
+  },
+  {
+   "label": "show +283 ms",
+   "time": 1.8166666666666667
+  },
+  {
+   "label": "show +377 ms",
+   "time": 1.9
+  },
+  {
+   "label": "end",
+   "time": 2.6666666666666665
+  }
+ ],
+ "display": {
+  "name": "Odyssey G95SC",
+  "points": [
+   2560,
+   1440
+  ],
+  "refreshRate": 120,
+  "scale": 1
+ },
+ "duration": 2.705,
+ "events": [],
+ "fps": 60,
+ "hideDuration": 0.16,
+ "input": "Scripted pointer, canvas events and model calls in the test host; not human or computer-use input.",
+ "macOS": "27.0.1",
+ "notes": "Hide tools (Control-Option-2 path), then show them again (Control-Shift-2 path), with seven drawings on the canvas.",
+ "packedFps": 60,
+ "packing": "Re-encoded at a constant 60 fps (H.264, CRF 20). The recording itself has a variable frame rate: ScreenCaptureKit delivers a frame when the screen changes, so times are real.",
+ "pixels": [
+  1440,
+  900
+ ],
+ "recorded": "2026-10-19",
+ "scale": 1,
+ "segments": [
+  {
+   "end": 0.8923148749163374,
+   "label": "hide",
+   "start": 0.6202431250130758
+  },
+  {
+   "end": 1.9074311249423772,
+   "label": "show",
+   "start": 1.5299567499896511
+  }
+ ],
+ "showDuration": 0.2,
+ "source": "Real-time ScreenCaptureKit recording of this process's windows only: the live toolbar, overlay, transient animation windows, an owned backdrop and an owned sample window.",
+ "style": "fade",
+ "take": "show-hide-fade",
+ "title": "Show and hide: fade",
+ "video": "show-hide-fade.mp4"
+}

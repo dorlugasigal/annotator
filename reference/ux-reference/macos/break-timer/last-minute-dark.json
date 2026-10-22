@@ -1,0 +1,59 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    193,
+    44.5,
+    94,
+    19
+   ],
+   "role": "AXStaticText",
+   "value": "Coffee break"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    148.5,
+    74,
+    183,
+    183
+   ],
+   "identifier": "break-countdown",
+   "label": "Break timer",
+   "role": "AXUnknown"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    171,
+    266.5,
+    138,
+    15.5
+   ],
+   "identifier": "break-lock-status",
+   "role": "AXStaticText",
+   "value": "This Mac locks if anyone touches it."
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "break-timer/last-minute-dark.png",
+ "kind": "view",
+ "notes": "The last minute: the ring and accent turn amber and breathe. Shown full screen on each display; always dark. Every size scales with the display's shorter side, so this 480 by 300 capture keeps the layout of a full screen.",
+ "pixels": [
+  960,
+  600
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  300
+ ],
+ "spec": [
+  "014",
+  "WIN-PAR-03"
+ ],
+ "state": "last-minute",
+ "surface": "break-timer"
+}

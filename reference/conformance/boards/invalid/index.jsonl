@@ -1,0 +1,53 @@
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"anchor-on-rectangle.json","name":"anchor-on-rectangle"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"anchor-outside-shape.json","name":"anchor-outside-shape"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"axis-ticks-25.json","name":"axis-ticks-25"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"axis-ticks-negative.json","name":"axis-ticks-negative"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"color-above-one.json","name":"color-above-one"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"color-alpha-negative.json","name":"color-alpha-negative"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"corner-radius-too-large.json","name":"corner-radius-too-large"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Duplicate object identifiers.","type":"CanvasError"},"file":"duplicate-ids.json","name":"duplicate-ids"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"effect-above-100.json","name":"effect-above-100"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"effect-negative.json","name":"effect-negative"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"eraser-tool.json","name":"eraser-tool"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"fill-above-one.json","name":"fill-above-one"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"fill-gradient-without-fill.json","name":"fill-gradient-without-fill"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"font-name-too-long.json","name":"font-name-too-long"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"font-size-too-large.json","name":"font-size-too-large"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"font-size-too-small.json","name":"font-size-too-small"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"frame-too-far.json","name":"frame-too-far"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"frame-too-wide.json","name":"frame-too-wide"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"gradient-angle-361.json","name":"gradient-angle-361"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"gradient-angle-negative.json","name":"gradient-angle-negative"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Gradients and matching labels need board format 3.","type":"CanvasError"},"file":"gradient-in-schema-2.json","name":"gradient-in-schema-2"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"gradient-nine-colors.json","name":"gradient-nine-colors"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"gradient-one-color.json","name":"gradient-one-color"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"gradient-translucent.json","name":"gradient-translucent"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"grid-columns-25.json","name":"grid-columns-25"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"grid-rows-zero.json","name":"grid-rows-zero"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"head-scale-too-large.json","name":"head-scale-too-large"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"head-scale-too-small.json","name":"head-scale-too-small"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Unexpected image data on a drawing tool.","type":"CanvasError"},"file":"image-data-on-rectangle.json","name":"image-data-on-rectangle"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: An image element must contain a bounded PNG image.","type":"CanvasError"},"file":"image-not-png.json","name":"image-not-png"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: An image element must contain a bounded PNG image.","type":"CanvasError"},"file":"image-without-data.json","name":"image-without-data"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Shape labels require board format 2.","type":"CanvasError"},"file":"label-in-schema-1.json","name":"label-in-schema-1"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Only shapes can own a shape label.","type":"CanvasError"},"file":"label-on-text.json","name":"label-on-text"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"label-style-invalid.json","name":"label-style-invalid"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Gradients and matching labels need board format 3.","type":"CanvasError"},"file":"matching-label-in-schema-2.json","name":"matching-label-in-schema-2"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"negative-width.json","name":"negative-width"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"opacity-above-one.json","name":"opacity-above-one"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"opacity-negative.json","name":"opacity-negative"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"point-too-far.json","name":"point-too-far"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"pressure-above-one.json","name":"pressure-above-one"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"pressure-count.json","name":"pressure-count"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Censor and pixel-effect regions must remain axis-aligned.","type":"CanvasError"},"file":"rotated-blur.json","name":"rotated-blur"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: Censor and pixel-effect regions must remain axis-aligned.","type":"CanvasError"},"file":"rotated-cover.json","name":"rotated-cover"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"roughness-too-large.json","name":"roughness-too-large"}
+{"error":{"case":"unsupportedSchema","message":"Drawing format 0 is not supported by this version.","type":"CanvasError"},"file":"schema-0.json","name":"schema-0"}
+{"error":{"case":"unsupportedSchema","message":"Drawing format 4 is not supported by this version.","type":"CanvasError"},"file":"schema-4.json","name":"schema-4"}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"file":"select-tool.json","name":"select-tool"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"width-too-large.json","name":"width-too-large"}
+{"error":{"case":"invalidStyle","message":"The drawing contains an unsupported style value.","type":"CanvasError"},"file":"width-too-small.json","name":"width-too-small"}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: The file exceeds the safe import memory budget.","type":"CanvasError"},"name":"file-over-128-mb","recipe":"134,217,729 zero bytes, read with DrawingFile.read."}
+{"error":{"case":"invalidGeometry","message":"The drawing contains invalid coordinates or dimensions.","type":"CanvasError"},"name":"text-over-1-mb","recipe":"One text element whose text is 1,000,001 letters a, opened as a document."}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: The shape label exceeds the supported text limit.","type":"CanvasError"},"name":"label-over-1-mb","recipe":"One rectangle whose label text is 1,000,001 letters a, opened as a document."}
+{"error":{"case":"invalidDocument","message":"The drawing could not be opened: An image element must contain a bounded PNG image.","type":"CanvasError"},"name":"image-over-32-mb","recipe":"One image element whose data is the 8-byte PNG signature followed by 33,554,425 zero bytes."}

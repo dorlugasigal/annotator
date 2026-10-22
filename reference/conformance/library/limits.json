@@ -1,0 +1,7 @@
+{
+  "libraryMaximumBytes" : 67108864,
+  "libraryMaximumEntries" : 256,
+  "savedShapeMaximumBytes" : 8388608,
+  "savedShapeSchema" : 1,
+  "sortOrder" : "By name with Swift String <, then by ID string."
+}

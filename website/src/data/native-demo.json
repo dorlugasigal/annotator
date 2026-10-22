@@ -1,0 +1,37 @@
+{
+  "duration": 51.81666666666667,
+  "chapters": [
+    {
+      "label": "The question",
+      "time": 2.004
+    },
+    {
+      "label": "Smart Draw and labels",
+      "time": 5.3
+    },
+    {
+      "label": "System shapes",
+      "time": 12.044
+    },
+    {
+      "label": "Arrow preferences",
+      "time": 22.799
+    },
+    {
+      "label": "Text labels",
+      "time": 31.531
+    },
+    {
+      "label": "Highlighter",
+      "time": 33.662
+    },
+    {
+      "label": "Select and edit",
+      "time": 39.921
+    },
+    {
+      "label": "Blur",
+      "time": 42.317
+    }
+  ]
+}

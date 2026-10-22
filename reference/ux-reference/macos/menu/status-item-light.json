@@ -1,0 +1,52 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      -1,
+      -1,
+      26,
+      24
+     ],
+     "help": "Annotator",
+     "label": "Annotator",
+     "role": "AXButton",
+     "value": 0
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    -1,
+    -1,
+    26,
+    24
+   ],
+   "help": "Annotator",
+   "label": "Annotator menu",
+   "role": "AXUnknown",
+   "value": "Region sharing off"
+  }
+ ],
+ "appearance": "light",
+ "image": "menu/status-item-light.png",
+ "kind": "image",
+ "notes": "Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one. The accessibility tree is the app's configured status button.",
+ "pixels": [
+  48,
+  44
+ ],
+ "scale": 2,
+ "size": [
+  24,
+  22
+ ],
+ "spec": [
+  "000 product spec (menu-bar popover)",
+  "WIN-UI-01",
+  "012"
+ ],
+ "state": "status-item",
+ "surface": "menu"
+}

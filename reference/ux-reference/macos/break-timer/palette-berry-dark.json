@@ -1,0 +1,59 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    127,
+    29.5,
+    66,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Coffee break"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    99,
+    49.5,
+    122,
+    122
+   ],
+   "identifier": "break-countdown",
+   "label": "Break timer",
+   "role": "AXUnknown"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    114,
+    178,
+    92,
+    10
+   ],
+   "identifier": "break-lock-status",
+   "role": "AXStaticText",
+   "value": "This Mac locks if anyone touches it."
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "break-timer/palette-berry-dark.png",
+ "kind": "view",
+ "notes": "Moving colors, Berry. The color fields drift on 22 to 37 second loops.",
+ "pixels": [
+  640,
+  400
+ ],
+ "scale": 2,
+ "size": [
+  320,
+  200
+ ],
+ "spec": [
+  "014",
+  "WIN-PAR-03"
+ ],
+ "state": "palette-berry",
+ "surface": "break-timer"
+}
