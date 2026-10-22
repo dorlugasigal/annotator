@@ -248,6 +248,15 @@ class WorkflowStructureTests(unittest.TestCase):
                     self.assertEqual(body["permissions"], {"contents": "read", "pages": "write", "id-token": "write"})
                     self.assertEqual(body["environment"]["name"], "github-pages")
                     continue
+                if (name, job_name) == ("labeler.yml", "label"):
+                    # Labels pull requests from forks; the job never checks out their code.
+                    self.assertEqual(body["permissions"], {"contents": "read", "pull-requests": "write"})
+                    continue
+                if (name, job_name) == ("scorecard.yml", "analysis"):
+                    # Uploads the OpenSSF Scorecard results to code scanning.
+                    self.assertEqual(body["permissions"], {"contents": "read", "actions": "read",
+                                                           "security-events": "write", "id-token": "write"})
+                    continue
                 if (name, job_name) == ("release.yml", "publish"):
                     # Publishing creates the release in this repository with the workflow token,
                     # behind the release-publishing environment.
@@ -269,6 +278,24 @@ class WorkflowStructureTests(unittest.TestCase):
         self.assertNotIn("secrets.", yaml.safe_dump(bridge))
         # The site is never committed to the repository; Pages gets an uploaded artifact.
         self.assertNotIn("pages.py sync", yaml.safe_dump(data))
+
+    def test_pull_request_target_never_runs_pull_request_code(self):
+        for name, data in self.workflows():
+            if "pull_request_target" not in (data["on"] if isinstance(data["on"], dict) else {}):
+                continue
+            self.assertEqual(name, "labeler.yml")
+            text = yaml.safe_dump(data, width=10**6)
+            self.assertNotIn("actions/checkout", text)
+            self.assertNotIn("run:", text)
+            self.assertNotIn("secrets.", text)
+
+    def test_pull_request_checks_have_stable_names_and_no_secrets(self):
+        data = dict(self.workflows())["pull-request.yml"]
+        self.assertEqual({job["name"] for job in data["jobs"].values()}, {"Linked issue", "Release note"})
+        self.assertNotIn("pull_request_target", data["on"])
+        self.assertNotIn("secrets.", yaml.safe_dump(data))
+        for body in data["jobs"].values():
+            self.assertLessEqual(body["timeout-minutes"], 10)
 
     def test_release_runs_one_at_a_time_without_cancelling(self):
         data = dict(self.workflows())["release.yml"]

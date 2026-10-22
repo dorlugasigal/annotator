@@ -1,0 +1,21 @@
+macos:
+  - changed-files:
+      - any-glob-to-any-file: ["apps/macos/**", "tools/macos/**"]
+windows:
+  - changed-files:
+      - any-glob-to-any-file: ["apps/windows/**", "tools/windows/**"]
+parity:
+  - changed-files:
+      - any-glob-to-any-file: ["reference/**", "docs/parity*.md"]
+website:
+  - changed-files:
+      - any-glob-to-any-file: ["website/**", "services/**", "netlify.toml"]
+release:
+  - changed-files:
+      - any-glob-to-any-file: ["releases/**", "tools/release/**", "packaging/**", "CHANGELOG.md"]
+ci:
+  - changed-files:
+      - any-glob-to-any-file: [".github/workflows/**", "tools/ci/**", ".github/dependabot.yml", ".github/labeler.yml"]
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "**/*.md"]

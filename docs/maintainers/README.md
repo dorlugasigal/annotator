@@ -85,3 +85,25 @@ pull request ([winget.md](winget.md)) is still a maintainer step.
 | Netlify token | Never (owner's choice) | User settings > Applications > Personal access tokens; update `NETLIFY_AUTH_TOKEN`; revoke the old one |
 
 Set a calendar reminder for each expiry date when you create the credential. Rotate a token with no expiry whenever a maintainer with access leaves.
+
+## Repository settings
+
+These live in GitHub's settings, not in files, so check them after any change
+to the workflows.
+
+- **Merging**: squash only, with the pull request title as the commit title.
+  Auto-merge is on, and branches are deleted after merging.
+- **Branch protection on `main`**: a pull request is required, conversations
+  must be resolved, and force pushes and deletion are blocked. Required checks:
+  `Lightweight source guards`, `Mac tests`, `Windows tests`, `Linked issue` and
+  `Release note`. The Mac and Windows jobs report "skipped" when a change
+  doesn't touch them, and a skipped check counts as passed.
+- **Tag ruleset "Release tags"**: `v*` tags can't be moved or deleted. The
+  Release workflow creates them.
+- **Security**: secret scanning with push protection, Dependabot alerts and
+  security updates, private vulnerability reporting, CodeQL default setup
+  (Actions, C#, JavaScript/TypeScript, Python) and the weekly OpenSSF
+  Scorecard.
+- **Labels**: `.github/labeler.yml` adds area labels to pull requests.
+  `no-issue` and `no-release-note` waive the two pull request checks; only
+  maintainers can add labels.

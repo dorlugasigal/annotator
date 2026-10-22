@@ -80,9 +80,18 @@ in [docs/parity.md](docs/parity.md#platform-terms).
 
 - Keep each pull request to one change. Describe what changed, why, and how
   you tested it on each platform.
+- Name the issue in the description: `Fixes #123` when the pull request
+  finishes it, `Part of #123` when it doesn't. The **Linked issue** check
+  fails without one.
 - Add user-visible changes to `unreleased` in `releases/notes.json` and run
-  `python3 tools/release/release.py changelog --write`.
-- CI runs the checks that don't need secrets. A maintainer reviews and merges.
+  `python3 tools/release/release.py changelog --write`. The **Release note**
+  check fails when app code changes and this file doesn't. If nothing changes
+  for people using Annotator, a maintainer adds the `no-release-note` label.
+- CI runs the checks that don't need secrets: the source guards, then the Mac
+  and Windows tests when your change touches those apps. Labels such as
+  `macos`, `windows` and `website` are added for you.
+- A maintainer reviews, then squash-merges. Small fixes can skip the issue if
+  a maintainer adds the `no-issue` label.
 
 By contributing, you agree that your contribution is licensed under the
 [Apache License 2.0](LICENSE), as section 5 of the licence describes.
