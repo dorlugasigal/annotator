@@ -90,8 +90,8 @@ jobs:
         run: brew install xcodegen
       - name: Swift package tests
         run: make test
-      - name: Conformance corpus matches the Mac sources
-        run: make conformance-check
+      - name: Conformance data matches the Mac sources
+        run: make conformance-check-data
       - name: Build the development app
         run: make app
 

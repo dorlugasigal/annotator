@@ -202,7 +202,9 @@ while the repository is public:
   their paths change.
 - **Mac tests** (`macos-26`, when `apps/macos`, `reference`, `tools/macos`,
   `integrations`, `releases`, the Makefile or the workflow change):
-  `make test`, `make conformance-check` and `make app`.
+  `make test`, `make conformance-check-data` (every corpus file except the
+  rendered PNGs, whose pixels depend on the macOS version) and `make app`.
+  Run the full `make conformance-check` on the Mac that generated the corpus.
 - **Windows tests** (`windows-2025-vs2026`, when `apps/windows`, `reference`,
   `tools/windows`, `integrations`, `releases` or the workflow change):
   `validate.ps1` `core`, `workspace` and `conformance`, then `app`.

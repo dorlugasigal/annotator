@@ -3,11 +3,13 @@ import Foundation
 import Metal
 
 let usage = """
-    Usage: swift run --package-path apps/macos ConformanceExport [--output DIR] [--check]
+    Usage: swift run --package-path apps/macos ConformanceExport [--output DIR] [--check | --check-data]
 
     Run from the repository root. Writes the macOS conformance corpus to DIR
     (default reference/conformance) with a manifest. With --check, exports in memory,
     compares the result with DIR and exits with 1 when any generated file differs.
+    --check-data compares everything except the rendered PNG images, whose pixels depend on
+    the macOS version and GPU; CI uses it on hosted Macs.
     """
 
 @MainActor func fail(_ message: String) -> Never {
@@ -17,6 +19,7 @@ let usage = """
 
 var outputPath = "reference/conformance"
 var checkOnly = false
+var dataOnly = false
 var arguments = Array(CommandLine.arguments.dropFirst())
 while !arguments.isEmpty {
     let argument = arguments.removeFirst()
@@ -25,6 +28,7 @@ while !arguments.isEmpty {
         guard !arguments.isEmpty else { fail(usage) }
         outputPath = arguments.removeFirst()
     case "--check": checkOnly = true
+    case "--check-data": checkOnly = true; dataOnly = true
     case "--help", "-h":
         print(usage)
         exit(0)
@@ -142,6 +146,7 @@ if checkOnly {
         guard let data = fileManager.contents(atPath: root.appendingPathComponent(path).path) else {
             problems.append("missing  \(path)"); continue
         }
+        if dataOnly && path.hasSuffix(".png") { continue }
         if data != corpus.files[path] { problems.append("changed  \(path)") }
     }
     for path in existing.subtracting(corpus.files.keys).subtracting(handWritten).subtracting(["manifest.json"]).sorted() {
@@ -154,7 +159,9 @@ if checkOnly {
         return object as NSDictionary
     }
     let savedManifest = fileManager.contents(atPath: root.appendingPathComponent("manifest.json").path)
-    if comparable(savedManifest) != comparable(manifest) { problems.append("changed  manifest.json") }
+    if dataOnly {
+        print("note     PNG images and manifest.json were not compared (--check-data)")
+    } else if comparable(savedManifest) != comparable(manifest) { problems.append("changed  manifest.json") }
     else if savedManifest != manifest {
         print("note     manifest.json differs only in its source or environment fields")
     }

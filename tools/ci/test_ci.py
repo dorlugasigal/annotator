@@ -73,7 +73,7 @@ class ValidationWorkflowTests(unittest.TestCase):
             self.assertIn("persist-credentials: false", block)
             self.assertNotIn("secrets.", block)
         self.assertIn("make test", job(VALIDATE, "macos"))
-        self.assertIn("make conformance-check", job(VALIDATE, "macos"))
+        self.assertIn("make conformance-check-data", job(VALIDATE, "macos"))
         self.assertIn("validate.ps1", job(VALIDATE, "windows"))
         for workflow in (ROOT / ".github/workflows").glob("*.yml"):
             source = workflow.read_text()

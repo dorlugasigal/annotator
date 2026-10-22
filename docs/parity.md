@@ -19,7 +19,9 @@ same pull request.
 
 - **Conformance corpus** (`reference/conformance`): data, geometry, motion
   curves and reference images. `make conformance` writes it and
-  `make conformance-check` compares. Commit the source change first, then
+  `make conformance-check` compares. CI runs `make conformance-check-data`,
+  which skips the rendered PNGs because their pixels depend on the macOS
+  version and GPU. Commit the source change first, then
   export, so the manifest names a clean commit. See
   [its README](../reference/conformance/README.md).
 - **UX reference** (`reference/ux-reference`): every surface and state at 2x in

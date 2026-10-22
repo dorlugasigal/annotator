@@ -1,7 +1,7 @@
 DEVELOPER_DIR ?= /Applications/Xcode.app/Contents/Developer
 export DEVELOPER_DIR
 
-.PHONY: test build conformance conformance-check generate app signed-dev signed-alpha native-test signed-native-test clean-check ai-skill preview-package release-check release-tests
+.PHONY: test build conformance conformance-check conformance-check-data generate app signed-dev signed-alpha native-test signed-native-test clean-check ai-skill preview-package release-check release-tests
 test:
 	swift test --package-path apps/macos
 
@@ -14,6 +14,10 @@ conformance:
 
 conformance-check:
 	swift run --package-path apps/macos ConformanceExport --check
+
+# Everything but the rendered images, which depend on the macOS version and GPU (used by CI).
+conformance-check-data:
+	swift run --package-path apps/macos ConformanceExport --check-data
 
 generate:
 	xcodegen generate --spec apps/macos/project.yml --project apps/macos

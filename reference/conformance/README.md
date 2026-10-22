@@ -13,6 +13,7 @@ Run from the repository root on a Mac with full Xcode:
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 make conformance         # writes reference/conformance
 make conformance-check   # compares; exits 1 on any difference
+make conformance-check-data   # the same without the rendered PNGs (CI on hosted Macs)
 ```
 
 Use the default debug build. The exporter reads a few internal renderer values
