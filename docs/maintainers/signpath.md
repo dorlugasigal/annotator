@@ -9,9 +9,14 @@ certificate, which is worse than no signature.
 
 ## Status
 
-Not applied yet. The repository owner submits the application at
-<https://signpath.org/apply>. Until SignPath approves it, the website's Windows
+Applied on 2026-10-23 at <https://signpath.org/apply>; waiting for SignPath's
+reply (tracked in issue #14). Until SignPath approves it, the website's Windows
 download text and the release notes keep the SmartScreen note.
+
+SignPath's terms expect the project site to have a code signing policy (who can
+approve a signing request, what the app sends over the network) and the download
+page to say "Free code signing provided by SignPath.io, certificate by SignPath
+Foundation". Add both when they approve, or earlier if their reviewers ask.
 
 ## Answers for the application
 
