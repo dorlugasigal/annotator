@@ -22,7 +22,7 @@
       15
      ],
      "role": "AXStaticText",
-     "value": "Version 0.1.0-beta.11 (29)"
+     "value": "Version 0.1.0-beta.12 (30)"
     },
     {
      "enabled": true,
@@ -242,25 +242,14 @@
       36
      ],
      "identifier": "menu-support",
-     "label": "Buy me a coffee…",
+     "label": "Enjoying it? Buy me a coffee…",
      "role": "AXButton"
     },
     {
      "enabled": true,
      "frame": [
-      26,
-      641,
-      182,
-      13
-     ],
-     "role": "AXStaticText",
-     "value": "Coffee is welcome. All tools stay free."
-    },
-    {
-     "enabled": true,
-     "frame": [
       16,
-      673,
+      660,
       288,
       36
      ],
@@ -274,7 +263,7 @@
     0,
     0,
     320,
-    725
+    712
    ],
    "role": "AXScrollArea"
   }
@@ -286,12 +275,12 @@
  "notes": "Tools visible, Use apps.",
  "pixels": [
   640,
-  1450
+  1424
  ],
  "scale": 2,
  "size": [
   320,
-  725
+  712
  ],
  "spec": [
   "000 product spec (menu-bar popover)",
