@@ -59,6 +59,8 @@
     <AssemblyMetadata Include="AnnotatorBuildStamp" Value="$(AnnotatorBuildStamp)" />
     <!-- The portable release ZIP sets AnnotatorDistribution=portable (tools/windows/package.ps1 -Portable). -->
     <AssemblyMetadata Include="AnnotatorDistribution" Value="$(AnnotatorDistribution)" />
+    <!-- The portable release's update feed on the website (package.ps1 -UpdateSite); only a portable copy reads it (WIN-SYS-03). -->
+    <AssemblyMetadata Include="AnnotatorUpdateFeedURL" Value="$(AnnotatorUpdateFeedUrl)" />
     <!-- The usage-count service's origin (ANNOTATOR_METRICS_URL on the Mac). Source builds have none and send nothing; the
          owner's release build sets it once UsageMetrics.ServiceAcceptsWindows is on (specification 011, WIN-PRV-01). -->
     <AssemblyMetadata Include="AnnotatorMetricsURL" Value="$(AnnotatorMetricsUrl)" />

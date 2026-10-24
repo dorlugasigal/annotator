@@ -39,6 +39,14 @@ internal sealed partial class ReferenceHost
                 reminder.ShowForReference(OffscreenOrigin());
                 Watch((FrameworkElement)reminder.Content, reminder.Hwnd);
                 break;
+            case ReferenceSurface.WhatsChanged:
+                // The Mac capture's settled view with its fixed notes, without the window's title bar.
+                var notes = new FirstUseReferenceWindow(_registry, WhatsChangedText.Title, WhatsChangedWindow.Body(
+                    ReferenceStates.WhatsChangedNotes, supportAvailable: true, static () => { }, static () => { }, animate: false));
+                _popover = notes;
+                notes.ShowForReference(OffscreenOrigin());
+                Watch((FrameworkElement)notes.Content, notes.Hwnd);
+                break;
         }
     }
 

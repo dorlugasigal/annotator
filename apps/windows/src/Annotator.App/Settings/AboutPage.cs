@@ -65,14 +65,15 @@ internal static class AboutPage
         {
             HorizontalAlignment = HorizontalAlignment.Center,
         };
-        downloads.Click += (_, _) => actions.OpenProductPage(ProductPage.Downloads);
+        downloads.Click += (_, _) => actions.OpenUpdateDownloads();
         column.Children.Add(downloads);
-        // The Mac shows the Downloads link only while updates are not set up.
+        // The Mac shows the Downloads link only while updates are not set up; a portable copy also shows it once its check
+        // found a release.
         UpdatesBinding.Follow(status, actions.Updates, () =>
         {
             check.IsEnabled = actions.Updates.CanCheck;
             status.Text = actions.Updates.Status;
-            downloads.Visibility = actions.Updates.IsConfigured ? Visibility.Collapsed : Visibility.Visible;
+            downloads.Visibility = actions.Updates.IsConfigured && actions.Updates.Release is null ? Visibility.Collapsed : Visibility.Visible;
         });
         column.Children.Add(new Rectangle { Height = 1, HorizontalAlignment = HorizontalAlignment.Stretch, Style = AppResources.Style("AnnotatorDivider") });
         column.Children.Add(Stretched(ReleaseNotesView.Make(environment, ColumnWidth - 12)));
@@ -195,12 +196,15 @@ internal static class ReleaseNotesView
 /// <summary>
 /// The app icon (apps/macos/Artwork/main.swift): the dark rounded tile, the A mark and the orange dot in the colors of the
 /// Mac's icon files (<see cref="AppIconArtwork"/>), drawn from the shared mark geometry. UI Automation reads an image named
-/// "Annotator app icon".
+/// "Annotator app icon", unless the icon is decorative (What's changed, where the Mac hides it).
 /// </summary>
 internal sealed partial class AppIconView : Grid
 {
-    public AppIconView(double size)
+    private readonly bool _decorative;
+
+    public AppIconView(double size, bool decorative = false)
     {
+        _decorative = decorative;
         Width = size;
         Height = size;
         var canvas = new Canvas { Width = size, Height = size };
@@ -231,8 +235,11 @@ internal sealed partial class AppIconView : Grid
         Canvas.SetTop(dot, size * 0.20);
         canvas.Children.Add(dot);
         Children.Add(canvas);
-        AutomationProperties.SetName(this, SettingsCopy.AppIconName);
-        AutomationProperties.SetAutomationId(this, "about-app-icon");
+        if (!decorative)
+        {
+            AutomationProperties.SetName(this, SettingsCopy.AppIconName);
+            AutomationProperties.SetAutomationId(this, "about-app-icon");
+        }
         // The app's icon keeps its colors in a contrast theme (WIN-UI-07).
         OwnColors.Mark(this);
     }
@@ -247,7 +254,9 @@ internal sealed partial class AppIconView : Grid
 
         protected override string GetClassNameCore() => "Image";
 
-        protected override bool IsControlElementCore() => true;
+        protected override bool IsControlElementCore() => !owner._decorative;
+
+        protected override bool IsContentElementCore() => !owner._decorative;
 
         protected override IList<AutomationPeer> GetChildrenCore() => new AutomationPeerList();
 

@@ -59,6 +59,12 @@ internal sealed partial class AppHost
     private readonly AppDefaults _defaults;
     private readonly SupportReminder _reminder;
     private readonly IntroductionController _introduction;
+    private readonly WhatsChangedTracker _whatsChangedTracker;
+    /// <summary>This launch follows an update and What's changed has not shown yet.</summary>
+    private ReleaseNotesEntry? _whatsChangedDue;
+    /// <summary>A quiet sign-in launch: What's changed waits until the person opens Annotator.</summary>
+    private bool _whatsChangedWaits;
+    private WhatsChangedWindow? _whatsChanged;
     private SupportReminderPopover? _reminderPopover;
     private WorkspaceMode _lastMode;
     private readonly Annotator.Workspace.Zoom.DisplayedZoomBoard _zoomBoard = new();
@@ -91,6 +97,9 @@ internal sealed partial class AppHost
     {
         _check = check;
         _queue = DispatcherQueue.GetForCurrentThread();
+        // An earlier Annotator saved settings here, read before anything this launch saves (What's changed after an update).
+        bool usedBefore = check is null && (File.Exists(Path.Combine(BuildInfo.DataFolder, "app-defaults-v1.json"))
+            || File.Exists(Path.Combine(BuildInfo.DataFolder, "workspace-preferences-v1.json")));
         // Failures inside window procedures, on either thread, are shown to the person instead of ending the app.
         CallbackErrors.Raised += error => ReportLater("A window message failed", error);
         NativeCallbackErrors.Unhandled += error => ReportLater("A window message failed", error);
@@ -137,13 +146,27 @@ internal sealed partial class AppHost
         _launch = new LaunchAtSignIn(check is not null ? new FixedStartupTask(LaunchAtSignInState.NotPackaged)
             : BuildInfo.IsPortable ? new RunKeyStartupTask() : new WindowsStartupTask(),
             message => _model.Report(message));
+        // First-use state (the Mac's UserDefaults): Show on launch, the coffee reminder's days of use, What's changed and a
+        // portable copy's update checks. The live check never reads or changes the person's.
+        _defaults = check is null ? AppDefaults.InFile(Path.Combine(BuildInfo.DataFolder, "app-defaults-v1.json")) : AppDefaults.InMemory();
+        _defaults.SaveFailed += message => _queue.TryEnqueue(() => _model.Report(message));
         // Updates come from the Microsoft Store (WIN-SYS-03). The live check's Store has an update that it never installs and
-        // never calls Windows, so Check for updates asks its question and installs nothing.
+        // never calls Windows, so Check for updates asks its question and installs nothing. A portable copy reads the
+        // website's update feed and only says where to get a newer release.
         IStoreUpdates store = check is null
             ? new WindowsStoreUpdates(() => _settings is { } settings ? (nint)settings.Hwnd : 0)
             : new FixedStoreUpdates(UpdateChannel.Store) { Answer = StoreUpdateCheck.Available, Outcome = StoreInstallOutcome.Cancelled };
+        PortableUpdateSource? portable = check is null && BuildInfo.UpdateFeed is { } feed && BuildInfo.BuildNumber is { } build
+            ? new PortableUpdateSource(new PortableReleaseFeed(feed, BuildInfo.NotesVersion), build, _defaults)
+            : null;
         _updates = new AppUpdates(store, () => UpdateQuestion.For(_model.Snapshot), AskBeforeUpdateAsync,
-            message => StartupLog.Note("store-update", message));
+            message => StartupLog.Note("store-update", message), portable: portable);
+        // What's changed follows an update once (the Mac's WhatsChangedTracker); the live check never shows it.
+        _whatsChangedTracker = new WhatsChangedTracker(_defaults);
+        _whatsChangedDue = check is null && BuildInfo.BuildNumber is { } running
+            ? _whatsChangedTracker.Due(running, usedBefore, () => ReleaseNotesCatalog.Load(
+                Path.Combine(AppContext.BaseDirectory, ReleaseNotesView.NotesFile), BuildInfo.NotesVersion, running))
+            : null;
         _settingsActions = new SettingsActions(_model, _launch, _updates,
             SettingsEnvironment.ForApp(CollectSupportFacts, check is null ? RegisterProfileShortcuts : null, hasTrayIcon: check is null) with
             {
@@ -193,10 +216,7 @@ internal sealed partial class AppHost
                 _overlays.CreateOverlays();
             }
         };
-        // First-use state (the Mac's UserDefaults): Show on launch and the coffee reminder's days of use. The live check
-        // never reads or changes the person's.
-        _defaults = check is null ? AppDefaults.InFile(Path.Combine(BuildInfo.DataFolder, "app-defaults-v1.json")) : AppDefaults.InMemory();
-        _defaults.SaveFailed += message => _queue.TryEnqueue(() => _model.Report(message));
+        // First-use state lives in _defaults, made with the update settings above.
         _reminder = new SupportReminder(_defaults);
         _reminder.Changed += UpdateSupportReminder;
         // Usage counts (WIN-PRV-01): the workspace reports what the Mac's model records; Settings and the tour show the switch.
@@ -612,9 +632,10 @@ internal sealed partial class AppHost
         RectInt32 icon = _tray!.Bounds() is { } rect
             ? new RectInt32(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
             : new RectInt32(anchor.X, anchor.Y, 1, 1);
-        // Check for updates… works in a copy installed from the Store; otherwise it says why (Mac updateStatus).
+        // Check for updates… works in a copy installed from the Store or a portable copy with the website's feed; otherwise it
+        // says why (Mac updateStatus). A release a check found turns it into Update available….
         var flyout = new TrayFlyout(_registry, _model.Snapshot, _tray.Problem, openedWithKeyboard, TrayFocusTarget, Perform,
-            BuildInfo.IsDevelopment, _updates.CanCheck, _updates.Status);
+            BuildInfo.IsDevelopment, _updates.CanCheck, _updates.Status, updateAvailable: _updates.Release is not null);
         flyout.Dismissed += () =>
         {
             if (flyout.ClosedByDeactivation && PressedOnTrayIcon())
@@ -630,6 +651,8 @@ internal sealed partial class AppHost
         _flyout = flyout;
         PostFrame();
         flyout.Open(icon, PopoverPlacement.AboveOrBelow);
+        PersonOpenedAnnotator();
+        CheckForUpdatesIfDue();
     }
 
     /// <summary>True when the pointer is on the tray icon, so the press that just closed the flyout was on the icon.</summary>
@@ -718,6 +741,7 @@ internal sealed partial class AppHost
             _settings.SetPage(SettingsTab.BreakTimer, new BreakTimerPage(_model, _breaks));
         }
         _settings.Show(tab);
+        CheckForUpdatesIfDue();
     }
 
     /// <summary>

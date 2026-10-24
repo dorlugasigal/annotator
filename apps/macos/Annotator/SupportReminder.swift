@@ -87,6 +87,8 @@ struct SupportReminderView: View {
 struct CoffeeSupportView: View {
     static let accent = Color(red: 0.58, green: 0.29, blue: 0.10)
     @ObservedObject var model: WorkspaceModel
+    /// The second line under "Enjoying Annotator?"; What's changed leaves it out.
+    var showsDetail = true
 
     var body: some View {
         HStack(spacing: 16) {
@@ -94,7 +96,9 @@ struct CoffeeSupportView: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 5) {
                 Text("Enjoying Annotator?").font(.headline)
-                Text("Coffee is always welcome. All tools stay free.").font(.callout).foregroundStyle(.secondary)
+                if showsDetail {
+                    Text("Coffee is always welcome. All tools stay free.").font(.callout).foregroundStyle(.secondary)
+                }
             }
             Spacer()
             Button("Buy me a coffee") { model.openOptionalSupport() }

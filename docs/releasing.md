@@ -55,8 +55,9 @@ Every release ships all of these:
 | Channel | What it gets | How |
 | --- | --- | --- |
 | GitHub release | Mac DMG and ZIP; Windows ZIPs for x64 and ARM64 with `annotator-windows.json` | Release workflow, publish job |
-| Sparkle feed | The signed Mac update | Website deploy, from the published release manifest |
-| Homebrew | `brew install --cask dorlugasigal/annotator/annotator` | `tools/release/distribution.py tap` writes `dorlugasigal/homebrew-annotator` |
+| Sparkle feed | The signed Mac update, with the release's Mac notes in its update window | Website deploy, from the published release manifest |
+| Windows update feed | `updates/windows-<track>.json`: the newest release with Windows ZIPs, which portable copies check daily (they never install it) | Website deploy, from the published `annotator-windows.json` |
+| Homebrew | `brew install --cask dorlugasigal/annotator/annotator`; the cask says `auto_updates true`, so `brew upgrade` leaves Sparkle's updates alone unless asked with `--greedy` | `tools/release/distribution.py tap` writes `dorlugasigal/homebrew-annotator` |
 | winget | `winget install DorLugasiGal.Annotator` (portable ZIP) | `tools/windows/winget.py manifests`, then a pull request to microsoft/winget-pkgs |
 | Microsoft Store | Signed MSIX bundle; Store updates | Release workflow, `windows_store` input |
 | Website | https://getannotator.app | Website workflow, after each Release run ([maintainers/website.md](maintainers/website.md)) |

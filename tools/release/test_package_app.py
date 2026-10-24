@@ -77,9 +77,9 @@ class PackageTests(unittest.TestCase):
         silicon = module.cask(metadata, "https://example.com/a.zip", "a"*64, "https://example.com", "release")
         universal = module.cask({**metadata, "architecture": "arm64 x86_64"}, "https://example.com/a.zip", "a"*64,
                                 "https://example.com", "release")
-        self.assertIn('homepage "https://example.com"\n\n  depends_on arch: :arm64\n  depends_on macos: :sonoma\n', silicon)
+        self.assertIn('homepage "https://example.com"\n  auto_updates true\n\n  depends_on arch: :arm64\n  depends_on macos: :sonoma\n', silicon)
         self.assertNotIn("depends_on arch", universal)
-        self.assertIn('homepage "https://example.com"\n\n  depends_on macos: :sonoma\n', universal)
+        self.assertIn('homepage "https://example.com"\n  auto_updates true\n\n  depends_on macos: :sonoma\n', universal)
 
     def test_preview_cask_is_pinned_and_does_not_delete_user_data(self):
         metadata = dict(name="Annotator Dev.app", identifier="com.dorlugasigal.annotator.dev",
@@ -90,6 +90,8 @@ class PackageTests(unittest.TestCase):
         self.assertIn('sha256 "'+"a"*64+'"', output)
         self.assertIn('app "Annotator Dev.app"', output)
         self.assertIn("not notarized", output)
+        # A development preview has no update feed, so Homebrew keeps upgrading it.
+        self.assertNotIn("auto_updates", output)
         for forbidden in ["no_check", "zap ", "system_command", "sudo", "quarantine", "launchctl"]:
             self.assertNotIn(forbidden, output)
 

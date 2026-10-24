@@ -254,9 +254,12 @@ jobs:
       - name: Build the x64 and ARM64 packages and the bundle
         env:
           METRICS_URL: ${{ steps.guards.outputs.metrics-url }}
+          # The portable app's update feed lives on the website (WIN-SYS-03); without it, the portable app can't check.
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
         run: |
           $arguments = @('-Output', "$env:RUNNER_TEMP/windows-packages", '-BuildStamp', "Release $($env:CANDIDATE_SHA.Substring(0, 12))", '-RequireArm64', '-Portable')
           if ($env:METRICS_URL) { $arguments += @('-MetricsUrl', $env:METRICS_URL) }
+          if ($env:WEBSITE_URL) { $arguments += @('-UpdateSite', $env:WEBSITE_URL) }
           pwsh -NoProfile -File tools/windows/package.ps1 @arguments
       - name: Check the bundle and write its receipt
         id: receipt

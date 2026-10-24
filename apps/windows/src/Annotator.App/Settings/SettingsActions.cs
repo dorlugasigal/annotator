@@ -278,6 +278,42 @@ internal sealed class SettingsActions(WorkspaceModel model, LaunchAtSignIn launc
         _ = updates.CheckAsync();
     }
 
+    /// <summary>
+    /// Open Downloads page...: the download page a portable copy's check named, or the website's Downloads page (Mac
+    /// openProductPage(.downloads)).
+    /// </summary>
+    public void OpenUpdateDownloads()
+    {
+        if (updates.Release is { } release)
+        {
+            if (!OpenLink(release.DownloadPage))
+            {
+                Fail(IssueReporting.BrowserUnavailableMessage);
+            }
+            return;
+        }
+        OpenProductPage(ProductPage.Downloads);
+    }
+
+    /// <summary>Copy winget command: the command that updates the portable release, for Terminal.</summary>
+    public void CopyWingetCommand()
+    {
+        if (!environment.Live)
+        {
+            return;
+        }
+        try
+        {
+            TextClipboard.SetText(Owner(), UpdateText.WingetCommand);
+            Say(UpdateText.WingetCopied);
+        }
+        catch (InvalidOperationException error)
+        {
+            StartupLog.Note("winget-command", error.Message);
+            Fail(UpdateText.WingetNotCopied);
+        }
+    }
+
     /// <summary>Support info: coarse app and system details, never drawings, screenshots, paths or names (WIN-PRV-04).</summary>
     public string SupportInfoText() => SupportInfo.Text(environment.Facts(), model.Snapshot);
 

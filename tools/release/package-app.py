@@ -97,6 +97,9 @@ def cask(metadata, url, checksum, homepage, channel):
     # A universal app installs on both kinds of Mac; only an Apple Silicon-only app limits the cask.
     arch = "  depends_on arch: :arm64\n" if metadata.get("architecture", "arm64") == "arm64" else ""
     conflict = ""
+    # A release app updates itself with Sparkle (automatic checks are on by default), so brew upgrade leaves it alone
+    # unless the person asks with --greedy. A development preview has no update feed.
+    updates = "\n  auto_updates true" if channel == "release" else ""
     if channel == "release":
         other = "annotator" if metadata["token"] == "annotator-preview" else "annotator-preview"
         conflict = f"  conflicts_with cask: {literal(other)}\n"
@@ -107,7 +110,7 @@ def cask(metadata, url, checksum, homepage, channel):
   url {literal(url)}
   name {literal(metadata['name'].removesuffix('.app'))}
   desc "Native live desktop annotation"
-  homepage {literal(homepage)}
+  homepage {literal(homepage)}{updates}
 
 {arch}  depends_on macos: :sonoma
 

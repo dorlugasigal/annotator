@@ -124,9 +124,38 @@ public sealed record UpdateQuestion(bool LosesDrawings, bool StopsSharing)
 /// </summary>
 public static class UpdateText
 {
+    /// <summary>The winget command that updates the portable release.</summary>
+    public const string WingetCommand = "winget upgrade DorLugasiGal.Annotator";
+
     /// <summary>The portable release's line: winget, or the website, brings new versions.</summary>
     public const string Portable =
         "This copy didn't come from the Microsoft Store. To update it, run winget upgrade DorLugasiGal.Annotator, or download the new version from getannotator.app.";
+
+    /// <summary>A portable copy with automatic checks on (the Mac's status with Sparkle's daily check).</summary>
+    public const string PortableReady = "Annotator checks for updates once a day. Checks need an internet connection.";
+
+    /// <summary>The Mac's status once automatic checks are off.</summary>
+    public const string PortableReadyManual = "Automatic checks are off. You can still check here.";
+
+    public const string PortableChecking = "Checking for updates...";
+
+    public const string PortableCheckFailed = "Annotator could not check for updates. Check your internet connection and try again.";
+
+    /// <summary>A portable copy found a newer release; Annotator never downloads or installs it itself.</summary>
+    public static string PortableAvailable(string version) =>
+        $"Annotator {version} is available. Download it from getannotator.app, or run {WingetCommand}.";
+
+    /// <summary>The once-per-version question after an automatic check found a release (Sparkle's update window).</summary>
+    public static string AvailableTitle(string version) => $"Annotator {version} is available";
+
+    public const string AvailableDetail =
+        "Download it from getannotator.app, or copy the winget command and run it in Terminal. Save your board and quit Annotator before you install it.";
+
+    public const string OpenDownloads = SettingsCopy.OpenDownloads;
+    public const string CopyWinget = "Copy winget command";
+    public const string WingetCopied = "The winget command is copied. Run it in Terminal to update Annotator.";
+    public const string WingetNotCopied = "Could not copy the winget command. Try again.";
+    public const string UpdateAvailableRow = "Update available…";
 
     public const string NotFromStore =
         "This copy wasn't installed from the Microsoft Store, so it can't check for updates. Find new versions in Settings > About.";
@@ -155,9 +184,17 @@ public static class UpdateText
 }
 
 /// <summary>
+/// What a portable copy needs to check for updates itself (WIN-SYS-03): the website's feed, its own build, the saved
+/// settings and the clock.
+/// </summary>
+public sealed record PortableUpdateSource(IReleaseFeed Feed, int Build, Annotator.Workspace.FirstUse.AppDefaults Defaults,
+                                          Func<DateTimeOffset>? Now = null);
+
+/// <summary>
 /// Check for updates... on Windows (WIN-SYS-03, the Mac's AppUpdateController with Sparkle). The Microsoft Store answers,
 /// and Windows asks before it installs. When an install could close Annotator while drawings exist or a region is shared,
-/// Annotator asks first. Only a copy installed from the Store can check; the others say why. Use it on the app thread.
+/// Annotator asks first. A portable copy reads the website's update feed instead and only says where to get a newer
+/// release. Other copies say why they cannot check. Use it on the app thread.
 /// </summary>
 public sealed class AppUpdates
 {
@@ -167,7 +204,20 @@ public sealed class AppUpdates
     /// <summary>How long an install may take, including Windows' question, before Annotator stops waiting for it.</summary>
     public static readonly TimeSpan InstallTimeout = TimeSpan.FromMinutes(30);
 
+    /// <summary>A portable copy checks at most once in this time on its own, like Sparkle's SUScheduledCheckInterval.</summary>
+    public static readonly TimeSpan CheckInterval = TimeSpan.FromDays(1);
+
+    /// <summary>Sparkle's key for automatic checks; missing means on, as the Mac's Info.plist sets.</summary>
+    public const string AutomaticChecksKey = "SUEnableAutomaticChecks";
+
+    /// <summary>Sparkle's key for the last finished check.</summary>
+    public const string LastCheckKey = "SULastCheckTime";
+
+    /// <summary>The newest build that a check found and announced, so the question shows once per release.</summary>
+    public const string AnnouncedBuildKey = "update-announced-build";
+
     private readonly IStoreUpdates _store;
+    private readonly PortableUpdateSource? _portable;
     private readonly Func<UpdateQuestion?> _question;
     private readonly Func<UpdateQuestion, Task<bool>> _confirm;
     private readonly Action<string> _note;
@@ -175,21 +225,23 @@ public sealed class AppUpdates
 
     /// <param name="question">The question to ask before installing now (<see cref="UpdateQuestion.For"/>), or null.</param>
     /// <param name="confirm">Asks the question; true installs, false waits (Not now).</param>
-    /// <param name="note">Records the details of a Store failure for the log.</param>
+    /// <param name="note">Records the details of a Store or feed failure for the log.</param>
     /// <param name="delay">Waits for a timeout; tests replace it.</param>
+    /// <param name="portable">The feed of a portable copy; without it, a portable copy cannot check.</param>
     public AppUpdates(IStoreUpdates store, Func<UpdateQuestion?> question, Func<UpdateQuestion, Task<bool>> confirm, Action<string> note,
-                      Func<TimeSpan, CancellationToken, Task>? delay = null)
+                      Func<TimeSpan, CancellationToken, Task>? delay = null, PortableUpdateSource? portable = null)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(question);
         ArgumentNullException.ThrowIfNull(confirm);
         ArgumentNullException.ThrowIfNull(note);
         _store = store;
+        _portable = store.Channel == UpdateChannel.Portable ? portable : null;
         _question = question;
         _confirm = confirm;
         _note = note;
         _delay = delay ?? Task.Delay;
-        Phase = store.Channel == UpdateChannel.Store ? UpdatePhase.Ready : UpdatePhase.Unavailable;
+        Phase = IsConfigured ? UpdatePhase.Ready : UpdatePhase.Unavailable;
     }
 
     /// <summary>Raised after <see cref="Phase"/> changed.</summary>
@@ -202,20 +254,46 @@ public sealed class AppUpdates
 
     public UpdateChannel Channel => _store.Channel;
 
-    /// <summary>The Mac's updatesConfigured: this copy gets its updates from the Microsoft Store.</summary>
-    public bool IsConfigured => _store.Channel == UpdateChannel.Store;
+    /// <summary>
+    /// The Mac's updatesConfigured: this copy gets its updates from the Microsoft Store, or it is a portable copy built
+    /// with the website's update feed.
+    /// </summary>
+    public bool IsConfigured => _store.Channel == UpdateChannel.Store || _portable is not null;
+
+    /// <summary>A portable copy that checks the website's feed itself; it only tells, it never installs.</summary>
+    public bool ChecksFeed => _portable is not null;
+
+    /// <summary>The newer release a portable copy found, while <see cref="Phase"/> is <see cref="UpdatePhase.Available"/>.</summary>
+    public ReleaseFeedEntry? Release { get; private set; }
 
     /// <summary>The Mac's canCheckForUpdates: Check for updates... works now.</summary>
     public bool CanCheck => IsConfigured && Phase is not (UpdatePhase.Checking or UpdatePhase.Installing);
 
     /// <summary>
-    /// The Mac's automaticallyCheckForUpdates, which Windows leaves to the Microsoft Store: on for a Store copy unless the
-    /// organization turned the Store's automatic updates off. Annotator cannot change it, so its switch stays disabled.
+    /// The Mac's automaticallyCheckForUpdates. A Store copy leaves it to the Microsoft Store: on unless the organization turned
+    /// the Store's automatic updates off, and Annotator cannot change it. A portable copy checks once a day unless the person
+    /// turned that off (<see cref="SetAutomaticChecks"/>).
     /// </summary>
-    public bool AutomaticChecks => IsConfigured && _store.AutomaticUpdates;
+    public bool AutomaticChecks => _portable is { } portable
+        ? !portable.Defaults.Contains(AutomaticChecksKey) || portable.Defaults.Bool(AutomaticChecksKey)
+        : IsConfigured && _store.AutomaticUpdates;
+
+    /// <summary>Only a portable copy's automatic checks belong to Annotator; the Store's belong to Windows.</summary>
+    public bool CanChangeAutomaticChecks => _portable is not null;
+
+    /// <summary>The Mac's setAutomaticChecks: a portable copy saves the person's choice.</summary>
+    public void SetAutomaticChecks(bool enabled)
+    {
+        if (_portable is not { } portable || AutomaticChecks == enabled && portable.Defaults.Contains(AutomaticChecksKey))
+        {
+            return;
+        }
+        portable.Defaults.Set(AutomaticChecksKey, enabled);
+        Changed?.Invoke();
+    }
 
     /// <summary>The Mac's updateStatus: the line under Check for updates... in Settings and in the flyout.</summary>
-    public string Status => Phase switch
+    public string Status => _portable is not null ? PortableStatus : Phase switch
     {
         UpdatePhase.Unavailable => _store.Channel switch
         {
@@ -239,6 +317,75 @@ public sealed class AppUpdates
         _ => UpdateText.CheckFailed,
     };
 
+    private string PortableStatus => Phase switch
+    {
+        UpdatePhase.Checking => UpdateText.PortableChecking,
+        UpdatePhase.UpToDate => UpdateText.UpToDate,
+        UpdatePhase.Available when Release is { } release => UpdateText.PortableAvailable(release.ReleaseVersion),
+        UpdatePhase.CheckFailed => UpdateText.PortableCheckFailed,
+        _ => AutomaticChecks ? UpdateText.PortableReady : UpdateText.PortableReadyManual,
+    };
+
+    /// <summary>
+    /// A portable copy's automatic check (Sparkle's scheduled check): when automatic checks are on and the last check is at
+    /// least <see cref="CheckInterval"/> old, reads the feed. Callers run it at launch and when the tray flyout or Settings
+    /// opens, so no timer runs (WIN-SYS-07). A failed automatic check stays quiet and tries again next time. True when it
+    /// found a release that was never announced, so the caller may ask about it once.
+    /// </summary>
+    public async Task<bool> CheckIfDueAsync()
+    {
+        if (_portable is not { } portable || !AutomaticChecks || !CanCheck)
+        {
+            return false;
+        }
+        DateTimeOffset now = Now(portable);
+        if (portable.Defaults.Date(LastCheckKey) is { } last && now - last < CheckInterval && now >= last)
+        {
+            return false;
+        }
+        return await CheckFeedAsync(portable, automatic: true);
+    }
+
+    /// <summary>Reads the feed; a found release is announced once, whether the person or the schedule checked.</summary>
+    private async Task<bool> CheckFeedAsync(PortableUpdateSource portable, bool automatic)
+    {
+        UpdatePhase before = Phase;
+        Set(UpdatePhase.Checking);
+        ReleaseFeedEntry? found;
+        try
+        {
+            found = await Bounded(portable.Feed.FetchAsync(), CheckTimeout);
+        }
+        catch (ReleaseFeedFailure failure)
+        {
+            _note($"Update check: {failure.Message}");
+            found = null;
+        }
+        if (found is not { } release)
+        {
+            if (!automatic)
+            {
+                _note("Update check: the update feed did not answer.");
+            }
+            Set(automatic ? before : UpdatePhase.CheckFailed);
+            return false;
+        }
+        portable.Defaults.Set(LastCheckKey, Now(portable));
+        if (release.Build <= portable.Build)
+        {
+            Release = null;
+            Set(UpdatePhase.UpToDate);
+            return false;
+        }
+        Release = release;
+        bool announce = portable.Defaults.Integer(AnnouncedBuildKey) < release.Build;
+        portable.Defaults.Set(AnnouncedBuildKey, (long)release.Build);
+        Set(UpdatePhase.Available);
+        return announce && automatic;
+    }
+
+    private static DateTimeOffset Now(PortableUpdateSource portable) => portable.Now?.Invoke() ?? DateTimeOffset.Now;
+
     /// <summary>
     /// Check for updates...: asks the Store; when it has an update, asks the person first if installing could remove drawings
     /// or stop sharing, then lets the Store download and install it. Every wait is bounded. Does nothing while
@@ -248,6 +395,11 @@ public sealed class AppUpdates
     {
         if (!CanCheck)
         {
+            return;
+        }
+        if (_portable is { } portable)
+        {
+            await CheckFeedAsync(portable, automatic: false);
             return;
         }
         Set(UpdatePhase.Checking);

@@ -235,6 +235,7 @@ Report a problem, Share feedback, What's changed, coffee reminder, keycaps, erro
 | `report-a-problem`<br>460 x 680 pt<br>Report a problem window. | <img src="dialogs/report-a-problem-light.png" width="420"> | <img src="dialogs/report-a-problem-dark.png" width="420"> |
 | `share-feedback`<br>460 x 680 pt<br>Share feedback window. | <img src="dialogs/share-feedback-light.png" width="420"> | <img src="dialogs/share-feedback-dark.png" width="420"> |
 | `whats-changed`<br>560 x 640 pt<br>What's changed, bundled with the app. | <img src="dialogs/whats-changed-light.png" width="420"> | <img src="dialogs/whats-changed-dark.png" width="420"> |
+| `whats-changed-update`<br>480 x 560 pt<br>What's changed after an update: fixed notes, Known limits closed, Enjoying Annotator? with Buy me a coffee, and Close. | <img src="dialogs/whats-changed-update-light.png" width="420"> | <img src="dialogs/whats-changed-update-dark.png" width="420"> |
 
 ## Canvas chrome
 

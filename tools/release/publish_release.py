@@ -386,7 +386,8 @@ def build_website(directory, source, site, settings=None):
 
 def verify_site(artifact, site, source, progress, interval, timeout, netlify_host=False):
     files = netlify.verify(artifact, site, source) if netlify_host else pages.verify(artifact, site, source)
-    paths = [name for name in ("index.html", "downloads/index.html", "admin/index.html", "updates/preview.xml", "updates/stable.xml") if name in files]
+    paths = [name for name in ("index.html", "downloads/index.html", "admin/index.html", "updates/preview.xml", "updates/stable.xml",
+                               "updates/windows-preview.json", "updates/windows-stable.json") if name in files]
     deadline = time.monotonic() + timeout
     while True:
         missing = []

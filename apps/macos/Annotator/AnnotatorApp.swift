@@ -50,6 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuPopover: MenuBarPopoverController?
     private var errorController: WorkspaceErrorController?
     private(set) var introduction: IntroductionController?
+    private(set) var whatsChanged: WhatsChangedController?
 
     override init() {
         model = WorkspaceModel()
@@ -87,15 +88,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         model.supportReminder.recordLaunch()
+        // Before Sparkle starts, which marks every launch: is this the first launch after an update?
+        whatsChanged?.prepare(build: (Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String).flatMap { Int($0) })
         model.usageMetrics.recordLaunch()
         model.onThemeChanged = { theme in Self.applyTheme(theme) }
         Self.applyTheme(model.preferences.theme ?? .system)
         model.loginItemController = LoginItemController { [weak model] error in model?.report(error) }
-        let updates = AppUpdateController { [weak model] available, automatic, message in
+        let updates = AppUpdateController(changed: { [weak model] available, automatic, message in
             model?.canCheckForUpdates = available
             model?.automaticallyCheckForUpdates = automatic
             model?.updateStatus = message
-        }
+        }, reminder: { [weak model] version in
+            model?.updateReminderVersion = version
+        }, canInterrupt: { [weak model] in
+            model?.canShowAnnouncement ?? false
+        })
         self.updates = updates
         do { try updates.configure(); model.updatesConfigured = updates.isConfigured }
         catch { model.updateStatus = error.localizedDescription; model.report(error) }
@@ -144,6 +151,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func finishLaunchPresentation(isLoginItem: Bool) {
         if !isLoginItem { showToolbar() }
         introduction?.showAutomatically(isLoginItem: isLoginItem)
+        whatsChanged?.start(isLoginItem: isLoginItem)
     }
 
     static func configureMenuBarButton(_ button: NSButton, sharingActive: Bool = false) {
@@ -176,6 +184,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func wireWorkspaceCallbacks() {
         errorController = WorkspaceErrorController(model: model)
         introduction = IntroductionController(model: model)
+        whatsChanged = WhatsChangedController(model: model)
         model.onShowIntroduction = { [weak self] in self?.introduction?.showManually() }
         model.onDismissMenuBar = { [weak self] in
             guard let self else { return false }
@@ -329,6 +338,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         introduction?.close()
         introduction = nil
+        whatsChanged?.close()
+        whatsChanged = nil
         model.onShowIntroduction = nil
         errorController?.close()
         hideDockPreview()
@@ -362,6 +373,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func toggleMenuPopover() {
         guard let button = item?.button else { return }
+        whatsChanged?.personOpenedAnnotator()
         if menuPopover == nil {
             menuPopover = MenuBarPopoverController(model: model,
                 toolsVisible: { [weak self] in self?.drawingToolsArePresented ?? false }) { [weak self] action in
@@ -596,6 +608,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showToolbar() {
+        whatsChanged?.personOpenedAnnotator()
         if model.visibilityAnimating && visibility.targetVisible { return }
         if let toolbar {
             recoverToolbarPlacement()

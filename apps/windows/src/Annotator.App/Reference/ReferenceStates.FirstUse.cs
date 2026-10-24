@@ -37,6 +37,19 @@ internal static partial class ReferenceStates
         _ => null,
     };
 
+    /// <summary>
+    /// The fixed notes of the Mac's What's changed capture (ReleaseNotesCatalog.Entry.uxReference in
+    /// WhatsChangedTests.swift), so the reference doesn't change with every release.
+    /// </summary>
+    internal static Annotator.Workspace.Settings.ReleaseNotesEntry WhatsChangedNotes { get; } = new(
+        "0.1.0-beta.13", 31, "2026-10-24",
+        [
+            ("Added", ["After an update, What's changed shows the new version's notes once."]),
+            ("Changed", ["Annotator checks for updates once a day. You can turn this off in Settings."]),
+            ("Fixed", ["The update window waits until you finish drawing or sharing a region."]),
+        ],
+        ["Effects do not follow moving windows and are not secure redaction."]);
+
     private static ReferenceScenario TourPage(IntroductionPage page, Action<WorkspaceModel> shortcuts) => new(ReferenceSurface.Tour)
     {
         TourPage = page,

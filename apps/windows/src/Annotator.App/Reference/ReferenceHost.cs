@@ -142,9 +142,12 @@ internal sealed partial class ReferenceHost
                     break;
                 case ReferenceSurface.Flyout:
                     // The Mac capture's updates-unavailable state is a build without updates; its other menu states could check.
+                    // Its update-available state found 0.1.0-beta.13 while the person was busy.
                     _flyout = new TrayFlyout(_registry, model.Snapshot, trayProblem: null, openedWithKeyboard: false,
                         static previous => previous, static _ => { }, scenario.DeveloperPreview, canCheckUpdates: !scenario.UpdatesUnavailable,
-                        Annotator.Workspace.Settings.SettingsCopy.UpdatesUnavailable);
+                        scenario.UpdateAvailable ? Annotator.Workspace.Updates.UpdateText.PortableAvailable(ReferenceStates.WhatsChangedNotes.Version)
+                            : Annotator.Workspace.Settings.SettingsCopy.UpdatesUnavailable,
+                        updateAvailable: scenario.UpdateAvailable);
                     _flyout.ShowForReference(OffscreenOrigin());
                     _flyout.ShowOpeningFocusForReference();
                     Watch((FrameworkElement)_flyout.Content, _flyout.Hwnd);
@@ -181,7 +184,7 @@ internal sealed partial class ReferenceHost
                 case ReferenceSurface.Keycaps:
                     ShowKeycaps(model);
                     break;
-                case ReferenceSurface.Tour or ReferenceSurface.CanvasHint or ReferenceSurface.CoffeeReminder:
+                case ReferenceSurface.Tour or ReferenceSurface.CanvasHint or ReferenceSurface.CoffeeReminder or ReferenceSurface.WhatsChanged:
                     ShowFirstUse(model, scenario);
                     break;
                 case ReferenceSurface.ZoomControls:
