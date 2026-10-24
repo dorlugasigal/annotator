@@ -49,9 +49,9 @@ internal interface IPropertiesHost
 /// <summary>
 /// The full properties panel, a port of ContextualInspector.swift with NativeInspectorComponents.swift: the "Editing …"
 /// line for a selection, the current tool's property blocks in the adaptive layout (or one column when
-/// <c>compact</c>), and the arrow controls. Every control applies to the tool's style and to the selection through the
-/// workspace model; slider drags and field edits are one Undo step each. The whole panel is unavailable while every
-/// selected object is locked.
+/// <c>compact</c>), with the arrow controls at the end of the layout (below it when compact). Every control applies to
+/// the tool's style and to the selection through the workspace model; slider drags and field edits are one Undo step
+/// each. The whole panel is unavailable while every selected object is locked.
 /// </summary>
 internal sealed class PropertiesPanel
 {
@@ -80,7 +80,7 @@ internal sealed class PropertiesPanel
             stack.Children.Add(Left(Context()));
         }
         Body(stack);
-        if (plan.Arrow)
+        if (plan.Arrow && compact)
         {
             stack.Children.Add(Left(ArrowControls()));
         }
@@ -176,6 +176,11 @@ internal sealed class PropertiesPanel
                 foreach (InspectorItem item in _plan.Items)
                 {
                     layout.Children.Add(Left(Item(item)));
+                }
+                // The arrow's choices follow Roughness on the same line when the toolbar has room (Mac arrowControls).
+                if (_plan.Arrow && !_compact)
+                {
+                    layout.Children.Add(Left(ArrowControls()));
                 }
                 stack.Children.Add(Left(layout));
                 break;
@@ -538,7 +543,7 @@ internal sealed class PropertiesPanel
     private FrameworkElement ArrowControls()
     {
         var group = new UnionGroup("Arrow properties");
-        Panel layout = Layout();
+        Panel layout = _compact ? new MacStack { Spacing = PropertyLayout.Spacing } : new MacFlow { Limit = _width };
         layout.Children.Add(Left(Block("Start", "arrow.left", ArrowEnd(start: true))));
         layout.Children.Add(Left(Block("End", "arrow.right", ArrowEnd(start: false))));
         var routes = new MacStack { Orientation = Orientation.Horizontal, Spacing = 7 };

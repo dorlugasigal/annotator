@@ -72,7 +72,8 @@ public enum InspectorItem
 /// The app turns the plan into controls; the plan changes only when the set of controls changes.
 /// </summary>
 /// <param name="Context">"Editing …" while objects are selected (Mac selected-object-context), or null.</param>
-/// <param name="Arrow">The arrow controls (Start, End, Arrow type and Head size) follow the body.</param>
+/// <param name="Arrow">The arrow controls (Start, End, Arrow type and Head size) end the body's layout as one
+/// group, or follow it when compact.</param>
 /// <param name="Caption">The counter's or ruler's hint for <see cref="InspectorItem.Caption"/>.</param>
 public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Body, ImmutableArray<InspectorItem> Items, bool Arrow,
                                    string? Caption)

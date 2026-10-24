@@ -39,7 +39,7 @@ The floating toolbar in every layout, size, mode and tool state. Compare with WI
 | `expanded-vertical-tools-only`<br>68 x 541 pt<br>Expanded toolbar, vertical, tools only. Pen selected. | <img src="toolbar/expanded-vertical-tools-only-light.png" width="136"> | <img src="toolbar/expanded-vertical-tools-only-dark.png" width="136"> |
 | `fit-narrow`<br>400 x 115 pt<br>Toolbar fitted into 400 x 600 points. | <img src="toolbar/fit-narrow-light.png" width="420"> | <img src="toolbar/fit-narrow-dark.png" width="420"> |
 | `fit-short`<br>648 x 115 pt<br>Toolbar fitted into 648 x 230 points. | <img src="toolbar/fit-short-light.png" width="420"> | <img src="toolbar/fit-short-dark.png" width="420"> |
-| `full-properties-arrow`<br>932 x 282 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-arrow-light.png" width="420"> | <img src="toolbar/full-properties-arrow-dark.png" width="420"> |
+| `full-properties-arrow`<br>932 x 196 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-arrow-light.png" width="420"> | <img src="toolbar/full-properties-arrow-dark.png" width="420"> |
 | `full-properties-blur`<br>932 x 157 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-blur-light.png" width="420"> | <img src="toolbar/full-properties-blur-dark.png" width="420"> |
 | `full-properties-pen`<br>932 x 196 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-pen-light.png" width="420"> | <img src="toolbar/full-properties-pen-dark.png" width="420"> |
 | `full-properties-rectangle`<br>932 x 196 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-rectangle-light.png" width="420"> | <img src="toolbar/full-properties-rectangle-dark.png" width="420"> |
@@ -62,8 +62,8 @@ The properties panel for each tool, 648 points wide unless noted.
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `arrow`<br>648 x 201 pt<br>Full properties for Arrow, 648 points wide. | <img src="properties/arrow-light.png" width="420"> | <img src="properties/arrow-dark.png" width="420"> |
-| `arrow-curved`<br>648 x 201 pt<br>Curved arrow. | <img src="properties/arrow-curved-light.png" width="420"> | <img src="properties/arrow-curved-dark.png" width="420"> |
+| `arrow`<br>648 x 205 pt<br>Full properties for Arrow, 648 points wide. | <img src="properties/arrow-light.png" width="420"> | <img src="properties/arrow-dark.png" width="420"> |
+| `arrow-curved`<br>648 x 205 pt<br>Curved arrow. | <img src="properties/arrow-curved-light.png" width="420"> | <img src="properties/arrow-curved-dark.png" width="420"> |
 | `blur`<br>648 x 76 pt<br>Full properties for Blur region, 648 points wide. | <img src="properties/blur-light.png" width="420"> | <img src="properties/blur-dark.png" width="420"> |
 | `counter`<br>648 x 88 pt<br>Full properties for Numbered counter, 648 points wide. | <img src="properties/counter-light.png" width="420"> | <img src="properties/counter-dark.png" width="420"> |
 | `diamond`<br>648 x 185 pt<br>Full properties for Diamond, 648 points wide. | <img src="properties/diamond-light.png" width="420"> | <img src="properties/diamond-dark.png" width="420"> |

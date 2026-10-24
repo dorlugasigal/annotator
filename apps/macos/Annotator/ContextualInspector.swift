@@ -127,9 +127,11 @@ struct ContextualInspector: View {
                             SmartDrawButton(model: model)
                         }.fixedSize(horizontal: true, vertical: false)
                     }
+                    // The arrow's choices follow Roughness on the same line when the toolbar has room.
+                    if tool == .arrow && !compact { arrowControls }
                 }
             }
-            if tool == .arrow { arrowControls }
+            if tool == .arrow && compact { arrowControls }
         }
         .controlSize(.small)
         .disabled(model.selectionStyleIsLocked)

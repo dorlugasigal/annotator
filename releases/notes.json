@@ -10,7 +10,7 @@
       "Annotator now checks for updates once a day by default. If an update arrives while you present, it doesn't interrupt you: the menu shows Update available... instead. You can turn automatic checks off in Settings > General.",
       "On the Mac, the update window now shows the release notes. The Homebrew cask now leaves updates to Annotator, so brew upgrade skips it unless you add --greedy.",
       "The menu-bar menu on a Mac and the tray menu on Windows now say \"Enjoying it? Buy me a coffee…\", without the extra line under the button.",
-      "The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon."
+      "The toolbar now shows all properties by default, so options like Curved are easy to find. The Arrow's choices sit on the same line as its color, width, pattern and roughness when the toolbar has room. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon."
     ],
     "Removed": [
       "Removed the four-page Quick start tour. The hands-on tutorial replaces it."
