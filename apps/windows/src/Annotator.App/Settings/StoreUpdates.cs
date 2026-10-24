@@ -47,6 +47,107 @@ internal static class UpdateDialog
             s_asking = false;
         }
     }
+
+    /// <summary>What the person chose in the question about a release a portable copy found.</summary>
+    public enum ReleaseChoice
+    {
+        NotNow,
+        Download,
+        CopyWinget,
+    }
+
+    /// <summary>
+    /// The portable copy's question after an automatic check found a release (Sparkle's update window on the Mac):
+    /// "Annotator 0.1.0-beta.13 is available", Open Downloads page, Copy winget command and Not now. Annotator never
+    /// downloads or installs it itself. Not now is the default button.
+    /// </summary>
+    public static async Task<ReleaseChoice> AskAboutReleaseAsync(FrameworkElement host, ReleaseFeedEntry release)
+    {
+        if (s_asking || host.XamlRoot is not { } root)
+        {
+            return ReleaseChoice.NotNow;
+        }
+        var dialog = new ContentDialog
+        {
+            XamlRoot = root,
+            RequestedTheme = host.ActualTheme,
+            Title = UpdateText.AvailableTitle(release.ReleaseVersion),
+            Content = new TextBlock { Text = UpdateText.AvailableDetail, TextWrapping = TextWrapping.Wrap, MaxWidth = 420 },
+            PrimaryButtonText = UpdateText.OpenDownloads,
+            SecondaryButtonText = UpdateText.CopyWinget,
+            CloseButtonText = UpdateText.NotNow,
+            DefaultButton = ContentDialogButton.Close,
+        };
+        s_asking = true;
+        try
+        {
+            return await dialog.ShowAsync() switch
+            {
+                ContentDialogResult.Primary => ReleaseChoice.Download,
+                ContentDialogResult.Secondary => ReleaseChoice.CopyWinget,
+                _ => ReleaseChoice.NotNow,
+            };
+        }
+        catch (Exception error) when (error is COMException or InvalidOperationException)
+        {
+            StartupLog.Note("update-release", error.Message);
+            return ReleaseChoice.NotNow;
+        }
+        finally
+        {
+            s_asking = false;
+        }
+    }
+}
+
+/// <summary>
+/// The website's update feed for a portable copy (WIN-SYS-03): one HTTPS request for a small JSON file that names the
+/// newest release. It sends Annotator's version as the user agent and nothing else, follows the system proxy, never
+/// follows a redirect to plain HTTP and reads at most <see cref="ReleaseFeed.MaximumBytes"/>.
+/// </summary>
+internal sealed class PortableReleaseFeed(Uri address, string version) : IReleaseFeed
+{
+    private static readonly HttpClient s_client = new(new SocketsHttpHandler
+    {
+        AllowAutoRedirect = true,
+        MaxAutomaticRedirections = 3,
+        UseCookies = false,
+        ConnectTimeout = TimeSpan.FromSeconds(15),
+    })
+    {
+        Timeout = TimeSpan.FromSeconds(30),
+    };
+
+    public async Task<ReleaseFeedEntry> FetchAsync()
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, address);
+            request.Headers.TryAddWithoutValidation("User-Agent", $"Annotator/{version}");
+            request.Headers.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue { NoCache = true };
+            using HttpResponseMessage response = await s_client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            if (response.RequestMessage?.RequestUri is not { Scheme: "https" })
+            {
+                throw new ReleaseFeedFailure("The update feed moved to an address that is not HTTPS.");
+            }
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ReleaseFeedFailure($"The update feed answered HTTP {(int)response.StatusCode}.");
+            }
+            await using Stream stream = await response.Content.ReadAsStreamAsync();
+            byte[] buffer = new byte[ReleaseFeed.MaximumBytes + 1];
+            int read = 0;
+            while (read < buffer.Length && await stream.ReadAsync(buffer.AsMemory(read)) is var count and > 0)
+            {
+                read += count;
+            }
+            return ReleaseFeed.Parse(buffer.AsSpan(0, read));
+        }
+        catch (Exception error) when (error is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
+        {
+            throw new ReleaseFeedFailure($"{error.GetType().Name}: {error.Message}");
+        }
+    }
 }
 
 /// <summary>Keeps a part of Settings in step with <see cref="AppUpdates"/> while it is in the window (the Mac's @Published updateStatus).</summary>

@@ -1,0 +1,184 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        32,
+        172,
+        20.5
+       ],
+       "role": "AXStaticText",
+       "value": "Annotator is updated"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        94,
+        56.5,
+        244,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "You now have version 0.1.0-beta.13 (31)."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        24,
+        96,
+        35.5,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Added"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        24,
+        120,
+        397.5,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "After an update, What's changed shows the new version's notes once."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        24,
+        145,
+        49,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Changed"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        24,
+        169,
+        420,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "Annotator checks for updates once a day. You can turn this off in Settings."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        24,
+        194,
+        29.5,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Fixed"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        24,
+        218,
+        390,
+        15
+       ],
+       "role": "AXStaticText",
+       "value": "The update window waits until you finish drawing or sharing a region."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        1.5,
+        247,
+        105.5,
+        15
+       ],
+       "identifier": "whats-changed-known-limits",
+       "label": "Known limits",
+       "role": "AXDisclosureTriangle",
+       "value": false
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      0,
+      0,
+      480,
+      423
+     ],
+     "role": "AXScrollArea"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      89,
+      463,
+      131.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Enjoying Annotator?"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      324,
+      459,
+      122,
+      24
+     ],
+     "label": "Buy me a coffee",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      405.5,
+      520,
+      58.5,
+      24
+     ],
+     "identifier": "whats-changed-close",
+     "label": "Close",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    0,
+    0,
+    480,
+    560
+   ],
+   "identifier": "whats-changed",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "window",
+ "image": "dialogs/whats-changed-update-light.png",
+ "kind": "view",
+ "notes": "What's changed after an update: fixed notes, Known limits closed, Enjoying Annotator? with Buy me a coffee, and Close.",
+ "pixels": [
+  960,
+  1120
+ ],
+ "scale": 2,
+ "size": [
+  480,
+  560
+ ],
+ "spec": [
+  "005",
+  "WIN-UI-05"
+ ],
+ "state": "whats-changed-update",
+ "surface": "dialogs"
+}

@@ -1,5 +1,6 @@
 using Annotator.App.Tutorial;
 using Annotator.App.Reference;
+using Annotator.App.Settings;
 using Annotator.App.Shell;
 using Annotator.Workspace;
 using Annotator.Workspace.FirstUse;
@@ -26,6 +27,9 @@ internal sealed partial class AppHost
         }
         _reminder.RecordLaunch();
         _usage.RecordLaunch();
+        _whatsChangedWaits = quiet;
+        // A portable copy's daily check (Sparkle's scheduled check): at launch, and when the tray flyout or Settings opens.
+        _queue.TryEnqueue(DispatcherQueuePriority.Low, CheckForUpdatesIfDue);
         if (quiet)
         {
             _tutorial.ShowAutomatically(startupLaunch: true);
@@ -36,6 +40,7 @@ internal sealed partial class AppHost
             if (!_quitting)
             {
                 _tutorial.ShowAutomatically(startupLaunch: false);
+                UpdateWhatsChanged();
             }
         });
     }
@@ -72,6 +77,88 @@ internal sealed partial class AppHost
         _lastMode = snapshot.Mode;
         _tutorial.Apply(snapshot);
         UpdateSupportReminder();
+        UpdateWhatsChanged();
+    }
+
+    /// <summary>
+    /// The Mac's WhatsChangedController.showIfReady: after an update, What's changed shows once, when it covers nothing the
+    /// person presents (<see cref="AnnouncementRules"/>), and after a quiet sign-in launch only once the person opened
+    /// Annotator (the toolbar or the tray flyout). The build counts as seen once the window shows.
+    /// </summary>
+    private void UpdateWhatsChanged()
+    {
+        if (_quitting || _whatsChangedDue is not { } entry || _whatsChanged is not null)
+        {
+            return;
+        }
+        WorkspaceSnapshot snapshot = _model.Snapshot;
+        if (_whatsChangedWaits && snapshot.ToolbarVisible)
+        {
+            _whatsChangedWaits = false;
+        }
+        if (_whatsChangedWaits || !AnnouncementRules.CanShow(snapshot, _tutorial.IsVisible, _breaks.IsRunning))
+        {
+            return;
+        }
+        _whatsChangedDue = null;
+        _whatsChangedTracker.Record(entry.Build);
+        var window = new WhatsChangedWindow(entry, _settingsActions);
+        window.Dismissed += () =>
+        {
+            if (_whatsChanged == window)
+            {
+                _whatsChanged = null;
+                UpdateSupportReminder();
+            }
+        };
+        _whatsChanged = window;
+        UpdateSupportReminder();
+        window.Present();
+    }
+
+    /// <summary>The person opened the tray flyout after a quiet sign-in launch: What's changed may follow.</summary>
+    private void PersonOpenedAnnotator()
+    {
+        if (_whatsChangedWaits)
+        {
+            _whatsChangedWaits = false;
+            UpdateWhatsChanged();
+        }
+    }
+
+    /// <summary>
+    /// A portable copy's automatic check, at most once a day (WIN-SYS-03, WIN-SYS-07: no timer runs). When it finds a release
+    /// that was never announced and nothing is being presented, Settings asks about it once, as Sparkle's window does on the
+    /// Mac; otherwise the tray flyout and Settings say Update available.
+    /// </summary>
+    private void CheckForUpdatesIfDue() => _ = CheckForUpdatesIfDueAsync();
+
+    private async Task CheckForUpdatesIfDueAsync()
+    {
+        if (_quitting || !_updates.ChecksFeed)
+        {
+            return;
+        }
+        bool announce = await _updates.CheckIfDueAsync();
+        if (!announce || _quitting || _updates.Release is not { } release
+            || !AnnouncementRules.CanShow(_model.Snapshot, _tutorial.IsVisible, _breaks.IsRunning) || _whatsChanged is not null)
+        {
+            return;
+        }
+        OpenSettings(Annotator.Workspace.Settings.SettingsTab.General);
+        if (_settings is not { } settings)
+        {
+            return;
+        }
+        switch (await settings.AskAboutReleaseAsync(release))
+        {
+            case UpdateDialog.ReleaseChoice.Download:
+                _settingsActions.OpenUpdateDownloads();
+                break;
+            case UpdateDialog.ReleaseChoice.CopyWinget:
+                _settingsActions.CopyWingetCommand();
+                break;
+        }
     }
 
     /// <summary>
@@ -86,7 +173,7 @@ internal sealed partial class AppHost
             return;
         }
         WorkspaceSnapshot snapshot = _model.Snapshot;
-        bool show = _reminder.Available && snapshot.ToolbarVisible &&
+        bool show = _reminder.Available && snapshot.ToolbarVisible && _whatsChanged is null &&
             SupportReminderRules.CanShow(snapshot, BuildInfo.SupportLink is not null, _settings?.IsShown == true, _tutorial.IsVisible);
         if (show && _reminderPopover is null)
         {
@@ -113,11 +200,13 @@ internal sealed partial class AppHost
         }
     }
 
-    /// <summary>Quit: the reminder and the tutorial close for good.</summary>
+    /// <summary>Quit: the reminder, What's changed and the tutorial close for good.</summary>
     private void CloseFirstUse()
     {
         _reminderPopover?.Dismiss(byPerson: false);
         _reminderPopover = null;
+        _whatsChanged?.Close();
+        _whatsChanged = null;
         _tutorial.Shutdown();
     }
 

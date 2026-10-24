@@ -83,6 +83,11 @@ in [docs/parity.md](docs/parity.md#platform-terms).
 - Name the issue in the description: `Fixes #123` when the pull request
   finishes it, `Part of #123` when it doesn't. The **Linked issue** check
   fails without one.
+- Fill in **Visuals**: screenshots of every change people can see, and a short
+  video or GIF for motion and interactions. Show before and after on each
+  platform you changed, in light and dark when the look differs. Attach them
+  to the pull request, not the repository. Write "No visual change" when
+  nothing changes on screen.
 - Add user-visible changes to `unreleased` in `releases/notes.json` and run
   `python3 tools/release/release.py changelog --write`. The **Release note**
   check fails when app code changes and this file doesn't. If nothing changes

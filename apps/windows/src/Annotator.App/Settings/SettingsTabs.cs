@@ -128,6 +128,7 @@ internal sealed partial class SettingsTabStrip : Panel
     /// <summary>The Mac's pill widths, from the selected tab's highlight in each reference state.</summary>
     private static readonly double[] s_pills = [71, 144, 67, 93, 97, 51.5, 60];
 
+    private readonly Border _backing;
     private readonly Border _track;
     private readonly Border _pill;
     private readonly List<SettingsTabItem> _items = [];
@@ -136,6 +137,8 @@ internal sealed partial class SettingsTabStrip : Panel
     public SettingsTabStrip(SettingsTabView owner, Action<SettingsTab> choose)
     {
         _choose = choose;
+        // The track is see-through and straddles the box's top edge; this backing hides that edge behind the titles.
+        _backing = new Border { Background = SettingsLook.Window, CornerRadius = new CornerRadius(8), IsHitTestVisible = false };
         _track = new Border { Background = SettingsLook.TabTrack, CornerRadius = new CornerRadius(8) };
         _pill = new Border
         {
@@ -150,6 +153,7 @@ internal sealed partial class SettingsTabStrip : Panel
             _track.BorderBrush = ContrastTheme.Brush(ContrastColor.WindowText);
             _track.BorderThickness = new Thickness(1);
         }
+        Children.Add(_backing);
         Children.Add(_track);
         Children.Add(_pill);
         foreach (SettingsTab tab in SettingsTab.AllCases)
@@ -185,6 +189,7 @@ internal sealed partial class SettingsTabStrip : Panel
 
     protected override Size MeasureOverride(Size availableSize)
     {
+        _backing.Measure(new Size(StripWidth, StripHeight));
         _track.Measure(new Size(StripWidth, StripHeight));
         _pill.Measure(new Size(s_pills[0], PillHeight));
         for (int index = 0; index < _items.Count; index++)
@@ -198,6 +203,7 @@ internal sealed partial class SettingsTabStrip : Panel
     {
         double scale = XamlRoot?.RasterizationScale ?? 1;
         Point residual = MacStack.InheritedResidual(this);
+        MacStack.ArrangeExact(_backing, residual.X, residual.Y, StripWidth, StripHeight, default, scale);
         MacStack.ArrangeExact(_track, residual.X, residual.Y, StripWidth, StripHeight, default, scale);
         double x = Inset;
         for (int index = 0; index < _items.Count; index++)

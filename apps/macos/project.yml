@@ -65,7 +65,8 @@ targets:
         NSScreenCaptureUsageDescription: Annotator reads screen pixels for requested zoom, live effects and region sharing. It does not record video.
         SUFeedURL: $(ANNOTATOR_UPDATE_FEED_URL)
         SUPublicEDKey: $(ANNOTATOR_UPDATE_PUBLIC_KEY)
-        SUEnableAutomaticChecks: false
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
         SUAutomaticallyUpdate: false
         SUSendProfileInfo: false
     settings:

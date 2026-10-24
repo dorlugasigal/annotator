@@ -99,6 +99,8 @@ final class WorkspaceModel: ObservableObject {
     @Published var settingsTab: CustomizationTab = .general
     /// True while a tutorial card shows, so the support reminder waits. The name predates the tutorial.
     @Published var introductionVisible = false
+    /// The What's changed window that follows an update is open.
+    @Published var whatsChangedVisible = false
     /// Opens the tutorial's welcome card from Settings.
     var onShowIntroduction: (() -> Void)?
     var openExternalURL: (URL) -> Bool = { NSWorkspace.shared.open($0) }
@@ -203,6 +205,11 @@ final class WorkspaceModel: ObservableObject {
     @Published var updatesConfigured = false
     @Published var automaticallyCheckForUpdates = false
     @Published var updateStatus = "Updates aren't set up in this build. Find new versions in Settings > About."
+    /// The version of an update that an automatic check found while the person was busy; Sparkle waits to show it.
+    @Published var updateReminderVersion: String?
+    var updateStatusLine: String {
+        updateReminderVersion.map { "Annotator \($0) is ready to install." } ?? updateStatus
+    }
     var onCheckForUpdates: (() -> Void)?
     var onAutomaticUpdateChecks: ((Bool) -> Void)?
     @Published var loginItemController: LoginItemController?

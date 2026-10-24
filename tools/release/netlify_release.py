@@ -109,7 +109,8 @@ def prepare(checkout, output, site, source):
         raise d.DistributionError("Netlify packaging needs the exact candidate checkout.")
     changes = d.command("git", "-C", checkout, "status", "--porcelain", "--untracked-files=all").splitlines()
     generated = {"website/src/data/distribution.json",
-                 "website/public/updates/preview.xml", "website/public/updates/stable.xml"}
+                 "website/public/updates/preview.xml", "website/public/updates/stable.xml",
+                 "website/public/updates/windows-preview.json", "website/public/updates/windows-stable.json"}
     if any(line[3:] not in generated for line in changes):
         raise d.DistributionError("Commit source changes before preparing Netlify artifacts.")
     directory = checkout / "website/dist"
@@ -209,7 +210,7 @@ def prepare_bridge(artifact, output, legacy, target, source):
         raise d.DistributionError("Use a fresh update-feed bridge directory.")
     directory = output / "site"
     (directory / "updates").mkdir(parents=True)
-    for path in ("updates/preview.xml", "updates/stable.xml"):
+    for path in ("updates/preview.xml", "updates/stable.xml", "updates/windows-preview.json", "updates/windows-stable.json"):
         if path in files:
             shutil.copy2(artifact / "site" / path, directory / path)
     if not any((directory / "updates").iterdir()):

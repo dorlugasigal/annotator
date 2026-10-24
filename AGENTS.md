@@ -86,3 +86,10 @@ to the repository. Version changes, signing, publishing,
 Store submissions and deploys are maintainer actions (`docs/releasing.md`,
 `docs/maintainers/`). Don't claim checks you didn't run; record what you
 verified and what's still open in the pull request.
+
+Every pull request, from anyone, fills in the template's **Visuals**
+section: before and after screenshots of each visible change, and a short
+video for motion or interactions, per platform and theme you changed. Capture
+them from the real app (never edit generated references to make them). Attach
+them to the pull request, not the repository. When you can't capture or upload
+one, list it as owed with the exact surface and state.

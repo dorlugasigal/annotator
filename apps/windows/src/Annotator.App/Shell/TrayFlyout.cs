@@ -29,6 +29,7 @@ internal sealed class TrayFlyout : PopoverWindow
     private readonly bool _keyboard;
     private readonly bool _canCheckUpdates;
     private readonly string _updatesStatus;
+    private readonly bool _updateAvailable;
     private Button? _primary;
     private Border? _primaryRing;
     private ParityButton? _board;
@@ -42,9 +43,13 @@ internal sealed class TrayFlyout : PopoverWindow
     /// <param name="developerPreview">Shows the Local build badge of development builds.</param>
     /// <param name="canCheckUpdates">Check for updates… works now (the Mac's canCheckForUpdates).</param>
     /// <param name="updatesStatus">The update status, shown under Check for updates… while it does not work (the Mac's updateStatus).</param>
+    /// <param name="updateAvailable">
+    /// A check found a newer release: the row reads Update available… and the status shows under it (the Mac's
+    /// updateReminderVersion).
+    /// </param>
     public TrayFlyout(WindowRegistry registry, WorkspaceSnapshot snapshot, string? trayProblem, bool openedWithKeyboard,
                       Func<HWND, HWND> focusTarget, Action<TrayAction> choose, bool developerPreview, bool canCheckUpdates,
-                      string updatesStatus)
+                      string updatesStatus, bool updateAvailable = false)
         : base(registry, "Annotator")
     {
         _choose = choose;
@@ -52,6 +57,7 @@ internal sealed class TrayFlyout : PopoverWindow
         _keyboard = openedWithKeyboard;
         _canCheckUpdates = canCheckUpdates;
         _updatesStatus = updatesStatus;
+        _updateAvailable = updateAvailable;
         // MenuBarPopoverView: a VStack with no spacing and 16 points of padding, 320 wide, inside a scroll view that
         // is the popover itself.
         var content = new MacStack { Width = 288, Margin = new Thickness(16) };
@@ -217,15 +223,16 @@ internal sealed class TrayFlyout : PopoverWindow
         content.Children.Add(Row("Settings…", "slider.horizontal.3", TrayAction.Settings, "Ctrl+,"));
         content.Children.Add(Row("Help", "questionmark.circle", TrayAction.Help, null));
         content.Children.Add(Row("About Annotator", "info.circle", TrayAction.About, null));
-        content.Children.Add(Row("Check for updates…", "arrow.triangle.2.circlepath", TrayAction.CheckForUpdates, null, enabled: _canCheckUpdates));
-        if (!_canCheckUpdates)
+        content.Children.Add(Row(_updateAvailable ? Annotator.Workspace.Updates.UpdateText.UpdateAvailableRow : "Check for updates…",
+            _updateAvailable ? "square.and.arrow.down" : "arrow.triangle.2.circlepath", TrayAction.CheckForUpdates, null, enabled: _canCheckUpdates));
+        if (!_canCheckUpdates || _updateAvailable)
         {
             // Mac: Text(model.updateStatus).font(.caption) under the disabled row, inset like the rows' titles.
             var why = new Settings.FormText(_updatesStatus, 10, "AnnotatorSecondaryText", wrapWidth: 268);
             why.Block.Width = 268;
             content.Children.Add(new Settings.Pad(why, new Thickness(10, 0, 10, 0)) { HorizontalAlignment = HorizontalAlignment.Left });
         }
-        Button support = Row("Buy me a coffee…", "cup.and.saucer", TrayAction.Support, null);
+        Button support = Row("Enjoying it? Buy me a coffee…", "cup.and.saucer", TrayAction.Support, null);
         var supportSurface = new Grid { Margin = new Thickness(0, 8, 0, 0) };
         supportSurface.Children.Add(new Border
         {
@@ -237,12 +244,6 @@ internal sealed class TrayFlyout : PopoverWindow
         });
         supportSurface.Children.Add(support);
         content.Children.Add(supportSurface);
-        // SwiftUI's .caption: 10 points on a 13-point line, inset like the rows' titles. The explicit height keeps the rows
-        // below on the Mac's points; a rounded 13.6-point text pushed them down.
-        TextBlock caption = Line("Coffee is welcome. All tools stay free.", 10, 13, FontWeights.Normal, "AnnotatorSecondaryText");
-        caption.Height = 13;
-        caption.Margin = new Thickness(10, 0, 10, 0);
-        content.Children.Add(caption);
         content.Children.Add(Divider());
         content.Children.Add(Row("Quit Annotator", "power", TrayAction.Quit, "Ctrl+Q"));
     }

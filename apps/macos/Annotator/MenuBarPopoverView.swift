@@ -192,18 +192,17 @@ struct MenuBarPopoverView: View {
             row("Settings…", symbol: "slider.horizontal.3", action: .settings, shortcut: "⌘,")
             row("Help", symbol: "questionmark.circle", action: .help)
             row("About Annotator", symbol: "info.circle", action: .about)
-            row("Check for updates…", symbol: "arrow.triangle.2.circlepath", action: .checkForUpdates,
-                enabled: model.canCheckForUpdates)
-            if !model.canCheckForUpdates {
-                Text(model.updateStatus).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
+            row(model.updateReminderVersion == nil ? "Check for updates…" : "Update available…",
+                symbol: model.updateReminderVersion == nil ? "arrow.triangle.2.circlepath" : "square.and.arrow.down",
+                action: .checkForUpdates, enabled: model.canCheckForUpdates)
+            if !model.canCheckForUpdates || model.updateReminderVersion != nil {
+                Text(model.updateStatusLine).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
             }
-            row("Buy me a coffee…", symbol: "cup.and.saucer", action: .support,
+            row("Enjoying it? Buy me a coffee…", symbol: "cup.and.saucer", action: .support,
                 enabled: model.optionalSupportURL != nil)
                 .background(Color.orange.opacity(scheme == .dark ? 0.20 : 0.14), in: RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.orange.opacity(0.3), lineWidth: 1))
                 .padding(.top, 8)
-            Text("Coffee is welcome. All tools stay free.")
-                .font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
             Divider().padding(.vertical, 9)
             row("Quit Annotator", symbol: "power", action: .quit, shortcut: "⌘Q")
         }

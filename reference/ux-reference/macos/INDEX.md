@@ -101,13 +101,13 @@ The menu-bar popover (the Windows tray flyout) and the menu-bar icon. Compare wi
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `developer-preview`<br>320 x 713 pt<br>Development build: the Developer preview badge. | <img src="menu/developer-preview-light.png" width="420"> | <img src="menu/developer-preview-dark.png" width="420"> |
-| `drawing`<br>320 x 725 pt<br>Tools visible, drawing. | <img src="menu/drawing-light.png" width="420"> | <img src="menu/drawing-dark.png" width="420"> |
+| `developer-preview`<br>320 x 700 pt<br>Development build: the Developer preview badge. | <img src="menu/developer-preview-light.png" width="420"> | <img src="menu/developer-preview-dark.png" width="420"> |
+| `drawing`<br>320 x 712 pt<br>Tools visible, drawing. | <img src="menu/drawing-light.png" width="420"> | <img src="menu/drawing-dark.png" width="420"> |
 | `status-item`<br>24 x 22 pt<br>Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one. The accessibility tree is the app's configured status button. | <img src="menu/status-item-light.png" width="48"> | <img src="menu/status-item-dark.png" width="48"> |
 | `status-item-sharing`<br>24 x 22 pt<br>Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one; the red dot shows while region sharing is on. The accessibility tree is the app's configured status button. | <img src="menu/status-item-sharing-light.png" width="48"> | <img src="menu/status-item-sharing-dark.png" width="48"> |
-| `tools-hidden`<br>320 x 689 pt<br>Release build, drawings and tools hidden. | <img src="menu/tools-hidden-light.png" width="420"> | <img src="menu/tools-hidden-dark.png" width="420"> |
-| `updates-unavailable`<br>320 x 739 pt<br>Update checks unavailable: the reason shows under the button. | <img src="menu/updates-unavailable-light.png" width="420"> | <img src="menu/updates-unavailable-dark.png" width="420"> |
-| `using-apps`<br>320 x 725 pt<br>Tools visible, Use apps. | <img src="menu/using-apps-light.png" width="420"> | <img src="menu/using-apps-dark.png" width="420"> |
+| `tools-hidden`<br>320 x 676 pt<br>Release build, drawings and tools hidden. | <img src="menu/tools-hidden-light.png" width="420"> | <img src="menu/tools-hidden-dark.png" width="420"> |
+| `updates-unavailable`<br>320 x 726 pt<br>Update checks unavailable: the reason shows under the button. | <img src="menu/updates-unavailable-light.png" width="420"> | <img src="menu/updates-unavailable-dark.png" width="420"> |
+| `using-apps`<br>320 x 712 pt<br>Tools visible, Use apps. | <img src="menu/using-apps-light.png" width="420"> | <img src="menu/using-apps-dark.png" width="420"> |
 
 ## Settings
 
@@ -235,6 +235,7 @@ Report a problem, Share feedback, What's changed, coffee reminder, keycaps, erro
 | `report-a-problem`<br>460 x 680 pt<br>Report a problem window. | <img src="dialogs/report-a-problem-light.png" width="420"> | <img src="dialogs/report-a-problem-dark.png" width="420"> |
 | `share-feedback`<br>460 x 680 pt<br>Share feedback window. | <img src="dialogs/share-feedback-light.png" width="420"> | <img src="dialogs/share-feedback-dark.png" width="420"> |
 | `whats-changed`<br>560 x 640 pt<br>What's changed, bundled with the app. | <img src="dialogs/whats-changed-light.png" width="420"> | <img src="dialogs/whats-changed-dark.png" width="420"> |
+| `whats-changed-update`<br>480 x 560 pt<br>What's changed after an update: fixed notes, Known limits closed, Enjoying Annotator? with Buy me a coffee, and Close. | <img src="dialogs/whats-changed-update-light.png" width="420"> | <img src="dialogs/whats-changed-update-dark.png" width="420"> |
 
 ## Canvas chrome
 

@@ -59,6 +59,7 @@ internal sealed class SettingsWindow : Window
         _presenter.IsMinimizable = true;
         _presenter.IsAlwaysOnTop = true;
         AppWindow.SetPresenter(_presenter);
+        Shell.AppIcon.Apply(AppWindow);
         AppWindow.IsShownInSwitchers = true;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));
         // Registered before the first show so capture can leave it out (S-1); the Mac raises Settings to the toolbar's level.
@@ -223,6 +224,16 @@ internal sealed class SettingsWindow : Window
     {
         Show(null);
         return UpdateDialog.AskAsync(_host, question);
+    }
+
+    /// <summary>
+    /// Shows Settings on General and asks about a release a portable copy's automatic check found (WIN-SYS-03, Sparkle's
+    /// update window on the Mac).
+    /// </summary>
+    public Task<UpdateDialog.ReleaseChoice> AskAboutReleaseAsync(ReleaseFeedEntry release)
+    {
+        Show(SettingsTab.General);
+        return UpdateDialog.AskAboutReleaseAsync(_host, release);
     }
 
     /// <summary>Report a problem or Share feedback over Settings, which waits until it closes (the Mac's sheet).</summary>

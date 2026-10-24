@@ -6,11 +6,21 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Added
 
+- After an update, a What's changed window shows the new version's notes once, with an optional Buy me a coffee link. It waits until you stop drawing, zooming, sharing a region or taking a break.
+- On Windows, the copy from winget or a download now checks for new versions once a day and tells you where to get them, with Open Downloads page and Copy winget command. It never installs anything itself.
 - A hands-on tutorial on Mac and Windows. Ten quick steps: grab a tool, draw a box, change the color, draw a curved arrow, circle something with the pen, move it, undo, go back to your apps, draw again, and hide and show everything. A ghost cursor shows each step, keys show right in the instructions, and shortcuts light up on a little keyboard. Use the keys or the mouse, whichever you like. Finishing pops a big burst of confetti. Replay it from Settings > Help.
 
 ### Changed
 
+- Annotator now checks for updates once a day by default. If an update arrives while you present, it doesn't interrupt you: the menu shows Update available... instead. You can turn automatic checks off in Settings > General.
+- On the Mac, the update window now shows the release notes. The Homebrew cask now leaves updates to Annotator, so brew upgrade skips it unless you add --greedy.
+- The menu-bar menu on a Mac and the tray menu on Windows now say "Enjoying it? Buy me a coffee…", without the extra line under the button.
 - The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon.
+
+### Fixed
+
+- On Windows, the Settings window and Annotator's other windows now show the Annotator icon in their title bar.
+- On Windows, the Settings tab names no longer have a line running through them.
 
 ### Removed
 

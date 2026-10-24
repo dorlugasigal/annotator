@@ -307,6 +307,14 @@ final class UXReferenceCaptureTests: XCTestCase {
             try await recorder.view(MenuBarPopoverView(model: off, developerPreview: true, perform: { _ in }, maximumHeight: menuHeight, toolsVisible: { false }),
                                     state: "updates-unavailable", dark: dark, background: .popover,
                                     notes: "Update checks unavailable: the reason shows under the button.", spec: spec)
+            off.canCheckForUpdates = true
+            off.updateStatus = AppUpdateController.status(automatic: true)
+            off.updateReminderVersion = "0.1.0-beta.13"
+            try await recorder.view(MenuBarPopoverView(model: off, developerPreview: false, perform: { _ in }, maximumHeight: menuHeight, toolsVisible: { false }),
+                                    state: "update-available", dark: dark, background: .popover,
+                                    notes: "An automatic check found an update while the person was busy: Update available and the waiting version.",
+                                    spec: spec + ["WIN-SYS-03"])
+            off.updateReminderVersion = nil
             let (model, _) = try liveModel("menu-draw")
             model.canCheckForUpdates = true
             try await recorder.view(MenuBarPopoverView(model: model, developerPreview: false, perform: { _ in }, maximumHeight: menuHeight, toolsVisible: { true }),
@@ -484,6 +492,11 @@ final class UXReferenceCaptureTests: XCTestCase {
             }
             try await dialogs.view(ReleaseNotesView().padding(20), state: "whats-changed", dark: dark, background: .window,
                                    width: 560, height: 640, notes: "What's changed, bundled with the app.", spec: ["WIN-UI-05"])
+            try await dialogs.view(WhatsChangedView(entry: .uxReference, model: model, close: {}, animatesEntrance: false),
+                                   state: "whats-changed-update", dark: dark, background: .window,
+                                   width: WhatsChangedView.width, height: WhatsChangedView.height,
+                                   notes: "What's changed after an update: fixed notes, Known limits closed, Enjoying Annotator? with Buy me a coffee, and Close.",
+                                   spec: ["005", "WIN-UI-05"])
             try await dialogs.view(SupportReminderView(model: model, reminder: model.supportReminder).padding(16),
                                    state: "coffee-reminder", dark: dark, background: .window, width: 460,
                                    notes: "Coffee reminder.", spec: ["005"])

@@ -447,7 +447,16 @@ platform that departs from the specifications, unless an ADR changes them.
 - **WIN-SYS-03**: Updates come from the Microsoft Store. Check for updates in
   the flyout and Settings asks the Store and offers the update. Annotator
   never closes itself for an update while drawings are visible; it asks first.
-  There is no separate updater.
+  There is no separate updater. The portable copy (WIN-DST-09) checks the
+  website's feed (`updates/windows-<track>.json`, written by
+  `tools/release/distribution.py`) at launch and when the tray flyout or
+  Settings opens, at most once a day while Automatically check for updates is
+  on (the default, like the Mac's daily Sparkle check). It never downloads or
+  installs anything: Update available… in the flyout and Settings says where
+  to get the release, with Open Downloads page... and Copy winget command, and
+  an automatic check asks about a new release once, only when nothing is being
+  presented (DV-11). After any update, What's changed shows the new version's
+  notes once, as on the Mac.
 - **WIN-SYS-04**: `.annotator` files open in Annotator through the package's
   file association, with the same rules as Open board. Open, Save and Export
   use the Windows file dialogs. Saves are atomic.
@@ -460,7 +469,8 @@ platform that departs from the specifications, unless an ADR changes them.
 - **WIN-SYS-07**: When nothing moves and no input arrives, the app runs no
   timers, polling or presents. Hooks exist only for the lifetimes in WIN-INP-06
   and WIN-INP-07. Energy saver may turn off transparency effects; WIN-CAP-03
-  then keeps method B regions opaque.
+  then keeps method B regions opaque. The portable copy's daily update check
+  runs at launch and when the tray flyout or Settings opens, never on a timer.
 
 ### Accessibility
 
@@ -489,7 +499,10 @@ platform that departs from the specifications, unless an ADR changes them.
   outside Annotator: Partner Center acquisition and install counts and
   Windows' own diagnostics.
 - **WIN-PRV-03**: The app makes no network requests except opt-in metrics,
-  Store update checks through Windows and links the person opens.
+  Store update checks through Windows, the portable copy's update check (one
+  HTTPS request for the website's feed, sending only the app version as its
+  user agent; Automatically check for updates turns the daily check off) and
+  links the person opens.
 - **WIN-PRV-04**: Support information stays coarse: app version and build,
   Windows version and build number, architecture and capability states, with no
   paths, user names or document names.
@@ -531,7 +544,9 @@ platform that departs from the specifications, unless an ADR changes them.
   (`winget install DorLugasiGal.Annotator`, a portable install from those
   ZIPs). The portable copy is a release, not a development preview: it is built
   with `AnnotatorDistribution=portable`, launches at sign-in through the
-  account's Run entry, and says that winget or a new download updates it. It is
+  account's Run entry, and says that winget or a new download updates it. A
+  release build also gets the website's update feed (`package.ps1
+  -UpdateSite`), so it checks for new releases itself (WIN-SYS-03). It is
   not code-signed until the owner chooses a certificate (WIN-DST-07), so a
   direct download can show a SmartScreen warning. winget can't use a plain
   repository as its own source, so the manifests go to microsoft/winget-pkgs
@@ -590,7 +605,7 @@ platform that departs from the specifications, unless an ADR changes them.
 | SwiftUI app windows | WinUI 3 | I in layout, E in control look |
 | SF Symbols | Icon set from D-6 | D-6 |
 | SF Pro and SF Mono | Font rule from D-4 | D-4 |
-| Sparkle | Microsoft Store updates | E |
+| Sparkle | Microsoft Store updates; the portable copy's feed check (DV-11) | E |
 | `SMAppService.mainApp` | MSIX startup task | E |
 | Applications move offer | None | N/A |
 | UserDefaults | JSON settings in the package's local data | E |
@@ -693,6 +708,14 @@ These need owner approval before Windows release.
 - **DV-10 Shortcut conflicts**: Ctrl+1 and Ctrl+2 replace tab switching in
   browsers and other app shortcuts while Annotator runs. The tutorial's
   finish card says how to change them.
+- **DV-11 Portable updates** (owner decision, 2026-10-24): the portable copy
+  finds new releases like Sparkle but doesn't install them. The copy isn't
+  code-signed, so a self-replacing download would meet SmartScreen. Update
+  available… says "Annotator 0.1.0-beta.13 is available. Download it from
+  getannotator.app, or run winget upgrade DorLugasiGal.Annotator." where the
+  Mac says the update is ready to install, and the automatic check's question
+  offers Open Downloads page..., Copy winget command and Not now instead of
+  Sparkle's install window. A Store copy keeps the Store's install.
 
 ## Owner decisions
 

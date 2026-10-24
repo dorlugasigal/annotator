@@ -26,15 +26,22 @@
   of each architecture, published with -p:AnnotatorDistribution=portable, zipped as
   Annotator-<label>-windows-<architecture>.zip with Annotator.exe at the root, the file winget installs as a portable
   app (tools/windows/winget.py). Each ZIP's SHA-256 is in package-report.json.
+
+  -UpdateSite gives the portable app the website that publishes its update feed (WIN-SYS-03), as the Mac's
+  ANNOTATOR_UPDATE_FEED_URL: an HTTPS root such as https://getannotator.app. The portable app then reads
+  <site>/updates/windows-<track>.json, where the track is preview for a prerelease and stable otherwise, and only says where
+  to get a newer release. Without it the portable app can't check and says how to update with winget.
 .EXAMPLE
   pwsh tools/windows/package.ps1
   pwsh tools/windows/package.ps1 -Portable
+  pwsh tools/windows/package.ps1 -Portable -UpdateSite https://getannotator.app
   pwsh tools/windows/package.ps1 -RequireArm64 -BuildStamp "Release 0123abc" -MetricsUrl https://annotator.example
 #>
 param(
     [string]$Output,
     [string]$BuildStamp = '',
     [string]$MetricsUrl = '',
+    [string]$UpdateSite = '',
     [switch]$RequireArm64,
     [switch]$Portable
 )
@@ -67,7 +74,21 @@ function Get-SharedVersion {
     [pscustomobject]@{
         Label = $label
         Msix = '{0}.{1}.{2}.0' -f ([int]$version.Groups[1].Value + 1), $version.Groups[2].Value, $values.CURRENT_PROJECT_VERSION
+        # The release track, as tools/release/distribution.py names it: a prerelease is preview.
+        Track = if ($values.ANNOTATOR_PRERELEASE) { 'preview' } else { 'stable' }
     }
+}
+
+# The portable app's update feed for -UpdateSite: <site>/updates/windows-<track>.json, an HTTPS root without credentials,
+# port, query or fragment (the app's own rule, ReleaseFeed.Address, checks it again).
+function Get-UpdateFeed([string]$site, [string]$track) {
+    $trimmed = $site.TrimEnd('/')
+    $uri = $null
+    if (-not [Uri]::TryCreate($trimmed, [UriKind]::Absolute, [ref]$uri) -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or
+        -not $uri.IsDefaultPort -or $uri.Query -or $uri.Fragment) {
+        throw "-UpdateSite must be an HTTPS website root such as https://getannotator.app, not '$site'."
+    }
+    "$trimmed/updates/windows-$track.json"
 }
 
 function Get-MakeAppx {
@@ -122,7 +143,7 @@ function Invoke-PackageBuild([string]$architecture, [string]$folder) {
     $msix.FullName
 }
 
-function Invoke-PortableBuild([string]$architecture, [string]$folder, [string]$label) {
+function Invoke-PortableBuild([string]$architecture, [string]$folder, [string]$label, [string]$feed) {
     $platform = if ($architecture -eq 'arm64') { 'ARM64' } else { 'x64' }
     $publish = Join-Path $folder "portable-$architecture"
     $arguments = @('publish', $project, '-c', 'Release', '-r', "win-$architecture", "-p:Platform=$platform", '-o', $publish, '-nologo',
@@ -133,6 +154,9 @@ function Invoke-PortableBuild([string]$architecture, [string]$folder, [string]$l
     }
     if ($MetricsUrl) {
         $arguments += "-p:AnnotatorMetricsUrl=$MetricsUrl"
+    }
+    if ($feed) {
+        $arguments += "-p:AnnotatorUpdateFeedUrl=$feed"
     }
     Write-Host "== Build the portable $architecture app (Native AOT)" -ForegroundColor Cyan
     $log = & dotnet @arguments 2>&1
@@ -148,6 +172,9 @@ function Invoke-PortableBuild([string]$architecture, [string]$folder, [string]$l
     }
     $exeText = [Text.Encoding]::Latin1.GetString([IO.File]::ReadAllBytes((Join-Path $publish 'Annotator.exe')))
     Assert-That ($exeText.Contains('AnnotatorDistribution', [StringComparison]::Ordinal) -and $exeText.Contains('portable', [StringComparison]::Ordinal)) "The portable $architecture Annotator.exe is not marked portable."
+    if ($feed) {
+        Assert-That ($exeText.Contains($feed, [StringComparison]::Ordinal)) "The portable $architecture Annotator.exe lacks its update feed $feed."
+    }
     $zip = Join-Path $folder "Annotator-$label-windows-$architecture.zip"
     Compress-Archive -Path (Join-Path $publish '*') -DestinationPath $zip -CompressionLevel Optimal
     Remove-Item $publish -Recurse -Force
@@ -271,6 +298,10 @@ if ($MetricsUrl -and $MetricsUrl -cnotmatch '^https://[A-Za-z0-9.-]+/?$') {
 
 $shared = Get-SharedVersion
 $version = $shared.Msix
+$feed = if ($UpdateSite) { Get-UpdateFeed $UpdateSite $shared.Track } else { '' }
+if ($feed -and -not $Portable) {
+    Write-Host '-UpdateSite only changes the portable app (-Portable); the Store packages get their updates from the Store.' -ForegroundColor Yellow
+}
 $folder = Join-Path $Output $version
 if (Test-Path $folder) {
     Remove-Item $folder -Recurse -Force
@@ -292,7 +323,7 @@ Push-Location $windows
 try {
     $bundleInput = Join-Path $folder 'bundle-input'
     New-Item -ItemType Directory -Force $bundleInput | Out-Null
-    $report = [ordered]@{ version = $version; label = $shared.Label; buildStamp = $BuildStamp; metricsUrl = $MetricsUrl; packages = @() }
+    $report = [ordered]@{ version = $version; label = $shared.Label; buildStamp = $BuildStamp; metricsUrl = $MetricsUrl; updateFeed = $feed; packages = @() }
     foreach ($architecture in $architectures) {
         $built = Invoke-PackageBuild $architecture $folder
         $name = "Annotator_${version}_$architecture.msix"
@@ -324,7 +355,7 @@ try {
         throw "MakeAppx could not unpack the x64 package (exit code $LASTEXITCODE)."
     }
     if ($Portable) {
-        $report.portable = @(foreach ($architecture in $architectures) { Invoke-PortableBuild $architecture $folder $shared.Label.Split(' ')[0] })
+        $report.portable = @(foreach ($architecture in $architectures) { Invoke-PortableBuild $architecture $folder $shared.Label.Split(' ')[0] $feed })
     }
     $report.problems = @($problems)
     $report | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $folder 'package-report.json') -Encoding utf8NoBOM

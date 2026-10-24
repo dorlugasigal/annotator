@@ -136,6 +136,7 @@ internal sealed class ScreenAccessWindow : Window
         presenter.IsResizable = false;
         presenter.IsAlwaysOnTop = true;
         AppWindow.SetPresenter(presenter);
+        AppIcon.Apply(AppWindow);
         AppWindow.IsShownInSwitchers = true;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));
         // Registered before the first show so capture can leave it out (S-1); above the toolbar, as the error window is.

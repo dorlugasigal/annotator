@@ -41,11 +41,13 @@
 	<key>SUAutomaticallyUpdate</key>
 	<false/>
 	<key>SUEnableAutomaticChecks</key>
-	<false/>
+	<true/>
 	<key>SUFeedURL</key>
 	<string>$(ANNOTATOR_UPDATE_FEED_URL)</string>
 	<key>SUPublicEDKey</key>
 	<string>$(ANNOTATOR_UPDATE_PUBLIC_KEY)</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>SUSendProfileInfo</key>
 	<false/>
 </dict>
