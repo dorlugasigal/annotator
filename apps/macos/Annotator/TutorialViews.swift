@@ -877,12 +877,14 @@ private struct TutorialKeyboardKey: View {
 
     var body: some View {
         let on = litIndex != nil
-        let wide = key.id.count > 1
+        let word = key.id.count > 1
+        // Only keys wider than one unit, such as tab and shift, put their word at the left; esc and F1 stay centered.
+        let wide = key.width > 1
         let reduce = reduceMotion
         let pressed = pressing && on
         let delay = TutorialMotion.keyStagger * Double(litIndex ?? 0)
         Text(TutorialText.keyboardLabel(key.id))
-            .font(.system(size: wide ? 8.5 : 10, weight: on ? .semibold : .regular))
+            .font(.system(size: word ? 8.5 : 10, weight: on ? .semibold : .regular))
             .foregroundStyle(on ? Color.white : Color.secondary)
             .lineLimit(1)
             .padding(.leading, wide ? 5 : 0)

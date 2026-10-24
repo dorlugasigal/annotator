@@ -10,7 +10,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Changed
 
-- The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away, with its own one-slider icon.
+- The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon.
 
 ### Removed
 

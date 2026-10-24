@@ -70,7 +70,7 @@ internal sealed class TutorialController
         _status = status;
         _usage = usage;
         _toolbar = toolbar;
-        _control = control;
+        _control = name => control(name) ?? (TutorialDemos.Fallback(name) is { } stand ? control(stand) : null);
         _openShortcuts = openShortcuts;
         Preferences = new TutorialPreferences(defaults);
         _actions = new TutorialCardActions

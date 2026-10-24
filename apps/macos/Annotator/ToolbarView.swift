@@ -38,21 +38,6 @@ enum ToolbarPropertiesMode: String, CaseIterable {
     }
 }
 
-/// The Properties button's icon for quick controls: one slider instead of three, drawn on Lucide's 24-unit grid from its
-/// sliders icon (see Lucide-LICENSE.txt). Full properties and tools only keep the three-slider symbol.
-struct OneSliderIcon: Shape {
-    func path(in rect: CGRect) -> Path {
-        let scale = min(rect.width, rect.height) / 24
-        let left = rect.midX - 12 * scale, top = rect.midY - 12 * scale
-        func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: left + x * scale, y: top + y * scale) }
-        var path = Path()
-        path.move(to: point(10, 12)); path.addLine(to: point(3, 12))
-        path.move(to: point(21, 12)); path.addLine(to: point(14, 12))
-        path.move(to: point(14, 10)); path.addLine(to: point(14, 14))
-        return path
-    }
-}
-
 enum ActiveToolbarMode: String, CaseIterable {
     case screenZoom, magnifier, spotlight, cursorHalo, whiteboard, blackboard
 
@@ -428,17 +413,11 @@ struct ToolbarView: View {
         Button {
             propertiesMode.next.apply(to: model)
         } label: {
-            Group {
-                if propertiesMode == .quick {
-                    OneSliderIcon()
-                        .stroke(style: StrokeStyle(lineWidth: 1.25, lineCap: .round, lineJoin: .round))
-                        .frame(width: 15, height: 15)
-                } else {
-                    Image(systemName: "slider.horizontal.3")
-                }
-            }
-            .frame(width: metrics.actionSize.width, height: metrics.actionSize.height)
-            .foregroundStyle(expanded ? Color.accentColor : .primary)
+            Image(systemName: "slider.horizontal.3")
+                .frame(width: metrics.actionSize.width, height: metrics.actionSize.height)
+                .foregroundStyle(expanded ? Color.accentColor : .primary)
+                // The whole cell takes the click, not only the symbol's lines.
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help("\(propertiesMode.rawValue). Show \(propertiesMode.next.rawValue.lowercased()). Cycles quick controls, full properties and tools only." +

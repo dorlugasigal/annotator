@@ -210,6 +210,8 @@ public sealed class TutorialWorkspaceTests
         Assert.IsType<TutorialDemoKeys>(TutorialDemos.For(TutorialGoal.Shown, snapshot, null).Single());
         Assert.Equal("Hide drawings and tools", TutorialDemos.Target(TutorialGoal.Hidden));
         Assert.Null(TutorialDemos.Target(TutorialGoal.ShapeDrawn));
+        Assert.Equal("Properties", TutorialDemos.Fallback(TutorialDemos.Target(TutorialGoal.CurvedStyle)!));
+        Assert.Null(TutorialDemos.Fallback("Rectangle"));
     }
 
     [Fact]

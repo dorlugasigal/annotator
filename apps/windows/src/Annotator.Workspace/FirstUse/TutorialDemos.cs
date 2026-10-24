@@ -74,6 +74,13 @@ public static class TutorialDemos
     public const string UndoControl = "Undo";
     public const string UseAppsControl = "Use apps";
     public const string HideControl = "Hide drawings and tools";
+    public const string PropertiesControl = "Properties";
+
+    /// <summary>
+    /// The control to point at when <paramref name="name"/> isn't showing: Curved is only in full properties, so the
+    /// Properties button stands in for it (Mac <c>TutorialAnchors.fallback</c>).
+    /// </summary>
+    public static string? Fallback(string name) => name == CurvedControl ? PropertiesControl : null;
 
     /// <summary>The toolbar control that the target ring shows for <paramref name="goal"/>, or null.</summary>
     public static string? Target(TutorialGoal goal) => goal switch

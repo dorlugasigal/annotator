@@ -5,7 +5,7 @@
       "A hands-on tutorial on Mac and Windows. Ten quick steps: grab a tool, draw a box, change the color, draw a curved arrow, circle something with the pen, move it, undo, go back to your apps, draw again, and hide and show everything. A ghost cursor shows each step, keys show right in the instructions, and shortcuts light up on a little keyboard. Use the keys or the mouse, whichever you like. Finishing pops a big burst of confetti. Replay it from Settings > Help."
     ],
     "Changed": [
-      "The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away, with its own one-slider icon."
+      "The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon."
     ],
     "Removed": [
       "Removed the four-page Quick start tour. The hands-on tutorial replaces it."

@@ -283,6 +283,8 @@ final class TutorialCoachTests: XCTestCase {
     }
 
     func testAnchorsAreFoundByTheirAccessibilityNames() async throws {
+        model.setInspectorPinned(false)
+        model.choose(.arrow)
         let panel = NSPanel(contentRect: CGRect(x: 200, y: 200, width: 900, height: 140),
                             styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isReleasedWhenClosed = false
@@ -297,6 +299,11 @@ final class TutorialCoachTests: XCTestCase {
         let pen = try XCTUnwrap(TutorialAnchors.frame(named: "Pen", in: panel))
         XCTAssertTrue(panel.frame.insetBy(dx: -1, dy: -1).contains(pen))
         XCTAssertNil(TutorialAnchors.frame(named: "No such control", in: panel))
+        XCTAssertNil(TutorialAnchors.frame(named: "Curved arrow", in: panel), "Quick controls don't show Curved.")
+        XCTAssertEqual(TutorialAnchors.anchor(named: "Curved arrow", in: panel),
+                       TutorialAnchors.frame(named: "Properties", in: panel),
+                       "Without Curved, the ring and the ghost point at the Properties button.")
+        XCTAssertNotNil(TutorialAnchors.anchor(named: "Curved arrow", in: panel))
         panel.orderOut(nil)
         XCTAssertNil(TutorialAnchors.frame(named: "Pen", in: panel), "A hidden toolbar has no anchors.")
         XCTAssertEqual(TutorialAnchors.name(for: .curvedStyle), "Curved arrow")

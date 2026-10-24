@@ -136,6 +136,15 @@ enum TutorialAnchors {
         }
     }
 
+    /// The control to point at when `name` isn't showing: Curved is only in full properties, so the Properties button
+    /// stands in for it.
+    static func fallback(for name: String) -> String? { name == "Curved arrow" ? "Properties" : nil }
+
+    /// The screen frame of the control named `name`, or of its stand-in when the toolbar doesn't show it.
+    static func anchor(named name: String, in window: NSWindow) -> CGRect? {
+        frame(named: name, in: window) ?? fallback(for: name).flatMap { frame(named: $0, in: window) }
+    }
+
     /// The screen frame of the control named `name` in `window`, or nil when the window doesn't show it.
     /// Buttons win over text with the same name, such as a control's caption.
     static func frame(named name: String, in window: NSWindow) -> CGRect? {
@@ -746,7 +755,7 @@ final class TutorialController: ObservableObject {
         ringGoal = goal
         ringToolbarFrame = toolbar.frame
         lastRingLookup = now
-        guard let anchor = TutorialAnchors.frame(named: name, in: toolbar) else {
+        guard let anchor = TutorialAnchors.anchor(named: name, in: toolbar) else {
             ringFound = false
             overlay.hideRing(animated: true)
             return
@@ -797,7 +806,7 @@ final class TutorialController: ObservableObject {
     private func demoRun(for goal: TutorialGoal) -> TutorialGhostRun? {
         let toolbar = toolbarWindow().flatMap { $0.isVisible ? $0 : nil }
         if let name = TutorialAnchors.name(for: goal) {
-            guard let toolbar, let anchor = TutorialAnchors.frame(named: name, in: toolbar) else { return nil }
+            guard let toolbar, let anchor = TutorialAnchors.anchor(named: name, in: toolbar) else { return nil }
             let target = CGPoint(x: anchor.midX, y: anchor.midY)
             guard let display = Self.screen(for: anchor)?.frame else { return nil }
             return TutorialGhostRun(display: display, start: ghostStart(on: display), steps: [.click(target)])

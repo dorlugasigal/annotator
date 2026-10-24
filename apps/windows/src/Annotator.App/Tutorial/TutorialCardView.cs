@@ -483,8 +483,8 @@ internal static class TutorialCardView
                 FontWeight = on ? FontWeights.SemiBold : FontWeights.Normal,
                 Foreground = on ? new SolidColorBrush(Microsoft.UI.Colors.White) : AppResources.Brush("AnnotatorSecondaryLabelBrush"),
                 VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = key.Id.Length > 1 ? HorizontalAlignment.Left : HorizontalAlignment.Center,
-                Margin = new Thickness(key.Id.Length > 1 ? 5 : 0, 0, 0, 0),
+                HorizontalAlignment = key.Width > 1 ? HorizontalAlignment.Left : HorizontalAlignment.Center,
+                Margin = new Thickness(key.Width > 1 ? 5 : 0, 0, 0, 0),
             };
             var cap = new Border
             {
