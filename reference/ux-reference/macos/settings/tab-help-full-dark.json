@@ -37,16 +37,16 @@
        "frame": [
         51,
         75,
-        116.5,
+        95.5,
         24
        ],
-       "label": "Quick start",
+       "label": "Tutorial",
        "role": "AXButton"
       },
       {
        "enabled": true,
        "frame": [
-        175.5,
+        154.5,
         75,
         126,
         24
@@ -57,7 +57,7 @@
       {
        "enabled": true,
        "frame": [
-        309.5,
+        288.5,
         75,
         110,
         24

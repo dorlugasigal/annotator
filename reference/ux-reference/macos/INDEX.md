@@ -39,11 +39,11 @@ The floating toolbar in every layout, size, mode and tool state. Compare with WI
 | `expanded-vertical-tools-only`<br>68 x 541 pt<br>Expanded toolbar, vertical, tools only. Pen selected. | <img src="toolbar/expanded-vertical-tools-only-light.png" width="136"> | <img src="toolbar/expanded-vertical-tools-only-dark.png" width="136"> |
 | `fit-narrow`<br>400 x 115 pt<br>Toolbar fitted into 400 x 600 points. | <img src="toolbar/fit-narrow-light.png" width="420"> | <img src="toolbar/fit-narrow-dark.png" width="420"> |
 | `fit-short`<br>648 x 115 pt<br>Toolbar fitted into 648 x 230 points. | <img src="toolbar/fit-short-light.png" width="420"> | <img src="toolbar/fit-short-dark.png" width="420"> |
-| `full-properties-arrow`<br>932 x 258 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-arrow-light.png" width="420"> | <img src="toolbar/full-properties-arrow-dark.png" width="420"> |
-| `full-properties-blur`<br>932 x 133 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-blur-light.png" width="420"> | <img src="toolbar/full-properties-blur-dark.png" width="420"> |
-| `full-properties-pen`<br>932 x 172 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-pen-light.png" width="420"> | <img src="toolbar/full-properties-pen-dark.png" width="420"> |
-| `full-properties-rectangle`<br>932 x 172 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-rectangle-light.png" width="420"> | <img src="toolbar/full-properties-rectangle-dark.png" width="420"> |
-| `full-properties-text`<br>932 x 172 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-text-light.png" width="420"> | <img src="toolbar/full-properties-text-dark.png" width="420"> |
+| `full-properties-arrow`<br>932 x 282 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-arrow-light.png" width="420"> | <img src="toolbar/full-properties-arrow-dark.png" width="420"> |
+| `full-properties-blur`<br>932 x 157 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-blur-light.png" width="420"> | <img src="toolbar/full-properties-blur-dark.png" width="420"> |
+| `full-properties-pen`<br>932 x 196 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-pen-light.png" width="420"> | <img src="toolbar/full-properties-pen-dark.png" width="420"> |
+| `full-properties-rectangle`<br>932 x 196 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-rectangle-light.png" width="420"> | <img src="toolbar/full-properties-rectangle-dark.png" width="420"> |
+| `full-properties-text`<br>932 x 196 pt<br>Full properties open inside the toolbar panel, below the rail. | <img src="toolbar/full-properties-text-light.png" width="420"> | <img src="toolbar/full-properties-text-dark.png" width="420"> |
 | `full-properties-vertical-arrow`<br>376 x 616 pt<br>Vertical rail with full properties beside it. | <img src="toolbar/full-properties-vertical-arrow-light.png" width="420"> | <img src="toolbar/full-properties-vertical-arrow-dark.png" width="420"> |
 | `minimal-horizontal-quick`<br>738 x 103 pt<br>Minimal toolbar, horizontal, quick properties. Pen selected. | <img src="toolbar/minimal-horizontal-quick-light.png" width="420"> | <img src="toolbar/minimal-horizontal-quick-dark.png" width="420"> |
 | `minimal-horizontal-tools-only`<br>738 x 52 pt<br>Minimal toolbar, horizontal, tools only. Pen selected. | <img src="toolbar/minimal-horizontal-tools-only-light.png" width="420"> | <img src="toolbar/minimal-horizontal-tools-only-dark.png" width="420"> |
@@ -106,6 +106,7 @@ The menu-bar popover (the Windows tray flyout) and the menu-bar icon. Compare wi
 | `status-item`<br>24 x 22 pt<br>Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one. The accessibility tree is the app's configured status button. | <img src="menu/status-item-light.png" width="48"> | <img src="menu/status-item-dark.png" width="48"> |
 | `status-item-sharing`<br>24 x 22 pt<br>Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one; the red dot shows while region sharing is on. The accessibility tree is the app's configured status button. | <img src="menu/status-item-sharing-light.png" width="48"> | <img src="menu/status-item-sharing-dark.png" width="48"> |
 | `tools-hidden`<br>320 x 676 pt<br>Release build, drawings and tools hidden. | <img src="menu/tools-hidden-light.png" width="420"> | <img src="menu/tools-hidden-dark.png" width="420"> |
+| `update-available`<br>320 x 689 pt<br>An automatic check found an update while the person was busy: Update available and the waiting version. | <img src="menu/update-available-light.png" width="420"> | <img src="menu/update-available-dark.png" width="420"> |
 | `updates-unavailable`<br>320 x 726 pt<br>Update checks unavailable: the reason shows under the button. | <img src="menu/updates-unavailable-light.png" width="420"> | <img src="menu/updates-unavailable-dark.png" width="420"> |
 | `using-apps`<br>320 x 712 pt<br>Tools visible, Use apps. | <img src="menu/using-apps-light.png" width="420"> | <img src="menu/using-apps-dark.png" width="420"> |
 
@@ -134,44 +135,36 @@ Every Settings tab at its default size, the same tab stretched to show all of it
 | `tab-toolbar`<br>840 x 700 pt<br>Settings, toolbar tab, at its default size. Content below the fold scrolls. | <img src="settings/tab-toolbar-light.png" width="420"> | <img src="settings/tab-toolbar-dark.png" width="420"> |
 | `tab-toolbar-full`<br>840 x 1500 pt<br>Settings, toolbar tab, stretched to 1500 points so the whole scrolling content shows. | <img src="settings/tab-toolbar-full-light.png" width="420"> | <img src="settings/tab-toolbar-full-dark.png" width="420"> |
 
-## Introduction tour
+## Tutorial
 
-The four tour pages, setup permission states and illustration motion.
+The welcome card, a coach card for each step, a goal and a step done, the finish card and the step change.
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `1-draw`<br>520 x 530 pt<br>Introduction page 1, final illustration state. | <img src="tour/1-draw-light.png" width="420"> | <img src="tour/1-draw-dark.png" width="420"> |
-| `2-color`<br>520 x 530 pt<br>Introduction page 2, final illustration state. | <img src="tour/2-color-light.png" width="420"> | <img src="tour/2-color-dark.png" width="420"> |
-| `3-focus`<br>520 x 530 pt<br>Introduction page 3, final illustration state. | <img src="tour/3-focus-light.png" width="420"> | <img src="tour/3-focus-dark.png" width="420"> |
-| `4-setup`<br>520 x 530 pt<br>Introduction page 4, final illustration state. | <img src="tour/4-setup-light.png" width="420"> | <img src="tour/4-setup-dark.png" width="420"> |
-| `4-setup-allowed`<br>520 x 530 pt<br>Introduction page 4, final illustration state. | <img src="tour/4-setup-allowed-light.png" width="420"> | <img src="tour/4-setup-allowed-dark.png" width="420"> |
-| `4-setup-not-allowed`<br>520 x 530 pt<br>Introduction page 4, final illustration state. | <img src="tour/4-setup-not-allowed-light.png" width="420"> | <img src="tour/4-setup-not-allowed-dark.png" width="420"> |
+| `coach-arrow`<br>340 x 212 pt<br>Coach card, step 4 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-arrow-light.png" width="420"> | <img src="tutorial/coach-arrow-dark.png" width="420"> |
+| `coach-arrow-curved`<br>340 x 212 pt<br>Arrow step: the Arrow is picked; Turn on Curved is the current goal. | <img src="tutorial/coach-arrow-curved-light.png" width="420"> | <img src="tutorial/coach-arrow-curved-dark.png" width="420"> |
+| `coach-color`<br>340 x 148 pt<br>Coach card, step 3 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-color-light.png" width="420"> | <img src="tutorial/coach-color-dark.png" width="420"> |
+| `coach-drawAgain`<br>340 x 295 pt<br>Coach card, step 9 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-drawAgain-light.png" width="420"> | <img src="tutorial/coach-drawAgain-dark.png" width="420"> |
+| `coach-hide`<br>340 x 331 pt<br>Coach card, step 10 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-hide-light.png" width="420"> | <img src="tutorial/coach-hide-dark.png" width="420"> |
+| `coach-move`<br>340 x 184 pt<br>Coach card, step 6 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-move-light.png" width="420"> | <img src="tutorial/coach-move-dark.png" width="420"> |
+| `coach-pen`<br>340 x 184 pt<br>Coach card, step 5 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-pen-light.png" width="420"> | <img src="tutorial/coach-pen-dark.png" width="420"> |
+| `coach-rectangle`<br>340 x 148 pt<br>Coach card, step 1 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-rectangle-light.png" width="420"> | <img src="tutorial/coach-rectangle-dark.png" width="420"> |
+| `coach-shape`<br>340 x 146 pt<br>Coach card, step 2 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-shape-light.png" width="420"> | <img src="tutorial/coach-shape-dark.png" width="420"> |
+| `coach-shape-done`<br>340 x 146 pt<br>Shape step done: the title's check shows during the 0.85 s pause before the next step. | <img src="tutorial/coach-shape-done-light.png" width="420"> | <img src="tutorial/coach-shape-done-dark.png" width="420"> |
+| `coach-undo`<br>340 x 295 pt<br>Coach card, step 7 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-undo-light.png" width="420"> | <img src="tutorial/coach-undo-dark.png" width="420"> |
+| `coach-useApps`<br>340 x 313 pt<br>Coach card, step 8 of 10: the first goal is current and nothing is done. | <img src="tutorial/coach-useApps-light.png" width="420"> | <img src="tutorial/coach-useApps-dark.png" width="420"> |
+| `finish`<br>340 x 364 pt<br>Finish card with the default shortcuts. Confetti plays on its display; it is not part of the card. | <img src="tutorial/finish-light.png" width="420"> | <img src="tutorial/finish-dark.png" width="420"> |
+| `welcome`<br>340 x 236 pt<br>Welcome card. It shows on launch until the tutorial is finished or Show on launch is off. | <img src="tutorial/welcome-light.png" width="420"> | <img src="tutorial/welcome-dark.png" width="420"> |
 
 Motion (contact sheet; the video plays at real speed):
 
-- `illustration-color` (dark, 87 frames at 24 fps): [video](tour/motion/illustration-color-dark.mp4). Page 2 illustration over 3.6 s, after a 0.3 s delay. Linear story progress.
+- `step-change` (dark, 37 frames at 61 fps): [video](tutorial/motion/step-change-dark.mp4). From the finished shape step to the color step. Words leave upward over 0.16 s; the next words rise 14.0 pt over 0.38 s after 0.06 s; the track's leading edge moves over 0.32 s and the trailing edge follows over 0.5 s after 0.07 s.
 
-  <img src="tour/motion/illustration-color-dark.png" width="640">
+  <img src="tutorial/motion/step-change-dark.png" width="640">
 
-- `illustration-color` (light, 87 frames at 24 fps): [video](tour/motion/illustration-color-light.mp4). Page 2 illustration over 3.6 s, after a 0.3 s delay. Linear story progress.
+- `step-change` (light, 37 frames at 61 fps): [video](tutorial/motion/step-change-light.mp4). From the finished shape step to the color step. Words leave upward over 0.16 s; the next words rise 14.0 pt over 0.38 s after 0.06 s; the track's leading edge moves over 0.32 s and the trailing edge follows over 0.5 s after 0.07 s.
 
-  <img src="tour/motion/illustration-color-light.png" width="640">
-
-- `illustration-draw` (dark, 116 frames at 24 fps): [video](tour/motion/illustration-draw-dark.mp4). Page 1 illustration over 4.8 s, after a 0.3 s delay. Linear story progress.
-
-  <img src="tour/motion/illustration-draw-dark.png" width="640">
-
-- `illustration-draw` (light, 116 frames at 24 fps): [video](tour/motion/illustration-draw-light.mp4). Page 1 illustration over 4.8 s, after a 0.3 s delay. Linear story progress.
-
-  <img src="tour/motion/illustration-draw-light.png" width="640">
-
-- `illustration-focus` (dark, 102 frames at 24 fps): [video](tour/motion/illustration-focus-dark.mp4). Page 3 illustration over 4.2 s, after a 0.3 s delay. Linear story progress.
-
-  <img src="tour/motion/illustration-focus-dark.png" width="640">
-
-- `illustration-focus` (light, 102 frames at 24 fps): [video](tour/motion/illustration-focus-light.mp4). Page 3 illustration over 4.2 s, after a 0.3 s delay. Linear story progress.
-
-  <img src="tour/motion/illustration-focus-light.png" width="640">
+  <img src="tutorial/motion/step-change-light.png" width="640">
 
 ## Tools window
 

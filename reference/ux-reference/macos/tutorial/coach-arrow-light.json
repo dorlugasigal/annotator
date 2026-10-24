@@ -1,0 +1,140 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      24,
+      207.5,
+      4
+     ],
+     "label": "Tutorial progress",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      233.5,
+      19.5,
+      60.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Step 4 of 10"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      304,
+      16,
+      20,
+      20
+     ],
+     "help": "End tutorial",
+     "identifier": "tutorial-end",
+     "label": "End tutorial",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      49.5,
+      147,
+      19
+     ],
+     "role": "AXStaticText",
+     "value": "Draw a curved arrow"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      82,
+      243,
+      18
+     ],
+     "label": "Grab the Arrow: press 5 or click it",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      111,
+      224.5,
+      16
+     ],
+     "label": "Turn on Curved in the properties",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      138,
+      294,
+      18
+     ],
+     "label": "Click points, then double-click (or return)",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      172,
+      79.5,
+      24
+     ],
+     "identifier": "tutorial-show-me",
+     "label": "Show me",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      243.5,
+      172,
+      80.5,
+      24
+     ],
+     "identifier": "tutorial-skip",
+     "label": "Skip step",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    308,
+    180
+   ],
+   "identifier": "tutorial-coach",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "tutorial/coach-arrow-light.png",
+ "kind": "view",
+ "notes": "Coach card, step 4 of 10: the first goal is current and nothing is done.",
+ "pixels": [
+  680,
+  424
+ ],
+ "scale": 2,
+ "size": [
+  340,
+  212
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "coach-arrow",
+ "surface": "tutorial"
+}

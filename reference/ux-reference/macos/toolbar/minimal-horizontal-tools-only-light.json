@@ -215,10 +215,10 @@
   {
    "enabled": true,
    "frame": [
-    647.5,
-    20.5,
-    13,
-    11
+    643,
+    14,
+    22,
+    24
    ],
    "help": "Show quick controls",
    "identifier": "toolbar-properties",

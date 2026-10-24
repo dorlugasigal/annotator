@@ -213,10 +213,10 @@
   {
    "enabled": true,
    "frame": [
-    826.5,
-    30.5,
-    13,
-    11
+    821,
+    23,
+    24,
+    26
    ],
    "help": "Show tools only",
    "identifier": "toolbar-properties",
@@ -690,6 +690,29 @@
     169
    ],
    "role": "AXScrollArea"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    863,
+    254.5,
+    26,
+    15
+   ],
+   "label": "Focus and cleanup",
+   "role": "AXMenuButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    899,
+    254.5,
+    21,
+    15
+   ],
+   "help": "Lens and full-screen zoom",
+   "label": "Zoom tools",
+   "role": "AXMenuButton"
   }
  ],
  "appearance": "light",
@@ -699,12 +722,12 @@
  "notes": "Full properties open inside the toolbar panel, below the rail.",
  "pixels": [
   1864,
-  516
+  564
  ],
  "scale": 2,
  "size": [
   932,
-  258
+  282
  ],
  "spec": [
   "002 design.md",

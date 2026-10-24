@@ -54,10 +54,10 @@
     {
      "enabled": true,
      "frame": [
-      27.5,
-      231.5,
-      13,
-      11
+      22,
+      224,
+      24,
+      26
      ],
      "help": "Show quick controls",
      "identifier": "toolbar-properties",
