@@ -175,7 +175,6 @@ final class GentleUpdateReminderTests: XCTestCase {
         model.updateStatus = AppUpdateController.status(automatic: true)
         XCTAssertEqual(model.updateStatusLine, "Annotator checks for updates once a day. Downloads are verified before installation.")
         model.updateReminderVersion = "0.1.0-beta.13"
-        XCTAssertEqual(model.updateStatusLine,
-                       "Annotator 0.1.0-beta.13 is ready to install. Choose Check for updates... to see what's new.")
+        XCTAssertEqual(model.updateStatusLine, "Annotator 0.1.0-beta.13 is ready to install.")
     }
 }

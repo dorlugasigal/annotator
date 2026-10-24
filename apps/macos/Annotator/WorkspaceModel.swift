@@ -203,8 +203,7 @@ final class WorkspaceModel: ObservableObject {
     /// The version of an update that an automatic check found while the person was busy; Sparkle waits to show it.
     @Published var updateReminderVersion: String?
     var updateStatusLine: String {
-        updateReminderVersion.map { "Annotator \($0) is ready to install. Choose Check for updates... to see what's new." }
-            ?? updateStatus
+        updateReminderVersion.map { "Annotator \($0) is ready to install." } ?? updateStatus
     }
     var onCheckForUpdates: (() -> Void)?
     var onAutomaticUpdateChecks: ((Bool) -> Void)?

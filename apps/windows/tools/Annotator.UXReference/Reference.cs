@@ -252,7 +252,7 @@ internal static partial class PlatformTerms
         ["Annotator can't lock this Mac. Turn this off to use the timer without locking."] = BreakCopy.CannotLock,
         // An update found while the person was busy (WIN-SYS-03, DV-11): Sparkle installs it on the Mac; a portable Windows
         // copy says where to download it.
-        ["Annotator 0.1.0-beta.13 is ready to install. Choose Check for updates... to see what's new."] =
+        ["Annotator 0.1.0-beta.13 is ready to install."] =
             Annotator.Workspace.Updates.UpdateText.PortableAvailable("0.1.0-beta.13"),
     };
 
