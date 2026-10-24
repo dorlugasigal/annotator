@@ -37,7 +37,8 @@
   - screen access (WIN-CAP-04): a development build needs no Windows consent, so the lens starts without the explanation
     a packaged build shows before Windows asks, and Settings > Permissions shows capture as working or allowed with Open
     screen recording settings (the packaged flow needs a registered package; see the README's screen access notes);
-  - Settings (WIN-UI-03): Ctrl+, on the canvas opens Settings on General with the keyboard; Share style between tools and
+  - Settings (WIN-UI-03): Ctrl+, on the canvas opens Settings on General with the keyboard and the app icon in its title
+    bar; Share style between tools and
     the theme (Dark, then System) change the in-memory profile; Share usage counts is off and unavailable with the
     Windows words (WIN-PRV-01); the About and Permissions tabs show; About's Check for updates (WIN-SYS-03) asks before
     installing while the canvas has drawings, and Not now and Install update end as the live check's fixed Store answers
@@ -156,6 +157,11 @@ public static class LiveInput
     public static bool PostClose(IntPtr hwnd) { return PostMessage(hwnd, 0x0010, IntPtr.Zero, IntPtr.Zero); }
 
     public static string ClassName(IntPtr hwnd) { var b = new StringBuilder(256); GetClassName(hwnd, b, 256); return b.ToString(); }
+
+    [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
+
+    /// WM_GETICON: the window's small and big title-bar icons, zero when it has none.
+    public static bool HasIcons(IntPtr hwnd) { return SendMessage(hwnd, 0x007F, IntPtr.Zero, IntPtr.Zero) != IntPtr.Zero && SendMessage(hwnd, 0x007F, (IntPtr)1, IntPtr.Zero) != IntPtr.Zero; }
 
     public static long ExStyle(IntPtr hwnd) { return GetWindowLongPtr(hwnd, -20).ToInt64(); }
 
@@ -1174,6 +1180,7 @@ try {
     $settings = SettingsWindow
     if ($null -ne $settings) {
         Check 'settings-on-general' (WaitFor { Chosen $settings 'General' }) "General chosen: $(Chosen $settings 'General')"
+        Check 'settings-app-icon' ([LiveInput]::HasIcons($settings)) "title-bar icons: $([LiveInput]::HasIcons($settings))"
         Note "click Share style between tools: $(ClickTyped 'Share style between tools' ([Windows.Automation.ControlType]::CheckBox) $settings)"
         Check 'settings-share-style-on' (WaitFor { Toggled 'Share style between tools' $settings }) "on: $(Toggled 'Share style between tools' $settings)"
         # Usage counts (WIN-PRV-01): off and unavailable, saying so, while Windows may not send them.
