@@ -241,25 +241,14 @@
       36
      ],
      "identifier": "menu-support",
-     "label": "Buy me a coffee…",
+     "label": "Enjoying it? Buy me a coffee…",
      "role": "AXButton"
     },
     {
      "enabled": true,
      "frame": [
-      26,
-      629,
-      182,
-      13
-     ],
-     "role": "AXStaticText",
-     "value": "Coffee is welcome. All tools stay free."
-    },
-    {
-     "enabled": true,
-     "frame": [
       16,
-      661,
+      648,
       288,
       36
      ],
@@ -273,7 +262,7 @@
     0,
     0,
     320,
-    713
+    700
    ],
    "role": "AXScrollArea"
   }
@@ -285,12 +274,12 @@
  "notes": "Development build: the Developer preview badge.",
  "pixels": [
   640,
-  1426
+  1400
  ],
  "scale": 2,
  "size": [
   320,
-  713
+  700
  ],
  "spec": [
   "000 product spec (menu-bar popover)",

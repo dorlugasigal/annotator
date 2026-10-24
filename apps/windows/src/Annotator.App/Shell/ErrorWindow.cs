@@ -161,6 +161,7 @@ internal sealed class ErrorWindow : Window
         presenter.IsResizable = false;
         presenter.IsAlwaysOnTop = true;
         AppWindow.SetPresenter(presenter);
+        AppIcon.Apply(AppWindow);
         AppWindow.IsShownInSwitchers = false;
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));

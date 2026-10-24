@@ -56,6 +56,10 @@ NOTIFYICON_VERSION_4
 // Icons
 CreateIconIndirect
 DestroyIcon
+LoadImage
+GDI_IMAGE_TYPE
+IMAGE_FLAGS
+SYSTEM_METRICS_INDEX
 CreateDIBSection
 CreateBitmap
 DeleteObject

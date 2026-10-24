@@ -13,6 +13,12 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 - Annotator now checks for updates once a day by default. If an update arrives while you present, it doesn't interrupt you: the menu shows Update available... instead. You can turn automatic checks off in Settings > General.
 - On the Mac, the update window now shows the release notes. The Homebrew cask now leaves updates to Annotator, so brew upgrade skips it unless you add --greedy.
+- The menu-bar menu on a Mac and the tray menu on Windows now say "Enjoying it? Buy me a coffee…", without the extra line under the button.
+
+### Fixed
+
+- On Windows, the Settings window and Annotator's other windows now show the Annotator icon in their title bar.
+- On Windows, the Settings tab names no longer have a line running through them.
 
 ## 0.1.0-beta.12 (build 30) - 2026-10-23
 

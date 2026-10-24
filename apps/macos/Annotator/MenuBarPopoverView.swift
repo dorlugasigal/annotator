@@ -198,13 +198,11 @@ struct MenuBarPopoverView: View {
             if !model.canCheckForUpdates || model.updateReminderVersion != nil {
                 Text(model.updateStatusLine).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
             }
-            row("Buy me a coffee…", symbol: "cup.and.saucer", action: .support,
+            row("Enjoying it? Buy me a coffee…", symbol: "cup.and.saucer", action: .support,
                 enabled: model.optionalSupportURL != nil)
                 .background(Color.orange.opacity(scheme == .dark ? 0.20 : 0.14), in: RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.orange.opacity(0.3), lineWidth: 1))
                 .padding(.top, 8)
-            Text("Coffee is welcome. All tools stay free.")
-                .font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
             Divider().padding(.vertical, 9)
             row("Quit Annotator", symbol: "power", action: .quit, shortcut: "⌘Q")
         }

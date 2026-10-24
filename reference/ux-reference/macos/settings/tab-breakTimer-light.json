@@ -494,9 +494,9 @@
         {
          "enabled": false,
          "frame": [
-          808,
+          803,
           50,
-          6,
+          11,
           392.5
          ],
          "role": "AXValueIndicator",
@@ -515,9 +515,9 @@
         {
          "enabled": false,
          "frame": [
-          808,
+          803,
           443,
-          6,
+          11,
           193
          ],
          "role": "AXButton",

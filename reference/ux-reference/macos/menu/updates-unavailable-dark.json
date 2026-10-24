@@ -252,25 +252,14 @@
       36
      ],
      "identifier": "menu-support",
-     "label": "Buy me a coffee…",
+     "label": "Enjoying it? Buy me a coffee…",
      "role": "AXButton"
     },
     {
      "enabled": true,
      "frame": [
-      26,
-      655,
-      182,
-      13
-     ],
-     "role": "AXStaticText",
-     "value": "Coffee is welcome. All tools stay free."
-    },
-    {
-     "enabled": true,
-     "frame": [
       16,
-      687,
+      674,
       288,
       36
      ],
@@ -284,7 +273,7 @@
     0,
     0,
     320,
-    739
+    726
    ],
    "role": "AXScrollArea"
   }
@@ -296,12 +285,12 @@
  "notes": "Update checks unavailable: the reason shows under the button.",
  "pixels": [
   640,
-  1478
+  1452
  ],
  "scale": 2,
  "size": [
   320,
-  739
+  726
  ],
  "spec": [
   "000 product spec (menu-bar popover)",

@@ -101,14 +101,13 @@ The menu-bar popover (the Windows tray flyout) and the menu-bar icon. Compare wi
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `developer-preview`<br>320 x 713 pt<br>Development build: the Developer preview badge. | <img src="menu/developer-preview-light.png" width="420"> | <img src="menu/developer-preview-dark.png" width="420"> |
-| `drawing`<br>320 x 725 pt<br>Tools visible, drawing. | <img src="menu/drawing-light.png" width="420"> | <img src="menu/drawing-dark.png" width="420"> |
+| `developer-preview`<br>320 x 700 pt<br>Development build: the Developer preview badge. | <img src="menu/developer-preview-light.png" width="420"> | <img src="menu/developer-preview-dark.png" width="420"> |
+| `drawing`<br>320 x 712 pt<br>Tools visible, drawing. | <img src="menu/drawing-light.png" width="420"> | <img src="menu/drawing-dark.png" width="420"> |
 | `status-item`<br>24 x 22 pt<br>Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one. The accessibility tree is the app's configured status button. | <img src="menu/status-item-light.png" width="48"> | <img src="menu/status-item-dark.png" width="48"> |
 | `status-item-sharing`<br>24 x 22 pt<br>Menu-bar icon. The template glyph is black on a light menu bar and white on a dark one; the red dot shows while region sharing is on. The accessibility tree is the app's configured status button. | <img src="menu/status-item-sharing-light.png" width="48"> | <img src="menu/status-item-sharing-dark.png" width="48"> |
-| `tools-hidden`<br>320 x 689 pt<br>Release build, drawings and tools hidden. | <img src="menu/tools-hidden-light.png" width="420"> | <img src="menu/tools-hidden-dark.png" width="420"> |
-| `update-available`<br>320 x 715 pt<br>An automatic check found an update while the person was busy: Update available and the waiting version. | <img src="menu/update-available-light.png" width="420"> | <img src="menu/update-available-dark.png" width="420"> |
-| `updates-unavailable`<br>320 x 739 pt<br>Update checks unavailable: the reason shows under the button. | <img src="menu/updates-unavailable-light.png" width="420"> | <img src="menu/updates-unavailable-dark.png" width="420"> |
-| `using-apps`<br>320 x 725 pt<br>Tools visible, Use apps. | <img src="menu/using-apps-light.png" width="420"> | <img src="menu/using-apps-dark.png" width="420"> |
+| `tools-hidden`<br>320 x 676 pt<br>Release build, drawings and tools hidden. | <img src="menu/tools-hidden-light.png" width="420"> | <img src="menu/tools-hidden-dark.png" width="420"> |
+| `updates-unavailable`<br>320 x 726 pt<br>Update checks unavailable: the reason shows under the button. | <img src="menu/updates-unavailable-light.png" width="420"> | <img src="menu/updates-unavailable-dark.png" width="420"> |
+| `using-apps`<br>320 x 712 pt<br>Tools visible, Use apps. | <img src="menu/using-apps-light.png" width="420"> | <img src="menu/using-apps-dark.png" width="420"> |
 
 ## Settings
 

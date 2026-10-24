@@ -66,6 +66,7 @@ internal sealed class ToolsWindow : Window
         _presenter.IsResizable = true;
         _presenter.IsAlwaysOnTop = true;
         AppWindow.SetPresenter(_presenter);
+        Shell.AppIcon.Apply(AppWindow);
         AppWindow.IsShownInSwitchers = false;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));
         // Registered before the first show so capture can leave it out (S-1); like the Mac panel, it shares the toolbar's level.

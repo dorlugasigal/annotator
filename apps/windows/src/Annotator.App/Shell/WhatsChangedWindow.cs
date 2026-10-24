@@ -86,9 +86,10 @@ internal sealed class WhatsChangedWindow : Window
         const double textWidth = width - 48;
         var notes = new MacStack { Spacing = 10, Margin = new Thickness(24) };
         var header = new MacStack { Orientation = Orientation.Horizontal, Spacing = 14, Margin = new Thickness(0, 0, 0, 6) };
-        header.Children.Add(new AppIconView(56));
+        // The Mac hides the icon from accessibility and reads the headline as plain text.
+        header.Children.Add(new AppIconView(56, decorative: true));
         var titles = new MacStack { Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
-        titles.Children.Add(new FormText(WhatsChangedText.Heading, 17, weight: FontWeights.Bold, heading: true));
+        titles.Children.Add(new FormText(WhatsChangedText.Heading, 17, weight: FontWeights.Bold));
         titles.Children.Add(new FormText(WhatsChangedText.Version(entry), 13, "AnnotatorSecondaryText", wrapWidth: textWidth - 70));
         header.Children.Add(titles);
         notes.Children.Add(header);
@@ -129,7 +130,13 @@ internal sealed class WhatsChangedWindow : Window
         // The coffee box gets the column's exact width (480 less 16 on each side): Enjoying Annotator? and the button.
         coffee.Width = width - 32;
 
-        var grid = new Grid { Width = width, Height = WhatsChangedText.Height, Background = SettingsLook.Window };
+        // The Mac's accessibilityElement(children: .contain) with the identifier and no name.
+        var grid = new AccessibleGroup(string.Empty, WhatsChangedText.Identifier)
+        {
+            Width = width,
+            Height = WhatsChangedText.Height,
+            Background = SettingsLook.Window,
+        };
         grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -145,8 +152,6 @@ internal sealed class WhatsChangedWindow : Window
         grid.Children.Add(divider);
         grid.Children.Add(coffeePad);
         grid.Children.Add(closePad);
-        AutomationProperties.SetAutomationId(grid, WhatsChangedText.Identifier);
-        AutomationProperties.SetName(grid, WhatsChangedText.Title);
         if (animate)
         {
             Enter(notes, 18);
