@@ -37,6 +37,7 @@ internal sealed class TutorialController
     private readonly Func<RectInt32?> _toolbar;
     private readonly Func<string, RectInt32?> _control;
     private readonly Action _openShortcuts;
+    private readonly Action _startDrawing;
     private readonly TutorialCardActions _actions;
     private TutorialCardWindow? _card;
     private TutorialOverlay? _overlay;
@@ -57,10 +58,12 @@ internal sealed class TutorialController
     /// <param name="toolbar">The toolbar's frame in physical pixels while it shows.</param>
     /// <param name="control">A toolbar control's frame in physical pixels, by accessible name.</param>
     /// <param name="openShortcuts">Opens Settings on Toolbar &amp; Shortcuts.</param>
+    /// <param name="startDrawing">Turns drawing on and shows the toolbar (Resume drawing), for Start tutorial.</param>
     public TutorialController(WindowRegistry registry, DispatcherQueue queue, AppDefaults defaults, Func<WorkspaceSnapshot> snapshot,
                               Action<string> status, Annotator.Workspace.Metrics.UsageMetrics usage, Func<RectInt32?> toolbar,
-                              Func<string, RectInt32?> control, Action openShortcuts)
+                              Func<string, RectInt32?> control, Action openShortcuts, Action startDrawing)
     {
+        _startDrawing = startDrawing;
         _registry = registry;
         _queue = queue;
         _snapshot = snapshot;
@@ -181,15 +184,19 @@ internal sealed class TutorialController
         }
     }
 
-    /// <summary>Start tutorial: the first step shows in the card, now placed next to the toolbar.</summary>
+    /// <summary>
+    /// Start tutorial: drawing turns on, so the first step's key reaches the canvas, and the first step shows in the card, now
+    /// placed next to the toolbar.
+    /// </summary>
     private void Start()
     {
+        _startDrawing();
         _progress = new TutorialProgress(TutorialObserver.Observe(_snapshot()));
         _stage = Stage.Coaching;
-        _shownStep = TutorialStep.Draw;
+        _shownStep = TutorialSteps.All[0];
         _shownGoal = 0;
         ShowShownStep();
-        // Steps that were done already (drawing that was on) count now, one beat at a time.
+        // Steps that were done already (a tool that was chosen) count now, one beat at a time.
         if (_progress.Step != _shownStep || _progress.IsFinished)
         {
             StepDone();
@@ -240,7 +247,7 @@ internal sealed class TutorialController
         StopGoal();
         if (_coach is { } coach)
         {
-            coach.TitleCheck.Root.Visibility = Visibility.Visible;
+            coach.TitleCheck.Root.Opacity = 1;
             Check(coach.TitleCheck);
             for (int index = _shownGoal; index < coach.Goals.Count; index++)
             {
@@ -306,8 +313,9 @@ internal sealed class TutorialController
             card.Show(coach.Root, NextToToolbar, takeFocus: false, reduce);
             coach.CurrentSegment.Loaded += (_, _) => TutorialCardView.Grow(coach.CurrentSegment, reduce);
             // Narrator reads the new step, as VoiceOver announces it on the Mac.
-            coach.Root.Loaded += (_, _) => TutorialCardView.Announce(coach.Root, TutorialText.StepValue(_shownStep) + ". " +
-                TutorialText.Step(_shownStep, _snapshot()).Title + ". " + TutorialText.Step(_shownStep, _snapshot()).Detail);
+            TutorialStepText words = TutorialText.Step(_shownStep, _snapshot());
+            coach.Root.Loaded += (_, _) => TutorialCardView.Announce(coach.Root, TutorialText.StepValue(_shownStep) + ". " + words.Title + ". " +
+                TutorialText.Plain(words.Detail ?? string.Join(". ", words.Goals)));
         }
         else
         {

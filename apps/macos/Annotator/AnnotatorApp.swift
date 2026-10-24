@@ -177,7 +177,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         errorController = WorkspaceErrorController(model: model)
         tutorial = TutorialController(model: model,
                                       presented: { [weak self] in self?.drawingToolsArePresented ?? false },
-                                      toolbarWindow: { [weak self] in self?.toolbarWindow })
+                                      toolbarWindow: { [weak self] in self?.toolbarWindow },
+                                      startDrawing: { [weak self] in self?.resumeDrawing() })
         model.onShowIntroduction = { [weak self] in self?.tutorial?.showManually() }
         model.onDismissMenuBar = { [weak self] in
             guard let self else { return false }

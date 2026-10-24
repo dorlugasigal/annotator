@@ -56,6 +56,9 @@ public enum TutorialMotion {
     public static let ghostReleaseDuration = 0.14
     public static let ghostPressScale = 0.86
 
+    /// The pause between the two clicks of the ghost's double-click.
+    public static let doubleClickGap = 0.1
+
     /// A click sends out one ring.
     public static let rippleDuration = 0.5
     public static let rippleStartRadius = 4.0
@@ -136,6 +139,21 @@ public enum TutorialMotion {
         return result
     }
 
+    /// The arrowhead's two barbs, in points, at the end of the ghost's curved arrow.
+    public static let arrowheadLength = 14.0
+
+    /// The angle between each barb and the arrow's line, in degrees.
+    public static let arrowheadAngle = 28.0
+
+    /// The ends of the arrowhead's two barbs at `tip`, for a line arriving from `from`; the barbs are `length` long (scale
+    /// it with the display).
+    public static func arrowhead(from: Point, tip: Point, length: Double = arrowheadLength) -> (left: Point, right: Point) {
+        let heading = atan2(tip.y - from.y, tip.x - from.x)
+        let spread = arrowheadAngle * Double.pi / 180
+        func barb(_ angle: Double) -> Point { Point(tip.x - cos(angle) * length, tip.y - sin(angle) * length) }
+        return (barb(heading - spread), barb(heading + spread))
+    }
+
     /// A loop around `center` for the ghost's pen: a little wider than tall, closing past its start.
     public static func loop(center: Point, radius: Double, samples: Int = 48) -> [Point] {
         (0...samples).map { index in
@@ -189,16 +207,23 @@ public struct ConfettiState: Equatable, Sendable {
     }
 }
 
-/// The celebration at the end: confetti pops from both bottom corners of the display, rises, and falls back. The pieces
-/// come from a fixed seed and their paths have a closed form, so both apps show the same burst.
+/// The celebration at the end: two waves of confetti pop from both bottom corners of the display, rise up to nine tenths
+/// of its height, drift as far as its middle and float back down. The pieces come from a fixed seed and their paths have
+/// a closed form, so both apps show the same burst.
 public enum ConfettiBurst {
     public static let seed: UInt64 = 0x5EED_A110_7A7E_C0DE
-    public static let piecesPerCorner = 60
-    public static let drag = 1.15
+    public static let piecesPerCorner = 110
+    public static let waves = 2
+
+    /// The second wave leaves this long after the first.
+    public static let waveGap = 0.4
+
+    /// How strongly air slows a piece, per second: enough that pieces float down rather than drop.
+    public static let drag = 2.0
     public static let fadeDuration = 0.45
 
-    /// The longest a burst can last, delay included.
-    public static let duration = 2.8
+    /// The longest the burst can last, delays included.
+    public static let duration = 4.2
 
     /// Sizes in points: a rectangle, a dot and a ribbon.
     public static let shapeSizes: [(width: Double, height: Double)] = [(8, 13), (7, 7), (4, 16)]
@@ -209,34 +234,38 @@ public enum ConfettiBurst {
     ]
 
     /// Gravity for a display `height` points tall: taller displays get a stronger pull and launch.
-    public static func gravity(height: Double) -> Double { 2000 * scale(height) }
+    public static func gravity(height: Double) -> Double { 900 * scale(height) }
 
-    /// The pieces for a display of `width` by `height` points, left corner first.
+    /// The pieces for a display of `width` by `height` points: wave by wave, left corner first.
     public static func pieces(width: Double, height: Double) -> [ConfettiPiece] {
         var random = SplitMix64(seed: seed)
         let factor = scale(height)
         var result: [ConfettiPiece] = []
-        result.reserveCapacity(piecesPerCorner * 2)
-        for corner in 0..<2 {
-            for _ in 0..<piecesPerCorner {
-                let angle = (52 + random.nextDouble() * 26) * Double.pi / 180
-                let speed = (1100 + random.nextDouble() * 650) * factor
-                let direction: Double = corner == 0 ? 1 : -1
-                let x = corner == 0 ? random.nextDouble() * 24 : width - random.nextDouble() * 24
-                let y = height + 6 - random.nextDouble() * 12
-                let velocity = Point(cos(angle) * speed * direction, -sin(angle) * speed)
-                let delay = random.nextDouble() * 0.18
-                let lifetime = 1.9 + random.nextDouble() * 0.7
-                let turn = random.nextDouble() * 360
-                let spin = (random.nextDouble() * 2 - 1) * 540
-                let phase = random.nextDouble() * Double.pi * 2
-                let flutter = 6 + random.nextDouble() * 8
-                let roll = random.nextDouble()
-                let shape = roll < 0.6 ? 0 : roll < 0.8 ? 1 : 2
-                let color = Int(random.nextDouble() * Double(palette.count)) % palette.count
-                result.append(ConfettiPiece(start: Point(x, y), velocity: velocity, delay: delay, lifetime: lifetime,
-                                            angle: turn, spin: spin, phase: phase, flutter: flutter,
-                                            shape: shape, color: color))
+        result.reserveCapacity(piecesPerCorner * 2 * waves)
+        for wave in 0..<waves {
+            for corner in 0..<2 {
+                for _ in 0..<piecesPerCorner {
+                    // rise 0 peaks at about 35% of the height and 1 at about 90%; reach 0 lands a tenth of the width from
+                    // its corner and 1 at the middle.
+                    let rise = random.nextDouble()
+                    let reach = random.nextDouble()
+                    let direction: Double = corner == 0 ? 1 : -1
+                    let x = corner == 0 ? random.nextDouble() * 24 : width - random.nextDouble() * 24
+                    let y = height + 6 - random.nextDouble() * 12
+                    let velocity = Point((0.2 + reach * 0.8) * width * direction, -(1220 + rise * 1240) * factor)
+                    let delay = Double(wave) * waveGap + random.nextDouble() * 0.18
+                    let lifetime = 1.8 + rise * 1.5 + random.nextDouble() * 0.3
+                    let turn = random.nextDouble() * 360
+                    let spin = (random.nextDouble() * 2 - 1) * 540
+                    let phase = random.nextDouble() * Double.pi * 2
+                    let flutter = 6 + random.nextDouble() * 8
+                    let roll = random.nextDouble()
+                    let shape = roll < 0.6 ? 0 : roll < 0.8 ? 1 : 2
+                    let color = Int(random.nextDouble() * Double(palette.count)) % palette.count
+                    result.append(ConfettiPiece(start: Point(x, y), velocity: velocity, delay: delay, lifetime: lifetime,
+                                                angle: turn, spin: spin, phase: phase, flutter: flutter,
+                                                shape: shape, color: color))
+                }
             }
         }
         return result

@@ -18,7 +18,7 @@ public class TutorialTests
     [Fact]
     public void StepsAndGoalsKeepTheirOrderAndRawValues()
     {
-        Assert.Equal(["draw", "rectangle", "shape", "color", "arrow", "pen", "move", "undo", "useApps", "drawAgain", "hide"],
+        Assert.Equal(["rectangle", "shape", "color", "arrow", "pen", "move", "undo", "useApps", "drawAgain", "hide"],
             TutorialSteps.All.Select(step => step.RawValue));
         Assert.Equal([TutorialGoal.ArrowTool, TutorialGoal.CurvedStyle, TutorialGoal.CurvedArrowDrawn], TutorialStep.Arrow.Goals);
         Assert.Equal([TutorialGoal.Hidden, TutorialGoal.Shown], TutorialStep.Hide.Goals);
@@ -28,9 +28,8 @@ public class TutorialTests
     [Fact]
     public void AWholeRunAcceptsKeysOrClicksBecauseOnlyTheResultCounts()
     {
-        var progress = new TutorialProgress(Look());
-        Assert.Equal(TutorialStep.Draw, progress.Step);
-        Assert.Equal(TutorialChange.Step, progress.Observe(Look(TutorialMode.Draw)));
+        // Start tutorial turns drawing on; the first step picks a tool.
+        var progress = new TutorialProgress(Look(TutorialMode.Draw));
         Assert.Equal(TutorialStep.Rectangle, progress.Step);
         Assert.Equal(TutorialChange.Step, progress.Observe(Look(TutorialMode.Draw, tool: Tool.Rectangle)));
         Assert.Equal(TutorialStep.Shape, progress.Step);
@@ -83,19 +82,21 @@ public class TutorialTests
     [Fact]
     public void AStateThatAlreadyHoldsCountsAtOnceButSomethingNewMustComeLater()
     {
-        // Clicking Rectangle to start drawing finishes both steps in one look; the drawing it waits for next must be new.
+        // The Rectangle already chosen finishes the first step at once; the drawing the next step waits for must be new.
         TutorialElement old = Drawing(Tool.Rectangle);
-        var progress = new TutorialProgress(Look(elements: [old]));
-        Assert.Equal(TutorialChange.Step, progress.Observe(Look(TutorialMode.Draw, tool: Tool.Rectangle, elements: [old])));
+        var progress = new TutorialProgress(Look(TutorialMode.Draw, tool: Tool.Rectangle, elements: [old]));
         Assert.Equal(TutorialStep.Shape, progress.Step);
-        Assert.Equal([TutorialStep.Draw, TutorialStep.Rectangle], progress.Completed);
+        Assert.Equal([TutorialStep.Rectangle], progress.Completed);
         Assert.Equal(TutorialChange.None, progress.Observe(Look(TutorialMode.Draw, tool: Tool.Rectangle, elements: [old])));
+        // Drawing after Use apps is a step of its own later.
+        Assert.Equal([TutorialGoal.Drawing], TutorialStep.DrawAgain.Goals);
     }
 
     [Fact]
     public void AnotherToolsColorIsNotAColorChange()
     {
         var progress = new TutorialProgress(Look(TutorialMode.Draw, tool: Tool.Rectangle));
+        Assert.Equal(TutorialStep.Shape, progress.Step);
         progress.Skip();
         Assert.Equal(TutorialStep.Color, progress.Step);
         Assert.Equal(TutorialChange.None, progress.Observe(Look(TutorialMode.Draw, tool: Tool.Arrow, color: Palette.Yellow)));
@@ -128,7 +129,7 @@ public class TutorialTests
     public void HiddenToolsAreNotDrawingAndSkippingTheLastStepFinishes()
     {
         var progress = new TutorialProgress(Look(TutorialMode.Draw, presented: false));
-        Assert.Equal(TutorialStep.Draw, progress.Step);
+        Assert.Equal(TutorialStep.Rectangle, progress.Step);
         while (progress.Step != TutorialStep.Hide)
         {
             Assert.Equal(TutorialChange.Step, progress.Skip());
@@ -161,6 +162,30 @@ public class TutorialTests
         Assert.Equal(21, smooth.Count);
         Assert.Equal(new Point(100, 0), smooth[^1]);
         Assert.Equal(49, TutorialMotion.Loop(new Point(0, 0), 40).Count);
+        (Point left, Point right) = TutorialMotion.Arrowhead(new Point(0, 0), new Point(100, 0));
+        Assert.True(left.X < 100 && right.X < 100 && left.Y * right.Y < 0, $"{left} {right}");
+        Assert.Equal(TutorialMotion.ArrowheadLength, Math.Sqrt((100 - left.X) * (100 - left.X) + left.Y * left.Y), 6);
+    }
+
+    [Fact]
+    public void TheKeyboardLightsShortcutsWithModifiersAndEscape()
+    {
+        Assert.Equal(["ctrl", "shift", "2"], TutorialKeyboard.Ids(["Ctrl", "Shift", "2"], mac: false));
+        Assert.Equal(["control", "shift", "2"], TutorialKeyboard.Ids(["⌃⇧2"], mac: true));
+        Assert.Equal(["command", "z"], TutorialKeyboard.Ids(["⌘Z"], mac: true));
+        Assert.True(TutorialKeyboard.Shows(["Ctrl", "2"], mac: false));
+        Assert.True(TutorialKeyboard.Shows(["Esc"], mac: false));
+        Assert.True(TutorialKeyboard.Shows(["esc"], mac: true));
+        Assert.False(TutorialKeyboard.Shows(["7"], mac: false));
+        Assert.False(TutorialKeyboard.Shows(["Enter"], mac: false));
+        Assert.False(TutorialKeyboard.Shows(["Ctrl", "Alt", "9"], mac: false));
+        Assert.Null(TutorialKeyboard.Ids(["Ctrl", "9"], mac: false));
+        foreach (bool mac in new[] { false, true })
+        {
+            IReadOnlyList<TutorialKey> keys = TutorialKeyboard.Keys(mac);
+            Assert.Equal(keys.Count, keys.Select(key => key.Id).Distinct().Count());
+            Assert.All(keys, key => Assert.InRange(TutorialKeyboard.Frame(key).Y, 0, TutorialKeyboard.Height));
+        }
     }
 
     [Fact]
@@ -168,24 +193,36 @@ public class TutorialTests
     {
         var size = new Size(1440, 900);
         IReadOnlyList<ConfettiPiece> pieces = ConfettiBurst.Pieces(size);
-        Assert.Equal(ConfettiBurst.PiecesPerCorner * 2, pieces.Count);
+        int perCorner = ConfettiBurst.PiecesPerCorner;
+        Assert.Equal(perCorner * 2 * ConfettiBurst.Waves, pieces.Count);
         Assert.Equal(pieces, ConfettiBurst.Pieces(size));
-        Assert.All(pieces.Take(ConfettiBurst.PiecesPerCorner), piece => Assert.True(piece.Start.X < 30 && piece.Velocity.X > 0));
-        Assert.All(pieces.Skip(ConfettiBurst.PiecesPerCorner), piece => Assert.True(piece.Start.X > size.Width - 30 && piece.Velocity.X < 0));
+        Assert.All(pieces.Take(perCorner), piece => Assert.True(piece.Start.X < 30 && piece.Velocity.X > 0));
+        Assert.All(pieces.Skip(perCorner).Take(perCorner), piece => Assert.True(piece.Start.X > size.Width - 30 && piece.Velocity.X < 0));
+        // The second wave leaves after the first.
+        Assert.All(pieces.Skip(perCorner * 2), piece => Assert.True(piece.Delay >= ConfettiBurst.WaveGap));
         Assert.All(pieces, piece => Assert.InRange(piece.Delay + piece.Lifetime, 0, ConfettiBurst.Duration));
-        double highest = double.MaxValue;
+        double highest = double.MaxValue, lowestPeak = double.MinValue, farthest = 0;
         foreach (ConfettiPiece piece in pieces)
         {
             Assert.Null(ConfettiBurst.State(piece, piece.Delay - 0.01, size.Height));
             Assert.Null(ConfettiBurst.State(piece, piece.Delay + piece.Lifetime + 0.01, size.Height));
+            double peak = double.MaxValue;
             for (double time = piece.Delay; time <= piece.Delay + piece.Lifetime; time += 0.05)
             {
-                highest = Math.Min(highest, ConfettiBurst.State(piece, time, size.Height)!.Value.Position.Y);
+                ConfettiState state = ConfettiBurst.State(piece, time, size.Height)!.Value;
+                peak = Math.Min(peak, state.Position.Y);
+                double fromCorner = piece.Velocity.X > 0 ? state.Position.X : size.Width - state.Position.X;
+                farthest = Math.Max(farthest, fromCorner);
             }
+            highest = Math.Min(highest, peak);
+            lowestPeak = Math.Max(lowestPeak, peak);
             ConfettiState end = ConfettiBurst.State(piece, piece.Delay + piece.Lifetime, size.Height)!.Value;
             Assert.Equal(0, end.Opacity, 9);
         }
-        Assert.InRange(highest, size.Height * 0.1, size.Height * 0.6);
+        // Pieces rise from about a third of the height to about nine tenths, and the farthest reach the middle.
+        Assert.InRange(highest, 0, size.Height * 0.15);
+        Assert.InRange(lowestPeak, size.Height * 0.55, size.Height * 0.7);
+        Assert.InRange(farthest, size.Width * 0.45, size.Width * 0.55);
         ConfettiState first = ConfettiBurst.State(pieces[0], pieces[0].Delay, size.Height)!.Value;
         Assert.Equal(pieces[0].Start, first.Position);
     }

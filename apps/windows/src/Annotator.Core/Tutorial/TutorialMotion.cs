@@ -61,6 +61,9 @@ public static class TutorialMotion
     public const double GhostReleaseDuration = 0.14;
     public const double GhostPressScale = 0.86;
 
+    /// <summary>The pause between the two clicks of the ghost's double-click.</summary>
+    public const double DoubleClickGap = 0.1;
+
     /// <summary>A click sends out one ring.</summary>
     public const double RippleDuration = 0.5;
     public const double RippleStartRadius = 4;
@@ -134,6 +137,24 @@ public static class TutorialMotion
         return result;
     }
 
+    /// <summary>The arrowhead's two barbs, in points, at the end of the ghost's curved arrow.</summary>
+    public const double ArrowheadLength = 14;
+
+    /// <summary>The angle between each barb and the arrow's line, in degrees.</summary>
+    public const double ArrowheadAngle = 28;
+
+    /// <summary>
+    /// The ends of the arrowhead's two barbs at <paramref name="tip"/>, for a line arriving from <paramref name="from"/>; the
+    /// barbs are <paramref name="length"/> long (scale it with the display).
+    /// </summary>
+    public static (Point Left, Point Right) Arrowhead(Point from, Point tip, double length = ArrowheadLength)
+    {
+        double heading = Math.Atan2(tip.Y - from.Y, tip.X - from.X);
+        double spread = ArrowheadAngle * Math.PI / 180;
+        Point Barb(double angle) => new(tip.X - Math.Cos(angle) * length, tip.Y - Math.Sin(angle) * length);
+        return (Barb(heading - spread), Barb(heading + spread));
+    }
+
     /// <summary>A loop around <paramref name="center"/> for the ghost's pen: a little wider than tall, closing past its start.</summary>
     public static IReadOnlyList<Point> Loop(Point center, double radius, int samples = 48)
     {
@@ -166,18 +187,25 @@ public readonly record struct ConfettiPiece(Point Start, Point Velocity, double 
 public readonly record struct ConfettiState(Point Position, double Angle, double WidthScale, double Opacity);
 
 /// <summary>
-/// The celebration at the end (Swift <c>ConfettiBurst</c>): confetti pops from both bottom corners of the display, rises, and
-/// falls back. The pieces come from a fixed seed and their paths have a closed form, so both apps show the same burst.
+/// The celebration at the end (Swift <c>ConfettiBurst</c>): two waves of confetti pop from both bottom corners of the display,
+/// rise up to nine tenths of its height, drift as far as its middle and float back down. The pieces come from a fixed seed and
+/// their paths have a closed form, so both apps show the same burst.
 /// </summary>
 public static class ConfettiBurst
 {
     public const ulong Seed = 0x5EED_A110_7A7E_C0DE;
-    public const int PiecesPerCorner = 60;
-    public const double Drag = 1.15;
+    public const int PiecesPerCorner = 110;
+    public const int Waves = 2;
+
+    /// <summary>The second wave leaves this long after the first.</summary>
+    public const double WaveGap = 0.4;
+
+    /// <summary>How strongly air slows a piece, per second: enough that pieces float down rather than drop.</summary>
+    public const double Drag = 2.0;
     public const double FadeDuration = 0.45;
 
-    /// <summary>The longest a burst can last, delay included.</summary>
-    public const double Duration = 2.8;
+    /// <summary>The longest the burst can last, delays included.</summary>
+    public const double Duration = 4.2;
 
     /// <summary>Sizes in points: a rectangle, a dot and a ribbon.</summary>
     public static IReadOnlyList<Size> ShapeSizes { get; } = [new Size(8, 13), new Size(7, 7), new Size(4, 16)];
@@ -190,34 +218,39 @@ public static class ConfettiBurst
     ];
 
     /// <summary>Gravity for a display of <paramref name="height"/> points: taller displays get a stronger pull and launch.</summary>
-    public static double Gravity(double height) => 2000 * Scale(height);
+    public static double Gravity(double height) => 900 * Scale(height);
 
-    /// <summary>The pieces for a display of <paramref name="size"/> points, left corner first.</summary>
+    /// <summary>The pieces for a display of <paramref name="size"/> points: wave by wave, left corner first.</summary>
     public static IReadOnlyList<ConfettiPiece> Pieces(Size size)
     {
         var random = new SplitMix64(Seed);
         double scale = Scale(size.Height);
-        var pieces = new List<ConfettiPiece>(PiecesPerCorner * 2);
-        for (int corner = 0; corner < 2; corner++)
+        var pieces = new List<ConfettiPiece>(PiecesPerCorner * 2 * Waves);
+        for (int wave = 0; wave < Waves; wave++)
         {
-            for (int index = 0; index < PiecesPerCorner; index++)
+            for (int corner = 0; corner < 2; corner++)
             {
-                double angle = (52 + random.NextDouble() * 26) * Math.PI / 180;
-                double speed = (1100 + random.NextDouble() * 650) * scale;
-                double direction = corner == 0 ? 1 : -1;
-                var start = new Point(corner == 0 ? random.NextDouble() * 24 : size.Width - random.NextDouble() * 24,
-                                      size.Height + 6 - random.NextDouble() * 12);
-                var velocity = new Point(Math.Cos(angle) * speed * direction, -Math.Sin(angle) * speed);
-                double delay = random.NextDouble() * 0.18;
-                double lifetime = 1.9 + random.NextDouble() * 0.7;
-                double turn = random.NextDouble() * 360;
-                double spin = (random.NextDouble() * 2 - 1) * 540;
-                double phase = random.NextDouble() * Math.PI * 2;
-                double flutter = 6 + random.NextDouble() * 8;
-                double roll = random.NextDouble();
-                int shape = roll < 0.6 ? 0 : roll < 0.8 ? 1 : 2;
-                int color = (int)(random.NextDouble() * Palette.Count) % Palette.Count;
-                pieces.Add(new ConfettiPiece(start, velocity, delay, lifetime, turn, spin, phase, flutter, shape, color));
+                for (int index = 0; index < PiecesPerCorner; index++)
+                {
+                    // rise 0 peaks at about 35% of the height and 1 at about 90%; reach 0 lands a tenth of the width from its
+                    // corner and 1 at the middle.
+                    double rise = random.NextDouble();
+                    double reach = random.NextDouble();
+                    double direction = corner == 0 ? 1 : -1;
+                    var start = new Point(corner == 0 ? random.NextDouble() * 24 : size.Width - random.NextDouble() * 24,
+                                          size.Height + 6 - random.NextDouble() * 12);
+                    var velocity = new Point((0.2 + reach * 0.8) * size.Width * direction, -(1220 + rise * 1240) * scale);
+                    double delay = wave * WaveGap + random.NextDouble() * 0.18;
+                    double lifetime = 1.8 + rise * 1.5 + random.NextDouble() * 0.3;
+                    double turn = random.NextDouble() * 360;
+                    double spin = (random.NextDouble() * 2 - 1) * 540;
+                    double phase = random.NextDouble() * Math.PI * 2;
+                    double flutter = 6 + random.NextDouble() * 8;
+                    double roll = random.NextDouble();
+                    int shape = roll < 0.6 ? 0 : roll < 0.8 ? 1 : 2;
+                    int color = (int)(random.NextDouble() * Palette.Count) % Palette.Count;
+                    pieces.Add(new ConfettiPiece(start, velocity, delay, lifetime, turn, spin, phase, flutter, shape, color));
+                }
             }
         }
         return pieces;

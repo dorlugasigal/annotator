@@ -204,7 +204,8 @@ internal sealed partial class AppHost
         _model.UsageRecorded += _usage.Record;
         _settingsActions.UsageMetrics = _usage;
         _tutorial = new TutorialController(_registry, _queue, _defaults, () => _model.Snapshot, _model.ShowStatus, _usage,
-            () => _model.Snapshot.ToolbarVisible ? _toolbar.Frame : null, _toolbar.Control, () => OpenSettings(SettingsTab.Toolbar));
+            () => _model.Snapshot.ToolbarVisible ? _toolbar.Frame : null, _toolbar.Control, () => OpenSettings(SettingsTab.Toolbar),
+            _model.ResumeDrawing);
         _tutorial.VisibilityChanged += UpdateSupportReminder;
         // Settings floats again once the tutorial card that opened in front of it hides.
         _tutorial.VisibilityChanged += () =>

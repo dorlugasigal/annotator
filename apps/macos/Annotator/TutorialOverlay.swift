@@ -12,14 +12,17 @@ struct TutorialGhostRun: Equatable {
         case click(CGPoint)
         /// Presses at the path's first point, follows it and lets go; the ink, if any, follows the ghost.
         case drag([CGPoint], ink: Ink?)
-        /// Clicks each point in turn while a smooth line grows through them: the curved arrow.
-        case clicks([CGPoint])
+        /// Clicks each point in turn while a smooth line grows through them: the curved arrow. With `double`, the last
+        /// click is a double-click, which finishes the arrow with its head.
+        case clicks([CGPoint], double: Bool = false)
     }
 
     /// The full frame of the display the ghost plays on.
     var display: CGRect
     var start: CGPoint
     var steps: [Step]
+    /// Keys pressed after the steps; after a curved arrow they finish it, which adds its head. 0 for none.
+    var finishKeys = 0
 }
 
 /// The ghost's keyframes for one run, sampled from the shared tutorial motion so both apps move alike.
@@ -49,7 +52,11 @@ struct TutorialGhostTimeline {
     private(set) var inks: [Ink] = []
     /// When the last click or drag has let go.
     private(set) var actionsEnd = 0.0
+    /// When the keys after the steps go down, if the run has any.
+    private(set) var keyCue: Double?
     private(set) var duration = 0.0
+    /// The curved arrow waiting for its head: its ink and its last segment.
+    private var arrow: (ink: Int, from: CGPoint, tip: CGPoint)?
 
     init(_ run: TutorialGhostRun) {
         var at = run.start
@@ -85,7 +92,7 @@ struct TutorialGhostTimeline {
                     }
                     inks.append(ink)
                 }
-            case .clicks(let points):
+            case .clicks(let points, let double):
                 guard let first = points.first else { continue }
                 travel(to: first, at: &at, time: &time)
                 let curve = Self.curve(through: points)
@@ -97,6 +104,7 @@ struct TutorialGhostTimeline {
                 ink.reveal = [(time, 0)]
                 click(at: first, time: &time)
                 for index in 1..<max(1, points.count) {
+                    time += TutorialMotion.ghostPause
                     let from = curve.anchors[index - 1], to = curve.anchors[index]
                     let base = lengths[from], span = lengths[to] - lengths[from]
                     ink.reveal.append((time, total > 0 ? base / total : 0))
@@ -106,10 +114,28 @@ struct TutorialGhostTimeline {
                     click(at: points[index], time: &time)
                 }
                 ink.release = time
+                if points.count >= 2 && curve.points.count >= 2 {
+                    arrow = (ink: inks.count, from: curve.points[curve.points.count - 2],
+                             tip: curve.points[curve.points.count - 1])
+                }
                 inks.append(ink)
+                if double, let last = points.last {
+                    time += TutorialMotion.doubleClickGap
+                    ripples.append(Ripple(center: last, time: time))
+                    press(time: &time)
+                    head(at: time)
+                    release(time: &time)
+                }
             }
             actionsEnd = time
             time += TutorialMotion.ghostPause
+        }
+        if run.finishKeys > 0 {
+            // The keys go down; after a curved arrow they finish it.
+            keyCue = time
+            head(at: time + TutorialMotion.keyDownDuration)
+            time += Double(run.finishKeys - 1) * TutorialMotion.keyStagger + TutorialMotion.keyDownDuration +
+                TutorialMotion.keyUpDuration + 0.35
         }
         let vanished = time + TutorialMotion.ghostVanishDuration
         positions.append((vanished, at))
@@ -194,6 +220,21 @@ struct TutorialGhostTimeline {
         time += duration
         at = last
         return samples
+    }
+
+    /// The curved arrow is finished at `at`: its head appears at the last point, and the arrow and its head fade together.
+    private mutating func head(at time: Double) {
+        guard let arrow else { return }
+        self.arrow = nil
+        let barbs = TutorialMotion.arrowhead(from: Point(Double(arrow.from.x), Double(arrow.from.y)),
+                                             tip: Point(Double(arrow.tip.x), Double(arrow.tip.y)))
+        var ink = Ink(style: .line)
+        ink.line = [CGPoint(x: barbs.left.x, y: barbs.left.y), arrow.tip, CGPoint(x: barbs.right.x, y: barbs.right.y)]
+        ink.reveal = [(time, 1)]
+        ink.start = time
+        ink.release = time
+        inks[arrow.ink].release = time
+        inks.append(ink)
     }
 
     private mutating func press(time: inout Double) {
@@ -290,18 +331,19 @@ final class TutorialOverlay {
     private var panels: [TutorialOverlayPanel] = []
     private var demo: CALayer?
     private var ring: CAShapeLayer?
-    private var celebration: CALayer?
+    private var bursts: [(token: Int, layer: CALayer, end: Task<Void, Never>)] = []
+    private var burstToken = 0
     private var fading: [(token: Int, layer: CALayer)] = []
     private var fadeToken = 0
     private var demoEnd: Task<Void, Never>?
-    private var celebrationEnd: Task<Void, Never>?
     /// The ring's frame in screen points, outset included.
     private(set) var ringFrame: CGRect?
     private(set) var ghostRuns = 0
+    /// Bursts started.
     private(set) var celebrations = 0
     var isPlayingDemo: Bool { demo != nil }
     var isRingVisible: Bool { ring != nil }
-    var isCelebrating: Bool { celebration != nil }
+    var isCelebrating: Bool { !bursts.isEmpty }
     var windows: [NSPanel] { panels }
 
     // MARK: Ghost
@@ -459,9 +501,9 @@ final class TutorialOverlay {
 
     // MARK: Confetti
 
-    /// Pops confetti from both bottom corners of `display` (screen points). It ends on its own.
+    /// Pops confetti from both bottom corners of `display` (screen points). Each burst ends on its own when its last piece
+    /// lands; a new one may start while another falls.
     func celebrate(on display: CGRect, level: NSWindow.Level) {
-        stopCelebration()
         guard let view = surface(on: display, level: level), let root = view.layer else { return }
         celebrations += 1
         let height = Double(display.height)
@@ -514,24 +556,39 @@ final class TutorialOverlay {
             container.addSublayer(layer)
         }
         CATransaction.commit()
-        celebration = container
+        burstToken &+= 1
+        let token = burstToken
+        let landed = pieces.map { $0.delay + $0.lifetime }.max() ?? 0
         // Holds the overlay until the burst ends, even when the tutorial closes first.
-        celebrationEnd = Task { @MainActor [self] in
-            try? await Task.sleep(for: .seconds(ConfettiBurst.duration + 0.1))
+        let end = Task { @MainActor [self] in
+            try? await Task.sleep(for: .seconds(landed + 0.1))
             guard !Task.isCancelled else { return }
-            self.celebrationEnd = nil
-            self.stopCelebration()
+            self.endBurst(token)
         }
+        bursts.append((token: token, layer: container, end: end))
     }
 
+    /// Removes every burst at once.
     func stopCelebration() {
-        celebrationEnd?.cancel()
-        celebrationEnd = nil
-        guard let celebration else { return }
-        self.celebration = nil
+        guard !bursts.isEmpty else { return }
+        let ended = bursts
+        bursts.removeAll()
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        celebration.removeFromSuperlayer()
+        for burst in ended {
+            burst.end.cancel()
+            burst.layer.removeFromSuperlayer()
+        }
+        CATransaction.commit()
+        tidy()
+    }
+
+    private func endBurst(_ token: Int) {
+        guard let index = bursts.firstIndex(where: { $0.token == token }) else { return }
+        let burst = bursts.remove(at: index)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        burst.layer.removeFromSuperlayer()
         CATransaction.commit()
         tidy()
     }

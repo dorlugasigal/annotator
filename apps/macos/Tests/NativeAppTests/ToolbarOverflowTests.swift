@@ -24,6 +24,7 @@ final class ToolbarOverflowTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        model.setInspectorPinned(false)
         model.beginDrawing()
         for tool in [Tool.pen, .rectangle, .text, .blur] {
             model.tool = tool

@@ -47,8 +47,11 @@ public abstract record TutorialDemoAction;
 /// <summary>The card's keycaps go down one after another.</summary>
 public sealed record TutorialDemoKeys(ImmutableArray<string> Keys) : TutorialDemoAction;
 
-/// <summary>The ghost travels to <paramref name="Target"/> and clicks; with <see cref="TutorialInk.Curve"/> the point joins the curve.</summary>
-public sealed record TutorialDemoClick(TutorialSpot Target, TutorialInk Ink = TutorialInk.None) : TutorialDemoAction;
+/// <summary>
+/// The ghost travels to <paramref name="Target"/> and clicks, twice when <paramref name="Double"/>; with
+/// <see cref="TutorialInk.Curve"/> the point joins the curve, and a double-click finishes it with its head.
+/// </summary>
+public sealed record TutorialDemoClick(TutorialSpot Target, TutorialInk Ink = TutorialInk.None, bool Double = false) : TutorialDemoAction;
 
 /// <summary>The ghost travels to <paramref name="From"/>, presses, drags in a straight line to <paramref name="To"/> and lets go.</summary>
 public sealed record TutorialDemoDrag(TutorialSpot From, TutorialSpot To, TutorialInk Ink) : TutorialDemoAction;
@@ -58,7 +61,7 @@ public sealed record TutorialDemoLoop(TutorialSpot Center, double Radius) : Tuto
 
 /// <summary>
 /// The ghost's demonstrations, one per goal (Mac TutorialDemos). Each shows the key first, then the click, so both ways are
-/// visible. The toolbar names are the controls' accessible names.
+/// visible; the curved arrow ends with a double-click. The toolbar names are the controls' accessible names.
 /// </summary>
 public static class TutorialDemos
 {
@@ -109,8 +112,7 @@ public static class TutorialDemos
             case TutorialGoal.CurvedArrowDrawn:
                 actions.Add(new TutorialDemoClick(TutorialSpot.Work(0.56, 0.62), TutorialInk.Curve));
                 actions.Add(new TutorialDemoClick(TutorialSpot.Work(0.64, 0.46), TutorialInk.Curve));
-                actions.Add(new TutorialDemoClick(TutorialSpot.Work(0.74, 0.54), TutorialInk.Curve));
-                actions.Add(new TutorialDemoKeys(keys));
+                actions.Add(new TutorialDemoClick(TutorialSpot.Work(0.74, 0.54), TutorialInk.Curve, Double: true));
                 break;
             case TutorialGoal.PenDrawn:
                 actions.Add(new TutorialDemoLoop(TutorialSpot.Work(0.30, 0.62), 56));

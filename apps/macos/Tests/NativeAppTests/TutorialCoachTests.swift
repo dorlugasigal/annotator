@@ -19,7 +19,7 @@ final class TutorialCoachTests: XCTestCase {
         defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         model = WorkspaceModel(defaults: defaults, zoomInputPermissions: ZoomInputPermissions(
             isGranted: { false }, request: { XCTFail("The tutorial must not request Accessibility."); return false }))
-        tutorial = TutorialController(model: model)
+        tutorial = TutorialController(model: model, startDrawing: { [weak self] in self?.draw() })
         tutorial.reducesMotion = { true }
     }
 
@@ -39,7 +39,7 @@ final class TutorialCoachTests: XCTestCase {
         let preferences = model.preferences
         try await startCoach()
         XCTAssertEqual(model.preferences, preferences, "Starting the tutorial changes no setting.")
-        draw()
+        XCTAssertEqual(model.mode, .draw, "Start tutorial turns drawing on.")
         try await waitFor(.rectangle)
         XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible, "The coach stays while drawing.")
         XCTAssertFalse(try XCTUnwrap(tutorial.window).isKeyWindow)
@@ -73,7 +73,7 @@ final class TutorialCoachTests: XCTestCase {
         try await waitUntil { self.tutorial.surface == .finish }
         XCTAssertTrue(tutorial.preferences.completed)
         XCTAssertEqual(tutorial.progress?.completed,
-                       [TutorialStep.draw, .rectangle, .shape, .color, .move, .undo, .useApps, .drawAgain, .hide])
+                       [TutorialStep.rectangle, .shape, .color, .move, .undo, .useApps, .drawAgain, .hide])
         XCTAssertEqual(tutorial.progress?.skipped, [TutorialStep.arrow, .pen])
         tutorial.done()
         try await waitUntil { !self.tutorial.isVisible }
@@ -97,7 +97,6 @@ final class TutorialCoachTests: XCTestCase {
         tutorial.demoDelay = 0
         try await startCoach()
         tutorial.skipStep()
-        tutorial.skipStep()
         XCTAssertEqual(tutorial.shownGoal, .shapeDrawn)
         tutorial.showMe()
         try await waitUntil { self.tutorial.demonstratedGoals.last == .shapeDrawn }
@@ -109,6 +108,8 @@ final class TutorialCoachTests: XCTestCase {
         XCTAssertEqual(tutorial.shownGoal, .colorChanged)
         try await waitUntil { self.tutorial.keyPressToken > presses }
         XCTAssertEqual(tutorial.overlay.ghostRuns, 0)
+        model.applyStyle { $0.color = .yellow }
+        try await waitUntil { self.tutorial.progress?.completed.contains(.color) == true }
         for _ in 0..<20 where tutorial.surface == .coach { tutorial.skipStep() }
         XCTAssertEqual(tutorial.surface, .finish)
         XCTAssertEqual(tutorial.overlay.celebrations, 0, "Reduce Motion leaves out the confetti.")
@@ -119,21 +120,22 @@ final class TutorialCoachTests: XCTestCase {
         tutorial.demoDelay = 60
         try await startCoach()
         tutorial.skipStep()
-        tutorial.skipStep()
         XCTAssertEqual(tutorial.shownGoal, .shapeDrawn)
         XCTAssertEqual(tutorial.overlay.ghostRuns, 0, "The ghost waits for its delay.")
+        let tool = model.tool
         tutorial.showMe()
         try await waitUntil { self.tutorial.overlay.isPlayingDemo }
         XCTAssertEqual(tutorial.overlay.ghostRuns, 1)
         XCTAssertFalse(tutorial.overlay.windows.isEmpty)
         XCTAssertTrue(tutorial.overlay.windows.allSatisfy { $0.ignoresMouseEvents && !$0.canBecomeKey },
                       "The ghost never takes a click or the keyboard.")
-        XCTAssertEqual(model.mode, .off, "The ghost's click is only a picture.")
+        XCTAssertEqual(model.tool, tool, "The ghost's click is only a picture.")
         tutorial.skipStep()
         try await waitUntil { !self.tutorial.overlay.isPlayingDemo }
         try await Task.sleep(for: .milliseconds(400))
         XCTAssertEqual(tutorial.overlay.ghostRuns, 1, "Nothing loops.")
-        XCTAssertTrue(model.desktopSessions.isEmpty)
+        XCTAssertEqual(model.mode, .draw)
+        XCTAssertTrue(model.desktopSessions.allSatisfy { $0.document.elements.isEmpty }, "The ghost draws nothing.")
     }
 
     func testFinishingCelebratesOnceAndOpensShortcutSettings() async throws {
@@ -143,7 +145,8 @@ final class TutorialCoachTests: XCTestCase {
         for _ in 0..<20 where tutorial.surface == .coach { tutorial.skipStep() }
         XCTAssertEqual(tutorial.surface, .finish)
         XCTAssertTrue(tutorial.preferences.completed)
-        XCTAssertEqual(tutorial.overlay.celebrations, 1)
+        XCTAssertEqual(tutorial.progress?.completed, [TutorialStep.drawAgain], "Drawing is on, so Draw again counts at once.")
+        XCTAssertEqual(tutorial.overlay.celebrations, 1, "Only the finished tutorial pops confetti.")
         XCTAssertTrue(tutorial.overlay.isCelebrating)
         tutorial.openSettings()
         XCTAssertEqual(model.settingsTab, .toolbar)
@@ -151,6 +154,42 @@ final class TutorialCoachTests: XCTestCase {
         try await waitUntil { !self.tutorial.isVisible }
         try await waitUntil { !self.tutorial.overlay.isCelebrating }
         XCTAssertTrue(tutorial.overlay.windows.allSatisfy { !$0.isVisible }, "Nothing waits on screen after the burst.")
+    }
+
+    func testFinishedStepsDoNotPopConfetti() async throws {
+        tutorial.reducesMotion = { false }
+        tutorial.demoDelay = 60
+        try await startCoach()
+        model.choose(.rectangle)
+        try await waitFor(.shape)
+        model.perform { try $0.add(Element(tool: .rectangle, frame: Rect(x: 120, y: 120, width: 160, height: 90))) }
+        try await waitFor(.color)
+        XCTAssertEqual(tutorial.progress?.completed, [TutorialStep.rectangle, .shape])
+        XCTAssertEqual(tutorial.overlay.celebrations, 0, "Only the finished tutorial celebrates.")
+        XCTAssertFalse(tutorial.overlay.isCelebrating)
+    }
+
+    func testTheColorStepAsksForGreenWhenTheDrawingIsBlueAlready() async throws {
+        let preferences = model.preferences
+        XCTAssertEqual(TutorialText.step(.color, preferences: preferences, color: .coral).title, "Make it blue")
+        XCTAssertEqual(TutorialText.keys(for: .colorChanged, preferences: preferences, color: .coral), ["B"])
+        let blue = TutorialText.step(.color, preferences: preferences, color: .blue)
+        XCTAssertEqual(blue.title, "Make it green")
+        XCTAssertEqual(blue.detail, "Press {G}, or pick any color in the toolbar.")
+        XCTAssertEqual(TutorialText.keys(for: .colorChanged, preferences: preferences, color: .blue), ["G"])
+        XCTAssertEqual(TutorialText.step(.color, preferences: preferences).title, "Make it blue")
+
+        model.applyStyle { $0.color = .blue }
+        try await startCoach()
+        tutorial.skipStep()
+        tutorial.skipStep()
+        XCTAssertEqual(tutorial.shownStep, .color)
+        XCTAssertEqual(tutorial.shownColor, .blue)
+        XCTAssertEqual(tutorial.lastAnnouncement,
+                       "Step 3 of 10. Make it green. Press G, or pick any color in the toolbar.")
+        model.applyStyle { $0.color = RGBA(0.28, 0.69, 0.4) }
+        try await waitUntil { self.tutorial.shownStepDone }
+        XCTAssertEqual(tutorial.shownColor, .blue, "The words stay put while the color changes.")
     }
 
     func testHintAppearsAfterAQuietSpellAndPointsAtShowMe() async throws {
@@ -174,7 +213,8 @@ final class TutorialCoachTests: XCTestCase {
         toolbar = panel
         tutorial.shutdown()
         tutorial = TutorialController(model: model, presented: { [weak self] in self?.toolsShown ?? false },
-                                      toolbarWindow: { [weak self] in self?.toolbar })
+                                      toolbarWindow: { [weak self] in self?.toolbar },
+                                      startDrawing: { [weak self] in self?.draw() })
         tutorial.reducesMotion = { true }
         try await startCoach()
         try await Task.sleep(for: .milliseconds(150))
@@ -288,7 +328,40 @@ final class TutorialCoachTests: XCTestCase {
         let ink = try XCTUnwrap(arrow.inks.first)
         XCTAssertEqual(try XCTUnwrap(ink.reveal.last).value, 1, accuracy: 1e-6)
         XCTAssertEqual(ink.line.count, 25)
+        let drawn = TutorialGhostTimeline.value(ink.reveal, at: arrow.ripples[1].time)
+        XCTAssertGreaterThan(drawn, 0.2, "The arrow grows along with the ghost.")
+        XCTAssertLessThan(drawn, 0.8)
         XCTAssertGreaterThan(arrow.duration, arrow.actionsEnd)
+        XCTAssertNil(arrow.keyCue)
+
+        let doubled = TutorialGhostTimeline(TutorialGhostRun(
+            display: display, start: .zero,
+            steps: [.clicks([CGPoint(x: 300, y: 300), CGPoint(x: 400, y: 420), CGPoint(x: 520, y: 360)], double: true)]))
+        XCTAssertNil(doubled.keyCue, "A double-click finishes the arrow; no key plays.")
+        XCTAssertEqual(doubled.ripples.count, 4, "The last point is clicked twice.")
+        XCTAssertEqual(doubled.ripples[3].time - doubled.ripples[2].time,
+                       TutorialMotion.ghostPressDuration + TutorialMotion.ghostReleaseDuration + TutorialMotion.doubleClickGap,
+                       accuracy: 1e-9)
+        XCTAssertEqual(doubled.inks.count, 2, "The double-click adds the arrowhead.")
+        let tip = try XCTUnwrap(doubled.inks.last)
+        XCTAssertEqual(tip.start, doubled.ripples[3].time + TutorialMotion.ghostPressDuration, accuracy: 1e-9)
+        XCTAssertEqual(doubled.inks[0].release, tip.start, accuracy: 1e-9)
+        XCTAssertEqual(doubled.actionsEnd, tip.start + TutorialMotion.ghostReleaseDuration, accuracy: 1e-9)
+
+        let finished = TutorialGhostTimeline(TutorialGhostRun(
+            display: display, start: .zero,
+            steps: [.clicks([CGPoint(x: 300, y: 300), CGPoint(x: 400, y: 420), CGPoint(x: 520, y: 360)])],
+            finishKeys: 1))
+        let cue = try XCTUnwrap(finished.keyCue)
+        XCTAssertEqual(cue, finished.actionsEnd + TutorialMotion.ghostPause, accuracy: 1e-9)
+        XCTAssertEqual(finished.inks.count, 2, "Return adds the arrowhead.")
+        let head = try XCTUnwrap(finished.inks.last)
+        XCTAssertEqual(head.start, cue + TutorialMotion.keyDownDuration, accuracy: 1e-9)
+        XCTAssertEqual(head.line.count, 3)
+        XCTAssertEqual(head.line[1].x, 520, accuracy: 1e-6)
+        XCTAssertEqual(head.line[1].y, 360, accuracy: 1e-6)
+        XCTAssertEqual(finished.inks[0].release, head.start, accuracy: 1e-9, "The arrow and its head fade together.")
+        XCTAssertGreaterThan(finished.duration, head.end - 1e-9)
     }
 
     // MARK: Helpers

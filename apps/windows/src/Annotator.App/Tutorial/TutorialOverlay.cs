@@ -60,7 +60,7 @@ internal sealed class TutorialOverlay : IDisposable
     private double _scale = 1;
     private ContainerVisual? _demo;
     private ShapeVisual? _ring;
-    private ContainerVisual? _confetti;
+    private readonly List<ContainerVisual> _confetti = [];
     private int _generation;
 
     public TutorialOverlay(WindowRegistry registry, Compositor compositor, Color accent)
@@ -176,19 +176,21 @@ internal sealed class TutorialOverlay : IDisposable
         Refresh();
     }
 
-    /// <summary>Confetti pops from both bottom corners of the display and falls away (Mac TutorialOverlay.celebrate).</summary>
+    /// <summary>
+    /// Confetti pops from both bottom corners of the display, drifts to the middle and floats down (Mac
+    /// TutorialOverlay.celebrate). It goes when its last piece lands.
+    /// </summary>
     public void Celebrate()
     {
         if (_frame.IsEmpty)
         {
             return;
         }
-        RemoveConfetti();
         var size = new CoreSize(_frame.Width / _scale, _frame.Height / _scale);
         ContainerVisual confetti = _compositor.CreateContainerVisual();
         confetti.RelativeSizeAdjustment = Vector2.One;
         Show().Root.Children.InsertAtTop(confetti);
-        _confetti = confetti;
+        _confetti.Add(confetti);
         CompositionScopedBatch batch = _compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
         foreach (ConfettiPiece piece in ConfettiBurst.Pieces(size))
         {
@@ -197,9 +199,10 @@ internal sealed class TutorialOverlay : IDisposable
         batch.End();
         batch.Completed += (_, _) =>
         {
-            if (_confetti == confetti)
+            if (_confetti.Remove(confetti))
             {
-                RemoveConfetti();
+                _window?.Root.Children.Remove(confetti);
+                confetti.Dispose();
                 Refresh();
             }
         };
@@ -232,7 +235,7 @@ internal sealed class TutorialOverlay : IDisposable
     /// <summary>Hides the layer once it has nothing to show, so an idle tutorial costs nothing.</summary>
     private void Refresh()
     {
-        if (_demo is null && _ring is null && _confetti is null && _window is { IsVisible: true } window)
+        if (_demo is null && _ring is null && _confetti.Count == 0 && _window is { IsVisible: true } window)
         {
             window.Hide();
         }
@@ -267,12 +270,12 @@ internal sealed class TutorialOverlay : IDisposable
 
     private void RemoveConfetti()
     {
-        if (_confetti is { } confetti)
+        foreach (ContainerVisual confetti in _confetti)
         {
-            _confetti = null;
             _window?.Root.Children.Remove(confetti);
             confetti.Dispose();
         }
+        _confetti.Clear();
     }
 
     /// <summary>The ghost: a soft accent halo under a hollow pointer outline, dark under white, moving along the timeline.</summary>

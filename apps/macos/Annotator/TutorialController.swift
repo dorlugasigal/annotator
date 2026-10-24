@@ -182,8 +182,11 @@ final class TutorialController: ObservableObject {
     /// Changes each time a card enters, so the view plays its entrance again.
     @Published private(set) var presentationToken = 0
     /// The step the card shows. It trails the progress by the short pause that lets a check mark land.
-    @Published private(set) var shownStep = TutorialStep.draw
+    @Published private(set) var shownStep = TutorialStep.allCases[0]
     @Published private(set) var shownGoalsDone = 0
+    /// The stroke color the toolbar showed when the shown step or goal appeared. The color step asks for green when it was
+    /// blue already; the words stay put while the person changes the color.
+    @Published private(set) var shownColor: RGBA?
     @Published private(set) var shownStepDone = false
     @Published private(set) var hintVisible = false
     /// Changes when the card's keycaps should press, one after another.
@@ -204,6 +207,7 @@ final class TutorialController: ObservableObject {
     private let model: WorkspaceModel
     private let presented: @MainActor () -> Bool
     private let toolbarWindow: @MainActor () -> NSWindow?
+    private let startDrawing: @MainActor () -> Void
     private var host: TutorialHostingView?
     private var cardSize = CGSize(width: TutorialLayout.width, height: 220)
     private var welcomeArea: CGRect?
@@ -223,13 +227,19 @@ final class TutorialController: ObservableObject {
     private var ringFound = false
     private var lastRingLookup: TimeInterval = 0
 
-    /// `presented` tells whether drawings and tools are shown or showing; `toolbarWindow` returns the drawing toolbar.
+    /// `presented` tells whether drawings and tools are shown or showing; `toolbarWindow` returns the drawing toolbar;
+    /// `startDrawing` turns drawing on the way the drawing shortcut does.
     init(model: WorkspaceModel, presented: (@MainActor () -> Bool)? = nil,
-         toolbarWindow: @escaping @MainActor () -> NSWindow? = { nil }) {
+         toolbarWindow: @escaping @MainActor () -> NSWindow? = { nil },
+         startDrawing: (@MainActor () -> Void)? = nil) {
         self.model = model
         preferences = TutorialPreferences(defaults: model.preferenceDefaults)
         self.presented = presented ?? { [weak model] in model.map { !$0.workspaceHidden } ?? false }
         self.toolbarWindow = toolbarWindow
+        self.startDrawing = startDrawing ?? { [weak model] in
+            guard let model, model.mode != .draw else { return }
+            model.beginDrawing()
+        }
         model.objectWillChange.sink { [weak self] in self?.scheduleObservation() }.store(in: &subscriptions)
     }
 
@@ -274,10 +284,12 @@ final class TutorialController: ObservableObject {
         present(takeFocus: true)
     }
 
-    /// Start tutorial: the welcome card leaves and the first step's card enters next to the toolbar.
+    /// Start tutorial: drawing turns on, so the first step's key reaches the canvas, the welcome card leaves and the
+    /// first step's card enters next to the toolbar.
     func start() {
         guard surface == .welcome, !leaving else { return }
         window?.allowsKeyFocus = false
+        startDrawing()
         let look = observation()
         progress = TutorialProgress(look)
         editing = look.editing
@@ -344,11 +356,12 @@ final class TutorialController: ObservableObject {
     }
 
     /// Shows a card state without a window, for design review and the UX reference.
-    func showReview(_ surface: Surface, step: TutorialStep = .draw, goalsDone: Int = 0, stepDone: Bool = false,
+    func showReview(_ surface: Surface, step: TutorialStep = .rectangle, goalsDone: Int = 0, stepDone: Bool = false,
                     hint: Bool = false) {
         self.surface = surface
         shownStep = step
         shownGoalsDone = stepDone ? step.goals.count : min(max(0, goalsDone), step.goals.count - 1)
+        shownColor = model.style.color
         shownStepDone = stepDone
         hintVisible = hint
         reviewStepChange = nil
@@ -455,6 +468,7 @@ final class TutorialController: ObservableObject {
             hintVisible = false
         }
         preferences.setCompleted(true)
+        // Only the finished tutorial celebrates: confetti pops from both bottom corners of the card's display.
         guard !reducesMotion(), let card = window?.frame, let display = Self.screen(for: card)?.frame else { return }
         overlay.celebrate(on: display, level: overlayLevel)
     }
@@ -462,8 +476,9 @@ final class TutorialController: ObservableObject {
     private func resetDisplay() {
         beat?.cancel()
         beat = nil
-        shownStep = .draw
+        shownStep = TutorialStep.allCases[0]
         shownGoalsDone = 0
+        shownColor = model.style.color
         shownStepDone = false
         hintVisible = false
         reviewStepChange = nil
@@ -521,6 +536,7 @@ final class TutorialController: ObservableObject {
             if shownGoalsDone != progress.goalIndex {
                 withAnimation(TutorialAnimation.check(reduceMotion: reducesMotion())) {
                     shownGoalsDone = progress.goalIndex
+                    shownColor = model.style.color
                 }
                 goalBecameCurrent()
             }
@@ -560,6 +576,7 @@ final class TutorialController: ObservableObject {
         let current = !progress.isFinished && step == progress.step
         withAnimation(TutorialAnimation.stepChange(reduceMotion: reducesMotion())) {
             shownStep = step
+            shownColor = model.style.color
             shownStepDone = false
             shownGoalsDone = current ? progress.goalIndex : 0
             hintVisible = false
@@ -569,11 +586,12 @@ final class TutorialController: ObservableObject {
         settleDisplay()
     }
 
-    /// VoiceOver reads the new step: "Step 4 of 11. Change the color. Press B for blue, or pick a color in the toolbar."
+    /// VoiceOver reads the new step: "Step 3 of 10. Make it blue. Press B, or pick any color in the toolbar."
     private func announceStep() {
         guard surface == .coach else { return }
-        let text = TutorialText.step(shownStep, preferences: model.preferences)
-        let announcement = "\(TutorialText.stepValue(shownStep)). \(text.title). \(text.detail)"
+        let text = TutorialText.step(shownStep, preferences: model.preferences, color: shownColor)
+        let words = TutorialText.plain(text.detail ?? text.goals.joined(separator: ". "))
+        let announcement = "\(TutorialText.stepValue(shownStep)). \(text.title). \(words)"
         lastAnnouncement = announcement
         NSAccessibility.post(element: NSApplication.shared, notification: .announcementRequested,
                              userInfo: [.announcement: announcement,
@@ -728,30 +746,23 @@ final class TutorialController: ObservableObject {
         }
     }
 
-    /// The keys press first, then the ghost moves and clicks; the curved arrow presses Return after its clicks.
-    /// With Reduce Motion only the keys play.
+    /// The keys press first, then the ghost moves and clicks, so both ways show; the curved arrow has no key and ends with
+    /// a double-click, which adds its head. With Reduce Motion only the keys play.
     private func playDemo(_ goal: TutorialGoal) async {
         guard surface == .coach, !leaving, shownGoal == goal, !editing else { return }
         demonstratedGoals.append(goal)
         if demonstratedGoals.count > 32 { demonstratedGoals.removeFirst(demonstratedGoals.count - 32) }
-        let keys = TutorialText.keys(for: goal, preferences: model.preferences)
-        let plan = demoPlan(for: goal)
-        let ghost = reducesMotion() ? nil : plan.run
-        if !keys.isEmpty && !plan.keysAfter {
+        let keys = goal == .curvedArrowDrawn ? []
+            : TutorialText.keys(for: goal, preferences: model.preferences, color: shownColor)
+        let ghost = reducesMotion() ? nil : demoRun(for: goal)
+        if !keys.isEmpty {
             keyPressToken &+= 1
             guard ghost != nil else { return }
             try? await Task.sleep(for: .seconds(Self.keysDuration(keys.count) + TutorialMotion.ghostPause))
             guard !Task.isCancelled, surface == .coach, shownGoal == goal else { return }
         }
-        guard let ghost else {
-            if plan.keysAfter && !keys.isEmpty { keyPressToken &+= 1 }
-            return
-        }
-        let timeline = overlay.play(ghost, level: overlayLevel)
-        guard plan.keysAfter, !keys.isEmpty else { return }
-        try? await Task.sleep(for: .seconds(timeline.actionsEnd))
-        guard !Task.isCancelled, surface == .coach, shownGoal == goal else { return }
-        keyPressToken &+= 1
+        guard let ghost else { return }
+        overlay.play(ghost, level: overlayLevel)
     }
 
     static func keysDuration(_ count: Int) -> Double {
@@ -759,37 +770,35 @@ final class TutorialController: ObservableObject {
     }
 
     /// Where the ghost goes for `goal`. A control it can't find is left out; the keys still play.
-    private func demoPlan(for goal: TutorialGoal) -> (run: TutorialGhostRun?, keysAfter: Bool) {
+    private func demoRun(for goal: TutorialGoal) -> TutorialGhostRun? {
         let toolbar = toolbarWindow().flatMap { $0.isVisible ? $0 : nil }
         if let name = TutorialAnchors.name(for: goal) {
-            guard let toolbar, let anchor = TutorialAnchors.frame(named: name, in: toolbar) else { return (nil, false) }
+            guard let toolbar, let anchor = TutorialAnchors.frame(named: name, in: toolbar) else { return nil }
             let target = CGPoint(x: anchor.midX, y: anchor.midY)
-            guard let display = Self.screen(for: anchor)?.frame else { return (nil, false) }
-            return (TutorialGhostRun(display: display, start: ghostStart(on: display), steps: [.click(target)]), false)
+            guard let display = Self.screen(for: anchor)?.frame else { return nil }
+            return TutorialGhostRun(display: display, start: ghostStart(on: display), steps: [.click(target)])
         }
         let screen = toolbar.flatMap { Self.screen(for: $0.frame) } ?? window.flatMap { Self.screen(for: $0.frame) }
             ?? Self.pointerScreen()
-        guard let screen else { return (nil, false) }
+        guard let screen else { return nil }
         let area = TutorialPracticeArea(workArea: screen.visibleFrame)
         let display = screen.frame
         let start = ghostStart(on: display)
         switch goal {
         case .shapeDrawn:
-            return (TutorialGhostRun(display: display, start: start,
-                                     steps: [.drag([area.point(0.34, 0.42), area.point(0.48, 0.58)], ink: .rectangle)]),
-                    false)
+            return TutorialGhostRun(display: display, start: start,
+                                    steps: [.drag([area.point(0.34, 0.42), area.point(0.48, 0.58)], ink: .rectangle)])
         case .curvedArrowDrawn:
-            return (TutorialGhostRun(display: display, start: start,
-                                     steps: [.clicks([area.point(0.56, 0.62), area.point(0.64, 0.46), area.point(0.74, 0.54)])]),
-                    true)
+            return TutorialGhostRun(display: display, start: start,
+                                    steps: [.clicks([area.point(0.56, 0.62), area.point(0.64, 0.46), area.point(0.74, 0.54)],
+                                                    double: true)])
         case .penDrawn:
             let loop = TutorialMotion.loop(center: area.local(0.30, 0.62), radius: 56).map { area.screenPoint($0) }
-            return (TutorialGhostRun(display: display, start: start, steps: [.drag(loop, ink: .line)]), false)
+            return TutorialGhostRun(display: display, start: start, steps: [.drag(loop, ink: .line)])
         case .moved:
-            return (TutorialGhostRun(display: display, start: start, steps: [.drag(movePath(on: display, area: area), ink: nil)]),
-                    false)
+            return TutorialGhostRun(display: display, start: start, steps: [.drag(movePath(on: display, area: area), ink: nil)])
         default:
-            return (nil, false)
+            return nil
         }
     }
 

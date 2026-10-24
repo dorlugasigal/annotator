@@ -381,8 +381,8 @@ platform that departs from the specifications, unless an ADR changes them.
   icons in the hidden overflow and apps cannot pin themselves; the tutorial's
   finish card shows how to keep the icon visible (DV-4).
 - **WIN-UI-02**: The toolbar and properties match 002 and ADR 0012 in points:
-  up to 1000 wide with default tools, 72 tools-only, 126 for the default
-  expanded rail, 44 by 48 tool targets, 34 for Minimal, a 15-point corner
+  up to 1000 wide with default tools, 72 tools-only, 126 with quick
+  controls, 44 by 48 tool targets, 34 for Minimal, a 15-point corner
   radius, and the same controls, states and separators. The background is the
   theme's window background color rather than Acrylic, so live and snapshot
   appearances are identical. Focus rings appear only during keyboard
@@ -395,13 +395,17 @@ platform that departs from the specifications, unless an ADR changes them.
   Permissions, Help and About. It may use Windows' Mica backdrop because it
   never appears in drawing snapshots.
 - **WIN-UI-04**: The hands-on tutorial matches the Mac: the welcome card, the
-  same eleven steps and goals (`AnnotationCore/Tutorial.swift`,
-  `Annotator.Core/Tutorial`), the same words with Windows key names, the ghost
-  cursor, ring and confetti with the same timings, cards that never take the
-  keyboard while coaching, no permission requests, and automatic presentation
-  without taking focus until the tutorial is finished or Show on launch is off.
-  Every step accepts the keyboard or the mouse: it checks the workspace's
-  result, never the input.
+  same ten steps and goals (`AnnotationCore/Tutorial.swift`,
+  `Annotator.Core/Tutorial`), the same words with Windows key names shown as
+  keycaps in the lines, the same keyboard for shortcuts with modifiers and Esc
+  (`TutorialKeyboard`) with the Windows bottom row, the ghost cursor, ring and
+  confetti with the same timings, cards that never take the keyboard while
+  coaching, no permission requests, and automatic presentation without taking
+  focus until the tutorial is finished or Show on launch is off. Start turns
+  drawing on. Every step accepts the keyboard or the mouse: it checks the
+  workspace's result, never the input. The finish card is 400 points wide
+  (the Mac's 340) for the longer Windows key names and the tray icon (DV-4)
+  and shortcut (DV-10) cards.
 - **WIN-UI-05**: The Tools window, the error window, Report a problem, support
   information and What's changed match 005. What's changed is bundled and
   matched to the running Windows version and build.

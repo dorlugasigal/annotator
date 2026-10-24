@@ -5,21 +5,24 @@ using Annotator.Workspace.Shortcuts;
 
 namespace Annotator.Workspace.FirstUse;
 
-/// <summary>The words of one tutorial step: its title, one line of detail, a line per goal when it has several, and a hint.</summary>
-public sealed record TutorialStepText(string Title, string Detail, ImmutableArray<string> Goals, string Hint);
+/// <summary>
+/// The words of one tutorial step: its title, one line when the step has one goal, a line per goal when it has several, and a
+/// hint. Keys are marked in braces, such as "Press {2}"; the card shows them as keycaps (<see cref="TutorialText.Segments"/>).
+/// </summary>
+public sealed record TutorialStepText(string Title, string? Detail, ImmutableArray<string> Goals, string Hint);
 
 /// <summary>A row of the finish card: what a key does and its keycaps.</summary>
 public sealed record TutorialKeyRow(string Label, ImmutableArray<string> Keys);
 
 /// <summary>
-/// The tutorial's words (Mac TutorialViews), with Windows key names and the platform terms of specification 013: Ctrl for
-/// Control and Command, Esc, Enter for Return, and the tray icon for the menu bar icon. Keys follow the person's shortcuts;
-/// a shortcut that is missing or that Windows refused uses the words without a key.
+/// The tutorial's words (Mac TutorialViews): short, casual and direct, with Windows key names and the platform terms of
+/// specification 013: Ctrl for Control and Command, Esc, Enter for Return, and the tray icon for the menu bar icon. Keys
+/// follow the person's shortcuts; a shortcut that is missing or that Windows refused uses the words without a key.
 /// </summary>
 public static class TutorialText
 {
     public const string WelcomeTitle = "Welcome to Annotator";
-    public const string WelcomeBody = "Learn the basics in about two minutes. Use the keys or the mouse, whichever you like.";
+    public const string WelcomeBody = "Let's learn the basics. It takes two minutes, and keys or mouse both work.";
     public const string Start = "Start tutorial";
     public const string NotNow = "Not now";
     public const string ShowOnLaunch = "Show on launch";
@@ -30,11 +33,11 @@ public static class TutorialText
     public const string SkipStep = "Skip step";
     public const string Done = "Done";
 
-    public const string FinishTitle = "You're ready.";
-    public const string FinishLead = "That's the basics. Keep these keys handy.";
+    public const string FinishTitle = "You did it!";
+    public const string FinishLead = "Keep these handy:";
     public const string ChangeShortcuts = "Change any shortcut in Settings > Toolbar & Shortcuts.";
     public const string OpenSettings = "Open Settings";
-    public const string PracticeAgain = "Practice again from Settings > Help.";
+    public const string PracticeAgain = "Replay this any time from Settings > Help.";
 
     public const string WelcomeIdentifier = "tutorial-welcome";
     public const string CoachIdentifier = "tutorial-coach";
@@ -54,6 +57,22 @@ public static class TutorialText
     public const string ReturnKey = "Enter";
     public const string UndoShortcut = "Ctrl+Z";
     public const string InkBlueKey = "B";
+    public const string InkGreenKey = "G";
+
+    /// <summary>
+    /// Whether the color step asks for green: when the drawing (or the tool) is blue already, the blue ink key would change
+    /// nothing.
+    /// </summary>
+    public static bool AsksForGreen(WorkspaceSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        RGBA color = snapshot.Style.Color;
+        return Math.Abs(color.Red - Palette.Blue.Red) < 0.002 && Math.Abs(color.Green - Palette.Blue.Green) < 0.002 &&
+               Math.Abs(color.Blue - Palette.Blue.Blue) < 0.002;
+    }
+
+    /// <summary>The ink key the color step shows: B, or G when the drawing is blue already.</summary>
+    public static string ColorKey(WorkspaceSnapshot snapshot) => AsksForGreen(snapshot) ? InkGreenKey : InkBlueKey;
 
     public const string SharingTitle = "Before you share";
 
@@ -104,53 +123,77 @@ public static class TutorialText
         ArgumentNullException.ThrowIfNull(snapshot);
         string? resume = Global(snapshot, GlobalShortcutAction.ResumeDrawing);
         string? showHide = Global(snapshot, GlobalShortcutAction.ShowHide);
+        string Pick(string name, Tool tool) =>
+            Local(snapshot, tool) is { } key ? $"Grab the {name}: press {{{key}}} or click it" : $"Grab the {name}: click it in the toolbar";
         return step switch
         {
-            TutorialStep.Draw => new("Start drawing",
-                resume is null ? "Click any tool in the toolbar." : $"Press {resume}, or click any tool in the toolbar.", [],
-                "No toolbar? Click Annotator's tray icon and choose Show drawings and tools."),
-            TutorialStep.Rectangle => new("Pick the Rectangle",
-                Local(snapshot, Tool.Rectangle) is { } rectangle ? $"Press {rectangle}, or click Rectangle in the toolbar." : "Click Rectangle in the toolbar.", [],
-                "Look for the square in the toolbar. The ring shows where."),
-            TutorialStep.Shape => new("Draw a rectangle", "Drag anywhere on the screen.", [], "Press, move the pointer, then let go."),
-            TutorialStep.Color => new("Change the color", $"Press {InkBlueKey} for blue, or pick a color in the toolbar.", [],
+            TutorialStep.Rectangle => new("Grab the Rectangle",
+                Local(snapshot, Tool.Rectangle) is { } rectangle ? $"Press {{{rectangle}}}, or click it in the toolbar." : "Click the Rectangle in the toolbar.", [],
+                "It's the square. Look for the blue ring."),
+            TutorialStep.Shape => new("Draw a box", "Drag anywhere on your screen.", [], "Press, drag, let go."),
+            TutorialStep.Color => new(AsksForGreen(snapshot) ? "Make it green" : "Make it blue",
+                $"Press {{{ColorKey(snapshot)}}}, or pick any color in the toolbar.", [],
                 "Any color works. New drawings use it too."),
-            TutorialStep.Arrow => new("Draw a curved arrow", "Arrows can bend around things.",
-                [
-                    Local(snapshot, Tool.Arrow) is { } arrow ? $"Pick the Arrow: press {arrow} or click it." : "Click the Arrow in the toolbar.",
-                    "Choose Curved in the properties.",
-                    $"Click a few points, then press {ReturnKey}.",
-                ],
-                $"Click, don't drag: each click adds a point. {ReturnKey} finishes the arrow."),
-            TutorialStep.Pen => new("Circle something with the Pen", "Draw freely, like on paper.",
-                [
-                    Local(snapshot, Tool.Pen) is { } pen ? $"Pick the Pen: press {pen} or click it." : "Click the Pen in the toolbar.",
-                    "Draw a circle around anything.",
-                ],
-                "Hold the mouse button down while you draw."),
-            TutorialStep.Move => new("Move a drawing", "Select lets you change what you drew.",
-                [
-                    Local(snapshot, Tool.Select) is { } select ? $"Pick Select: press {select} or click it." : "Click Select in the toolbar.",
-                    "Drag one of your drawings to a new place.",
-                ],
-                "Press on the drawing's line, not the empty space inside it."),
-            TutorialStep.Undo => new("Undo", $"Press {UndoShortcut}, or click Undo in the toolbar.", [],
-                "Undo takes back your last change. Redo brings it back."),
-            TutorialStep.UseApps => new("Use your apps",
-                $"Press {EscapeKey}, or click Use apps in the toolbar. Your drawings stay on the screen.", [],
-                $"Typing text or drawing? The first {EscapeKey} finishes that. Press it again."),
+            TutorialStep.Arrow => new("Draw a curved arrow", null,
+                [Pick("Arrow", Tool.Arrow), "Turn on Curved in the properties", $"Click points, then double-click (or {{{ReturnKey}}})"],
+                "Click, don't drag. Can't see Curved? Click the sliders button."),
+            TutorialStep.Pen => new("Circle something", null,
+                [Pick("Pen", Tool.Pen), "Draw a circle around anything"],
+                "Hold the mouse button down as you draw."),
+            TutorialStep.Move => new("Move it", null,
+                [Local(snapshot, Tool.Select) is { } select ? $"Grab Select: press {{{select}}} or click it" : "Grab Select: click it in the toolbar",
+                 "Drag, turn or resize a drawing"],
+                "Grab the line, not the empty middle."),
+            TutorialStep.Undo => new("Oops! Undo that", $"Press {{{UndoShortcut}}}, or click Undo.", [],
+                "Changed your mind again? Redo is right next to it."),
+            TutorialStep.UseApps => new("Back to your apps", $"Press {{{EscapeKey}}}, or click Use apps. Your drawings stay put.", [],
+                $"Typing or mid-drawing? Press {{{EscapeKey}}} twice."),
             TutorialStep.DrawAgain => new("Draw again",
-                resume is null ? "Click any tool in the toolbar." : $"Press {resume}, or click any tool in the toolbar.", [],
-                resume is null ? "Any tool in the toolbar starts drawing." : $"{resume} works from any app."),
-            TutorialStep.Hide => new("Hide and show", "Clear your screen in a moment. Everything comes back as you left it.",
+                resume is null ? "Click any tool in the toolbar." : $"Press {{{resume}}} from any app, or click a tool.", [],
+                resume is null ? "Any tool in the toolbar starts drawing." : "That shortcut works everywhere, even in other apps."),
+            TutorialStep.Hide => new("Now you see it\u2026", null,
                 [
-                    showHide is null ? "Click Hide drawings and tools in the toolbar." : $"Press {showHide}, or click Hide drawings and tools in the toolbar.",
-                    showHide is null ? "Click Annotator's tray icon and choose Show drawings and tools." : $"Press {showHide} again to bring them back.",
+                    showHide is null ? "Hide it all: click \u00D7 in the toolbar" : $"Hide it all: press {{{showHide}}}",
+                    showHide is null ? "Bring it back: use the tray icon" : $"Bring it back: press {{{showHide}}} again",
                 ],
-                "You can also use Annotator's tray icon."),
+                "No keys? Use \u00D7 in the toolbar to hide, and the tray icon to bring it back."),
             _ => throw new ArgumentOutOfRangeException(nameof(step)),
         };
     }
+
+    /// <summary>Whether the card shows the keyboard for <paramref name="goal"/>: a shortcut with Ctrl, Shift or Alt, or Esc.</summary>
+    public static bool ShowsKeyboard(TutorialGoal goal, WorkspaceSnapshot snapshot) => TutorialKeyboard.Shows(Keys(goal, snapshot), mac: false);
+
+    /// <summary>
+    /// A line split into its words and its keys: "Press {Ctrl+Z}, or click Undo." gives ("Press ", no keys), ("", Ctrl and Z)
+    /// and (", or click Undo.", no keys).
+    /// </summary>
+    public static ImmutableArray<(string Text, ImmutableArray<string> Keys)> Segments(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+        ImmutableArray<(string, ImmutableArray<string>)>.Builder segments = ImmutableArray.CreateBuilder<(string, ImmutableArray<string>)>();
+        int index = 0;
+        while (index < line.Length)
+        {
+            int open = line.IndexOf('{', index);
+            int close = open < 0 ? -1 : line.IndexOf('}', open + 1);
+            if (open < 0 || close < 0)
+            {
+                segments.Add((line[index..], []));
+                break;
+            }
+            if (open > index)
+            {
+                segments.Add((line[index..open], []));
+            }
+            segments.Add((string.Empty, Caps(line[(open + 1)..close])));
+            index = close + 1;
+        }
+        return segments.ToImmutable();
+    }
+
+    /// <summary>The line as screen readers and tests read it: keys without their braces.</summary>
+    public static string Plain(string line) => line?.Replace("{", string.Empty, StringComparison.Ordinal).Replace("}", string.Empty, StringComparison.Ordinal) ?? string.Empty;
 
     /// <summary>The keycaps the card shows for <paramref name="goal"/>; empty when the goal has no key.</summary>
     public static ImmutableArray<string> Keys(TutorialGoal goal, WorkspaceSnapshot snapshot)
@@ -160,7 +203,7 @@ public static class TutorialText
         {
             TutorialGoal.Drawing => Global(snapshot, GlobalShortcutAction.ResumeDrawing),
             TutorialGoal.RectangleTool => Local(snapshot, Tool.Rectangle),
-            TutorialGoal.ColorChanged => InkBlueKey,
+            TutorialGoal.ColorChanged => ColorKey(snapshot),
             TutorialGoal.ArrowTool => Local(snapshot, Tool.Arrow),
             TutorialGoal.CurvedArrowDrawn => ReturnKey,
             TutorialGoal.PenTool => Local(snapshot, Tool.Pen),
@@ -185,7 +228,7 @@ public static class TutorialText
         rows.Add(new TutorialKeyRow("Use apps", Caps(EscapeKey)));
         if (Global(snapshot, GlobalShortcutAction.ShowHide) is { } showHide)
         {
-            rows.Add(new TutorialKeyRow("Show / hide", Caps(showHide)));
+            rows.Add(new TutorialKeyRow("Show or hide", Caps(showHide)));
         }
         rows.Add(new TutorialKeyRow("Undo", Caps(UndoShortcut)));
         return rows.ToImmutable();

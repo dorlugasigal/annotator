@@ -407,6 +407,7 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
                        size: CGSize(width: 800, height: 1720), name: "toolbar-shortcuts-full", dark: dark)
             model.setToolbarSize(.minimal)
             model.setToolbarOrientation(.horizontal)
+            model.setInspectorPinned(false)
             model.setQuickPreferencesExpanded(true)
             try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal-quick", dark: dark)
             model.setQuickPreferencesExpanded(false)

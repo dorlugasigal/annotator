@@ -771,7 +771,7 @@ final class WorkspaceModel: ObservableObject {
 
     func toggleProperties() {
         if let owner = globalSettingsOwner { owner.toggleProperties(); return }
-        let expanded = preferences.inspectorPinned == true && preferences.quickPreferencesExpanded != false
+        let expanded = preferences.inspectorPinned != false && preferences.quickPreferencesExpanded != false
         setInspectorPinned(!expanded)
     }
 

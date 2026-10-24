@@ -19,11 +19,10 @@ public sealed class TutorialWorkspaceTests
     {
         WorkspaceModel model = Create();
         model.ShowToolbar();
+        // Start tutorial turns drawing on, so the first step's key reaches the canvas.
+        model.ResumeDrawing();
         var progress = new TutorialProgress(TutorialObserver.Observe(model.Snapshot));
         TutorialChange Look() => progress.Observe(TutorialObserver.Observe(model.Snapshot));
-
-        model.ResumeDrawing();
-        Assert.Equal(TutorialChange.Step, Look());
         Assert.Equal(TutorialStep.Rectangle, progress.Step);
         Assert.Equal(ToolChoice.Chosen, model.Choose(Tool.Rectangle));
         Assert.Equal(TutorialChange.Step, Look());
@@ -131,24 +130,36 @@ public sealed class TutorialWorkspaceTests
     {
         WorkspaceModel model = Create();
         WorkspaceSnapshot snapshot = model.Snapshot;
-        Assert.Equal("Press Ctrl+Shift+2, or click any tool in the toolbar.", TutorialText.Step(TutorialStep.Draw, snapshot).Detail);
-        Assert.Equal("Press 2, or click Rectangle in the toolbar.", TutorialText.Step(TutorialStep.Rectangle, snapshot).Detail);
-        Assert.Equal(["Pick the Arrow: press 5 or click it.", "Choose Curved in the properties.", "Click a few points, then press Enter."],
+        Assert.Equal("Press {Ctrl+Shift+2} from any app, or click a tool.", TutorialText.Step(TutorialStep.DrawAgain, snapshot).Detail);
+        Assert.Equal("Press {2}, or click it in the toolbar.", TutorialText.Step(TutorialStep.Rectangle, snapshot).Detail);
+        Assert.Equal(["Grab the Arrow: press {5} or click it", "Turn on Curved in the properties", "Click points, then double-click (or {Enter})"],
             TutorialText.Step(TutorialStep.Arrow, snapshot).Goals);
-        Assert.Equal("Press Esc, or click Use apps in the toolbar. Your drawings stay on the screen.", TutorialText.Step(TutorialStep.UseApps, snapshot).Detail);
-        Assert.Equal("Press Ctrl+Z, or click Undo in the toolbar.", TutorialText.Step(TutorialStep.Undo, snapshot).Detail);
+        Assert.Equal("Drag, turn or resize a drawing", TutorialText.Step(TutorialStep.Move, snapshot).Goals[1]);
+        Assert.Null(TutorialText.Step(TutorialStep.Arrow, snapshot).Detail);
+        Assert.Equal("Press {Esc}, or click Use apps. Your drawings stay put.", TutorialText.Step(TutorialStep.UseApps, snapshot).Detail);
+        Assert.Equal("Press {Ctrl+Z}, or click Undo.", TutorialText.Step(TutorialStep.Undo, snapshot).Detail);
+        Assert.Equal("Press Ctrl+Z, or click Undo.", TutorialText.Plain(TutorialText.Step(TutorialStep.Undo, snapshot).Detail!));
+        Assert.Equal([("Press ", ImmutableArray<string>.Empty), ("", ["Ctrl", "Z"]), (", or click Undo.", ImmutableArray<string>.Empty)],
+            TutorialText.Segments("Press {Ctrl+Z}, or click Undo."), new SegmentComparer());
+        Assert.True(TutorialText.ShowsKeyboard(TutorialGoal.Drawing, snapshot));
+        Assert.True(TutorialText.ShowsKeyboard(TutorialGoal.UsingApps, snapshot));
+        Assert.True(TutorialText.ShowsKeyboard(TutorialGoal.Undone, snapshot));
+        Assert.False(TutorialText.ShowsKeyboard(TutorialGoal.PenTool, snapshot));
+        Assert.False(TutorialText.ShowsKeyboard(TutorialGoal.CurvedArrowDrawn, snapshot));
         Assert.Equal(["Ctrl", "Shift", "2"], TutorialText.Keys(TutorialGoal.Drawing, snapshot));
         Assert.Equal(["Ctrl", "2"], TutorialText.Keys(TutorialGoal.Hidden, snapshot));
         Assert.Equal(["7"], TutorialText.Keys(TutorialGoal.PenTool, snapshot));
         Assert.Empty(TutorialText.Keys(TutorialGoal.ShapeDrawn, snapshot));
-        Assert.Equal("Step 5 of 11", TutorialText.StepValue(TutorialStep.Arrow));
-        Assert.Equal(["Draw", "Use apps", "Show / hide", "Undo"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
+        Assert.Equal("Step 4 of 10", TutorialText.StepValue(TutorialStep.Arrow));
+        Assert.Equal(["Draw", "Use apps", "Show or hide", "Undo"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
 
         foreach (TutorialStep step in TutorialSteps.All)
         {
             TutorialStepText text = TutorialText.Step(step, snapshot);
             Assert.True(text.Goals.IsEmpty || text.Goals.Length == step.Goals.Length, $"{step} has a line per goal.");
-            string all = string.Join(' ', [text.Title, text.Detail, text.Hint, .. text.Goals]);
+            Assert.True(text.Detail is null != text.Goals.IsEmpty, $"{step} has a line or goals, not both.");
+            string all = string.Join(' ', [text.Title, text.Detail ?? string.Empty, text.Hint, .. text.Goals]);
+            Assert.DoesNotContain(text.Title, text.Detail ?? string.Empty, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("Command", all, StringComparison.Ordinal);
             Assert.DoesNotContain("Return", all, StringComparison.Ordinal);
             Assert.DoesNotContain("menu bar", all, StringComparison.Ordinal);
@@ -156,9 +167,28 @@ public sealed class TutorialWorkspaceTests
 
         model.SetGlobalShortcutState(new GlobalShortcutState(GlobalShortcutAction.ResumeDrawing, "Ctrl+Shift+2", GlobalShortcutStatus.AlreadyUsed, "In use."));
         snapshot = model.Snapshot;
-        Assert.Equal("Click any tool in the toolbar.", TutorialText.Step(TutorialStep.Draw, snapshot).Detail);
+        Assert.Equal("Click any tool in the toolbar.", TutorialText.Step(TutorialStep.DrawAgain, snapshot).Detail);
         Assert.Empty(TutorialText.Keys(TutorialGoal.Drawing, snapshot));
-        Assert.Equal(["Use apps", "Show / hide", "Undo"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
+        Assert.False(TutorialText.ShowsKeyboard(TutorialGoal.Drawing, snapshot));
+        Assert.Equal(["Use apps", "Show or hide", "Undo"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
+    }
+
+    [Fact]
+    public void TheColorStepAsksForGreenWhenTheDrawingIsBlueAlready()
+    {
+        WorkspaceModel model = Create();
+        model.ShowToolbar();
+        model.Choose(Tool.Rectangle);
+        Assert.Equal("Make it blue", TutorialText.Step(TutorialStep.Color, model.Snapshot).Title);
+        Assert.Equal("Press {B}, or pick any color in the toolbar.", TutorialText.Step(TutorialStep.Color, model.Snapshot).Detail);
+        Assert.Equal(["B"], TutorialText.Keys(TutorialGoal.ColorChanged, model.Snapshot));
+
+        model.SetPaintColor(Palette.Blue, fill: false);
+        Assert.Equal("Make it green", TutorialText.Step(TutorialStep.Color, model.Snapshot).Title);
+        Assert.Equal("Press {G}, or pick any color in the toolbar.", TutorialText.Step(TutorialStep.Color, model.Snapshot).Detail);
+        Assert.Equal(["G"], TutorialText.Keys(TutorialGoal.ColorChanged, model.Snapshot));
+        Assert.True(model.ApplyInkKey("g"));
+        Assert.False(TutorialText.AsksForGreen(model.Snapshot));
     }
 
     [Fact]
@@ -171,7 +201,8 @@ public sealed class TutorialWorkspaceTests
 
         ImmutableArray<TutorialDemoAction> curve = TutorialDemos.For(TutorialGoal.CurvedArrowDrawn, snapshot, null);
         Assert.Equal(3, curve.Count(action => action is TutorialDemoClick { Ink: TutorialInk.Curve }));
-        Assert.Equal(["Enter"], Assert.IsType<TutorialDemoKeys>(curve[^1]).Keys);
+        Assert.True(Assert.IsType<TutorialDemoClick>(curve[^1]).Double, "A double-click on the last point finishes the arrow.");
+        Assert.DoesNotContain(curve, action => action is TutorialDemoKeys);
 
         TutorialDemoDrag move = Assert.IsType<TutorialDemoDrag>(TutorialDemos.For(TutorialGoal.Moved, snapshot, new Point(300, 200)).Single());
         Assert.Equal(TutorialSpot.OnDisplay(new Point(420, 240)), move.To);
@@ -197,5 +228,13 @@ public sealed class TutorialWorkspaceTests
         Assert.Equal(3, observation.Elements.Length);
         Assert.Equal(TutorialMode.Draw, observation.Mode);
         Assert.True(observation.Presented);
+    }
+
+    private sealed class SegmentComparer : IEqualityComparer<(string Text, ImmutableArray<string> Keys)>
+    {
+        public bool Equals((string Text, ImmutableArray<string> Keys) x, (string Text, ImmutableArray<string> Keys) y) =>
+            x.Text == y.Text && x.Keys.SequenceEqual(y.Keys);
+
+        public int GetHashCode((string Text, ImmutableArray<string> Keys) obj) => obj.Text.GetHashCode(StringComparison.Ordinal);
     }
 }

@@ -76,7 +76,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Global keys need Ctrl, Alt or Win; Shift with digits recorded correctly | Hotkey service | E | S-9 |
 | Expanded and Minimal sizes; Share style between tools; Show tips on screen | XAML and core | I | UI tests |
 | Arrange and key motion: lift, slide, settle, pulse, bounce, shake | Composition | I | Motion corpus |
-| Hands-on tutorial: welcome, eleven steps, ghost cursor, ring, finish card and confetti; Reduce Motion without ghost or confetti | Card window and click-through composition layer | I | Unit tests, live check |
+| Hands-on tutorial: welcome, ten steps, inline keycaps, shortcut keyboard, ghost cursor, ring, confetti at the end; Reduce Motion without ghost or confetti | Card window and click-through composition layer | I | Unit tests, live check |
 | Tutorial shows without taking focus, never takes the keyboard while coaching, asks for no permissions | `WS_EX_NOACTIVATE` window | E | Live check |
 | Pointer settings and interactive preview | Settings and overlay renderer | I | UI tests |
 | Inline color wheel inside the palette | Custom XAML control | I | UI tests |

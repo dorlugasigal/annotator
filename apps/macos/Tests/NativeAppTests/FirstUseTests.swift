@@ -16,7 +16,7 @@ final class FirstUseTests: XCTestCase {
         defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         model = WorkspaceModel(defaults: defaults, zoomInputPermissions: ZoomInputPermissions(
             isGranted: { false }, request: { XCTFail("The tutorial must not request Accessibility."); return false }))
-        tutorial = TutorialController(model: model)
+        tutorial = TutorialController(model: model, startDrawing: { [weak self] in self?.draw() })
         tutorial.reducesMotion = { true }
     }
 
@@ -103,17 +103,52 @@ final class FirstUseTests: XCTestCase {
         XCTAssertEqual(model.mode, .draw)
     }
 
-    func testStartingDrawingKeepsTheCoachOpenAndCountsTheStep() async throws {
+    func testStartTutorialTurnsDrawingOnAndTheCoachStaysOpen() async throws {
         tutorial.showAutomatically(isLoginItem: false)
+        XCTAssertEqual(model.mode, .off)
         tutorial.start()
+        XCTAssertEqual(model.mode, .draw, "Start tutorial turns drawing on, so the first step's key reaches the canvas.")
         try await waitUntil { self.tutorial.surface == .coach }
-        model.beginDrawing()
-        model.active?.panel.ignoresMouseEvents = true
-        try await waitUntil { self.tutorial.progress?.step == .rectangle }
+        XCTAssertEqual(tutorial.shownStep, .rectangle)
+        XCTAssertEqual(tutorial.progress?.step, .rectangle)
         XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible)
         XCTAssertFalse(try XCTUnwrap(tutorial.window).isKeyWindow, "The coach card never takes key focus.")
         XCTAssertTrue(model.introductionVisible)
+        model.choose(.rectangle)
+        try await waitUntil { self.tutorial.progress?.step == .shape }
+        XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible)
         XCTAssertEqual(model.mode, .draw)
+    }
+
+    func testStepWordsUseInlineKeysAndOneLineOrGoalRows() {
+        let preferences = model.preferences
+        for step in TutorialStep.allCases {
+            let text = TutorialText.step(step, preferences: preferences)
+            if step.goals.count == 1 {
+                XCTAssertNotNil(text.detail, "\(step) has one goal, so it has a line.")
+                XCTAssertTrue(text.goals.isEmpty)
+            } else {
+                XCTAssertNil(text.detail, "\(step) has goal rows instead of a line.")
+                XCTAssertEqual(text.goals.count, step.goals.count)
+            }
+        }
+        XCTAssertEqual(TutorialText.step(.rectangle, preferences: preferences).detail, "Press {2}, or click it in the toolbar.")
+        XCTAssertEqual(TutorialText.plain("Press {⌘Z}, or click Undo."), "Press ⌘Z, or click Undo.")
+        let segments = TutorialText.segments("Press {⌘Z}, or click Undo.")
+        XCTAssertEqual(segments.map { $0.text }, ["Press ", "", ", or click Undo."])
+        XCTAssertEqual(segments.map { $0.keys }, [[], ["⌘Z"], []])
+        let tokens = TutorialText.tokens("Press {2}, or click it.")
+        XCTAssertEqual(tokens.map(\.text), ["Press", "2", ",", "or", "click", "it."])
+        XCTAssertEqual(tokens.map(\.isKey), [false, true, false, false, false, false])
+        XCTAssertEqual(tokens.map(\.spaceBefore), [false, true, false, true, true, true], "The comma stays with its key.")
+        XCTAssertEqual(TutorialText.spoken(["⌃⇧2"]), "Control + Shift + 2")
+        XCTAssertEqual(TutorialText.spoken(["esc"]), "Escape")
+        XCTAssertEqual(TutorialText.keys(for: .drawing, preferences: preferences), ["⌃⇧2"])
+        XCTAssertTrue(TutorialText.showsKeyboard(.drawing, preferences: preferences), "A shortcut with a modifier lights the keyboard.")
+        XCTAssertTrue(TutorialText.showsKeyboard(.usingApps, preferences: preferences))
+        XCTAssertFalse(TutorialText.showsKeyboard(.rectangleTool, preferences: preferences), "A single key shows only in the line.")
+        XCTAssertFalse(TutorialText.showsKeyboard(.curvedArrowDrawn, preferences: preferences))
+        XCTAssertEqual(TutorialText.finishRows(preferences: preferences).map { $0.label }, ["Draw", "Use apps", "Show or hide", "Undo"])
     }
 
     func testTutorialDoesNotOverlapSupportReminder() {
@@ -225,16 +260,24 @@ final class FirstUseTests: XCTestCase {
         try await waitUntil { self.tutorial.surface == .coach }
         try await Task.sleep(for: .milliseconds(150))
         text = accessibilityText(in: host)
-        XCTAssertTrue(text.contains("Control + Shift + 2"), "The first step shows the Draw shortcut's keys.")
-        XCTAssertTrue(text.contains("Press ⌃⇧2, or click any tool in the toolbar."))
-        XCTAssertEqual(tutorial.lastAnnouncement,
-                       "Step 1 of 11. Start drawing. Press ⌃⇧2, or click any tool in the toolbar.")
-        for _ in 0..<20 where tutorial.shownStep != .hide { tutorial.skipStep() }
+        XCTAssertTrue(text.contains("Press 2, or click it in the toolbar."), "Keys read as plain words.")
+        XCTAssertFalse(text.contains("Keyboard:"), "A single key shows only in the line.")
+        XCTAssertEqual(tutorial.lastAnnouncement, "Step 1 of 10. Grab the Rectangle. Press 2, or click it in the toolbar.")
+        for _ in 0..<20 where tutorial.shownStep != .drawAgain { tutorial.skipStep() }
+        XCTAssertEqual(tutorial.shownStep, .drawAgain)
+        try await Task.sleep(for: .milliseconds(150))
+        text = accessibilityText(in: host)
+        XCTAssertTrue(text.contains("Press ⌃⇧2 from any app, or click a tool."))
+        XCTAssertTrue(text.contains("Keyboard: Control + Shift + 2"), "The Draw shortcut lights the keyboard.")
+        tutorial.skipStep()
         XCTAssertEqual(tutorial.shownStep, .hide)
         try await Task.sleep(for: .milliseconds(150))
         text = accessibilityText(in: host)
-        XCTAssertTrue(text.contains("Press ⌃⌥3, or click Hide drawings and tools in the toolbar."))
+        XCTAssertTrue(text.contains("Hide it all: press ⌃⌥3"))
+        XCTAssertTrue(text.contains("Bring it back: press ⌃⌥3 again"))
         XCTAssertTrue(text.contains("Control + Option + 3"))
+        XCTAssertEqual(tutorial.lastAnnouncement,
+                       "Step 10 of 10. Now you see it…. Hide it all: press ⌃⌥3. Bring it back: press ⌃⌥3 again")
         tutorial.skipStep()
         try await waitUntil { self.tutorial.surface == .finish }
         try await Task.sleep(for: .milliseconds(150))
@@ -253,7 +296,7 @@ final class FirstUseTests: XCTestCase {
         XCTAssertTrue(tutorial.preferences.completed)
     }
 
-    func testSkippingEveryStepNeverChangesDrawingOrRequestsPermissions() async throws {
+    func testSkippingEveryStepNeverDrawsOrRequestsPermissions() async throws {
         tutorial.showManually()
         NativeAccessibilityNode.enable()
         let host = try XCTUnwrap(tutorial.window?.contentView)
@@ -277,14 +320,16 @@ final class FirstUseTests: XCTestCase {
                 $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Skip step"
             })
             XCTAssertTrue(skip.accessibilityPerformPress())
-            XCTAssertEqual(model.mode, .off)
-            XCTAssertTrue(model.desktopSessions.isEmpty)
+            XCTAssertEqual(model.mode, .draw, "Start tutorial turned drawing on; skipping changes nothing.")
+            XCTAssertTrue(model.desktopSessions.allSatisfy { $0.document.elements.isEmpty })
             XCTAssertEqual(model.zoomStartState, .idle)
         }
         try await waitUntil { self.tutorial.surface == .finish }
         XCTAssertTrue(tutorial.preferences.completed)
         XCTAssertEqual(tutorial.overlay.celebrations, 0, "Reduce Motion leaves out the confetti.")
-        XCTAssertEqual(tutorial.progress?.skipped, TutorialStep.allCases)
+        XCTAssertEqual(tutorial.progress?.completed, [TutorialStep.drawAgain],
+                       "Start tutorial turned drawing on, so Draw again counts as soon as it shows.")
+        XCTAssertEqual(tutorial.progress?.skipped, TutorialStep.allCases.filter { $0 != .drawAgain })
     }
 
     func testProductHelpDestinationsAndBrowserFailuresAreExplicit() {
@@ -390,6 +435,12 @@ final class FirstUseTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(100))
         XCTAssertTrue(accessibilityText(in: host).contains("Share usage counts"))
         XCTAssertFalse(model.usageMetrics.enabled)
+    }
+
+    /// Starts drawing with click-through canvases, so the test never covers the desktop's input.
+    private func draw() {
+        model.beginDrawing()
+        for session in model.desktopSessions { session.panel.ignoresMouseEvents = true }
     }
 
     private func accessibilityText(in host: NSView) -> String {

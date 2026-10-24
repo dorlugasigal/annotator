@@ -6,7 +6,11 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Added
 
-- A hands-on tutorial on Mac and Windows. It walks you through starting to draw, picking tools, drawing a shape, changing color, drawing a curved arrow, using the pen, moving a drawing, undoing, using your apps, drawing again and hiding everything. A ghost cursor shows each step and keycaps show what to press. Use the keys or the mouse, whichever you like. Confetti marks the end. Replay it from Settings > Help.
+- A hands-on tutorial on Mac and Windows. Ten quick steps: grab a tool, draw a box, change the color, draw a curved arrow, circle something with the pen, move it, undo, go back to your apps, draw again, and hide and show everything. A ghost cursor shows each step, keys show right in the instructions, and shortcuts light up on a little keyboard. Use the keys or the mouse, whichever you like. Finishing pops a big burst of confetti. Replay it from Settings > Help.
+
+### Changed
+
+- The toolbar now shows all properties by default, so options like Curved are easy to find. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away, with its own one-slider icon.
 
 ### Removed
 

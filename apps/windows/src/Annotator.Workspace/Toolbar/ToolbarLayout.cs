@@ -34,11 +34,14 @@ public static class ToolbarPropertiesModeExtensions
 
     extension(ToolbarPropertiesMode)
     {
-        /// <summary>Mac ToolbarPropertiesMode(model:): tools only when quick preferences are collapsed, else full when pinned.</summary>
+        /// <summary>
+        /// Mac ToolbarPropertiesMode(model:): tools only when quick preferences are collapsed, quick controls when the person chose
+        /// them (the inspector unpinned), else full properties, which is the default.
+        /// </summary>
         public static ToolbarPropertiesMode From(in WorkspacePreferences preferences) =>
             preferences.QuickPreferencesExpanded == false ? ToolbarPropertiesMode.ToolsOnly
-            : preferences.InspectorPinned == true ? ToolbarPropertiesMode.Full
-            : ToolbarPropertiesMode.Quick;
+            : preferences.InspectorPinned == false ? ToolbarPropertiesMode.Quick
+            : ToolbarPropertiesMode.Full;
     }
 }
 

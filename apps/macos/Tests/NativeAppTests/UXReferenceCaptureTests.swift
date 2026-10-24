@@ -28,11 +28,13 @@ final class UXReferenceCaptureTests: XCTestCase {
 
     // MARK: Models
 
-    /// A model with no drawing session: the toolbar and menu show the Off state.
+    /// A model with no drawing session: the toolbar and menu show the Off state. Properties start as quick controls, so
+    /// the states keep their meaning now that full properties are the default; only the full-properties states pin them.
     private func plainModel(_ name: String) throws -> WorkspaceModel {
         let suite = "ux-reference-\(name)-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
+        model.setInspectorPinned(false)
         cleanups.append { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
         return model
     }
@@ -399,7 +401,7 @@ final class UXReferenceCaptureTests: XCTestCase {
             }
             tutorial.showReview(.coach, step: .arrow, goalsDone: 1)
             try await recorder.view(card, state: "coach-arrow-curved", dark: dark,
-                                    notes: "Arrow step: the Arrow is picked, Choose Curved is the current goal.", spec: spec)
+                                    notes: "Arrow step: the Arrow is picked; Turn on Curved is the current goal.", spec: spec)
             tutorial.showReview(.coach, step: .shape, stepDone: true)
             try await recorder.view(card, state: "coach-shape-done", dark: dark,
                                     notes: "Shape step done: the title's check shows during the \(TutorialMotion.doneBeat) s pause before the next step.",

@@ -4,10 +4,10 @@ namespace Annotator.Core.Tutorial;
 
 /// <summary>
 /// The hands-on tutorial's steps in order (Swift <c>TutorialStep</c>). Raw values are stable identifiers shared with the Mac.
+/// Start tutorial turns drawing on, so the first step picks a tool; Draw again teaches the drawing shortcut later.
 /// </summary>
 public enum TutorialStep
 {
-    Draw,
     Rectangle,
     Shape,
     Color,
@@ -77,7 +77,7 @@ public static class TutorialSteps
     /// <summary>Every step in order.</summary>
     public static ImmutableArray<TutorialStep> All { get; } =
     [
-        TutorialStep.Draw, TutorialStep.Rectangle, TutorialStep.Shape, TutorialStep.Color, TutorialStep.Arrow,
+        TutorialStep.Rectangle, TutorialStep.Shape, TutorialStep.Color, TutorialStep.Arrow,
         TutorialStep.Pen, TutorialStep.Move, TutorialStep.Undo, TutorialStep.UseApps, TutorialStep.DrawAgain, TutorialStep.Hide,
     ];
 
@@ -86,7 +86,6 @@ public static class TutorialSteps
         /// <summary>The Mac's raw value.</summary>
         public string RawValue => step switch
         {
-            TutorialStep.Draw => "draw",
             TutorialStep.Rectangle => "rectangle",
             TutorialStep.Shape => "shape",
             TutorialStep.Color => "color",
@@ -103,7 +102,6 @@ public static class TutorialSteps
         /// <summary>The goals, in the order the step asks for them.</summary>
         public ImmutableArray<TutorialGoal> Goals => step switch
         {
-            TutorialStep.Draw => [TutorialGoal.Drawing],
             TutorialStep.Rectangle => [TutorialGoal.RectangleTool],
             TutorialStep.Shape => [TutorialGoal.ShapeDrawn],
             TutorialStep.Color => [TutorialGoal.ColorChanged],
@@ -216,7 +214,7 @@ public sealed class TutorialProgress
         Settle(start);
     }
 
-    public TutorialStep Step { get; private set; } = TutorialStep.Draw;
+    public TutorialStep Step { get; private set; } = TutorialSteps.All[0];
 
     /// <summary>The current goal's position in the step's goals; equal to the goal count once the tutorial is finished.</summary>
     public int GoalIndex { get; private set; }

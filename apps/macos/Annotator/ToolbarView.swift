@@ -13,9 +13,10 @@ private struct ToolbarMeasuredSize: PreferenceKey {
 enum ToolbarPropertiesMode: String, CaseIterable {
     case toolsOnly = "Tools only", quick = "Quick controls", full = "Full properties"
 
+    /// Full properties are the default, so Curved and the other choices show without a click.
     @MainActor init(model: WorkspaceModel) {
         self = model.preferences.quickPreferencesExpanded == false ? .toolsOnly :
-            model.preferences.inspectorPinned == true ? .full : .quick
+            model.preferences.inspectorPinned == false ? .quick : .full
     }
 
     var next: Self {
@@ -34,6 +35,21 @@ enum ToolbarPropertiesMode: String, CaseIterable {
             model.setQuickPreferencesExpanded(true)
         case .full: model.setInspectorPinned(true)
         }
+    }
+}
+
+/// The Properties button's icon for quick controls: one slider instead of three, drawn on Lucide's 24-unit grid from its
+/// sliders icon (see Lucide-LICENSE.txt). Full properties and tools only keep the three-slider symbol.
+struct OneSliderIcon: Shape {
+    func path(in rect: CGRect) -> Path {
+        let scale = min(rect.width, rect.height) / 24
+        let left = rect.midX - 12 * scale, top = rect.midY - 12 * scale
+        func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: left + x * scale, y: top + y * scale) }
+        var path = Path()
+        path.move(to: point(10, 12)); path.addLine(to: point(3, 12))
+        path.move(to: point(21, 12)); path.addLine(to: point(14, 12))
+        path.move(to: point(14, 10)); path.addLine(to: point(14, 14))
+        return path
     }
 }
 
@@ -290,9 +306,10 @@ struct ToolbarView: View {
             if pinned {
                 Divider()
                 CompactInspectorViewport(model: model, width: width - 24,
-                    limit: max(64, availableSize.height - 100 - (compactRail ? 48 : 0) - (showsModeStrip ? 52 : 0)),
+                    limit: max(64, availableSize.height - 100 - (compactRail ? 48 : 24) - (showsModeStrip ? 52 : 0)),
                     compact: width < 620)
                     .modifier(PropertiesReveal(animated: revealingProperties))
+                if !compactRail { fullPropertiesMenus }
             }
             if model.isConstructingArrow {
                 HStack(spacing: 8) {
@@ -396,12 +413,32 @@ struct ToolbarView: View {
         .accessibilityLabel("Active and pending modes")
     }
 
+    /// The quick row's menus, kept under full properties so Focus and cleanup and Zoom stay one click away now that full
+    /// properties are the default.
+    private var fullPropertiesMenus: some View {
+        HStack(spacing: 10) {
+            if model.selectionCount > 0 { selectionMenu }
+            if !model.hasReferenceImage { backgroundMenu; zoomMenu }
+        }
+        .frame(height: 16)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
     private var propertiesButton: some View {
         Button {
             propertiesMode.next.apply(to: model)
         } label: {
-            Image(systemName: "slider.horizontal.3").frame(width: metrics.actionSize.width, height: metrics.actionSize.height)
-                .foregroundStyle(expanded ? Color.accentColor : .primary)
+            Group {
+                if propertiesMode == .quick {
+                    OneSliderIcon()
+                        .stroke(style: StrokeStyle(lineWidth: 1.25, lineCap: .round, lineJoin: .round))
+                        .frame(width: 15, height: 15)
+                } else {
+                    Image(systemName: "slider.horizontal.3")
+                }
+            }
+            .frame(width: metrics.actionSize.width, height: metrics.actionSize.height)
+            .foregroundStyle(expanded ? Color.accentColor : .primary)
         }
         .buttonStyle(.plain)
         .help("\(propertiesMode.rawValue). Show \(propertiesMode.next.rawValue.lowercased()). Cycles quick controls, full properties and tools only." +

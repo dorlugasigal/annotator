@@ -93,10 +93,14 @@ internal sealed record ToolbarLook
 
     /// <summary>
     /// Mac CompactInspectorViewport's height limit: below the horizontal rail, the available height less the rail, the
-    /// compact actions row and the board strip; beside the vertical rail, the available height less the tool title.
+    /// compact actions row or the menus row below full properties, and the board strip; beside the vertical rail, the
+    /// available height less the tool title.
     /// </summary>
     public double InspectorLimit => Vertical ? Math.Max(64, Available.Height - 50)
-        : Math.Max(64, Available.Height - 100 - (CompactRail ? 48 : 0) - (ShowsModeStrip ? 52 : 0));
+        : Math.Max(64, Available.Height - 100 - (CompactRail ? 48 : FullMenusHeight + 8) - (ShowsModeStrip ? 52 : 0));
+
+    /// <summary>The menus row below horizontal full properties (Mac fullPropertiesMenus): the 16-point menu buttons.</summary>
+    public const double FullMenusHeight = 16;
 
     /// <summary>A horizontal toolbar narrower than 620 points shows full properties in one column, as a vertical one does.</summary>
     public bool InspectorCompact => Vertical || Width < 620;

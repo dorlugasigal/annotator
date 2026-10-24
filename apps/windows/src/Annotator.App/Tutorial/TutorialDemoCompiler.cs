@@ -27,8 +27,7 @@ internal static class TutorialDemoCompiler
         double scale = monitor.Scale;
         var position = origin;
         double t = 0;
-        var curve = new List<CorePoint>();
-        int drawnSpans = 0;
+        int curveClicks = 0;
         timeline.Appear = 0;
         timeline.Path.Add((0, position));
         t += TutorialMotion.GhostAppearDuration;
@@ -78,6 +77,18 @@ internal static class TutorialDemoCompiler
             timeline.Press.Add((t, (float)TutorialMotion.GhostPressScale));
         }
 
+        // The curved arrow is known before the ghost starts: a smooth line through every point it clicks. The ghost draws each
+        // span as it moves to the next point, so the arrow grows click by click, and the double-click on the last point (or
+        // Enter) adds the head.
+        const int CurveSegments = 12;
+        Vector2[] curveTargets = [.. actions.OfType<TutorialDemoClick>().Where(click => click.Ink == TutorialInk.Curve)
+            .Select(click => Resolve(click.Target)).OfType<Vector2>()];
+        Vector2[] curve = curveTargets.Length >= 3
+            ? [.. TutorialMotion.Smooth([.. curveTargets.Select(point => new CorePoint(point.X, point.Y))], CurveSegments)
+                .Select(point => new Vector2((float)point.X, (float)point.Y))]
+            : curveTargets;
+        int curveStride = curveTargets.Length >= 3 ? CurveSegments : 1;
+
         // Draws or drags along a path at TutorialMotion.DragDuration, following it by length with the standard curve; with
         // Trail ink, the line appears behind the ghost.
         void Follow(IReadOnlyList<Vector2> path, bool trail)
@@ -112,6 +123,21 @@ internal static class TutorialDemoCompiler
             position = path[^1];
         }
 
+        // The arrow is finished at <at>: its head appears at the last point.
+        void Head(double at)
+        {
+            if (curveClicks < 2 || curve.Length < 2)
+            {
+                return;
+            }
+            Vector2 tip = curve[^1], from = curve[^2];
+            (CorePoint left, CorePoint right) = TutorialMotion.Arrowhead(new CorePoint(from.X, from.Y), new CorePoint(tip.X, tip.Y),
+                TutorialMotion.ArrowheadLength * scale);
+            timeline.Ink.Add((at, tip, new Vector2((float)left.X, (float)left.Y)));
+            timeline.Ink.Add((at, tip, new Vector2((float)right.X, (float)right.Y)));
+            curveClicks = 0;
+        }
+
         void Release()
         {
             timeline.Path.Add((t, position));
@@ -128,17 +154,32 @@ internal static class TutorialDemoCompiler
                 case TutorialDemoKeys keys:
                     timeline.Path.Add((t, position));
                     timeline.Keys.Add(new DemoKeyCue(t, keys.Keys));
+                    Head(t + TutorialMotion.KeyDownDuration);
                     t += TutorialMotion.KeyStagger * Math.Max(0, keys.Keys.Length - 1) + TutorialMotion.KeyDownDuration +
                          TutorialMotion.KeyUpDuration + 0.35;
                     break;
                 case TutorialDemoClick click when Resolve(click.Target) is { } target:
-                    Travel(target);
+                    if (click.Ink == TutorialInk.Curve && curveClicks > 0 && curveClicks < curveTargets.Length)
+                    {
+                        int from = (curveClicks - 1) * curveStride;
+                        Follow(curve[from..Math.Min(curve.Length, from + curveStride + 1)], trail: true);
+                    }
+                    else
+                    {
+                        Travel(target);
+                    }
                     Press(ripple: true);
                     Release();
                     if (click.Ink == TutorialInk.Curve)
                     {
-                        curve.Add(new CorePoint(target.X, target.Y));
-                        drawnSpans = AddCurveSpans(timeline, curve, drawnSpans, t);
+                        curveClicks++;
+                    }
+                    if (click.Double)
+                    {
+                        t += TutorialMotion.DoubleClickGap;
+                        Press(ripple: true);
+                        Head(t);
+                        Release();
                     }
                     t += TutorialMotion.GhostPause;
                     break;
@@ -188,28 +229,5 @@ internal static class TutorialDemoCompiler
             }
         }
         return path[^1];
-    }
-
-    /// <summary>
-    /// Once the ghost has clicked three points, the smooth curve through them draws itself over a moment; each later click adds
-    /// its span. Returns how many spans are drawn.
-    /// </summary>
-    private static int AddCurveSpans(DemoTimeline timeline, List<CorePoint> curve, int drawn, double time)
-    {
-        if (curve.Count < 3)
-        {
-            return drawn;
-        }
-        const int segments = 12;
-        IReadOnlyList<CorePoint> smooth = TutorialMotion.Smooth(curve, segments);
-        int start = drawn * segments;
-        int count = smooth.Count - 1 - start;
-        for (int index = start + 1; index < smooth.Count; index++)
-        {
-            double delay = 0.3 * (index - start - 1) / Math.Max(1, count);
-            timeline.Ink.Add((time + delay, new Vector2((float)smooth[index - 1].X, (float)smooth[index - 1].Y),
-                new Vector2((float)smooth[index].X, (float)smooth[index].Y)));
-        }
-        return curve.Count - 1;
     }
 }

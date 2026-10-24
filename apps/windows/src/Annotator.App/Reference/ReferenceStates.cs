@@ -208,10 +208,13 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     public TimeSpan Settle { get; init; }
 }
 
-/// <summary>The profile fields the reference states change.</summary>
+/// <summary>
+/// The profile fields the reference states change. The captures start in quick controls, as the Mac capture's
+/// setInspectorPinned(false); full properties states choose them.
+/// </summary>
 internal sealed class ReferenceProfile
 {
-    public WorkspacePreferences Preferences = new();
+    public WorkspacePreferences Preferences = new() { InspectorPinned = false };
 }
 
 /// <summary>The named states of the toolbar and the tray flyout and icon (reference/ux-reference/macos/INDEX.md).</summary>

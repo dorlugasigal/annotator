@@ -1,8 +1,9 @@
 import Foundation
 
 /// The hands-on tutorial's steps in order. Raw values are stable identifiers shared with Windows (`TutorialStep`).
+/// Start tutorial turns drawing on, so the first step picks a tool; Draw again teaches the drawing shortcut later.
 public enum TutorialStep: String, CaseIterable, Codable, Sendable {
-    case draw, rectangle, shape, color, arrow, pen, move, undo, useApps, drawAgain, hide
+    case rectangle, shape, color, arrow, pen, move, undo, useApps, drawAgain, hide
 
     /// Every step in order.
     public static var all: [TutorialStep] { allCases }
@@ -10,7 +11,6 @@ public enum TutorialStep: String, CaseIterable, Codable, Sendable {
     /// The goals, in the order the step asks for them.
     public var goals: [TutorialGoal] {
         switch self {
-        case .draw: [.drawing]
         case .rectangle: [.rectangleTool]
         case .shape: [.shapeDrawn]
         case .color: [.colorChanged]
@@ -127,7 +127,7 @@ public enum TutorialChange: Sendable {
 /// (the mode or the tool) is done as soon as the state holds. When a goal is done, the next goal is checked against the
 /// same observation, so a state that already holds counts at once, while anything new must come later.
 public struct TutorialProgress: Sendable {
-    public private(set) var step = TutorialStep.draw
+    public private(set) var step = TutorialStep.allCases[0]
     /// The current goal's position in the step's goals; equal to the goal count once the tutorial is finished.
     public private(set) var goalIndex = 0
     public private(set) var isFinished = false

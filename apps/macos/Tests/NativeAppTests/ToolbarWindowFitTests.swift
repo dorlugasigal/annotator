@@ -9,6 +9,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let suite = "toolbar-display-recovery-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
+        model.setInspectorPinned(false)
         model.setVisibilityAnimation(false)
         let app = AppDelegate(model: model)
         defer {
@@ -43,6 +44,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let suite = "toolbar-small-display-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
+        model.setInspectorPinned(false)
         model.setVisibilityAnimation(false)
         let app = AppDelegate(model: model)
         defer {
@@ -390,6 +392,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let suite = "owned-toolbar-drag-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
+        model.setInspectorPinned(false)
         model.setVisibilityAnimation(false)
         let app = AppDelegate(model: model)
         defer {

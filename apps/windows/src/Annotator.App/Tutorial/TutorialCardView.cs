@@ -34,9 +34,9 @@ internal sealed class CoachContent
     public required FrameworkElement Root { get; init; }
     public required List<FrameworkElement> Keys { get; init; }
     public required List<(Grid Slot, CheckBadge Check)> Goals { get; init; }
-    public required List<TextBlock> GoalTexts { get; init; }
+    public required List<RichTextBlock> GoalTexts { get; init; }
     public required CheckBadge TitleCheck { get; init; }
-    public required TextBlock Hint { get; init; }
+    public required RichTextBlock Hint { get; init; }
     public required Button ShowMe { get; init; }
     public required Border CurrentSegment { get; init; }
 }
@@ -113,21 +113,27 @@ internal static class TutorialCardView
         header.Children.Add(end);
         column.Children.Add(header);
 
-        var titleRow = new Grid { ColumnSpacing = 8 };
+        // The title's check has its room from the start, so a finished step never changes the card's size.
+        var titleRow = new Grid { ColumnSpacing = 8, Height = 22 };
         titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        TextBlock title = CardParts.Text(text.Title, 15, weight: FontWeights.SemiBold);
+        TextBlock title = CardParts.Text(text.Title, 15, weight: FontWeights.SemiBold, wrap: false);
         title.VerticalAlignment = VerticalAlignment.Center;
+        title.TextTrimming = TextTrimming.CharacterEllipsis;
         titleRow.Children.Add(title);
         var titleCheck = new CheckBadge(TutorialText.Done, TutorialText.Done, dark);
-        titleCheck.Root.Visibility = Visibility.Collapsed;
+        titleCheck.Root.Opacity = 0;
         Grid.SetColumn(titleCheck.Root, 1);
         titleRow.Children.Add(titleCheck.Root);
         column.Children.Add(Spaced(titleRow, 12));
-        column.Children.Add(Spaced(CardParts.Text(text.Detail, 13, CardParts.Secondary), 4));
+        var keys = new List<FrameworkElement>();
+        if (text.Detail is { } detail)
+        {
+            column.Children.Add(Spaced(KeyLine(detail, 13, CardParts.Secondary, dark, keys), 6));
+        }
 
         var goals = new List<(Grid, CheckBadge)>();
-        var goalTexts = new List<TextBlock>();
+        var goalTexts = new List<RichTextBlock>();
         if (!text.Goals.IsEmpty)
         {
             var rows = new MacStack { Spacing = 6 };
@@ -145,7 +151,8 @@ internal static class TutorialCardView
                 pending.Visibility = done ? Visibility.Collapsed : Visibility.Visible;
                 check.Root.Visibility = done ? Visibility.Visible : Visibility.Collapsed;
                 row.Children.Add(slot);
-                TextBlock line = CardParts.Text(text.Goals[index], 13, index == progress.GoalIndex ? CardParts.Primary : CardParts.Secondary);
+                bool now = index == progress.GoalIndex;
+                RichTextBlock line = KeyLine(text.Goals[index], 13, now ? CardParts.Primary : CardParts.Secondary, dark, now ? keys : null);
                 line.VerticalAlignment = VerticalAlignment.Center;
                 Grid.SetColumn(line, 1);
                 row.Children.Add(line);
@@ -156,13 +163,13 @@ internal static class TutorialCardView
             column.Children.Add(Spaced(rows, 10));
         }
 
-        var keys = new List<FrameworkElement>();
-        if (progress.CurrentGoal is { } goal && TutorialText.Keys(goal, snapshot) is { IsEmpty: false } caps)
+        // Shortcuts with Ctrl, Shift or Alt, and Esc, also show on a keyboard with their keys lit; single keys show in the line.
+        if (progress.CurrentGoal is { } goal && TutorialText.ShowsKeyboard(goal, snapshot))
         {
-            column.Children.Add(Spaced(Keycaps(caps, dark, keys), 12));
+            column.Children.Add(Spaced(Keyboard(TutorialText.Keys(goal, snapshot), dark, keys), 12));
         }
 
-        TextBlock hint = CardParts.Text(text.Hint, 11, CardParts.Secondary);
+        RichTextBlock hint = KeyLine(text.Hint, 11, CardParts.Secondary, dark, null);
         hint.Visibility = Visibility.Collapsed;
         column.Children.Add(Spaced(hint, 10));
 
@@ -369,7 +376,7 @@ internal static class TutorialCardView
         return button;
     }
 
-    /// <summary>Keycaps five points apart, read as one element named like "Ctrl + Shift + 2".</summary>
+    /// <summary>Keycaps five points apart, read as one element named like "Ctrl + Shift + 2" (the finish card's rows).</summary>
     private static FrameworkElement Keycaps(ImmutableArray<string> caps, bool dark, List<FrameworkElement> keys)
     {
         string spoken = string.Join(" + ", caps);
@@ -387,6 +394,152 @@ internal static class TutorialCardView
         group.Children.Add(row);
         return group;
     }
+
+    /// <summary>
+    /// A line whose keys, marked in braces, show as small keycaps inside the words (Mac TutorialKeyLine). Screen readers read
+    /// the plain words. The keycaps go into <paramref name="keys"/> so the ghost's key presses move them.
+    /// </summary>
+    private static RichTextBlock KeyLine(string line, double size, string style, bool dark, List<FrameworkElement>? keys)
+    {
+        var block = new RichTextBlock
+        {
+            FontSize = size,
+            TextWrapping = TextWrapping.Wrap,
+            IsTextSelectionEnabled = false,
+            Foreground = AppResources.Brush(style == CardParts.Primary ? "AnnotatorLabelBrush" : "AnnotatorSecondaryLabelBrush"),
+        };
+        var paragraph = new Microsoft.UI.Xaml.Documents.Paragraph();
+        foreach ((string words, ImmutableArray<string> caps) in TutorialText.Segments(line))
+        {
+            if (caps.IsEmpty)
+            {
+                paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = words });
+                continue;
+            }
+            var group = new MacStack { Orientation = Orientation.Horizontal, Spacing = 2, Margin = new Thickness(1, 0, 1, 0) };
+            foreach (string cap in caps)
+            {
+                FrameworkElement key = InlineKey(cap, dark);
+                group.Children.Add(key);
+                keys?.Add(key);
+            }
+            // Inline content sits on the text's baseline; this lowers the keycaps to the middle of the words.
+            group.RenderTransform = new TranslateTransform { Y = 4 };
+            paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.InlineUIContainer { Child = group });
+        }
+        block.Blocks.Add(paragraph);
+        AutomationProperties.SetName(block, TutorialText.Plain(line));
+        return block;
+    }
+
+    /// <summary>A small keycap inside a line: monospaced semibold on a faint fill with a fine outline and 4-point corners.</summary>
+    private static Border InlineKey(string cap, bool dark)
+    {
+        var label = new TextBlock
+        {
+            Text = cap,
+            FontFamily = new FontFamily("Cascadia Mono, Consolas"),
+            FontSize = 11,
+            FontWeight = FontWeights.SemiBold,
+            Style = AppResources.Style(CardParts.Primary),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+        };
+        AutomationProperties.SetAccessibilityView(label, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
+        return new Border
+        {
+            MinWidth = 18,
+            Height = 18,
+            Padding = new Thickness(5, 0, 5, 0),
+            CornerRadius = new CornerRadius(4),
+            Background = CardParts.Fill(dark, 0.06),
+            BorderBrush = CardParts.Line(dark, 0.22),
+            BorderThickness = new Thickness(1),
+            Child = label,
+        };
+    }
+
+    /// <summary>
+    /// The left part of a keyboard with the shortcut's keys lit in the accent (Mac TutorialKeyboardView): the Esc row, the
+    /// number row, three letter rows and the bottom row, cut at its right edge, which fades into the card.
+    /// </summary>
+    private static FrameworkElement Keyboard(ImmutableArray<string> caps, bool dark, List<FrameworkElement> keys)
+    {
+        IReadOnlyList<string> lit = TutorialKeyboard.Ids(caps, mac: false) ?? [];
+        var canvas = new Canvas { Width = TutorialKeyboard.Width, Height = TutorialKeyboard.Height };
+        var litKeys = new Dictionary<string, FrameworkElement>(StringComparer.Ordinal);
+        foreach (TutorialKey key in TutorialKeyboard.Keys(mac: false))
+        {
+            Annotator.Core.Rect frame = TutorialKeyboard.Frame(key);
+            if (frame.X >= TutorialKeyboard.Width)
+            {
+                continue;
+            }
+            bool on = lit.Contains(key.Id);
+            var label = new TextBlock
+            {
+                Text = KeyLabel(key.Id),
+                FontSize = key.Id.Length > 1 ? 8.5 : 10,
+                FontWeight = on ? FontWeights.SemiBold : FontWeights.Normal,
+                Foreground = on ? new SolidColorBrush(Microsoft.UI.Colors.White) : AppResources.Brush("AnnotatorSecondaryLabelBrush"),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = key.Id.Length > 1 ? HorizontalAlignment.Left : HorizontalAlignment.Center,
+                Margin = new Thickness(key.Id.Length > 1 ? 5 : 0, 0, 0, 0),
+            };
+            var cap = new Border
+            {
+                Width = frame.Width,
+                Height = frame.Height,
+                CornerRadius = new CornerRadius(4),
+                Background = on ? CardParts.Accent(1) : CardParts.Fill(dark, 0.05),
+                BorderBrush = on ? CardParts.Accent(1) : CardParts.Line(dark, 0.14),
+                BorderThickness = new Thickness(1),
+                Child = label,
+            };
+            Canvas.SetLeft(cap, frame.X);
+            Canvas.SetTop(cap, frame.Y);
+            canvas.Children.Add(cap);
+            if (on)
+            {
+                litKeys[key.Id] = cap;
+            }
+        }
+        foreach (string id in lit)
+        {
+            if (litKeys.TryGetValue(id, out FrameworkElement? cap))
+            {
+                keys.Add(cap);
+            }
+        }
+        Windows.UI.Color background = AppResources.Brush("AnnotatorWindowBackgroundBrush") is SolidColorBrush { Color: var color }
+            ? color : Windows.UI.Color.FromArgb(255, 30, 30, 30);
+        var fade = new LinearGradientBrush { StartPoint = new Windows.Foundation.Point(0, 0.5), EndPoint = new Windows.Foundation.Point(1, 0.5) };
+        fade.GradientStops.Add(new GradientStop { Color = Windows.UI.Color.FromArgb(0, background.R, background.G, background.B), Offset = 0 });
+        fade.GradientStops.Add(new GradientStop { Color = background, Offset = 1 });
+        var edge = new Rectangle { Width = TutorialKeyboard.FadeWidth, Height = TutorialKeyboard.Height, Fill = fade, IsHitTestVisible = false };
+        Canvas.SetLeft(edge, TutorialKeyboard.Width - TutorialKeyboard.FadeWidth);
+        canvas.Children.Add(edge);
+        canvas.Clip = new RectangleGeometry { Rect = new Windows.Foundation.Rect(0, 0, TutorialKeyboard.Width, TutorialKeyboard.Height) };
+        var group = new AccessibleGroup($"Keyboard: {string.Join(" + ", caps)}") { HorizontalAlignment = HorizontalAlignment.Left };
+        AutomationProperties.SetAccessibilityView(canvas, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
+        group.Children.Add(canvas);
+        return group;
+    }
+
+    /// <summary>Windows keycap words for the tutorial keyboard's keys.</summary>
+    private static string KeyLabel(string id) => id switch
+    {
+        "esc" => "Esc",
+        "tab" => "Tab",
+        "caps" => "Caps",
+        "shift" => "Shift",
+        "ctrl" => "Ctrl",
+        "win" => "Win",
+        "alt" => "Alt",
+        "space" => string.Empty,
+        "f1" or "f2" or "f3" or "f4" or "f5" or "f6" => id.ToUpperInvariant(),
+        _ => id.ToUpperInvariant(),
+    };
 
     private static T Spaced<T>(T element, double top) where T : FrameworkElement
     {

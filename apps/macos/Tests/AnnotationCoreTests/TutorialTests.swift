@@ -29,7 +29,7 @@ private final class Run {
 
 @Test func tutorialStepsAndGoalsKeepTheirOrderAndRawValues() {
     #expect(TutorialStep.all.map(\.rawValue) ==
-        ["draw", "rectangle", "shape", "color", "arrow", "pen", "move", "undo", "useApps", "drawAgain", "hide"])
+        ["rectangle", "shape", "color", "arrow", "pen", "move", "undo", "useApps", "drawAgain", "hide"])
     #expect(TutorialStep.arrow.goals == [.arrowTool, .curvedStyle, .curvedArrowDrawn])
     #expect(TutorialStep.hide.goals == [.hidden, .shown])
     #expect(TutorialGoal.allCases.allSatisfy { !$0.rawValue.isEmpty })
@@ -37,9 +37,8 @@ private final class Run {
 }
 
 @Test func aWholeTutorialAcceptsKeysOrClicksBecauseOnlyTheResultCounts() {
-    let run = Run(look())
-    #expect(run.step == .draw)
-    #expect(run.observe(look(.draw)) == TutorialChange.step)
+    // Start tutorial turns drawing on; the first step picks a tool.
+    let run = Run(look(.draw))
     #expect(run.step == .rectangle)
     #expect(run.observe(look(.draw, tool: .rectangle)) == TutorialChange.step)
     #expect(run.step == .shape)
@@ -91,17 +90,19 @@ private final class Run {
 }
 
 @Test func aStateThatAlreadyHoldsCountsAtOnceButSomethingNewMustComeLater() {
-    // Clicking Rectangle to start drawing finishes both steps in one look; the drawing it waits for next must be new.
+    // The Rectangle already chosen finishes the first step at once; the drawing the next step waits for must be new.
     let old = drawing(.rectangle)
-    let run = Run(look(elements: [old]))
-    #expect(run.observe(look(.draw, tool: .rectangle, elements: [old])) == TutorialChange.step)
+    let run = Run(look(.draw, tool: .rectangle, elements: [old]))
     #expect(run.step == .shape)
-    #expect(run.progress.completed == [TutorialStep.draw, .rectangle])
+    #expect(run.progress.completed == [TutorialStep.rectangle])
     #expect(run.observe(look(.draw, tool: .rectangle, elements: [old])) == TutorialChange.none)
+    // Drawing after Use apps is a step of its own later.
+    #expect(TutorialStep.drawAgain.goals == [.drawing])
 }
 
 @Test func anotherToolsColorIsNotAColorChange() {
     let run = Run(look(.draw, tool: .rectangle))
+    #expect(run.step == .shape)
     run.skip()
     #expect(run.step == .color)
     #expect(run.observe(look(.draw, tool: .arrow, color: .yellow)) == TutorialChange.none)
@@ -129,7 +130,7 @@ private final class Run {
 
 @Test func hiddenToolsAreNotDrawingAndSkippingTheLastStepFinishes() {
     let run = Run(look(.draw, presented: false))
-    #expect(run.step == .draw)
+    #expect(run.step == .rectangle)
     while run.step != .hide {
         #expect(run.skip() == TutorialChange.step)
     }
@@ -140,6 +141,24 @@ private final class Run {
     #expect(run.progress.isFinished)
     #expect(run.observe(look()) == TutorialChange.finished)
     #expect(run.progress.skipped == TutorialStep.all)
+}
+
+@Test func theKeyboardLightsShortcutsWithModifiersAndEscape() {
+    #expect(TutorialKeyboard.ids(["Ctrl", "Shift", "2"], mac: false) == ["ctrl", "shift", "2"])
+    #expect(TutorialKeyboard.ids(["\u{2303}\u{21E7}2"], mac: true) == ["control", "shift", "2"])
+    #expect(TutorialKeyboard.ids(["\u{2318}Z"], mac: true) == ["command", "z"])
+    #expect(TutorialKeyboard.shows(["Ctrl", "2"], mac: false))
+    #expect(TutorialKeyboard.shows(["Esc"], mac: false))
+    #expect(TutorialKeyboard.shows(["esc"], mac: true))
+    #expect(!TutorialKeyboard.shows(["7"], mac: false))
+    #expect(!TutorialKeyboard.shows(["Enter"], mac: false))
+    #expect(!TutorialKeyboard.shows(["Ctrl", "Alt", "9"], mac: false))
+    #expect(TutorialKeyboard.ids(["Ctrl", "9"], mac: false) == nil)
+    for mac in [false, true] {
+        let keys = TutorialKeyboard.keys(mac: mac)
+        #expect(Set(keys.map(\.id)).count == keys.count)
+        #expect(keys.allSatisfy { (0...TutorialKeyboard.height).contains(TutorialKeyboard.frame($0).y) })
+    }
 }
 
 @Test func tutorialElementsReadTheDrawingsRouteAndPlace() {
