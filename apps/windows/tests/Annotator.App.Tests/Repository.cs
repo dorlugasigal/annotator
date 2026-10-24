@@ -44,10 +44,12 @@ internal static class Repository
     {
         string? filter = Environment.GetEnvironmentVariable("ANNOTATOR_A11Y_STATES");
         string[] patterns = filter is { Length: > 0 } ? filter.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) : ["*"];
-        foreach (string surface in new[] { "toolbar", "menu", "properties", "pickers", "tools-window", "settings", "tour", "dialogs", "region-sharing", "break-timer" })
+        foreach (string surface in new[] { "toolbar", "menu", "properties", "pickers", "tools-window", "settings", "tutorial", "dialogs", "region-sharing", "break-timer" })
         {
-            // The break screen is always dark, so its states have only dark captures.
-            IEnumerable<string> names = Directory.EnumerateFiles(Path.Combine(Reference, surface), "*.json")
+            // The break screen is always dark, so its states have only dark captures. A surface the Mac has not captured yet,
+            // such as a new one before the reference is regenerated, has only its Windows-only states.
+            IEnumerable<string> names = (Directory.Exists(Path.Combine(Reference, surface))
+                    ? Directory.EnumerateFiles(Path.Combine(Reference, surface), "*.json") : [])
                 .Select(Path.GetFileName)
                 .Select(file => file!.EndsWith("-light.json", StringComparison.Ordinal) ? file[..^"-light.json".Length]
                     : file.EndsWith("-dark.json", StringComparison.Ordinal) ? file[..^"-dark.json".Length] : null)

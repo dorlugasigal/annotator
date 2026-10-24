@@ -26,7 +26,7 @@ Microsoft Store and as portable ZIPs on each GitHub release.
 | `tests/Annotator.Conformance.Tests/` | xUnit tests that compare Core and the Windows key table with the Mac conformance corpus in `reference/conformance` (platform, boards, profiles, shortcuts, library, editing, geometry, recognition and hit testing); any OS. Every corpus file is checked against `manifest.json` first, and the differences that remain are listed with their reasons in `Support/OpenDifferences.List.cs` |
 | `benchmarks/Annotator.Benchmarks/` | The Release benchmarks (WIN-PERF-01): the Mac suite's 34 workloads with the same names, fixtures and JSON, and the overlay presenter's frame work; Native AOT, never shipped; see its [README](benchmarks/Annotator.Benchmarks/README.md) |
 | `tools/Annotator.RenderHarness/` | Manual measurements: the presenter on the real overlay (latency, memory, WIN-PERF-01), input latency into the running app, and Windows.Graphics.Capture screenshots; not part of the solution; see its [README](tools/Annotator.RenderHarness/README.md) |
-| `tools/Annotator.UXReference/` | Compares every state of the macOS UX reference (the toolbar, tray flyout and menu, canvas, properties, pickers, Tools window, Settings, tour, dialogs and region sharing) and the cursors with the app (UI Automation tree, canvas objects and side-by-side sheets, WIN-PAR-06); not part of the solution; see its [README](tools/Annotator.UXReference/README.md) |
+| `tools/Annotator.UXReference/` | Compares every state of the macOS UX reference (the toolbar, tray flyout and menu, canvas, properties, pickers, Tools window, Settings, tutorial, dialogs and region sharing) and the cursors with the app (UI Automation tree, canvas objects and side-by-side sheets, WIN-PAR-06); not part of the solution; see its [README](tools/Annotator.UXReference/README.md) |
 | `tools/Annotator.IconExport/` | Writes the MSIX logos and `Annotator.ico` from the A mark artwork; not part of the solution |
 
 
@@ -102,7 +102,9 @@ recording gate; Alt+F4 hides Settings and the gear opens it again), and the
 canvas uses the new key; boards (Save board, Export PNG, a broken board's error
 in the error window, Open board and Insert image, with files in the output
 folder); the Shift constraints; the on-screen tip with its zoom line and no
-status line; the tour and the coffee reminder after a first-use event; and
+status line; the tutorial (welcome card, steps finished by a click, a key, a
+drag and an ink key, the click-through layer) and the coffee reminder after a
+first-use event; and
 region sharing (a custom region, Left half, the output turning live, Cursor halo
 drawn in it, the output staying live and following full-screen zoom, a hide and
 a show with Show / hide played in the output as copies of the drawings, Stop and

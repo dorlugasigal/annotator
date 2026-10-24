@@ -97,7 +97,9 @@ final class WorkspaceModel: ObservableObject {
     }
     @Published var showHelp = false
     @Published var settingsTab: CustomizationTab = .general
+    /// True while a tutorial card shows, so the support reminder waits. The name predates the tutorial.
     @Published var introductionVisible = false
+    /// Opens the tutorial's welcome card from Settings.
     var onShowIntroduction: (() -> Void)?
     var openExternalURL: (URL) -> Bool = { NSWorkspace.shared.open($0) }
     @Published var status = "Ready. Control-2 opens drawing."
@@ -149,6 +151,9 @@ final class WorkspaceModel: ObservableObject {
     @Published private(set) var selectionCount = 0
     @Published private(set) var canUndo = false
     @Published private(set) var canRedo = false
+    /// Counts Undo operations that changed something, not an Undo that only cancelled an edit in progress.
+    /// The tutorial reads it to see that Undo ran.
+    @Published private(set) var undoSerial: UInt64 = 0
     @Published var smartDraw = false {
         didSet {
             if applyingSharedPreferences { return }
@@ -1195,7 +1200,9 @@ final class WorkspaceModel: ObservableObject {
         } else {
             if applyWorkspaceHistory(redo: false) { return }
             active.canvas.commitTextIfNeeded()
+            let generation = active.document.generation
             active.document.undo()
+            if active.document.generation != generation { undoSerial &+= 1 }
             active.canvas.renderer.reset()
             synchronize()
         }
@@ -1310,6 +1317,7 @@ final class WorkspaceModel: ObservableObject {
             if redo { session.document.redo() } else { session.document.undo() }
             session.canvas.renderer.reset()
         }
+        if !redo { undoSerial &+= 1 }
         selectionIsWorkspaceWide = entry.globalSelection
         if entry.globalSelection { tool = .select }
         synchronize()

@@ -128,7 +128,7 @@ public sealed class UsageMetrics
 
     /// <summary>
     /// The Windows sending switch (WIN-PRV-01). The service deployed today rejects the Windows payload, so Windows offers
-    /// no usage counts: Settings and the tour say they aren't available, sharing cannot be turned on and nothing is
+    /// no usage counts: Settings and the tutorial say they aren't available, sharing cannot be turned on and nothing is
     /// recorded or sent. Owner step: deploy services/metrics with the platform field (specification 011), then set this
     /// to true and give the release build its AnnotatorMetricsUrl.
     /// </summary>

@@ -67,7 +67,7 @@ main-actor (Mac) or UI-thread (Windows) isolated.
 | Break timer | `BreakTimerController.swift`, `BreakScreenView.swift`, `AnnotationCore/BreakTimer.swift` | `Core/BreakTimer.cs`, `Workspace/Breaks`, `App/Breaks` |
 | Settings and shortcuts | `SettingsView.swift`, `ToolbarShortcutSettings.swift`, `AnnotationCore/Preferences.swift`, `Shortcuts.swift` | `Core/Preferences.cs`, `Workspace/Settings`, `Workspace/Shortcuts`, `App/Settings` |
 | Boards, saved shapes, export | `ShapeLibraryModel.swift`, `ToolLibrary.swift`, `SnapshotExporter.swift` | `Workspace/Files`, `Workspace/Library`, `App/Library`, `Rendering/Export` |
-| First use and help | `IntroductionController.swift`, `FeedbackView.swift`, `SupportInfo.swift` | `Workspace/FirstUse`, `App/Introduction`, `Workspace/Settings` |
+| First use and help | `AnnotationCore/Tutorial.swift`, `TutorialController.swift`, `FeedbackView.swift`, `SupportInfo.swift` | `Core/Tutorial`, `Workspace/FirstUse`, `App/Tutorial`, `Workspace/Settings` |
 | Updates | Sparkle (`AppUpdateController.swift`) | Microsoft Store, `Workspace/Updates`, `Platform/Updates` |
 | Usage counts (opt-in) | `UsageMetrics.swift` | `Workspace/Metrics`; service in `services/metrics` |
 | AI control | `ComputerUseSkill.swift`, [`integrations/computer-use/annotator`](../integrations/computer-use/annotator/SKILL.md) | Same skill, bundled with the app |

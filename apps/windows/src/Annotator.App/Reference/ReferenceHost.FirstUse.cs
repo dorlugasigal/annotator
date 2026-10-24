@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices.WindowsRuntime;
-using Annotator.App.Introduction;
 using Annotator.App.Shell;
+using Annotator.App.Tutorial;
+using Annotator.Core.Tutorial;
 using Annotator.Core.Geometry;
 using Annotator.Core.Scene;
 using Annotator.Platform.Graphics;
@@ -20,15 +21,15 @@ using CoreRect = Annotator.Core.Rect;
 
 namespace Annotator.App.Reference;
 
-/// <summary>The tour, the on-screen tip and the coffee reminder for the UX reference (spec 005, WIN-UI-04).</summary>
+/// <summary>The tutorial cards, the on-screen tip and the coffee reminder for the UX reference (spec 005, WIN-UI-04).</summary>
 internal sealed partial class ReferenceHost
 {
     private void ShowFirstUse(WorkspaceModel model, ReferenceScenario scenario)
     {
         switch (scenario.Surface)
         {
-            case ReferenceSurface.Tour:
-                ShowTour(model, scenario.TourPage);
+            case ReferenceSurface.Tutorial:
+                ShowTutorial(model, scenario.TutorialState);
                 break;
             case ReferenceSurface.CanvasHint:
                 ShowCanvasHint(model);
@@ -43,20 +44,45 @@ internal sealed partial class ReferenceHost
     }
 
     /// <summary>
-    /// The tour's content on <paramref name="page"/> with every story at its end (the Mac capture's review progress of 1),
-    /// 520 by 530 points like the Mac's on a display with room, without the window's title bar like the Mac capture. The
-    /// illustrations draw into bitmaps, which the capture reads; it waits for the check box's check to finish drawing in.
+    /// A tutorial card's surface as the Mac capture shows it, without the room for motion around it: the welcome card, a coach
+    /// card (coach-&lt;step&gt; with nothing done, coach-arrow-curved with the arrow's first goal done, coach-shape-done with the
+    /// step's check) or the finish card. It waits for the checks to finish drawing in.
     /// </summary>
-    private void ShowTour(WorkspaceModel model, IntroductionPage page)
+    private void ShowTutorial(WorkspaceModel model, string state)
     {
-        IllustrationView.Stills = true;
-        var navigator = new IntroductionNavigator { ReviewProgress = 1 };
-        navigator.Select(page);
-        navigator.SetPresented(true);
-        var preferences = new IntroductionPreferences(AppDefaults.InMemory());
-        var view = new TourView(navigator, preferences, () => model.Snapshot, ReferenceUsage(), static () => { }) { ContentHeight = 530 };
-        view.Shown();
-        var window = new FirstUseReferenceWindow(_registry, IntroductionText.WindowTitle, (FrameworkElement)view.Root);
+        var actions = new TutorialCardActions();
+        bool dark = Application.Current.RequestedTheme == ApplicationTheme.Dark;
+        FrameworkElement content;
+        if (state == "welcome")
+        {
+            content = TutorialCardView.Welcome(actions, new TutorialPreferences(AppDefaults.InMemory()), ReferenceUsage());
+        }
+        else if (state == "finish")
+        {
+            content = TutorialCardView.Finish(model.Snapshot, actions, dark);
+        }
+        else
+        {
+            ProgressView view = state switch
+            {
+                "coach-arrow-curved" => new ProgressView(TutorialStep.Arrow, 1),
+                "coach-shape-done" => new ProgressView(TutorialStep.Shape, 1),
+                _ => new ProgressView(TutorialSteps.All.First(step => "coach-" + step.RawValue == state), 0),
+            };
+            CoachContent coach = TutorialCardView.Coach(view, model.Snapshot, actions, dark);
+            if (state == "coach-shape-done")
+            {
+                coach.TitleCheck.Root.Visibility = Visibility.Visible;
+            }
+            content = coach.Root;
+        }
+        var surface = new Border
+        {
+            Style = AppResources.Style("AnnotatorToolbarSurface"),
+            CornerRadius = new CornerRadius(13),
+            Child = content,
+        };
+        var window = new FirstUseReferenceWindow(_registry, "Annotator tutorial", surface);
         _popover = window;
         window.ShowForReference(OffscreenOrigin());
         Microsoft.UI.Dispatching.DispatcherQueueTimer settle = _queue.CreateTimer();

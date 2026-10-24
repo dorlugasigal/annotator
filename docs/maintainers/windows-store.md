@@ -393,7 +393,7 @@ Submission options. Paste:
 Annotator is a desktop app for drawing on the live screen during demos and calls. It needs no account or sign-in and has no paid features.
 
 How to test:
-1. Start Annotator from Start. The toolbar and a short welcome tour appear. Annotator's icon is in the system tray, near the clock; Windows may put it under the up arrow.
+1. Start Annotator from Start. The toolbar and a short welcome card for the tutorial appear. Annotator's icon is in the system tray, near the clock; Windows may put it under the up arrow.
 2. Select a tool, such as Pen or Arrow, and drag anywhere on the screen to draw. Press Escape or select Use apps to work in other apps again; the drawings stay visible. Ctrl+2 shows or hides the toolbar and drawings.
 3. Screen zoom (Ctrl+1), the pointer lens, Blur, Pixelate, Distort and region sharing read the screen while they run. The first time, Annotator asks Windows for permission to capture the screen; please allow it.
 4. To quit, right-click the tray icon and select Quit.

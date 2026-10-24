@@ -9,7 +9,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     HStack {
-                        Button("Quick start", systemImage: "play.rectangle") { model.onShowIntroduction?() }
+                        Button("Tutorial", systemImage: "play.rectangle") { model.onShowIntroduction?() }
                             .buttonStyle(.borderedProminent)
                         Button("Online guide", systemImage: "book") { model.openProductPage(.help) }
                         Button("Shortcuts", systemImage: "keyboard") { model.openPreferences(tab: .toolbar) }

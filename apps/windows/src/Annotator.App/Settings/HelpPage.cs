@@ -8,8 +8,8 @@ namespace Annotator.App.Settings;
 
 /// <summary>
 /// Settings > Help (the Mac's SettingsView): the guide buttons, three disclosure groups on screen sharing, saving and
-/// AI assistants, the feedback buttons and Support info. Text is callout-sized, as the Mac's .font(.callout). Quick
-/// start opens the tour (WIN-UI-04).
+/// AI assistants, the feedback buttons and Support info. Text is callout-sized, as the Mac's .font(.callout). Tutorial
+/// opens the hands-on tutorial (WIN-UI-04).
 /// </summary>
 internal static class HelpPage
 {
@@ -20,9 +20,9 @@ internal static class HelpPage
         var stack = new MacStack { Spacing = 22, HorizontalAlignment = HorizontalAlignment.Stretch };
 
         var guides = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8 };
-        var quickStart = new SettingsButton(SettingsCopy.QuickStart, ButtonLook.Prominent, SettingsWidths.Button(SettingsCopy.QuickStart),
+        var quickStart = new SettingsButton(SettingsCopy.Tutorial, ButtonLook.Prominent, SettingsWidths.Button(SettingsCopy.Tutorial),
             symbol: "play.rectangle", fontSize: 12);
-        quickStart.Click += (_, _) => actions.ShowIntroduction?.Invoke();
+        quickStart.Click += (_, _) => actions.ShowTutorial?.Invoke();
         guides.Children.Add(quickStart);
         guides.Children.Add(Button(SettingsCopy.OnlineGuide, "book", () => actions.OpenProductPage(ProductPage.Help)));
         guides.Children.Add(Button(SettingsCopy.Shortcuts, "keyboard", () => actions.OpenTab?.Invoke(SettingsTab.Toolbar)));

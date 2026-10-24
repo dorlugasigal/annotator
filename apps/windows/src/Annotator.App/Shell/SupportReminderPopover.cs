@@ -1,4 +1,4 @@
-using Annotator.App.Introduction;
+using Annotator.App.Tutorial;
 using Annotator.Platform.Windowing;
 using Annotator.Workspace.FirstUse;
 using Microsoft.UI.Text;
@@ -79,8 +79,8 @@ internal sealed class SupportReminderPopover : Window
     public static FrameworkElement Body(Func<bool> support, Action notNow)
     {
         var column = new MacStack { Spacing = 10, Width = 300 - 32 };
-        column.Children.Add(TourParts.Text(SupportReminderText.Title, 13, weight: FontWeights.SemiBold, wrap: false));
-        column.Children.Add(TourParts.Text(SupportReminderText.Detail, 12, TourParts.Secondary));
+        column.Children.Add(CardParts.Text(SupportReminderText.Title, 13, weight: FontWeights.SemiBold, wrap: false));
+        column.Children.Add(CardParts.Text(SupportReminderText.Detail, 12, CardParts.Secondary));
         var buttons = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8 };
         Button coffee = Small(SupportReminderText.Support);
         Tint(coffee);

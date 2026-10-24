@@ -484,6 +484,45 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
             (int)(bounds.Width * scale), (int)(bounds.Height * scale));
     }
 
+    /// <summary>
+    /// The tutorial's anchor (Mac TutorialAnchors): the frame in physical screen pixels of the first shown control whose
+    /// accessible name is <paramref name="name"/>, such as "Rectangle" or "Undo"; null while the toolbar is hidden or has no
+    /// such control.
+    /// </summary>
+    public RectInt32? Control(string name)
+    {
+        if (!_shown || Content is not FrameworkElement root || !root.IsLoaded)
+        {
+            return null;
+        }
+        return Find(root, name) is { } element ? Anchor(element) : null;
+    }
+
+    private static FrameworkElement? Find(DependencyObject node, string name)
+    {
+        if (node is FrameworkElement element)
+        {
+            if (element.Visibility != Visibility.Visible || element.Opacity <= 0)
+            {
+                return null;
+            }
+            if (element.ActualWidth > 0 && element.ActualHeight > 0 &&
+                string.Equals(Microsoft.UI.Xaml.Automation.AutomationProperties.GetName(element), name, StringComparison.Ordinal))
+            {
+                return element;
+            }
+        }
+        int count = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(node);
+        for (int index = 0; index < count; index++)
+        {
+            if (Find(Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(node, index), name) is { } found)
+            {
+                return found;
+            }
+        }
+        return null;
+    }
+
     WorkspaceModel IPropertiesHost.Model => _model;
 
     Brush IPropertiesHost.Ink => _ink;

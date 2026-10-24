@@ -17,14 +17,14 @@ using Windows.UI;
 using FontWeight = Windows.UI.Text.FontWeight;
 using WinRect = Windows.Foundation.Rect;
 
-namespace Annotator.App.Introduction;
+namespace Annotator.App.Tutorial;
 
 /// <summary>
-/// The tour's building blocks in the Mac's SwiftUI sizes (spec 005): text styles, keycaps, the disclosure, the setup
-/// cards and their ready badge. Colors come from the theme the window shows when it builds them; the window builds its
-/// pages again when the theme changes.
+/// The tutorial cards' building blocks in the Mac's SwiftUI sizes: text styles, keycaps, the disclosure, the information
+/// cards and the check badge. Colors come from the theme the card shows when it builds them; the card builds its content
+/// again when the theme changes.
 /// </summary>
-internal static class TourParts
+internal static class CardParts
 {
     public const string Primary = "AnnotatorPrimaryText";
     public const string Secondary = "AnnotatorSecondaryText";
@@ -176,7 +176,7 @@ internal static class TourParts
             ToolTipService.SetToolTip(cap, key);
             row.Children.Add(cap);
         }
-        var group = new TourShortcut { VerticalAlignment = VerticalAlignment.Center };
+        var group = new CardShortcut { VerticalAlignment = VerticalAlignment.Center };
         AutomationProperties.SetName(group, spoken);
         AutomationProperties.SetHelpText(group, spoken);
         ToolTipService.SetToolTip(group, spoken);
@@ -265,12 +265,12 @@ internal static class TourParts
 /// The Mac's DisclosureGroup: a chevron and a title that open text below them. UI Automation reads it as a group with the
 /// ExpandCollapse pattern (the Mac's disclosure triangle) named by its title.
 /// </summary>
-internal sealed partial class TourDisclosure : Button
+internal sealed partial class CardDisclosure : Button
 {
     private readonly FrameworkElement _chevron;
     private bool _expanded;
 
-    public TourDisclosure(string title, string identifier, FrameworkElement details, bool expanded)
+    public CardDisclosure(string title, string identifier, FrameworkElement details, bool expanded)
     {
         Details = details;
         Style = AppResources.Style("AnnotatorPlainButton");
@@ -280,7 +280,7 @@ internal sealed partial class TourDisclosure : Button
         _chevron.VerticalAlignment = VerticalAlignment.Center;
         var label = new MacStack { Orientation = Orientation.Horizontal, Spacing = 6 };
         label.Children.Add(_chevron);
-        TextBlock text = TourParts.Text(title, 13, wrap: false);
+        TextBlock text = CardParts.Text(title, 13, wrap: false);
         // The disclosure reads as one element named by its title.
         AutomationProperties.SetAccessibilityView(text, AccessibilityView.Raw);
         label.Children.Add(text);
@@ -327,7 +327,7 @@ internal sealed partial class TourDisclosure : Button
 
     protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
 
-    private sealed partial class Peer(TourDisclosure owner) : ButtonAutomationPeer(owner), IExpandCollapseProvider
+    private sealed partial class Peer(CardDisclosure owner) : ButtonAutomationPeer(owner), IExpandCollapseProvider
     {
         public ExpandCollapseState ExpandCollapseState => owner.Expanded ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
 
@@ -347,26 +347,26 @@ internal sealed partial class TourDisclosure : Button
 }
 
 /// <summary>
-/// The setup page's ready badge (Mac IntroductionAllowedBadge): a green check drawing itself in a 22-point circle that grows
+/// The check badge (Mac TutorialCheckBadge): a green check drawing itself in a 22-point circle that grows
 /// from 60%, then a word. UI Automation reads one element named by <paramref name="spoken"/>.
 /// </summary>
-internal sealed class TourBadge
+internal sealed class CheckBadge
 {
     private const double CheckLength = 1.6;
     private readonly Ellipse _circle;
     private readonly Polyline _check;
     private readonly double _length;
 
-    public TourBadge(string word, string spoken, bool dark)
+    public CheckBadge(string word, string spoken, bool dark)
     {
-        Color green = TourParts.Green(dark);
+        Color green = CardParts.Green(dark);
         _circle = new Ellipse
         {
             Width = 22,
             Height = 22,
-            Fill = ContrastTheme.Pick(ContrastColor.Window, new SolidColorBrush(Color.FromArgb(TourParts.Alpha(0.16), green.R, green.G, green.B))),
+            Fill = ContrastTheme.Pick(ContrastColor.Window, new SolidColorBrush(Color.FromArgb(CardParts.Alpha(0.16), green.R, green.G, green.B))),
         };
-        // IntroductionCheckShape in the 10-point square inside 6 points of padding.
+        // The check in the 10-point square inside 6 points of padding.
         var points = new Windows.Foundation.Point[] { new(6, 6 + 5 + 0.4), new(6 + 3.8, 6 + 10 - 0.8), new(16, 6 + 1.2) };
         _length = Distance(points[0], points[1]) + Distance(points[1], points[2]);
         _check = new Polyline
@@ -387,7 +387,7 @@ internal sealed class TourBadge
         mark.Children.Add(_check);
         var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 6 };
         row.Children.Add(mark);
-        TextBlock text = TourParts.Text(word, 12, TourParts.Secondary, FontWeights.Medium, wrap: false);
+        TextBlock text = CardParts.Text(word, 12, CardParts.Secondary, FontWeights.Medium, wrap: false);
         text.VerticalAlignment = VerticalAlignment.Center;
         AutomationProperties.SetAccessibilityView(text, AccessibilityView.Raw);
         row.Children.Add(text);
@@ -403,7 +403,7 @@ internal sealed class TourBadge
     public void Draw(double drawn)
     {
         drawn = Math.Clamp(drawn, 0, 1);
-        TourParts.ScaleAroundCenter(_circle, 0.6 + 0.4 * Math.Min(1, drawn * CheckLength));
+        CardParts.ScaleAroundCenter(_circle, 0.6 + 0.4 * Math.Min(1, drawn * CheckLength));
         _circle.CenterPoint = new Vector3(11, 11, 0);
         double units = _length / _check.StrokeThickness;
         _check.StrokeDashArray = drawn >= 1 ? null : new DoubleCollection { Math.Max(0.0001, units * drawn), units * 2 };
@@ -415,29 +415,29 @@ internal sealed class TourBadge
 }
 
 /// <summary>
-/// One setup card (Mac permissionCard): a tinted 32-point icon tile, a headline and detail with optional notes, and a button
+/// One information card (Mac TutorialInfoCard): a tinted 32-point icon tile, a headline and detail with optional notes, and a button
 /// or the ready badge on the right; 12 points of padding on a 4% fill with an 8% outline and a 10-point corner.
 /// </summary>
-internal sealed class TourCard
+internal sealed class InfoCard
 {
-    public TourCard(string symbol, string symbolLabel, string title, string detail, IReadOnlyList<string> notes, bool ready, bool dark,
+    public InfoCard(string symbol, string symbolLabel, string title, string detail, IReadOnlyList<string> notes, bool ready, bool dark,
                     FrameworkElement trailing)
     {
-        Color tint = ready ? TourParts.Green(dark) : TourParts.Accent(1).Color;
+        Color tint = ready ? CardParts.Green(dark) : CardParts.Accent(1).Color;
         var tile = new Grid { Width = 32, Height = 32, VerticalAlignment = VerticalAlignment.Center };
         tile.Children.Add(new Border
         {
             CornerRadius = new CornerRadius(8),
-            Background = ContrastTheme.Pick(ContrastColor.Window, new SolidColorBrush(Color.FromArgb(TourParts.Alpha(0.14), tint.R, tint.G, tint.B))),
+            Background = ContrastTheme.Pick(ContrastColor.Window, new SolidColorBrush(Color.FromArgb(CardParts.Alpha(0.14), tint.R, tint.G, tint.B))),
         });
-        FrameworkElement icon = TourParts.Symbol(symbol, 18, "AnnotatorGlyphAccent", symbolLabel, ready ? tint : null);
+        FrameworkElement icon = CardParts.Symbol(symbol, 18, "AnnotatorGlyphAccent", symbolLabel, ready ? tint : null);
         tile.Children.Add(icon);
         var texts = new MacStack { Spacing = 2, VerticalAlignment = VerticalAlignment.Center };
-        texts.Children.Add(TourParts.Text(title, 13, weight: FontWeights.SemiBold));
-        texts.Children.Add(TourParts.Text(detail, 12, TourParts.Secondary));
+        texts.Children.Add(CardParts.Text(title, 13, weight: FontWeights.SemiBold));
+        texts.Children.Add(CardParts.Text(detail, 12, CardParts.Secondary));
         foreach (string note in notes)
         {
-            texts.Children.Add(TourParts.Text(note, 10, TourParts.Secondary));
+            texts.Children.Add(CardParts.Text(note, 10, CardParts.Secondary));
         }
         trailing.VerticalAlignment = VerticalAlignment.Center;
         trailing.Margin = new Thickness(8, 0, 0, 0);
@@ -454,8 +454,8 @@ internal sealed class TourCard
         {
             Padding = new Thickness(12),
             CornerRadius = new CornerRadius(10),
-            Background = TourParts.Fill(dark, 0.04),
-            BorderBrush = TourParts.Line(dark, 0.08),
+            Background = CardParts.Fill(dark, 0.04),
+            BorderBrush = CardParts.Line(dark, 0.08),
             BorderThickness = new Thickness(1),
             Child = row,
         };
@@ -468,7 +468,7 @@ internal sealed class TourCard
     {
         Root.Opacity = arrival.Opacity;
         Root.Translation = new Vector3(0, (float)arrival.Offset, 0);
-        TourParts.ScaleAroundCenter(Root, arrival.Scale);
+        CardParts.ScaleAroundCenter(Root, arrival.Scale);
     }
 }
 
@@ -476,11 +476,11 @@ internal sealed class TourCard
 /// A shortcut's keycaps as one element (the Mac's ShortcutKeycaps view, an unknown role with its label): a custom control
 /// named with the keys, framed like the Mac's keycaps with their outline's outer half point.
 /// </summary>
-internal sealed partial class TourShortcut : Grid
+internal sealed partial class CardShortcut : Grid
 {
     protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
 
-    private sealed partial class Peer(TourShortcut owner) : FrameworkElementAutomationPeer(owner)
+    private sealed partial class Peer(CardShortcut owner) : FrameworkElementAutomationPeer(owner)
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Custom;
 

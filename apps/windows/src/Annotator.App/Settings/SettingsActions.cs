@@ -135,8 +135,8 @@ internal sealed class SettingsActions(WorkspaceModel model, LaunchAtSignIn launc
     /// <summary>Opens Report a problem or Share feedback.</summary>
     public Action<FeedbackKind>? OpenFeedback { get; set; }
 
-    /// <summary>Opens the tour (the Mac's onShowIntroduction): General's Show introduction and Help's Quick start.</summary>
-    public Action? ShowIntroduction { get; set; }
+    /// <summary>Opens the tutorial (the Mac's onShowIntroduction): General's Show tutorial and Help's Tutorial.</summary>
+    public Action? ShowTutorial { get; set; }
 
     /// <summary>
     /// Usage counts for General's Privacy section (the Mac's model.usageMetrics, WIN-PRV-01): the app sets its own; reference

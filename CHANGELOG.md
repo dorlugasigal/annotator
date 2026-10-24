@@ -4,6 +4,14 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- A hands-on tutorial on Mac and Windows. It walks you through starting to draw, picking tools, drawing a shape, changing color, drawing a curved arrow, using the pen, moving a drawing, undoing, using your apps, drawing again and hiding everything. A ghost cursor shows each step and keycaps show what to press. Use the keys or the mouse, whichever you like. Confetti marks the end. Replay it from Settings > Help.
+
+### Removed
+
+- Removed the four-page Quick start tour. The hands-on tutorial replaces it.
+
 ## 0.1.0-beta.12 (build 30) - 2026-10-23
 
 ### Changed

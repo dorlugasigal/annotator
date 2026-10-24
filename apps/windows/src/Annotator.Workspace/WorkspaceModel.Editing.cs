@@ -45,10 +45,15 @@ public sealed partial class WorkspaceModel
         }
         if (ApplyWorkspaceHistory(redo: false))
         {
+            _undoSerial++;
             return;
         }
         if (active.Document.CanUndo || active.Document.IsEditing)
         {
+            if (active.Document.CanUndo)
+            {
+                _undoSerial++;
+            }
             Mutate(active, (ref CanvasDocument document) => document.Undo());
         }
         Synchronize();
