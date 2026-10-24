@@ -58,7 +58,7 @@ public sealed partial class ComputerUseSkillTests
             Assert.Contains($"**{CanvasAccessibility.Label}**", words, StringComparison.Ordinal);
             Assert.Contains($"**{SettingsCopy.LocalBuild}**", words, StringComparison.Ordinal);
             Assert.Contains("Windows Settings > Privacy & security > Screenshots and screen recording", SettingsCopy.RecoveryCheckSettings, StringComparison.Ordinal);
-            Assert.Contains("Windows Settings > Personalization > Taskbar", IntroductionText.TrayActionHelp, StringComparison.Ordinal);
+            Assert.Contains("Windows Settings > Personalization > Taskbar", TutorialText.TrayActionHelp, StringComparison.Ordinal);
         }
         finally
         {

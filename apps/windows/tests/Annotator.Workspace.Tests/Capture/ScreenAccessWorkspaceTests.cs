@@ -360,13 +360,13 @@ public sealed class ScreenAccessWorkspaceTests
     }
 
     [Fact]
-    public void ThePackagedTourUsesTheMacsPermissionWords()
+    public void ThePackagedTutorialUsesTheMacsPermissionWords()
     {
-        Assert.Equal(IntroductionText.SetupLead, IntroductionText.SetupLeadFor(ScreenAccess.NotNeeded));
-        Assert.Equal("No permissions needed for that. These two are optional; you can set them up later.", IntroductionText.SetupLeadFor(ScreenAccess.NotAsked));
-        Assert.Equal(IntroductionText.SharingBody, IntroductionText.SharingBodyFor(ScreenAccess.NotNeeded));
+        Assert.Equal(TutorialText.SharingBody, TutorialText.SharingBodyFor(ScreenAccess.NotNeeded));
         Assert.EndsWith("Drawing needs no permissions. Zoom, effects and region sharing ask when needed.",
-            IntroductionText.SharingBodyFor(ScreenAccess.Allowed), StringComparison.Ordinal);
+            TutorialText.SharingBodyFor(ScreenAccess.Allowed), StringComparison.Ordinal);
+        Assert.EndsWith("Drawing needs no permissions, and neither do zoom, effects or region sharing.",
+            TutorialText.SharingBodyFor(ScreenAccess.NotNeeded), StringComparison.Ordinal);
     }
 
     /// <summary>The Share a region window, outline and selection panels, which these tests only need to exist.</summary>

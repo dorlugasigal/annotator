@@ -288,7 +288,7 @@ platform that departs from the specifications, unless an ADR changes them.
   Resume drawing Ctrl+Shift+2, Live zoom Ctrl+1, Hide only Ctrl+Alt+Shift+2.
   If a default is refused under WIN-INP-04 or owned by another app (for
   example ZoomIt), Annotator keeps running, leaves that action without a
-  shortcut and says why in Settings and in the first-use tour.
+  shortcut and says why in Settings and in the tutorial.
 - **WIN-INP-06**: Alt+scroll replaces Option-scroll. A low-level mouse hook
   exists only while the toolbar is visible or zoom is active, the same
   lifetime as the Mac listener. It runs on its own thread with a message loop,
@@ -378,8 +378,8 @@ platform that departs from the specifications, unless an ADR changes them.
   the Mac popover's content and states. Escape and outside
   clicks dismiss without drawing or stopping zoom. Keyboard and Narrator work.
   Event hooks exist only while the flyout is open. Windows 11 may put new
-  icons in the hidden overflow and apps cannot pin themselves; the tour shows
-  how to keep the icon visible (DV-4).
+  icons in the hidden overflow and apps cannot pin themselves; the tutorial's
+  finish card shows how to keep the icon visible (DV-4).
 - **WIN-UI-02**: The toolbar and properties match 002 and ADR 0012 in points:
   up to 1000 wide with default tools, 72 tools-only, 126 for the default
   expanded rail, 44 by 48 tool targets, 34 for Minimal, a 15-point corner
@@ -394,9 +394,14 @@ platform that departs from the specifications, unless an ADR changes them.
   same six tabs in the same order: General, Toolbar & Shortcuts, Pointer,
   Permissions, Help and About. It may use Windows' Mica backdrop because it
   never appears in drawing snapshots.
-- **WIN-UI-04**: The tour matches 005: four pages, the same words with Windows
-  key names, the same illustrations and motion, no permission requests while
-  browsing, and automatic presentation without taking focus.
+- **WIN-UI-04**: The hands-on tutorial matches the Mac: the welcome card, the
+  same eleven steps and goals (`AnnotationCore/Tutorial.swift`,
+  `Annotator.Core/Tutorial`), the same words with Windows key names, the ghost
+  cursor, ring and confetti with the same timings, cards that never take the
+  keyboard while coaching, no permission requests, and automatic presentation
+  without taking focus until the tutorial is finished or Show on launch is off.
+  Every step accepts the keyboard or the mouse: it checks the workspace's
+  result, never the input.
 - **WIN-UI-05**: The Tools window, the error window, Report a problem, support
   information and What's changed match 005. What's changed is bundled and
   matched to the running Windows version and build.
@@ -457,7 +462,7 @@ platform that departs from the specifications, unless an ADR changes them.
 
 - **WIN-A11Y-01**: Every Mac accessibility label, value and identifier has a
   UI Automation name, value and AutomationId with the same text. Narrator
-  reads the toolbar, properties, flyout, Settings and tour illustrations.
+  reads the toolbar, properties, flyout, Settings and the tutorial cards.
 - **WIN-A11Y-02**: Everything in app windows works from the keyboard. Mac
   VoiceOver actions, such as Move left or Remove from toolbar, become context
   menu items with the same names, reachable with Shift+F10 or the Menu key.
@@ -682,8 +687,8 @@ These need owner approval before Windows release.
   shares), and a blur that crosses the region edge may include blurred pixels
   from just outside it.
 - **DV-10 Shortcut conflicts**: Ctrl+1 and Ctrl+2 replace tab switching in
-  browsers and other app shortcuts while Annotator runs. The tour says how
-  to change them.
+  browsers and other app shortcuts while Annotator runs. The tutorial's
+  finish card says how to change them.
 
 ## Owner decisions
 

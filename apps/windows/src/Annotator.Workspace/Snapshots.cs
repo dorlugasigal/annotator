@@ -276,6 +276,12 @@ public sealed class WorkspaceSnapshot
 
     public bool CanRedo { get; internal init; }
 
+    /// <summary>
+    /// How many times Undo took something back since launch (Mac undoSerial). Cancelling an edit in progress does not count.
+    /// The tutorial's Undo step waits for it to grow.
+    /// </summary>
+    public ulong UndoSerial { get; internal init; }
+
     public bool CanClearCanvas { get; internal init; }
 
     public bool CanDeleteCurrent { get; internal init; }
@@ -396,7 +402,7 @@ public sealed class WorkspaceSnapshot
 
     /// <summary>
     /// Screen zoom or the pointer lens is on, or a zoom request is not idle (Mac screenZoomEnabled, magnifierEnabled and
-    /// zoomStartState): the tour and the coffee reminder wait until it ends.
+    /// zoomStartState): the tutorial and the coffee reminder wait until it ends.
     /// </summary>
     public bool ZoomActive => ScreenZoomEnabled || MagnifierEnabled || ZoomStart.Phase != Zoom.ZoomStartPhase.Idle;
 

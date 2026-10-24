@@ -17,7 +17,7 @@ public sealed class WindowAccessibilityTests(ITestOutputHelper output)
 {
     /// <summary>
     /// The Mac's VoiceOver actions, which Windows offers as context menu items with the same names (WIN-A11Y-02): the tiles of
-    /// Settings > Toolbar & Shortcuts (groups named after their item) and the tour's illustration.
+    /// Settings > Toolbar & Shortcuts (groups named after their item).
     /// </summary>
     private static readonly (Func<string, UiaElementKind, bool> Element, string[] Items)[] s_actions =
     [
@@ -25,7 +25,6 @@ public sealed class WindowAccessibilityTests(ITestOutputHelper output)
             ["Move left", "Move right", "Remove from toolbar"]),
         ((id, kind) => kind == UiaElementKind.ArrangerTile && id == "toolbar-tool-select", ["Move left", "Move right"]),
         ((id, kind) => kind == UiaElementKind.ArrangerTile && id.StartsWith("more-", StringComparison.Ordinal), ["Add to toolbar"]),
-        ((id, _) => id == "introduction-illustration", ["Replay animation"]),
     ];
 
     /// <summary>
@@ -109,7 +108,7 @@ public sealed class WindowAccessibilityTests(ITestOutputHelper output)
     /// <summary>
     /// Runs <paramref name="check"/> on every state and fails with every problem found, state by state. The states that show
     /// Share usage counts run once more as Windows will show them once it may send usage counts (WIN-PRV-01): the switch and
-    /// the tour's check box can be used then, so they need their names, keyboard reach, contrast colors and room for large text.
+    /// the tutorial's check box can be used then, so they need their names, keyboard reach, contrast colors and room for large text.
     /// </summary>
     private void EveryState(string[] options, Action<string, string[], ReferenceApp, List<string>> check)
     {
@@ -150,11 +149,11 @@ public sealed class WindowAccessibilityTests(ITestOutputHelper output)
         Assert.True(failures.Count == 0, string.Join('\n', failures));
     }
 
-    /// <summary>The state as this build shows it, and for General and the tour also with usage counts available.</summary>
+    /// <summary>The state as this build shows it, and for General and the tutorial also with usage counts available.</summary>
     private static IEnumerable<string[]> Variants(string state)
     {
         yield return [];
-        if (state is "settings/tab-general-full" or "tour/1-draw")
+        if (state is "settings/tab-general-full" or "tutorial/welcome")
         {
             yield return ["--usage-counts", "available"];
         }

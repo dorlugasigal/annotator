@@ -9,11 +9,9 @@ internal static class SettingsWidths
 {
     private static readonly Dictionary<string, double> s_buttons = new(StringComparer.Ordinal)
     {
-        ["Show introduction"] = 134,
         ["Check for updates..."] = 147,
         ["Buy me a coffee"] = 122,
         ["Refresh status"] = 108,
-        ["Quick start"] = 116.5,
         ["Online guide"] = 126,
         ["Shortcuts"] = 110,
         ["Report a problem..."] = 140.5,

@@ -9,19 +9,20 @@ final class FirstUseTests: XCTestCase {
     private var suite = ""
     private var defaults: UserDefaults!
     private var model: WorkspaceModel!
-    private var introduction: IntroductionController!
+    private var tutorial: TutorialController!
 
     override func setUp() async throws {
         suite = "first-use-\(UUID())"
         defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         model = WorkspaceModel(defaults: defaults, zoomInputPermissions: ZoomInputPermissions(
-            isGranted: { false }, request: { XCTFail("Introduction must not request Accessibility."); return false }))
-        introduction = IntroductionController(model: model)
+            isGranted: { false }, request: { XCTFail("The tutorial must not request Accessibility."); return false }))
+        tutorial = TutorialController(model: model)
+        tutorial.reducesMotion = { true }
     }
 
     override func tearDown() async throws {
-        introduction.close()
-        introduction = nil
+        tutorial.shutdown()
+        tutorial = nil
         model.closeAll()
         model = nil
         defaults.removePersistentDomain(forName: suite)
@@ -29,76 +30,99 @@ final class FirstUseTests: XCTestCase {
 
     func testOrdinaryLaunchShowsWithoutTakingKeyFocusOrChangingMode() throws {
         let keyWindow = NSApp.keyWindow
-        introduction.showAutomatically(isLoginItem: false)
-        XCTAssertTrue(try XCTUnwrap(introduction.window).isVisible)
-        XCTAssertFalse(try XCTUnwrap(introduction.window).isKeyWindow)
+        tutorial.showAutomatically(isLoginItem: false)
+        XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible)
+        XCTAssertFalse(try XCTUnwrap(tutorial.window).isKeyWindow)
         XCTAssertTrue(NSApp.keyWindow === keyWindow)
+        XCTAssertEqual(tutorial.surface, .welcome)
+        XCTAssertTrue(model.introductionVisible)
         XCTAssertEqual(model.mode, .off)
         XCTAssertEqual(model.zoomStartState, .idle)
         XCTAssertTrue(model.desktopSessions.isEmpty)
-        introduction.close()
-        introduction.showAutomatically(isLoginItem: false)
-        XCTAssertFalse(try XCTUnwrap(introduction.window).isVisible)
+        tutorial.close()
+        XCTAssertFalse(model.introductionVisible)
+        tutorial.showAutomatically(isLoginItem: false)
+        XCTAssertFalse(try XCTUnwrap(tutorial.window).isVisible, "The welcome card shows once per launch.")
     }
 
     func testSuppressionPersistsButManualReopeningStillWorks() throws {
-        introduction.preferences.setSuppressed(true)
-        introduction = IntroductionController(model: model)
-        XCTAssertTrue(introduction.preferences.suppressed)
-        introduction.showAutomatically(isLoginItem: false)
-        XCTAssertNil(introduction.window)
-        introduction.showManually()
-        XCTAssertTrue(try XCTUnwrap(introduction.window).isVisible)
-        introduction.close()
-        XCTAssertTrue(introduction.preferences.suppressed)
-        introduction.preferences.setSuppressed(false)
-        XCTAssertFalse(IntroductionPreferences(defaults: defaults).suppressed)
+        tutorial.preferences.setSuppressed(true)
+        XCTAssertTrue(defaults.bool(forKey: "introduction-suppressed"), "Show on launch keeps the old tour's key.")
+        tutorial.shutdown()
+        tutorial = TutorialController(model: model)
+        XCTAssertTrue(tutorial.preferences.suppressed)
+        tutorial.showAutomatically(isLoginItem: false)
+        XCTAssertNil(tutorial.window)
+        tutorial.showManually()
+        XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible)
+        tutorial.close()
+        XCTAssertTrue(tutorial.preferences.suppressed)
+        tutorial.preferences.setSuppressed(false)
+        XCTAssertFalse(TutorialPreferences(defaults: defaults).suppressed)
+    }
+
+    func testFinishedTutorialNoLongerShowsOnLaunchButStaysInSettings() throws {
+        XCTAssertFalse(tutorial.preferences.completed)
+        tutorial.preferences.setCompleted(true)
+        XCTAssertTrue(defaults.bool(forKey: "tutorial-completed"))
+        tutorial.shutdown()
+        tutorial = TutorialController(model: model)
+        tutorial.showAutomatically(isLoginItem: false)
+        XCTAssertNil(tutorial.window)
+        tutorial.showManually()
+        XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible)
+        XCTAssertEqual(tutorial.surface, .welcome)
     }
 
     func testLoginLaunchDoesNotShowOrPersistSuppression() {
-        introduction.showAutomatically(isLoginItem: true)
-        XCTAssertNil(introduction.window)
-        XCTAssertFalse(introduction.preferences.suppressed)
+        tutorial.showAutomatically(isLoginItem: true)
+        XCTAssertNil(tutorial.window)
+        XCTAssertFalse(tutorial.preferences.suppressed)
+        XCTAssertFalse(tutorial.preferences.completed)
     }
 
     func testBusyStatesPreventPresentationWithoutChangingInteraction() {
         model.visibilityAnimating = true
-        XCTAssertFalse(introduction.isEligible)
-        introduction.showManually()
-        XCTAssertNil(introduction.window)
+        XCTAssertFalse(tutorial.isEligible)
+        tutorial.showManually()
+        XCTAssertNil(tutorial.window)
+        XCTAssertEqual(model.status, "Finish drawing and stop zoom, then open the tutorial from Settings > Help.")
         XCTAssertTrue(model.visibilityAnimating)
         model.visibilityAnimating = false
         model.errorMessage = "Test error"
-        XCTAssertFalse(introduction.isEligible)
+        XCTAssertFalse(tutorial.isEligible)
         model.errorMessage = nil
         model.reportCaptureFailure(NSError(domain: "FirstUseTests", code: 1))
-        XCTAssertFalse(introduction.isEligible)
+        XCTAssertFalse(tutorial.isEligible)
         model.noteCaptureFrame()
         model.beginDrawing()
         model.active?.panel.ignoresMouseEvents = true
-        XCTAssertFalse(introduction.isEligible)
-        introduction.showManually()
-        XCTAssertNil(introduction.window)
+        XCTAssertFalse(tutorial.isEligible)
+        tutorial.showManually()
+        XCTAssertNil(tutorial.window)
         XCTAssertEqual(model.mode, .draw)
     }
 
-    func testStartingDrawingClosesIntroductionAndKeepsDrawingActive() async throws {
-        introduction.showAutomatically(isLoginItem: false)
+    func testStartingDrawingKeepsTheCoachOpenAndCountsTheStep() async throws {
+        tutorial.showAutomatically(isLoginItem: false)
+        tutorial.start()
+        try await waitUntil { self.tutorial.surface == .coach }
         model.beginDrawing()
         model.active?.panel.ignoresMouseEvents = true
-        try await Task.sleep(for: .milliseconds(80))
-        XCTAssertFalse(try XCTUnwrap(introduction.window).isVisible)
-        XCTAssertFalse(model.introductionVisible)
+        try await waitUntil { self.tutorial.progress?.step == .rectangle }
+        XCTAssertTrue(try XCTUnwrap(tutorial.window).isVisible)
+        XCTAssertFalse(try XCTUnwrap(tutorial.window).isKeyWindow, "The coach card never takes key focus.")
+        XCTAssertTrue(model.introductionVisible)
         XCTAssertEqual(model.mode, .draw)
     }
 
-    func testIntroductionDoesNotOverlapSupportReminder() {
+    func testTutorialDoesNotOverlapSupportReminder() {
         model.beginDrawing()
         model.interact()
         XCTAssertTrue(model.canShowSupportReminder)
-        introduction.showManually()
+        tutorial.showManually()
         XCTAssertFalse(model.canShowSupportReminder)
-        introduction.close()
+        tutorial.close()
         XCTAssertTrue(model.canShowSupportReminder)
     }
 
@@ -112,8 +136,8 @@ final class FirstUseTests: XCTestCase {
         defer { panel.orderOut(nil); panel.contentView = nil; panel.close() }
         NativeAccessibilityNode.enable()
         for (tab, expected) in [
-            (CustomizationTab.general, ["Buy me a coffee", "Check for updates...", "Show introduction", "Startup", "Appearance"]),
-            (.help, ["Quick start", "Screen-sharing limits", "Report a problem...", "Use an AI assistant"]),
+            (CustomizationTab.general, ["Buy me a coffee", "Check for updates...", "Show tutorial", "Startup", "Appearance"]),
+            (.help, ["Tutorial", "Screen-sharing limits", "Report a problem...", "Use an AI assistant"]),
             (.about, ["Version", "Check for updates...", "Copy support info", "Open Downloads page..."])
         ] {
             model.settingsTab = tab
@@ -162,9 +186,9 @@ final class FirstUseTests: XCTestCase {
         model.canCheckForUpdates = true
         app.performMenuAction(.checkForUpdates)
         XCTAssertEqual(checks, 1)
-        app.introduction?.preferences.setSuppressed(true)
+        app.tutorial?.preferences.setSuppressed(true)
         model.onShowIntroduction?()
-        XCTAssertTrue(app.introduction?.window?.isVisible == true)
+        XCTAssertTrue(app.tutorial?.window?.isVisible == true)
     }
 
     func testSupportRouteUsesConfiguredURLAndKeepsReminderPreference() throws {
@@ -187,66 +211,80 @@ final class FirstUseTests: XCTestCase {
         XCTAssertNil(defaults.object(forKey: SupportReminder.lastShownKey))
     }
 
-    func testIntroductionUsesConfiguredShortcuts() async throws {
+    func testTutorialUsesConfiguredShortcuts() async throws {
         model.setActivationShortcut(ActivationShortcut(keyCode: 20, character: "3", control: true, option: true))
-        introduction.showManually()
+        tutorial.showManually()
         NativeAccessibilityNode.enable()
         try await Task.sleep(for: .milliseconds(100))
-        let host = try XCTUnwrap(introduction.window?.contentView)
-        let labels = NativeAccessibilityNode.nodes(in: host).flatMap {
-            [$0.accessibilityLabel(), $0.accessibilityValue() as? String].compactMap { $0 }
-        }.joined(separator: "\n")
-        XCTAssertTrue(labels.contains("Control + Option + 3"))
-        XCTAssertTrue(labels.contains("Control + Shift + 2"))
-        XCTAssertTrue(labels.contains("Escape"))
-        XCTAssertTrue(labels.contains("Show on launch"))
-        XCTAssertTrue(labels.contains("Covers hide too"))
-        XCTAssertFalse(labels.contains("development preview"))
-        let visibleText = Set(NativeAccessibilityNode.nodes(in: host).filter {
-            $0.accessibilityRole() == .staticText
-        }.compactMap { $0.accessibilityValue() as? String ?? $0.accessibilityLabel() })
-        XCTAssertLessThanOrEqual(visibleText.joined(separator: " ").split(whereSeparator: \.isWhitespace).count, 120)
-        try await expand("introduction-sharing", in: host)
+        let host = try XCTUnwrap(tutorial.window?.contentView)
+        var text = accessibilityText(in: host)
+        XCTAssertTrue(text.contains("Start tutorial"))
+        XCTAssertTrue(text.contains("Show on launch"))
+        XCTAssertFalse(text.contains("development preview"))
+        tutorial.start()
+        try await waitUntil { self.tutorial.surface == .coach }
+        try await Task.sleep(for: .milliseconds(150))
+        text = accessibilityText(in: host)
+        XCTAssertTrue(text.contains("Control + Shift + 2"), "The first step shows the Draw shortcut's keys.")
+        XCTAssertTrue(text.contains("Press ⌃⇧2, or click any tool in the toolbar."))
+        XCTAssertEqual(tutorial.lastAnnouncement,
+                       "Step 1 of 11. Start drawing. Press ⌃⇧2, or click any tool in the toolbar.")
+        for _ in 0..<20 where tutorial.shownStep != .hide { tutorial.skipStep() }
+        XCTAssertEqual(tutorial.shownStep, .hide)
+        try await Task.sleep(for: .milliseconds(150))
+        text = accessibilityText(in: host)
+        XCTAssertTrue(text.contains("Press ⌃⌥3, or click Hide drawings and tools in the toolbar."))
+        XCTAssertTrue(text.contains("Control + Option + 3"))
+        tutorial.skipStep()
+        try await waitUntil { self.tutorial.surface == .finish }
+        try await Task.sleep(for: .milliseconds(150))
+        text = accessibilityText(in: host)
+        for keys in ["Control + Shift + 2", "Escape", "Control + Option + 3", "Command + Z"] {
+            XCTAssertTrue(text.contains(keys), "Missing \(keys) on the finish card.")
+        }
+        try await expand("tutorial-sharing", in: host)
         XCTAssertTrue(accessibilityText(in: host).contains("App or window sharing may leave out covers"))
-        let close = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
-            $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Got it"
+        let done = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
+            $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Done"
         })
-        XCTAssertTrue(close.accessibilityPerformPress())
-        XCTAssertFalse(try XCTUnwrap(introduction.window).isVisible)
-        XCTAssertFalse(introduction.preferences.suppressed, "Closing must not change launch suppression.")
+        XCTAssertTrue(done.accessibilityPerformPress())
+        try await waitUntil { self.tutorial.window?.isVisible != true }
+        XCTAssertFalse(tutorial.preferences.suppressed, "Closing must not change Show on launch.")
+        XCTAssertTrue(tutorial.preferences.completed)
     }
 
-    func testTourPagesRemainSkippableWithoutChangingDrawingOrRequestingPermissions() async throws {
-        introduction.showManually()
+    func testSkippingEveryStepNeverChangesDrawingOrRequestsPermissions() async throws {
+        tutorial.showManually()
         NativeAccessibilityNode.enable()
-        let host = try XCTUnwrap(introduction.window?.contentView)
-        for (index, title) in ["Make a point", "Make it yours", "Lead the way", "A little setup"].enumerated() {
-            try await Task.sleep(for: .milliseconds(80))
-            let step = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
-                $0.accessibilityRole() == .button && $0.accessibilityLabel() == title
-            })
-            XCTAssertTrue(step.accessibilityPerformPress())
-            try await Task.sleep(for: .milliseconds(100))
-            XCTAssertEqual(model.mode, .off)
-            XCTAssertTrue(model.desktopSessions.isEmpty)
-            XCTAssertEqual(model.zoomStartState, .idle)
-            let output = Bundle(for: Self.self).bundleURL.deletingLastPathComponent().deletingLastPathComponent()
-                .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("UIReview")
-            try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+        let host = try XCTUnwrap(tutorial.window?.contentView)
+        try await Task.sleep(for: .milliseconds(100))
+        let start = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
+            $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Start tutorial"
+        })
+        XCTAssertTrue(start.accessibilityPerformPress())
+        try await waitUntil { self.tutorial.surface == .coach }
+        let output = Bundle(for: Self.self).bundleURL.deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("UIReview")
+        try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+        for step in TutorialStep.allCases {
+            try await Task.sleep(for: .milliseconds(120))
+            XCTAssertEqual(tutorial.shownStep, step)
             let bitmap = try XCTUnwrap(host.bitmapImageRepForCachingDisplay(in: host.bounds))
             host.cacheDisplay(in: host.bounds, to: bitmap)
             try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
-                .write(to: output.appendingPathComponent("tour-\(index + 1).png"))
+                .write(to: output.appendingPathComponent("tutorial-\(step.index + 1)-\(step.rawValue).png"))
+            let skip = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
+                $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Skip step"
+            })
+            XCTAssertTrue(skip.accessibilityPerformPress())
+            XCTAssertEqual(model.mode, .off)
+            XCTAssertTrue(model.desktopSessions.isEmpty)
+            XCTAssertEqual(model.zoomStartState, .idle)
         }
-        let text = accessibilityText(in: host)
-        XCTAssertTrue(text.contains("optional"))
-        XCTAssertTrue(text.contains("Screen Recording"))
-        XCTAssertTrue(text.contains("Accessibility"))
-        let close = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
-            $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Got it"
-        })
-        XCTAssertTrue(close.accessibilityPerformPress())
-        XCTAssertFalse(try XCTUnwrap(introduction.window).isVisible)
+        try await waitUntil { self.tutorial.surface == .finish }
+        XCTAssertTrue(tutorial.preferences.completed)
+        XCTAssertEqual(tutorial.overlay.celebrations, 0, "Reduce Motion leaves out the confetti.")
+        XCTAssertEqual(tutorial.progress?.skipped, TutorialStep.allCases)
     }
 
     func testProductHelpDestinationsAndBrowserFailuresAreExplicit() {
@@ -329,10 +367,10 @@ final class FirstUseTests: XCTestCase {
 
     func testUsageConsentIsOffAndAppearsInBothFirstUseAndGeneral() async throws {
         XCTAssertFalse(model.usageMetrics.enabled)
-        introduction.showManually()
+        tutorial.showManually()
         NativeAccessibilityNode.enable()
         try await Task.sleep(for: .milliseconds(100))
-        let welcome = try XCTUnwrap(introduction.window?.contentView)
+        let welcome = try XCTUnwrap(tutorial.window?.contentView)
         let consent = try XCTUnwrap(NativeAccessibilityNode.nodes(in: welcome).first {
             $0.accessibilityRole() == .checkBox && $0.accessibilityLabel() == "Share usage counts"
         })
@@ -341,7 +379,7 @@ final class FirstUseTests: XCTestCase {
         XCTAssertNotNil(defaults.string(forKey: UsageMetrics.installationKey))
         model.usageMetrics.setEnabled(false)
         XCTAssertNil(defaults.string(forKey: UsageMetrics.installationKey))
-        introduction.close()
+        tutorial.close()
         let host = NSHostingView(rootView: CustomizationView(model: model, initialTab: .general))
         let panel = NSPanel(contentRect: NSRect(x: 100, y: 100, width: 840, height: 700),
                             styleMask: [.titled, .nonactivatingPanel], backing: .buffered, defer: false)
@@ -358,6 +396,14 @@ final class FirstUseTests: XCTestCase {
         NativeAccessibilityNode.nodes(in: host).flatMap {
             [$0.accessibilityLabel(), $0.accessibilityValue() as? String].compactMap { $0 }
         }.joined(separator: "\n")
+    }
+
+    private func waitUntil(timeout: Duration = .seconds(5), _ condition: () -> Bool) async throws {
+        let deadline = ContinuousClock.now + timeout
+        while !condition() {
+            guard ContinuousClock.now < deadline else { return XCTFail("Timed out waiting for the tutorial.") }
+            try await Task.sleep(for: .milliseconds(20))
+        }
     }
 
     private func expand(_ id: String, in host: NSView) async throws {

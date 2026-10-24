@@ -127,6 +127,8 @@ public sealed partial class WorkspaceModel
     private string? _errorMessage;
     private FocusRequest? _focus;
     private ulong _focusSerial;
+    /// <summary>How many times Undo took something back (Mac undoSerial), for the tutorial's Undo step.</summary>
+    private ulong _undoSerial;
     private ImmutableArray<GlobalShortcutState> _shortcuts;
     private uint _epoch;
     private ulong _revision;
