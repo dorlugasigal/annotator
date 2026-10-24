@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import XCTest
 import AnnotationCore
 @testable import AnnotatorApp

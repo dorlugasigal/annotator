@@ -58,13 +58,13 @@
       {
        "enabled": true,
        "frame": [
-        343,
+        342,
         224,
-        154.5,
+        156.5,
         16
        ],
        "role": "AXStaticText",
-       "value": "Version 0.1.0-beta.11 (29)"
+       "value": "Version 0.1.0-beta.12 (30)"
       },
       {
        "enabled": true,
