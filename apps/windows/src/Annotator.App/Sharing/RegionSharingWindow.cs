@@ -89,6 +89,7 @@ internal sealed partial class RegionSharingWindow : Window
         _presenter.IsResizable = true;
         _presenter.IsAlwaysOnTop = true;
         AppWindow.SetPresenter(_presenter);
+        Shell.AppIcon.Apply(AppWindow);
         AppWindow.IsShownInSwitchers = true;
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));

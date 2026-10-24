@@ -22,7 +22,7 @@
       15
      ],
      "role": "AXStaticText",
-     "value": "Version 0.1.0-beta.11 (29)"
+     "value": "Version 0.1.0-beta.12 (30)"
     },
     {
      "enabled": true,
@@ -230,25 +230,14 @@
       36
      ],
      "identifier": "menu-support",
-     "label": "Buy me a coffee…",
+     "label": "Enjoying it? Buy me a coffee…",
      "role": "AXButton"
     },
     {
      "enabled": true,
      "frame": [
-      26,
-      605,
-      182,
-      13
-     ],
-     "role": "AXStaticText",
-     "value": "Coffee is welcome. All tools stay free."
-    },
-    {
-     "enabled": true,
-     "frame": [
       16,
-      637,
+      624,
       288,
       36
      ],
@@ -262,7 +251,7 @@
     0,
     0,
     320,
-    689
+    676
    ],
    "role": "AXScrollArea"
   }
@@ -274,12 +263,12 @@
  "notes": "Release build, drawings and tools hidden.",
  "pixels": [
   640,
-  1378
+  1352
  ],
  "scale": 2,
  "size": [
   320,
-  689
+  676
  ],
  "spec": [
   "000 product spec (menu-bar popover)",

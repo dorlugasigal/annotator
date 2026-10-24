@@ -114,10 +114,17 @@ ffmpeg.
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 make generate
+defaults write com.dorlugasigal.annotator.dev AppleShowScrollBars Always
 TEST_RUNNER_ANNOTATOR_CAPTURE_UX_REFERENCE=1 bash tools/macos/build-signed-dev.sh test \
   -only-testing:NativeAppTests/UXReferenceCaptureTests
+defaults delete com.dorlugasigal.annotator.dev AppleShowScrollBars
 python3 tools/macos/ux_reference.py pack
 ```
+
+The `defaults` lines keep scroll bars always visible in Annotator Dev only.
+With the system's automatic setting, a Mac with only a trackpad draws thinner
+overlay scroll bars, which moves the Settings, Toolbar and Tools window layouts
+by a few points.
 
 `pack` rebuilds `macos/` and then runs `python3 tools/macos/ux_reference.py check`,
 which verifies every file against the manifest. Packing the same capture twice

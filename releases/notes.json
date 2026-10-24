@@ -1,6 +1,14 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Changed": [
+      "The menu-bar menu on a Mac and the tray menu on Windows now say \"Enjoying it? Buy me a coffee…\", without the extra line under the button."
+    ],
+    "Fixed": [
+      "On Windows, the Settings window and Annotator's other windows now show the Annotator icon in their title bar.",
+      "On Windows, the Settings tab names no longer have a line running through them."
+    ]
+  },
   "releases": [
     {
       "version": "0.1.0-beta.12",

@@ -59,6 +59,7 @@ internal sealed class SettingsWindow : Window
         _presenter.IsMinimizable = true;
         _presenter.IsAlwaysOnTop = true;
         AppWindow.SetPresenter(_presenter);
+        Shell.AppIcon.Apply(AppWindow);
         AppWindow.IsShownInSwitchers = true;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));
         // Registered before the first show so capture can leave it out (S-1); the Mac raises Settings to the toolbar's level.

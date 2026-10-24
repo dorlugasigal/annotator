@@ -38,6 +38,7 @@ internal sealed class IntroductionWindow : Window
         presenter.IsMinimizable = false;
         presenter.IsResizable = false;
         AppWindow.SetPresenter(presenter);
+        Shell.AppIcon.Apply(AppWindow);
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
         Hwnd = new HWND(Win32Interop.GetWindowFromWindowId(AppWindow.Id));
         _view = new TourView(navigator, preferences, snapshot, usage, close);
