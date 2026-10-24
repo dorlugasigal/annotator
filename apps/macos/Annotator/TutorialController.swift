@@ -93,6 +93,30 @@ final class TutorialHostingView: NSHostingView<TutorialPanelRoot> {
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
 
+/// Holds the card's hosting view so the controller owns the window's frame. As a window's content view, the hosting
+/// view resizes the window from inside layout and AppKit stops the loop with an exception.
+final class TutorialContentView: NSView {
+    let host: TutorialHostingView
+
+    init(host: TutorialHostingView) {
+        self.host = host
+        super.init(frame: .zero)
+        addSubview(host)
+        host.autoresizingMask = [.width, .height]
+    }
+
+    required init?(coder: NSCoder) { nil }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func layout() {
+        super.layout()
+        host.frame = bounds
+    }
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        host.frame = bounds
+    }
+}
+
 /// Finds toolbar controls by their accessibility names, the names VoiceOver reads.
 @MainActor
 enum TutorialAnchors {
@@ -407,7 +431,7 @@ final class TutorialController: ObservableObject {
             tutorial: self, model: model, preferences: preferences, metrics: model.usageMetrics,
             sized: { [weak self] size in self?.cardSizeChanged(size) }))
         host.sizingOptions = []
-        panel.contentView = host
+        panel.contentView = TutorialContentView(host: host)
         self.host = host
         window = panel
         return panel

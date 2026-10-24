@@ -3,6 +3,7 @@ import ServiceManagement
 import SwiftUI
 import XCTest
 import AnnotationCore
+import MotionCore
 import NativePlatform
 import PresentationRendering
 @testable import AnnotatorApp
