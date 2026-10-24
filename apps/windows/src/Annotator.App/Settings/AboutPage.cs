@@ -65,14 +65,15 @@ internal static class AboutPage
         {
             HorizontalAlignment = HorizontalAlignment.Center,
         };
-        downloads.Click += (_, _) => actions.OpenProductPage(ProductPage.Downloads);
+        downloads.Click += (_, _) => actions.OpenUpdateDownloads();
         column.Children.Add(downloads);
-        // The Mac shows the Downloads link only while updates are not set up.
+        // The Mac shows the Downloads link only while updates are not set up; a portable copy also shows it once its check
+        // found a release.
         UpdatesBinding.Follow(status, actions.Updates, () =>
         {
             check.IsEnabled = actions.Updates.CanCheck;
             status.Text = actions.Updates.Status;
-            downloads.Visibility = actions.Updates.IsConfigured ? Visibility.Collapsed : Visibility.Visible;
+            downloads.Visibility = actions.Updates.IsConfigured && actions.Updates.Release is null ? Visibility.Collapsed : Visibility.Visible;
         });
         column.Children.Add(new Rectangle { Height = 1, HorizontalAlignment = HorizontalAlignment.Stretch, Style = AppResources.Style("AnnotatorDivider") });
         column.Children.Add(Stretched(ReleaseNotesView.Make(environment, ColumnWidth - 12)));

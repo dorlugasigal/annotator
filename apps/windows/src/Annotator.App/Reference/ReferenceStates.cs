@@ -54,6 +54,9 @@ internal enum ReferenceSurface
     /// <summary>The coffee reminder's content (Mac SupportReminderView) in a 460 by 135-point window.</summary>
     CoffeeReminder,
 
+    /// <summary>What's changed after an update (Mac WhatsChangedView) with fixed notes, 480 by 560 points.</summary>
+    WhatsChanged,
+
     /// <summary>The live zoom level (Mac LiveZoomControls) with 12 points of padding, compact or full.</summary>
     ZoomControls,
 
@@ -171,6 +174,12 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     /// </summary>
     public bool UpdatesUnavailable { get; init; }
 
+    /// <summary>
+    /// A check found a newer release: the flyout reads Update available… with the status under it (the Mac's
+    /// updateReminderVersion "0.1.0-beta.13"). Windows shows a portable copy's words, which say where to get it.
+    /// </summary>
+    public bool UpdateAvailable { get; init; }
+
     /// <summary>The page the tour shows, for <see cref="ReferenceSurface.Tour"/>.</summary>
     public Annotator.Workspace.FirstUse.IntroductionPage TourPage { get; init; }
 
@@ -286,6 +295,7 @@ internal static partial class ReferenceStates
         "report-a-problem" => new ReferenceScenario(ReferenceSurface.Feedback) { Feedback = FeedbackKind.Issue },
         "share-feedback" => new ReferenceScenario(ReferenceSurface.Feedback) { Feedback = FeedbackKind.Feedback },
         "whats-changed" => new ReferenceScenario(ReferenceSurface.ReleaseNotes),
+        "whats-changed-update" => new ReferenceScenario(ReferenceSurface.WhatsChanged),
         "coffee-reminder" or "canvas-hint" => FirstUseDialogs(state),
         "error-window" => new ReferenceScenario(ReferenceSurface.ErrorWindow)
         {
@@ -594,6 +604,7 @@ internal static partial class ReferenceStates
     {
         "developer-preview" => new ReferenceScenario(ReferenceSurface.Flyout),
         "updates-unavailable" => new ReferenceScenario(ReferenceSurface.Flyout) { UpdatesUnavailable = true },
+        "update-available" => new ReferenceScenario(ReferenceSurface.Flyout) { DeveloperPreview = false, UpdateAvailable = true },
         "tools-hidden" => new ReferenceScenario(ReferenceSurface.Flyout) { DeveloperPreview = false },
         "drawing" => new ReferenceScenario(ReferenceSurface.Flyout)
         {

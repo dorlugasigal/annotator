@@ -2,6 +2,7 @@ using Annotator.App.Shell;
 using Annotator.Core;
 using Annotator.Workspace;
 using Annotator.Workspace.Settings;
+using Annotator.Workspace.Updates;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
@@ -84,22 +85,44 @@ internal sealed partial class GeneralPage
             SettingsForm.Single(Indented(SettingsLabel.Make("eye.slash", SettingsCopy.HidingHidesCovers, 10, "AnnotatorPrimaryText", "AnnotatorGlyph", 11, 4))),
         ]));
         form.Children.Add(SettingsForm.Header(SettingsCopy.Updates, first: false));
-        // The Microsoft Store manages automatic updates (WIN-SYS-03), so the switch shows them and stays disabled.
+        // The Microsoft Store manages a Store copy's automatic updates (WIN-SYS-03), so its switch shows them and stays
+        // disabled; a portable copy checks the website itself, and its switch works as the Mac's.
         var check = new SettingsButton(SettingsCopy.CheckForUpdates, ButtonLook.Bordered, SettingsWidths.Button(SettingsCopy.CheckForUpdates));
         check.Click += (_, _) => actions.CheckForUpdates();
-        var automatic = new SettingsSwitch(SettingsCopy.AutomaticChecks) { IsEnabled = false };
+        bool switchable = actions.Updates.CanChangeAutomaticChecks;
+        var automatic = new SettingsSwitch(SettingsCopy.AutomaticChecks) { IsEnabled = switchable };
+        automatic.Toggled += on => actions.Updates.SetAutomaticChecks(on);
         FormText updateStatus = SettingsForm.Caption(actions.Updates.Status, wrapWidth: SettingsForm.RowWidth);
+        // A portable copy that found a release says where to get it; Annotator downloads nothing itself.
+        var downloads = new SettingsButton(UpdateText.OpenDownloads, ButtonLook.Bordered, SettingsWidths.Button(UpdateText.OpenDownloads));
+        downloads.Click += (_, _) => actions.OpenUpdateDownloads();
+        var winget = new SettingsButton(UpdateText.CopyWinget, ButtonLook.Bordered, SettingsWidths.Button(UpdateText.CopyWinget));
+        winget.Click += (_, _) => actions.CopyWingetCommand();
+        AutomationProperties.SetAutomationId(downloads, "update-open-downloads");
+        AutomationProperties.SetAutomationId(winget, "update-copy-winget");
+        var release = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(0, 8, 0, 0) };
+        release.Children.Add(downloads);
+        release.Children.Add(winget);
+        FrameworkElement statusBlock = updateStatus;
+        if (actions.Updates.ChecksFeed)
+        {
+            var block = new MacStack();
+            block.Children.Add(updateStatus);
+            block.Children.Add(release);
+            statusBlock = block;
+        }
         UpdatesBinding.Follow(updateStatus, actions.Updates, () =>
         {
             check.IsEnabled = actions.Updates.CanCheck;
             automatic.IsOn = actions.Updates.AutomaticChecks;
             updateStatus.Text = actions.Updates.Status;
+            release.Visibility = actions.Updates.Release is not null ? Visibility.Visible : Visibility.Collapsed;
         });
         form.Children.Add(SettingsForm.Card(
         [
             SettingsForm.Single(check),
-            SettingsForm.Toggle(SettingsCopy.AutomaticChecks, automatic, enabled: false),
-            SettingsForm.Single(updateStatus),
+            SettingsForm.Toggle(SettingsCopy.AutomaticChecks, automatic, enabled: switchable),
+            SettingsForm.Single(statusBlock),
             SettingsForm.Single(new SettingsDisclosure(SettingsCopy.WhatUpdateCheckSends, null, 13,
                 () => SettingsForm.Caption(SettingsCopy.UpdateCheckSends, wrapWidth: SettingsForm.RowWidth - 12), contentTop: 6)),
         ]));
@@ -202,23 +225,39 @@ internal sealed partial class GeneralPage
     /// The Mac's CoffeeSupportView, padded 16: the cup, two lines and Buy me a coffee in the coffee color on a 10% orange
     /// box with 12-point corners. The button is disabled when the build has no support link.
     /// </summary>
-    private static FrameworkElement CoffeeView(SettingsActions actions)
+    internal static FrameworkElement CoffeeView(SettingsActions actions) =>
+        CoffeeView(actions.Environment.SupportLink is not null, actions.BuyCoffee);
+
+    /// <param name="available">The build has a support link; otherwise the button is disabled.</param>
+    /// <param name="buy">Opens the support link (Mac openOptionalSupport).</param>
+    /// <param name="width">
+    /// The box's width in a narrow window (What's changed): the second line wraps in the room the cup and button leave,
+    /// as SwiftUI's Text does, and the row grows with it. Settings leaves it null: one line each, 36 points high.
+    /// </param>
+    internal static FrameworkElement CoffeeView(bool available, Action buy, double? width = null)
     {
         FrameworkElement cup = SettingsIcons.Make("cup.and.saucer.fill", 30, SettingsLook.Coffee);
         cup.Width = 39;
         cup.VerticalAlignment = VerticalAlignment.Center;
         AutomationProperties.SetAccessibilityView(cup, AccessibilityView.Raw);
+        double? buttonWidth = SettingsWidths.Button(SettingsCopy.BuyMeACoffee);
+        // The room between the cup and the button: the box less its padding, the cup, three gaps and the button.
+        double? textWidth = width is { } boxWidth ? boxWidth - 36 - 39 - 3 * 16 - (buttonWidth ?? 122) : null;
         var texts = new MacStack { Spacing = 5, VerticalAlignment = VerticalAlignment.Center };
-        texts.Children.Add(new FormText(SettingsCopy.EnjoyingAnnotator, 13, weight: FontWeights.SemiBold));
-        texts.Children.Add(new FormText(SettingsCopy.CoffeeWelcome, 12, "AnnotatorSecondaryText"));
-        var button = new SettingsButton(SettingsCopy.BuyMeACoffee, ButtonLook.Prominent, SettingsWidths.Button(SettingsCopy.BuyMeACoffee), tint: SettingsLook.Coffee)
+        texts.Children.Add(new FormText(SettingsCopy.EnjoyingAnnotator, 13, weight: FontWeights.SemiBold, wrapWidth: textWidth));
+        texts.Children.Add(new FormText(SettingsCopy.CoffeeWelcome, 12, "AnnotatorSecondaryText", wrapWidth: textWidth));
+        var button = new SettingsButton(SettingsCopy.BuyMeACoffee, ButtonLook.Prominent, buttonWidth, tint: SettingsLook.Coffee)
         {
-            IsEnabled = actions.Environment.SupportLink is not null,
+            IsEnabled = available,
             VerticalAlignment = VerticalAlignment.Center,
         };
-        button.Click += (_, _) => actions.BuyCoffee();
+        button.Click += (_, _) => buy();
         // HStack(spacing: 16) { cup; VStack(spacing: 5); Spacer; button }.padding(18), 72 points high with these lines.
-        var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16, Height = 36, HorizontalAlignment = HorizontalAlignment.Stretch };
+        var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16, HorizontalAlignment = HorizontalAlignment.Stretch };
+        if (width is null)
+        {
+            row.Height = 36;
+        }
         row.Children.Add(cup);
         row.Children.Add(texts);
         row.Children.Add(new MacSpacer());

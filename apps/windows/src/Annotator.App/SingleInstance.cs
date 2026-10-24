@@ -22,6 +22,12 @@ internal static class BuildInfo
     public static bool IsDevelopment { get; } = !HasPackageIdentity() && !IsPortable;
 
     /// <summary>
+    /// The website's update feed of the portable release (AnnotatorUpdateFeedURL, set by tools/windows/package.ps1
+    /// -UpdateSite), or null for every other copy and a portable build without one (WIN-SYS-03).
+    /// </summary>
+    public static Uri? UpdateFeed { get; } = IsPortable ? Annotator.Workspace.Updates.ReleaseFeed.Address(Metadata("AnnotatorUpdateFeedURL")) : null;
+
+    /// <summary>
     /// The Mac's formatVersion from the shared version (WIN-DST-04): version, prerelease suffix and build, for example
     /// "0.1.0-beta.7 (25)". Development builds carry the same label and show the Local build badge in About, as on the Mac.
     /// </summary>

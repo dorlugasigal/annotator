@@ -1,6 +1,15 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Added": [
+      "After an update, a What's changed window shows the new version's notes once, with an optional Buy me a coffee link. It waits until you stop drawing, zooming, sharing a region or taking a break.",
+      "On Windows, the copy from winget or a download now checks for new versions once a day and tells you where to get them, with Open Downloads page and Copy winget command. It never installs anything itself."
+    ],
+    "Changed": [
+      "Annotator now checks for updates once a day by default. If an update arrives while you present, it doesn't interrupt you: the menu shows Update available... instead. You can turn automatic checks off in Settings > General.",
+      "On the Mac, the update window now shows the release notes. The Homebrew cask now leaves updates to Annotator, so brew upgrade skips it unless you add --greedy."
+    ]
+  },
   "releases": [
     {
       "version": "0.1.0-beta.12",

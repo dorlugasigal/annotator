@@ -89,7 +89,8 @@ class NetlifyReleaseTests(unittest.TestCase):
             notice.write_text("Fixture notice")
             changes = (" M website/src/data/distribution.json\n"
                        "?? website/public/updates/preview.xml\n"
-                       "?? website/public/updates/stable.xml\n")
+                       "?? website/public/updates/stable.xml\n"
+                       "?? website/public/updates/windows-preview.json\n")
 
             def command(*args, **kwargs):
                 if args[0] == "git":
@@ -114,7 +115,8 @@ class NetlifyReleaseTests(unittest.TestCase):
             with patch.object(n.d, "command", side_effect=command):
                 output = n.prepare(checkout, root / "prepared", SITE, SOURCE)
                 self.assertIn("updates/preview.xml", n.verify(output, SITE, SOURCE))
-                for path in ("website/public/updates/extra.xml", "website/src/pages/index.astro",
+                for path in ("website/public/updates/extra.xml", "website/public/updates/windows-extra.json",
+                             "website/src/pages/index.astro",
                              "services/metrics/netlify/functions/collect-app.ts", ".env"):
                     changes = f" M website/src/data/distribution.json\n?? {path}\n"
                     with self.subTest(path=path), self.assertRaisesRegex(n.d.DistributionError, "Commit source"):

@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -707,6 +708,68 @@ class DistributionTests(unittest.TestCase):
             self.assertEqual(payload["preview"]["diskImageSHA256"], preview["diskImage"]["sha256"])
             self.assertEqual(payload["preview"]["diskImageSize"], preview["diskImage"]["size"])
             self.assertNotIn("diskImageURL", payload["stable"])
+
+    def test_appcast_shows_the_releases_mac_notes_and_fails_without_them(self):
+        data = manifest()
+        notes = {"releases": [{"version": "0.1.0-alpha.1", "build": 9, "changes": {"Fixed": ["Pen <strokes> & arrows"], "Added": ["Zoom"]},
+                               "knownIssues": ["Effects are not secure redaction."],
+                               "platforms": {"windows": {"changes": {"Added": ["Windows only"]}, "knownIssues": []}}}]}
+        root = ET.fromstring(d.appcast(data, notes))
+        description = root.find("channel/item/description").text
+        # Categories keep the notes' order, the text is escaped, and only the Mac notes go to the Mac feed.
+        self.assertEqual(description, "<h3>Added</h3><ul><li>Zoom</li></ul><h3>Fixed</h3><ul><li>Pen &lt;strokes&gt; &amp; arrows</li></ul>"
+                                      "<h3>Known limits</h3><ul><li>Effects are not secure redaction.</li></ul>")
+        self.assertNotIn("Windows only", description)
+        without_limits = {"releases": [{**notes["releases"][0], "knownIssues": []}]}
+        self.assertNotIn("Known limits", d.update_notes(data, without_limits))
+        for missing in ({"releases": []}, {"releases": [{**notes["releases"][0], "build": 8}]},
+                        {"releases": [{**notes["releases"][0], "changes": {"Other": ["x"]}}]}):
+            with self.subTest(missing=missing), self.assertRaises(d.DistributionError):
+                d.appcast(data, missing)
+        # Without explicit notes, the feed reads releases/notes.json.
+        self.assertIn("<h3>", ET.fromstring(d.appcast(data)).find("channel/item/description").text)
+
+    def windows_description(self, data):
+        files = [{"architecture": arch, "file": f"Annotator-{data['releaseVersion']}-windows-{arch}.zip", "size": 10, "sha256": "a"*64}
+                 for arch in ("x64", "arm64")]
+        description = {"schemaVersion": 1, "releaseVersion": data["releaseVersion"], "build": int(data["build"]), "source": data["source"], "files": files}
+        assets = [{"name": row["file"], "size": row["size"]} for row in files]
+        return description, assets
+
+    def test_published_windows_files_must_match_the_release(self):
+        data = manifest()
+        description, assets = self.windows_description(data)
+        self.assertEqual(d.validate_windows_description(description, data, assets), description)
+        for changed, published in (({**description, "build": 10}, assets), ({**description, "releaseVersion": "0.1.0"}, assets),
+                                   ({**description, "schemaVersion": 2}, assets), (description, assets[1:]),
+                                   (description, [{**assets[0], "size": 11}, assets[1]]),
+                                   ({**description, "files": description["files"][1:]}, assets),
+                                   ({**description, "files": [{**description["files"][0], "file": "other.zip"}]}, assets)):
+            with self.subTest(changed=changed, published=published), self.assertRaises(d.DistributionError):
+                d.validate_windows_description(changed, data, published)
+
+    def test_website_metadata_writes_a_windows_feed_only_for_releases_with_windows_files(self):
+        preview = manifest()
+        newer_mac_only = {**preview, "build": "10", "releaseVersion": "0.1.0-alpha.2", "tag": "v0.1.0-alpha.2"}
+        with_windows = {**preview, "windows": self.windows_description(preview)[0]}
+        stable = {**preview, "track": "stable", "releaseVersion": "0.1.0", "build": "11"}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root/"website/src/data").mkdir(parents=True)
+            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
+                 patch.object(d, "published_manifests", return_value=[newer_mac_only, with_windows, stable]), \
+                 patch.object(d, "appcast", return_value="xml"):
+                d.website_metadata()
+            feed = json.loads((root/"website/public/updates/windows-preview.json").read_text())
+            # The Mac feed moves on to build 10, but Windows copies only hear about a release that has Windows files.
+            self.assertEqual(feed, {"schemaVersion": 1, "track": "preview", "releaseVersion": "0.1.0-alpha.1", "build": 9,
+                                    "downloadPage": "https://annotator.example/downloads/",
+                                    "releaseURL": "https://github.com/example/annotator-releases/releases/tag/v0.1.0-alpha.1"})
+            self.assertFalse((root/"website/public/updates/windows-stable.json").exists())
+            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
+                 patch.object(d, "published_manifests", return_value=[newer_mac_only]), patch.object(d, "appcast", return_value="xml"):
+                d.website_metadata()
+            self.assertFalse((root/"website/public/updates/windows-preview.json").exists())
 
     @unittest.skipUnless(sys.platform == "darwin", "CryptoKit CLI verification requires macOS.")
     def test_update_verifier_accepts_public_rfc8032_vector_and_rejects_changed_data(self):

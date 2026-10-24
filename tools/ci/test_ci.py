@@ -171,7 +171,8 @@ class WindowsReleaseTests(unittest.TestCase):
                      "hosted_release.py toolchain", "test_publish_windows.py", "test_hosted_release.py",
                      "hosted_release.py guards", "tools/windows/package.ps1", "'-RequireArm64'",
                      "hosted_release.py receipt", "name: windows-bundle", "if-no-files-found: error",
-                     "'-Portable'", "test_winget.py", "winget.py describe", "winget.py verify", "name: windows-portable"):
+                     "'-Portable'", "test_winget.py", "winget.py describe", "winget.py verify", "name: windows-portable",
+                     "WEBSITE_URL: ${{ vars.WEBSITE_URL }}", "'-UpdateSite', $env:WEBSITE_URL"):
             self.assertIn(step, build)
         for expensive in ("validate.ps1", "dotnet test", "make ", "appcert", "benchmarks", "a11y"):
             self.assertNotIn(expensive, build)

@@ -225,6 +225,16 @@ internal sealed class SettingsWindow : Window
         return UpdateDialog.AskAsync(_host, question);
     }
 
+    /// <summary>
+    /// Shows Settings on General and asks about a release a portable copy's automatic check found (WIN-SYS-03, Sparkle's
+    /// update window on the Mac).
+    /// </summary>
+    public Task<UpdateDialog.ReleaseChoice> AskAboutReleaseAsync(ReleaseFeedEntry release)
+    {
+        Show(SettingsTab.General);
+        return UpdateDialog.AskAboutReleaseAsync(_host, release);
+    }
+
     /// <summary>Report a problem or Share feedback over Settings, which waits until it closes (the Mac's sheet).</summary>
     private void OpenFeedback(FeedbackKind kind)
     {

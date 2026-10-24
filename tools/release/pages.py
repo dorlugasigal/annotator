@@ -17,7 +17,8 @@ from distribution import DistributionError, command, gh_json, repository, websit
 ROOT = Path(__file__).resolve().parents[2]
 ALLOWED = {".html", ".css", ".js", ".svg", ".jpg", ".jpeg", ".png", ".webp", ".ico",
            ".woff", ".woff2", ".mp4", ".vtt", ".glb", ".xml"}
-SPECIAL = {"fonts/OFL-bricolage.txt", "downloads/annotator-skill.zip"}
+SPECIAL = {"fonts/OFL-bricolage.txt", "downloads/annotator-skill.zip",
+           "updates/windows-preview.json", "updates/windows-stable.json"}
 
 
 class LocalLinks(HTMLParser):

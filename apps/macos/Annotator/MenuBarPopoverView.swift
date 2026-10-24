@@ -192,10 +192,11 @@ struct MenuBarPopoverView: View {
             row("Settings…", symbol: "slider.horizontal.3", action: .settings, shortcut: "⌘,")
             row("Help", symbol: "questionmark.circle", action: .help)
             row("About Annotator", symbol: "info.circle", action: .about)
-            row("Check for updates…", symbol: "arrow.triangle.2.circlepath", action: .checkForUpdates,
-                enabled: model.canCheckForUpdates)
-            if !model.canCheckForUpdates {
-                Text(model.updateStatus).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
+            row(model.updateReminderVersion == nil ? "Check for updates…" : "Update available…",
+                symbol: model.updateReminderVersion == nil ? "arrow.triangle.2.circlepath" : "square.and.arrow.down",
+                action: .checkForUpdates, enabled: model.canCheckForUpdates)
+            if !model.canCheckForUpdates || model.updateReminderVersion != nil {
+                Text(model.updateStatusLine).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 10)
             }
             row("Buy me a coffee…", symbol: "cup.and.saucer", action: .support,
                 enabled: model.optionalSupportURL != nil)

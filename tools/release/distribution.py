@@ -3,6 +3,7 @@
 import argparse
 import base64
 import hashlib
+import html
 import importlib.util
 import json
 import os
@@ -373,13 +374,37 @@ def validate_disk_image_manifest(data, manifest):
     return data
 
 
-def appcast(data):
+def update_notes(data, notes=None):
+    """The Mac notes of the manifest's release as HTML for Sparkle's update window; fails closed without them."""
+    if notes is None:
+        notes = json.loads((ROOT / "releases/notes.json").read_text())
+    entry = next((row for row in notes.get("releases", []) if isinstance(row, dict)
+                  and row.get("version") == data["releaseVersion"] and str(row.get("build")) == str(data["build"])), None)
+    if entry is None:
+        raise DistributionError("releases/notes.json has no notes for this release. Add them before building the update feed.")
+    try:
+        release.changes(entry["changes"])
+        release.strings(entry["knownIssues"], "knownIssues", allow_empty=True)
+    except (KeyError, release.ReleaseError) as error:
+        raise DistributionError("The release notes for this release are not valid.") from error
+
+    def section(title, items):
+        return f"<h3>{html.escape(title)}</h3><ul>" + "".join(f"<li>{html.escape(item)}</li>" for item in items) + "</ul>"
+    parts = [section(category, entry["changes"][category]) for category in release.CATEGORIES if category in entry["changes"]]
+    if entry["knownIssues"]:
+        parts.append(section("Known limits", entry["knownIssues"]))
+    return "".join(parts)
+
+
+def appcast(data, notes=None):
     validate_manifest(data)
     rss = ET.Element("rss", version="2.0")
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = f"Annotator {data['track']} updates"
     item = ET.SubElement(channel, "item")
     ET.SubElement(item, "title").text = data["releaseVersion"]
+    # Sparkle shows the item's description as the release notes in its update window.
+    ET.SubElement(item, "description").text = update_notes(data, notes)
     ET.SubElement(item, f"{{{SPARKLE}}}version").text = str(data["build"])
     ET.SubElement(item, f"{{{SPARKLE}}}shortVersionString").text = data["releaseVersion"]
     ET.SubElement(item, f"{{{SPARKLE}}}minimumSystemVersion").text = "14.0.0"
@@ -418,8 +443,39 @@ def published_manifests(repo):
             if not dmg or dmg["size"] != disk["size"] or dmg["browser_download_url"] != disk["downloadURL"]:
                 raise DistributionError("Published disk image is missing or mismatched.")
             data = {**data, "diskImage": disk}
+        windows_asset = next((a for a in row.get("assets", []) if a["name"] == winget.DESCRIPTION_FILE), None)
+        if windows_asset is not None:
+            windows = gh_json("api", "-H", "Accept: application/octet-stream", f"repos/{repo}/releases/assets/{windows_asset['id']}")
+            data = {**data, "windows": validate_windows_description(windows, data, row["assets"])}
         result.append(data)
     return result
+
+
+def validate_windows_description(windows, data, assets):
+    """The portable Windows files of a published release (WIN-DST-09), checked against its Mac manifest and assets."""
+    if not isinstance(windows, dict) or windows.get("schemaVersion") != 1 or windows.get("releaseVersion") != data["releaseVersion"] \
+            or str(windows.get("build")) != str(data["build"]) or not isinstance(windows.get("files"), list):
+        raise DistributionError("Published Windows files disagree with the release manifest.")
+    published = {asset["name"]: asset for asset in assets}
+    architectures = set()
+    for row in windows["files"]:
+        if not isinstance(row, dict) or row.get("architecture") not in winget.ARCHITECTURES \
+                or row.get("file") != winget.zip_name(data["releaseVersion"], row["architecture"]):
+            raise DistributionError("Published Windows files are misnamed.")
+        asset = published.get(row["file"])
+        if asset is None or asset["size"] != row.get("size"):
+            raise DistributionError("A published Windows ZIP is missing or mismatched.")
+        architectures.add(row["architecture"])
+    if "x64" not in architectures:
+        raise DistributionError("Published Windows files have no x64 ZIP.")
+    return windows
+
+
+def windows_feed(data):
+    """What a portable Windows copy reads to learn about a newer release; it downloads nothing from it."""
+    return {"schemaVersion": 1, "track": data["track"], "releaseVersion": data["releaseVersion"], "build": int(data["build"]),
+            "downloadPage": f"{data['homepage']}/downloads/",
+            "releaseURL": f"https://github.com/{data['repository']}/releases/tag/{data['tag']}"}
 
 
 def publish(folder, disk_image_folder=None, windows_folder=None):
@@ -598,6 +654,15 @@ def website_metadata():
                                  diskImageSHA256=data["diskImage"]["sha256"],
                                  diskImageSize=data["diskImage"]["size"])
         (directory / f"{track}.xml").write_text(appcast(data))
+    # Portable Windows copies check this feed (WIN-SYS-03); it names the newest release with Windows files.
+    for track in output:
+        feed = directory / f"windows-{track}.json"
+        candidates = [row for row in entries if row["track"] == track and row.get("windows")]
+        if not candidates:
+            if feed.exists():
+                feed.unlink()
+            continue
+        feed.write_text(json.dumps(windows_feed(max(candidates, key=lambda row: int(row["build"]))), indent=2) + "\n")
     (ROOT / "website/src/data/distribution.json").write_text(json.dumps(output, indent=2) + "\n")
 
 

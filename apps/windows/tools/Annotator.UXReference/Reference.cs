@@ -250,6 +250,10 @@ internal static partial class PlatformTerms
         ["macOS doesn't let apps show anything on the lock screen. So the timer stays on screen, and from 3 seconds after it starts, your Mac locks as soon as someone presses a key, clicks or moves the mouse. Until then, your Mac stays signed in behind the timer. While your Mac is locked, the timer keeps counting and plays its sound at zero. It comes back when you sign in. If Annotator quits, the timer goes away."] =
             BreakCopy.LockingExplanation,
         ["Annotator can't lock this Mac. Turn this off to use the timer without locking."] = BreakCopy.CannotLock,
+        // An update found while the person was busy (WIN-SYS-03, DV-11): Sparkle installs it on the Mac; a portable Windows
+        // copy says where to download it.
+        ["Annotator 0.1.0-beta.13 is ready to install. Choose Check for updates... to see what's new."] =
+            Annotator.Workspace.Updates.UpdateText.PortableAvailable("0.1.0-beta.13"),
     };
 
     /// <summary>

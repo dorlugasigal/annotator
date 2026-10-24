@@ -126,7 +126,7 @@ struct CustomizationView: View {
                     get: { model.automaticallyCheckForUpdates },
                     set: { model.onAutomaticUpdateChecks?($0) }))
                     .disabled(!model.updatesConfigured)
-                Text(model.updateStatus).font(.caption).foregroundStyle(.secondary)
+                Text(model.updateStatusLine).font(.caption).foregroundStyle(.secondary)
                 DisclosureGroup("What an update check sends") {
                     Text("The release server gets connection details, including your IP address. Your drawings and screenshots are not sent.")
                         .font(.caption).foregroundStyle(.secondary)
@@ -162,7 +162,7 @@ struct CustomizationView: View {
                         .disabled(!model.canCheckForUpdates)
                     Button("Copy support info") { model.copySupportInfo() }
                 }
-                Text(model.updateStatus).font(.caption).foregroundStyle(.secondary)
+                Text(model.updateStatusLine).font(.caption).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 if !model.updatesConfigured {
                     Button("Open Downloads page...") { model.openProductPage(.downloads) }

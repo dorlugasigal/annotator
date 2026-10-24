@@ -49,7 +49,15 @@ extension WorkspaceModel {
         optionalSupportURL != nil && mode == .interact && !workspaceHidden &&
             !visibilityAnimating && !screenZoomEnabled && !magnifierEnabled &&
             zoomStartState == .idle && captureFailureMessage == nil &&
-            !showHelp && !settingsVisible && !introductionVisible && errorMessage == nil &&
+            !showHelp && !settingsVisible && !introductionVisible && !whatsChangedVisible && errorMessage == nil &&
+            desktopSessions.allSatisfy { !$0.canvas.hasActiveEdit }
+    }
+    /// A window about the app itself (an update, or What's changed after one) may appear now without covering a
+    /// presentation: not drawing, zooming, sharing a region, taking a break or editing, and no introduction or error.
+    var canShowAnnouncement: Bool {
+        !(mode == .draw && !workspaceHidden) && !visibilityAnimating && !screenZoomEnabled && !magnifierEnabled &&
+            zoomStartState == .idle && !regionSharingState.isCapturing && !breakTimerRunning &&
+            captureFailureMessage == nil && !introductionVisible && errorMessage == nil &&
             desktopSessions.allSatisfy { !$0.canvas.hasActiveEdit }
     }
     var issueReportURL: URL? {
