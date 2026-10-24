@@ -19,8 +19,9 @@ namespace Annotator.App.Shell;
 /// <summary>
 /// What's changed after an update (the Mac's WhatsChangedController and WhatsChangedView): a small window titled What's
 /// changed, centered on the display under the pointer, with "Annotator is updated", the version, this version's notes,
-/// Known limits closed, the coffee line and Close. It shows without taking focus, once per version (the host decides when),
-/// and closing it releases it. The content rises and fades in unless Windows' animation effects are off.
+/// Known limits closed, "Enjoying Annotator?" with Buy me a coffee, and Close. It shows without taking focus, once per
+/// version (the host decides when), and closing it releases it. The content rises and fades in unless Windows' animation
+/// effects are off.
 /// </summary>
 internal sealed class WhatsChangedWindow : Window
 {
@@ -124,8 +125,8 @@ internal sealed class WhatsChangedWindow : Window
         };
         AutomationProperties.SetAutomationId(closeButton, WhatsChangedText.CloseIdentifier);
         closeButton.Click += (_, _) => close();
-        FrameworkElement coffee = GeneralPage.CoffeeView(supportAvailable, buyCoffee, width - 32);
-        // The coffee box gets the column's exact width (480 less 16 on each side); its second line wraps to fit.
+        FrameworkElement coffee = GeneralPage.CoffeeView(supportAvailable, buyCoffee, width - 32, detail: false);
+        // The coffee box gets the column's exact width (480 less 16 on each side): Enjoying Annotator? and the button.
         coffee.Width = width - 32;
 
         var grid = new Grid { Width = width, Height = WhatsChangedText.Height, Background = SettingsLook.Window };

@@ -231,10 +231,11 @@ internal sealed partial class GeneralPage
     /// <param name="available">The build has a support link; otherwise the button is disabled.</param>
     /// <param name="buy">Opens the support link (Mac openOptionalSupport).</param>
     /// <param name="width">
-    /// The box's width in a narrow window (What's changed): the second line wraps in the room the cup and button leave,
-    /// as SwiftUI's Text does, and the row grows with it. Settings leaves it null: one line each, 36 points high.
+    /// The box's width in a narrow window (What's changed): the text wraps in the room the cup and button leave, as SwiftUI's
+    /// Text does, and the row grows with it. Settings leaves it null: one line each, 36 points high.
     /// </param>
-    internal static FrameworkElement CoffeeView(bool available, Action buy, double? width = null)
+    /// <param name="detail">The second line under "Enjoying Annotator?"; What's changed leaves it out (Mac showsDetail).</param>
+    internal static FrameworkElement CoffeeView(bool available, Action buy, double? width = null, bool detail = true)
     {
         FrameworkElement cup = SettingsIcons.Make("cup.and.saucer.fill", 30, SettingsLook.Coffee);
         cup.Width = 39;
@@ -245,7 +246,10 @@ internal sealed partial class GeneralPage
         double? textWidth = width is { } boxWidth ? boxWidth - 36 - 39 - 3 * 16 - (buttonWidth ?? 122) : null;
         var texts = new MacStack { Spacing = 5, VerticalAlignment = VerticalAlignment.Center };
         texts.Children.Add(new FormText(SettingsCopy.EnjoyingAnnotator, 13, weight: FontWeights.SemiBold, wrapWidth: textWidth));
-        texts.Children.Add(new FormText(SettingsCopy.CoffeeWelcome, 12, "AnnotatorSecondaryText", wrapWidth: textWidth));
+        if (detail)
+        {
+            texts.Children.Add(new FormText(SettingsCopy.CoffeeWelcome, 12, "AnnotatorSecondaryText", wrapWidth: textWidth));
+        }
         var button = new SettingsButton(SettingsCopy.BuyMeACoffee, ButtonLook.Prominent, buttonWidth, tint: SettingsLook.Coffee)
         {
             IsEnabled = available,

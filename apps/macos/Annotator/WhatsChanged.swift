@@ -34,9 +34,9 @@ struct WhatsChangedTracker {
     func record(_ build: Int) { defaults.set(build, forKey: Self.lastBuildKey) }
 }
 
-/// What's changed after an update: a small window, centered on screen, with the new version's notes and an optional
-/// coffee line. It appears at most once per version, only when it covers nothing the person is presenting, and after a
-/// quiet sign-in launch only once the person opens Annotator.
+/// What's changed after an update: a small window, centered on screen, with the new version's notes and "Enjoying
+/// Annotator?" with an optional Buy me a coffee button. It appears at most once per version, only when it covers nothing
+/// the person is presenting, and after a quiet sign-in launch only once the person opens Annotator.
 @MainActor
 final class WhatsChangedController: NSObject, NSWindowDelegate {
     static let title = "What's changed"
@@ -170,7 +170,7 @@ struct WhatsChangedView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             Divider()
-            CoffeeSupportView(model: model)
+            CoffeeSupportView(model: model, showsDetail: false)
                 .padding(.horizontal, 16).padding(.top, 14)
                 .scaleEffect(settled || reduceMotion ? 1 : 0.96)
             HStack {

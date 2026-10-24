@@ -458,7 +458,7 @@ final class UXReferenceCaptureTests: XCTestCase {
             try await dialogs.view(WhatsChangedView(entry: .uxReference, model: model, close: {}, animatesEntrance: false),
                                    state: "whats-changed-update", dark: dark, background: .window,
                                    width: WhatsChangedView.width, height: WhatsChangedView.height,
-                                   notes: "What's changed after an update: fixed notes, Known limits closed, the coffee line and Close.",
+                                   notes: "What's changed after an update: fixed notes, Known limits closed, Enjoying Annotator? with Buy me a coffee, and Close.",
                                    spec: ["005", "WIN-UI-05"])
             try await dialogs.view(SupportReminderView(model: model, reminder: model.supportReminder).padding(16),
                                    state: "coffee-reminder", dark: dark, background: .window, width: 460,

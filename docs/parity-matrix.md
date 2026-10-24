@@ -189,7 +189,7 @@ requester uses Windows. The shared logic is `Annotator.Workspace`'s `BreakSessio
 | Show menu-bar icon preference | Show tray icon preference | E | UI tests |
 | Updates and What's changed | Store updates, bundled notes | E | S-10 |
 | Daily automatic update checks, on by default; waits while presenting | Portable copy's feed check at launch and when the flyout or Settings opens; tells, never installs (DV-11) | E | Workspace tests |
-| What's changed window once after each update, with the coffee line | Normal window shown without focus; Animation effects | I | UX reference `dialogs/whats-changed-update`; workspace tests |
+| What's changed window once after each update, with Enjoying Annotator? and Buy me a coffee | Normal window shown without focus; Animation effects | I | UX reference `dialogs/whats-changed-update`; workspace tests |
 | Universal app | MSIX bundle x64 and ARM64 | E | S-10, ARM64 gate |
 | Homebrew install | `winget` through `msstore` | E | S-10 |
 | VoiceOver, Reduce Motion, Increase Contrast | Narrator, Animation effects, contrast themes | E | Physical gates |

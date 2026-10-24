@@ -140,6 +140,7 @@ final class WhatsChangedTests: XCTestCase {
             XCTAssertTrue(text.contains(expected), "Missing \(expected)")
         }
         XCTAssertFalse(text.contains("secure redaction"), "Known limits start closed.")
+        XCTAssertFalse(text.contains("Coffee is always welcome"), "What's changed shows only Enjoying Annotator? and the button.")
         XCTAssertNotNil(NativeAccessibilityNode.nodes(in: host).first { $0.accessibilityIdentifier() == "whats-changed-close" })
     }
 }
