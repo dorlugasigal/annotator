@@ -12,6 +12,15 @@ Fixes #<!-- issue number. Use "Part of #123" if this doesn't finish the issue. -
 
 <!-- Every user-visible change ships on both platforms. If this pull request covers one, say what the other needs. -->
 
+## Visuals
+
+<!--
+Show every change people can see: screenshots for still UI and copy, a short video or GIF for motion and interactions.
+Show before and after, on each platform you changed, in light and dark when the look differs.
+Drag the files into this box; don't commit them to the repository.
+If nothing changes on screen, write "No visual change". If a visual is still owed, say which one.
+-->
+
 ## Testing
 
 <!-- The commands you ran on each platform and their results, e.g. `make test`, `validate.ps1 workspace`. -->
