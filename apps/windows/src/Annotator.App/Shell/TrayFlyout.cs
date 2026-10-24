@@ -225,7 +225,7 @@ internal sealed class TrayFlyout : PopoverWindow
             why.Block.Width = 268;
             content.Children.Add(new Settings.Pad(why, new Thickness(10, 0, 10, 0)) { HorizontalAlignment = HorizontalAlignment.Left });
         }
-        Button support = Row("Buy me a coffee…", "cup.and.saucer", TrayAction.Support, null);
+        Button support = Row("Enjoying it? Buy me a coffee…", "cup.and.saucer", TrayAction.Support, null);
         var supportSurface = new Grid { Margin = new Thickness(0, 8, 0, 0) };
         supportSurface.Children.Add(new Border
         {
@@ -237,12 +237,6 @@ internal sealed class TrayFlyout : PopoverWindow
         });
         supportSurface.Children.Add(support);
         content.Children.Add(supportSurface);
-        // SwiftUI's .caption: 10 points on a 13-point line, inset like the rows' titles. The explicit height keeps the rows
-        // below on the Mac's points; a rounded 13.6-point text pushed them down.
-        TextBlock caption = Line("Coffee is welcome. All tools stay free.", 10, 13, FontWeights.Normal, "AnnotatorSecondaryText");
-        caption.Height = 13;
-        caption.Margin = new Thickness(10, 0, 10, 0);
-        content.Children.Add(caption);
         content.Children.Add(Divider());
         content.Children.Add(Row("Quit Annotator", "power", TrayAction.Quit, "Ctrl+Q"));
     }
