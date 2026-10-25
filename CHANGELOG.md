@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On a Mac, buttons in the menu-bar menu now work every time. After a break timer ended, the next click in the menu, such as 15 min or Show drawings and tools, closed the menu and did nothing.
+
 ## 0.1.0-beta.14 (build 32) - 2026-10-25
 
 ### Added

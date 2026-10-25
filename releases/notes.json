@@ -1,6 +1,10 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Fixed": [
+      "On a Mac, buttons in the menu-bar menu now work every time. After a break timer ended, the next click in the menu, such as 15 min or Show drawings and tools, closed the menu and did nothing."
+    ]
+  },
   "releases": [
     {
       "version": "0.1.0-beta.14",

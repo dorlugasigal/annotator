@@ -8,6 +8,7 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
     private let model: WorkspaceModel
     private let action: (MenuBarAction) -> Void
     private let monitorsEnabled: Bool
+    private let activatesApp: Bool
     private let toolsVisible: () -> Bool
     private var localMonitor: Any?
     private var globalMonitor: Any?
@@ -18,11 +19,13 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
 
     init(model: WorkspaceModel,
          monitorsEnabled: Bool = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil,
+         activatesApp: Bool = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil,
          toolsVisible: @escaping () -> Bool = { false },
          action: @escaping (MenuBarAction) -> Void) {
         self.model = model
         self.action = action
         self.monitorsEnabled = monitorsEnabled
+        self.activatesApp = activatesApp
         self.toolsVisible = toolsVisible
         super.init()
         popover.behavior = .applicationDefined
@@ -59,9 +62,7 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
         popover.animates = false
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popover.contentViewController?.view.window?.level = .popUpMenu
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
-            NSApp.activate(ignoringOtherApps: true)
-        }
+        if activatesApp { NSApp.activate(ignoringOtherApps: true) }
         popover.contentViewController?.view.window?.makeKey()
         popover.contentViewController?.view.window?.makeFirstResponder(host.view)
         if monitorsEnabled { installMonitors() }
@@ -122,6 +123,15 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
         return event
     }
 
+    /// A click in another app closes the menu. After a break gives focus back to the app that was in front, macOS also
+    /// reports the next click on the menu itself here, as well as to the menu. Closing on that click removed the menu
+    /// between press and release, so the button never acted; a click inside the menu is never a click elsewhere.
+    func handleGlobalMouseDown(at point: CGPoint) {
+        guard popover.isShown else { return }
+        if let window = popover.contentViewController?.view.window, window.frame.contains(point) { return }
+        close()
+    }
+
     private func installMonitors() {
         removeMonitors()
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown, .keyDown]) {
@@ -133,7 +143,7 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
             return consumed ? nil : event
         }
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) {
-            [weak self] _ in MainActor.assumeIsolated { self?.close() }
+            [weak self] _ in MainActor.assumeIsolated { self?.handleGlobalMouseDown(at: NSEvent.mouseLocation) }
         }
         activationObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didResignActiveNotification, object: nil, queue: .main

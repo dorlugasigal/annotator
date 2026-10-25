@@ -219,6 +219,91 @@ final class MenuBarPopoverTests: XCTestCase {
         XCTAssertEqual(try frame("menu-breakFive"), five)
     }
 
+    /// A click on the menu that macOS also reports as a click elsewhere leaves the menu open, so its button can act.
+    func testOnlyAClickOutsideTheMenuClosesIt() throws {
+        let (model, defaults, suite) = try model()
+        let (panel, button) = anchor()
+        let controller = MenuBarPopoverController(model: model, monitorsEnabled: false, action: { _ in })
+        defer {
+            controller.close(); panel.orderOut(nil); panel.close(); model.closeAll()
+            defaults.removePersistentDomain(forName: suite)
+        }
+        controller.toggle(relativeTo: button)
+        let frame = try XCTUnwrap(controller.popover.contentViewController?.view.window).frame
+        controller.handleGlobalMouseDown(at: CGPoint(x: frame.midX, y: frame.midY))
+        XCTAssertTrue(controller.popover.isShown)
+        controller.handleGlobalMouseDown(at: CGPoint(x: frame.maxX + 40, y: frame.midY))
+        XCTAssertFalse(controller.popover.isShown)
+    }
+
+    /// Tester report: menu bar icon, 15 min, end the break, menu bar icon, 15 min again: nothing happens. Real clicks
+    /// on a real menu bar item, with Annotator activating as it does outside tests.
+    func testEveryOpeningOfTheMenuActsAfterABreak() async throws {
+        guard CGPreflightPostEventAccess() else { throw XCTSkip("Needs permission to post mouse and key events.") }
+        let (model, defaults, suite) = try model()
+        var settings = BreakTimerSettings()
+        settings.lockWhenTouched = false
+        settings.chime = false
+        model.setBreakTimerSettings(settings)
+        var environment = BreakTimerEnvironment()
+        environment.chime = {}
+        environment.announces = false
+        model.breakTimerEnvironment = environment
+        let app = AppDelegate(model: model)
+        model.setVisibilityAnimation(false)
+        var received: [MenuBarAction] = []
+        let controller = MenuBarPopoverController(model: model, monitorsEnabled: true, activatesApp: true,
+                                                  toolsVisible: { app.drawingToolsArePresented }) { action in
+            received.append(action)
+            app.performMenuAction(action)
+        }
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        let button = try XCTUnwrap(item.button)
+        button.title = "A"
+        let target = MenuItemTarget { controller.toggle(relativeTo: button) }
+        button.target = target
+        button.action = #selector(MenuItemTarget.act)
+        defer {
+            model.breakTimer.close(); controller.close(); NSStatusBar.system.removeStatusItem(item); _ = target
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            defaults.removePersistentDomain(forName: suite)
+        }
+        NativeAccessibilityNode.enable()
+        func click(_ frame: CGRect) async throws {
+            let point = CGPoint(x: frame.midX, y: NSScreen.screens[0].frame.maxY - frame.midY)
+            for type in [CGEventType.mouseMoved, .leftMouseDown, .leftMouseUp] {
+                CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left)?
+                    .post(tap: .cghidEventTap)
+                try await Task.sleep(for: .milliseconds(type == .mouseMoved ? 120 : 60))
+            }
+        }
+        // Someone working in another app opens the menu.
+        NSWorkspace.shared.runningApplications.first { $0.bundleIdentifier == "com.apple.finder" }?.activate()
+        try await Task.sleep(for: .milliseconds(600))
+        let steps: [(String, MenuBarAction)] = [("menu-breakFifteen", .breakFifteen), ("menu-breakFifteen", .breakFifteen),
+                                                ("menu-show-tools", .showTools)]
+        for (identifier, expected) in steps {
+            try await click(try XCTUnwrap(button.window).convertToScreen(button.convert(button.bounds, to: nil)))
+            try await Task.sleep(for: .milliseconds(600))
+            XCTAssertTrue(controller.popover.isShown, "The menu didn't open for \(identifier)")
+            let content = try XCTUnwrap(controller.popover.contentViewController?.view)
+            let node = try XCTUnwrap(NativeAccessibilityNode.nodes(in: content).first { $0.accessibilityIdentifier() == identifier })
+            try await click(node.accessibilityFrame())
+            try await Task.sleep(for: .milliseconds(800))
+            XCTAssertEqual(received.last, expected, "\(identifier) did nothing after \(received)")
+            XCTAssertFalse(controller.popover.isShown)
+            if model.breakTimerRunning {
+                for down in [true, false] {
+                    CGEvent(keyboardEventSource: nil, virtualKey: 53, keyDown: down)?.post(tap: .cghidEventTap)
+                    try await Task.sleep(for: .milliseconds(50))
+                }
+                try await Task.sleep(for: .milliseconds(1200))
+                if model.breakTimerRunning { model.breakTimer.end(); try await Task.sleep(for: .milliseconds(800)) }
+            }
+        }
+        XCTAssertEqual(received, steps.map(\.1))
+    }
+
     func testPopoverExpandsForBoardsAndEscapeDismissesIt() async throws {
         let (model, defaults, suite) = try model()
         let (panel, button) = anchor()
@@ -355,4 +440,10 @@ final class MenuBarPopoverTests: XCTestCase {
                 .write(to: directory.appendingPathComponent("\(name).png"))
         }
     }
+}
+
+private final class MenuItemTarget: NSObject {
+    private let fire: () -> Void
+    init(_ fire: @escaping () -> Void) { self.fire = fire }
+    @objc func act() { fire() }
 }
