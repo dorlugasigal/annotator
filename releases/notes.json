@@ -1,11 +1,39 @@
 {
   "schemaVersion": 1,
-  "unreleased": {
-    "Fixed": [
-      "On a Mac, buttons in the menu-bar menu now work every time. After a break timer ended, the next click in the menu, such as 15 min or Show drawings and tools, closed the menu and did nothing."
-    ]
-  },
+  "unreleased": {},
   "releases": [
+    {
+      "version": "0.1.0-beta.15",
+      "build": 33,
+      "date": "2026-10-25",
+      "changes": {
+        "Fixed": [
+          "On a Mac, buttons in the menu-bar menu now work every time. After a break timer ended, the next click in the menu, such as 15 min or Show drawings and tools, closed the menu and did nothing."
+        ]
+      },
+      "knownIssues": [
+        "Ink pressure was tuned with a mouse and a trackpad. Drawing with a pressure-sensitive pen still needs a hands-on check.",
+        "The on-screen tips, Ink pressure and the new gradients were checked on Windows with automated and live checks. On the Mac they passed automated checks; VoiceOver for the tip's ✕ still needs a hands-on check.",
+        "The daily update check and What's changed passed automated checks. A real update from beta.14 to this version still needs a hands-on check on both platforms.",
+        "The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.",
+        "The animations added in beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.",
+        "The new names of the three toolbar menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.",
+        "The screen zoom ramp was checked with automated state tests only. The live-capture zoom tests did not run on the validation Mac because the test build had no Screen Recording permission.",
+        "In the Shared Region window, the spotlight still turns on and off at once instead of fading.",
+        "Shared animations passed controlled local capture checks. Their appearance in a Teams, Meet or Zoom receiver still needs a hands-on check.",
+        "The controlled toolbar-sharing check has been inconsistent on this Mac. Check that the toolbar appears in your meeting's shared window before relying on it.",
+        "The owner confirmed the region highlight works on the current monitor setup. Full-screen browser transitions, Stage Manager and unplugging or reconnecting monitors still need separate checks.",
+        "Choosing a different area in the configuration window or changing the display setup turns region sharing off. Check the outline before starting it again.",
+        "Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.",
+        "The Intel app and tests compiled, but runtime tests could not run because Rosetta is missing on the validation Mac. No Intel Mac has run this version yet.",
+        "Installing on another Mac and updating from an earlier version still need a hands-on check.",
+        "VoiceOver and Full Keyboard Access checks remain incomplete.",
+        "With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.",
+        "Cross-monitor dragging still needs a hands-on check.",
+        "Effects do not follow moving windows or scrolling content and are not secure redaction.",
+        "Heavy gradient scenes and long-session resource use still need native performance checks."
+      ]
+    },
     {
       "version": "0.1.0-beta.14",
       "build": 32,
@@ -31,7 +59,7 @@
         "The menu-bar click fix comes from a tester report we couldn't reproduce. The menu now takes a click as soon as it opens; tell us if a click still does nothing.",
         "Ink pressure was tuned with a mouse and a trackpad. Drawing with a pressure-sensitive pen still needs a hands-on check.",
         "The on-screen tips, Ink pressure and the new gradients were checked on Windows with automated and live checks. On the Mac they passed automated checks; VoiceOver for the tip's ✕ still needs a hands-on check.",
-        "The daily update check and What's changed passed automated checks. A real update from beta.13 to this version still needs a hands-on check on both platforms.",
+        "The daily update check and What's changed passed automated checks. A real update from beta.14 to this version still needs a hands-on check on both platforms.",
         "The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.",
         "The animations added in beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.",
         "The new names of the three toolbar menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.",
