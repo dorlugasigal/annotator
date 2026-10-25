@@ -328,6 +328,10 @@ final class WorkspaceModel: ObservableObject {
                 errorMessage = "Saved settings were not loaded: \(error.localizedDescription)"
                 status = errorMessage ?? "Saved settings could not be loaded."
             }
+        } else {
+            // Not saved until the first change, so a first install still reads as one (What's changed).
+            preferences = .firstUse
+            style = preferences.toolStyles[tool.rawValue] ?? .defaults(for: tool)
         }
         displayObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main

@@ -1130,6 +1130,10 @@ try {
         # A palette color other than the stroke's own changes the label's paint. The popover shows for the first time: it
         # showed cloaked until its content had drawn, so its first click works.
         $own = if ($outline -like '#2B73E0*') { @('Yellow, hex #F5E338FF', '#F5E338') } else { @('Blue, hex #2B73E0FF', '#2B73E0') }
+        # A gradient stroke (new profiles start with Sunset) opens the popover on Gradient; Solid shows the palette.
+        if ($null -eq (Find $own[0] $strokePopover) -and $null -ne (Find 'Solid' $strokePopover)) {
+            ClickUntil 'Solid' $strokePopover { $null -ne (Find $own[0] $strokePopover) }
+        }
         ClickUntil $own[0] $strokePopover { MatchEnabled $strokePopover }
         Check 'label-own-color' ((MatchEnabled $strokePopover) -and (StrokeValue) -like "$($own[1])*") "Match outline enabled $(MatchEnabled $strokePopover); stroke $(StrokeValue)"
         Note "click Match outline: $(ClickButton 'Match outline' $strokePopover)"

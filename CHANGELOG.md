@@ -4,10 +4,15 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- Seven more gradients to choose from: Aurora, Cherry, Forest, Copper, Neon, Tropic and Steel. The color picker now shows Gradient before Solid.
+
 ### Changed
 
 - With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.
 - The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
+- New drawings start with a gradient. When you first open Annotator, shapes, lines, arrows, the pen and text use the Sunset gradient. If you already use Annotator, your colors stay the same.
 
 ### Fixed
 
