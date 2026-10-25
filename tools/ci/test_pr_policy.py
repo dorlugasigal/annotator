@@ -34,6 +34,14 @@ class LinkedIssueTests(unittest.TestCase):
         self.assertIsNone(self.check("", labels=["no-issue"]))
         self.assertIsNone(self.check("", author="dependabot[bot]"))
 
+    def test_a_release_pull_request_needs_no_issue(self):
+        bump = {"apps/macos/project.yml", "apps/macos/Annotator.xcodeproj/project.pbxproj", "releases/notes.json", "CHANGELOG.md"}
+        self.assertIsNone(pr_policy.linked_issue("", set(), "someone", bump))
+        self.assertIsNone(pr_policy.linked_issue("", set(), "someone", {"apps/macos/project.yml"}))
+        # Notes alone, or a version bump with any other change, is ordinary work that names its issue.
+        self.assertIsNotNone(pr_policy.linked_issue("", set(), "someone", {"releases/notes.json", "CHANGELOG.md"}))
+        self.assertIsNotNone(pr_policy.linked_issue("", set(), "someone", bump | {"apps/windows/src/Annotator.App/App.xaml.cs"}))
+
 
 class ReleaseNoteTests(unittest.TestCase):
     def check(self, files, labels=(), author="someone"):

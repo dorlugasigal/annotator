@@ -15,7 +15,10 @@ STAGES = ("alpha", "beta", "rc", "stable")
 # Optional per-entry notes for an edition other than the Mac app. The Mac app reads only the entry's own
 # changes and knownIssues, so those always describe the Mac app; macOS is never a key here.
 PLATFORMS = {"windows": "Windows"}
-ENTRY_FIELDS = {"version", "build", "date", "source", "changes", "knownIssues"}
+ENTRY_FIELDS = {"version", "build", "date", "changes", "knownIssues"}
+# Releases before 0.1.0-beta.14 recorded the commit they were built from. A release now builds from the main-branch
+# commit its Release run starts on, and the published release tag and manifest record that commit.
+OPTIONAL_FIELDS = {"source", "platforms"}
 
 
 class ReleaseError(ValueError):
@@ -72,7 +75,7 @@ def platforms(value):
         strings(notes["knownIssues"], f"{PLATFORMS[name]} knownIssues", allow_empty=True)
 
 
-def load_notes(root=ROOT, require_frozen=False):
+def load_notes(root=ROOT):
     notes = json.loads((root / "releases/notes.json").read_text())
     if not isinstance(notes, dict) or set(notes) != {"schemaVersion", "unreleased", "releases"} or type(notes["schemaVersion"]) is not int or notes["schemaVersion"] != 1:
         raise ReleaseError("Unsupported release-notes schema.")
@@ -82,7 +85,7 @@ def load_notes(root=ROOT, require_frozen=False):
     versions, builds = set(), set()
     previous_build = float("inf")
     for entry in notes["releases"]:
-        if not isinstance(entry, dict) or set(entry) - {"platforms"} != ENTRY_FIELDS:
+        if not isinstance(entry, dict) or set(entry) - OPTIONAL_FIELDS != ENTRY_FIELDS:
             raise ReleaseError("Release entries have missing or unknown fields.")
         parse_version(entry["version"])
         build = entry["build"]
@@ -96,11 +99,8 @@ def load_notes(root=ROOT, require_frozen=False):
         if not isinstance(entry["date"], str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", entry["date"]):
             raise ReleaseError("Release date must be YYYY-MM-DD.")
         datetime.date.fromisoformat(entry["date"])
-        source = entry["source"]
-        if not isinstance(source, str) or not (re.fullmatch(r"[0-9a-f]{7,40}", source) or source == "pending"):
-            raise ReleaseError("Source must be a commit hash or explicit pending preparation state.")
-        if require_frozen and source == "pending":
-            raise ReleaseError("Pending source is not a frozen candidate.")
+        if "source" in entry and not (isinstance(entry["source"], str) and re.fullmatch(r"[0-9a-f]{7,40}", entry["source"])):
+            raise ReleaseError("A recorded source must be a commit hash.")
         changes(entry["changes"])
         strings(entry["knownIssues"], "knownIssues", allow_empty=True)
         if "platforms" in entry:
@@ -191,29 +191,20 @@ def changelog(notes, version=None):
     return "\n".join(lines).rstrip() + "\n"
 
 
-def verify_frozen_source(notes, root=ROOT):
-    def git(*args):
-        result = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True)
-        if result.returncode:
-            raise ReleaseError(f"Could not verify frozen source: {result.stderr.strip()}")
-        return result.stdout.strip()
-    if git("status", "--porcelain"):
-        raise ReleaseError("Packaging requires a clean worktree. Commit the approved candidate first.")
-    source = notes["releases"][0]["source"]
-    git("cat-file", "-e", f"{source}^{{commit}}")
-    # Sources, Packages and Package.swift are the Mac package's locations before it moved into apps/macos.
-    changed = git("diff", "--name-only", source, "HEAD", "--",
-                  "apps", "Sources", "Packages", "Package.swift", "tools", ".github/workflows",
-                  "website", "services/metrics", "integrations/computer-use", "netlify.toml")
-    if changed:
-        raise ReleaseError("App/build source differs from the recorded release. Prepare an approved new candidate instead of reusing its version.")
+def verify_candidate(root=ROOT):
+    """A release builds the checked-out commit as it is: the worktree must be clean."""
+    result = subprocess.run(["git", "-C", str(root), "status", "--porcelain"], capture_output=True, text=True)
+    if result.returncode:
+        raise ReleaseError(f"Could not check the candidate: {result.stderr.strip()}")
+    if result.stdout.strip():
+        raise ReleaseError("Packaging requires a clean worktree. Commit the release candidate first.")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     check = sub.add_parser("check")
-    check.add_argument("--require-frozen", action="store_true")
+    check.add_argument("--candidate", action="store_true", help="Also require a clean worktree, as packaging does.")
     proposal = sub.add_parser("plan")
     proposal.add_argument("--change", choices=["fix", "feature", "breaking", "docs"], required=True)
     proposal.add_argument("--stage", choices=STAGES)
@@ -222,12 +213,12 @@ def main():
     render.add_argument("--write", action="store_true", help="Regenerate CHANGELOG.md; never edits notes or version settings.")
     args = parser.parse_args()
     try:
-        notes = load_notes(require_frozen=getattr(args, "require_frozen", False))
+        notes = load_notes()
         if args.command == "check":
             if (ROOT / "CHANGELOG.md").read_text() != changelog(notes):
                 raise ReleaseError("CHANGELOG.md is stale. Run changelog --write.")
-            if args.require_frozen:
-                verify_frozen_source(notes)
+            if args.candidate:
+                verify_candidate()
             print("Release metadata, bundled notes and changelog agree.")
         elif args.command == "plan":
             print(json.dumps(plan(*configured_version(), args.change, args.stage), indent=2))

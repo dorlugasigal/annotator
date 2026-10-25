@@ -1,6 +1,6 @@
 ---
 name: annotator-release
-description: Prepare and guide Annotator releases for macOS and the Windows edition. Use for local release readiness, version bumps, source freezing, signing/notarization handoff on a maintainer's Mac, the Windows package build, WACK and Microsoft Store handoff on a maintainer's Windows PC, progress monitoring, release recovery, Homebrew and website publication, or release notes. Prefer local checks and preserve exact artifacts. Ask before advancing versions/stages; do not infer production or Store authorization.
+description: Prepare and guide Annotator releases for macOS and the Windows edition. Use for local release readiness, version bumps, signing/notarization handoff on a maintainer's Mac, the Windows package build, WACK and Microsoft Store handoff on a maintainer's Windows PC, progress monitoring, release recovery, Homebrew and website publication, or release notes. Prefer local checks and preserve exact artifacts. Ask before advancing versions/stages; do not infer production or Store authorization.
 ---
 
 # Annotator release checkpoint
@@ -19,7 +19,7 @@ section covers a maintainer's Windows PC and the Microsoft Store. On Windows, wr
 
 ## Inspect before recommending
 
-1. Read `AGENTS.md`, `docs/releasing.md`, open release issues and
+1. Read `AGENTS.md`, `docs/releasing.md`, the newest GitHub release and
    `releases/notes.json`.
    For signing, publication, Homebrew, website or support-link work, also read
    `docs/maintainers/README.md`, `docs/maintainers/release-workflow.md`,
@@ -31,10 +31,11 @@ section covers a maintainer's Windows PC and the Microsoft Store. On Windows, wr
    Never enable external gates
    just because validation or version approval passed.
 2. Run `python3 tools/release/release.py check` and inspect the worktree.
-3. Use the current release's `source` commit from the notes as the baseline.
-   Inspect the log and diff since that commit, plus uncommitted files. If the
-   source is unavailable, report that and identify an explicitly verified
-   candidate commit; do not silently use HEAD or an arbitrary tag.
+3. Use the commit of the current release's tag (`v<version>`) as the baseline;
+   entries up to 0.1.0-beta.13 also record it as `source`. Inspect the log and
+   diff since that commit, plus uncommitted files. If the tag is unavailable,
+   report that and identify an explicitly verified commit; do not silently use
+   HEAD or an arbitrary tag.
 4. Separate behavior changes, compatible fixes, breaking changes, documentation
    and infrastructure-only changes. Read relevant code/specs; commit subjects
    alone are not evidence. Include regressions, actual test results, skipped
@@ -74,19 +75,22 @@ after every small edit or after a maintainer already chose to wait.
    These settings are the shared version. The Windows build reads the same
    file (`apps/windows/src/Annotator.App/SharedVersion.props`), so never set a
    Windows version anywhere else.
-2. Move the applicable Unreleased items into a new notes entry with date and
-   known issues. Mark its source `pending` until the candidate source is frozen;
-   this is a preparation state, not a releasable record.
+2. Move the applicable Unreleased items into a new notes entry with version,
+   build, date, changes and known issues. Do the bump and the notes in one
+   release pull request that changes only `apps/macos/project.yml`, the Xcode
+   project's version lines, `releases/notes.json` and `CHANGELOG.md`; it needs
+   no issue (the Linked issue check exempts it), so don't open one.
 3. Regenerate with `make generate`; render the changelog and run the complete
    validation matrix in the pipeline guide. Fix errors, record skip reasons,
    and record actual results in the release pull request. `make generate` and the
    Mac matrix need the Mac; on the Windows PC, say that they are still owed
    rather than skipping them silently.
-4. Checkpoint the source only with commit authorization. Replace `pending` in
-   the new record with that source commit in a separate evidence change,
-   without altering the candidate code. Run
-   `python3 tools/release/release.py check --require-frozen` before packaging. A clean
-   package commit may include that evidence change; record its exact SHA too.
+4. Merge the release pull request only with authorization. Releases build only
+   from `main`, so the merged commit is the release: there is no separate freeze
+   commit and no `source` field. Run `python3 tools/release/release.py check
+   --candidate` from a clean checkout of it before packaging, and start the
+   Release run on that exact commit (the head of `main`). Its tag and manifest
+   record it.
 5. Build the appropriate identity and signing channel. Verify the extracted
    signature, embedded version/stage/build, absence of test fixtures, source
    stamp and checksum. Use a fresh output directory. Never rename an old ZIP.
@@ -108,8 +112,8 @@ Read its `--help` and the handoff before running it. Configure existing
 identity and key-file paths locally; never put private key contents or tokens
 in source, command arguments, a skill or chat.
 
-1. Confirm `python3 tools/release/release.py check --require-frozen` passes from a clean
-   candidate. A freeze records the exact source; it is not Apple approval.
+1. Confirm `python3 tools/release/release.py check --candidate` passes from a clean
+   checkout of the release commit on `main`. That is not Apple approval.
    Never overwrite a published version or rewrite its historical source.
 2. Plan without production actions:
 
@@ -137,7 +141,7 @@ in source, command arguments, a skill or chat.
    stale after a crash; do not claim liveness from the file alone.
 6. Leave the release's original checkout unchanged while it runs or is paused.
    Make further edits in a separate worktree. Do not pull new tool/app changes
-   into the frozen checkout to improve its display.
+   into the release's checkout to improve its display.
 7. On timeout or interruption, keep the release directory and rerun the same
    command from the same source/config. It verifies the receipt and original
    archive before resuming; it does not rebuild or resubmit completed stages.
@@ -154,8 +158,9 @@ environment variables to publish locally.
 
 ## Windows edition
 
-The Windows edition (`apps/windows`, specification 013) ships only through the
-Microsoft Store. Nothing is on the Store yet. Signing, notarization, the disk
+The Windows edition (`apps/windows`, specification 013) ships through the
+Microsoft Store (public since 2026-10-21) and the portable ZIPs on each GitHub
+release, which winget installs. Signing, notarization, the disk
 image, Homebrew casks, `make generate` and `tools/release/publish_release.py` stay
 Mac-only; the Windows flow never signs anything, because the Store signs what
 it publishes.
@@ -245,10 +250,13 @@ the text to paste.
 
 This skill does not authorize Developer ID material creation, notarization
 uploads, public tags/releases, feed changes, live checkout or deployment.
-For Windows, version approval never authorizes a Store submission (a Partner
-Center upload, `msstore publish`, or a Release run with **windows_store**),
-a package flight for testers, a public listing, `STORE_SUBMISSION_ENABLED`,
-the website's `storeId` or turning off `partOfReleases`.
+Every release goes to the public Store listing (owner decision, 2026-10-25):
+a Release run that the owner approved to publish keeps **windows_store** at
+its default, `public`, and the Store job runs with it. Version approval alone
+still authorizes no Release run, and nothing authorizes a Store submission
+outside a release (a Partner Center upload or `msstore publish`), a package
+flight for testers, `STORE_SUBMISSION_ENABLED`, the website's `storeId` or
+turning off `partOfReleases`.
 Never override a Gatekeeper rejection, alter quarantine or change MDM policy.
 Ask for the specific external action when it becomes necessary. Do not merge
 or push main, create a public release, or contact testers merely because a local

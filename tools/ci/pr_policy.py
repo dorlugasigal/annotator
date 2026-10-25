@@ -2,10 +2,11 @@
 
 The Pull request checks workflow runs this on every pull request:
 
-    python3 tools/ci/pr_policy.py issue --event "$GITHUB_EVENT_PATH"
+    python3 tools/ci/pr_policy.py issue --event "$GITHUB_EVENT_PATH" --files changed.txt
     python3 tools/ci/pr_policy.py notes --event "$GITHUB_EVENT_PATH" --files changed.txt
 
-Maintainers can waive a check with the `no-issue` or `no-release-note` label.
+A release pull request (the version bump with its notes) needs no issue. Maintainers can waive a check with the
+`no-issue` or `no-release-note` label.
 """
 
 import argparse
@@ -18,6 +19,9 @@ BOTS = {"dependabot[bot]", "github-actions[bot]"}
 NOTES = "releases/notes.json"
 # Paths that change what the apps do. Tests, tools and docs don't need a note.
 APP_PATHS = ("apps/macos/Annotator/", "apps/macos/Sources/", "apps/macos/Packages/", "apps/windows/src/")
+# A release pull request bumps the shared version and moves the notes, and changes nothing else.
+VERSION_FILE = "apps/macos/project.yml"
+RELEASE_FILES = {VERSION_FILE, "apps/macos/Annotator.xcodeproj/project.pbxproj", NOTES, "CHANGELOG.md"}
 REFERENCE = re.compile(
     r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?|part of|refs?|related to)\b:?\s+"
     r"(?:[\w.-]+/[\w.-]+)?#\d+"
@@ -31,8 +35,13 @@ def strip_comments(body):
     return re.sub(r"<!--.*?-->", "", body or "", flags=re.S)
 
 
-def linked_issue(body, labels, author):
-    if author in BOTS or "no-issue" in labels:
+def release_pull_request(files):
+    """The version bump that starts a release: it changes the version and touches only the release files."""
+    return VERSION_FILE in files and set(files) <= RELEASE_FILES
+
+
+def linked_issue(body, labels, author, files=frozenset()):
+    if author in BOTS or "no-issue" in labels or release_pull_request(files):
         return None
     if REFERENCE.search(strip_comments(body)):
         return None
@@ -62,15 +71,15 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("check", choices=["issue", "notes"])
     parser.add_argument("--event", required=True, type=Path)
-    parser.add_argument("--files", type=Path, help="Changed paths, one per line (notes only).")
+    parser.add_argument("--files", type=Path, help="Changed paths, one per line (required for notes).")
     args = parser.parse_args(argv)
     body, labels, author = pull_request(args.event)
+    files = {line.strip() for line in args.files.read_text().splitlines() if line.strip()} if args.files else set()
     if args.check == "issue":
-        problem = linked_issue(body, labels, author)
+        problem = linked_issue(body, labels, author, files)
     else:
         if not args.files:
             parser.error("notes needs --files")
-        files = {line.strip() for line in args.files.read_text().splitlines() if line.strip()}
         problem = release_note(files, labels, author)
     if problem:
         print(f"::error::{problem}")

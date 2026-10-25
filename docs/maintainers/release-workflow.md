@@ -1,6 +1,6 @@
 # Release workflow
 
-`.github/workflows/release.yml` builds Mac and Windows from one frozen commit.
+`.github/workflows/release.yml` builds Mac and Windows from one commit on `main`.
 It starts only when a maintainer selects **Run workflow** on `main`; a push
 never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
 
@@ -9,16 +9,17 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
 | Input | Meaning |
 | --- | --- |
 | `version` | The approved label, such as `0.1.0-beta.12` |
-| `candidate_sha` | Full SHA of the frozen candidate on `main` |
+| `candidate_sha` | Full SHA of the head of `main`: the merged release pull request |
 | `notarize` | Send the Mac build to Apple |
 | `publish` | Publish the verified files to the GitHub release, Homebrew and feeds |
 | `windows_packages` | Build Windows packages even when `releases/windows.json` leaves Windows out |
-| `windows_store` | `none`, `testers` (the flight, or the private audience) or `public` |
+| `windows_store` | `public` (the default: every release goes to the Store), `testers` (the flight) or `none` (a run that publishes nothing) |
 
 ## Jobs
 
-1. **Preflight** (Linux) checks the candidate, the approved version, the
-   frozen notes and the switches, and decides the Windows part. A Store
+1. **Preflight** (Linux) checks the candidate (a clean `main` commit), the
+   approved version, the notes and the switches, and decides the Windows part.
+   A public Store submission needs `publish` on. A Store
    submission that isn't allowed stops here.
 2. **Validate** (Linux) runs the release, packaging and CI guards.
 3. **Sign** (macOS, `release-signing`) builds, signs, notarizes and staples the
@@ -40,8 +41,11 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
 6. **Publish** (Linux, `release-publishing`) uses the workflow's own token to
    upload the Mac files, the disk image and the Windows ZIPs to the GitHub
    release. With `TAP_FROM_ACTIONS` on, it also updates the Homebrew tap with
-   `TAP_TOKEN`; otherwise run `python3 tools/release/distribution.py tap` with
-   a maintainer's login.
+   `TAP_TOKEN`. GitHub's release list can lag a few seconds behind a new
+   release, so the tap step waits until this run's version is listed, and
+   fails rather than write an older cask; re-run the publish job then.
+   Otherwise run `python3 tools/release/distribution.py tap` with a
+   maintainer's login.
 7. **Microsoft Store** (Windows, `windows-store`) sends the bundle the run
    built.
 
@@ -53,8 +57,8 @@ release ([website.md](website.md)).
 
 Nothing goes to the Store unless all of these hold:
 
-- A maintainer ran Release by hand with `windows_store` set to `testers` or
-  `public`.
+- A maintainer ran Release by hand with `windows_store` set to `public` (the
+  default, with `publish` on) or `testers`.
 - The run was started by the repository owner.
 - `STORE_SUBMISSION_ENABLED` is `true`.
 - The bundle carries the real Partner Center identity

@@ -389,17 +389,19 @@ class LocalReleaseTests(unittest.TestCase):
             with self.assertRaisesRegex(local.Error, "metadata"):
                 local.finalize(self.folder, self.receipt, (), self.key)
 
-    def test_candidate_requires_exact_clean_frozen_source(self):
+    def test_candidate_requires_the_exact_clean_commit(self):
         with patch.object(d, "command", return_value=SOURCE), \
              patch.object(local.release, "configured_version", return_value=("0.1.0-alpha.2", 10)), \
              patch.object(local.release, "load_notes", return_value=self.notes), \
-             patch.object(local.release, "verify_frozen_source") as frozen:
+             patch.object(local.release, "verify_candidate") as clean:
             self.assertEqual(local.candidate("0.1.0-alpha.2", SOURCE), (10, self.notes))
-            frozen.assert_called_once_with(self.notes, local.ROOT)
+            clean.assert_called_once_with(local.ROOT)
             with self.assertRaisesRegex(local.Error, "exact original"):
                 local.candidate("0.1.0-alpha.2", "b" * 40)
-            frozen.side_effect = local.release.ReleaseError("App/build source differs")
-            with self.assertRaisesRegex(local.release.ReleaseError, "source differs"):
+            with self.assertRaisesRegex(local.Error, "version"):
+                local.candidate("0.1.0-alpha.3", SOURCE)
+            clean.side_effect = local.release.ReleaseError("Packaging requires a clean worktree.")
+            with self.assertRaisesRegex(local.release.ReleaseError, "clean worktree"):
                 local.candidate("0.1.0-alpha.2", SOURCE)
 
     def test_prepare_rejects_stale_source_before_build_or_directory_creation(self):

@@ -197,7 +197,9 @@ class WindowsReleaseTests(unittest.TestCase):
             self.assertEqual(RELEASE.count(f"secrets.{name}"), 1)
             self.assertIn(f"{name}: ${{{{ secrets.{name} }}}}", store)
         dispatch = RELEASE.split("windows_store:")[1].split("permissions:")[0]
-        self.assertIn("default: none", dispatch)
+        # Every release goes to the public listing (owner decision, 2026-10-25); preflight refuses it without publish.
+        self.assertIn("default: public", dispatch)
+        self.assertIn("RELEASE_PUBLISHES: ${{ inputs.publish }}", job(RELEASE, "preflight"))
         self.assertIn("options: [none, testers, public]", dispatch)
 
     def test_signing_keeps_the_archive_sent_to_apple_on_failure(self):

@@ -25,8 +25,8 @@ on:
         default: false
         type: boolean
       windows_store:
-        description: Send this run's Windows bundle to the Microsoft Store (testers = the package flight or the private audience; public only after the launch decision)
-        default: none
+        description: Send this run's Windows bundle to the Microsoft Store (every release goes to the public listing; testers = the package flight; none for a run that publishes nothing)
+        default: public
         type: choice
         options: [none, testers, public]
 
@@ -86,6 +86,7 @@ jobs:
           RELEASE_PROCEEDS: ${{ inputs.notarize }}
           BUILD_WINDOWS: ${{ inputs.windows_packages }}
           STORE_TARGET: ${{ inputs.windows_store }}
+          RELEASE_PUBLISHES: ${{ inputs.publish }}
           STORE_SUBMISSION_ENABLED: ${{ vars.STORE_SUBMISSION_ENABLED }}
           WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
           TRIGGERING_ACTOR: ${{ github.triggering_actor }}
@@ -194,6 +195,8 @@ jobs:
         if: ${{ vars.TAP_FROM_ACTIONS == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+          # The cask waits until this run's release shows among the published ones.
+          EXPECTED_VERSION: ${{ needs.preflight.outputs.version }}
           PUBLICATION_ENABLED: ${{ vars.PUBLICATION_ENABLED }}
           DISTRIBUTION_REPOSITORY: ${{ vars.DISTRIBUTION_REPOSITORY }}
           HOMEBREW_TAP_REPOSITORY: ${{ vars.HOMEBREW_TAP_REPOSITORY }}
@@ -395,6 +398,7 @@ jobs:
   windows-store:
     name: Microsoft Store submission
     needs: [preflight, windows-package]
+    # Every release goes to the public listing: preflight stops a public submission from a run that publishes nothing.
     if: ${{ needs.preflight.outputs.windows-store != 'none' && github.event_name == 'workflow_dispatch' && github.triggering_actor == github.repository_owner && vars.STORE_SUBMISSION_ENABLED == 'true' }}
     runs-on: windows-2025-vs2026
     timeout-minutes: 60
