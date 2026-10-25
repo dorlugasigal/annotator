@@ -6,7 +6,7 @@
       "version": "0.1.0-beta.13",
       "build": 31,
       "date": "2026-10-25",
-      "source": "pending",
+      "source": "eff8f645ac500f2b7126f6565d9c21411d774d5e",
       "changes": {
         "Added": [
           "After an update, a What's changed window shows the new version's notes once, with an optional Buy me a coffee link. It waits until you stop drawing, zooming, sharing a region or taking a break.",
