@@ -1286,7 +1286,7 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "a58d223bb4bc84b89bcc6bbaac6b91739787f0fb",
+    "commit" : "f1b4b99d412cbd6c1afd8c23d376ddd7141c6f6e",
     "date" : "2026-10-25",
     "fingerprint" : "372b6628daf74564dc6de92f38decdd29da24820c6a90da2d24b42241d34ad7e",
     "paths" : [
