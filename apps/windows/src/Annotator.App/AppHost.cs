@@ -1060,8 +1060,8 @@ internal sealed partial class AppHost
     }
 
     /// <summary>
-    /// A display's effect layer changed (Mac effectsReady, noteCaptureFrame and reportCaptureFailure): the toolbar warns while
-    /// the editing target's regions wait or capture failed, and the status says why.
+    /// A display's effect layer changed (Mac effectsReady, noteCaptureFrame and reportCaptureFailure): the toolbar warns when
+    /// capture failed, and the status says why.
     /// </summary>
     private void OnEffects(OverlayEvent.Effects effects)
     {

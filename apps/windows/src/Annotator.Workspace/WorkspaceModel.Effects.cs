@@ -16,9 +16,6 @@ public sealed partial class WorkspaceModel
     /// <summary>The toolbar's warning while capture failed (Mac ToolbarView, captureFailureMessage set).</summary>
     public const string CaptureUnavailableWarning = "Live pixels are unavailable. Details are in Settings.";
 
-    /// <summary>The toolbar's warning while effect regions wait for capture (Mac ToolbarView, censorFallbackActive).</summary>
-    public const string CaptureCoveredWarning = "Pixel effects are covered solidly until capture is ready.";
-
     private string? _captureFailureMessage;
     private bool _captureVerified;
     private ulong _effectsRetry;

@@ -8,6 +8,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 - When a new version of Annotator is out, the menu now says Update available… until you install it or skip that version. Choosing Remind me later no longer hides it. When you open the menu and the last check was more than 6 hours ago, Annotator checks again in the background, and the menu updates while it's open. On Windows, a copy from the Microsoft Store now shows this too.
 
+### Fixed
+
+- Moving a blur, pixelate or distort area no longer flashes a short message in the toolbar or changes its size for a moment.
+
 ## 0.1.0-beta.15 (build 33) - 2026-10-25
 
 ### Fixed

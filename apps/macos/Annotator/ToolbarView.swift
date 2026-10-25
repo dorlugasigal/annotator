@@ -199,7 +199,7 @@ struct ToolbarView: View {
         if case .failed(let message) = model.zoomStartState { return message }
         return nil
     }
-    private var needsCaptureRecovery: Bool { model.censorFallbackActive || model.captureFailureMessage != nil || zoomFailure != nil }
+    private var needsCaptureRecovery: Bool { model.captureFailureMessage != nil || zoomFailure != nil }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -306,8 +306,7 @@ struct ToolbarView: View {
             }
             if needsCaptureRecovery {
                 HStack(spacing: 8) {
-                    Label(zoomFailure ?? (model.captureFailureMessage == nil ? "Pixel effects are covered solidly until capture is ready." :
-                            "Live pixels are unavailable. Details are in Settings."), systemImage: "exclamationmark.shield")
+                    Label(zoomFailure ?? "Live pixels are unavailable. Details are in Settings.", systemImage: "exclamationmark.shield")
                         .font(.system(size: 10)).foregroundStyle(.secondary)
                     Spacer()
                 }
