@@ -142,7 +142,11 @@ internal sealed partial class SwatchGrid : Panel
             child.Measure(new Size(Cell, Cell));
         }
         int rows = Rows;
-        return new Size(ContentWidth, rows == 0 ? 0 : rows * Cell + (rows - 1) * (RowPitch - Cell));
+        double height = rows == 0 ? 0 : rows * Cell + (rows - 1) * (RowPitch - Cell);
+        // Whole pixels, rounded down: layout rounding would take three rows (187.5 pixels at 125%) up a pixel and move
+        // the text below the grid further from the Mac's place than the swatches are.
+        double scale = XamlRoot?.RasterizationScale ?? 1;
+        return new Size(ContentWidth, Math.Floor(height * scale + 1e-6) / scale);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
