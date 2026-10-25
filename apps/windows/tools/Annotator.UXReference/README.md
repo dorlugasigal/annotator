@@ -179,7 +179,10 @@ and 400 points wide (WIN-UI-04, DV-4, DV-10).
 `dialogs/canvas-hint` draws the on-screen tip while drawing in the Mac's 540
 by 130-point view, with its ✕ and the Turn off tips button over it, and
 `dialogs/coffee-reminder` the reminder at the Mac's place in a 460 by 135-point
-window.
+window. The tip's ✕ takes its label, "Turn off tips", from `WorkspaceHint.swift`,
+because the Mac recorder wrote only its title (`HintExpectations`). The ✕ sits
+at the end of the text, so its left edge follows the text's width (D-4) and is
+reported as a text width difference; its top, size, label and help must match.
 
 Properties states (`properties/<state>`) show the full properties panel on
 its own, 16 points from the edges of a window as wide as the reference (648
