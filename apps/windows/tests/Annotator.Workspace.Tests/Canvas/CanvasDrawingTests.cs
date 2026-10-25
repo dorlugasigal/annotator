@@ -42,16 +42,21 @@ public sealed class CanvasDrawingTests
     }
 
     [Fact]
-    public void MouseStrokesUseFullPressureAndTheReleasePointOnce()
+    public void MouseStrokesGetInkPressureAndTheReleasePointOnce()
     {
+        // Without a pressure-sensitive pen, Ink simulates pressure from speed and tapers both ends (InkPressure).
         using CanvasHarness h = Single();
         h.Choose(Tool.Pen);
         h.Down(Main, new Point(5, 5));
         h.Move(Main, new Point(9, 9));
-        h.Up(Main, new Point(9, 9));
+        h.Move(Main, new Point(40, 9));
+        h.Up(Main, new Point(40, 9));
         Element stroke = Assert.Single(h.Elements(Main));
-        Assert.Equal([new Point(5, 5), new Point(9, 9)], stroke.Points);
-        Assert.Equal([1.0, 1.0], stroke.Pressures);
+        Assert.Equal([new Point(5, 5), new Point(9, 9), new Point(40, 9)], stroke.Points);
+        var ink = new InkPressure(stroke.Style.Width);
+        double[] drawn = [ink.Next(new Point(5, 5), 11.0), ink.Next(new Point(9, 9), 11.008), ink.Next(new Point(40, 9), 11.016)];
+        Assert.Equal(InkPressure.TaperEnd(stroke.Points, ValueList.Create<double>(drawn), stroke.Style.Width), stroke.Pressures);
+        Assert.True(stroke.Pressures[0] < 1 && stroke.Pressures[2] < stroke.Pressures[1]);
     }
 
     [Fact]

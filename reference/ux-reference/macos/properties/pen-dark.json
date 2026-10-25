@@ -199,8 +199,8 @@
     36,
     36
    ],
-   "help": "Tablet pressure",
-   "label": "Tablet pressure",
+   "help": "Ink pressure",
+   "label": "Ink pressure",
    "role": "AXButton"
   },
   {
@@ -266,13 +266,13 @@
   {
    "enabled": true,
    "frame": [
-    586.5,
+    594.5,
     76,
-    30,
+    14.5,
     13
    ],
    "role": "AXStaticText",
-   "value": "Tablet"
+   "value": "Ink"
   },
   {
    "enabled": true,

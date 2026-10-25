@@ -7,7 +7,7 @@ using Annotator.Core.Scene;
 namespace Annotator.Conformance.Tests;
 
 /// <summary>
-/// Section <c>geometry</c>: renderer paths for every shape and stroke, arrowheads, polygons and rounded diamonds,
+/// Section <c>geometry</c>: renderer paths for every shape and stroke, simulated Ink pen pressure, arrowheads, polygons and rounded diamonds,
 /// connector curves, anchors, drag constraints, viewports and sharing regions, transforms, axis ticks and pointer
 /// shapes. Same path element kinds and counts; numbers within 1e-6 (WIN-CORE-04). <c>geometry/text.jsonl</c> holds
 /// macOS font measurements, so only the layout rules are compared there.
@@ -19,6 +19,8 @@ public class GeometryTests
     public static TheoryData<string> ShapeCases => CorpusCases.Of("geometry/shapes.jsonl", record => $"{record["element"]!["tool"]}: {record["variant"]}");
 
     public static TheoryData<string> StrokeCases => CorpusCases.Of("geometry/strokes.jsonl", record => record["variant"]!.GetValue<string>());
+
+    public static TheoryData<string> InkPressureCases => CorpusCases.Of("geometry/ink-pressure.jsonl", record => record["case"]!.GetValue<string>());
 
     public static TheoryData<string> ArrowheadCases => CorpusCases.Of("geometry/arrowheads.jsonl", record => $"{record["kind"]}, {record["config"]}");
 
@@ -55,6 +57,25 @@ public class GeometryTests
     [Theory]
     [MemberData(nameof(StrokeCases))]
     public void StrokePathMatchesTheMac(string caseName) => RendererPath(caseName);
+
+    /// <summary>Ink pen pressure simulated from sample times, and the end taper on release (InkPressure).</summary>
+    [Theory]
+    [MemberData(nameof(InkPressureCases))]
+    public void InkPressureMatchesTheMac(string caseName)
+    {
+        var record = CorpusCases.Record(caseName);
+        var width = record["width"]!.GetValue<double>();
+        var points = record["points"]!.AsArray().Select(Shapes.Point).ToArray();
+        var times = record["times"]!.AsArray().Select(time => time!.GetValue<double>()).ToArray();
+        var ink = new InkPressure(width);
+        var pressures = points.Select((point, index) => ink.Next(point, times[index])).ToArray();
+        var tapered = InkPressure.TaperEnd(ValueList.Create<Point>(points), ValueList.Create<double>(pressures), width);
+        Same(caseName, record, new JsonObject
+        {
+            ["pressures"] = new JsonArray(pressures.Select(value => (JsonNode)JsonValue.Create(value)).ToArray()),
+            ["tapered"] = new JsonArray(tapered.AsSpan().ToArray().Select(value => (JsonNode)JsonValue.Create(value)).ToArray()),
+        });
+    }
 
     /// <summary>The exporter makes one record per shape tool, variant and roughness, in <c>Tool.allCases</c> order.</summary>
     [Fact]
