@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using Annotator.Platform;
 using Annotator.Platform.Updates;
+using Annotator.Workspace.Packaging;
 using Annotator.Workspace.Updates;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -193,7 +194,19 @@ internal sealed class WindowsStoreUpdates(Func<nint> owner) : IStoreUpdates
     public Task<StoreUpdateCheck> CheckAsync() =>
         Run(async () => await _service.CheckAsync(owner()) > 0 ? StoreUpdateCheck.Available : StoreUpdateCheck.UpToDate);
 
-    public Task<StoreInstallOutcome> InstallAsync() => Run(async () => Map(await _service.InstallAsync(owner())));
+    public Task<StoreInstallOutcome> InstallAsync() => Run(async () =>
+    {
+        // The person asked for this update, so Annotator comes back as an ordinary launch if Windows closes it to install.
+        Program.RegisterUpdateRestart("");
+        try
+        {
+            return Map(await _service.InstallAsync(owner()));
+        }
+        finally
+        {
+            Program.RegisterUpdateRestart(LaunchArguments.AfterUpdateSwitch);
+        }
+    });
 
     public static StoreInstallOutcome Map(StoreInstallState state) => state switch
     {

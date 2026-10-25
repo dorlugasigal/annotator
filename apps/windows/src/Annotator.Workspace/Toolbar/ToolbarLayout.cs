@@ -84,6 +84,12 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
 
     public double PropertiesWidth => Minimal ? 640 : 700;
 
+    /// <summary>
+    /// Full properties below a minimal rail keep the expanded toolbar's layout, drawn smaller by as much as the tool buttons,
+    /// so a tool's properties stay on one row.
+    /// </summary>
+    public double PropertiesScale => Minimal ? 34.0 / 44.0 : 1;
+
     public double MinimumWidth => Minimal ? 300 : 400;
 
     public double CompactThreshold => Minimal ? 420 : 700;

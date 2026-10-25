@@ -72,7 +72,29 @@
      "enabled": true,
      "frame": [
       16,
-      214,
+      207.5,
+      308.5,
+      29
+     ],
+     "label": "Zoom, Control + 1",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      241.5,
+      308.5,
+      29
+     ],
+     "label": "Break timer, Control + 3",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      282,
       241,
       30
      ],
@@ -83,7 +105,7 @@
      "enabled": true,
      "frame": [
       16,
-      250,
+      318,
       110.5,
       24
      ],
@@ -95,7 +117,7 @@
      "enabled": true,
      "frame": [
       -6.5,
-      290,
+      358,
       136.5,
       16
      ],
@@ -108,7 +130,7 @@
      "enabled": true,
      "frame": [
       16,
-      329.5,
+      397.5,
       202.5,
       13
      ],
@@ -119,7 +141,7 @@
      "enabled": true,
      "frame": [
       268,
-      324,
+      392,
       56,
       24
      ],
@@ -133,7 +155,7 @@
     -6.5,
     16,
     331,
-    332
+    400
    ],
    "identifier": "tutorial-finish",
    "role": "AXGroup"
@@ -146,12 +168,12 @@
  "notes": "Finish card with the default shortcuts. Confetti plays on its display; it is not part of the card.",
  "pixels": [
   680,
-  728
+  864
  ],
  "scale": 2,
  "size": [
   340,
-  364
+  432
  ],
  "spec": [
   "005 guided first use",

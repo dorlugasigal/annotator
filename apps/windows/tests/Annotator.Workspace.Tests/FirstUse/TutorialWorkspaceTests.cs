@@ -151,7 +151,9 @@ public sealed class TutorialWorkspaceTests
         Assert.Equal(["7"], TutorialText.Keys(TutorialGoal.PenTool, snapshot));
         Assert.Empty(TutorialText.Keys(TutorialGoal.ShapeDrawn, snapshot));
         Assert.Equal("Step 4 of 10", TutorialText.StepValue(TutorialStep.Arrow));
-        Assert.Equal(["Draw", "Use apps", "Show or hide", "Undo"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
+        Assert.Equal(["Draw", "Use apps", "Show or hide", "Undo", "Zoom", "Break timer"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
+        Assert.Equal(["Ctrl", "1"], TutorialText.FinishRows(snapshot).Single(row => row.Label == "Zoom").Keys);
+        Assert.Equal(["Ctrl", "3"], TutorialText.FinishRows(snapshot).Single(row => row.Label == "Break timer").Keys);
 
         foreach (TutorialStep step in TutorialSteps.All)
         {
@@ -170,7 +172,7 @@ public sealed class TutorialWorkspaceTests
         Assert.Equal("Click any tool in the toolbar.", TutorialText.Step(TutorialStep.DrawAgain, snapshot).Detail);
         Assert.Empty(TutorialText.Keys(TutorialGoal.Drawing, snapshot));
         Assert.False(TutorialText.ShowsKeyboard(TutorialGoal.Drawing, snapshot));
-        Assert.Equal(["Use apps", "Show or hide", "Undo"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
+        Assert.Equal(["Use apps", "Show or hide", "Undo", "Zoom", "Break timer"], TutorialText.FinishRows(snapshot).Select(row => row.Label));
     }
 
     [Fact]

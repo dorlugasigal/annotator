@@ -103,16 +103,30 @@ internal sealed class PropertiesPanel
     /// <summary>
     /// Port of CompactInspectorViewport: the panel in a vertical scroll area of <paramref name="width"/> points, as tall as
     /// the panel up to <paramref name="limit"/>. The panel leaves room for the scroll bar, as the Mac's legacy scroller does.
+    /// Below 1, <paramref name="scale"/> lays the panel out that much wider and draws it that much smaller (minimal toolbar).
     /// </summary>
     public static ScrollViewer Viewport(IPropertiesHost host, WorkspaceSnapshot snapshot, bool compact, double width, double limit,
-                                        List<Action<WorkspaceSnapshot>> updates)
+                                        List<Action<WorkspaceSnapshot>> updates, double scale = 1)
     {
-        var panel = new PropertiesPanel(host, InspectorPlan.For(snapshot), compact, width - ScrollerWidth, updates);
+        double contentWidth = width - ScrollerWidth;
+        var panel = new PropertiesPanel(host, InspectorPlan.For(snapshot), compact, contentWidth / scale, updates);
+        UIElement content = panel.Root;
+        if (scale < 1)
+        {
+            content = new ScaledContent
+            {
+                Factor = scale,
+                Width = contentWidth,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                Child = panel.Root,
+            };
+        }
         return new ScrollViewer
         {
             Width = width,
             MaxHeight = limit,
-            Content = panel.Root,
+            Content = content,
             HorizontalScrollMode = ScrollMode.Disabled,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             VerticalScrollMode = ScrollMode.Auto,

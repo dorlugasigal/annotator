@@ -148,7 +148,16 @@ final class FirstUseTests: XCTestCase {
         XCTAssertTrue(TutorialText.showsKeyboard(.usingApps, preferences: preferences))
         XCTAssertFalse(TutorialText.showsKeyboard(.rectangleTool, preferences: preferences), "A single key shows only in the line.")
         XCTAssertFalse(TutorialText.showsKeyboard(.curvedArrowDrawn, preferences: preferences))
-        XCTAssertEqual(TutorialText.finishRows(preferences: preferences).map { $0.label }, ["Draw", "Use apps", "Show or hide", "Undo"])
+        let rows = TutorialText.finishRows(preferences: preferences)
+        XCTAssertEqual(rows.map { $0.label }, ["Draw", "Use apps", "Show or hide", "Undo", "Zoom", "Break timer"])
+        XCTAssertEqual(rows[4].keys, [ActivationShortcut.liveZoom.label])
+        XCTAssertEqual(rows[5].keys, [ActivationShortcut.breakTimer.label])
+        var custom = preferences
+        custom.zoomShortcut = ActivationShortcut(keyCode: 21, character: "4", control: true)
+        custom.breakShortcut = ActivationShortcut(keyCode: 23, character: "5", control: true)
+        let customRows = TutorialText.finishRows(preferences: custom)
+        XCTAssertEqual(customRows[4].keys, ["⌃4"], "The finish card follows the person's zoom shortcut.")
+        XCTAssertEqual(customRows[5].keys, ["⌃5"], "The finish card follows the person's break shortcut.")
     }
 
     func testTutorialDoesNotOverlapSupportReminder() {

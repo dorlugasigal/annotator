@@ -596,6 +596,7 @@ internal static partial class ReferenceStates
                 Profile = profile => { Vertical(profile); Pinned(profile); },
                 Available = VerticalAvailable,
             },
+            "minimal-full-properties-arrow" => Drawing(Tool.Arrow) with { Profile = profile => { Minimal(profile); Pinned(profile); } },
             _ when state.StartsWith("full-properties-", StringComparison.Ordinal) &&
                    Tool.FromRawValue(state["full-properties-".Length..]) is { } tool => Drawing(tool) with { Profile = Pinned },
             _ => null,

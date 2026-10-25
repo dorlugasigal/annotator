@@ -265,7 +265,10 @@ public static class TutorialText
         return Caps(label);
     }
 
-    /// <summary>The finish card's keys: Draw, Use apps, Show / hide and Undo. A shortcut that does not work is left out.</summary>
+    /// <summary>
+    /// The finish card's keys: Draw, Use apps, Show / hide, Undo, Zoom and Break timer. A shortcut that does not work is
+    /// left out.
+    /// </summary>
     public static ImmutableArray<TutorialKeyRow> FinishRows(WorkspaceSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
@@ -280,6 +283,14 @@ public static class TutorialText
             rows.Add(new TutorialKeyRow("Show or hide", Caps(showHide)));
         }
         rows.Add(new TutorialKeyRow("Undo", Caps(UndoShortcut)));
+        if (Global(snapshot, GlobalShortcutAction.LiveZoom) is { } zoom)
+        {
+            rows.Add(new TutorialKeyRow("Zoom", Caps(zoom)));
+        }
+        if (Global(snapshot, GlobalShortcutAction.BreakTimer) is { } breakTimer)
+        {
+            rows.Add(new TutorialKeyRow("Break timer", Caps(breakTimer)));
+        }
         return rows.ToImmutable();
     }
 

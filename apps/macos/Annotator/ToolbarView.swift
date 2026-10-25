@@ -292,7 +292,7 @@ struct ToolbarView: View {
                 Divider()
                 CompactInspectorViewport(model: model, width: width - 24,
                     limit: max(64, availableSize.height - 100 - (compactRail ? 48 : 24) - (showsModeStrip ? 52 : 0)),
-                    compact: width < 620)
+                    compact: width < 620, scale: width < 620 ? 1 : metrics.propertiesScale)
                     .modifier(PropertiesReveal(animated: revealingProperties))
                 if !compactRail { fullPropertiesMenus }
             }
@@ -820,23 +820,47 @@ private struct SupportReminderPresentation: ViewModifier {
     }
 }
 
+/// Takes `scale` times its content's room; the content, drawn with the same scaleEffect, fills it from the top leading corner.
+private struct ScaledPropertiesLayout: Layout {
+    let scale: CGFloat
+
+    private func contentSize(_ view: LayoutSubview, width: CGFloat?, height: CGFloat?) -> CGSize {
+        view.sizeThatFits(ProposedViewSize(width: width.map { $0 / scale }, height: height.map { $0 / scale }))
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let view = subviews.first else { return .zero }
+        let size = contentSize(view, width: proposal.width, height: proposal.height)
+        return CGSize(width: size.width * scale, height: size.height * scale)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let view = subviews.first else { return }
+        let size = contentSize(view, width: bounds.width, height: bounds.height)
+        view.place(at: bounds.origin, anchor: .topLeading, proposal: ProposedViewSize(size))
+    }
+}
+
 private struct CompactInspectorViewport: NSViewRepresentable {
     @ObservedObject var model: WorkspaceModel
     let width: CGFloat
     let limit: CGFloat
     var compact = false
+    /// Below 1, the panel is laid out `1 / scale` times wider and drawn `scale` times smaller (minimal toolbar).
+    var scale: CGFloat = 1
     struct Target: Equatable {
         let session: ObjectIdentifier?
         let selection: Set<UUID>
         let tool: Tool
         let width: CGFloat
         let compact: Bool
+        let scale: CGFloat
     }
 
     private var target: Target {
         Target(session: model.active.map(ObjectIdentifier.init),
                selection: model.active?.document.selection ?? [], tool: model.effectiveTool,
-               width: width, compact: compact)
+               width: width, compact: compact, scale: scale)
     }
 
     private var contentWidth: CGFloat {
@@ -844,10 +868,12 @@ private struct CompactInspectorViewport: NSViewRepresentable {
     }
 
     private var content: AnyView {
-        AnyView(ContextualInspector(model: model, compact: compact)
-            .frame(width: contentWidth, alignment: .topLeading)
+        let inspector = ContextualInspector(model: model, compact: compact)
+            .frame(width: contentWidth / scale, alignment: .topLeading)
             .fixedSize(horizontal: false, vertical: true)
-            .background { ToolbarDragBackground(model: model) })
+            .background { ToolbarDragBackground(model: model) }
+        guard scale < 1 else { return AnyView(inspector) }
+        return AnyView(ScaledPropertiesLayout(scale: scale) { inspector.scaleEffect(scale, anchor: .topLeading) })
     }
 
     func makeNSView(context: Context) -> InspectorScrollView {

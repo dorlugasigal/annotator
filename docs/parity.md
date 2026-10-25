@@ -452,6 +452,10 @@ platform that departs from the specifications, unless an ADR changes them.
 - **WIN-SYS-03**: Updates come from the Microsoft Store. Check for updates in
   the flyout and Settings asks the Store and offers the update. Annotator
   never closes itself for an update while drawings are visible; it asks first.
+  If Windows closes Annotator to install an update, Windows starts it again
+  (RegisterApplicationRestart, updates only; the Mac's Sparkle relaunch): as an
+  ordinary launch after Check for updates, and quietly, with the tray icon
+  only, after an update the Store installed by itself.
   There is no separate updater. The portable copy (WIN-DST-09) checks the
   website's feed (`updates/windows-<track>.json`, written by
   `tools/release/distribution.py`) at launch and when the tray flyout or
