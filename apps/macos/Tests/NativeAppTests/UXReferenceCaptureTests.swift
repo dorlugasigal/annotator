@@ -174,6 +174,11 @@ final class UXReferenceCaptureTests: XCTestCase {
                                     state: "full-properties-vertical-arrow", dark: dark,
                                     notes: "Vertical rail with full properties beside it.", spec: spec)
             model.setToolbarOrientation(.horizontal)
+            model.setToolbarSize(.minimal)
+            try await recorder.view(ToolbarView(model: model), state: "minimal-full-properties-arrow", dark: dark,
+                                    notes: "Minimal toolbar: full properties keep the expanded layout, drawn at the minimal button size, on one row.",
+                                    spec: spec)
+            model.setToolbarSize(.expanded)
             model.setInspectorPinned(false)
 
             use(model, tool: .arrow)
