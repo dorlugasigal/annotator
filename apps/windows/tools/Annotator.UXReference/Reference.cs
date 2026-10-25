@@ -255,6 +255,11 @@ internal static partial class PlatformTerms
         // copy says where to download it.
         ["Annotator 0.1.0-beta.13 is ready to install."] =
             Annotator.Workspace.Updates.UpdateText.PortableAvailable("0.1.0-beta.13"),
+        // The tutorial (WIN-UI-04): the Mac's keycaps say esc and return, and Undo is Command-Z there, Ctrl+Z on Windows.
+        ["Press esc, or click Use apps. Your drawings stay put."] = "Press Esc, or click Use apps. Your drawings stay put.",
+        ["Click points, then double-click (or return)"] = "Click points, then double-click (or Enter)",
+        ["Undo, Command + Z"] = "Undo, Ctrl + Z",
+        ["Keyboard: Command + Z"] = "Keyboard: Ctrl + Z",
     };
 
     /// <summary>

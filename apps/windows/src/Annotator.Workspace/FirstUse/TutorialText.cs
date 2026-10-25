@@ -15,6 +15,12 @@ public sealed record TutorialStepText(string Title, string? Detail, ImmutableArr
 public sealed record TutorialKeyRow(string Label, ImmutableArray<string> Keys);
 
 /// <summary>
+/// One word or key of a line (Mac <c>TutorialLineToken</c>), whether a space comes before it, and for a key its place among
+/// the line's keys.
+/// </summary>
+public readonly record struct TutorialLineToken(string Text, bool IsKey, bool SpaceBefore, int KeyIndex);
+
+/// <summary>
 /// The tutorial's words (Mac TutorialViews): short, casual and direct, with Windows key names and the platform terms of
 /// specification 013: Ctrl for Control and Command, Esc, Enter for Return, and the tray icon for the menu bar icon. Keys
 /// follow the person's shortcuts; a shortcut that is missing or that Windows refused uses the words without a key.
@@ -190,6 +196,49 @@ public static class TutorialText
             index = close + 1;
         }
         return segments.ToImmutable();
+    }
+
+    /// <summary>
+    /// The line's words and keys in order (Mac TutorialText.tokens). Words and keys written together, such as "{2},", stay
+    /// together: only a token with <see cref="TutorialLineToken.SpaceBefore"/> may start a new row.
+    /// </summary>
+    public static ImmutableArray<TutorialLineToken> Tokens(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+        ImmutableArray<TutorialLineToken>.Builder tokens = ImmutableArray.CreateBuilder<TutorialLineToken>();
+        bool space = false;
+        int keys = 0;
+        foreach ((string text, ImmutableArray<string> caps) in Segments(line))
+        {
+            if (caps.IsEmpty)
+            {
+                string[] words = text.Split(' ');
+                for (int index = 0; index < words.Length; index++)
+                {
+                    space |= index > 0;
+                    if (words[index].Length == 0)
+                    {
+                        continue;
+                    }
+                    tokens.Add(new TutorialLineToken(words[index], false, space && tokens.Count > 0, 0));
+                    space = false;
+                }
+                continue;
+            }
+            tokens.Add(new TutorialLineToken(string.Join('+', caps), true, space && tokens.Count > 0, keys++));
+            space = false;
+        }
+        return tokens.ToImmutable();
+    }
+
+    /// <summary>
+    /// What screen readers read for keys (Mac TutorialText.spoken): "Ctrl", "Shift" and "2" are "Ctrl + Shift + 2", and Esc
+    /// is "Escape".
+    /// </summary>
+    public static string Spoken(IEnumerable<string> keys)
+    {
+        ArgumentNullException.ThrowIfNull(keys);
+        return string.Join(" + ", keys.Select(key => key == EscapeKey ? "Escape" : key));
     }
 
     /// <summary>The line as screen readers and tests read it: keys without their braces.</summary>

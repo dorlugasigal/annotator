@@ -174,6 +174,25 @@ public sealed class TutorialWorkspaceTests
     }
 
     [Fact]
+    public void LinesSplitIntoWordsAndKeysLikeTheMac()
+    {
+        Assert.Equal(
+            [
+                new TutorialLineToken("Press", false, false, 0), new TutorialLineToken("Ctrl+Z", true, true, 0),
+                new TutorialLineToken(",", false, false, 0), new TutorialLineToken("or", false, true, 0),
+                new TutorialLineToken("click", false, true, 0), new TutorialLineToken("Undo.", false, true, 0),
+            ],
+            TutorialText.Tokens("Press {Ctrl+Z}, or click Undo."));
+        ImmutableArray<TutorialLineToken> arrow = TutorialText.Tokens("Click points, then double-click (or {Enter})");
+        Assert.Equal(new TutorialLineToken("(or", false, true, 0), arrow[^3]);
+        Assert.Equal(new TutorialLineToken("Enter", true, true, 0), arrow[^2]);
+        Assert.Equal(new TutorialLineToken(")", false, false, 0), arrow[^1]);
+        Assert.Equal(1, TutorialText.Tokens("Hide it all: press {Ctrl+2}, then {Ctrl+2}").Last().KeyIndex);
+        Assert.Equal("Ctrl + Shift + 2", TutorialText.Spoken(["Ctrl", "Shift", "2"]));
+        Assert.Equal("Escape", TutorialText.Spoken(["Esc"]));
+    }
+
+    [Fact]
     public void TheColorStepAsksForGreenWhenTheDrawingIsBlueAlready()
     {
         WorkspaceModel model = Create();

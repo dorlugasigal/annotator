@@ -247,12 +247,11 @@ internal sealed class TutorialController
         StopGoal();
         if (_coach is { } coach)
         {
-            coach.TitleCheck.Root.Opacity = 1;
-            Check(coach.TitleCheck);
+            coach.TitleCheck.Reveal();
+            Check(coach.TitleCheck.Check);
             for (int index = _shownGoal; index < coach.Goals.Count; index++)
             {
-                coach.Goals[index].Slot.Children[0].Visibility = Visibility.Collapsed;
-                coach.Goals[index].Check.Root.Visibility = Visibility.Visible;
+                coach.Goals[index].Show(done: true);
                 Check(coach.Goals[index].Check);
             }
         }
@@ -581,7 +580,7 @@ internal sealed class TutorialController
     }
 
     /// <summary>A goal's check draws itself over <see cref="TutorialMotion.CheckDuration"/>, or at once with Reduce Motion.</summary>
-    private void Check(CheckBadge badge)
+    private void Check(TutorialCheck badge)
     {
         if (SystemMotionReduced())
         {

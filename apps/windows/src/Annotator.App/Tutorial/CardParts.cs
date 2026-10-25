@@ -137,53 +137,6 @@ internal static class CardParts
         return key;
     }
 
-    /// <summary>The key names of a Windows shortcut, modifiers first: "Ctrl", "Shift", "2".</summary>
-    public static IReadOnlyList<string> Keys(ShortcutChord chord)
-    {
-        var keys = new List<string>();
-        if (chord.Modifiers.HasFlag(ChordModifiers.Ctrl))
-        {
-            keys.Add("Ctrl");
-        }
-        if (chord.Modifiers.HasFlag(ChordModifiers.Alt))
-        {
-            keys.Add("Alt");
-        }
-        if (chord.Modifiers.HasFlag(ChordModifiers.Shift))
-        {
-            keys.Add("Shift");
-        }
-        if (chord.Modifiers.HasFlag(ChordModifiers.Win))
-        {
-            keys.Add("Win");
-        }
-        keys.Add(chord.Key.ToUpperInvariant());
-        return keys;
-    }
-
-    /// <summary>
-    /// A shortcut's keycaps 5 points apart (Mac ShortcutKeycaps), read by UI Automation as one element named like
-    /// "Ctrl + Shift + 2", as Settings' keycaps read; each key names itself in a tooltip.
-    /// </summary>
-    public static FrameworkElement Shortcut(ShortcutChord chord, bool dark)
-    {
-        IReadOnlyList<string> keys = Keys(chord);
-        string spoken = string.Join(" + ", keys);
-        var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 5 };
-        foreach (string key in keys)
-        {
-            FrameworkElement cap = Keycap(key, dark, hidden: true);
-            ToolTipService.SetToolTip(cap, key);
-            row.Children.Add(cap);
-        }
-        var group = new CardShortcut { VerticalAlignment = VerticalAlignment.Center };
-        AutomationProperties.SetName(group, spoken);
-        AutomationProperties.SetHelpText(group, spoken);
-        ToolTipService.SetToolTip(group, spoken);
-        group.Children.Add(row);
-        return group;
-    }
-
     /// <summary>A Mac-sized push button (regular size, 24 points tall); prominent uses the accent, like borderedProminent.</summary>
     public static Button PushButton(string title, bool prominent = false)
     {
@@ -208,24 +161,6 @@ internal static class CardParts
         AutomationProperties.SetName(button, title);
         return button;
     }
-
-    /// <summary>
-    /// A plain check box with a 13-point label (Mac Toggle in the default macOS checkbox style). Windows draws a 20-point
-    /// box; negative margins give it the Mac's <paramref name="height"/> in the layout, so the rows around it keep the
-    /// Mac's places.
-    /// </summary>
-    public static CheckBox CheckBox(string title, double height = 16) => new()
-    {
-        Content = title,
-        FontSize = 13,
-        Height = 20,
-        Margin = new Thickness(0, -(20 - height) / 2, 0, -(20 - height) / 2),
-        MinHeight = 0,
-        MinWidth = 0,
-        Padding = new Thickness(6, 0, 0, 0),
-        VerticalAlignment = VerticalAlignment.Center,
-        VerticalContentAlignment = VerticalAlignment.Center,
-    };
 
     /// <summary>A Mac SF Symbol as its Windows icon, read as an image with the Mac's label and the symbol's name.</summary>
     public static FrameworkElement Symbol(string symbol, double size, string style, string label, Color? tint = null)
@@ -342,7 +277,10 @@ internal sealed partial class CardDisclosure : Button
         protected override object? GetPatternCore(PatternInterface patternInterface) =>
             patternInterface == PatternInterface.ExpandCollapse ? this : base.GetPatternCore(patternInterface);
 
-        protected override WinRect GetBoundingRectangleCore() => AutomationFrames.Of(owner, base.GetBoundingRectangleCore());
+        // The Mac's disclosure triangle frame: from 22.5 points before the content to the title's end, 16 points tall
+        // (as Settings' disclosures report it).
+        protected override WinRect GetBoundingRectangleCore() =>
+            CardElement.Frame(owner, new WinRect(-22.5, (owner.ActualHeight - 16) / 2, owner.ActualWidth + 22.5, 16), base.GetBoundingRectangleCore());
     }
 }
 
@@ -415,8 +353,9 @@ internal sealed class CheckBadge
 }
 
 /// <summary>
-/// One information card (Mac TutorialInfoCard): a tinted 32-point icon tile, a headline and detail with optional notes, and a button
-/// or the ready badge on the right; 12 points of padding on a 4% fill with an 8% outline and a 10-point corner.
+/// One information card, which only Windows' finish card has (DV-4, DV-10): a tinted 32-point icon tile, a headline and detail
+/// with optional notes, and a button or the ready badge below them; 12 points of padding on a 4% fill with an 8% outline and
+/// a 10-point corner.
 /// </summary>
 internal sealed class InfoCard
 {
@@ -432,24 +371,24 @@ internal sealed class InfoCard
         });
         FrameworkElement icon = CardParts.Symbol(symbol, 18, "AnnotatorGlyphAccent", symbolLabel, ready ? tint : null);
         tile.Children.Add(icon);
-        var texts = new MacStack { Spacing = 2, VerticalAlignment = VerticalAlignment.Center };
+        var texts = new MacStack { Spacing = 2, VerticalAlignment = VerticalAlignment.Top };
         texts.Children.Add(CardParts.Text(title, 13, weight: FontWeights.SemiBold));
         texts.Children.Add(CardParts.Text(detail, 12, CardParts.Secondary));
         foreach (string note in notes)
         {
             texts.Children.Add(CardParts.Text(note, 10, CardParts.Secondary));
         }
-        trailing.VerticalAlignment = VerticalAlignment.Center;
-        trailing.Margin = new Thickness(8, 0, 0, 0);
+        // Below the words, so the words keep the card's width.
+        trailing.HorizontalAlignment = HorizontalAlignment.Left;
+        trailing.Margin = new Thickness(0, 8, 0, 0);
+        texts.Children.Add(trailing);
+        tile.VerticalAlignment = VerticalAlignment.Top;
         var row = new Grid { ColumnSpacing = 12 };
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         row.Children.Add(tile);
         Grid.SetColumn(texts, 1);
         row.Children.Add(texts);
-        Grid.SetColumn(trailing, 2);
-        row.Children.Add(trailing);
         Root = new Border
         {
             Padding = new Thickness(12),
@@ -469,30 +408,5 @@ internal sealed class InfoCard
         Root.Opacity = arrival.Opacity;
         Root.Translation = new Vector3(0, (float)arrival.Offset, 0);
         CardParts.ScaleAroundCenter(Root, arrival.Scale);
-    }
-}
-
-/// <summary>
-/// A shortcut's keycaps as one element (the Mac's ShortcutKeycaps view, an unknown role with its label): a custom control
-/// named with the keys, framed like the Mac's keycaps with their outline's outer half point.
-/// </summary>
-internal sealed partial class CardShortcut : Grid
-{
-    protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
-
-    private sealed partial class Peer(CardShortcut owner) : FrameworkElementAutomationPeer(owner)
-    {
-        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Custom;
-
-        protected override string GetLocalizedControlTypeCore() => "shortcut";
-
-        protected override string GetClassNameCore() => "ShortcutKeycaps";
-
-        protected override bool IsControlElementCore() => true;
-
-        protected override IList<AutomationPeer> GetChildrenCore() => new AutomationPeerList();
-
-        protected override WinRect GetBoundingRectangleCore() =>
-            AutomationFrames.Of(owner, new WinRect(-0.5, -0.5, owner.ActualWidth + 1, owner.ActualHeight + 1), base.GetBoundingRectangleCore());
     }
 }

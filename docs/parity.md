@@ -403,9 +403,14 @@ platform that departs from the specifications, unless an ADR changes them.
   coaching, no permission requests, and automatic presentation without taking
   focus until the tutorial is finished or Show on launch is off. Start turns
   drawing on. Every step accepts the keyboard or the mouse: it checks the
-  workspace's result, never the input. The finish card is 400 points wide
-  (the Mac's 340) for the longer Windows key names and the tray icon (DV-4)
-  and shortcut (DV-10) cards.
+  workspace's result, never the input. The cards have the Mac's sizes,
+  places and accessibility elements (`reference/ux-reference/macos/tutorial`).
+  Lines and check boxes are a few points narrower or wider than the Mac's,
+  because Segoe UI is narrower than SF (D-4) and Windows keycaps name their
+  keys ("Ctrl+2" where the Mac shows ⌃2). The keyboard's bottom row (Ctrl, Win,
+  Alt) is shorter than the Mac's (fn, ⌃, ⌥, ⌘), so its frame is narrower. Only
+  Windows' finish card adds the tray icon (DV-4) and shortcut (DV-10) cards,
+  which make it taller.
 - **WIN-UI-05**: The Tools window, the error window, Report a problem, support
   information and What's changed match 005. What's changed is bundled and
   matched to the running Windows version and build.

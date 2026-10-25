@@ -80,7 +80,7 @@ internal sealed partial class ReferenceHost
             CoachContent coach = TutorialCardView.Coach(view, model.Snapshot, actions, dark);
             if (state == "coach-shape-done")
             {
-                coach.TitleCheck.Root.Opacity = 1;
+                coach.TitleCheck.Reveal();
             }
             content = coach.Root;
         }
