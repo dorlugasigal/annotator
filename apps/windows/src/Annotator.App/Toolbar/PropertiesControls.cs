@@ -59,7 +59,7 @@ internal static class PropertyMetrics
         ("Straight", 10) => 38.5,
         ("Curved", 10) => 35,
         ("Constant", 10) => 44,
-        ("Tablet", 10) => 30,
+        ("Ink", 10) => 14.5,
         ("75%", 10) => 22.5,
         ("Opacity", 10) => 37.5,
         ("Width", 10) => 28.5,

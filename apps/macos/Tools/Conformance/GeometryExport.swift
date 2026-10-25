@@ -8,9 +8,10 @@ import Foundation
 @MainActor
 enum GeometryExport {
     static func run(_ corpus: Corpus) throws {
-        corpus.describe("geometry", "Path elements from SceneRenderer for every shape and stroke (rough ones from the element seed), arrowheads, polygons, rounded diamonds, connector curves, anchors, drag constraints, viewports, sharing regions, transforms, axis ticks and pointer shapes. text.jsonl depends on macOS fonts.")
+        corpus.describe("geometry", "Path elements from SceneRenderer for every shape and stroke (rough ones from the element seed), simulated Ink pen pressure from InkPressure, arrowheads, polygons, rounded diamonds, connector curves, anchors, drag constraints, viewports, sharing regions, transforms, axis ticks and pointer shapes. text.jsonl depends on macOS fonts.")
         try shapes(corpus)
         try strokes(corpus)
+        try inkPressure(corpus)
         try arrowheads(corpus)
         try polygons(corpus)
         try connectors(corpus)
@@ -82,6 +83,38 @@ enum GeometryExport {
             ("curved arrow, roughness 2", Fixture.element(2_013, .arrow, points: corner, style: Fixture.style(.arrow) { $0.curved = true; $0.roughness = 2 }))
         ]
         try corpus.lines("geometry/strokes.jsonl", cases.map { pathRecord($0.1, renderer, $0.0) })
+    }
+
+    /// Ink pen strokes drawn without a pressure-sensitive pen: each sample's simulated pressure, then the
+    /// pressures after the end taper on release. Times are in seconds.
+    private static func inkPressure(_ corpus: Corpus) throws {
+        func run(_ count: Int, _ sample: (Int) -> (Point, Double)) -> [(Point, Double)] { (0..<count).map(sample) }
+        var random = SeededRandom(seed: 0xA11CE)
+        let cases: [(String, Double, [(Point, Double)])] = [
+            ("slow line", 3, run(40) { (Point(Double($0), 0), Double($0) * 0.016) }),
+            ("fast line", 3, run(30) { (Point(Double($0) * 20, 0), Double($0) * 0.008) }),
+            ("speeding up", 3, run(40) { (Point(Double($0 * $0) * 0.5, 10), Double($0) * 0.008) }),
+            ("slowing down", 5, run(40) { (Point(400 - Double((40 - $0) * (40 - $0)) * 0.25, 0), Double($0) * 0.008) }),
+            ("samples sharing a millisecond", 3, run(48) { (Point(Double($0) * 2, Double($0)), Double($0 / 4) * 0.004) }),
+            ("pause, then fast", 3, run(30) { $0 < 10 ? (Point(Double($0), 0), Double($0) * 0.5) : (Point(10 + Double($0 - 10) * 25, 0), 4.5 + Double($0 - 9) * 0.008) }),
+            ("times out of order", 3, run(20) { (Point(Double($0) * 6, 0), $0 % 3 == 1 ? 0 : Double($0) * 0.01) }),
+            ("wide wave", 12, Samples.wave(from: Point(0, 50), count: 40, step: 6, amplitude: 30).enumerated().map { ($0.element, Double($0.offset) * 0.011) }),
+            ("random walk", 4, run(60) { index in (Point(random.range(0, 300), random.range(0, 200)), Double(index) * random.range(0.004, 0.02)) }),
+            ("two points", 3, [(Point(0, 0), 0), (Point(30, 0), 0.016)]),
+            ("single point", 3, [(Point(5, 5), 0)])
+        ]
+        var records: [J] = []
+        for (name, width, samples) in cases {
+            var ink = InkPressure(width: width)
+            let points = samples.map(\.0)
+            let pressures = samples.map { ink.next($0.0, time: $0.1) }
+            records.append([
+                "case": .string(name), "width": .double(width), "points": points.json,
+                "times": samples.map(\.1).json, "pressures": pressures.json,
+                "tapered": InkPressure.taperEnd(points: points, pressures: pressures, width: width).json
+            ])
+        }
+        try corpus.lines("geometry/ink-pressure.jsonl", records)
     }
 
     static func headRecord(_ head: ArrowHeadGeometry?) -> J {

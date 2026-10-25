@@ -258,7 +258,7 @@ internal sealed class PropertiesPanel
             case InspectorItem.Pressure:
                 var pressure = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16 };
                 pressure.Children.Add(Left(PressureChoice(false, "Constant")));
-                pressure.Children.Add(Left(PressureChoice(true, "Tablet")));
+                pressure.Children.Add(Left(PressureChoice(true, "Ink")));
                 return Block("Pressure", "pencil.tip", pressure);
             case InspectorItem.SmartDraw:
                 var smart = new SmartDrawToggle(_model, 36);

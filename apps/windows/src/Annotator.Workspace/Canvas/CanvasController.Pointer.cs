@@ -467,7 +467,8 @@ public sealed partial class CanvasController
         if (tool.IsFreehand)
         {
             gesture.IncrementalInk = IncrementalInkAllowed();
-            AppendSample(point, e.HasPressure ? e.Current.Pressure : 1);
+            _inkPressure = tool == Tool.Pen && !e.HasPressure ? new InkPressure(_draft.Style.Width) : null;
+            AppendSample(point, SamplePressure(point, e.Current, e.HasPressure));
             _draft.GeometryToken = Guid.NewGuid();
         }
     }
@@ -488,6 +489,18 @@ public sealed partial class CanvasController
             }
         }
         return true;
+    }
+
+    /// <summary>Mac samplePressure: a pen's own pressure, else simulated from the stroke's speed (Ink).</summary>
+    private double SamplePressure(Point point, in PointerSample sample, bool hasPressure)
+    {
+        if (_inkPressure is { } ink)
+        {
+            double pressure = ink.Next(point, sample.Timestamp / 1000.0);
+            _inkPressure = ink;
+            return pressure;
+        }
+        return hasPressure ? sample.Pressure : 1;
     }
 
     /// <summary>
@@ -587,7 +600,7 @@ public sealed partial class CanvasController
                         {
                             dirty = Union(dirty, IncrementalInkRect(_draft.Points[^1], sample.Position, gesture.Bounds), ref incremental);
                         }
-                        AppendSample(sample.Position, e.HasPressure ? sample.Pressure : 1);
+                        AppendSample(sample.Position, SamplePressure(sample.Position, sample, e.HasPressure));
                     }
                     _draft.GeometryToken = Guid.NewGuid();
                     if (!incremental)
@@ -997,9 +1010,14 @@ public sealed partial class CanvasController
                 }
                 else if (_draft.Tool.IsFreehand && _draft.Points[^1] != point)
                 {
-                    AppendSample(point, e.HasPressure ? e.Current.Pressure : 1);
+                    AppendSample(point, SamplePressure(point, e.Current, e.HasPressure));
                     _draft.GeometryToken = Guid.NewGuid();
                 }
+                if (_draft.Tool == Tool.Pen && _inkPressure is not null)
+                {
+                    _draft.Pressures = InkPressure.TaperEnd(_draft.Points, _draft.Pressures, _draft.Style.Width);
+                }
+                _inkPressure = null;
                 Element created = _draft;
                 _hasDraft = false;
                 _draft = default;

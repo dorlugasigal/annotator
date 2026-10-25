@@ -266,8 +266,10 @@ platform that departs from the specifications, unless an ADR changes them.
 ### Input
 
 - **WIN-INP-01**: Pointer input uses Windows pointer messages for mouse, pen
-  and touch, with the full pointer history so no samples are lost. Tablet
-  pressure uses the pen pressure value. Touch draws with one finger like a
+  and touch, with the full pointer history so no samples are lost. Ink
+  pressure uses the pen pressure value when the pen reports one; mouse, touchpad
+  and touch strokes get the Mac's simulated pressure (`InkPressure`, from the
+  sample times). Touch draws with one finger like a
   mouse (D-9). Long strokes keep every sample, as in 001.
 - **WIN-INP-02**: Local keys follow the [keyboard mapping](#keyboard-mapping):
   Command becomes Ctrl, Control stays Ctrl, Option becomes Alt.

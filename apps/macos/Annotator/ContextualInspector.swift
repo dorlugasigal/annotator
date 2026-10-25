@@ -120,7 +120,7 @@ struct ContextualInspector: View {
                         PropertyBlock(name: "Pressure", symbol: "pencil.tip") {
                             HStack(spacing: 16) {
                                 pressureChoice(false, label: "Constant")
-                                pressureChoice(true, label: "Tablet")
+                                pressureChoice(true, label: "Ink")
                             }
                         }.fixedSize(horizontal: true, vertical: false)
                         PropertyBlock(name: "Smart Draw", symbol: "wand.and.stars") {

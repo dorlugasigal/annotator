@@ -39,6 +39,8 @@ public sealed partial class CanvasController : IDisposable
     private Gesture? _gesture;
     private bool _hasDraft;
     private Element _draft;
+    /// <summary>Simulated pressure for the pen stroke being drawn without a pressure-sensitive pen.</summary>
+    private InkPressure? _inkPressure;
     private ImmutableHashSet<Guid> _eraseIds = ImmutableHashSet<Guid>.Empty;
     private Rect? _marquee;
     private ImmutableArray<Anchor> _attachHints = [];

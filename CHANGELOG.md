@@ -8,6 +8,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 - With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.
 - The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
+- The pen's Tablet pressure is now Ink, and it works with a mouse or trackpad: the line gets thinner when you move fast, thicker when you move slowly, and narrows at the start and end. A pressure-sensitive pen still uses its own pressure.
 
 ### Fixed
 

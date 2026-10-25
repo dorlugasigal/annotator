@@ -9,10 +9,11 @@ final class NativeCanvasTests: XCTestCase {
         let suite = "com.dorlugasigal.annotator.native-test.\(UUID().uuidString)"
         return (WorkspaceModel(defaults: try XCTUnwrap(UserDefaults(suiteName: suite))), suite)
     }
-    private func event(_ type: NSEvent.EventType, at point: NSPoint, session: OverlaySession) throws -> NSEvent {
+    private func event(_ type: NSEvent.EventType, at point: NSPoint, session: OverlaySession,
+                       time: TimeInterval = ProcessInfo.processInfo.systemUptime) throws -> NSEvent {
         let native = session.canvas.convert(point, to: nil)
         return try XCTUnwrap(NSEvent.mouseEvent(with: type, location: native, modifierFlags: [],
-                                               timestamp: ProcessInfo.processInfo.systemUptime,
+                                               timestamp: time,
                                                windowNumber: session.panel.windowNumber, context: nil,
                                                eventNumber: 1, clickCount: 1, pressure: 1))
     }
@@ -35,6 +36,37 @@ final class NativeCanvasTests: XCTestCase {
         XCTAssertTrue(session.panel.ignoresMouseEvents)
         XCTAssertEqual(model.mode, .interact)
         XCTAssertEqual(session.document.elements.count, 1)
+        session.document.undo()
+        XCTAssertTrue(session.document.elements.isEmpty)
+    }
+
+    func testMousePenStrokesGetInkPressureInOneUndoStep() throws {
+        let (model, suite) = try makeModel()
+        defer { model.closeAll(); UserDefaults.standard.removePersistentDomain(forName: suite) }
+        model.smartDraw = false
+        model.beginDrawing()
+        let session = try XCTUnwrap(model.active)
+        model.tool = .pen
+        let samples: [(NSEvent.EventType, NSPoint, TimeInterval)] = [
+            (.leftMouseDown, NSPoint(x: 200, y: 200), 100), (.leftMouseDragged, NSPoint(x: 203, y: 200), 100.016),
+            (.leftMouseDragged, NSPoint(x: 260, y: 210), 100.024), (.leftMouseDragged, NSPoint(x: 330, y: 230), 100.032),
+            (.leftMouseUp, NSPoint(x: 336, y: 232), 100.048)
+        ]
+        for (type, point, time) in samples {
+            let event = try event(type, at: point, session: session, time: time)
+            switch type {
+            case .leftMouseDown: session.canvas.mouseDown(with: event)
+            case .leftMouseDragged: session.canvas.mouseDragged(with: event)
+            default: session.canvas.mouseUp(with: event)
+            }
+        }
+        let stroke = try XCTUnwrap(session.document.elements.first)
+        XCTAssertEqual(stroke.points.count, samples.count)
+        var ink = InkPressure(width: stroke.style.width)
+        let drawn = zip(stroke.points, samples).map { ink.next($0.0, time: $0.1.2) }
+        XCTAssertEqual(stroke.pressures, InkPressure.taperEnd(points: stroke.points, pressures: drawn, width: stroke.style.width))
+        XCTAssertLessThan(stroke.pressures[0], 1)
+        XCTAssertLessThan(stroke.pressures[4], stroke.pressures[2])
         session.document.undo()
         XCTAssertTrue(session.document.elements.isEmpty)
     }

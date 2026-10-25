@@ -20,6 +20,8 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
         case erase
     }
     private var gesture: Gesture?
+    /// Simulated pressure for the pen stroke being drawn with a mouse or trackpad; nil for a tablet pen.
+    private var inkPressure: InkPressure?
     private var marquee: Rect?
     private var eraseIDs: Set<UUID> = []
     private var textEditor: NSTextView?
@@ -580,14 +582,35 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
                 var element = Element(tool: model.tool, frame: Rect(from: point, to: point), style: model.style)
                 if model.tool.isConnector || model.tool == .ruler { element.points = [point, point] }
                 try session.document.add(element)
+                inkPressure = model.tool == .pen && !Self.isTabletPoint(event) ? InkPressure(width: element.style.width) : nil
                 if model.tool.isFreehand {
                     try session.document.appendSample(to: element.id, point: point,
-                                                       pressure: event.pressure > 0 ? Double(event.pressure) : 1)
+                                                       pressure: samplePressure(event, at: point))
                 }
                 gesture = .create(element.id, point)
             }
             model.synchronize()
         } catch { fail(error) }
+    }
+
+    /// Pressure for a pen sample: a tablet's own pressure, else simulated from the stroke's speed (Ink).
+    private func samplePressure(_ event: NSEvent, at point: Point) -> Double {
+        if var ink = inkPressure {
+            let pressure = ink.next(point, time: event.timestamp)
+            inkPressure = ink
+            return pressure
+        }
+        return event.pressure > 0 ? Double(event.pressure) : 1
+    }
+
+    private static func isTabletPoint(_ event: NSEvent) -> Bool {
+        switch event.type {
+        case .leftMouseDown, .leftMouseDragged, .leftMouseUp, .rightMouseDown, .rightMouseDragged, .rightMouseUp,
+             .otherMouseDown, .otherMouseDragged, .otherMouseUp, .mouseMoved:
+            return event.subtype == .tabletPoint
+        default:
+            return false
+        }
     }
 
     func incrementalInkRect(for element: Element, to point: Point) -> CGRect? {
@@ -618,7 +641,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
                 } else if element.tool.isFreehand {
                     inkRect = incrementalInkRect(for: element, to: point)
                     try session.document.appendSample(to: id, point: point,
-                                                       pressure: event.pressure > 0 ? Double(event.pressure) : 1)
+                                                       pressure: samplePressure(event, at: point))
                     requestSmartPreview(id: id)
                 } else {
                     var finish = point
@@ -785,8 +808,18 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
                         try updateStraightHighlight(in: session, id: id, start: startPoint, point: finalPoint)
                     } else if element.tool.isFreehand && element.points.last != finalPoint {
                         try session.document.appendSample(to: id, point: finalPoint,
-                                                           pressure: event.pressure > 0 ? Double(event.pressure) : 1)
+                                                           pressure: samplePressure(event, at: finalPoint))
                     }
+                    if element.tool == .pen, inkPressure != nil,
+                       let drawn = session.document.elements.first(where: { $0.id == id }) {
+                        let tapered = InkPressure.taperEnd(points: drawn.points, pressures: drawn.pressures,
+                                                           width: drawn.style.width)
+                        if tapered != drawn.pressures {
+                            try session.document.update(id) { $0.pressures = tapered }
+                            needsDisplay = true
+                        }
+                    }
+                    inkPressure = nil
                     if element.tool.isConnector, let first = element.points.first, let last = element.points.last {
                         let start = session.document.nearestAnchor(to: first, excluding: id)
                         let end = session.document.nearestAnchor(to: last, excluding: id)

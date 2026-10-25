@@ -183,7 +183,9 @@ public sealed class CanvasContractTests
         h.Pump();
         Element stroke = Assert.Single(h.Elements(Main));
         Assert.Equal([new Point(10, 10), new Point(15, 10), new Point(30, 10)], stroke.Points);
-        Assert.Equal([1.0, 1.0, 1.0], stroke.Pressures);
+        var ink = new InkPressure(stroke.Style.Width);
+        double[] drawn = [ink.Next(new Point(10, 10), 0.001), ink.Next(new Point(15, 10), 0.009), ink.Next(new Point(30, 10), 0.017)];
+        Assert.Equal(InkPressure.TaperEnd(stroke.Points, ValueList.Create<double>(drawn), stroke.Style.Width), stroke.Pressures);
     }
 
     [Fact]
