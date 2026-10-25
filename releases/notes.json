@@ -6,7 +6,8 @@
       "The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3)."
     ],
     "Fixed": [
-      "On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only."
+      "On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.",
+      "On a Mac, the menu-bar menu now takes a click as soon as it opens. Before, a quick click on a button such as 5 min or Show drawings and tools sometimes did nothing."
     ]
   },
   "releases": [
