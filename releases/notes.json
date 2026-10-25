@@ -1,26 +1,54 @@
 {
   "schemaVersion": 1,
-  "unreleased": {
-    "Added": [
-      "After an update, a What's changed window shows the new version's notes once, with an optional Buy me a coffee link. It waits until you stop drawing, zooming, sharing a region or taking a break.",
-      "On Windows, the copy from winget or a download now checks for new versions once a day and tells you where to get them, with Open Downloads page and Copy winget command. It never installs anything itself.",
-      "A hands-on tutorial on Mac and Windows. Ten quick steps: grab a tool, draw a box, change the color, draw a curved arrow, circle something with the pen, move it, undo, go back to your apps, draw again, and hide and show everything. A ghost cursor shows each step, keys show right in the instructions, and shortcuts light up on a little keyboard. Use the keys or the mouse, whichever you like. Finishing pops a big burst of confetti. Replay it from Settings > Help."
-    ],
-    "Changed": [
-      "Annotator now checks for updates once a day by default. If an update arrives while you present, it doesn't interrupt you: the menu shows Update available... instead. You can turn automatic checks off in Settings > General.",
-      "On the Mac, the update window now shows the release notes. The Homebrew cask now leaves updates to Annotator, so brew upgrade skips it unless you add --greedy.",
-      "The menu-bar menu on a Mac and the tray menu on Windows now say \"Enjoying it? Buy me a coffee…\", without the extra line under the button.",
-      "The toolbar now shows all properties by default, so options like Curved are easy to find. The Arrow's choices sit on the same line as its color, width, pattern and roughness when the toolbar has room. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon."
-    ],
-    "Removed": [
-      "Removed the four-page Quick start tour. The hands-on tutorial replaces it."
-    ],
-    "Fixed": [
-      "On Windows, the Settings window and Annotator's other windows now show the Annotator icon in their title bar.",
-      "On Windows, the Settings tab names no longer have a line running through them."
-    ]
-  },
+  "unreleased": {},
   "releases": [
+    {
+      "version": "0.1.0-beta.13",
+      "build": 31,
+      "date": "2026-10-25",
+      "source": "pending",
+      "changes": {
+        "Added": [
+          "After an update, a What's changed window shows the new version's notes once, with an optional Buy me a coffee link. It waits until you stop drawing, zooming, sharing a region or taking a break.",
+          "On Windows, the copy from winget or a download now checks for new versions once a day and tells you where to get them, with Open Downloads page and Copy winget command. It never installs anything itself.",
+          "A hands-on tutorial on Mac and Windows. Ten quick steps: grab a tool, draw a box, change the color, draw a curved arrow, circle something with the pen, move it, undo, go back to your apps, draw again, and hide and show everything. A ghost cursor shows each step, keys show right in the instructions, and shortcuts light up on a little keyboard. Use the keys or the mouse, whichever you like. Finishing pops a big burst of confetti. Replay it from Settings > Help."
+        ],
+        "Changed": [
+          "Annotator now checks for updates once a day by default. If an update arrives while you present, it doesn't interrupt you: the menu shows Update available... instead. You can turn automatic checks off in Settings > General.",
+          "On the Mac, the update window now shows the release notes. The Homebrew cask now leaves updates to Annotator, so brew upgrade skips it unless you add --greedy.",
+          "The menu-bar menu on a Mac and the tray menu on Windows now say \"Enjoying it? Buy me a coffee…\", without the extra line under the button.",
+          "The toolbar now shows all properties by default, so options like Curved are easy to find. The Arrow's choices sit on the same line as its color, width, pattern and roughness when the toolbar has room. Focus and cleanup and Zoom stay on the toolbar with them. Quick controls is still one click away: the whole Properties button now takes the click, not only its icon."
+        ],
+        "Removed": [
+          "Removed the four-page Quick start tour. The hands-on tutorial replaces it."
+        ],
+        "Fixed": [
+          "On Windows, the Settings window and Annotator's other windows now show the Annotator icon in their title bar.",
+          "On Windows, the Settings tab names no longer have a line running through them."
+        ]
+      },
+      "knownIssues": [
+        "The hands-on tutorial was checked step by step on Windows, with automated and live checks. On the Mac, doing each step once by key and once by mouse, the confetti, Reduce Motion and VoiceOver still need a hands-on check.",
+        "The daily update check and What's changed passed automated checks. A real update from beta.12 to this version still needs a hands-on check on both platforms.",
+        "The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.",
+        "The animations added in beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.",
+        "The new names of the three toolbar menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.",
+        "The screen zoom ramp was checked with automated state tests only. The live-capture zoom tests did not run on the validation Mac because the test build had no Screen Recording permission.",
+        "In the Shared Region window, the spotlight still turns on and off at once instead of fading.",
+        "Shared animations passed controlled local capture checks. Their appearance in a Teams, Meet or Zoom receiver still needs a hands-on check.",
+        "The controlled toolbar-sharing check has been inconsistent on this Mac. Check that the toolbar appears in your meeting's shared window before relying on it.",
+        "The owner confirmed the region highlight works on the current monitor setup. Full-screen browser transitions, Stage Manager and unplugging or reconnecting monitors still need separate checks.",
+        "Choosing a different area in the configuration window or changing the display setup turns region sharing off. Check the outline before starting it again.",
+        "Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.",
+        "The Intel app and tests compiled, but runtime tests could not run because Rosetta is missing on the validation Mac. No Intel Mac has run this version yet.",
+        "Installing on another Mac and updating from an earlier version still need a hands-on check.",
+        "VoiceOver and Full Keyboard Access checks remain incomplete.",
+        "With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.",
+        "Cross-monitor dragging still needs a hands-on check.",
+        "Effects do not follow moving windows or scrolling content and are not secure redaction.",
+        "Heavy gradient scenes and long-session resource use still need native performance checks."
+      ]
+    },
     {
       "version": "0.1.0-beta.12",
       "build": 30,
