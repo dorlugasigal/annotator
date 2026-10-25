@@ -64,6 +64,9 @@ internal sealed partial class AppHost
     private ReleaseNotesEntry? _whatsChangedDue;
     /// <summary>A quiet sign-in launch: What's changed waits until the person opens Annotator.</summary>
     private bool _whatsChangedWaits;
+
+    /// <summary>The launch presentation happened (Mac WhatsChangedController.start): What's changed may show from now on.</summary>
+    private bool _whatsChangedStarted;
     private WhatsChangedWindow? _whatsChanged;
     private SupportReminderPopover? _reminderPopover;
     private WorkspaceMode _lastMode;
@@ -227,6 +230,8 @@ internal sealed partial class AppHost
             () => _model.Snapshot.ToolbarVisible ? _toolbar.Frame : null, _toolbar.Control, () => OpenSettings(SettingsTab.Toolbar),
             _model.ResumeDrawing);
         _tutorial.VisibilityChanged += UpdateSupportReminder;
+        // What's changed follows once the tutorial's card goes (Mac showIfReady on the model's change).
+        _tutorial.VisibilityChanged += UpdateWhatsChanged;
         // Settings floats again once the tutorial card that opened in front of it hides.
         _tutorial.VisibilityChanged += () =>
         {

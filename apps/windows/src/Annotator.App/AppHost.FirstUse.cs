@@ -33,13 +33,17 @@ internal sealed partial class AppHost
         if (quiet)
         {
             _tutorial.ShowAutomatically(startupLaunch: true);
+            _whatsChangedStarted = true;
             return;
         }
+        // What's changed starts after the tutorial's welcome card had its chance, so the two never open together (Mac
+        // finishLaunchPresentation).
         _toolbar.FirstFrame += () => _queue.TryEnqueue(DispatcherQueuePriority.Low, () =>
         {
             if (!_quitting)
             {
                 _tutorial.ShowAutomatically(startupLaunch: false);
+                _whatsChangedStarted = true;
                 UpdateWhatsChanged();
             }
         });
@@ -81,13 +85,14 @@ internal sealed partial class AppHost
     }
 
     /// <summary>
-    /// The Mac's WhatsChangedController.showIfReady: after an update, What's changed shows once, when it covers nothing the
-    /// person presents (<see cref="AnnouncementRules"/>), and after a quiet sign-in launch only once the person opened
-    /// Annotator (the toolbar or the tray flyout). The build counts as seen once the window shows.
+    /// The Mac's WhatsChangedController.showIfReady: after an update, What's changed shows once, after the launch
+    /// presentation, when it covers nothing the person presents (<see cref="AnnouncementRules"/>, the tutorial's cards
+    /// included), and after a quiet sign-in launch only once the person opened Annotator (the toolbar or the tray flyout).
+    /// The build counts as seen once the window shows.
     /// </summary>
     private void UpdateWhatsChanged()
     {
-        if (_quitting || _whatsChangedDue is not { } entry || _whatsChanged is not null)
+        if (_quitting || !_whatsChangedStarted || _whatsChangedDue is not { } entry || _whatsChanged is not null)
         {
             return;
         }
