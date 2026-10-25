@@ -38,7 +38,7 @@ enum InspectorGlyph {
     static let dots: [CGFloat] = [1.5, 2]
     static let dotPhase: CGFloat = 1.5
 
-    /// A wavy line that gets looser: one smooth wave, a doubled wave, then a looping scribble.
+    /// A wavy line that gets looser: one smooth wave, a doubled wave, then three waves spread wider apart.
     static func roughness(_ value: Double) -> [Stroke] {
         let wave = Stroke(start: p(7, 21), segments: [.curve(p(11, 11), p(15, 11), p(18, 18)),
                                                       .curve(p(21, 25), p(25, 25), p(29, 15))])
@@ -47,11 +47,12 @@ enum InspectorGlyph {
             return [wave, Stroke(start: p(8, 23), segments: [.curve(p(12, 14), p(16, 14), p(19, 20)),
                                                              .curve(p(22, 26), p(26, 24), p(28, 17))])]
         }
-        return [Stroke(start: p(6, 21), segments: [.curve(p(8, 10), p(13, 9), p(14, 17)),
-                                                   .curve(p(15, 25), p(10, 26), p(12, 18)),
-                                                   .curve(p(14, 9), p(20, 9), p(21, 17)),
-                                                   .curve(p(22, 25), p(17, 26), p(19, 18)),
-                                                   .curve(p(21, 10), p(28, 10), p(30, 17))])]
+        return [Stroke(start: p(6, 20), segments: [.curve(p(10, 9), p(15, 9), p(18, 17)),
+                                                   .curve(p(21, 25), p(26, 26), p(30, 14))]),
+                Stroke(start: p(8, 24), segments: [.curve(p(12, 14), p(16, 15), p(19, 21)),
+                                                   .curve(p(22, 28), p(26, 26), p(29, 19))]),
+                Stroke(start: p(7, 17), segments: [.curve(p(11, 7), p(14, 7), p(17, 14)),
+                                                   .curve(p(20, 21), p(25, 22), p(28, 11))])]
     }
 
     /// A dotted square with its top-left corner drawn solid, sharp or rounded.
