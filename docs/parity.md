@@ -462,7 +462,12 @@ platform that departs from the specifications, unless an ADR changes them.
   website's feed (`updates/windows-<track>.json`, written by
   `tools/release/distribution.py`) at launch and when the tray flyout or
   Settings opens, at most once a day while Automatically check for updates is
-  on (the default, like the Mac's daily Sparkle check). It never downloads or
+  on (the default, like the Mac's daily Sparkle check). Opening the tray
+  flyout also checks quietly when the last check is at least 6 hours old,
+  like the Mac's menu (Sparkle's `checkForUpdateInformation`); a Store copy
+  asks the Store the same way. A quiet check never asks anything; it only
+  turns the open flyout's row into Update available…, which stays until a
+  later check finds no update. It never downloads or
   installs anything: Update available… in the flyout and Settings says where
   to get the release, with Open Downloads page... and Copy winget command, and
   an automatic check asks about a new release once, only when nothing is being

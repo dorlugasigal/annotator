@@ -29,7 +29,7 @@ internal sealed partial class AppHost
         _usage.RecordLaunch();
         _whatsChangedWaits = quiet;
         // A portable copy's daily check (Sparkle's scheduled check): at launch, and when the tray flyout or Settings opens.
-        _queue.TryEnqueue(DispatcherQueuePriority.Low, CheckForUpdatesIfDue);
+        _queue.TryEnqueue(DispatcherQueuePriority.Low, () => CheckForUpdatesIfDue());
         if (quiet)
         {
             _tutorial.ShowAutomatically(startupLaunch: true);
@@ -134,17 +134,19 @@ internal sealed partial class AppHost
     /// <summary>
     /// A portable copy's automatic check, at most once a day (WIN-SYS-03, WIN-SYS-07: no timer runs). When it finds a release
     /// that was never announced and nothing is being presented, Settings asks about it once, as Sparkle's window does on the
-    /// Mac; otherwise the tray flyout and Settings say Update available.
+    /// Mac; otherwise the tray flyout and Settings say Update available. When the tray flyout opens, a portable or Store copy
+    /// also checks quietly if the last check is a few hours old, so the open flyout can say Update available (the Mac's menu
+    /// check). The live check never checks.
     /// </summary>
-    private void CheckForUpdatesIfDue() => _ = CheckForUpdatesIfDueAsync();
+    private void CheckForUpdatesIfDue(bool menuOpened = false) => _ = CheckForUpdatesIfDueAsync(menuOpened);
 
-    private async Task CheckForUpdatesIfDueAsync()
+    private async Task CheckForUpdatesIfDueAsync(bool menuOpened)
     {
-        if (_quitting || !_updates.ChecksFeed)
+        if (_quitting || _check is not null || !_updates.IsConfigured)
         {
             return;
         }
-        bool announce = await _updates.CheckIfDueAsync();
+        bool announce = await _updates.CheckIfDueAsync(menuOpened);
         if (!announce || _quitting || _updates.Release is not { } release
             || !AnnouncementRules.CanShow(_model.Snapshot, _tutorial.IsVisible, _breaks.IsRunning) || _whatsChanged is not null)
         {

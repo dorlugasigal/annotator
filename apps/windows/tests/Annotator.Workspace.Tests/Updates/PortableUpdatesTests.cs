@@ -44,6 +44,43 @@ public sealed class PortableUpdatesTests
     }
 
     [Fact]
+    public async Task OpeningTheMenuChecksQuietlyAfterSixHoursWithoutAnnouncing()
+    {
+        AppUpdates updates = Make(build: 31);
+        Assert.False(await updates.CheckIfDueAsync(menuOpened: true));
+        Assert.Equal(1, _feed.Fetches);
+        Assert.False(updates.UpdateWaiting);
+
+        _feed.Answer = new ReleaseFeedEntry("0.1.0-beta.14", 32, Downloads);
+        _now = _now.AddHours(5);
+        Assert.False(await updates.CheckIfDueAsync(menuOpened: true));
+        Assert.Equal(1, _feed.Fetches);
+        Assert.False(await updates.CheckIfDueAsync(), "Settings keeps the daily schedule.");
+        Assert.Equal(1, _feed.Fetches);
+
+        _now = _now.AddHours(1);
+        Assert.False(await updates.CheckIfDueAsync(menuOpened: true), "A quiet check never asks.");
+        Assert.Equal(2, _feed.Fetches);
+        Assert.True(updates.UpdateWaiting);
+        Assert.Equal(UpdatePhase.Available, updates.Phase);
+        Assert.Equal(0, _defaults.Integer(AppUpdates.AnnouncedBuildKey));
+        Assert.Equal(_now, _defaults.Date(AppUpdates.LastCheckKey));
+
+        _now = _now.AddDays(1);
+        Assert.True(await updates.CheckIfDueAsync(menuOpened: true), "The daily check still announces the release once.");
+        Assert.Equal(32, _defaults.Integer(AppUpdates.AnnouncedBuildKey));
+    }
+
+    [Fact]
+    public async Task TheMenuChecksNothingWhileAutomaticChecksAreOff()
+    {
+        AppUpdates updates = Make();
+        updates.SetAutomaticChecks(false);
+        Assert.False(await updates.CheckIfDueAsync(menuOpened: true));
+        Assert.Equal(0, _feed.Fetches);
+    }
+
+    [Fact]
     public async Task TheSameOrAnOlderBuildIsUpToDate()
     {
         AppUpdates updates = Make(build: 31);

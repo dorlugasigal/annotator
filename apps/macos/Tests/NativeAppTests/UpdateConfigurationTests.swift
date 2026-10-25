@@ -47,6 +47,13 @@ final class UpdateConfigurationTests: XCTestCase {
         XCTAssertTrue(result.2.contains("Settings > About"))
         XCTAssertFalse(result.2.contains("will be available"))
     }
+    func testMenuChecksQuietlyOnlyWhenTheLastCheckIsSixHoursOld() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        XCTAssertTrue(AppUpdateController.menuCheckIsDue(lastCheck: nil, now: now))
+        XCTAssertFalse(AppUpdateController.menuCheckIsDue(lastCheck: now.addingTimeInterval(-5 * 60 * 60), now: now))
+        XCTAssertTrue(AppUpdateController.menuCheckIsDue(lastCheck: now.addingTimeInterval(-6 * 60 * 60), now: now))
+        XCTAssertTrue(AppUpdateController.menuCheckIsDue(lastCheck: now.addingTimeInterval(60), now: now))
+    }
     func testOnlyHTTPSFeedsWithSigningKeysCanBeEnabled() throws {
         let key = Data(repeating:1,count:32).base64EncodedString()
         XCTAssertTrue(try AppUpdateController.validate(feed:"https://updates.example.org/appcast.xml",publicKey:key))

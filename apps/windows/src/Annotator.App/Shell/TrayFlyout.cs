@@ -27,9 +27,10 @@ internal sealed class TrayFlyout : PopoverWindow
     private readonly Action<TrayAction> _choose;
     private readonly Func<HWND, HWND> _focusTarget;
     private readonly bool _keyboard;
-    private readonly bool _canCheckUpdates;
-    private readonly string _updatesStatus;
-    private readonly bool _updateAvailable;
+    private bool _canCheckUpdates;
+    private string _updatesStatus;
+    private bool _updateAvailable;
+    private MacStack? _updatesHost;
     private Button? _primary;
     private Border? _primaryRing;
     private ParityButton? _board;
@@ -223,16 +224,10 @@ internal sealed class TrayFlyout : PopoverWindow
         content.Children.Add(Row("Settings…", "slider.horizontal.3", TrayAction.Settings, "Ctrl+,"));
         content.Children.Add(Row("Help", "questionmark.circle", TrayAction.Help, null));
         content.Children.Add(Row("About Annotator", "info.circle", TrayAction.About, null));
-        content.Children.Add(Row(_updateAvailable ? Annotator.Workspace.Updates.UpdateText.UpdateAvailableRow : "Check for updates…",
-            _updateAvailable ? "square.and.arrow.down" : "arrow.triangle.2.circlepath", TrayAction.CheckForUpdates, null, enabled: _canCheckUpdates));
-        if (!_canCheckUpdates || _updateAvailable)
-        {
-            // Mac: Text(model.updateStatus).font(.caption) under the disabled row, inset like the rows' titles.
-            var why = new Settings.FormText(_updatesStatus, 10, "AnnotatorSecondaryText", wrapWidth: 268);
-            why.Block.Width = 268;
-            content.Children.Add(new Settings.Pad(why, new Thickness(10, 0, 10, 0)) { HorizontalAlignment = HorizontalAlignment.Left });
-        }
-        Button support = Row("Enjoying it? Buy me a coffee…", "cup.and.saucer", TrayAction.Support, null);
+        _updatesHost = new MacStack();
+        AddUpdates(_updatesHost);
+        content.Children.Add(_updatesHost);
+        Button support =  Row("Enjoying it? Buy me a coffee…", "cup.and.saucer", TrayAction.Support, null);
         var supportSurface = new Grid { Margin = new Thickness(0, 8, 0, 0) };
         supportSurface.Children.Add(new Border
         {
@@ -246,6 +241,65 @@ internal sealed class TrayFlyout : PopoverWindow
         content.Children.Add(supportSurface);
         content.Children.Add(Divider());
         content.Children.Add(Row("Quit Annotator", "power", TrayAction.Quit, "Ctrl+Q"));
+    }
+
+    /// <summary>
+    /// Check for updates… (Update available… once a check found an update), and the status under it while the row does not
+    /// work or an update waits: the Mac's popover row and its Text(model.updateStatusLine).
+    /// </summary>
+    private void AddUpdates(MacStack host)
+    {
+        host.Children.Add(Row(_updateAvailable ? Annotator.Workspace.Updates.UpdateText.UpdateAvailableRow : "Check for updates…",
+            _updateAvailable ? "square.and.arrow.down" : "arrow.triangle.2.circlepath", TrayAction.CheckForUpdates, null, enabled: _canCheckUpdates));
+        if (!_canCheckUpdates || _updateAvailable)
+        {
+            // Mac: Text(model.updateStatus).font(.caption) under the disabled row, inset like the rows' titles.
+            var why = new Settings.FormText(_updatesStatus, 10, "AnnotatorSecondaryText", wrapWidth: 268);
+            why.Block.Width = 268;
+            host.Children.Add(new Settings.Pad(why, new Thickness(10, 0, 10, 0)) { HorizontalAlignment = HorizontalAlignment.Left });
+        }
+    }
+
+    /// <summary>
+    /// A check finished or started while the flyout is open: the update row and its status follow, as the Mac's popover
+    /// follows the model, and the flyout fits its content again.
+    /// </summary>
+    public void ShowUpdates(bool canCheckUpdates, string updatesStatus, bool updateAvailable)
+    {
+        if (_updatesHost is not { } host
+            || canCheckUpdates == _canCheckUpdates && updatesStatus == _updatesStatus && updateAvailable == _updateAvailable)
+        {
+            return;
+        }
+        _canCheckUpdates = canCheckUpdates;
+        _updatesStatus = updatesStatus;
+        _updateAvailable = updateAvailable;
+        bool focused = host.XamlRoot is { } root && FocusManager.GetFocusedElement(root) is DependencyObject element
+            && IsInside(element, host);
+        host.Children.Clear();
+        AddUpdates(host);
+        if (focused && host.Children[0] is Control row && row.IsEnabled)
+        {
+            row.Focus(FocusState.Keyboard);
+        }
+        else if (focused)
+        {
+            // The row is off while a check runs; the keyboard keeps working from the primary button.
+            _primary?.Focus(FocusState.Keyboard);
+        }
+        Refit();
+    }
+
+    private static bool IsInside(DependencyObject element, DependencyObject container)
+    {
+        for (DependencyObject? at = element; at is not null; at = VisualTreeHelper.GetParent(at))
+        {
+            if (ReferenceEquals(at, container))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// <summary>The Mac's systemRed in the app's theme.</summary>

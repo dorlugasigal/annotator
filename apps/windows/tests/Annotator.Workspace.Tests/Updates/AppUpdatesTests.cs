@@ -19,11 +19,77 @@ public sealed class AppUpdatesTests
     private UpdateQuestion? _question;
     private bool _answer;
 
-    private AppUpdates Make(IStoreUpdates store) => new(store, () => _question, question =>
+    private AppUpdates Make(IStoreUpdates store, Func<DateTimeOffset>? now = null) => new(store, () => _question, question =>
     {
         _asked.Add(question);
         return Task.FromResult(_answer);
-    }, _notes.Add, Delay);
+    }, _notes.Add, Delay, now: now);
+
+    [Fact]
+    public async Task OpeningTheMenuAsksTheStoreQuietlyAtMostEverySixHours()
+    {
+        DateTimeOffset now = new(2026, 10, 25, 9, 0, 0, TimeSpan.Zero);
+        var store = new FixedStoreUpdates(UpdateChannel.Store);
+        AppUpdates updates = Make(store, () => now);
+        var phases = new List<UpdatePhase>();
+        updates.Changed += () => phases.Add(updates.Phase);
+
+        Assert.False(await updates.CheckIfDueAsync(), "Only the menu asks the Store on its own.");
+        Assert.Equal(0, store.Checks);
+
+        Assert.False(await updates.CheckIfDueAsync(menuOpened: true));
+        Assert.Equal(1, store.Checks);
+        Assert.Equal(new[] { UpdatePhase.Checking, UpdatePhase.Ready }, phases);
+        Assert.False(updates.UpdateWaiting);
+
+        now = now.AddHours(5);
+        store.Answer = StoreUpdateCheck.Available;
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(1, store.Checks);
+
+        now = now.AddHours(1);
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(2, store.Checks);
+        Assert.Equal(UpdatePhase.Available, updates.Phase);
+        Assert.True(updates.UpdateWaiting);
+        Assert.Equal(UpdateText.Available, updates.Status);
+        Assert.Equal(0, store.Installs);
+        Assert.Empty(_asked);
+
+        now = now.AddDays(1);
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(2, store.Checks);
+        Assert.True(updates.UpdateWaiting, "The update stays until it is installed.");
+    }
+
+    [Fact]
+    public async Task AQuietStoreCheckThatFailsStaysQuietAndAManualCheckCountsAsTheLastCheck()
+    {
+        DateTimeOffset now = new(2026, 10, 25, 9, 0, 0, TimeSpan.Zero);
+        var store = new FixedStoreUpdates(UpdateChannel.Store) { Failure = new StoreUpdateFailure("0x80072EE7") };
+        AppUpdates updates = Make(store, () => now);
+
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(UpdatePhase.Ready, updates.Phase);
+        Assert.Contains("Update check: 0x80072EE7", _notes);
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(2, store.Checks);
+
+        store.Failure = null;
+        await updates.CheckAsync();
+        Assert.Equal(UpdatePhase.UpToDate, updates.Phase);
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(3, store.Checks);
+    }
+
+    [Fact]
+    public async Task TheMenuDoesNotAskTheStoreWhenTheOrganizationTurnedUpdatesOff()
+    {
+        var store = new FixedStoreUpdates(UpdateChannel.Store, automaticUpdates: false);
+        AppUpdates updates = Make(store);
+        await updates.CheckIfDueAsync(menuOpened: true);
+        Assert.Equal(0, store.Checks);
+    }
 
     private Task Delay(TimeSpan timeout, CancellationToken token)
     {
