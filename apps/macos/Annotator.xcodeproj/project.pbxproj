@@ -946,7 +946,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ANNOTATOR_ISSUES_URL = "https://github.com/dorlugasigal/annotator/issues/new";
 				ANNOTATOR_METRICS_URL = "";
-				ANNOTATOR_PRERELEASE = beta.13;
+				ANNOTATOR_PRERELEASE = beta.14;
 				ANNOTATOR_SUPPORT_URL = "https://buymeacoffee.com/dorlugasigal";
 				ANNOTATOR_WEBSITE_URL = "https://dorlugasigal.github.io/annotator";
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -981,7 +981,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1065,7 +1065,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ANNOTATOR_ISSUES_URL = "https://github.com/dorlugasigal/annotator/issues/new";
 				ANNOTATOR_METRICS_URL = "";
-				ANNOTATOR_PRERELEASE = beta.13;
+				ANNOTATOR_PRERELEASE = beta.14;
 				ANNOTATOR_SUPPORT_URL = "https://buymeacoffee.com/dorlugasigal";
 				ANNOTATOR_WEBSITE_URL = "https://dorlugasigal.github.io/annotator";
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -1100,7 +1100,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
