@@ -6,7 +6,7 @@
   "motion": 8
  },
  "files": {
-  "INDEX.md": "301672fb22dce8684fe7a2d7d5f595d3fca38986ad1a37c4602e7c8a6f1fd82f",
+  "INDEX.md": "0c9e26863b5c4b2a8bbafb1d775e9575f87eb2e5002013e37688abc7eefb4c74",
   "break-timer/armed-dark.json": "64f34b956ce5d5302e0bf5bc3616a215ca73b341855f57e055f5aaf7f080c91c",
   "break-timer/armed-dark.png": "7847f7c3e497ca5b4e54d0de43a1664f70aa12d3f9499550bf73cdac7deb9706",
   "break-timer/arming-dark.json": "fac7cd20fdf127d558759b84243d18dbae4ccbc815c36c318eea4254fa0cffaa",
@@ -233,10 +233,10 @@
   "pickers/color-fill-dark.png": "10ea939ff1c21bd90782b94d4531c4079394c1755957ca24024c670baa6b25c4",
   "pickers/color-fill-light.json": "806fcba86d665b4280102577cc4a79bbeaee445656dc549610eb2e0aa490adc6",
   "pickers/color-fill-light.png": "8f9cc4f86eb3da262ec086cee7033d9dcb025920d65f479c28940fd8e90ac2cb",
-  "pickers/color-gradient-dark.json": "ffe1d8a5c53a4eb5265533b76c59ee939d0e641a5dbff999f9f21b5ae19df6ef",
-  "pickers/color-gradient-dark.png": "f7d826212ec649a3b0f5d0a7b84e0c75607116c35402aa4a19ae9ac3229d9d9f",
-  "pickers/color-gradient-light.json": "c145b4d3c9265b45e715d4c2d6920f5539512a4ef79fa6a31f37cc675cb7ad92",
-  "pickers/color-gradient-light.png": "a7bf15402fb4233331ae7836097cf9f829846f4003d1119b478a8da0c9e540be",
+  "pickers/color-gradient-dark.json": "df010641bf47ea95230c5fb3de844495aba755dcd03939b79adbb9d808972499",
+  "pickers/color-gradient-dark.png": "dd20dad3fcfe21fc5710fe9cfdf3b8f534a80c0d0a9be8c18b490770f145a2a0",
+  "pickers/color-gradient-light.json": "0c8b9df89115e1952de05b4d4c00a55c1133b9ffa75ae3ea24450b14b9b60720",
+  "pickers/color-gradient-light.png": "b1933d4681ee5f0b4dd9408bbf119d131f9bb843e874a9665913ddf8945d01da",
   "pickers/color-stroke-dark.json": "ea732cbcf2567db363b1f0375f36516a901c4f7b10fa814ca30d8aeb9d3bc126",
   "pickers/color-stroke-dark.png": "16d0c1514528bd99cf1f3c6f4f5c18920c25a61aec101c21a89e1210617b996e",
   "pickers/color-stroke-light.json": "b6ed4d0d043dea8fd5e14404133549ebaca8c7f16c037bd8e05dadd020718d14",
@@ -736,7 +736,7 @@
  "source": {
   "accentColor": "#007AFFFF",
   "appSourcesClean": true,
-  "commit": "270122fd4e25a21cb0bdba42f797870220c60ae8",
+  "commit": "513c88dac0626d0037eca20ddf89869dbd111146",
   "macOS": "27.0.1",
   "method": "Offscreen AppKit and SwiftUI rendering into sRGB bitmaps at 2x, independent of the display.",
   "renderScale": 2,

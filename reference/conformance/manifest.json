@@ -1281,9 +1281,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "0c27dec67c24bd330dfd363991b1e20eb09b6d42",
+    "commit" : "513c88dac0626d0037eca20ddf89869dbd111146",
     "date" : "2026-10-25",
-    "fingerprint" : "bd365c274d4d7a634c1b497eb2a8b5bff54422f23247a2c0e369c2c955c24d34",
+    "fingerprint" : "2926a67cf02dc7f29edac91f9564c4482707e9b56a880ec0988fabe21c3a9b6b",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
