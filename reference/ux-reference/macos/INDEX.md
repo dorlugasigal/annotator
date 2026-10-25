@@ -219,7 +219,7 @@ Report a problem, Share feedback, What's changed, coffee reminder, keycaps, erro
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `canvas-hint`<br>540 x 130 pt<br>On-screen tip in the canvas corner while drawing. | <img src="dialogs/canvas-hint-light.png" width="420"> | <img src="dialogs/canvas-hint-dark.png" width="420"> |
+| `canvas-hint`<br>540 x 130 pt<br>On-screen tip in the canvas corner while drawing, with the ✕ that turns tips off. | <img src="dialogs/canvas-hint-light.png" width="420"> | <img src="dialogs/canvas-hint-dark.png" width="420"> |
 | `coffee-reminder`<br>460 x 135 pt<br>Coffee reminder. | <img src="dialogs/coffee-reminder-light.png" width="420"> | <img src="dialogs/coffee-reminder-dark.png" width="420"> |
 | `error-window`<br>460 x 160 pt<br>Import error window, titled Annotator. | <img src="dialogs/error-window-light.png" width="420"> | <img src="dialogs/error-window-dark.png" width="420"> |
 | `keycaps-hide-only`<br>110 x 44 pt<br>Keycaps for the default hide-only shortcut. Windows shows Ctrl, Alt, Shift and Win as text. | <img src="dialogs/keycaps-hide-only-light.png" width="200"> | <img src="dialogs/keycaps-hide-only-dark.png" width="200"> |

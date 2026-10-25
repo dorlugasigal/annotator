@@ -1,6 +1,20 @@
 {
  "accessibility": [
   {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      176.5,
+      1.5,
+      26,
+      26
+     ],
+     "help": "Turn them back on in Settings > General.",
+     "role": "AXButton",
+     "title": "Turn off tips"
+    }
+   ],
    "enabled": false,
    "frame": [
     0,
@@ -9,14 +23,14 @@
     130
    ],
    "role": "AXStaticText",
-   "value": "Drawing  ·  ⌃⇧2: draw\n⌃1: screen zoom  ·  Option-scroll starts zoom\nEscape: use apps\nTurn off these tips in Settings > General."
+   "value": "Drawing  ·  Escape: use apps"
   }
  ],
  "appearance": "dark",
  "background": "none",
  "image": "dialogs/canvas-hint-dark.png",
  "kind": "view",
- "notes": "On-screen tip in the canvas corner while drawing.",
+ "notes": "On-screen tip in the canvas corner while drawing, with the ✕ that turns tips off.",
  "pixels": [
   1080,
   260

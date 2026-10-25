@@ -101,9 +101,9 @@ only by the check, never a default shortcut) and sees Draw refuse it through the
 recording gate; Alt+F4 hides Settings and the gear opens it again), and the
 canvas uses the new key; boards (Save board, Export PNG, a broken board's error
 in the error window, Open board and Insert image, with files in the output
-folder); the Shift constraints; the on-screen tip with its zoom line and no
-status line; the tutorial (welcome card, Start turning drawing on, steps
-finished by a key, a drag and an ink key, the click-through layer) and the
+folder); the Shift constraints; the on-screen tip after Resume drawing wakes
+it, with its Turn off tips button and no status line; the tutorial (welcome
+card, Start turning drawing on, steps finished by a key, a drag and an ink key, the click-through layer) and the
 coffee reminder after a first-use event; and
 region sharing (a custom region, Left half, the output turning live, Cursor halo
 drawn in it, the output staying live and following full-screen zoom, a hide and

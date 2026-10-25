@@ -522,8 +522,9 @@ final class UXReferenceCaptureTests: XCTestCase {
             }
             let hint = WorkspaceHintView(frame: CGRect(x: 0, y: 0, width: 540, height: 130))
             hint.text = WorkspaceHint.text(model: model)
+            hint.closable = true
             try await dialogs.nsView(hint, state: "canvas-hint", dark: dark,
-                                     notes: "On-screen tip in the canvas corner while drawing.", spec: ["003", "WIN-OVR-03"])
+                                     notes: "On-screen tip in the canvas corner while drawing, with the ✕ that turns tips off.", spec: ["003", "WIN-OVR-03"])
 
             let sharing = RegionSharingController(model: model)
             sharing.refreshDisplays()

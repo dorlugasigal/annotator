@@ -759,9 +759,9 @@
       "sha256" : "133586b779d52c9e6115177f71fbb35e32c4d9a1ab14c15856e763bf200993ac"
     },
     {
-      "bytes" : 2993,
+      "bytes" : 3020,
       "path" : "motion/durations.json",
-      "sha256" : "9d94704114d71f72f4fabb76af28d606d22450b8c0043015aebad094193042e0"
+      "sha256" : "caca6541e8fee0bf600a51a7fb146a30318af338728b2e2db8103607c88612a8"
     },
     {
       "bytes" : 93195,
@@ -1283,7 +1283,7 @@
   "source" : {
     "commit" : "513c88dac0626d0037eca20ddf89869dbd111146",
     "date" : "2026-10-25",
-    "fingerprint" : "2926a67cf02dc7f29edac91f9564c4482707e9b56a880ec0988fabe21c3a9b6b",
+    "fingerprint" : "b31bf35f6dde4a5c9a02f61b8a0e301751db67dde8b1d1b52272e3fa64a3f167",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

@@ -6,7 +6,7 @@
   "motion": 8
  },
  "files": {
-  "INDEX.md": "0c9e26863b5c4b2a8bbafb1d775e9575f87eb2e5002013e37688abc7eefb4c74",
+  "INDEX.md": "f49b2e96c23f91bef8b24bdd85ef081c596b0b838176aa7a4df09bcb0f7807a4",
   "break-timer/armed-dark.json": "64f34b956ce5d5302e0bf5bc3616a215ca73b341855f57e055f5aaf7f080c91c",
   "break-timer/armed-dark.png": "7847f7c3e497ca5b4e54d0de43a1664f70aa12d3f9499550bf73cdac7deb9706",
   "break-timer/arming-dark.json": "fac7cd20fdf127d558759b84243d18dbae4ccbc815c36c318eea4254fa0cffaa",
@@ -145,10 +145,10 @@
   "cursors/text-8-light.json": "6752594e91fb853c53a4d22f301262cba0b421ec3506795b634db8a8f64337d7",
   "cursors/text-8-light.png": "903a4c214d4505158a9cc87d39d1bd8ad9655bcee07c6170f2c71d3de2aa5d8c",
   "design-values.json": "837f9cff61ed39fb11b1c38cf371bd22171a0555aa96003a4836fcf77fcc949f",
-  "dialogs/canvas-hint-dark.json": "2bcd3dcb2df225c1fd5cfdce876b65661c2f720c8fe8aca16a448d9dac1b38fb",
-  "dialogs/canvas-hint-dark.png": "f66f931a0d998285155695d2a90b039d37d4b6c843a9415302fc7965ffe45e9c",
-  "dialogs/canvas-hint-light.json": "4cec0f869d503e306760f3a97824c87307372637a3f4d9514d7ec92fe37bdc45",
-  "dialogs/canvas-hint-light.png": "f66f931a0d998285155695d2a90b039d37d4b6c843a9415302fc7965ffe45e9c",
+  "dialogs/canvas-hint-dark.json": "34bd4ca9df4c2a787b0fcd74201ebec323072055b837ef8d21f9148053a9ebc1",
+  "dialogs/canvas-hint-dark.png": "b48327cfbc3646d20206a1a7ba71ad13b02ab4875bba295f2e43b797b29aca49",
+  "dialogs/canvas-hint-light.json": "2ee3f7cd7b2caac635407d8a70a33561ae8c28d9a5ac1479b9b4b3327e9bd547",
+  "dialogs/canvas-hint-light.png": "b48327cfbc3646d20206a1a7ba71ad13b02ab4875bba295f2e43b797b29aca49",
   "dialogs/coffee-reminder-dark.json": "de1c244802f67277dbaabf6459b859e8f993c3ee6032e662e56da6581b612365",
   "dialogs/coffee-reminder-dark.png": "c1180b6427277e48d026e820fd3a1109c22dfec259a5459338fb562d635cc059",
   "dialogs/coffee-reminder-light.json": "bd756d7855dada2d5666926eccfcb1a1227a4ae7dd7575a93a9429e3e693ac65",
@@ -740,6 +740,6 @@
   "macOS": "27.0.1",
   "method": "Offscreen AppKit and SwiftUI rendering into sRGB bitmaps at 2x, independent of the display.",
   "renderScale": 2,
-  "xcode": ""
+  "xcode": "Xcode 26.6"
  }
 }
