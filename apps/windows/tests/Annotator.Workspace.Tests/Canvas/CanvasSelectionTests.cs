@@ -631,18 +631,15 @@ public sealed class CanvasSelectionTests
     {
         using CanvasHarness h = Single();
         WorkspaceSnapshot drawing = h.Model.Snapshot;
-        Assert.Equal("Drawing  ·  Ctrl+Shift+2: draw\nEscape: use apps\nTurn off these tips in Settings > General.",
-            WorkspaceHint.Text(drawing, hasTextEditor: false, hasActiveEdit: false));
+        Assert.Equal("Drawing  ·  Escape: use apps", WorkspaceHint.Text(drawing, hasTextEditor: false, hasActiveEdit: false));
         h.Choose(Tool.Highlighter);
-        Assert.Equal("Drawing  ·  Ctrl+Shift+2: draw\nHold Shift for a straight highlight.\nEscape cancels the current edit.\n" +
-                     "Turn off these tips in Settings > General.",
+        Assert.Equal("Drawing  ·  Escape cancels the edit\nHold Shift for a straight highlight.",
             WorkspaceHint.Text(h.Model.Snapshot, hasTextEditor: false, hasActiveEdit: true));
-        Assert.Contains("Escape finishes text.", WorkspaceHint.Text(h.Model.Snapshot, hasTextEditor: true, hasActiveEdit: true));
-        Assert.Contains("Ctrl+1: screen zoom  ·  Alt+scroll starts zoom",
-            WorkspaceHint.Text(h.Model.Snapshot, false, false, new ZoomHint(false, 1, string.Empty)));
+        Assert.StartsWith("Drawing  ·  Escape finishes text", WorkspaceHint.Text(h.Model.Snapshot, hasTextEditor: true, hasActiveEdit: true));
+        Assert.DoesNotContain("screen zoom", WorkspaceHint.Text(h.Model.Snapshot, false, false, new ZoomHint(false, 1, string.Empty)));
         Assert.True(WorkspaceHint.IsVisible(h.Model.Snapshot, h.Model.Display(Main)));
         h.Model.UseApps();
-        Assert.StartsWith("Using apps  ·  Ctrl+Shift+2: draw\nTurn off", WorkspaceHint.Text(h.Model.Snapshot, false, false));
+        Assert.Equal("Using apps  ·  Ctrl+Shift+2: draw", WorkspaceHint.Text(h.Model.Snapshot, false, false));
         h.Model.HideTools();
         Assert.False(WorkspaceHint.IsVisible(h.Model.Snapshot, h.Model.Display(Main)));
     }

@@ -51,8 +51,9 @@
     toolbar, and Reset brings the default tools and keys back; Show / hide records
     Ctrl+Alt+Shift+9 (held by the check's own registrar until it quits) and recording Draw then refuses it through the
     recording gate; the canvas uses the new key. The check never presses a default global shortcut;
-  - on-screen tip (spec 009): the canvas reads the tip as static text while drawing, with the zoom line, and an ink key
-    leaves it as it was (no status line, as on the Mac);
+  - on-screen tip (spec 009): right after Resume drawing wakes it, the canvas reads the tip as static text
+    ('Drawing  ·  Escape: use apps') with its Turn off tips button, and an ink key leaves it as it was (no status line, as
+    on the Mac);
   - first use (WIN-UI-04): after the script sets the first-use event, the tutorial's welcome card shows as at a launch
     without taking the keyboard, with Share usage counts off and unavailable (WIN-PRV-01); Start tutorial turns drawing on
     and starts the coach, which never takes the keyboard; a tool key, a drag and an ink key each finish a step while the
@@ -1602,8 +1603,9 @@ public static class BoardDialogs
     $summaryAfterShift = if ($null -ne $canvasElement -and $canvasElement.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern, [ref]$canvasValue)) { $canvasValue.Current.Value } else { '' }
     $selectAfterShift = IsOn 'Select'
 
-    # On-screen tip (spec 009, WIN-OVR-09): the canvas reads the tip as static text while drawing, with the zoom line; like
-    # the Mac's, it shows no status message, so an ink key leaves it as it was.
+    # On-screen tip (spec 009, WIN-OVR-09): it shows for 5 seconds after it wakes, so Use apps and Resume drawing wake it
+    # first. The canvas reads it as static text while drawing, then its Turn off tips button; like the Mac's, it shows no
+    # status message, so an ink key leaves it as it was.
     function TipText() {
         $tip = [Windows.Automation.AutomationElement]::FromHandle($overlay).FindFirst([Windows.Automation.TreeScope]::Descendants,
             ([Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::Text)))
@@ -1612,7 +1614,14 @@ public static class BoardDialogs
     }
     function Flat([string]$text) { $text -replace "`r?`n", ' | ' }
     [void](WaitFor { (Foreground) -eq $overlay })
-    Check 'tip-shows-while-drawing' (WaitFor { (TipText) -like 'Drawing*screen zoom*Turn off these tips in Settings > General.' }) "tip '$(Flat (TipText))'"
+    Note "Escape on the canvas: $([LiveInput]::Tap(0x1B, $appPid))"
+    [void](WaitFor { (([LiveInput]::ExStyle($overlay)) -band 0x20) -ne 0 })
+    Note "click Resume drawing: $(ClickButton 'Resume drawing')"
+    [void](WaitFor { (Foreground) -eq $overlay })
+    Check 'tip-shows-while-drawing' (WaitFor { (TipText) -eq 'Drawing  ·  Escape: use apps' } 4000) "tip '$(Flat (TipText))'"
+    $tipClose = [Windows.Automation.AutomationElement]::FromHandle($overlay).FindFirst([Windows.Automation.TreeScope]::Descendants,
+        ([Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, 'Turn off tips')))
+    Check 'tip-close-button' ($null -ne $tipClose -and $tipClose.Current.ControlType -eq [Windows.Automation.ControlType]::Button -and $tipClose.Current.HelpText -eq 'Turn them back on in Settings > General.') "button $($null -ne $tipClose)"
     $tipBefore = TipText
     Note "R (red ink): $([LiveInput]::Tap(0x52, $appPid))"
     Start-Sleep -Milliseconds 400

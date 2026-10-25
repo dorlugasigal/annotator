@@ -8,6 +8,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 - With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.
 - The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
+- The on-screen tips are shorter and easier to read. They show for a few seconds when you start drawing or switch mode, then fade away. Click ✕ on a tip to turn tips off. You can turn them back on in Settings > General.
 
 ### Fixed
 

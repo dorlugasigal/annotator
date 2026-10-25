@@ -115,6 +115,9 @@ public enum CanvasCommandKind
     /// <summary>Alt+F4 or a close request: release drawing input like Use apps (WIN-OVR-12).</summary>
     ReleaseInput,
 
+    /// <summary>The on-screen tip's ✕: turns tips off, as Show tips on screen in Settings does (Mac setShortcutHints(false)).</summary>
+    TurnOffTips,
+
     /// <summary>An unmodified ink color key (r, g, b, y, o, p, c, w, k).</summary>
     InkKey,
 

@@ -102,17 +102,19 @@ internal sealed partial class ReferenceHost
 
     /// <summary>
     /// The on-screen tip while drawing in the Mac capture's 540 by 130-point view: the box drawn by the canvas's own display
-    /// list, and static text with the tip's words for UI Automation, as the Mac's view reads.
+    /// list with the ✕ that turns tips off, static text with the tip's words for UI Automation, as the Mac's view reads, and
+    /// then the ✕'s button over its click area.
     /// </summary>
     private void ShowCanvasHint(WorkspaceModel model)
     {
         PointInt32 origin = OffscreenOrigin();
         double scale = WindowChrome.MonitorAt(origin.X, origin.Y).Scale;
         var measurer = new DirectWriteTextMeasurer();
-        // The canvas passes the zoom facts, so the tip has the zoom line, as the Mac's has.
+        // The canvas passes the zoom facts; zoom is off, so the tip has no zoom line, as the Mac's has none.
         string text = WorkspaceHint.Text(model.Snapshot, hasTextEditor: false, hasActiveEdit: false, model.Snapshot.ZoomHint);
         var view = new CoreRect(0, 0, HintBox.MaximumWidth, HintBox.ViewHeight);
-        (DisplayList list, _) = HintBox.Build(text, view, measurer);
+        // While drawing the canvas takes clicks, so the tip has its ✕.
+        (DisplayList list, CoreRect box) = HintBox.Build(text, view, measurer, closable: true);
         RasterImage image;
         using (GraphicsDevices devices = GraphicsDevices.Create(new GraphicsDeviceOptions { UseWarp = true }))
         using (var exporter = new PngExporter(devices, measurer))
@@ -141,6 +143,24 @@ internal sealed partial class ReferenceHost
             Height = view.Height,
             IsHitTestVisible = false,
         });
+        // Mac HintCloseButton: a borderless button over the ✕'s click area.
+        CoreRect close = HintBox.CloseAccessibleFrame(box);
+        var closeButton = new Button
+        {
+            Width = close.Width,
+            Height = close.Height,
+            Margin = new Thickness(close.X, close.Y, 0, 0),
+            Padding = new Thickness(0),
+            MinWidth = 0,
+            MinHeight = 0,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
+            BorderThickness = new Thickness(0),
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(closeButton, WorkspaceHint.CloseLabel);
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetHelpText(closeButton, WorkspaceHint.CloseHelp);
+        surface.Children.Add(closeButton);
         var window = new FirstUseReferenceWindow(_registry, "On-screen tips", surface);
         _popover = window;
         window.ShowForReference(origin);

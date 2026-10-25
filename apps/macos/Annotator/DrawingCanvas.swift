@@ -154,8 +154,18 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
         (interactButton as? HUDButton)?.fader = fader
         return fader
     }()
-    private let shortcutHint = WorkspaceHintView(frame: CGRect(x:16,y:50,width:540,height:130))
-    private lazy var hintFader = HUDFader(shortcutHint)
+    private lazy var shortcutHint: WorkspaceHintView = {
+        let hint = WorkspaceHintView(frame: CGRect(x:16,y:50,width:540,height:130))
+        hint.onClose = { [weak self] in self?.model?.setShortcutHints(false) }
+        return hint
+    }()
+    private lazy var hintFader: HUDFader = {
+        let fader = HUDFader(shortcutHint)
+        shortcutHint.fader = fader
+        return fader
+    }()
+    private var hintSchedule = HintSchedule()
+    private var hintTimer: Timer?
     /// Visibility the drawing HUD settles on; fades may still be running.
     var drawingHUDVisible: Bool { interactFader.targetVisible }
     var shortcutHintVisible: Bool { hintFader.targetVisible }
@@ -184,13 +194,29 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
     func setDrawingHUDVisible(_ visible: Bool) { interactFader.setVisible(visible); refreshHint() }
     private func refreshHint() {
         guard let model, let session else { hintFader.setVisible(false); return }
-        hintFader.setVisible(!(model.preferences.showShortcutHints == false || model.workspaceHidden || model.active !== session ||
-            session.sourceImage != nil || session.document.presentation.mode == .screen))
+        let available = !(model.preferences.showShortcutHints == false || model.workspaceHidden || model.active !== session ||
+            session.sourceImage != nil || session.document.presentation.mode == .screen)
+        let wake = HintWake(available: available, drawing: model.mode == .draw,
+                            highlighter: model.mode == .draw && model.tool == .highlighter,
+                            zooming: model.screenZoomEnabled, editingText: hasTextEditor)
+        let now = CACurrentMediaTime()
+        let shows = hintSchedule.shows(wake, at: now)
+        scheduleHintFade(shows ? hintSchedule.hidesAt - now : nil)
+        shortcutHint.closable = model.mode == .draw
+        hintFader.setVisible(shows)
         shortcutHint.text = WorkspaceHint.text(model: model)
         shortcutHint.frame = CGRect(x:16,y:interactFader.targetVisible ? 50 : 14,
                                     width:min(540,max(80,bounds.width-32)),height:130)
     }
     override func layout() { super.layout(); refreshHint() }
+    private func scheduleHintFade(_ delay: CFTimeInterval?) {
+        hintTimer?.invalidate()
+        hintTimer = nil
+        guard let delay else { return }
+        hintTimer = Timer.scheduledTimer(withTimeInterval: max(0, delay) + 0.01, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshHint() }
+        }
+    }
     func refreshAccessibilitySummary() {
         guard let session, let model else { return }
         refreshHint()

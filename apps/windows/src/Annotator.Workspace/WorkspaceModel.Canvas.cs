@@ -162,6 +162,9 @@ public sealed partial class WorkspaceModel
             case CanvasCommandKind.ReleaseInput:
                 UseApps();
                 return CanvasCommandResult.Done;
+            case CanvasCommandKind.TurnOffTips:
+                SetShortcutHints(false);
+                return CanvasCommandResult.Done;
             case CanvasCommandKind.Status:
                 if (string.IsNullOrWhiteSpace(command.Message))
                 {

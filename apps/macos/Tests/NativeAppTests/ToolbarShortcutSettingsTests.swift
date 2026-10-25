@@ -3,6 +3,7 @@ import SwiftUI
 import XCTest
 import AnnotationCore
 import PresentationRendering
+import MotionCore
 @testable import AnnotatorApp
 
 @MainActor
@@ -361,14 +362,49 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
         XCTAssertNil(model.preferences.toolbarSize, "Expanded is the default and is not stored.")
     }
 
-    func testTipsSayHowToTurnThemOff() {
-        let tips = WorkspaceHint.text(model: model)
-        XCTAssertTrue(tips.hasSuffix(WorkspaceHint.footer))
-        XCTAssertTrue(tips.contains("Settings > General"))
-        let styled = WorkspaceHint.attributed(tips)
-        let range = (tips as NSString).range(of: WorkspaceHint.footer)
-        let color = styled.attribute(.foregroundColor, at: range.location, effectiveRange: nil) as? NSColor
-        XCTAssertLessThan(color?.alphaComponent ?? 1, 1, "The footer is quieter than the tips.")
+    func testTipsAreShortAndTheCrossTurnsThemOff() throws {
+        model.beginDrawing()
+        XCTAssertEqual(WorkspaceHint.text(model: model), "Drawing  ·  Escape: use apps")
+        model.interact()
+        let draw = (model.preferences.resumeShortcut ?? .resumeDrawing).label
+        XCTAssertEqual(WorkspaceHint.text(model: model), "Using apps  ·  \(draw): draw")
+
+        let container = NSView(frame: CGRect(x: 0, y: 0, width: 600, height: 200))
+        let hint = WorkspaceHintView(frame: CGRect(x: 16, y: 14, width: 540, height: 130))
+        container.addSubview(hint)
+        hint.text = "Drawing  ·  Escape: use apps"
+        XCTAssertNil(hint.closeFrame, "Using apps passes clicks through, so there is no ✕.")
+        let open = WorkspaceHint.box(hint.text, in: hint.bounds, origin: .zero, closable: false)
+        hint.closable = true
+        let closable = WorkspaceHint.box(hint.text, in: hint.bounds, origin: .zero, closable: true)
+        XCTAssertEqual(closable.width, open.width + WorkspaceHint.closeReserve, accuracy: 0.5)
+        let close = try XCTUnwrap(hint.closeFrame)
+        XCTAssertTrue(closable.contains(CGPoint(x: close.midX, y: close.midY)))
+        let button = try XCTUnwrap(hint.hitTest(container.convert(CGPoint(x: close.midX, y: close.midY), from: hint)) as? NSButton)
+        XCTAssertEqual(button.accessibilityLabel(), WorkspaceHint.closeLabel)
+        XCTAssertNil(hint.hitTest(container.convert(CGPoint(x: 20, y: 10), from: hint)), "The text lets clicks through to the canvas.")
+
+        var closed = false
+        hint.onClose = { closed = true; self.model.setShortcutHints(false) }
+        button.performClick(nil)
+        XCTAssertTrue(closed)
+        XCTAssertEqual(model.preferences.showShortcutHints, false)
+    }
+
+    func testTipWakesOnModeChangesAndFadesAfterItsDwell() {
+        var schedule = HintSchedule()
+        let drawing = HintWake(available: true, drawing: true, highlighter: false, zooming: false, editingText: false)
+        XCTAssertTrue(schedule.shows(drawing, at: 10))
+        XCTAssertTrue(schedule.shows(drawing, at: 14.9), "Strokes and zoom values don't wake it again.")
+        XCTAssertFalse(schedule.shows(drawing, at: 15.1))
+        var apps = drawing
+        apps.drawing = false
+        XCTAssertTrue(schedule.shows(apps, at: 20))
+        XCTAssertEqual(schedule.hidesAt, 20 + MotionTiming.hintDwellDuration)
+        var off = apps
+        off.available = false
+        XCTAssertFalse(schedule.shows(off, at: 21))
+        XCTAssertTrue(schedule.shows(apps, at: 30), "It wakes again when it can show again.")
     }
 
     func testRendersTheWholeTabAndMinimalToolbarForReview() throws {
