@@ -161,7 +161,8 @@ final class UniformEditingTests: XCTestCase {
         XCTAssertEqual(InspectorGlyph.roughness(2).count, 2)
         XCTAssertEqual(InspectorGlyph.roughness(2).first, InspectorGlyph.roughness(0).first)
         let wild = InspectorGlyph.roughness(6)
-        XCTAssertEqual(wild.count, 3)
+        XCTAssertEqual(wild.count, 2)
+        XCTAssertNotEqual(wild, InspectorGlyph.roughness(2))
         XCTAssertTrue(wild.allSatisfy { $0.segments.count == 2 })
         XCTAssertTrue(InspectorGlyph.roughness(6).allSatisfy { !$0.dotted })
         for rounded in [false, true] {

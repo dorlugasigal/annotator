@@ -27,7 +27,7 @@ public static class InspectorGlyph
     public const double Width = 1.5;
     public const double DotPhase = 1.5;
 
-    /// <summary>A wavy line that gets looser: one smooth wave, a doubled wave, then three waves spread wider apart.</summary>
+    /// <summary>A wavy line that gets looser: one smooth wave, a doubled wave, then a doubled wave whose strokes drift apart.</summary>
     public static GlyphStroke[] Roughness(double value)
     {
         var wave = new GlyphStroke(new Point(7, 21),
@@ -43,9 +43,8 @@ public static class InspectorGlyph
         }
         return
         [
-            new GlyphStroke(new Point(6, 20), [GlyphSegment.Curve(10, 9, 15, 9, 18, 17), GlyphSegment.Curve(21, 25, 26, 26, 30, 14)]),
-            new GlyphStroke(new Point(8, 24), [GlyphSegment.Curve(12, 14, 16, 15, 19, 21), GlyphSegment.Curve(22, 28, 26, 26, 29, 19)]),
-            new GlyphStroke(new Point(7, 17), [GlyphSegment.Curve(11, 7, 14, 7, 17, 14), GlyphSegment.Curve(20, 21, 25, 22, 28, 11)]),
+            new GlyphStroke(new Point(6, 20), [GlyphSegment.Curve(10, 9, 15, 10, 18, 18), GlyphSegment.Curve(21, 26, 26, 25, 30, 13)]),
+            new GlyphStroke(new Point(9, 25), [GlyphSegment.Curve(11, 13, 17, 12, 19, 19), GlyphSegment.Curve(21, 25, 24, 28, 29, 19)]),
         ];
     }
 

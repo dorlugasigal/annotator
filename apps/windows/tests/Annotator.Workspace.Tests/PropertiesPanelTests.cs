@@ -359,9 +359,10 @@ public sealed class PropertiesPanelTests
         Assert.Equal(2, InspectorGlyph.Roughness(2).Length);
         Assert.Equal(InspectorGlyph.Roughness(0)[0].Start, InspectorGlyph.Roughness(2)[0].Start);
         GlyphStroke[] wild = InspectorGlyph.Roughness(6);
-        Assert.Equal(3, wild.Length);
+        Assert.Equal(2, wild.Length);
         Assert.All(wild, stroke => Assert.Equal(2, stroke.Segments.Length));
-        Assert.Equal(3, InspectorSample.Roughness(6).Draw(ink, builder).Length);
+        Assert.NotEqual(InspectorGlyph.Roughness(2)[0].Start, wild[0].Start);
+        Assert.Equal(2, InspectorSample.Roughness(6).Draw(ink, builder).Length);
         Assert.Equal(2, InspectorSample.Roughness(2).Draw(ink, builder).Length);
         foreach (bool rounded in new[] { false, true })
         {
