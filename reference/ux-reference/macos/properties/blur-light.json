@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    82.5,
+    224.5,
     16.5,
     120,
     20
@@ -15,7 +15,7 @@
   {
    "enabled": true,
    "frame": [
-    210.5,
+    352.5,
     20,
     19.5,
     13
@@ -28,7 +28,7 @@
     {
      "enabled": true,
      "frame": [
-      301,
+      443,
       19.5,
       18,
       14
@@ -38,7 +38,7 @@
    ],
    "enabled": true,
    "frame": [
-    236,
+    378,
     19.5,
     90,
     14
@@ -50,7 +50,7 @@
   {
    "enabled": true,
    "frame": [
-    332,
+    474,
     16,
     48,
     21
@@ -64,7 +64,7 @@
   {
    "enabled": true,
    "frame": [
-    82.5,
+    224.5,
     47,
     483,
     13
@@ -77,14 +77,14 @@
  "background": "window",
  "image": "properties/blur-light.png",
  "kind": "view",
- "notes": "Full properties for Blur region, 648 points wide.",
+ "notes": "Full properties for Blur region, 932 points wide: one row.",
  "pixels": [
-  1296,
+  1864,
   152
  ],
  "scale": 2,
  "size": [
-  648,
+  932,
   76
  ],
  "spec": [

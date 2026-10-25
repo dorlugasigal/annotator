@@ -58,6 +58,28 @@
   {
    "enabled": true,
    "frame": [
+    571,
+    16,
+    64.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Fill style"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    703,
+    16,
+    56,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Edges"
+  },
+  {
+   "enabled": true,
+   "frame": [
     16,
     36,
     36,
@@ -192,6 +214,68 @@
    "role": "AXButton"
   },
   {
+   "enabled": true,
+   "frame": [
+    569.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Solid",
+   "label": "Solid",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    610.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Hatch",
+   "label": "Hatch",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    651.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Crosshatch",
+   "label": "Crosshatch",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    701.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Sharp corners",
+   "label": "Sharp corners",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    742.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Rounded corners",
+   "label": "Rounded corners",
+   "role": "AXButton"
+  },
+  {
    "children": [
     {
      "enabled": true,
@@ -239,90 +323,6 @@
    ],
    "role": "AXStaticText",
    "value": "pt"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    17.5,
-    113,
-    64.5,
-    14
-   ],
-   "role": "AXStaticText",
-   "value": "Fill style"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    149.5,
-    113,
-    56,
-    14
-   ],
-   "role": "AXStaticText",
-   "value": "Edges"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    133,
-    36,
-    36
-   ],
-   "help": "Solid",
-   "label": "Solid",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    57,
-    133,
-    36,
-    36
-   ],
-   "help": "Hatch",
-   "label": "Hatch",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    98,
-    133,
-    36,
-    36
-   ],
-   "help": "Crosshatch",
-   "label": "Crosshatch",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    148,
-    133,
-    36,
-    36
-   ],
-   "help": "Sharp corners",
-   "label": "Sharp corners",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    189,
-    133,
-    36,
-    36
-   ],
-   "help": "Rounded corners",
-   "label": "Rounded corners",
-   "role": "AXButton"
   }
  ],
  "appearance": "light",
@@ -331,13 +331,13 @@
  "kind": "view",
  "notes": "Fill on: fill pattern and opacity appear.",
  "pixels": [
-  1296,
-  370
+  1864,
+  230
  ],
  "scale": 2,
  "size": [
-  648,
-  185
+  932,
+  115
  ],
  "spec": [
   "002 design.md",

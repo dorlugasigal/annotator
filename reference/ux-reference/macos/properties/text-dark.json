@@ -238,14 +238,14 @@
  "background": "window",
  "image": "properties/text-dark.png",
  "kind": "view",
- "notes": "Full properties for Text, 648 points wide.",
+ "notes": "Full properties for Text, 932 points wide: one row.",
  "pixels": [
-  1296,
+  1864,
   230
  ],
  "scale": 2,
  "size": [
-  648,
+  932,
   115
  ],
  "spec": [

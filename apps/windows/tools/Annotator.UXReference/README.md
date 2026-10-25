@@ -185,8 +185,9 @@ at the end of the text, so its left edge follows the text's width (D-4) and is
 reported as a text width difference; its top, size, label and help must match.
 
 Properties states (`properties/<state>`) show the full properties panel on
-its own, 16 points from the edges of a window as wide as the reference (648
-points, or 932 for `diamond-wide`), as `ContextualInspector().padding(16)` is
+its own, 16 points from the edges of a window as wide as the reference (932
+points, so each tool's properties fit on one row, or 648 for `rectangle-narrow`,
+where Edges wraps to a second row), as `ContextualInspector().padding(16)` is
 captured. The arrowhead choices (`pickers/arrowhead-start` and `-end`) show the
 popover for the Arrow tool's default style. SwiftUI reports their lazy grids as
 `AXOpaqueProviderGroup`; on Windows they are groups with the Grid pattern, like

@@ -63,24 +63,25 @@ The properties panel for each tool, 648 points wide unless noted.
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `arrow`<br>648 x 205 pt<br>Full properties for Arrow, 648 points wide. | <img src="properties/arrow-light.png" width="420"> | <img src="properties/arrow-dark.png" width="420"> |
-| `arrow-curved`<br>648 x 205 pt<br>Curved arrow. | <img src="properties/arrow-curved-light.png" width="420"> | <img src="properties/arrow-curved-dark.png" width="420"> |
-| `blur`<br>648 x 76 pt<br>Full properties for Blur region, 648 points wide. | <img src="properties/blur-light.png" width="420"> | <img src="properties/blur-dark.png" width="420"> |
-| `counter`<br>648 x 88 pt<br>Full properties for Numbered counter, 648 points wide. | <img src="properties/counter-light.png" width="420"> | <img src="properties/counter-dark.png" width="420"> |
-| `diamond`<br>648 x 185 pt<br>Full properties for Diamond, 648 points wide. | <img src="properties/diamond-light.png" width="420"> | <img src="properties/diamond-dark.png" width="420"> |
+| `arrow`<br>932 x 115 pt<br>Full properties for Arrow, 932 points wide: one row. | <img src="properties/arrow-light.png" width="420"> | <img src="properties/arrow-dark.png" width="420"> |
+| `arrow-curved`<br>932 x 115 pt<br>Curved arrow. | <img src="properties/arrow-curved-light.png" width="420"> | <img src="properties/arrow-curved-dark.png" width="420"> |
+| `blur`<br>932 x 76 pt<br>Full properties for Blur region, 932 points wide: one row. | <img src="properties/blur-light.png" width="420"> | <img src="properties/blur-dark.png" width="420"> |
+| `counter`<br>932 x 88 pt<br>Full properties for Numbered counter, 932 points wide: one row. | <img src="properties/counter-light.png" width="420"> | <img src="properties/counter-dark.png" width="420"> |
+| `diamond`<br>932 x 115 pt<br>Full properties for Diamond, 932 points wide: one row. | <img src="properties/diamond-light.png" width="420"> | <img src="properties/diamond-dark.png" width="420"> |
 | `diamond-wide`<br>932 x 115 pt<br>Wide layout: one row. | <img src="properties/diamond-wide-light.png" width="420"> | <img src="properties/diamond-wide-dark.png" width="420"> |
-| `distort`<br>648 x 76 pt<br>Full properties for Distort region, 648 points wide. | <img src="properties/distort-light.png" width="420"> | <img src="properties/distort-dark.png" width="420"> |
-| `ellipse`<br>648 x 115 pt<br>Full properties for Ellipse, 648 points wide. | <img src="properties/ellipse-light.png" width="420"> | <img src="properties/ellipse-dark.png" width="420"> |
-| `eraser`<br>648 x 115 pt<br>Full properties for Eraser, 648 points wide. | <img src="properties/eraser-light.png" width="420"> | <img src="properties/eraser-dark.png" width="420"> |
-| `highlighter`<br>648 x 115 pt<br>Full properties for Highlighter, 648 points wide. | <img src="properties/highlighter-light.png" width="420"> | <img src="properties/highlighter-dark.png" width="420"> |
-| `line`<br>648 x 115 pt<br>Full properties for Line, 648 points wide. | <img src="properties/line-light.png" width="420"> | <img src="properties/line-dark.png" width="420"> |
-| `pen`<br>648 x 185 pt<br>Full properties for Pen, 648 points wide. | <img src="properties/pen-light.png" width="420"> | <img src="properties/pen-dark.png" width="420"> |
-| `pen-smart-draw`<br>648 x 185 pt<br>Pen with Smart draw on. | <img src="properties/pen-smart-draw-light.png" width="420"> | <img src="properties/pen-smart-draw-dark.png" width="420"> |
-| `pixelate`<br>648 x 76 pt<br>Full properties for Pixelate region, 648 points wide. | <img src="properties/pixelate-light.png" width="420"> | <img src="properties/pixelate-dark.png" width="420"> |
-| `rectangle`<br>648 x 185 pt<br>Full properties for Rectangle, 648 points wide. | <img src="properties/rectangle-light.png" width="420"> | <img src="properties/rectangle-dark.png" width="420"> |
-| `rectangle-filled`<br>648 x 185 pt<br>Fill on: fill pattern and opacity appear. | <img src="properties/rectangle-filled-light.png" width="420"> | <img src="properties/rectangle-filled-dark.png" width="420"> |
-| `ruler`<br>648 x 142 pt<br>Full properties for Pixel ruler, 648 points wide. | <img src="properties/ruler-light.png" width="420"> | <img src="properties/ruler-dark.png" width="420"> |
-| `text`<br>648 x 115 pt<br>Full properties for Text, 648 points wide. | <img src="properties/text-light.png" width="420"> | <img src="properties/text-dark.png" width="420"> |
+| `distort`<br>932 x 76 pt<br>Full properties for Distort region, 932 points wide: one row. | <img src="properties/distort-light.png" width="420"> | <img src="properties/distort-dark.png" width="420"> |
+| `ellipse`<br>932 x 115 pt<br>Full properties for Ellipse, 932 points wide: one row. | <img src="properties/ellipse-light.png" width="420"> | <img src="properties/ellipse-dark.png" width="420"> |
+| `eraser`<br>932 x 115 pt<br>Full properties for Eraser, 932 points wide: one row. | <img src="properties/eraser-light.png" width="420"> | <img src="properties/eraser-dark.png" width="420"> |
+| `highlighter`<br>932 x 115 pt<br>Full properties for Highlighter, 932 points wide: one row. | <img src="properties/highlighter-light.png" width="420"> | <img src="properties/highlighter-dark.png" width="420"> |
+| `line`<br>932 x 115 pt<br>Full properties for Line, 932 points wide: one row. | <img src="properties/line-light.png" width="420"> | <img src="properties/line-dark.png" width="420"> |
+| `pen`<br>932 x 115 pt<br>Full properties for Pen, 932 points wide: one row. | <img src="properties/pen-light.png" width="420"> | <img src="properties/pen-dark.png" width="420"> |
+| `pen-smart-draw`<br>932 x 115 pt<br>Pen with Smart draw on. | <img src="properties/pen-smart-draw-light.png" width="420"> | <img src="properties/pen-smart-draw-dark.png" width="420"> |
+| `pixelate`<br>932 x 76 pt<br>Full properties for Pixelate region, 932 points wide: one row. | <img src="properties/pixelate-light.png" width="420"> | <img src="properties/pixelate-dark.png" width="420"> |
+| `rectangle`<br>932 x 115 pt<br>Full properties for Rectangle, 932 points wide: one row. | <img src="properties/rectangle-light.png" width="420"> | <img src="properties/rectangle-dark.png" width="420"> |
+| `rectangle-filled`<br>932 x 115 pt<br>Fill on: fill pattern and opacity appear. | <img src="properties/rectangle-filled-light.png" width="420"> | <img src="properties/rectangle-filled-dark.png" width="420"> |
+| `rectangle-narrow`<br>648 x 185 pt<br>Narrow layout, 648 points wide: Edges wraps to a second row. | <img src="properties/rectangle-narrow-light.png" width="420"> | <img src="properties/rectangle-narrow-dark.png" width="420"> |
+| `ruler`<br>932 x 115 pt<br>Full properties for Pixel ruler, 932 points wide: one row. | <img src="properties/ruler-light.png" width="420"> | <img src="properties/ruler-dark.png" width="420"> |
+| `text`<br>932 x 115 pt<br>Full properties for Text, 932 points wide: one row. | <img src="properties/text-light.png" width="420"> | <img src="properties/text-dark.png" width="420"> |
 
 ## Pickers and zoom controls
 

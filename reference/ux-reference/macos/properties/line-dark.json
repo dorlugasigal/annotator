@@ -221,14 +221,14 @@
  "background": "window",
  "image": "properties/line-dark.png",
  "kind": "view",
- "notes": "Full properties for Line, 648 points wide.",
+ "notes": "Full properties for Line, 932 points wide: one row.",
  "pixels": [
-  1296,
+  1864,
   230
  ],
  "scale": 2,
  "size": [
-  648,
+  932,
   115
  ],
  "spec": [

@@ -85,6 +85,17 @@
   {
    "enabled": true,
    "frame": [
+    476.5,
+    16,
+    223.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Drag to measure the distance in source pixels."
+  },
+  {
+   "enabled": true,
+   "frame": [
     16,
     36,
     36,
@@ -179,32 +190,21 @@
    ],
    "role": "AXStaticText",
    "value": "pt"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    113,
-    223.5,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "Drag to measure the distance in source pixels."
   }
  ],
  "appearance": "dark",
  "background": "window",
  "image": "properties/ruler-dark.png",
  "kind": "view",
- "notes": "Full properties for Pixel ruler, 648 points wide.",
+ "notes": "Full properties for Pixel ruler, 932 points wide: one row.",
  "pixels": [
-  1296,
-  284
+  1864,
+  230
  ],
  "scale": 2,
  "size": [
-  648,
-  142
+  932,
+  115
  ],
  "spec": [
   "002 design.md",
