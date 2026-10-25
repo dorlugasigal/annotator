@@ -12,10 +12,14 @@ enum AppUpdateConfigurationError: Error, LocalizedError {
 }
 
 /// Sparkle updates. Automatic checks are on by default, once a day. Annotator is a menu bar app, so it uses Sparkle's
-/// gentle reminders: an update found while the person draws, zooms, shares a region or takes a break waits, and the
-/// menu and Settings say it's ready until the person chooses Check for updates.
+/// gentle reminders: an update found while the person draws, zooms, shares a region or takes a break waits. Once any check
+/// finds an update, the menu and Settings say it's ready until the person installs or skips it. Opening the menu checks
+/// quietly when the last check is a few hours old, so the menu can say so.
 @MainActor
 final class AppUpdateController: NSObject {
+    /// Opening the menu checks quietly when the last check is at least this old.
+    nonisolated static let menuCheckInterval: TimeInterval = 6 * 60 * 60
+
     private var controller: SPUStandardUpdaterController?
     private var observation: NSKeyValueObservation?
     private let changed: (Bool, Bool, String) -> Void
@@ -25,7 +29,8 @@ final class AppUpdateController: NSObject {
     var isConfigured: Bool { controller != nil }
 
     /// - Parameters:
-    ///   - reminder: Called with the version of an update that waits for the person, and with nil once they see it.
+    ///   - reminder: Called with the version of an update that a check found, and with nil once it's installed or skipped,
+    ///     or a check finds none.
     ///   - canInterrupt: Whether Sparkle's update window may appear now.
     init(changed: @escaping (Bool, Bool, String) -> Void, reminder: @escaping (String?) -> Void = { _ in },
          canInterrupt: @escaping () -> Bool = { true }) {
@@ -53,7 +58,7 @@ final class AppUpdateController: NSObject {
             changed(false,false,"Updates aren't set up in this build. Find new versions in Settings > About.")
             return
         }
-        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: self)
+        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: self, userDriverDelegate: self)
         controller.updater.sendsSystemProfile = false
         try controller.updater.start()
         self.controller = controller
@@ -72,10 +77,26 @@ final class AppUpdateController: NSObject {
 
     func check() { controller?.checkForUpdates(nil) }
 
+    /// The menu opened: when automatic checks are on and the last check is old enough, asks the feed without showing
+    /// anything. A found update turns the menu's row into Update available….
+    func checkWhenMenuOpens(now: Date = Date()) {
+        guard let updater = controller?.updater, updater.automaticallyChecksForUpdates, updater.canCheckForUpdates,
+              !updater.sessionInProgress, Self.menuCheckIsDue(lastCheck: updater.lastUpdateCheckDate, now: now) else { return }
+        updater.checkForUpdateInformation()
+    }
+
+    /// Whether a quiet menu check is due: no check yet, the last one is at least `menuCheckInterval` old, or the clock
+    /// was set back since.
+    nonisolated static func menuCheckIsDue(lastCheck: Date?, now: Date) -> Bool {
+        guard let lastCheck else { return true }
+        let age = now.timeIntervalSince(lastCheck)
+        return age < 0 || age >= menuCheckInterval
+    }
+
     /// Whether Sparkle may show a scheduled update now; otherwise it waits as a gentle reminder.
     var showsScheduledUpdateNow: Bool { canInterrupt() }
 
-    /// Names the update that waits for the person, or clears it once they see it.
+    /// Names the update that a check found, or clears it once it's installed, skipped or gone.
     func remind(_ version: String?) { reminder(version) }
 
     func setAutomaticChecks(_ enabled: Bool) {
@@ -97,10 +118,18 @@ extension AppUpdateController: @preconcurrency SPUStandardUserDriverDelegate {
 
     func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem,
                                                    state: SPUUserUpdateState) {
-        if !handleShowingUpdate { remind(update.displayVersionString) }
+        remind(update.displayVersionString)
     }
+}
 
-    func standardUserDriverDidReceiveUserAttention(forUpdate update: SUAppcastItem) { remind(nil) }
+extension AppUpdateController: SPUUpdaterDelegate {
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) { remind(item.displayVersionString) }
 
-    func standardUserDriverWillFinishUpdateSession() { remind(nil) }
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater) { remind(nil) }
+
+    /// Remind me later keeps the menu's Update available…; installing or skipping the version clears it.
+    func updater(_ updater: SPUUpdater, userDidMake choice: SPUUserUpdateChoice, forUpdate updateItem: SUAppcastItem,
+                 state: SPUUserUpdateState) {
+        remind(choice == .dismiss ? updateItem.displayVersionString : nil)
+    }
 }

@@ -207,6 +207,12 @@ public sealed class AppUpdates
     /// <summary>A portable copy checks at most once in this time on its own, like Sparkle's SUScheduledCheckInterval.</summary>
     public static readonly TimeSpan CheckInterval = TimeSpan.FromDays(1);
 
+    /// <summary>
+    /// When the tray flyout opens and the last check is at least this old, Annotator checks again quietly, so the flyout can
+    /// say Update available (the Mac's menu check, Sparkle's checkForUpdateInformation).
+    /// </summary>
+    public static readonly TimeSpan MenuCheckInterval = TimeSpan.FromHours(6);
+
     /// <summary>Sparkle's key for automatic checks; missing means on, as the Mac's Info.plist sets.</summary>
     public const string AutomaticChecksKey = "SUEnableAutomaticChecks";
 
@@ -222,14 +228,20 @@ public sealed class AppUpdates
     private readonly Func<UpdateQuestion, Task<bool>> _confirm;
     private readonly Action<string> _note;
     private readonly Func<TimeSpan, CancellationToken, Task> _delay;
+    private readonly Func<DateTimeOffset> _now;
+
+    /// <summary>When the Microsoft Store last answered a check in this launch.</summary>
+    private DateTimeOffset? _lastStoreCheck;
 
     /// <param name="question">The question to ask before installing now (<see cref="UpdateQuestion.For"/>), or null.</param>
     /// <param name="confirm">Asks the question; true installs, false waits (Not now).</param>
     /// <param name="note">Records the details of a Store or feed failure for the log.</param>
     /// <param name="delay">Waits for a timeout; tests replace it.</param>
     /// <param name="portable">The feed of a portable copy; without it, a portable copy cannot check.</param>
+    /// <param name="now">The clock of a Store copy's menu checks; tests replace it. A portable copy uses its source's clock.</param>
     public AppUpdates(IStoreUpdates store, Func<UpdateQuestion?> question, Func<UpdateQuestion, Task<bool>> confirm, Action<string> note,
-                      Func<TimeSpan, CancellationToken, Task>? delay = null, PortableUpdateSource? portable = null)
+                      Func<TimeSpan, CancellationToken, Task>? delay = null, PortableUpdateSource? portable = null,
+                      Func<DateTimeOffset>? now = null)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(question);
@@ -241,7 +253,8 @@ public sealed class AppUpdates
         _confirm = confirm;
         _note = note;
         _delay = delay ?? Task.Delay;
-        Phase = IsConfigured ? UpdatePhase.Ready : UpdatePhase.Unavailable;
+        _now = now ?? (static () => DateTimeOffset.Now);
+        Phase =  IsConfigured ? UpdatePhase.Ready : UpdatePhase.Unavailable;
     }
 
     /// <summary>Raised after <see cref="Phase"/> changed.</summary>
@@ -265,6 +278,12 @@ public sealed class AppUpdates
 
     /// <summary>The newer release a portable copy found, while <see cref="Phase"/> is <see cref="UpdatePhase.Available"/>.</summary>
     public ReleaseFeedEntry? Release { get; private set; }
+
+    /// <summary>
+    /// The Mac's updateReminderVersion: a check found an update that is not installed yet, so the tray flyout reads Update
+    /// available… until a later check finds none.
+    /// </summary>
+    public bool UpdateWaiting => Phase == UpdatePhase.Available;
 
     /// <summary>The Mac's canCheckForUpdates: Check for updates... works now.</summary>
     public bool CanCheck => IsConfigured && Phase is not (UpdatePhase.Checking or UpdatePhase.Installing);
@@ -329,25 +348,78 @@ public sealed class AppUpdates
     /// <summary>
     /// A portable copy's automatic check (Sparkle's scheduled check): when automatic checks are on and the last check is at
     /// least <see cref="CheckInterval"/> old, reads the feed. Callers run it at launch and when the tray flyout or Settings
-    /// opens, so no timer runs (WIN-SYS-07). A failed automatic check stays quiet and tries again next time. True when it
-    /// found a release that was never announced, so the caller may ask about it once.
+    /// opens, so no timer runs (WIN-SYS-07). A failed automatic check stays quiet and tries again next time. True when it found a release
+    /// that was never announced, so the caller may ask about it once.
+    /// <para>
+    /// With <paramref name="menuOpened"/> (the tray flyout opened, the Mac's menu check) it also checks quietly when the last
+    /// check is at least <see cref="MenuCheckInterval"/> old: a portable copy reads the feed, and a Store copy asks the
+    /// Microsoft Store. A quiet check never announces; it only turns the flyout's row into Update available….
+    /// </para>
     /// </summary>
-    public async Task<bool> CheckIfDueAsync()
+    public async Task<bool> CheckIfDueAsync(bool menuOpened = false)
     {
-        if (_portable is not { } portable || !AutomaticChecks || !CanCheck)
+        if (!AutomaticChecks || !CanCheck)
         {
             return false;
         }
-        DateTimeOffset now = Now(portable);
-        if (portable.Defaults.Date(LastCheckKey) is { } last && now - last < CheckInterval && now >= last)
+        if (_portable is not { } portable)
         {
+            if (menuOpened)
+            {
+                await CheckStoreQuietlyAsync();
+            }
             return false;
         }
-        return await CheckFeedAsync(portable, automatic: true);
+        TimeSpan? age = Age(portable.Defaults.Date(LastCheckKey), Now(portable));
+        if (age is not { } since || since >= CheckInterval)
+        {
+            return await CheckFeedAsync(portable, automatic: true);
+        }
+        if (menuOpened && since >= MenuCheckInterval)
+        {
+            await CheckFeedAsync(portable, automatic: true, announce: false);
+        }
+        return false;
     }
 
-    /// <summary>Reads the feed; a found release is announced once, whether the person or the schedule checked.</summary>
-    private async Task<bool> CheckFeedAsync(PortableUpdateSource portable, bool automatic)
+    /// <summary>How long ago <paramref name="last"/> was, or null when there was none or the clock was set back since.</summary>
+    private static TimeSpan? Age(DateTimeOffset? last, DateTimeOffset now) => last is { } at && now >= at ? now - at : null;
+
+    /// <summary>
+    /// A Store copy's quiet check when the tray flyout opens: asks the Microsoft Store whether an update waits, without
+    /// installing it or asking anything. Only an update changes what the flyout says; a failure stays quiet.
+    /// </summary>
+    private async Task CheckStoreQuietlyAsync()
+    {
+        if (_store.Channel != UpdateChannel.Store || Phase is not (UpdatePhase.Ready or UpdatePhase.UpToDate or UpdatePhase.CheckFailed)
+            || Age(_lastStoreCheck, _now()) is { } since && since < MenuCheckInterval)
+        {
+            return;
+        }
+        UpdatePhase before = Phase;
+        Set(UpdatePhase.Checking);
+        StoreUpdateCheck? found;
+        try
+        {
+            found = await Bounded(_store.CheckAsync(), CheckTimeout);
+        }
+        catch (StoreUpdateFailure failure)
+        {
+            _note($"Update check: {failure.Message}");
+            found = null;
+        }
+        if (found is not null)
+        {
+            _lastStoreCheck = _now();
+        }
+        Set(found == StoreUpdateCheck.Available ? UpdatePhase.Available : before);
+    }
+
+    /// <summary>
+    /// Reads the feed; a found release is announced once, whether the person or the schedule checked. A quiet check
+    /// (<paramref name="announce"/> false) leaves the announcement to the next scheduled check.
+    /// </summary>
+    private async Task<bool> CheckFeedAsync(PortableUpdateSource portable, bool automatic, bool announce = true)
     {
         UpdatePhase before = Phase;
         Set(UpdatePhase.Checking);
@@ -378,10 +450,15 @@ public sealed class AppUpdates
             return false;
         }
         Release = release;
-        bool announce = portable.Defaults.Integer(AnnouncedBuildKey) < release.Build;
+        if (!announce)
+        {
+            Set(UpdatePhase.Available);
+            return false;
+        }
+        bool announced = portable.Defaults.Integer(AnnouncedBuildKey) < release.Build;
         portable.Defaults.Set(AnnouncedBuildKey, (long)release.Build);
         Set(UpdatePhase.Available);
-        return announce && automatic;
+        return announced && automatic;
     }
 
     private static DateTimeOffset Now(PortableUpdateSource portable) => portable.Now?.Invoke() ?? DateTimeOffset.Now;
@@ -420,6 +497,7 @@ public sealed class AppUpdates
             Set(UpdatePhase.CheckFailed);
             return;
         }
+        _lastStoreCheck = _now();
         if (result == StoreUpdateCheck.UpToDate)
         {
             Set(UpdatePhase.UpToDate);

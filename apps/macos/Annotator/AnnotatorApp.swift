@@ -384,6 +384,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         menuPopover?.toggle(relativeTo: button)
+        if menuPopover?.popover.isShown == true { updates?.checkWhenMenuOpens() }
     }
 
     func performMenuAction(_ action: MenuBarAction) {

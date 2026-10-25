@@ -164,6 +164,8 @@ internal sealed partial class AppHost
             : null;
         _updates = new AppUpdates(store, () => UpdateQuestion.For(_model.Snapshot), AskBeforeUpdateAsync,
             message => StartupLog.Note("store-update", message), portable: portable);
+        // The open tray flyout follows a check, as the Mac's popover follows updateReminderVersion.
+        _updates.Changed += () => _flyout?.ShowUpdates(_updates.CanCheck, _updates.Status, _updates.UpdateWaiting);
         // What's changed follows an update once (the Mac's WhatsChangedTracker); the live check never shows it.
         _whatsChangedTracker = new WhatsChangedTracker(_defaults);
         _whatsChangedDue = check is null && BuildInfo.BuildNumber is { } running
@@ -642,7 +644,7 @@ internal sealed partial class AppHost
         // Check for updates… works in a copy installed from the Store or a portable copy with the website's feed; otherwise it
         // says why (Mac updateStatus). A release a check found turns it into Update available….
         var flyout = new TrayFlyout(_registry, _model.Snapshot, _tray.Problem, openedWithKeyboard, TrayFocusTarget, Perform,
-            BuildInfo.IsDevelopment, _updates.CanCheck, _updates.Status, updateAvailable: _updates.Release is not null);
+            BuildInfo.IsDevelopment, _updates.CanCheck, _updates.Status, updateAvailable: _updates.UpdateWaiting);
         flyout.Dismissed += () =>
         {
             if (flyout.ClosedByDeactivation && PressedOnTrayIcon())
@@ -659,7 +661,7 @@ internal sealed partial class AppHost
         PostFrame();
         flyout.Open(icon, PopoverPlacement.AboveOrBelow);
         PersonOpenedAnnotator();
-        CheckForUpdatesIfDue();
+        CheckForUpdatesIfDue(menuOpened: true);
     }
 
     /// <summary>True when the pointer is on the tray icon, so the press that just closed the flyout was on the icon.</summary>
