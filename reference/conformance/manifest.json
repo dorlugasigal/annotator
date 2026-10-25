@@ -6,7 +6,7 @@
     "macOS" : "27.0.1",
     "machine" : "arm64"
   },
-  "fileCount" : 251,
+  "fileCount" : 252,
   "files" : [
     {
       "bytes" : 1364,
@@ -567,6 +567,11 @@
       "bytes" : 8837,
       "path" : "geometry/connectors.jsonl",
       "sha256" : "ac6589b6b7a6432971676d537836772d8de2128077bff2af13fa4e2dd085cfb7"
+    },
+    {
+      "bytes" : 20974,
+      "path" : "geometry/ink-pressure.jsonl",
+      "sha256" : "04e2e7b1380b9e9d375c10b6afb6e117292c95fd114db55eb7568fc26f80a840"
     },
     {
       "bytes" : 4577,
@@ -1270,7 +1275,7 @@
     "boards" : "Board files. valid: the input and the bytes DrawingFile writes after reading it. invalid: the input and the error DrawingFile.read throws.",
     "editing" : "Scripted CanvasDocument sessions. Each line is one step: its result or error, then the elements, selection, generation, undo state and history size after it.",
     "effects" : "Input PNGs and CaptureCompositor.image output, rendered into sRGB RGBA8 by a Core Image context configured like the app's (Metal, default working space: extended linear sRGB in half float). See context.json.",
-    "geometry" : "Path elements from SceneRenderer for every shape and stroke (rough ones from the element seed), arrowheads, polygons, rounded diamonds, connector curves, anchors, drag constraints, viewports, sharing regions, transforms, axis ticks and pointer shapes. text.jsonl depends on macOS fonts.",
+    "geometry" : "Path elements from SceneRenderer for every shape and stroke (rough ones from the element seed), simulated Ink pen pressure from InkPressure, arrowheads, polygons, rounded diamonds, connector curves, anchors, drag constraints, viewports, sharing regions, transforms, axis ticks and pointer shapes. text.jsonl depends on macOS fonts.",
     "hittest" : "contains.jsonl: per element, a grid of HitTesting.contains results ('#' hit, '.' miss). frontmost.jsonl: per scene, a grid of ElementStacking.frontmost results by element letter. Grid points are origin + (column, row) × step.",
     "library" : "Saved-shape files with their read result and the document after inserting them, creation and naming refusals, invalid files, and a scripted ShapeLibraryStore session.",
     "motion" : "MotionCore curves, springs, fades and timelines sampled every millisecond, the per-style show and hide durations, and the pointer click pulse.",
@@ -1281,9 +1286,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "513c88dac0626d0037eca20ddf89869dbd111146",
+    "commit" : "a58d223bb4bc84b89bcc6bbaac6b91739787f0fb",
     "date" : "2026-10-25",
-    "fingerprint" : "b31bf35f6dde4a5c9a02f61b8a0e301751db67dde8b1d1b52272e3fa64a3f167",
+    "fingerprint" : "372b6628daf74564dc6de92f38decdd29da24820c6a90da2d24b42241d34ad7e",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
