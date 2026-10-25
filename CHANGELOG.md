@@ -14,6 +14,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
 - The on-screen tips are shorter and easier to read. They show for a few seconds when you start drawing or switch mode, then fade away. Click ✕ on a tip to turn tips off. You can turn them back on in Settings > General.
 - New drawings start with a gradient. When you first open Annotator, shapes, lines, arrows, the pen and text use the Sunset gradient. If you already use Annotator, your colors stay the same.
+- The Roughness and Edges buttons in Properties have clearer pictures: a hand-drawn squiggle that gets looser for Clean, Sketchy and Wild, and a square that shows a sharp or rounded corner.
 - The pen's Tablet pressure is now Ink, and it works with a mouse or trackpad: the line gets thinner when you move fast, thicker when you move slowly, and narrows at the start and end. A pressure-sensitive pen still uses its own pressure.
 
 ### Fixed

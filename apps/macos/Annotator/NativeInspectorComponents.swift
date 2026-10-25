@@ -21,8 +21,84 @@ enum InspectorSample: Equatable {
     case fill(FillPattern), route(Bool), head(ArrowHead, Bool), headSize(Double), pressure(Bool)
 }
 
-enum InspectorPreviewStyle {
-    static func roughness(_ value: Double) -> Double { min(1.2, max(0, value * 0.3)) }
+/// The Roughness and Edges icons: hand-drawn strokes in sample points (0 to 36), drawn directly so both platforms
+/// draw the same picture (Windows InspectorGlyph).
+enum InspectorGlyph {
+    enum Segment: Equatable {
+        case line(CGPoint), curve(CGPoint, CGPoint, CGPoint)
+    }
+
+    struct Stroke: Equatable {
+        var start: CGPoint
+        var segments: [Segment]
+        var dotted = false
+    }
+
+    static let width = 1.5
+    static let dots: [CGFloat] = [1.5, 2]
+    static let dotPhase: CGFloat = 1.5
+
+    /// A short hand-drawn squiggle that gets looser: one stroke, the stroke drawn twice, then two strokes further apart
+    /// with sharper turns.
+    static func roughness(_ value: Double) -> [Stroke] {
+        let squiggle = Stroke(start: p(8, 21.5), segments: [.curve(p(12, 20), p(16.5, 16), p(19.5, 15.5)),
+                                                            .curve(p(22, 15), p(18, 19.5), p(20, 20)),
+                                                            .curve(p(21.5, 20.5), p(25, 18.5), p(28, 17.5))])
+        if value <= 0 { return [squiggle] }
+        if value < 4 {
+            return [squiggle, Stroke(start: p(8.3, 23), segments: [.curve(p(12.5, 21), p(16.5, 17.5), p(19.8, 17)),
+                                                                   .curve(p(22, 16.6), p(19, 20.8), p(20.8, 21.2)),
+                                                                   .curve(p(22.5, 21.6), p(25.5, 19.6), p(28.2, 18.6))])]
+        }
+        return [Stroke(start: p(7.5, 20), segments: [.curve(p(10, 19), p(17, 14.5), p(20.5, 13.5)),
+                                                     .curve(p(21.5, 13.2), p(18.2, 18.6), p(19, 19)),
+                                                     .curve(p(20, 19.5), p(26, 16.5), p(28.5, 15.5))]),
+                Stroke(start: p(8.5, 23.5), segments: [.curve(p(11, 22.5), p(18, 17.8), p(22, 17.2)),
+                                                       .curve(p(23, 17), p(19.8, 21.8), p(20.6, 22.3)),
+                                                       .curve(p(21.6, 22.8), p(27, 20), p(29.5, 19))])]
+    }
+
+    /// A dotted square with its top-left corner drawn solid, sharp or rounded.
+    static func edges(rounded: Bool) -> [Stroke] {
+        let r = 6.0, k = r * 0.45
+        if !rounded {
+            return [Stroke(start: p(9, 18), segments: [.line(p(9, 27)), .line(p(27, 27)), .line(p(27, 9)), .line(p(18, 9))],
+                           dotted: true),
+                    Stroke(start: p(9, 18), segments: [.line(p(9, 9)), .line(p(18, 9))])]
+        }
+        return [Stroke(start: p(9, 18), segments: [.line(p(9, 27 - r)), .curve(p(9, 27 - k), p(9 + k, 27), p(9 + r, 27)),
+                                                   .line(p(27 - r, 27)), .curve(p(27 - k, 27), p(27, 27 - k), p(27, 27 - r)),
+                                                   .line(p(27, 9 + r)), .curve(p(27, 9 + k), p(27 - k, 9), p(27 - r, 9)),
+                                                   .line(p(18, 9))],
+                       dotted: true),
+                Stroke(start: p(9, 18), segments: [.line(p(9, 9 + r)), .curve(p(9, 9 + k), p(9 + k, 9), p(9 + r, 9)),
+                                                   .line(p(18, 9))])]
+    }
+
+    static func draw(_ strokes: [Stroke], in context: CGContext, ink: CGColor) {
+        context.setStrokeColor(ink)
+        context.setLineWidth(width)
+        context.setLineJoin(.round)
+        for stroke in strokes {
+            context.move(to: stroke.start)
+            for segment in stroke.segments {
+                switch segment {
+                case .line(let to): context.addLine(to: to)
+                case .curve(let c1, let c2, let to): context.addCurve(to: to, control1: c1, control2: c2)
+                }
+            }
+            if stroke.dotted {
+                context.setLineCap(.butt)
+                context.setLineDash(phase: dotPhase, lengths: dots)
+            } else {
+                context.setLineCap(.round)
+                context.setLineDash(phase: 0, lengths: [])
+            }
+            context.strokePath()
+        }
+    }
+
+    private static func p(_ x: Double, _ y: Double) -> CGPoint { CGPoint(x: x, y: y) }
 }
 
 struct InspectorSampleView: NSViewRepresentable {
@@ -48,11 +124,11 @@ struct InspectorSampleView: NSViewRepresentable {
             case .thickness(let value): element.style.width = min(5, max(1, value / 1.5))
             case .pattern(let value): element.style.pattern = value
             case .roughness(let value):
-                element = Element(tool: .rectangle, frame: Rect(x: 9, y: 8, width: 18, height: 20), style: style)
-                element.style.roughness = InspectorPreviewStyle.roughness(value)
+                InspectorGlyph.draw(InspectorGlyph.roughness(value), in: context, ink: ink.cgColor)
+                return
             case .edges(let rounded):
-                element = Element(tool: .rectangle, frame: Rect(x: 9, y: 9, width: 20, height: 20), style: style)
-                element.style.cornerRadius = rounded ? 7 : 0
+                InspectorGlyph.draw(InspectorGlyph.edges(rounded: rounded), in: context, ink: ink.cgColor)
+                return
             case .fill(let pattern):
                 element = Element(tool: .rectangle, frame: Rect(x: 8, y: 8, width: 21, height: 21), style: style)
                 element.style.fill = style.color
