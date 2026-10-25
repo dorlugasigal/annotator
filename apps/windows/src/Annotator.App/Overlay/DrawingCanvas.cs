@@ -86,10 +86,16 @@ internal sealed class DrawingCanvas : IOverlayCanvas
     private bool _hudShown;
     private bool _overHud;
     private uint? _hudPress;
+    /// <summary>Whether <see cref="_hudPress"/> is on the tip's ✕ rather than the Use apps button.</summary>
+    private bool _hudPressCloses;
     private WorkspaceSnapshot? _hintWorkspace;
     private DisplaySnapshot? _hintDisplay;
-    private (bool TextEditor, bool ActiveEdit, bool Shown) _hinted;
+    private (bool TextEditor, bool ActiveEdit, bool Shown, bool Closable) _hinted;
     private bool _hintShown;
+    private bool _hintClosable;
+    private readonly HintSchedule _hintSchedule = new();
+    private readonly System.Diagnostics.Stopwatch _hintClock = System.Diagnostics.Stopwatch.StartNew();
+    private Windows.System.DispatcherQueueTimer? _hintTimer;
     private bool _wasVisible;
     private string _summary = string.Empty;
     private bool _summaryDrawing;
@@ -715,6 +721,7 @@ internal sealed class DrawingCanvas : IOverlayCanvas
         _hud.Dispose();
         _factory.PointerEffects.Detach(_pointerEffects);
         _pointerEffects.Dispose();
+        _hintTimer?.Stop();
         _hint?.Dispose();
         _context.Overlay.Accessibility = null;
         _content.Children.Remove(_board);
@@ -1092,8 +1099,9 @@ internal sealed class DrawingCanvas : IOverlayCanvas
     }
 
     /// <summary>
-    /// Mac HUDButton: a primary press inside the shown Use apps button belongs to the button, and releasing it there uses
-    /// apps. While it fades out it takes no clicks. Returns true when the button took the input.
+    /// Mac HUDButton and HintCloseButton: a primary press inside the shown Use apps button or the tip's ✕ belongs to it, and
+    /// releasing it there uses apps or turns tips off. While they fade out they take no clicks. Returns true when a button
+    /// took the input.
     /// </summary>
     private bool HandleHud(in PointerInput input)
     {
@@ -1102,12 +1110,12 @@ internal sealed class DrawingCanvas : IOverlayCanvas
             return false;
         }
         Vector2 position = input.Current.Position;
-        Rect frame = CanvasHud.UseAppsFrame;
         double x = position.X / _scale, y = position.Y / _scale;
-        bool inside = _hud.IsVisible && x >= frame.X && y >= frame.Y && x < frame.MaxX && y < frame.MaxY;
+        bool useApps = _hud.IsVisible && Contains(CanvasHud.UseAppsFrame, x, y);
+        bool close = _hint is { IsVisible: true, Closable: true } hint && _hintShown && Contains(hint.CloseFrame, x, y);
         if (input.Kind is PointerInputKind.Move or PointerInputKind.Enter or PointerInputKind.Leave)
         {
-            bool over = inside && input.Kind != PointerInputKind.Leave;
+            bool over = (useApps || close) && input.Kind != PointerInputKind.Leave;
             if (over != _overHud)
             {
                 _overHud = over;
@@ -1119,9 +1127,16 @@ internal sealed class DrawingCanvas : IOverlayCanvas
             if (input.Kind == PointerInputKind.Up && Buttons(input.ChangedButton) == CanvasButtons.Primary)
             {
                 _hudPress = null;
-                if (inside)
+                if (_hudPressCloses ? close : useApps)
                 {
-                    ReleaseInput();
+                    if (_hudPressCloses)
+                    {
+                        TurnOffTips();
+                    }
+                    else
+                    {
+                        ReleaseInput();
+                    }
                 }
             }
             else if (input.Kind == PointerInputKind.Canceled)
@@ -1130,21 +1145,29 @@ internal sealed class DrawingCanvas : IOverlayCanvas
             }
             return true;
         }
-        if (input.Kind == PointerInputKind.Down && inside && Buttons(input.ChangedButton) == CanvasButtons.Primary)
+        if (input.Kind == PointerInputKind.Down && (useApps || close) && Buttons(input.ChangedButton) == CanvasButtons.Primary)
         {
             _hudPress = input.PointerId;
+            _hudPressCloses = !useApps;
             return true;
         }
         return false;
+
+        static bool Contains(Rect frame, double x, double y) => x >= frame.X && y >= frame.Y && x < frame.MaxX && y < frame.MaxY;
     }
 
     /// <summary>The Use apps button: release drawing input like Use apps. Safe on any thread (UI Automation invokes it).</summary>
     private void ReleaseInput() => _context.Channel.Send(new CanvasCommand(CanvasCommandKind.ReleaseInput, _display));
 
+    /// <summary>The tip's ✕: turn tips off (Mac setShortcutHints(false)). Safe on any thread (UI Automation invokes it).</summary>
+    private void TurnOffTips() => _context.Channel.Send(new CanvasCommand(CanvasCommandKind.TurnOffTips, _display));
+
     /// <summary>
-    /// Mac refreshHint: the tip shows on the editing target's canvas unless the person turned tips off, with the mode, the
-    /// shortcuts, zoom and what Escape does now. Its text is built again only when something it says changed, so a stroke's
-    /// samples cost a few comparisons.
+    /// Mac refreshHint: the tip shows on the editing target's canvas unless the person turned tips off, with the mode, what
+    /// Escape does now and zoom. It wakes when its <see cref="HintWake"/> changes and fades out
+    /// <see cref="Annotator.Core.Motion.MotionTiming.HintDwellDuration"/> later (Mac HintSchedule); strokes and zoom values
+    /// update the text without waking it. While drawing it has the ✕ that turns tips off. Its text is built again only when
+    /// something it says changed, so a stroke's samples cost a few comparisons.
     /// </summary>
     private void UpdateHint(WorkspaceSnapshot? workspace, DisplaySnapshot? display, bool animate)
     {
@@ -1154,8 +1177,10 @@ internal sealed class DrawingCanvas : IOverlayCanvas
         }
         bool textEditor = _text.Editor is { IsEnded: false };
         bool activeEdit = _controller.HasActiveEdit;
-        bool shown = display is not null && WorkspaceHint.IsVisible(workspace, display);
-        var hinted = (textEditor, activeEdit, shown);
+        double now = _hintClock.Elapsed.TotalSeconds;
+        bool shown = _hintSchedule.Shows(WorkspaceHint.Wake(workspace, display, textEditor), now);
+        bool closable = CanvasHud.ShowsUseApps(workspace);
+        var hinted = (textEditor, activeEdit, shown, closable);
         if (ReferenceEquals(workspace, _hintWorkspace) && ReferenceEquals(display, _hintDisplay) && hinted == _hinted)
         {
             return;
@@ -1164,18 +1189,45 @@ internal sealed class DrawingCanvas : IOverlayCanvas
         _hintDisplay = display;
         _hinted = hinted;
         string text = WorkspaceHint.Text(workspace, textEditor, activeEdit, workspace.ZoomHint);
-        Rect view = HintBox.ViewFrame(_bounds.Width, CanvasHud.ShowsUseApps(workspace));
+        Rect view = HintBox.ViewFrame(_bounds.Width, closable);
         string? before = _hint.Text;
-        _hint.Update(text, view, shown, animate, ReducesMotion());
+        _hint.Update(text, view, closable, shown, animate, ReducesMotion());
         if (_hint.Failure is { } failure && shown && !_hintShown)
         {
             _factory.Report(new OverlayEvent.Failure("Show the on-screen tips", failure));
         }
-        if (shown != _hintShown || (shown && text != before))
+        ScheduleHintFade(shown, now);
+        if (shown != _hintShown || closable != _hintClosable || (shown && text != before))
         {
             _hintShown = shown;
+            _hintClosable = closable;
             _accessibility.Tree = AccessibleTree();
         }
+    }
+
+    /// <summary>A shown tip looks again when its dwell ends, so it fades out without other input.</summary>
+    private void ScheduleHintFade(bool shown, double now)
+    {
+        if (!shown)
+        {
+            _hintTimer?.Stop();
+            return;
+        }
+        if (_hintTimer is null)
+        {
+            _hintTimer = _factory.Queue.CreateTimer();
+            _hintTimer.IsRepeating = false;
+            _hintTimer.Tick += (_, _) =>
+            {
+                if (!_disposed)
+                {
+                    UpdateHint(_hintWorkspace, _hintDisplay, animate: true);
+                }
+            };
+        }
+        _hintTimer.Stop();
+        _hintTimer.Interval = TimeSpan.FromSeconds(Math.Max(0, _hintSchedule.HidesAt - now) + 0.001);
+        _hintTimer.Start();
     }
 
     /// <summary>
@@ -1211,7 +1263,7 @@ internal sealed class DrawingCanvas : IOverlayCanvas
             Value = _summary.Length == 0 ? null : _summary,
             HelpText = CanvasAccessibility.Help,
         };
-        var children = ImmutableArray.CreateBuilder<OverlayAccessibleNode>(3);
+        var children = ImmutableArray.CreateBuilder<OverlayAccessibleNode>(4);
         if (_hudShown)
         {
             Rect frame = CanvasHud.UseAppsAccessibleFrame;
@@ -1225,6 +1277,15 @@ internal sealed class DrawingCanvas : IOverlayCanvas
         {
             // Mac WorkspaceHintView: static text whose value is the tip, over the hint view's frame.
             children.Add(new OverlayAccessibleNode(OverlayControlType.Text, tip, Pixels(_hint.View)) { Value = tip });
+            if (_hintClosable && _hint.Closable)
+            {
+                // Mac HintCloseButton: the ✕ that turns tips off, over its click area.
+                children.Add(new OverlayAccessibleNode(OverlayControlType.Button, WorkspaceHint.CloseLabel, Pixels(HintBox.CloseAccessibleFrame(_hint.Box)))
+                {
+                    HelpText = WorkspaceHint.CloseHelp,
+                    Invoke = TurnOffTips,
+                });
+            }
         }
         if (_editorNode is { } editor)
         {

@@ -55,6 +55,7 @@ public sealed class MotionCorpusTests
             ["hintFadeInDuration"] = MotionTiming.HintFadeInDuration,
             ["hintFadeOutDuration"] = MotionTiming.HintFadeOutDuration,
             ["hintTextCrossfadeDuration"] = MotionTiming.HintTextCrossfadeDuration,
+            ["hintDwellDuration"] = MotionTiming.HintDwellDuration,
             ["pointerClickDuration"] = CursorHighlightSettings.ClickDuration,
         };
         foreach (JsonProperty property in root.EnumerateObject())

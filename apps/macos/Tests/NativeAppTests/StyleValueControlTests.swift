@@ -34,7 +34,7 @@ final class StyleValueControlTests: XCTestCase {
         func paletteIsVisible() -> Bool {
             NSApp.windows.filter(\.isVisible).compactMap(\.contentView).flatMap {
                 NativeAccessibilityNode.nodes(in: $0)
-            }.contains { $0.accessibilityLabel() == "Stroke hex color and alpha" }
+            }.contains { $0.accessibilityLabel() == "Pick from screen" }
         }
         XCTAssertTrue(paletteIsVisible())
         func event(_ type: NSEvent.EventType, _ point: CGPoint) throws -> NSEvent {

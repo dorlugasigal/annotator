@@ -1,4 +1,5 @@
 using Annotator.Core;
+using Annotator.Core.Motion;
 using Annotator.Core.Geometry;
 using Annotator.Core.Scene;
 using Annotator.Workspace.Canvas;
@@ -13,26 +14,85 @@ namespace Annotator.Workspace.Tests.Canvas;
 public sealed class WorkspaceHintTests
 {
     [Fact]
-    public void TipsTextFollowsTheModeToolAndEditAndEndsWithTheFooter()
+    public void TipsTextIsTheModeAndWhatEscapeDoesOnOneLine()
     {
-        // Mac ToolbarShortcutSettingsTests (tips end with the footer) and LocalZoomScrollTests ("Using apps", "Drawing").
+        // Mac ToolbarShortcutSettingsTests and LocalZoomScrollTests ("Using apps", "Drawing").
         WorkspaceModel model = Create();
         model.ShowToolbar();
         model.BeginDrawing();
-        string drawing = WorkspaceHint.Text(model.Snapshot, hasTextEditor: false, hasActiveEdit: false);
-        Assert.Equal("Drawing  ·  Ctrl+Shift+2: draw\nEscape: use apps\nTurn off these tips in Settings > General.", drawing);
-        Assert.EndsWith(WorkspaceHint.Footer, drawing, StringComparison.Ordinal);
+        Assert.Equal("Drawing  ·  Escape: use apps", WorkspaceHint.Text(model.Snapshot, hasTextEditor: false, hasActiveEdit: false));
+        Assert.Equal("Drawing  ·  Escape finishes text", WorkspaceHint.Text(model.Snapshot, hasTextEditor: true, hasActiveEdit: true));
+        Assert.Equal("Drawing  ·  Escape cancels the edit", WorkspaceHint.Text(model.Snapshot, false, hasActiveEdit: true));
+        // Zoom off adds nothing; the old screen zoom line is gone.
+        Assert.Equal("Drawing  ·  Escape: use apps", WorkspaceHint.Text(model.Snapshot, false, false, new ZoomHint(false, 1, string.Empty)));
         model.Choose(Tool.Highlighter);
-        Assert.Contains("Hold Shift for a straight highlight.", WorkspaceHint.Text(model.Snapshot, false, false), StringComparison.Ordinal);
-        Assert.Contains("Escape finishes text.", WorkspaceHint.Text(model.Snapshot, hasTextEditor: true, hasActiveEdit: true), StringComparison.Ordinal);
-        Assert.Contains("Escape cancels the current edit.", WorkspaceHint.Text(model.Snapshot, false, hasActiveEdit: true), StringComparison.Ordinal);
+        Assert.Equal("Drawing  ·  Escape: use apps\nHold Shift for a straight highlight.", WorkspaceHint.Text(model.Snapshot, false, false));
+        // While zooming Escape stops nothing, so the first line says only the mode.
+        Assert.Equal("Drawing\nHold Shift for a straight highlight.\nZoom 2.0×  ·  Ctrl+1: stop\nScroll",
+            WorkspaceHint.Text(model.Snapshot, false, false, new ZoomHint(true, 2, "Scroll")));
         model.UseApps();
-        string apps = WorkspaceHint.Text(model.Snapshot, false, false);
-        Assert.StartsWith("Using apps", apps, StringComparison.Ordinal);
-        Assert.DoesNotContain("Escape: use apps", apps, StringComparison.Ordinal);
-        // The Mac reference's zoom line appears once zoom exists on Windows; Alt+scroll needs no permission (WIN-INP-08).
-        Assert.Contains("Ctrl+1: screen zoom  ·  Alt+scroll starts zoom",
-            WorkspaceHint.Text(model.Snapshot, false, false, new ZoomHint(false, 1, string.Empty)), StringComparison.Ordinal);
+        Assert.Equal("Using apps  ·  Ctrl+Shift+2: draw", WorkspaceHint.Text(model.Snapshot, false, false));
+        Assert.Equal("Using apps  ·  Ctrl+Shift+2: draw  ·  Escape cancels the edit", WorkspaceHint.Text(model.Snapshot, false, true));
+        Assert.DoesNotContain("Turn off", WorkspaceHint.Text(model.Snapshot, false, false), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheTipWakesOnWhatItSaysAndFadesAfterItsDwell()
+    {
+        // Mac HintSchedule: it wakes when it can show, the mode, the highlighter, zoom or the text editor changes.
+        Assert.Equal(5.0, MotionTiming.HintDwellDuration);
+        WorkspaceModel model = Create();
+        model.ShowToolbar();
+        model.BeginDrawing();
+        DisplaySnapshot Target() => model.Snapshot.Display(model.Snapshot.ActiveDisplay!.Value)!;
+        var schedule = new HintSchedule();
+        Assert.True(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), hasTextEditor: false), 10));
+        Assert.Equal(15, schedule.HidesAt);
+        Assert.True(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 14.9));
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 15));
+
+        // Strokes (an active edit) and zoom values don't wake it; they aren't in its wake key.
+        model.ApplyInkKey("r");
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 16));
+
+        // The highlighter wakes it, and so does a text editor.
+        model.Choose(Tool.Highlighter);
+        Assert.True(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 20));
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 25.5));
+        Assert.True(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), hasTextEditor: true), 26));
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), true), 31));
+
+        // A mode change wakes it.
+        model.UseApps();
+        Assert.True(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 40));
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 45));
+
+        // Turning tips off hides it at once; turning them back on wakes it.
+        model.SetShortcutHints(false);
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 46));
+        model.SetShortcutHints(true);
+        Assert.True(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, Target(), false), 47));
+        // Without a display it can't show.
+        Assert.False(schedule.Shows(WorkspaceHint.Wake(model.Snapshot, null, false), 48));
+    }
+
+    [Fact]
+    public void WakeKeysIgnoreEditsAndMagnification()
+    {
+        WorkspaceModel model = Create();
+        model.ShowToolbar();
+        model.BeginDrawing();
+        DisplaySnapshot target = model.Snapshot.Display(model.Snapshot.ActiveDisplay!.Value)!;
+        HintWake wake = WorkspaceHint.Wake(model.Snapshot, target, false);
+        Assert.Equal(new HintWake(Available: true, Drawing: true, Highlighter: false, Zooming: false, EditingText: false), wake);
+        var schedule = new HintSchedule();
+        Assert.True(schedule.Shows(wake with { Zooming = true }, 0));
+        // The same key at another magnification is the same key: no wake.
+        Assert.False(schedule.Shows(wake with { Zooming = true }, 6));
+        Assert.True(schedule.Shows(wake, 7));
+        // Unavailable keeps its last wake time, and hides.
+        Assert.False(schedule.Shows(wake with { Available = false }, 8));
+        Assert.Equal(7, schedule.WokeAt);
     }
 
     [Fact]
@@ -71,26 +131,68 @@ public sealed class WorkspaceHintTests
         Assert.Equal(new Rect(16, 14, 368, 130), HintBox.ViewFrame(400, useAppsShown: false));
         Assert.Equal(new Rect(16, 14, 80, 130), HintBox.ViewFrame(60, useAppsShown: false));
 
-        const string text = "Drawing  ·  Ctrl+Shift+2: draw\nCtrl+1: screen zoom  ·  Alt+scroll starts zoom\nEscape: use apps\n" + WorkspaceHint.Footer;
+        const string text = "Drawing  ·  Escape: use apps\nHold Shift for a straight highlight.";
         var measurer = new FixedMeasurer();
-        (DisplayList list, Rect box) = HintBox.Build(text, new Rect(16, 50, 540, 130), measurer);
-        // The Mac reference: 3 lines of 13 points and a 12-point footer, 7 above and below: 65 high.
-        Assert.Equal(65, box.Height);
-        Assert.Equal(Math.Ceiling(measurer.Width("Ctrl+1: screen zoom  ·  Alt+scroll starts zoom", 11)) + 18, box.Width);
+        (DisplayList list, Rect box) = HintBox.Build(text, new Rect(16, 50, 540, 130), measurer, closable: false);
+        // 2 lines of the 12-point medium font, 15 points each, and 7 above and below: 44 high.
+        Assert.Equal(MacTextMetrics.LineHeight(12) * 2 + 14, box.Height);
+        Assert.Equal(15, MacTextMetrics.LineHeight(12));
+        Assert.Equal(Math.Ceiling(measurer.Width("Hold Shift for a straight highlight.", 12)) + 18, box.Width);
         Assert.Equal(new Point(16, 50), new Point(box.X, box.Y));
         DisplayItem shape = list.Items[0];
         Assert.Equal(DisplayOp.FillPath, shape.Op);
-        Assert.Equal(new RGBA(0, 0, 0, 0.78), shape.Paint!.Color);
+        Assert.Equal(new RGBA(0, 0, 0, 0.82), shape.Paint!.Color);
         TextRun[] lines = [.. list.Items.ToArray().Skip(1).Select(item => item.Text!)];
-        Assert.Equal(4, lines.Length);
-        Assert.Equal([57.0, 70.0, 83.0, 96.0], lines.Select(line => line.Frame.Y));
-        Assert.Equal(57 + MacTextMetrics.Ascender(11), lines[0].Baseline, 9);
-        Assert.Equal(96 + MacTextMetrics.Ascender(10), lines[3].Baseline, 9);
-        Assert.Equal(new TextFont(FontDesign.System, HintBox.Medium, 11), lines[0].Font);
-        Assert.Equal(new TextFont(FontDesign.System, FontWeight.Regular, 10), lines[3].Font);
-        Assert.Equal(new RGBA(1, 1, 1, 0.62), lines[3].Paint.Color);
-        Assert.Equal(new RGBA(1, 1, 1), lines[1].Paint.Color);
+        Assert.Equal(2, lines.Length);
+        Assert.Equal([57.0, 72.0], lines.Select(line => line.Frame.Y));
+        Assert.Equal(57 + MacTextMetrics.Ascender(12), lines[0].Baseline, 9);
+        Assert.All(lines, line => Assert.Equal(new TextFont(FontDesign.System, HintBox.Medium, 12), line.Font));
+        Assert.All(lines, line => Assert.Equal(new RGBA(1, 1, 1), line.Paint.Color));
         Assert.All(lines, line => Assert.Equal(25, line.Frame.X));
+        Assert.All(lines, line => Assert.Equal(box.Width - 18, line.Frame.Width));
+    }
+
+    [Fact]
+    public void AClosableBoxLeavesRoomForTheCloseCross()
+    {
+        // Mac WorkspaceHint.draw(closable: true): 18 more points for the ✕, drawn at the right of the first line.
+        const string text = "Drawing  ·  Escape: use apps";
+        var measurer = new FixedMeasurer();
+        (DisplayList list, Rect box) = HintBox.Build(text, new Rect(16, 50, 540, 130), measurer, closable: true);
+        double textWidth = Math.Ceiling(measurer.Width(text, 12));
+        Assert.Equal(textWidth + 18 + 18, box.Width);
+        Assert.Equal(29, box.Height);
+        TextRun line = list.Items[1].Text!;
+        Assert.Equal(box.Width - 18 - 18, line.Frame.Width);
+        DisplayItem cross = list.Items[^1];
+        Assert.Equal(DisplayOp.StrokePath, cross.Op);
+        Assert.Equal(new RGBA(1, 1, 1, 0.7), cross.Paint!.Color);
+        Assert.Equal(1.5, cross.Stroke!.Width);
+        Assert.Equal(LineCap.Round, cross.Stroke.Cap);
+        Point center = HintBox.CloseCenter(box);
+        Assert.Equal(new Point(box.MaxX - 9 - 3.5, 50 + 7 + 7.5), center);
+        Assert.Equal(new Rect(center.X - 3.5, center.Y - 3.5, 7, 7), cross.Path!.Bounds);
+        Assert.Equal(new Rect(center.X - 12, center.Y - 12, 24, 24), HintBox.CloseFrame(box));
+
+        // A narrow view caps the box; the text keeps the room for the ✕.
+        (_, Rect narrow) = HintBox.Build(text, new Rect(16, 14, 80, 130), measurer, closable: true);
+        Assert.Equal(80, narrow.Width);
+    }
+
+    [Fact]
+    public void TheCloseCrossTurnsTipsOffThroughTheCanvasCommand()
+    {
+        var store = new MemoryPreferencesStore();
+        WorkspaceModel model = Create(store: store);
+        model.ShowToolbar();
+        model.BeginDrawing();
+        Assert.Equal("Turn off tips", WorkspaceHint.CloseLabel);
+        Assert.Equal("Turn them back on in Settings > General.", WorkspaceHint.CloseHelp);
+        Assert.Equal(CanvasCommandResult.Done, model.Perform(new CanvasCommand(CanvasCommandKind.TurnOffTips, model.Snapshot.ActiveDisplay!.Value)));
+        Assert.False(model.Snapshot.Preferences.ShowShortcutHints);
+        Assert.False(WorkspaceHint.IsVisible(model.Snapshot, model.Snapshot.Display(model.Snapshot.ActiveDisplay!.Value)!));
+        Assert.Equal(WorkspaceMode.Draw, model.Snapshot.Mode);
+        Assert.False(Create(store: store).Snapshot.Preferences.ShowShortcutHints, "Turning tips off is saved like the Settings switch.");
     }
 
     [Fact]

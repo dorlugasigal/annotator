@@ -128,6 +128,7 @@ enum MotionExport {
             "snapMorphDuration": .double(MotionTiming.snapMorphDuration), "eraseFadeDuration": .double(MotionTiming.eraseFadeDuration),
             "hintFadeInDuration": .double(MotionTiming.hintFadeInDuration), "hintFadeOutDuration": .double(MotionTiming.hintFadeOutDuration),
             "hintTextCrossfadeDuration": .double(MotionTiming.hintTextCrossfadeDuration),
+            "hintDwellDuration": .double(MotionTiming.hintDwellDuration),
             "pointerClickDuration": .double(CursorHighlightSettings.clickDuration),
             "notes": .array([
                 "Visibility durations apply to the toolbar and to each shape (WorkspaceLayerMotion in ToolbarSlideMotion.swift). Reversals take max(minimumReversalShare, distance left) of the duration and use the standard curve.",

@@ -91,7 +91,7 @@ Color popover, arrowhead choices and zoom controls.
 | `arrowhead-end`<br>193 x 319 pt<br>Arrowhead choices for the end. | <img src="pickers/arrowhead-end-light.png" width="200"> | <img src="pickers/arrowhead-end-dark.png" width="200"> |
 | `arrowhead-start`<br>193 x 319 pt<br>Arrowhead choices for the start. | <img src="pickers/arrowhead-start-light.png" width="200"> | <img src="pickers/arrowhead-start-dark.png" width="200"> |
 | `color-fill`<br>284 x 511 pt<br>Fill color popover. | <img src="pickers/color-fill-light.png" width="420"> | <img src="pickers/color-fill-dark.png" width="420"> |
-| `color-gradient`<br>284 x 351 pt<br>Stroke with the spectrum gradient preset. | <img src="pickers/color-gradient-light.png" width="420"> | <img src="pickers/color-gradient-dark.png" width="420"> |
+| `color-gradient`<br>284 x 405 pt<br>Stroke with the spectrum gradient preset. | <img src="pickers/color-gradient-light.png" width="420"> | <img src="pickers/color-gradient-dark.png" width="420"> |
 | `color-stroke`<br>284 x 487 pt<br>Stroke color popover, 284 points wide. Shown in a system popover. | <img src="pickers/color-stroke-light.png" width="420"> | <img src="pickers/color-stroke-dark.png" width="420"> |
 | `zoom-compact`<br>68 x 67 pt<br>Compact zoom controls from the toolbar. | <img src="pickers/zoom-compact-light.png" width="136"> | <img src="pickers/zoom-compact-dark.png" width="136"> |
 | `zoom-full`<br>169 x 50 pt<br>Zoom controls in full properties. | <img src="pickers/zoom-full-light.png" width="200"> | <img src="pickers/zoom-full-dark.png" width="200"> |
@@ -219,7 +219,7 @@ Report a problem, Share feedback, What's changed, coffee reminder, keycaps, erro
 
 | State | Light | Dark |
 | --- | --- | --- |
-| `canvas-hint`<br>540 x 130 pt<br>On-screen tip in the canvas corner while drawing. | <img src="dialogs/canvas-hint-light.png" width="420"> | <img src="dialogs/canvas-hint-dark.png" width="420"> |
+| `canvas-hint`<br>540 x 130 pt<br>On-screen tip in the canvas corner while drawing, with the ✕ that turns tips off. | <img src="dialogs/canvas-hint-light.png" width="420"> | <img src="dialogs/canvas-hint-dark.png" width="420"> |
 | `coffee-reminder`<br>460 x 135 pt<br>Coffee reminder. | <img src="dialogs/coffee-reminder-light.png" width="420"> | <img src="dialogs/coffee-reminder-dark.png" width="420"> |
 | `error-window`<br>460 x 160 pt<br>Import error window, titled Annotator. | <img src="dialogs/error-window-light.png" width="420"> | <img src="dialogs/error-window-dark.png" width="420"> |
 | `keycaps-hide-only`<br>110 x 44 pt<br>Keycaps for the default hide-only shortcut. Windows shows Ctrl, Alt, Shift and Win as text. | <img src="dialogs/keycaps-hide-only-light.png" width="200"> | <img src="dialogs/keycaps-hide-only-dark.png" width="200"> |

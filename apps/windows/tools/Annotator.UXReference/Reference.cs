@@ -32,6 +32,12 @@ internal sealed class AxNode
 
     public double[]? Frame { get; init; }
 
+    /// <summary>
+    /// The node sits at the end of a line of text, so its left edge follows that text's width, which comes from the fonts
+    /// (D-4). Only an expectation sets it; the reference never records it.
+    /// </summary>
+    public bool FollowsTextWidth { get; init; }
+
     /// <summary>False for a disabled control. The reference never records it (see the README), so it is reported, not compared.</summary>
     public bool Enabled { get; init; } = true;
 
@@ -167,6 +173,10 @@ internal sealed record ReferenceState(string Surface, string State, string Theme
         if (ShortcutExpectations.Applies(surface, state))
         {
             return ShortcutExpectations.Apply(reference);
+        }
+        if (HintExpectations.Applies(surface, state))
+        {
+            return HintExpectations.Apply(reference);
         }
         if (surface != "canvas")
         {
