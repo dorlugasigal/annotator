@@ -100,6 +100,8 @@ internal sealed partial class ToolbarWindow
             content.Children.Add(ToolbarParts.Divider(height: 1));
             ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, look.InspectorCompact, look.Width - 24, look.InspectorLimit, _updates,
                                                              look.InspectorCompact ? 1 : look.Metrics.PropertiesScale);
+            // Centered like the Mac's VStack: the minimal toolbar's 8-point padding leaves 4 points on each side.
+            viewport.HorizontalAlignment = HorizontalAlignment.Center;
             content.Children.Add(viewport);
             if (revealedFrom is not null)
             {

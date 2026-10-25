@@ -113,16 +113,13 @@ internal sealed class PropertiesPanel
         UIElement content = panel.Root;
         if (scale < 1)
         {
-            // A frame of the unscaled width keeps the scale exact when the panel hugs its controls (Mac scaleEffect).
-            var frame = new Grid { Width = contentWidth / scale, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
-            frame.Children.Add(panel.Root);
-            content = new Viewbox
+            content = new ScaledContent
             {
+                Factor = scale,
                 Width = contentWidth,
-                Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top,
-                Child = frame,
+                Child = panel.Root,
             };
         }
         return new ScrollViewer
