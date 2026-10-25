@@ -52,8 +52,8 @@ public static class Program
         // also reports the activation kind to a packaged app, once, so it is read here before anything else could.
         var launch = LaunchArguments.Parse(args);
         Board = launch.Board;
-        QuietLaunch = Board is null && (launch.StartupTask || Platform.Startup.StartupTaskService.ActivatedByStartupTask());
-        StartupLog.Note("launch", QuietLaunch ? "quiet (startup task)" : Board is null ? "ordinary" : "board");
+        QuietLaunch = launch.Quiet || Board is null && Platform.Startup.StartupTaskService.ActivatedByStartupTask();
+        StartupLog.Note("launch", QuietLaunch ? launch.AfterUpdate ? "quiet (after update)" : "quiet (startup task)" : Board is null ? "ordinary" : "board");
         s_instance = new Mutex(initiallyOwned: false, SingleInstance.MutexName, out bool created);
         if (!created)
         {
@@ -67,6 +67,7 @@ public static class Program
             return result == SingleInstance.ForwardResult.Delivered ? 0 : 1;
         }
 
+        RegisterUpdateRestart(LaunchArguments.AfterUpdateSwitch);
         EnablePointerMessages();
         Application.Start(parameters =>
         {
@@ -76,6 +77,27 @@ public static class Program
         });
         GC.KeepAlive(s_instance);
         return 0;
+    }
+
+    /// <summary>
+    /// Asks Windows to start Annotator again when it closes it to install an update (WIN-SYS-03), with
+    /// <paramref name="arguments"/>. Only an installed package is updated that way; a refusal leaves the update as it was.
+    /// </summary>
+    internal static void RegisterUpdateRestart(string arguments)
+    {
+        if (!Platform.Startup.StartupTaskService.HasPackageIdentity)
+        {
+            return;
+        }
+        try
+        {
+            Platform.Updates.UpdateRestart.Register(arguments);
+            StartupLog.Note("update-restart", arguments.Length == 0 ? "ordinary" : arguments);
+        }
+        catch (Platform.NativeCallException error)
+        {
+            StartupLog.Note("update-restart", error.Message);
+        }
     }
 
     /// <summary>

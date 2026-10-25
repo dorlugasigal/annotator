@@ -25,6 +25,9 @@ struct ToolbarMetrics: Equatable {
     var railReserve: CGFloat { regularReserve - 16 }
     var compactRailReserve: CGFloat { minimal ? 150 : 214 }
     var propertiesWidth: CGFloat { minimal ? 640 : 700 }
+    /// Full properties below a minimal rail keep the expanded toolbar's layout, drawn smaller by as much as the tool buttons,
+    /// so a tool's properties stay on one row.
+    var propertiesScale: CGFloat { minimal ? 34.0 / 44.0 : 1 }
     var minimumWidth: CGFloat { minimal ? 300 : 400 }
     var compactThreshold: CGFloat { minimal ? 420 : 700 }
     var verticalRailWidth: CGFloat { buttonWidth + padding * 2 }

@@ -288,6 +288,8 @@ GlobalSize
 CLIPBOARD_FORMAT
 // Launch at sign-in: whether the app runs with a package identity (the MSIX startup task needs one)
 GetCurrentPackageFullName
+// Updates (WIN-SYS-03): Windows starts Annotator again after it closes it to install an update
+RegisterApplicationRestart
 // Pointer effects (Spotlight and Cursor halo): raw mouse input on a message-only window while an effect shows
 RegisterRawInputDevices
 GetRegisteredRawInputDevices

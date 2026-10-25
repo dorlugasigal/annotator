@@ -98,7 +98,8 @@ internal sealed partial class ToolbarWindow
             // Full properties replace the quick properties below the rail (Mac pinned CompactInspectorViewport, 24 points
             // narrower than the toolbar in both sizes).
             content.Children.Add(ToolbarParts.Divider(height: 1));
-            ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, look.InspectorCompact, look.Width - 24, look.InspectorLimit, _updates);
+            ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, look.InspectorCompact, look.Width - 24, look.InspectorLimit, _updates,
+                                                             look.InspectorCompact ? 1 : look.Metrics.PropertiesScale);
             content.Children.Add(viewport);
             if (revealedFrom is not null)
             {

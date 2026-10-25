@@ -28,6 +28,17 @@ public sealed class LaunchArgumentsTests
     }
 
     [Fact]
+    public void TheAfterUpdateSwitchMakesAQuietLaunch()
+    {
+        LaunchArguments launch = LaunchArguments.Parse([LaunchArguments.AfterUpdateSwitch]);
+        Assert.True(launch.AfterUpdate);
+        Assert.False(launch.StartupTask);
+        Assert.True(launch.Quiet);
+        Assert.Null(launch.Board);
+        Assert.Equal("--after-update", LaunchArguments.AfterUpdateSwitch);
+    }
+
+    [Fact]
     public void AFileAssociationLaunchOpensTheBoardAtItsFullPath()
     {
         string board = Path.Combine(Path.GetTempPath(), "Team notes", "Explanation.annotator");

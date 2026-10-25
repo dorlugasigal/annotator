@@ -164,7 +164,7 @@ public static class UpdateText
     public const string Checking = "Checking the Microsoft Store for updates...";
     public const string UpToDate = "Annotator is up to date.";
     public const string Available = "An update is ready in the Microsoft Store. Select Check for updates to install it.";
-    public const string Installing = "The Microsoft Store is installing the update. Windows may close Annotator to finish.";
+    public const string Installing = "The Microsoft Store is installing the update. If Windows closes Annotator to finish, Annotator opens again by itself.";
     public const string Installed = "The update is installed. Quit Annotator and open it again to use the new version.";
     public const string Cancelled = "The update was not installed. Select Check for updates to try again.";
     public const string LowBattery = "The update was not installed because the battery is low. Plug in your computer and try again.";

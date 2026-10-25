@@ -4,6 +4,15 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Changed
+
+- With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.
+- The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
+
+### Fixed
+
+- On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.
+
 ## 0.1.0-beta.13 (build 31) - 2026-10-25
 
 ### Added

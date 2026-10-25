@@ -149,10 +149,12 @@ enum TutorialText {
         TutorialKeyboard.shows(keys(for: goal, preferences: preferences, color: color), mac: true)
     }
 
-    /// The finish card's keys: Draw, Use apps, Show or hide and Undo.
+    /// The finish card's keys: Draw, Use apps, Show or hide, Undo, Zoom and Break timer.
     static func finishRows(preferences: WorkspacePreferences) -> [(label: String, keys: [String])] {
         [("Draw", [resumeShortcut(preferences).label]), ("Use apps", [escapeKey]),
-         ("Show or hide", [preferences.activationShortcut.label]), ("Undo", [undoShortcut])]
+         ("Show or hide", [preferences.activationShortcut.label]), ("Undo", [undoShortcut]),
+         ("Zoom", [(preferences.zoomShortcut ?? .liveZoom).label]),
+         ("Break timer", [(preferences.breakShortcut ?? .breakTimer).label])]
     }
 
     /// A line split into its words and its keys: "Press {⌘Z}, or click Undo." gives ("Press ", no keys), ("", ⌘Z) and
