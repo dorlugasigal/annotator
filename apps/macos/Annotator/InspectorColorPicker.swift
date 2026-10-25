@@ -193,8 +193,8 @@ struct InspectorColorPalette: View {
                         wheelExpanded = false
                     })
             ) {
-                Text("Solid").tag(false)
                 Text("Gradient").tag(true)
+                Text("Solid").tag(false)
             }.pickerStyle(.segmented).labelsHidden()
             VStack(alignment: .leading, spacing: 12) {
                 if !wheelExpanded {

@@ -14,8 +14,8 @@ namespace Annotator.Rendering.Presentation;
 /// The on-screen tip at the canvas's top-left corner (Mac WorkspaceHintView with its HUDFader): the box of
 /// <see cref="HintBox"/> on its own surface, fading in over 0.16 s with a 3-point rise and out over 0.12 s. A new text while
 /// the tip shows crossfades over 0.14 s, unless the text changed less than 0.14 s before, as a value changing every frame
-/// updates in place. Two <see cref="OverlayHud"/>s take turns for the crossfade; a resting tip costs nothing. Use it on the
-/// overlay thread that created it.
+/// updates in place. While <see cref="Closable"/>, the box has the ✕ that turns tips off. Two <see cref="OverlayHud"/>s
+/// take turns for the crossfade; a resting tip costs nothing. Use it on the overlay thread that created it.
 /// </summary>
 public sealed class HintHud : IDisposable
 {
@@ -52,6 +52,12 @@ public sealed class HintHud : IDisposable
     /// <summary>The drawn box, in canvas points.</summary>
     public Rect Box { get; private set; }
 
+    /// <summary>Whether the box has the ✕ (Mac WorkspaceHintView.closable).</summary>
+    public bool Closable { get; private set; }
+
+    /// <summary>Where a click on the ✕ lands (<see cref="HintBox.CloseFrame"/>), in canvas points.</summary>
+    public Rect CloseFrame => HintBox.CloseFrame(Box);
+
     /// <summary>Whether the tip shows or fades in.</summary>
     public bool IsVisible => huds[current].IsVisible;
 
@@ -59,16 +65,17 @@ public sealed class HintHud : IDisposable
     public Exception? Failure => huds[current].Failure;
 
     /// <summary>
-    /// Shows <paramref name="text"/> in <paramref name="view"/>, or hides the tip. <paramref name="animate"/> is false when the
-    /// overlay itself appears or goes, where the tip changes at once like the Mac's.
+    /// Shows <paramref name="text"/> in <paramref name="view"/>, with the ✕ when <paramref name="closable"/>, or hides the
+    /// tip. <paramref name="animate"/> is false when the overlay itself appears or goes, where the tip changes at once like
+    /// the Mac's.
     /// </summary>
-    public void Update(string text, Rect view, bool shown, bool animate, bool reduceMotion)
+    public void Update(string text, Rect view, bool closable, bool shown, bool animate, bool reduceMotion)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         ArgumentNullException.ThrowIfNull(text);
-        if (text != Text || view != View)
+        if (text != Text || view != View || closable != Closable)
         {
-            (DisplayList list, Rect box) = HintBox.Build(text, view, measurer);
+            (DisplayList list, Rect box) = HintBox.Build(text, view, measurer, closable);
             double now = clock.Elapsed.TotalSeconds;
             bool crossfade = animate && shown && IsVisible && Text is not null && text != Text &&
                 now - lastTextChange >= MotionTiming.HintTextCrossfadeDuration;
@@ -78,6 +85,7 @@ public sealed class HintHud : IDisposable
             }
             Text = text;
             View = view;
+            Closable = closable;
             Box = box;
             Rect area = Outer(box);
             if (crossfade)

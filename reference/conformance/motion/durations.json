@@ -1,5 +1,6 @@
 {
   "eraseFadeDuration" : 0.12,
+  "hintDwellDuration" : 5,
   "hintFadeInDuration" : 0.16,
   "hintFadeOutDuration" : 0.12,
   "hintTextCrossfadeDuration" : 0.14,

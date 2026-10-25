@@ -221,6 +221,9 @@ public static class MotionTiming
 
     public const double HintTextCrossfadeDuration = 0.14;
 
+    /// <summary>How long the on-screen tip stays after it wakes, before it fades out.</summary>
+    public const double HintDwellDuration = 5.0;
+
     /// <summary>Selection, toggles and small state changes.</summary>
     public static SpringMotion Snappy { get; } = new(0.28, 0.86);
 

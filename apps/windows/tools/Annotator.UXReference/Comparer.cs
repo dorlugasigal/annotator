@@ -129,12 +129,17 @@ internal static class Comparer
 
     private static bool Aligns((AxNode Node, int Depth) expected, (AxNode Node, int Depth) actual) => expected.Node.Key == actual.Node.Key;
 
-    /// <summary>Only the frame of a static text or heading differs, its height and vertical position match, and it is narrower or wider.</summary>
+    /// <summary>
+    /// Only the frame of a static text or heading differs, its height and vertical position match, and it is narrower or
+    /// wider; or only the left edge of a node that follows a text's width (<see cref="AxNode.FollowsTextWidth"/>) differs.
+    /// </summary>
     private static bool TextWidthOnly(AxNode expected, AxNode actual, List<string> differences) =>
-        expected.Role is "AXStaticText" or "AXHeading" && differences.Count == 1 && differences[0].StartsWith("frame ", StringComparison.Ordinal) &&
+        differences.Count == 1 && differences[0].StartsWith("frame ", StringComparison.Ordinal) &&
         expected.Frame is { } want && actual.Frame is { } have &&
         Math.Abs(have[1] - want[1]) <= Tolerance && Math.Abs(have[3] - want[3]) <= Tolerance &&
-        Math.Abs(have[2] - want[2]) > Tolerance;
+        (expected.Role is "AXStaticText" or "AXHeading"
+            ? Math.Abs(have[2] - want[2]) > Tolerance
+            : expected.FollowsTextWidth && Math.Abs(have[2] - want[2]) <= Tolerance);
 
     private static List<string> Differences(AxNode expected, AxNode actual)
     {
@@ -232,6 +237,7 @@ internal static class Comparer
                     Value = node.Value,
                     Help = node.Help,
                     Frame = node.Frame,
+                    FollowsTextWidth = node.FollowsTextWidth,
                 }, list[index].Depth);
             }
         }
@@ -267,6 +273,7 @@ internal static class Comparer
         Value = node.Value is { } value && !value.TryGetValue(out double _) ? System.Text.Json.Nodes.JsonValue.Create(PlatformTerms.Windows(node.ValueText)) : node.Value,
         Help = PlatformTerms.Windows(node.Help),
         Frame = node.Frame,
+        FollowsTextWidth = node.FollowsTextWidth,
     };
 
     private static AxNode WindowsVersion(AxNode node) => new()

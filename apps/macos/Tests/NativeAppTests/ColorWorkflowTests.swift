@@ -13,7 +13,8 @@ final class ColorWorkflowTests: XCTestCase {
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
         model.tool = .rectangle
-        model.applyStyle { $0.setFillEnabled(true) }
+        // Solid paint, so the palette shows the solid swatches and the hex field.
+        model.applyStyle { $0.setPaintColor(.coral, fill: false); $0.setFillEnabled(true) }
         NativeAccessibilityNode.enable()
         for height in [CGFloat(900), 300] {
             let host = NSHostingView(rootView: InspectorColorPalette(

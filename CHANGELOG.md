@@ -4,15 +4,22 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- Seven more gradients to choose from: Aurora, Cherry, Forest, Copper, Neon, Tropic and Steel. The color picker now shows Gradient before Solid.
+
 ### Changed
 
 - With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.
 - The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
+- The on-screen tips are shorter and easier to read. They show for a few seconds when you start drawing or switch mode, then fade away. Click ✕ on a tip to turn tips off. You can turn them back on in Settings > General.
+- New drawings start with a gradient. When you first open Annotator, shapes, lines, arrows, the pen and text use the Sunset gradient. If you already use Annotator, your colors stay the same.
 - The pen's Tablet pressure is now Ink, and it works with a mouse or trackpad: the line gets thinner when you move fast, thicker when you move slowly, and narrows at the start and end. A pressure-sensitive pen still uses its own pressure.
 
 ### Fixed
 
 - On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.
+- On a Mac, the menu-bar menu now takes a click as soon as it opens. Before, a quick click on a button such as 5 min or Show drawings and tools sometimes did nothing.
 
 ## 0.1.0-beta.13 (build 31) - 2026-10-25
 

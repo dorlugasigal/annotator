@@ -163,6 +163,8 @@ public enum MotionTiming {
     public static let hintFadeInDuration = 0.16
     public static let hintFadeOutDuration = 0.12
     public static let hintTextCrossfadeDuration = 0.14
+    /// How long the on-screen tip stays after it wakes, before it fades out.
+    public static let hintDwellDuration = 5.0
 
     /// Seconds for one shape's or the toolbar's show (`appearing`) or hide in each workspace style.
     public static func visibilityDuration(_ style: VisibilityAnimationStyle, appearing: Bool) -> Double {

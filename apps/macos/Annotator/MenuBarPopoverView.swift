@@ -26,11 +26,24 @@ struct MenuBarPopoverView: View {
     var resized: (CGSize) -> Void = { _ in }
     var maximumHeight: CGFloat = 640
     var toolsVisible: () -> Bool = { false }
+    /// The content's measured height (`naturalHeight`), so the popover opens at its final size.
+    var initialContentHeight: CGFloat = 380
+    /// Lays out the content without the scroll view, to measure its natural height.
+    var measuring = false
     @Environment(\.colorScheme) private var scheme
     @Environment(\.openSettings) private var openSettings
     @State private var boardExpanded = false
-    @State private var contentHeight: CGFloat = 380
+    @State private var measuredHeight: CGFloat?
     @FocusState private var focus: Focus?
+
+    private var contentHeight: CGFloat { measuredHeight ?? initialContentHeight }
+
+    /// The height of the content as it opens, before any scrolling.
+    static func naturalHeight(model: WorkspaceModel, developerPreview: Bool, toolsVisible: @escaping () -> Bool) -> CGFloat {
+        let probe = NSHostingView(rootView: MenuBarPopoverView(model: model, developerPreview: developerPreview,
+            perform: { _ in }, toolsVisible: toolsVisible, measuring: true))
+        return probe.fittingSize.height
+    }
 
     private enum Focus: Hashable {
         case action(MenuBarAction), board
@@ -60,7 +73,11 @@ struct MenuBarPopoverView: View {
         return result + [.action(.quit)]
     }
 
-    var body: some View {
+    @ViewBuilder var body: some View {
+        if measuring { content } else { scrolling }
+    }
+
+    private var scrolling: some View {
         ScrollView(.vertical) { content }
             .scrollIndicators(.hidden)
             .frame(width: 320, height: min(contentHeight, maximumHeight))
@@ -219,9 +236,9 @@ struct MenuBarPopoverView: View {
             GeometryReader { proxy in Color.clear.preference(key: MenuPopoverSize.self, value: proxy.size) }
         }
         .onPreferenceChange(MenuPopoverSize.self) { size in
-            guard size.width > 0, size.height > 0 else { return }
+            guard !measuring, size.width > 0, size.height > 0 else { return }
             Task { @MainActor in
-                contentHeight = size.height
+                measuredHeight = size.height
                 resized(CGSize(width: size.width, height: min(size.height, maximumHeight)))
             }
         }

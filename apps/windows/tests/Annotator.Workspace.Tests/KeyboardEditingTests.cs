@@ -165,6 +165,7 @@ public sealed class KeyboardEditingTests
         Assert.Equal(CanvasCommandResult.Done, model.Perform(new CanvasCommand(CanvasCommandKind.InkKey, Primary) { Key = "b" }));
         Assert.Equal("Blue ink", model.Snapshot.Status);
         Assert.Equal(Palette.Blue, model.Snapshot.Style.Color);
+        Assert.Null(model.Snapshot.Style.StrokeGradient);
         Assert.Equal(Palette.Blue, model.Snapshot.Preferences.ToolStyles["pen"].Color);
         Assert.Equal(1, store.SaveCount);
         Assert.Equal(Palette.Blue, WorkspacePreferences.Read(store.Data!).ToolStyles["pen"].Color);
