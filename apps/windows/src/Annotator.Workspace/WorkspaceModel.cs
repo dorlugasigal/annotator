@@ -162,6 +162,13 @@ public sealed partial class WorkspaceModel
                 _preferences = WorkspacePreferences.Read(data);
                 _style = StyleFor(_tool);
             }
+            else
+            {
+                // Mac: a brand-new profile starts drawing tools with a gradient. It is saved with the first change, so a
+                // first install still reads as one.
+                _preferences = WorkspacePreferences.FirstUse;
+                _style = StyleFor(_tool);
+            }
         }
         catch (Exception error) when (IsReportable(error))
         {

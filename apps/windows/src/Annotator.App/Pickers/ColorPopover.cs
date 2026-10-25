@@ -135,15 +135,15 @@ internal sealed class ColorPopover : PopoverWindow
             _content.Children.Add(_fillToggle);
         }
 
-        // Picker("Color options") { Solid; Gradient }.pickerStyle(.segmented)
+        // Picker("Color options") { Gradient; Solid }.pickerStyle(.segmented)
         var segments = new SegmentGroup("Color options") { Width = 153.5, Height = 24, HorizontalAlignment = HorizontalAlignment.Left };
         segments.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         segments.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         var track = new Border { CornerRadius = new CornerRadius(6), Background = PickerColors.ControlFill, IsHitTestVisible = false };
         Grid.SetColumnSpan(track, 2);
         segments.Children.Add(track);
-        _solid = Segment(segments, "Solid", 0, gradients: false);
-        _gradient = Segment(segments, "Gradient", 1, gradients: true);
+        _gradient = Segment(segments, "Gradient", 0, gradients: true);
+        _solid = Segment(segments, "Solid", 1, gradients: false);
         _content.Children.Add(segments);
 
         // VStack(alignment: .leading, spacing: 12): the palette or presets, the wheel and the hex field.
@@ -526,8 +526,8 @@ internal sealed class ColorPopover : PopoverWindow
             }
             _solid.IsChosen = !_showingGradients;
             _gradient.IsChosen = _showingGradients;
-            ShowSegment(_solid);
             ShowSegment(_gradient);
+            ShowSegment(_solid);
             _pick.IsEnabled = _screen is not null;
         }
         finally

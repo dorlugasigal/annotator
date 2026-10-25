@@ -29,7 +29,31 @@ public sealed class ToolAndPreferenceTests
         model.Choose(Tool.Pen);
         Assert.Empty(model.Document(Primary).Selection);
         Assert.Equal(Tool.Pen, model.Snapshot.EffectiveTool);
-        Assert.Equal(Style.Defaults(Tool.Pen), model.Snapshot.Style);
+        Assert.Equal(Style.FirstUse(Tool.Pen), model.Snapshot.Style);
+    }
+
+    // Mac testNewProfilesStartWithAGradientAndSavedProfilesKeepTheirColors.
+    [Fact]
+    public void NewProfilesStartWithAGradientAndSavedProfilesKeepTheirColors()
+    {
+        var fresh = new MemoryPreferencesStore();
+        WorkspaceModel model = Create(store: fresh);
+        Assert.Equal(0, fresh.SaveCount);
+        model.ShowToolbar();
+        model.Choose(Tool.Rectangle);
+        Assert.Equal(GradientPreset.Sunset.Gradient, model.Snapshot.Style.StrokeGradient);
+        model.Choose(Tool.Highlighter);
+        Assert.Equal(Style.Defaults(Tool.Highlighter), model.Snapshot.Style);
+        model.ApplyStyle((ref Style style) => style.Width = 6);
+        Assert.Equal(GradientPreset.Sunset.Gradient, WorkspacePreferences.Read(fresh.Data!).ToolStyles["pen"].StrokeGradient);
+
+        var existing = new MemoryPreferencesStore(new WorkspacePreferences().Data());
+        WorkspaceModel returning = Create(store: existing);
+        Assert.Equal(0, existing.SaveCount);
+        returning.ShowToolbar();
+        returning.Choose(Tool.Rectangle);
+        Assert.Equal(Style.Defaults(Tool.Rectangle), returning.Snapshot.Style);
+        Assert.Null(returning.Snapshot.Style.StrokeGradient);
     }
 
     [Fact]

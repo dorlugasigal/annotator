@@ -62,7 +62,7 @@ public class ColorPaintTests
     [Fact]
     public void GradientsValidateAndRequireTheNewBoardFormat()
     {
-        Assert.Equal(8, GradientPreset.AllCases.Count);
+        Assert.Equal(10, GradientPreset.AllCases.Count);
         foreach (var preset in GradientPreset.AllCases)
         {
             Assert.Equal(25.0, preset.Gradient.Angle);

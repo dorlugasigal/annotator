@@ -298,7 +298,35 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
         XCTAssertEqual(canvasModel.tool, .queue, "Ink letters never choose tools.")
     }
 
+    func testNewProfilesStartWithAGradientAndSavedProfilesKeepTheirColors() throws {
+        XCTAssertNil(defaults.data(forKey: "workspace-preferences-v1"), "Nothing is saved before the first change.")
+        model.choose(.rectangle)
+        XCTAssertEqual(model.style.strokeGradient, GradientPreset.sunset.gradient)
+        model.choose(.highlighter)
+        XCTAssertEqual(model.style, .defaults(for: .highlighter))
+        model.applyStyle { $0.width = 6 }
+        let saved = try WorkspacePreferences.read(try XCTUnwrap(defaults.data(forKey: "workspace-preferences-v1")))
+        XCTAssertEqual(saved.toolStyles[Tool.pen.rawValue]?.strokeGradient, GradientPreset.sunset.gradient,
+                       "The first change saves the first-use gradients with it.")
+
+        let returningSuite = "toolbar-shortcuts-returning-\(UUID())"
+        let returningDefaults = try XCTUnwrap(UserDefaults(suiteName: returningSuite))
+        defer { returningDefaults.removePersistentDomain(forName: returningSuite) }
+        let existing = try WorkspacePreferences().data()
+        returningDefaults.set(existing, forKey: "workspace-preferences-v1")
+        let returning = WorkspaceModel(defaults: returningDefaults)
+        defer { returning.closeAll() }
+        returning.choose(.rectangle)
+        XCTAssertEqual(returning.style, .defaults(for: .rectangle), "An existing profile keeps solid coral.")
+        let kept = try WorkspacePreferences.read(try XCTUnwrap(returningDefaults.data(forKey: "workspace-preferences-v1")))
+        XCTAssertTrue(kept.toolStyles.isEmpty, "Opening an existing profile adds no gradient.")
+    }
+
     func testSharedStyleIsOffByDefaultAndCopiesOnlyChangesWhenOn() throws {
+        // An existing profile with no tool styles, so every tool starts from its solid defaults.
+        model.closeAll()
+        defaults.set(try WorkspacePreferences().data(), forKey: "workspace-preferences-v1")
+        model = WorkspaceModel(defaults: defaults)
         model.tool = .pen
         model.style = .defaults(for: .pen)
         model.applyStyle { $0.setPaintColor(.blue, fill: false) }

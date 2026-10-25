@@ -22,12 +22,12 @@ public readonly record struct ColorGradient(ValueList<RGBA> Colors, double Angle
     public override int GetHashCode() => HashCode.Combine(Colors, Angle);
 }
 
-public enum GradientPreset { Sunset, Lagoon, Ember, Spectrum, Dusk, Citrus, Ocean, Orchid }
+public enum GradientPreset { Sunset, Lagoon, Ember, Spectrum, Dusk, Citrus, Ocean, Orchid, Aurora, Cherry }
 
 public static class GradientPresetExtensions
 {
     internal static readonly RawValueMap<GradientPreset> RawValues =
-        new("sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid");
+        new("sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry");
 
     extension(GradientPreset)
     {
@@ -51,6 +51,8 @@ public static class GradientPresetExtensions
             GradientPreset.Citrus => "Citrus",
             GradientPreset.Ocean => "Ocean",
             GradientPreset.Orchid => "Orchid",
+            GradientPreset.Aurora => "Aurora",
+            GradientPreset.Cherry => "Cherry",
             _ => throw new ArgumentOutOfRangeException(nameof(preset)),
         };
 
@@ -72,6 +74,8 @@ public static class GradientPresetExtensions
                     GradientPreset.Citrus => [new(1, 0.55, 0.12), new(0.97, 0.83, 0.2), new(0.42, 0.76, 0.3)],
                     GradientPreset.Ocean => [new(0.08, 0.79, 0.74), new(0.18, 0.51, 0.94), new(0.47, 0.3, 0.85)],
                     GradientPreset.Orchid => [new(0.98, 0.43, 0.69), new(0.7, 0.44, 0.91), new(0.38, 0.63, 0.97)],
+                    GradientPreset.Aurora => [new(0.13, 0.72, 0.47), new(0.25, 0.55, 0.95), new(0.82, 0.33, 0.88)],
+                    GradientPreset.Cherry => [new(0.86, 0.1, 0.22), new(0.95, 0.27, 0.47), new(0.6, 0.17, 0.76)],
                     _ => throw new ArgumentOutOfRangeException(nameof(preset)),
                 };
                 return new ColorGradient(colors, 25);
