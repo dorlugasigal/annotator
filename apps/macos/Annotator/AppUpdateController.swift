@@ -122,7 +122,7 @@ extension AppUpdateController: @preconcurrency SPUStandardUserDriverDelegate {
     }
 }
 
-extension AppUpdateController: @preconcurrency SPUUpdaterDelegate {
+extension AppUpdateController: SPUUpdaterDelegate {
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) { remind(item.displayVersionString) }
 
     func updaterDidNotFindUpdate(_ updater: SPUUpdater) { remind(nil) }
