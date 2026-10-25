@@ -156,11 +156,22 @@ final class UniformEditingTests: XCTestCase {
         XCTAssertNil(presentation.selectionOverlayLevel)
     }
 
-    func testRoughnessIconsAreGentlerWithoutChangingDrawingValues() {
-        XCTAssertEqual(InspectorPreviewStyle.roughness(0), 0)
-        XCTAssertEqual(InspectorPreviewStyle.roughness(2), 0.6, accuracy: 0.001)
-        XCTAssertEqual(InspectorPreviewStyle.roughness(6), 1.2, accuracy: 0.001)
-        let style = Style()
-        XCTAssertEqual(style.roughness, 0)
+    func testRoughnessAndEdgesIconsAreHandDrawnStrokes() {
+        let clean = InspectorGlyph.roughness(0)
+        XCTAssertEqual(clean.count, 1)
+        XCTAssertEqual(InspectorGlyph.roughness(2).count, 2)
+        XCTAssertEqual(InspectorGlyph.roughness(2).first, clean.first)
+        let wild = InspectorGlyph.roughness(6)
+        XCTAssertEqual(wild.count, 2)
+        XCTAssertFalse(wild.contains(clean[0]))
+        XCTAssertTrue((clean + InspectorGlyph.roughness(2) + wild).allSatisfy { $0.segments.count == 3 })
+        XCTAssertTrue(InspectorGlyph.roughness(6).allSatisfy { !$0.dotted })
+        for rounded in [false, true] {
+            let edges = InspectorGlyph.edges(rounded: rounded)
+            XCTAssertEqual(edges.map(\.dotted), [true, false])
+            let corner = edges[1].segments
+            XCTAssertEqual(corner.contains { if case .curve = $0 { return true }; return false }, rounded)
+        }
+        XCTAssertEqual(Style().roughness, 0)
     }
 }

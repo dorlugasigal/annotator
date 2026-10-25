@@ -25,7 +25,7 @@ public enum InspectorSampleKind
 public readonly record struct InspectorSample(InspectorSampleKind Kind, double Value = 0, StrokePattern Pattern = StrokePattern.Solid,
                                               FillPattern FillPattern = FillPattern.Solid, ArrowHead Head = ArrowHead.None, bool Flag = false)
 {
-    /// <summary>The seed the Mac gives every sample, so rough samples always look the same.</summary>
+    /// <summary>The seed the Mac gives every element sample, so they always look the same.</summary>
     public const ulong Seed = 93;
 
     public static InspectorSample Thickness(double width) => new(InspectorSampleKind.Thickness, width);
@@ -46,9 +46,6 @@ public readonly record struct InspectorSample(InspectorSampleKind Kind, double V
 
     public static InspectorSample Pressure(bool variable) => new(InspectorSampleKind.Pressure, Flag: variable);
 
-    /// <summary>Mac InspectorPreviewStyle.roughness: the preview's roughness for a roughness choice.</summary>
-    public static double PreviewRoughness(double value) => Math.Min(1.2, Math.Max(0, value * 0.3));
-
     /// <summary>
     /// The sample's drawing in sample points (0 to 36 on both axes), in <paramref name="ink"/>. Draw it clipped to the
     /// sample's box. <paramref name="builder"/> builds the element's display list as the canvas would.
@@ -56,15 +53,20 @@ public readonly record struct InspectorSample(InspectorSampleKind Kind, double V
     public DisplayItem[] Draw(RGBA ink, SceneBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        if (Kind == InspectorSampleKind.Route)
+        switch (Kind)
         {
-            return RouteItems(ink with { Alpha = 1 });
+            case InspectorSampleKind.Route:
+                return RouteItems(ink with { Alpha = 1 });
+            case InspectorSampleKind.Roughness:
+                return InspectorGlyph.Draw(InspectorGlyph.Roughness(Value), ink with { Alpha = 1 });
+            case InspectorSampleKind.Edges:
+                return InspectorGlyph.Draw(InspectorGlyph.Edges(Flag), ink with { Alpha = 1 });
         }
         Element element = Element(ink);
         return builder.List(element).Items.ToArray();
     }
 
-    /// <summary>The element the Mac draws for every sample but <see cref="InspectorSampleKind.Route"/>.</summary>
+    /// <summary>The element the Mac draws for every sample but Route, Roughness and Edges, which are drawn directly.</summary>
     public Element Element(RGBA ink)
     {
         var style = new Style { Color = ink with { Alpha = 1 }, Width = 1.5 };
@@ -76,14 +78,6 @@ public readonly record struct InspectorSample(InspectorSampleKind Kind, double V
                 break;
             case InspectorSampleKind.Pattern:
                 element.Style.Pattern = Pattern;
-                break;
-            case InspectorSampleKind.Roughness:
-                element = new Element(Tool.Rectangle, new Rect(9, 8, 18, 20), style: style);
-                element.Style.Roughness = PreviewRoughness(Value);
-                break;
-            case InspectorSampleKind.Edges:
-                element = new Element(Tool.Rectangle, new Rect(9, 9, 20, 20), style: style);
-                element.Style.CornerRadius = Flag ? 7 : 0;
                 break;
             case InspectorSampleKind.Fill:
                 element = new Element(Tool.Rectangle, new Rect(8, 8, 21, 21), style: style);
@@ -107,8 +101,8 @@ public readonly record struct InspectorSample(InspectorSampleKind Kind, double V
                 element.Style.Pressure = Flag;
                 element.Pressures = Flag ? [0.15, 0.4, 1, 0.6, 0.2] : default;
                 break;
-            case InspectorSampleKind.Route:
-                throw new InvalidOperationException("The route sample is drawn directly; use Draw.");
+            case InspectorSampleKind.Route or InspectorSampleKind.Roughness or InspectorSampleKind.Edges:
+                throw new InvalidOperationException($"The {Kind} sample is drawn directly; use Draw.");
             default:
                 throw new InvalidOperationException($"Unknown sample {Kind}.");
         }
