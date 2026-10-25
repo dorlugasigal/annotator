@@ -55,12 +55,17 @@ class ReleaseTests(unittest.TestCase):
                 "    MARKETING_VERSION: 0.1.0\n    ANNOTATOR_PRERELEASE: alpha.1\n    CURRENT_PROJECT_VERSION: 9\n")
             path = root / "releases/notes.json"
             path.write_text(json.dumps(original))
-            self.assertEqual(release.load_notes(root, require_frozen=True), original)
+            self.assertEqual(release.load_notes(root), original)
             rendered = release.changelog(original)
             self.assertIn("## Unreleased", rendered)
             self.assertIn("0.1.0-alpha.1 (build 9)", rendered)
             self.assertNotIn("Unreleased", release.changelog(original, "0.1.0-alpha.1"))
-            for mutation in ["duplicate", "version", "build", "date", "category", "source"]:
+            # A release builds the main-branch commit its run starts on, so a new entry records no source.
+            unrecorded = copy.deepcopy(original)
+            del unrecorded["releases"][0]["source"]
+            path.write_text(json.dumps(unrecorded))
+            self.assertEqual(release.load_notes(root), unrecorded)
+            for mutation in ["duplicate", "version", "build", "date", "category", "source", "field"]:
                 notes = copy.deepcopy(original)
                 entry = notes["releases"][0]
                 if mutation == "duplicate": notes["releases"].append(copy.deepcopy(entry))
@@ -69,9 +74,10 @@ class ReleaseTests(unittest.TestCase):
                 if mutation == "date": entry["date"] = "2026-02-31"
                 if mutation == "category": entry["changes"] = {"Oops": ["bad"]}
                 if mutation == "source": entry["source"] = "pending"
+                if mutation == "field": entry["candidate"] = "abcdef0"
                 path.write_text(json.dumps(notes))
                 with self.subTest(mutation=mutation), self.assertRaises(ValueError):
-                    release.load_notes(root, require_frozen=True)
+                    release.load_notes(root)
 
     def test_platform_notes_are_optional_validated_and_rendered_separately(self):
         entry = {
@@ -88,7 +94,7 @@ class ReleaseTests(unittest.TestCase):
                 "    MARKETING_VERSION: 0.1.0\n    ANNOTATOR_PRERELEASE: beta.8\n    CURRENT_PROJECT_VERSION: 26\n")
             path = root / "releases/notes.json"
             path.write_text(json.dumps(original))
-            self.assertEqual(release.load_notes(root, require_frozen=True), original)
+            self.assertEqual(release.load_notes(root), original)
             rendered = release.changelog(original, "0.1.0-beta.8")
             self.assertEqual(rendered, "\n".join([
                 "## 0.1.0-beta.8 (build 26) - 2026-10-20", "",
@@ -120,23 +126,14 @@ class ReleaseTests(unittest.TestCase):
         release.plan(version, build, "feature")
         self.assertEqual(before, [path.read_bytes() for path in paths])
 
-    def test_frozen_packaging_rejects_dirty_or_changed_source(self):
-        notes = {"releases": [{"source": "abcdef0"}]}
+    def test_packaging_needs_a_clean_candidate(self):
         def result(output):
             return type("GitResult", (), {"returncode": 0, "stdout": output, "stderr": ""})()
         with patch.object(release.subprocess, "run", return_value=result(" M apps/file.swift")):
             with self.assertRaisesRegex(release.ReleaseError, "clean worktree"):
-                release.verify_frozen_source(notes)
-        with patch.object(release.subprocess, "run", side_effect=[result(""), result(""), result("apps/file.swift")]):
-            with self.assertRaisesRegex(release.ReleaseError, "differs"):
-                release.verify_frozen_source(notes)
-        with patch.object(release.subprocess, "run", side_effect=[result(""), result(""), result("")]):
-            release.verify_frozen_source(notes)
-        for path in ["website/src/pages/index.astro", "services/metrics/src/http.ts", "netlify.toml",
-                     "integrations/computer-use/annotator/SKILL.md"]:
-            with self.subTest(path=path), patch.object(release.subprocess, "run", side_effect=[result(""), result(""), result(path)]):
-                with self.assertRaisesRegex(release.ReleaseError, "differs"):
-                    release.verify_frozen_source(notes)
+                release.verify_candidate()
+        with patch.object(release.subprocess, "run", return_value=result("")):
+            release.verify_candidate()
 
 if __name__ == "__main__":
     unittest.main()

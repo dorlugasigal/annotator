@@ -57,9 +57,9 @@ Every release ships all of these:
 | GitHub release | Mac DMG and ZIP; Windows ZIPs for x64 and ARM64 with `annotator-windows.json` | Release workflow, publish job |
 | Sparkle feed | The signed Mac update, with the release's Mac notes in its update window | Website deploy, from the published release manifest |
 | Windows update feed | `updates/windows-<track>.json`: the newest release with Windows ZIPs, which portable copies check daily (they never install it) | Website deploy, from the published `annotator-windows.json` |
-| Homebrew | `brew install --cask dorlugasigal/annotator/annotator`; the cask says `auto_updates true`, so `brew upgrade` leaves Sparkle's updates alone unless asked with `--greedy` | `tools/release/distribution.py tap` writes `dorlugasigal/homebrew-annotator` |
+| Homebrew | `brew install --cask dorlugasigal/annotator/annotator`; the cask says `auto_updates true`, so `brew upgrade` leaves Sparkle's updates alone unless asked with `--greedy` | Release workflow, publish job: `tools/release/distribution.py tap` writes `dorlugasigal/homebrew-annotator` once the new release is listed |
 | winget | `winget install DorLugasiGal.Annotator` (portable ZIP) | `tools/windows/winget.py manifests`, then a pull request to microsoft/winget-pkgs |
-| Microsoft Store | Signed MSIX bundle; Store updates | Release workflow, `windows_store` input |
+| Microsoft Store | Signed MSIX bundle; Store updates | Release workflow: every release goes to the public listing (`windows_store` is `public` by default) |
 | Website | https://getannotator.app | Website workflow, after each Release run ([maintainers/website.md](maintainers/website.md)) |
 
 `releases/windows.json` decides whether the Release workflow builds Windows.
@@ -70,9 +70,11 @@ the Windows packages from the same commit.
 
 1. **Review**: list the changes since the last release and agree on the next
    label with the maintainer.
-2. **Bump**: set the three version settings, move the approved `unreleased`
-   items into a new entry with real known issues, run `make generate` and
-   `python3 tools/release/release.py changelog --write`.
+2. **Bump**: in one pull request, set the three version settings, move the
+   approved `unreleased` items into a new entry (version, build, date, changes
+   and real known issues), run `make generate` and
+   `python3 tools/release/release.py changelog --write`. A release pull request
+   changes only these files, so it needs no issue.
 3. **Validate** on a Mac:
 
    ```sh
@@ -85,12 +87,14 @@ the Windows packages from the same commit.
    ```
 
    And on Windows: `pwsh -NoProfile -File tools/windows/validate.ps1 all`.
-4. **Freeze**: merge the candidate to `main`. Record its SHA as the entry's
-   `source` in a follow-up commit; `release.py check --require-frozen` rejects
-   app source that changed after that SHA.
+4. **Merge** the release pull request. Releases build only from `main`, so the
+   merged commit is the release: the Release run checks that it is clean and
+   that its version and notes agree (`release.py check --candidate`), and the
+   published tag and manifest record it. Releases up to 0.1.0-beta.13 also
+   recorded it as the entry's `source`; new entries don't.
 5. **Run Release**: Actions > Release > Run workflow on `main`, with the label,
-   the candidate SHA, `notarize` and `publish` on, and `windows_store` set to
-   `public` (or `testers` for a flight). See
+   the SHA of the head of `main`, and `notarize` and `publish` on.
+   `windows_store` stays `public`: every release goes to the Store. See
    [maintainers/release-workflow.md](maintainers/release-workflow.md).
 6. **Website**: check that the Website workflow that follows the release
    finished, so the site and the Sparkle feeds show it
@@ -101,4 +105,4 @@ the Windows packages from the same commit.
    `brew upgrade --cask annotator`, check the website and the Store listing.
 
 Only a maintainer with the release secrets can run steps 5 to 7. Anyone can
-prepare steps 1 to 4 in a pull request.
+prepare steps 1 to 3 in a pull request.

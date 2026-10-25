@@ -128,7 +128,10 @@ class SwitchAndPlanTests(Fixture):
         ready = dict(STORE_TARGET="testers", STORE_SUBMISSION_ENABLED="true", WINDOWS_STORE_ID=STORE_ID)
         values = self.plan(**ready)
         self.assertEqual((values["windows"], values["store-ready"], values["store"]), (True, True, "testers"))
-        self.assertEqual(self.plan(**{**ready, "STORE_TARGET": "public"})["store"], "public")
+        self.assertEqual(self.plan(**{**ready, "STORE_TARGET": "public", "RELEASE_PUBLISHES": "true"})["store"], "public")
+        # Every release goes to the public listing with its published release; a run that publishes nothing cannot.
+        with self.assertRaisesRegex(hosted.Stop, "publish"):
+            self.plan(**{**ready, "STORE_TARGET": "public", "RELEASE_PUBLISHES": "false"})
         for change, message in [({"TRIGGERING_ACTOR": "someone-else"}, "owner"),
                                 ({"REPOSITORY_OWNER": "", "TRIGGERING_ACTOR": ""}, "owner"),
                                 ({"STORE_SUBMISSION_ENABLED": "false"}, "by hand"),

@@ -216,7 +216,7 @@ them you ran.
 
 The Release workflow builds the real artifacts only: it signs and notarizes the
 Mac app and builds the Windows bundle. Don't add test suites there, and don't
-weaken exact-source, frozen-version, signing, timestamp, entitlement,
+weaken exact-source, version, signing, timestamp, entitlement,
 notarization or immutable-artifact checks. For maintainer-run resumable
 artifact work, see `tools/release/local_release.py --help` and
 `docs/maintainers/local-fallback.md`. Use `make release-tests` for its mocked
@@ -241,7 +241,7 @@ bytes or authorize publishing a newly rebuilt binary.
 
 The local release helper retains the original ZIP before submission and offers
 checksum-bound recovery. It does not recover missing historical artifacts or
-relax the candidate freeze. Leave its submission-attempt marker intact after
+relax the candidate checks (the exact, clean commit). Leave its submission-attempt marker intact after
 an ambiguous failure; use the documented recovery command instead of retrying
 the upload.
 
@@ -260,6 +260,6 @@ Distinguish:
 
 None substitutes for the others. State which checks still need CI or a
 physical test. Use
-`.github/skills/annotator-release/SKILL.md` for version/freeze decisions.
+`.github/skills/annotator-release/SKILL.md` for version decisions.
 This skill does not authorize production credentials, signing submissions,
 publication, deployment or changes to billing.

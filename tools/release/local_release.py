@@ -131,10 +131,10 @@ def candidate(version, source):
     if d.command("git", "-C", ROOT, "rev-parse", "HEAD").strip() != source:
         raise Error("Check out the exact original candidate before preparing or finalizing.")
     actual_version, build = release.configured_version(ROOT)
-    notes = release.load_notes(ROOT, require_frozen=True)
-    release.verify_frozen_source(notes, ROOT)
+    notes = release.load_notes(ROOT)
+    release.verify_candidate(ROOT)
     if actual_version != version:
-        raise Error("The requested version differs from the frozen candidate.")
+        raise Error("The requested version differs from the candidate's version.")
     return build, notes
 
 
@@ -174,7 +174,7 @@ def prepare(args):
         built = derived / "Build/Products/Release/Annotator.app"
         metadata = d.packager.inspect_app(built, "release")
         if (metadata["releaseVersion"], int(metadata["build"])) != (args.version, build):
-            raise Error("The built app does not match the frozen version/build.")
+            raise Error("The built app does not match the candidate's version/build.")
         d.sign_distribution_bundle(built, args.identity, args.team)
         app = output / "Annotator.app"
         d.command("ditto", built, app)

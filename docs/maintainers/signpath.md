@@ -29,7 +29,7 @@ Foundation". Add both when they approve, or earlier if their reviewers ask.
 | Maintainers | Dor Lugasi-Gal (@dorlugasigal), owner and release manager |
 | Files to sign | `Annotator.exe` inside `Annotator-<version>-windows-x64.zip` and `-arm64.zip` |
 | Build system | GitHub Actions, `.github/workflows/release.yml`: job `windows-package` builds the ZIPs and job `windows-sign` sends them to SignPath, both on GitHub-hosted Windows runners |
-| How the build is reproducible | Each release builds from one frozen commit recorded in `releases/notes.json`. The .NET SDK and tools are pinned in `tools/windows/toolchain.json`. The job restores no caches, and `annotator-windows.json` records each ZIP's SHA-256. |
+| How the build is reproducible | Each release builds from one commit on `main`, recorded by its release tag and `annotator-manifest.json`. The .NET SDK and tools are pinned in `tools/windows/toolchain.json`. The job restores no caches, and `annotator-windows.json` records each ZIP's SHA-256. |
 | Release approval | Only the owner can start the Release workflow; signing runs in a protected environment |
 | Website | https://getannotator.app |
 | Distribution | GitHub releases, winget (`DorLugasiGal.Annotator`), and the Microsoft Store (signed by Microsoft) |

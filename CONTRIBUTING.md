@@ -96,7 +96,8 @@ in [docs/parity.md](docs/parity.md#platform-terms).
   and Windows tests when your change touches those apps. Labels such as
   `macos`, `windows` and `website` are added for you.
 - A maintainer reviews, then squash-merges. Small fixes can skip the issue if
-  a maintainer adds the `no-issue` label.
+  a maintainer adds the `no-issue` label. A release pull request (the version
+  bump with its notes) needs no issue.
 
 By contributing, you agree that your contribution is licensed under the
 [Apache License 2.0](LICENSE), as section 5 of the licence describes.

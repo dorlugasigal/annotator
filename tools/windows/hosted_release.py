@@ -106,6 +106,9 @@ def plan(environ, root=ROOT):
     switch = part_of_releases(root)
     version, build = release.configured_version(root)
     msix = publish_windows.msix_version(version, build)
+    if target == "public" and environ.get("RELEASE_PUBLISHES") != "true":
+        raise Stop("A public Store submission goes out with its published release. Turn on publish, or set windows_store "
+                   "to testers or none for a run that publishes nothing.")
     if target != "none":
         owner = environ.get("REPOSITORY_OWNER", "")
         if not owner or environ.get("TRIGGERING_ACTOR") != owner:

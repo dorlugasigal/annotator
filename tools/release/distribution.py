@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -63,9 +64,10 @@ def configuration():
 
 
 def metadata():
+    """The configured version and build, after checking that the release notes describe them."""
     version, build = release.configured_version()
-    notes = release.load_notes(require_frozen=True)
-    return version, build, notes
+    release.load_notes()
+    return version, build
 
 
 def preflight(expected, candidate):
@@ -77,10 +79,10 @@ def preflight(expected, candidate):
         raise DistributionError("Signing requires a main-branch push or explicit main-branch dispatch.")
     if os.environ.get("GITHUB_SHA") != candidate:
         raise DistributionError("Candidate must match the exact commit that triggered this workflow.")
-    version, build, notes = metadata()
+    version, build = metadata()
     if expected != version:
         raise DistributionError("Approved version does not match project.yml.")
-    release.verify_frozen_source(notes)
+    release.verify_candidate()
     repo, site = configuration()
     return dict(version=version, build=build, source=candidate, repository=repo,
                 homepage=site, tag=f"v{version}", track="preview" if "-" in version else "stable")
@@ -578,7 +580,7 @@ def update_tap():
         raise DistributionError("Write casks to the dedicated tap, never to the repository that runs this workflow.")
     if gh_json("api", f"repos/{tap}").get("private") is not False:
         raise DistributionError("The configured tap must be public.")
-    published = published_manifests(repo)
+    published = published_release(repo, os.environ.get("EXPECTED_VERSION"))
     stable = [row for row in published if row["track"] == "stable"]
     # Use the alpha under the canonical name until a stable release exists.
     entries = stable or [row for row in published if row["track"] == "preview"]
@@ -598,6 +600,20 @@ def update_tap():
     if tap != repo and repo != os.environ.get("GITHUB_REPOSITORY"):
         write_cask(repo, path, content, message, create=False)
     return content
+
+
+def published_release(repo, expected=None, attempts=12, wait=10):
+    """
+    The published releases, once they include `expected`. GitHub's release list can lag a few seconds behind the release
+    the same run just published, and the cask must not be written from the one before it.
+    """
+    for attempt in range(attempts):
+        published = published_manifests(repo)
+        if not expected or any(row["releaseVersion"] == expected for row in published):
+            return published
+        if attempt + 1 < attempts:
+            time.sleep(wait)
+    raise DistributionError(f"{expected} is not among the published releases yet; the cask was left as it was. Run the tap update again.")
 
 
 def tap_name(repo):

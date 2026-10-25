@@ -136,11 +136,11 @@ class DistributionTests(unittest.TestCase):
         for event in ("push", "workflow_dispatch"):
             with self.subTest(event=event), patch.dict(os.environ, {**env, "GITHUB_EVENT_NAME": event}, clear=True), \
                  patch.object(d, "command", return_value=sha), \
-                 patch.object(d, "metadata", return_value=("0.1.0-alpha.2", 10, {})), \
-                 patch.object(d.release, "verify_frozen_source") as frozen:
+                 patch.object(d, "metadata", return_value=("0.1.0-alpha.2", 10)), \
+                 patch.object(d.release, "verify_candidate") as candidate:
                 info = d.preflight("0.1.0-alpha.2", sha)
                 self.assertEqual((info["source"], info["version"], info["build"]), (sha, "0.1.0-alpha.2", 10))
-                frozen.assert_called_once_with({})
+                candidate.assert_called_once_with()
                 with self.assertRaisesRegex(d.DistributionError, "Approved version"):
                     d.preflight("0.1.0-alpha.1", sha)
         for overrides in [
@@ -628,6 +628,20 @@ class DistributionTests(unittest.TestCase):
              patch.object(d, "command") as run:
             d.update_tap()
             run.assert_not_called()
+
+    def test_tap_waits_until_the_run_s_release_is_listed(self):
+        old, new = {"releaseVersion": "0.1.0-beta.12"}, {"releaseVersion": "0.1.0-beta.13"}
+        with patch.object(d, "published_manifests", side_effect=[[old], [old], [old, new]]) as listed, \
+             patch.object(d.time, "sleep") as sleep:
+            self.assertEqual(d.published_release("example/releases", "0.1.0-beta.13"), [old, new])
+            self.assertEqual((listed.call_count, sleep.call_count), (3, 2))
+        with patch.object(d, "published_manifests", return_value=[old]), patch.object(d.time, "sleep"):
+            with self.assertRaisesRegex(d.DistributionError, "not among the published releases"):
+                d.published_release("example/releases", "0.1.0-beta.13", attempts=3)
+        # Without an expected version (a maintainer's own run), it reads the list once.
+        with patch.object(d, "published_manifests", return_value=[old]) as listed, patch.object(d.time, "sleep") as sleep:
+            self.assertEqual(d.published_release("example/releases"), [old])
+            self.assertEqual((listed.call_count, sleep.call_count), (1, 0))
 
     def test_dedicated_tap_gets_the_cask_and_the_old_copy_stays_current(self):
         data = manifest()

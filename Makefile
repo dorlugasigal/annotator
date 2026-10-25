@@ -47,7 +47,7 @@ ai-skill:
 	python3 -m zipfile -c website/public/downloads/annotator-skill.zip integrations/computer-use/annotator
 
 release-check:
-	python3 tools/release/release.py check --require-frozen
+	python3 tools/release/release.py check --candidate
 	python3 tools/release/test_release.py
 
 release-tests:

@@ -551,8 +551,8 @@ msstore publish "<bundle>" -id <Store ID> --noCommit -f <flight ID>
 `msstore publish` replaces a draft that is waiting, so run it before you edit
 the draft in Partner Center. Check the draft there, then submit.
 
-GitHub Actions can do the upload for you instead, from the same frozen
-commit: see [6](#6-send-builds-from-github-actions).
+GitHub Actions can do the upload for you instead, from the same commit:
+see [6](#6-send-builds-from-github-actions).
 
 ### 5.4 The launch decision
 
@@ -654,14 +654,17 @@ showing it.
    branch `main`.
 3. Fill in **version** (the approved label, such as `0.1.0-beta.8`) and
    **candidate_sha** (the full SHA of the newest commit on `main`).
-4. Set **windows_store**:
-   - `testers`: the package flight in `WINDOWS_STORE_FLIGHT_ID`. Without a
-     flight, the main submission, but only while its audience is private.
-     Otherwise the job stops and leaves a draft for you to check.
-   - `public`: the main submission as it is. Choose it only after your launch
-     decision ([5.4](#54-the-launch-decision)).
-5. Leave **notarize** and **publish** off, unless the same run also releases
-   the Mac.
+4. **windows_store**:
+   - `public` (the default): every release goes to the public listing
+     (owner decision, 2026-10-25). It needs **notarize** and **publish** on,
+     so the Store gets the same build as the GitHub release.
+   - `testers`: the package flight in `WINDOWS_STORE_FLIGHT_ID`, for a test
+     build that publishes nothing. Without a flight, the main submission, but
+     only while its audience is private. Otherwise the job stops and leaves a
+     draft for you to check.
+   - `none`: a run that builds without sending anything to the Store.
+5. For a release, turn on **notarize** and **publish**. For a testers build
+   alone, leave them off.
 6. Select **Run workflow**. The run checks the candidate on Linux, builds and
    checks the bundle on Windows, then sends it. The run's summary shows the
    bundle's SHA-256 and where it went.
@@ -679,10 +682,10 @@ the Store out, use **Actions > Resume Store submission** with that run's ID
 
 ## Still open
 
-- The Release workflow's Windows jobs haven't run on GitHub yet. A local dry
-  run of the build steps passed (acceptance record); the hosted build, the
-  Store job and its Partner Center sign-in are owner checks for the first
-  manual run.
+- The hosted Windows build ran for 0.1.0-beta.12 and beta.13. The hosted
+  Store submission, with its Partner Center sign-in, first ran on
+  2026-10-25, when **Resume Store submission** sent beta.13 to the public
+  listing.
 - The website's "Microsoft Store and Windows" privacy section is live since
   `storeId` was set on 2026-10-21. Before that, the privacy policy link opened
   a page that described Annotator for Mac; certification passed anyway.

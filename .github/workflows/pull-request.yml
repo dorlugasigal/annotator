@@ -16,8 +16,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - name: List the changed files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh api "repos/$REPOSITORY/pulls/$NUMBER/files" --paginate --jq '.[].filename' > "$RUNNER_TEMP/changed.txt"
+      # A release pull request (the version bump with its notes) needs no issue.
       - name: Check that the pull request names its issue
-        run: python3 tools/ci/pr_policy.py issue --event "$GITHUB_EVENT_PATH"
+        run: python3 tools/ci/pr_policy.py issue --event "$GITHUB_EVENT_PATH" --files "$RUNNER_TEMP/changed.txt"
 
   notes:
     name: Release note

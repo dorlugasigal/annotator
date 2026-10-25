@@ -110,4 +110,6 @@ to the workflows.
   Scorecard.
 - **Labels**: `.github/labeler.yml` adds area labels to pull requests.
   `no-issue` and `no-release-note` waive the two pull request checks; only
-  maintainers can add labels.
+  maintainers can add labels. A release pull request needs no `no-issue`
+  label: the Linked issue check exempts a change to only the version and the
+  release notes.
