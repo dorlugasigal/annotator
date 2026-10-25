@@ -569,9 +569,9 @@
       "sha256" : "ac6589b6b7a6432971676d537836772d8de2128077bff2af13fa4e2dd085cfb7"
     },
     {
-      "bytes" : 20774,
+      "bytes" : 20974,
       "path" : "geometry/ink-pressure.jsonl",
-      "sha256" : "861842e6d5aaaac6edb9e90d8b7d6257ccb9259a4303bce422673f7cc32ed6f0"
+      "sha256" : "04e2e7b1380b9e9d375c10b6afb6e117292c95fd114db55eb7568fc26f80a840"
     },
     {
       "bytes" : 4577,
@@ -1286,9 +1286,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "7b24bac06e652242207bbf8dd41ef6bd0260fd70",
+    "commit" : "fb865de75600eca92ae99c684bb92836e6a9b62f",
     "date" : "2026-10-25",
-    "fingerprint" : "49c0f47fe1d067a7a84d6de1edb4d4148638ceee5ba57367d0e3105a584de275",
+    "fingerprint" : "f69496ba0c57e1e1629f606f265f0283139df92e5f28c4d4c4558eaf7097b682",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
