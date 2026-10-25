@@ -10,7 +10,7 @@ private func pressures(width: Double = 3, step: Double, interval: Double, count:
 @Test func inkDrawsFastMovementThinnerThanSlowMovement() {
     let slow = pressures(step: 1, interval: 0.016, count: 60)
     let fast = pressures(step: 25, interval: 0.008, count: 60)
-    #expect(slow[40] > 0.95)
+    #expect(slow[40] > 0.9)
     #expect(fast[40] < 0.5)
     #expect(fast.allSatisfy { $0 >= InkPressure.thinnest * InkPressure.tip && $0 <= 1 })
 }

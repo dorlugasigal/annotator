@@ -19,7 +19,7 @@ public class InkPressureTests
     {
         var slow = Pressures(1, 0.016, 60);
         var fast = Pressures(25, 0.008, 60);
-        Assert.True(slow[40] > 0.95);
+        Assert.True(slow[40] > 0.9);
         Assert.True(fast[40] < 0.5);
         Assert.All(fast, value => Assert.InRange(value, InkPressure.Thinnest * InkPressure.Tip, 1));
     }

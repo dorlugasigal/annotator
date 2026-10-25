@@ -10,9 +10,9 @@ namespace Annotator.Core;
 public struct InkPressure
 {
     /// <summary>Pressure at full speed, before tapering.</summary>
-    public const double Thinnest = 0.4;
+    public const double Thinnest = 0.35;
     /// <summary>Speed in points per second at which the line is thinnest.</summary>
-    public const double FastSpeed = 1_500.0;
+    public const double FastSpeed = 900.0;
     /// <summary>Shortest time in seconds over which speed is measured; samples closer together are added up first.</summary>
     public const double Window = 0.008;
     /// <summary>About how long in seconds the width takes to follow a change of speed.</summary>

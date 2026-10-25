@@ -7,9 +7,9 @@ import Foundation
 /// The Windows port (Annotator.Core InkPressure) must match it number for number.
 public struct InkPressure: Sendable {
     /// Pressure at full speed, before tapering.
-    public static let thinnest = 0.4
+    public static let thinnest = 0.35
     /// Speed in points per second at which the line is thinnest.
-    public static let fastSpeed = 1_500.0
+    public static let fastSpeed = 900.0
     /// Shortest time in seconds over which speed is measured; samples closer together are added up first.
     public static let window = 0.008
     /// About how long in seconds the width takes to follow a change of speed.
