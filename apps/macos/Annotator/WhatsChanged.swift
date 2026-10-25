@@ -11,7 +11,7 @@ struct WhatsChangedTracker {
     /// follows an update from a version before What's changed existed. Sparkle writes SUHasLaunchedBefore after its
     /// first start, so read these before Sparkle starts.
     static let earlierUseKeys = ["SUHasLaunchedBefore", "NSStatusItem Preferred Position AnnotatorMenuBar",
-                                 IntroductionPreferences.suppressedKey, SupportReminder.lastUseKey,
+                                 TutorialPreferences.suppressedKey, SupportReminder.lastUseKey,
                                  "workspace-preferences-v1"]
     let defaults: UserDefaults
 

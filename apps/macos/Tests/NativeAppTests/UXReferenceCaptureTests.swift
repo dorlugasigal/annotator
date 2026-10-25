@@ -3,6 +3,7 @@ import ServiceManagement
 import SwiftUI
 import XCTest
 import AnnotationCore
+import MotionCore
 import NativePlatform
 import PresentationRendering
 @testable import AnnotatorApp
@@ -28,11 +29,13 @@ final class UXReferenceCaptureTests: XCTestCase {
 
     // MARK: Models
 
-    /// A model with no drawing session: the toolbar and menu show the Off state.
+    /// A model with no drawing session: the toolbar and menu show the Off state. Properties start as quick controls, so
+    /// the states keep their meaning now that full properties are the default; only the full-properties states pin them.
     private func plainModel(_ name: String) throws -> WorkspaceModel {
         let suite = "ux-reference-\(name)-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
+        model.setInspectorPinned(false)
         cleanups.append { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
         return model
     }
@@ -383,48 +386,82 @@ final class UXReferenceCaptureTests: XCTestCase {
         }
     }
 
-    // MARK: Introduction
+    // MARK: Tutorial
 
-    func test05Introduction() async throws {
-        let recorder = try UXReferenceRecorder("tour")
+    func test05Tutorial() async throws {
+        let recorder = try UXReferenceRecorder("tutorial")
         let spec = ["005 guided first use", "WIN-UI-04"]
         for dark in [false, true] {
-            let model = try plainModel("tour")
-            let preferences = IntroductionPreferences(defaults: model.preferenceDefaults)
-            let permissionCases: [(screen: Bool, gestures: Bool)?] = [nil, (screen: false, gestures: false),
-                                                                       (screen: true, gestures: true)]
-            for permissions in permissionCases {
-                let navigator = IntroductionNavigator()
-                navigator.reducesMotion = { true }
-                navigator.reviewProgress = 1
-                navigator.reviewPermissions = permissions
-                navigator.setPresented(true)
-                let view = IntroductionView(model: model, preferences: preferences, metrics: model.usageMetrics,
-                                            navigator: navigator, close: {})
-                let pages = permissions == nil ? IntroductionPage.allCases : [.setup]
-                for page in pages {
-                    navigator.select(page)
-                    let suffix = permissions.map { $0.screen ? "-allowed" : "-not-allowed" } ?? ""
-                    try await recorder.view(view, state: "\(page.rawValue + 1)-\(page)\(suffix)", dark: dark,
-                                            background: .window, width: 520,
-                                            notes: "Introduction page \(page.rawValue + 1), final illustration state.", spec: spec)
-                }
+            let model = try plainModel("tutorial")
+            let tutorial = TutorialController(model: model)
+            tutorial.reducesMotion = { true }
+            cleanups.append { tutorial.shutdown() }
+            let card = TutorialCardView(tutorial: tutorial, model: model, preferences: tutorial.preferences,
+                                        metrics: model.usageMetrics)
+            tutorial.showReview(.welcome)
+            try await recorder.view(card, state: "welcome", dark: dark,
+                                    notes: "Welcome card. It shows on launch until the tutorial is finished or Show on launch is off.",
+                                    spec: spec)
+            for step in TutorialStep.allCases {
+                tutorial.showReview(.coach, step: step)
+                try await recorder.view(card, state: "coach-\(step.rawValue)", dark: dark,
+                                        notes: "Coach card, step \(step.index + 1) of \(TutorialStep.allCases.count): the first goal is current and nothing is done.",
+                                        spec: spec)
             }
-            for page in IntroductionPage.allCases where page.illustrationDescription != nil {
-                let count = Int((page.storyDuration * 24).rounded()) + 1
-                let times = (0..<count).map { Double($0) / 24 }
-                let frames = try times.map { time -> CGImage in
-                    let renderer = ImageRenderer(content: IntroductionIllustration(page: page, progress: time / page.storyDuration)
-                        .frame(width: 472, height: 120)
-                        .environment(\.colorScheme, dark ? .dark : .light))
-                    renderer.scale = UXReferenceRecorder.scale
-                    return try XCTUnwrap(renderer.cgImage)
-                }
-                try recorder.sequence(frames, name: "illustration-\(page)", dark: dark, times: times,
-                                      notes: "Page \(page.rawValue + 1) illustration over \(page.storyDuration) s, after a \(IntroductionMotion.storyDelay) s delay. Linear story progress.",
-                                      spec: spec)
-            }
+            tutorial.showReview(.coach, step: .arrow, goalsDone: 1)
+            try await recorder.view(card, state: "coach-arrow-curved", dark: dark,
+                                    notes: "Arrow step: the Arrow is picked; Turn on Curved is the current goal.", spec: spec)
+            tutorial.showReview(.coach, step: .shape, stepDone: true)
+            try await recorder.view(card, state: "coach-shape-done", dark: dark,
+                                    notes: "Shape step done: the title's check shows during the \(TutorialMotion.doneBeat) s pause before the next step.",
+                                    spec: spec)
+            tutorial.showReview(.finish)
+            try await recorder.view(card, state: "finish", dark: dark,
+                                    notes: "Finish card with the default shortcuts. Confetti plays on its display; it is not part of the card.",
+                                    spec: spec)
+            let times = (0...36).map { Double($0) / 60 }
+            let frames = try await stepChangeFrames(tutorial, model: model, dark: dark, times: times)
+            try recorder.sequence(frames, name: "step-change", dark: dark, times: times,
+                                  notes: "From the finished shape step to the color step. Words leave upward over \(TutorialMotion.stepOutDuration) s; the next words rise \(TutorialMotion.stepInRise) pt over \(TutorialMotion.stepInDuration) s after \(TutorialMotion.stepInDelay) s; the track's leading edge moves over \(TutorialMotion.trackLeadDuration) s and the trailing edge follows over \(TutorialMotion.trackTrailDuration) s after \(TutorialMotion.trackTrailDelay) s.",
+                                  spec: spec)
         }
+    }
+
+    /// The change from the shape step's finished card to the color step, drawn still at each time.
+    private func stepChangeFrames(_ tutorial: TutorialController, model: WorkspaceModel, dark: Bool,
+                                  times: [Double]) async throws -> [CGImage] {
+        let panel = UXReferenceRecorder.panel(size: CGSize(width: TutorialLayout.width, height: 400), dark: dark)
+        defer { panel.orderOut(nil); panel.contentView = nil; panel.close() }
+        let host = NSHostingView(rootView: TutorialCardView(tutorial: tutorial, model: model,
+                                                            preferences: tutorial.preferences, metrics: model.usageMetrics)
+            .frame(maxHeight: .infinity, alignment: .top)
+            .environment(\.colorScheme, dark ? .dark : .light)
+            .environment(\.controlActiveState, .key))
+        host.appearance = panel.appearance
+        panel.contentView = host
+        panel.orderFrontRegardless()
+        // Every frame has the size of the taller card, so the motion doesn't jump.
+        var height: CGFloat = 0
+        for step in [TutorialStep.shape, .color] {
+            tutorial.showReview(.coach, step: step, stepDone: step == .shape)
+            try await Task.sleep(for: .milliseconds(80))
+            host.layoutSubtreeIfNeeded()
+            height = max(height, host.fittingSize.height)
+        }
+        let size = CGSize(width: TutorialLayout.width, height: ceil(height))
+        panel.setContentSize(size)
+        host.setFrameSize(size)
+        // Let the switch to the still review frames finish before recording.
+        tutorial.showStepChangeReview(from: .shape, time: 0)
+        try await Task.sleep(for: .milliseconds(400))
+        var frames: [CGImage] = []
+        for time in times {
+            tutorial.showStepChangeReview(from: .shape, time: time)
+            try await Task.sleep(for: .milliseconds(30))
+            host.layoutSubtreeIfNeeded()
+            frames.append(try UXReferenceRecorder.render(host))
+        }
+        return frames
     }
 
     // MARK: Windows and dialogs

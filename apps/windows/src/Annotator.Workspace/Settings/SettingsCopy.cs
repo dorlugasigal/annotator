@@ -18,7 +18,7 @@ public static class SettingsCopy
     public const string ShowTrayIcon = "Show tray icon";
     public const string ShowTrayIconHelp =
         "Windows may keep the icon in the hidden icons menu. You can still show the tools with your Show / hide shortcut.";
-    public const string ShowIntroduction = "Show introduction";
+    public const string ShowTutorial = "Show tutorial";
 
     // General: Drawing.
     public const string Drawing = "Drawing";
@@ -90,7 +90,7 @@ public static class SettingsCopy
     public const string BlurNotRedaction = "Blur isn't secure redaction. App or window sharing may leave out covers.";
 
     // Help.
-    public const string QuickStart = "Quick start";
+    public const string Tutorial = "Tutorial";
     public const string OnlineGuide = "Online guide";
     public const string Shortcuts = "Shortcuts";
     public const string SharingLimits = "Screen-sharing limits";

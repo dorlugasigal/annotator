@@ -1,0 +1,129 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      24,
+      207.5,
+      4
+     ],
+     "label": "Tutorial progress",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      233.5,
+      19.5,
+      60.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Step 6 of 10"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      304,
+      16,
+      20,
+      20
+     ],
+     "help": "End tutorial",
+     "identifier": "tutorial-end",
+     "label": "End tutorial",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      49.5,
+      52,
+      19
+     ],
+     "role": "AXStaticText",
+     "value": "Move it"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      82,
+      222,
+      18
+     ],
+     "label": "Grab Select: press 1 or click it",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      111,
+      206.5,
+      16
+     ],
+     "label": "Drag, turn or resize a drawing",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      144,
+      79.5,
+      24
+     ],
+     "identifier": "tutorial-show-me",
+     "label": "Show me",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      243.5,
+      144,
+      80.5,
+      24
+     ],
+     "identifier": "tutorial-skip",
+     "label": "Skip step",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    308,
+    152
+   ],
+   "identifier": "tutorial-coach",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "tutorial/coach-move-light.png",
+ "kind": "view",
+ "notes": "Coach card, step 6 of 10: the first goal is current and nothing is done.",
+ "pixels": [
+  680,
+  368
+ ],
+ "scale": 2,
+ "size": [
+  340,
+  184
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "coach-move",
+ "surface": "tutorial"
+}

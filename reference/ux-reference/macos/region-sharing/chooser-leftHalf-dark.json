@@ -49,12 +49,12 @@
    "frame": [
     80.5,
     100,
-    147,
+    146.5,
     24
    ],
    "identifier": "region-display",
    "role": "AXPopUpButton",
-   "value": "Odyssey G95SD"
+   "value": "Odyssey G95SC"
   },
   {
    "enabled": true,
@@ -276,7 +276,7 @@
     13
    ],
    "role": "AXStaticText",
-   "value": "2,560 × 1,440 pixels"
+   "value": "1,280 × 1,440 pixels"
   },
   {
    "enabled": true,
@@ -359,7 +359,7 @@
    "label": "Region width in points",
    "placeholder": "Width",
    "role": "AXTextField",
-   "value": "2560"
+   "value": "1280"
   },
   {
    "enabled": true,

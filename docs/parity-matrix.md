@@ -76,8 +76,8 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Global keys need Ctrl, Alt or Win; Shift with digits recorded correctly | Hotkey service | E | S-9 |
 | Expanded and Minimal sizes; Share style between tools; Show tips on screen | XAML and core | I | UI tests |
 | Arrange and key motion: lift, slide, settle, pulse, bounce, shake | Composition | I | Motion corpus |
-| Four-page tour with illustrations, arrows and Reduce Motion stills | Tour window | I | UI tests |
-| Tour shows without taking focus or asking for permissions | `SW_SHOWNOACTIVATE` window | E | S-6 |
+| Hands-on tutorial: welcome, ten steps, inline keycaps, shortcut keyboard, ghost cursor, ring, confetti at the end; Reduce Motion without ghost or confetti | Card window and click-through composition layer | I | Unit tests, live check |
+| Tutorial shows without taking focus, never takes the keyboard while coaching, asks for no permissions | `WS_EX_NOACTIVATE` window | E | Live check |
 | Pointer settings and interactive preview | Settings and overlay renderer | I | UI tests |
 | Inline color wheel inside the palette | Custom XAML control | I | UI tests |
 | Starting a drawing closes the color picker first | Model | I | UI tests |
@@ -91,7 +91,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | My shapes: save, thumbnails, insert, delete with confirmation, limits | Library on local data | I | Corpus |
 | Empty new text cancels its transaction | Core and editor | I | Corpus, S-7 |
 | Applications move offer | Not needed for MSIX | N/A | None |
-| Introduction suppression, safe-boundary reopening, Escape explanation | Tour | I | UI tests |
+| Show on launch, finished tutorial, safe-boundary reopening | Tutorial | I | Unit tests |
 | Report a problem, AI setup explanation, skill export | Help with Windows tools | E | UI tests |
 | Launch at login | MSIX startup task | E | S-10 |
 | Resizable Tools window that keeps its size | WinUI window | I | UI tests |
@@ -147,7 +147,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | --- | --- | --- | --- |
 | Off by default; consent identity lifecycle; daily summary; buckets | Metrics client (`UsageMetrics`) | I | Unit tests |
 | Payload fields | Adds `platform`; 011 and the service accept it since 2026-10-20; sending stays off (`UsageMetrics.ServiceAcceptsWindows`) until the owner deploys the service | E | 011 amendment, owner deploy |
-| Settings control and plain privacy words | Settings and the tour follow the client; unavailable words until sending is on | I | UI tests |
+| Settings control and plain privacy words | Settings and the tutorial follow the client; unavailable words until sending is on | I | UI tests |
 
 ## 012 Region sharing
 

@@ -45,8 +45,8 @@ internal enum ReferenceSurface
     /// <summary>The keycaps of one global shortcut with 8 points of padding (Mac ShortcutKeycaps().padding(8)).</summary>
     Keycaps,
 
-    /// <summary>The tour window's content (Mac IntroductionView) on one page, with its story at its end.</summary>
-    Tour,
+    /// <summary>The tutorial card (Mac TutorialViews): the welcome card, a coach card or the finish card.</summary>
+    Tutorial,
 
     /// <summary>The canvas's on-screen tip on its own (Mac WorkspaceHintView), 540 by 130 points.</summary>
     CanvasHint,
@@ -180,8 +180,8 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     /// </summary>
     public bool UpdateAvailable { get; init; }
 
-    /// <summary>The page the tour shows, for <see cref="ReferenceSurface.Tour"/>.</summary>
-    public Annotator.Workspace.FirstUse.IntroductionPage TourPage { get; init; }
+    /// <summary>The tutorial card's state, for <see cref="ReferenceSurface.Tutorial"/>: welcome, coach-&lt;step&gt;, coach-arrow-curved, coach-shape-done or finish.</summary>
+    public string TutorialState { get; init; } = string.Empty;
 
     /// <summary>The vertical rail's compact controls rather than the full row, for <see cref="ReferenceSurface.ZoomControls"/>.</summary>
     public bool Compact { get; init; }
@@ -217,10 +217,13 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     public TimeSpan Settle { get; init; }
 }
 
-/// <summary>The profile fields the reference states change.</summary>
+/// <summary>
+/// The profile fields the reference states change. The captures start in quick controls, as the Mac capture's
+/// setInspectorPinned(false); full properties states choose them.
+/// </summary>
 internal sealed class ReferenceProfile
 {
-    public WorkspacePreferences Preferences = new();
+    public WorkspacePreferences Preferences = new() { InspectorPinned = false };
 }
 
 /// <summary>The named states of the toolbar and the tray flyout and icon (reference/ux-reference/macos/INDEX.md).</summary>
@@ -238,7 +241,7 @@ internal static partial class ReferenceStates
         "pickers" => Pickers(state),
         "tools-window" => Tools(state),
         "settings" => Settings(state),
-        "tour" => Tour(state),
+        "tutorial" => Tutorial(state),
         "dialogs" => Dialogs(state),
         "region-sharing" => Sharing(state),
         "break-timer" => Break(state),

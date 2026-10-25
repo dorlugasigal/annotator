@@ -1259,9 +1259,9 @@
       "sha256" : "440942d4c56372a999d8dd24a4a089dcc49fca5af82615261dad9be17b20ab85"
     },
     {
-      "bytes" : 4800,
+      "bytes" : 4804,
       "path" : "shortcuts/macos-key-codes.json",
-      "sha256" : "ea89d294d0f0ee84dde8c3c5a01aac059e675e35d549af5967ca99014892ee24"
+      "sha256" : "4dbaae26c86056dd1c9a3a04c238afe2ee093e7bca9e375401455fca7101d75d"
     }
   ],
   "format" : 1,
@@ -1281,9 +1281,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "7c43cd434bb0050ff7cde62395078e219f8f0868",
-    "date" : "2026-10-22",
-    "fingerprint" : "9177a4804eeecc27a84eeaff8111914b8b258f35366437bb4fc6896ceaed0a1e",
+    "commit" : "d81e87158b10d27720a70e7f44af6ee92e48ef3c",
+    "date" : "2026-10-25",
+    "fingerprint" : "6d7a6f846d2055f623423909ce237ff6b1403bf9247b106d3a416edac1d53984",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

@@ -126,7 +126,7 @@ public sealed class SupportReminderTests : IDisposable
     }
 
     [Fact]
-    public void AnEditInProgressOnAnyDisplayHoldsTheReminderAndTheIntroduction()
+    public void AnEditInProgressOnAnyDisplayHoldsTheReminderAndTheTutorial()
     {
         // Canvases report edits only while drawing; Use apps cancels or commits them first.
         WorkspaceModel model = Create();
@@ -140,7 +140,7 @@ public sealed class SupportReminderTests : IDisposable
         Assert.False(SupportReminderRules.HasActiveEdit(model.Snapshot));
         model.UseApps();
         Assert.True(SupportReminderRules.CanShow(model.Snapshot, true, false, false));
-        Assert.True(IntroductionRules.IsEligible(model.Snapshot));
+        Assert.True(TutorialRules.IsEligible(model.Snapshot));
     }
 
     [Fact]
@@ -150,12 +150,12 @@ public sealed class SupportReminderTests : IDisposable
         AppDefaults first = AppDefaults.InFile(path);
         Assert.Null(first.LoadFailure);
         var when = new DateTimeOffset(2026, 10, 19, 12, 30, 15, 250, TimeSpan.FromHours(3));
-        first.Set(IntroductionPreferences.SuppressedKey, true);
+        first.Set(TutorialPreferences.SuppressedKey, true);
         first.Set(SupportReminder.UseDaysKey, 4L);
         first.Set(SupportReminder.LastShownKey, when);
         AppDefaults second = AppDefaults.InFile(path);
         Assert.Null(second.LoadFailure);
-        Assert.True(second.Bool(IntroductionPreferences.SuppressedKey));
+        Assert.True(second.Bool(TutorialPreferences.SuppressedKey));
         Assert.Equal(4, second.Integer(SupportReminder.UseDaysKey));
         Assert.Equal(when, second.Date(SupportReminder.LastShownKey));
         Assert.False(second.Bool("missing"));
@@ -175,9 +175,9 @@ public sealed class SupportReminderTests : IDisposable
         AppDefaults defaults = AppDefaults.InFile(path);
         Assert.NotNull(defaults.LoadFailure);
         Assert.StartsWith("Saved app settings could not be read", defaults.LoadFailure, StringComparison.Ordinal);
-        Assert.False(defaults.Bool(IntroductionPreferences.SuppressedKey));
-        defaults.Set(IntroductionPreferences.SuppressedKey, true);
-        Assert.True(AppDefaults.InFile(path).Bool(IntroductionPreferences.SuppressedKey));
+        Assert.False(defaults.Bool(TutorialPreferences.SuppressedKey));
+        defaults.Set(TutorialPreferences.SuppressedKey, true);
+        Assert.True(AppDefaults.InFile(path).Bool(TutorialPreferences.SuppressedKey));
     }
 
     [Fact]
@@ -190,9 +190,9 @@ public sealed class SupportReminderTests : IDisposable
         AppDefaults defaults = AppDefaults.InFile(path);
         var failures = new List<string>();
         defaults.SaveFailed += failures.Add;
-        defaults.Set(IntroductionPreferences.SuppressedKey, true);
+        defaults.Set(TutorialPreferences.SuppressedKey, true);
         defaults.Set(SupportReminder.UseDaysKey, 2L);
-        Assert.True(defaults.Bool(IntroductionPreferences.SuppressedKey));
+        Assert.True(defaults.Bool(TutorialPreferences.SuppressedKey));
         Assert.Equal(2, defaults.Integer(SupportReminder.UseDaysKey));
         Assert.Single(failures);
         Assert.StartsWith("App settings could not be saved", failures[0], StringComparison.Ordinal);

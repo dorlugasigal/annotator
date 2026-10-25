@@ -167,8 +167,8 @@ internal sealed class SettingsWindow : Window
     }
 
     /// <summary>
-    /// Leaves the band above other windows while the tour opened from Settings shows in front of it (the tour is a normal
-    /// window); <see cref="Float"/> or the next <see cref="Show"/> puts it back above them.
+    /// Leaves the band above other windows while the tutorial card opened from Settings shows in front of it;
+    /// <see cref="Float"/> or the next <see cref="Show"/> puts it back above them.
     /// </summary>
     public void StepBack() => _presenter.IsAlwaysOnTop = false;
 

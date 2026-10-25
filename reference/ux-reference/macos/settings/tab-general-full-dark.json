@@ -130,10 +130,10 @@
        "frame": [
         78,
         246,
-        134,
+        103.5,
         24
        ],
-       "label": "Show introduction",
+       "label": "Show tutorial",
        "role": "AXButton"
       },
       {

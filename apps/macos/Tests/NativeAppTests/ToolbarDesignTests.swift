@@ -46,6 +46,7 @@ final class ToolbarDesignTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        model.setInspectorPinned(false)
         model.beginDrawing()
         for dark in [false, true] {
             for tool in [Tool.select, .rectangle, .ellipse, .arrow, .line, .pen, .highlighter, .text, .eraser,
@@ -97,6 +98,7 @@ final class ToolbarDesignTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        model.setInspectorPinned(false)
         model.tool = .arrow
         let size = try render(ToolbarView(model: model, availableSize: CGSize(width: 648, height: 230)),
                               name: "short", dark: false)

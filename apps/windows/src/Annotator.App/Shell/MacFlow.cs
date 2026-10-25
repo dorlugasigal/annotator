@@ -16,6 +16,12 @@ internal sealed partial class MacFlow : Panel
 
     public double Spacing { get; init; } = PropertyLayout.Spacing;
 
+    /// <summary>
+    /// Without a <see cref="FrameworkElement.Width"/>, a flow inside another flow is as wide as its items in one row, up to
+    /// this width (SwiftUI proposes min(width, ideal) to a nested AdaptivePropertyLayout).
+    /// </summary>
+    public double Limit { get; init; } = double.PositiveInfinity;
+
     /// <summary>The exact size of the last measure, before WinUI rounds it to pixels.</summary>
     public Size? ExactSize { get; private set; }
 
@@ -34,7 +40,7 @@ internal sealed partial class MacFlow : Panel
         }
         double flow = !double.IsNaN(Width) ? Width
             : double.IsFinite(availableSize.Width) ? availableSize.Width
-            : sizes.Sum(size => size.Width) + Math.Max(0, sizes.Count - 1) * Spacing;
+            : Math.Min(Limit, sizes.Sum(size => size.Width) + Math.Max(0, sizes.Count - 1) * Spacing);
         Annotator.Core.Rect[] frames = PropertyLayout.Frames(sizes.ToArray(), Math.Max(1, flow), Spacing);
         _frames = [.. frames.Select(frame => new Rect(frame.X, frame.Y, frame.Width, frame.Height))];
         double height = 0;

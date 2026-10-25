@@ -59,8 +59,8 @@ internal sealed partial class GeneralPage
         SettingsHelp.Set(_theme, SettingsCopy.ThemeHelp);
         SettingsHelp.Set(_tips, SettingsCopy.ShowTipsHelp);
         SettingsHelp.Set(_animation, SettingsCopy.WorkspaceAnimationHelp);
-        var introduction = new SettingsButton(SettingsCopy.ShowIntroduction, ButtonLook.Bordered, SettingsWidths.Button(SettingsCopy.ShowIntroduction));
-        introduction.Click += (_, _) => actions.ShowIntroduction?.Invoke();
+        var introduction = new SettingsButton(SettingsCopy.ShowTutorial, ButtonLook.Bordered, SettingsWidths.Button(SettingsCopy.ShowTutorial));
+        introduction.Click += (_, _) => actions.ShowTutorial?.Invoke();
 
         var form = new MacStack { HorizontalAlignment = HorizontalAlignment.Stretch };
         form.Children.Add(SettingsForm.Header(SettingsCopy.Startup, first: true));

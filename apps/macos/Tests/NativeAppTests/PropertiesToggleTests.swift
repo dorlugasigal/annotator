@@ -22,4 +22,20 @@ final class PropertiesToggleTests: XCTestCase {
             XCTAssertEqual(owner.preferences.inspectorPinned, false)
         }
     }
+
+    func testFullPropertiesAreTheDefaultAndTheToggleSwitchesToQuickControls() throws {
+        let suite = "properties-default-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let model = WorkspaceModel(defaults: defaults)
+        defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        XCTAssertNil(model.preferences.inspectorPinned)
+        XCTAssertEqual(ToolbarPropertiesMode(model: model), .full, "Full properties are the default, so Curved shows at once.")
+        model.toggleProperties()
+        XCTAssertEqual(model.preferences.inspectorPinned, false)
+        XCTAssertEqual(ToolbarPropertiesMode(model: model), .quick)
+        model.toggleProperties()
+        XCTAssertEqual(ToolbarPropertiesMode(model: model), .full)
+        model.setQuickPreferencesExpanded(false)
+        XCTAssertEqual(ToolbarPropertiesMode(model: model), .toolsOnly)
+    }
 }

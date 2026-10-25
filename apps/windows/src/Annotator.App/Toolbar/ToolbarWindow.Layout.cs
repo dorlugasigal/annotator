@@ -104,6 +104,18 @@ internal sealed partial class ToolbarWindow
             {
                 PropertiesReveal.Start(viewport);
             }
+            if (!look.CompactRail)
+            {
+                // Full properties are the default, so they keep the quick row's menus within reach (Mac fullPropertiesMenus).
+                var menus = new MacStack { Orientation = Orientation.Horizontal, Spacing = 10, HorizontalAlignment = HorizontalAlignment.Right, Height = ToolbarLook.FullMenusHeight };
+                if (look.HasSelection)
+                {
+                    menus.Children.Add(SelectionMenu());
+                }
+                menus.Children.Add(FocusMenu());
+                menus.Children.Add(ZoomMenu(snapshot));
+                content.Children.Add(menus);
+            }
         }
         if (look.CaptureWarning is { } warning)
         {
@@ -705,14 +717,16 @@ internal sealed partial class ToolbarWindow
         return button;
     }
 
-    /// <summary>Mac propertiesButton: shows the current properties mode and cycles quick controls, full properties and tools only.</summary>
+    /// <summary>
+    /// Mac propertiesButton: shows the current properties mode and cycles quick controls, full properties and tools only.
+    /// </summary>
     private ParityButton PropertiesButton(ToolbarLook look)
     {
         (double width, double height) = look.Metrics.ActionSize;
         FrameworkElement glyph = ToolbarParts.SymbolGlyph("slider.horizontal.3", style: look.Expanded ? "AnnotatorGlyphAccent" : "AnnotatorGlyph");
         var host = new ContentControl { Content = glyph, IsTabStop = false, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+        // The Mac button takes clicks over its whole cell, so its accessible frame is the cell, not the glyph.
         ParityButton button = ToolbarParts.Button(width, height, host, "Properties");
-        button.BoundsElement = glyph;
         AutomationProperties.SetAutomationId(button, "toolbar-properties");
         ToolbarPropertiesMode mode = look.Properties;
         ToolbarPropertiesMode next = mode.Next;

@@ -189,6 +189,7 @@ public sealed partial class WorkspaceModel
             SelectionSupportsFill = selected.Count == 0 ? effective.SupportsFill : editable.Any(element => element.Tool.SupportsFill),
             CanUndo = active is not null && (active.Document.CanUndo || active.Document.IsEditing || active.Edit is not null),
             CanRedo = active is not null && active.Document.CanRedo && !active.Document.IsEditing && active.Edit is null,
+            UndoSerial = _undoSerial,
             CanClearCanvas = canClear,
             CanDeleteCurrent = active is not null && (active.Edit is not null || (selected.Count > 0 ? editable.Count > 0 : canClear)),
             DeleteActionLabel = deleteLabel,

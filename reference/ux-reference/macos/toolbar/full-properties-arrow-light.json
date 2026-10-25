@@ -213,10 +213,10 @@
   {
    "enabled": true,
    "frame": [
-    826.5,
-    30.5,
-    13,
-    11
+    821,
+    23,
+    24,
+    26
    ],
    "help": "Show tools only",
    "identifier": "toolbar-properties",
@@ -473,8 +473,8 @@
       {
        "enabled": true,
        "frame": [
-        13.5,
-        170,
+        521,
+        77,
         47,
         14
        ],
@@ -484,8 +484,8 @@
       {
        "enabled": true,
        "frame": [
-        12,
-        190,
+        519.5,
+        97,
         68,
         36
        ],
@@ -497,8 +497,8 @@
       {
        "enabled": true,
        "frame": [
-        95.5,
-        170,
+        603,
+        77,
         40.5,
         14
        ],
@@ -508,8 +508,8 @@
       {
        "enabled": true,
        "frame": [
-        94,
-        190,
+        601.5,
+        97,
         68,
         36
        ],
@@ -521,8 +521,8 @@
       {
        "enabled": true,
        "frame": [
-        177.5,
-        170,
+        685,
+        77,
         77,
         14
        ],
@@ -532,8 +532,8 @@
       {
        "enabled": true,
        "frame": [
-        177.5,
-        190,
+        685,
+        97,
         36,
         36
        ],
@@ -545,8 +545,8 @@
       {
        "enabled": true,
        "frame": [
-        176,
-        230,
+        683.5,
+        137,
         38.5,
         13
        ],
@@ -556,8 +556,8 @@
       {
        "enabled": true,
        "frame": [
-        221.5,
-        190,
+        729,
+        97,
         36,
         36
        ],
@@ -568,8 +568,8 @@
       {
        "enabled": true,
        "frame": [
-        222,
-        230,
+        729.5,
+        137,
         35,
         13
        ],
@@ -579,8 +579,8 @@
       {
        "enabled": true,
        "frame": [
-        273,
-        170,
+        780.5,
+        77,
         73,
         14
        ],
@@ -590,8 +590,8 @@
       {
        "enabled": true,
        "frame": [
-        271.5,
-        190,
+        779,
+        97,
         36,
         36
        ],
@@ -602,8 +602,8 @@
       {
        "enabled": true,
        "frame": [
-        312.5,
-        190,
+        820,
+        97,
         36,
         36
        ],
@@ -615,8 +615,8 @@
       {
        "enabled": true,
        "frame": [
-        353.5,
-        190,
+        861,
+        97,
         36,
         36
        ],
@@ -629,8 +629,8 @@
         {
          "enabled": true,
          "frame": [
-          283,
-          232,
+          790.5,
+          139,
           18,
           14
          ],
@@ -639,8 +639,8 @@
        ],
        "enabled": true,
        "frame": [
-        271.5,
-        232,
+        779,
+        139,
         86,
         14
        ],
@@ -651,8 +651,8 @@
       {
        "enabled": true,
        "frame": [
-        373,
-        232.5,
+        880.5,
+        139.5,
         22.5,
         13
        ],
@@ -662,8 +662,8 @@
      ],
      "enabled": true,
      "frame": [
-      12,
-      170,
+      519.5,
+      77,
       383.5,
       76
      ],
@@ -676,7 +676,7 @@
       906,
       76,
       15,
-      171
+      85
      ],
      "role": "AXScrollBar",
      "value": 0
@@ -687,9 +687,32 @@
     12,
     77,
     908,
-    169
+    83
    ],
    "role": "AXScrollArea"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    863,
+    168.5,
+    26,
+    15
+   ],
+   "label": "Focus and cleanup",
+   "role": "AXMenuButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    899,
+    168.5,
+    21,
+    15
+   ],
+   "help": "Lens and full-screen zoom",
+   "label": "Zoom tools",
+   "role": "AXMenuButton"
   }
  ],
  "appearance": "light",
@@ -699,12 +722,12 @@
  "notes": "Full properties open inside the toolbar panel, below the rail.",
  "pixels": [
   1864,
-  516
+  392
  ],
  "scale": 2,
  "size": [
   932,
-  258
+  196
  ],
  "spec": [
   "002 design.md",

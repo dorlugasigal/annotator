@@ -222,7 +222,7 @@
       "name" : "ForwardDelete"
     },
     {
-      "appUse" : "Checked by the canvas, the menu bar flyout, the region guide, the tour, image pasting and shortcut recording.",
+      "appUse" : "Checked by the canvas, the menu bar flyout, the region guide, the tutorial, image pasting and shortcut recording.",
       "keyCode" : 53,
       "name" : "Escape"
     },

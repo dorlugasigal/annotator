@@ -172,7 +172,7 @@ enum ShortcutsExport {
             ("Space", kVK_Space, "Plays the pointer preview in Settings."),
             ("Delete", kVK_Delete, "Deletes the current selection on the canvas."),
             ("ForwardDelete", kVK_ForwardDelete, "Deletes the current selection on the canvas."),
-            ("Escape", kVK_Escape, "Checked by the canvas, the menu bar flyout, the region guide, the tour, image pasting and shortcut recording."),
+            ("Escape", kVK_Escape, "Checked by the canvas, the menu bar flyout, the region guide, the tutorial, image pasting and shortcut recording."),
             ("LeftArrow", kVK_LeftArrow, "Nudges the selection by 1 point, or 10 with Shift."),
             ("RightArrow", kVK_RightArrow, "Nudges the selection by 1 point, or 10 with Shift."),
             ("DownArrow", kVK_DownArrow, "Nudges the selection by 1 point, or 10 with Shift."),

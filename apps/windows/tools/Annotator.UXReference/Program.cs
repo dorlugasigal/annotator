@@ -44,7 +44,7 @@ internal static class Program
     }
 
     private const string Usage = """
-        Annotator.UXReference: compares the Windows toolbar, tray flyout, canvas, color popover, Tools window, Settings with the Toolbar & Shortcuts, Pointer and Break timer pages, the tour, dialogs, keycaps, the error window, region sharing and the break screen with reference/ux-reference/macos (WIN-PAR-06).
+        Annotator.UXReference: compares the Windows toolbar, tray flyout, canvas, color popover, Tools window, Settings with the Toolbar & Shortcuts, Pointer and Break timer pages, the tutorial, dialogs, keycaps, the error window, region sharing and the break screen with reference/ux-reference/macos (WIN-PAR-06).
 
           run   --out <folder>  Shows each state in Annotator.exe (development builds, off-screen, never activated),
                                 dumps its UI Automation tree, compares it with the reference and writes, per state and
@@ -57,11 +57,11 @@ internal static class Program
         Options:
           --app <path>          Annotator.exe; default: the Debug build, else apps/windows/out/app/Annotator.exe.
           --reference <folder>  reference/ux-reference/macos; found from the current folder by default.
-          --states <patterns>   Comma-separated surface/state patterns with * (default: toolbar/*,menu/*,canvas/*,properties/*,pickers/*,tools-window/*,settings/*,tour/*,dialogs/*,region-sharing/*,break-timer/*).
+          --states <patterns>   Comma-separated surface/state patterns with * (default: toolbar/*,menu/*,canvas/*,properties/*,pickers/*,tools-window/*,settings/*,tutorial/*,dialogs/*,region-sharing/*,break-timer/*).
           --themes <list>       light,dark (default both).
           --timeout <seconds>   How long Annotator.exe may take to show a state (default 40).
           --usage-counts available
-                                Shows Share usage counts in Settings and the tour as available and off (the Mac's
+                                Shows Share usage counts in Settings and the tutorial as available and off (the Mac's
                                 states, as Windows shows them once it may send usage counts, WIN-PRV-01) and compares
                                 them with the Mac's words; by default they show as unavailable, as this build has them.
           --contrast <theme>    Shows each state as in a Windows contrast theme: aquatic, desert, dusk or nightsky (WIN-A11Y-03,
@@ -307,7 +307,7 @@ internal static class Program
 
         public string Reference { get; private set; } = string.Empty;
 
-        public IReadOnlyList<string> Patterns { get; private set; } = ["toolbar/*", "menu/*", "canvas/*", "properties/*", "pickers/*", "tools-window/*", "settings/*", "tour/*", "dialogs/*", "region-sharing/*", "break-timer/*"];
+        public IReadOnlyList<string> Patterns { get; private set; } = ["toolbar/*", "menu/*", "canvas/*", "properties/*", "pickers/*", "tools-window/*", "settings/*", "tutorial/*", "dialogs/*", "region-sharing/*", "break-timer/*"];
 
         public IReadOnlyList<string> Themes { get; private set; } = ["light", "dark"];
 
@@ -361,7 +361,7 @@ internal static class Program
 
         public IEnumerable<string> States()
         {
-            foreach (string surface in new[] { "toolbar", "menu", "canvas", "properties", "pickers", "tools-window", "settings", "tour", "dialogs", "region-sharing", "break-timer" })
+            foreach (string surface in new[] { "toolbar", "menu", "canvas", "properties", "pickers", "tools-window", "settings", "tutorial", "dialogs", "region-sharing", "break-timer" })
             {
                 foreach (string state in ReferenceState.States(Reference, surface)
                              .Concat(ReferenceState.WindowsOnlyStates.Where(name => name.StartsWith(surface + "/", StringComparison.Ordinal))

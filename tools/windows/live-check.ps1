@@ -53,9 +53,10 @@
     recording gate; the canvas uses the new key. The check never presses a default global shortcut;
   - on-screen tip (spec 009): the canvas reads the tip as static text while drawing, with the zoom line, and an ink key
     leaves it as it was (no status line, as on the Mac);
-  - first use (WIN-UI-04): after the script sets the first-use event, the tour shows as at a launch without taking the
-    keyboard, with Share usage counts off and unavailable in its footer (WIN-PRV-01); Next, Left, Right, Back and Got it
-    work; with four days of use recorded in memory, the next Draw makes
+  - first use (WIN-UI-04): after the script sets the first-use event, the tutorial's welcome card shows as at a launch
+    without taking the keyboard, with Share usage counts off and unavailable (WIN-PRV-01); Start tutorial turns drawing on
+    and starts the coach, which never takes the keyboard; a tool key, a drag and an ink key each finish a step while the
+    click-through tutorial layer shows; End tutorial closes it; with four days of use recorded in memory, the next Draw makes
     the coffee reminder due, Use apps shows it without the keyboard, and Not now snoozes it;
   - region sharing: the Tools tile opens Share a region, a custom region drawn on the selection panel fills the
     numbers, Left half starts sharing into an ordinary window (never topmost or active) that turns live within the Mac's
@@ -618,7 +619,8 @@ try {
     function Popover() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::Title($_) -eq 'Fill color' } | Select-Object -First 1 }
     # Canvas points (scaled like the app) from a line below the toolbar's tallest layout.
     $scale = [double]$ready.scale
-    $drawTop = $area[1] + 170 * $scale
+    # Below the toolbar with full properties, the default: the Arrow's, the tallest, is 282 points high.
+    $drawTop = $area[1] + 360 * $scale
     function Canvas([double]$x, [double]$y) { @([int]($area[0] + $x * $scale), [int]($drawTop + $y * $scale)) }
     function DrawOnCanvas([int[]]$from, [int[]]$to, [string]$label, [int]$key = 0) {
         $xs = @(); $ys = @()
@@ -1114,7 +1116,13 @@ try {
     Note "type 'API': $([LiveInput]::Type('API', $appPid))"
     [void](WaitFor { (EditorValue) -eq 'API' })
     $outline = StrokeValue
-    Note "click Stroke color: $(ClickButton 'Stroke color')"
+    # Full properties also title the well "Stroke color", so this clicks the button.
+    $strokeWell = ([Windows.Automation.AutomationElement]::FromHandle($toolbar)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+        [Windows.Automation.AndCondition]::new(
+            [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, 'Stroke color'),
+            [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::Button)))
+    $wellCenter = if ($null -ne $strokeWell) { Center $strokeWell } else { $null }
+    Note "click Stroke color: $(if ($null -ne $wellCenter) { [LiveInput]::Click($wellCenter[0], $wellCenter[1], $toolbar) } else { 'no Stroke color button' })"
     $strokePopover = if (WaitFor { $null -ne (StrokePopover) }) { StrokePopover } else { $null }
     $match = if ($null -ne $strokePopover) { Find 'Match outline' $strokePopover } else { $null }
     Check 'label-match-outline-unavailable' ($null -ne $match -and -not $match.Current.IsEnabled) "Match outline: $(if ($match) { "enabled $($match.Current.IsEnabled)" } else { 'missing' }); stroke $outline"
@@ -1610,10 +1618,14 @@ public static class BoardDialogs
     Start-Sleep -Milliseconds 400
     Check 'tip-no-status-line' ((TipText) -eq $tipBefore -and (TipText) -notlike '*Red ink*') "tip '$(Flat (TipText))'"
 
-    # First use (WIN-UI-04, spec 005): after the first-use event the tour shows as at a launch, without the keyboard; Next,
-    # the arrow keys and Back move through it and Got it closes it. Four recorded days of use make the coffee reminder due
-    # on the next Draw; Use apps shows it next to the toolbar without the keyboard, and Not now snoozes it.
-    function Tour() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::Title($_) -eq 'Welcome to Annotator' } | Select-Object -First 1 }
+    # First use (WIN-UI-04, spec 005): after the first-use event the tutorial's welcome card shows as at a launch, without
+    # the keyboard. Start tutorial turns drawing on and turns the card into the coach next to the toolbar, which never takes
+    # the keyboard: the Rectangle key, a drag on the canvas and the blue ink key each finish a step, while the tutorial's layer
+    # shows the ring, the ghost and a step's confetti without taking clicks. End tutorial closes it. Four recorded days
+    # of use make the coffee reminder due on the next Draw; Use apps shows it next to the toolbar without the keyboard, and
+    # Not now snoozes it.
+    function Tutorial() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::Title($_) -eq 'Annotator tutorial' } | Select-Object -First 1 }
+    function TutorialLayer() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::ClassName($_) -eq 'Annotator.Platform.TutorialOverlay' } | Select-Object -First 1 }
     function Reminder() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::Title($_) -eq 'Enjoying Annotator?' } | Select-Object -First 1 }
     Note "Escape on the canvas: $([LiveInput]::Tap(0x1B, $appPid))"
     [void](WaitFor { (([LiveInput]::ExStyle($overlay)) -band 0x20) -ne 0 })
@@ -1621,30 +1633,37 @@ public static class BoardDialogs
     $firstUse = [Threading.EventWaitHandle]::OpenExisting("Local\Annotator.LiveCheck.$appPid.first-use")
     [void]$firstUse.Set()
     $firstUse.Dispose()
-    Check 'tour-shows' (WaitFor { $null -ne (Tour) } 5000) "tour $(Show (Tour))"
-    $tour = Tour
-    Check 'tour-without-focus' ($null -ne $tour -and (Foreground) -ne $tour) "foreground $(Show (Foreground)), before $(Show $before)"
-    if ($null -ne $tour) {
-        # Like the Mac's orderFrontRegardless, it is in front of the active app's windows.
+    Check 'tutorial-shows' (WaitFor { $null -ne (Tutorial) } 5000) "card $(Show (Tutorial))"
+    $card = Tutorial
+    Check 'tutorial-without-focus' ($null -ne $card -and (Foreground) -ne $card) "foreground $(Show (Foreground)), before $(Show $before)"
+    if ($null -ne $card) {
         $frame = New-Object LiveInput+RECT
-        [void][LiveInput]::GetWindowRect($tour, [ref]$frame)
+        [void][LiveInput]::GetWindowRect($card, [ref]$frame)
         $front = [LiveInput]::TopLevelAt([int](($frame.Left + $frame.Right) / 2), [int](($frame.Top + $frame.Bottom) / 2))
-        Check 'tour-in-front' ($front -eq $tour) "at the tour's center: $(Show $front)"
-        Check 'tour-first-page' (Chosen $tour 'Make a point') "Make a point selected: $(Chosen $tour 'Make a point')"
-        # Share usage counts (WIN-PRV-01): off and unavailable in the footer, with the Windows note.
-        $counts = Typed 'Share usage counts' ([Windows.Automation.ControlType]::CheckBox) $tour
-        Check 'tour-usage-counts-unavailable' ($null -ne $counts -and -not $counts.Current.IsEnabled -and $null -ne (Find 'Not available on Windows yet.' $tour)) "check box: $(if ($counts) { "enabled $($counts.Current.IsEnabled)" } else { 'none' })"
-        Note "click Next: $(ClickButton 'Next' $tour)"
-        Check 'tour-next' (WaitFor { Chosen $tour 'Make it yours' }) "Make it yours selected: $(Chosen $tour 'Make it yours')"
-        [void](WaitFor { (Foreground) -eq $tour })
-        Note "Left: $([LiveInput]::Tap(0x25, $appPid))"
-        Check 'tour-left-arrow' (WaitFor { Chosen $tour 'Make a point' }) "Make a point selected: $(Chosen $tour 'Make a point')"
-        foreach ($i in 1..3) { Note "Right: $([LiveInput]::Tap(0x27, $appPid))"; Start-Sleep -Milliseconds 150 }
-        Check 'tour-right-arrows' (WaitFor { (Chosen $tour 'A little setup') -and (Named $tour 'Tray icon') }) "A little setup selected: $(Chosen $tour 'A little setup'); tray card: $(Named $tour 'Tray icon')"
-        Note "click Back: $(ClickButton 'Back' $tour)"
-        Check 'tour-back' (WaitFor { Chosen $tour 'Lead the way' }) "Lead the way selected: $(Chosen $tour 'Lead the way')"
-        Note "click Got it: $(ClickButton 'Got it' $tour)"
-        Check 'tour-got-it-closes' (WaitFor { $null -eq (Tour) }) "tour $(Show (Tour))"
+        Check 'tutorial-in-front' ($front -eq $card) "at the card's center: $(Show $front)"
+        Check 'tutorial-welcome' (WaitFor { Named $card 'Welcome to Annotator' }) "welcome: $(Named $card 'Welcome to Annotator')"
+        # Share usage counts (WIN-PRV-01): off and unavailable on the welcome card, with the Windows note.
+        $counts = Typed 'Share usage counts' ([Windows.Automation.ControlType]::CheckBox) $card
+        Check 'tutorial-usage-counts-unavailable' ($null -ne $counts -and -not $counts.Current.IsEnabled -and $null -ne (Find 'Not available on Windows yet.' $card)) "check box: $(if ($counts) { "enabled $($counts.Current.IsEnabled)" } else { 'none' })"
+        ClickUntil 'Start tutorial' $card { Named $card 'Grab the Rectangle' }
+        Check 'tutorial-starts' (WaitFor { Named $card 'Grab the Rectangle' } 4000) "first step: $(Named $card 'Grab the Rectangle')"
+        Check 'tutorial-starts-drawing' (WaitFor { (Foreground) -eq $overlay } 3000) "foreground $(Show (Foreground))"
+        Check 'tutorial-coach-without-focus' ((Foreground) -ne $card) "foreground $(Show (Foreground))"
+        $layer = TutorialLayer
+        Check 'tutorial-layer-shows' (WaitFor { $null -ne ($script:layer = TutorialLayer) -and [LiveInput]::IsWindowVisible($script:layer) } 3000) "layer $(Show $layer)"
+        Check 'tutorial-layer-passes-clicks' ($null -ne $layer -and ([LiveInput]::ExStyle($layer) -band 0x20) -ne 0) ('ex-style 0x{0:X}' -f $(if ($layer) { [LiveInput]::ExStyle($layer) } else { 0 }))
+        [void](WaitFor { (Foreground) -eq $overlay })
+        Note "2 (Rectangle): $([LiveInput]::Tap(0x32, $appPid))"
+        Check 'tutorial-key-step' (WaitFor { Named $card 'Draw a box' } 5000) "shape step: $(Named $card 'Draw a box')"
+        [void](DrawOnCanvas (Canvas 260 40) (Canvas 380 120) 'a rectangle for the tutorial')
+        Check 'tutorial-drag-step' (WaitFor { Named $card 'Make it blue' } 5000) "color step: $(Named $card 'Make it blue')"
+        Note "B (blue ink): $([LiveInput]::Tap(0x42, $appPid))"
+        Check 'tutorial-ink-step' (WaitFor { Named $card 'Draw a curved arrow' } 5000) "arrow step: $(Named $card 'Draw a curved arrow')"
+        Check 'tutorial-canvas-keeps-keys' ((Foreground) -eq $overlay) "foreground $(Show (Foreground))"
+        ClickUntil 'End tutorial' $card { -not (Named $card 'Draw a curved arrow') }
+        Check 'tutorial-ends' (WaitFor { -not (Named $card 'Draw a curved arrow') } 3000) "arrow step still shown: $(Named $card 'Draw a curved arrow')"
+        Check 'tutorial-layer-hides' (WaitFor { $null -eq ($l = TutorialLayer) -or -not [LiveInput]::IsWindowVisible($l) } 3000) "layer $(Show (TutorialLayer))"
+        foreach ($i in 1..2) { Note "Ctrl+Z (the tutorial's color, then its rectangle): $([LiveInput]::Key(0x11, $false, $appPid)), $([LiveInput]::Tap(0x5A, $appPid)), $([LiveInput]::Key(0x11, $true, $appPid))"; Start-Sleep -Milliseconds 200 }
     }
     Note "click Resume drawing: $(ClickButton 'Resume drawing')"
     [void](WaitFor { (Foreground) -eq $overlay })

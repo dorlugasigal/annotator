@@ -1,0 +1,162 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      16,
+      90.5,
+      24
+     ],
+     "role": "AXStaticText",
+     "value": "You did it!"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      44,
+      112.5,
+      16
+     ],
+     "role": "AXStaticText",
+     "value": "Keep these handy:"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      71.5,
+      308.5,
+      29
+     ],
+     "label": "Draw, Control + Shift + 2",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      105.5,
+      308.5,
+      29
+     ],
+     "label": "Use apps, Escape",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      139.5,
+      308.5,
+      29
+     ],
+     "label": "Show or hide, Control + 2",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      173.5,
+      308.5,
+      29
+     ],
+     "label": "Undo, Command + Z",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      214,
+      241,
+      30
+     ],
+     "role": "AXStaticText",
+     "value": "Change any shortcut in Settings > Toolbar & Shortcuts."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      250,
+      110.5,
+      24
+     ],
+     "identifier": "tutorial-open-settings",
+     "label": "Open Settings",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      -6.5,
+      290,
+      136.5,
+      16
+     ],
+     "identifier": "tutorial-sharing",
+     "label": "Before you share",
+     "role": "AXDisclosureTriangle",
+     "value": false
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      329.5,
+      202.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Replay this any time from Settings > Help."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      268,
+      324,
+      56,
+      24
+     ],
+     "identifier": "tutorial-done",
+     "label": "Done",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    -6.5,
+    16,
+    331,
+    332
+   ],
+   "identifier": "tutorial-finish",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "tutorial/finish-light.png",
+ "kind": "view",
+ "notes": "Finish card with the default shortcuts. Confetti plays on its display; it is not part of the card.",
+ "pixels": [
+  680,
+  728
+ ],
+ "scale": 2,
+ "size": [
+  340,
+  364
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "finish",
+ "surface": "tutorial"
+}

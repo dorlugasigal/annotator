@@ -2,7 +2,7 @@ namespace Annotator.Workspace.Capture;
 
 /// <summary>
 /// The words of screen access: the Mac's permission flow (WorkspaceModel.requestCapturePermission, reportCaptureFailure,
-/// ZoomStartController, the Screen Recording cards of CustomizationView and IntroductionController) with the Windows terms
+/// ZoomStartController, the Screen Recording cards of CustomizationView) with the Windows terms
 /// of specification 013, where Screen Recording is Windows' Screenshots and screen recording. Windows asks two questions
 /// with Yes and No (checked on build 26200: "Let Annotator take screenshots or record the screen?" and "Let Annotator turn
 /// off the screenshot border when taking screenshots or recording the screen?"), so the explanation says so.

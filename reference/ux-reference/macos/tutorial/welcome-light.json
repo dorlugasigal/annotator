@@ -1,0 +1,131 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      16,
+      205,
+      24
+     ],
+     "role": "AXStaticText",
+     "value": "Welcome to Annotator"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      46,
+      291,
+      32
+     ],
+     "role": "AXStaticText",
+     "value": "Let's learn the basics. It takes two minutes, and keys or mouse both work."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      92,
+      100,
+      24
+     ],
+     "identifier": "tutorial-start",
+     "label": "Start tutorial",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      124,
+      92,
+      74.5,
+      24
+     ],
+     "identifier": "tutorial-not-now",
+     "label": "Not now",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      141,
+      116.5,
+      16.5
+     ],
+     "identifier": "tutorial-show-on-launch",
+     "label": "Show on launch",
+     "role": "AXCheckBox",
+     "value": 1
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      163.5,
+      141,
+      16.5
+     ],
+     "help": "Optional daily counts: version, macOS, chip and feature categories. No drawings, screenshots, text or file names. Change this in General.",
+     "label": "Share usage counts",
+     "role": "AXCheckBox",
+     "value": 0
+    },
+    {
+     "enabled": true,
+     "frame": [
+      36,
+      182,
+      183.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Optional. Never your drawings or text."
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      207,
+      162.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Find this again in Settings > Help."
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    308,
+    204
+   ],
+   "identifier": "tutorial-welcome",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "tutorial/welcome-light.png",
+ "kind": "view",
+ "notes": "Welcome card. It shows on launch until the tutorial is finished or Show on launch is off.",
+ "pixels": [
+  680,
+  472
+ ],
+ "scale": 2,
+ "size": [
+  340,
+  236
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "welcome",
+ "surface": "tutorial"
+}

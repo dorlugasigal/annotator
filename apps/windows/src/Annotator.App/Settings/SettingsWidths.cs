@@ -9,11 +9,9 @@ internal static class SettingsWidths
 {
     private static readonly Dictionary<string, double> s_buttons = new(StringComparer.Ordinal)
     {
-        ["Show introduction"] = 134,
         ["Check for updates..."] = 147,
         ["Buy me a coffee"] = 122,
         ["Refresh status"] = 108,
-        ["Quick start"] = 116.5,
         ["Online guide"] = 126,
         ["Shortcuts"] = 110,
         ["Report a problem..."] = 140.5,
@@ -28,8 +26,10 @@ internal static class SettingsWidths
         ["Support info"] = 122.5,
         // The Mac's "Open Screen Recording settings", worded with Windows' lower-case page name: the same control.
         ["Open screen recording settings"] = 220,
-        // The Mac's Allow screen access (its tour card's frame; Settings shows it while access is not allowed).
+        // The Mac's Allow screen access, measured on the removed tour's card; Settings shows it while access is not allowed.
         ["Allow screen access"] = 147,
+        ["Tutorial"] = 95.5,
+        ["Show tutorial"] = 103.5,
         // Settings > Break timer's Start button at the default length (BreakTimerPage widens other lengths alike).
         ["Start a 10-minute break"] = 197,
     };

@@ -176,8 +176,9 @@ internal sealed record ReferenceState(string Surface, string State, string Theme
     }
 
     /// <summary>Every state of a surface folder, from its light or dark JSON files (the break screen is always dark).</summary>
+    /// <remarks>A surface the Mac has not captured yet, such as a new one before the reference is regenerated, has no states.</remarks>
     public static IEnumerable<string> States(string root, string surface) =>
-        Directory.EnumerateFiles(Path.Combine(root, surface), "*.json")
+        !Directory.Exists(Path.Combine(root, surface)) ? [] : Directory.EnumerateFiles(Path.Combine(root, surface), "*.json")
             .Select(path => Path.GetFileName(path))
             .Select(file => file.EndsWith("-light.json", StringComparison.Ordinal) ? file[..^"-light.json".Length]
                 : file.EndsWith("-dark.json", StringComparison.Ordinal) ? file[..^"-dark.json".Length] : null)
@@ -254,18 +255,23 @@ internal static partial class PlatformTerms
         // copy says where to download it.
         ["Annotator 0.1.0-beta.13 is ready to install."] =
             Annotator.Workspace.Updates.UpdateText.PortableAvailable("0.1.0-beta.13"),
+        // The tutorial (WIN-UI-04): the Mac's keycaps say esc and return, and Undo is Command-Z there, Ctrl+Z on Windows.
+        ["Press esc, or click Use apps. Your drawings stay put."] = "Press Esc, or click Use apps. Your drawings stay put.",
+        ["Click points, then double-click (or return)"] = "Click points, then double-click (or Enter)",
+        ["Undo, Command + Z"] = "Undo, Ctrl + Z",
+        ["Keyboard: Command + Z"] = "Keyboard: Ctrl + Z",
     };
 
     /// <summary>
-    /// Share usage counts in Settings and the tour (WIN-PRV-01): the unavailable words this build shows, or with
+    /// Share usage counts in Settings and the tutorial (WIN-PRV-01): the unavailable words this build shows, or with
     /// <c>--usage-counts available</c> the Mac's words with Windows for macOS, as Windows shows them once it may send.
     /// </summary>
     private static readonly Dictionary<string, (string Unavailable, string Available)> UsageCounts = new(StringComparer.Ordinal)
     {
         ["Usage counts are off."] = (SettingsCopy.UsageCountsUnavailable, Annotator.Workspace.Metrics.UsageMetricsText.Off),
-        ["Optional. Never your drawings or text."] = (IntroductionText.UsageCountsUnavailableNote, IntroductionText.UsageCountsNote),
+        ["Optional. Never your drawings or text."] = (TutorialText.UsageCountsUnavailableNote, TutorialText.UsageCountsNote),
         ["Optional daily counts: version, macOS, chip and feature categories. No drawings, screenshots, text or file names. Change this in General."] =
-            (IntroductionText.UsageCountsUnavailableHelp, IntroductionText.UsageCountsHelp),
+            (TutorialText.UsageCountsUnavailableHelp, TutorialText.UsageCountsHelp),
     };
 
     /// <summary>The app shows usage counts as available (<c>--usage-counts available</c>).</summary>

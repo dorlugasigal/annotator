@@ -45,7 +45,7 @@ SURFACES = [
     ("pickers", "Pickers and zoom controls", "Color popover, arrowhead choices and zoom controls."),
     ("menu", "Menu-bar menu and icon", "The menu-bar popover (the Windows tray flyout) and the menu-bar icon. Compare with WIN-UI-01."),
     ("settings", "Settings", "Every Settings tab at its default size, the same tab stretched to show all of its content, and the launch-at-login states."),
-    ("tour", "Introduction tour", "The four tour pages, setup permission states and illustration motion."),
+    ("tutorial", "Tutorial", "The welcome card, a coach card for each step, a goal and a step done, the finish card and the step change."),
     ("tools-window", "Tools window", "Each section of the Tools window and a wider window."),
     ("region-sharing", "Region sharing", "The Share a region window, outlines and the opaque output while it starts."),
     ("break-timer", "Break timer", "The full-screen break countdown in each state, the five color sets and the plain background (specification 014)."),

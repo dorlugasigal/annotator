@@ -2,7 +2,7 @@
 
 Compares the Windows toolbar, full properties, arrowhead choices, color popover,
 Tools window, Settings with the Toolbar & Shortcuts, Pointer and Break timer pages,
-keycaps, the tour, region sharing, the break screen, the error window, tray flyout,
+keycaps, the tutorial, region sharing, the break screen, the error window, tray flyout,
 drawing canvas and cursors with
 the macOS UX reference in
 `reference/ux-reference/macos` (specification 013, WIN-PAR-06). It is a development
@@ -107,13 +107,13 @@ dotnet run --project apps/windows/tools/Annotator.UXReference -- run --out <fold
 ```
 
 Options: `--states toolbar/draw-quick-*,menu/drawing` (patterns with `*`;
-default `toolbar/*,menu/*,canvas/*,properties/*,pickers/*,tools-window/*,settings/*,tour/*,dialogs/*,region-sharing/*,break-timer/*`),
+default `toolbar/*,menu/*,canvas/*,properties/*,pickers/*,tools-window/*,settings/*,tutorial/*,dialogs/*,region-sharing/*,break-timer/*`),
 `--themes light`
 (default both), `--app <path>`
 (default the Debug build, else `apps/windows/out/app/Annotator.exe`),
 `--reference <folder>` and `--timeout <seconds>`. `list` prints the selected
 states. `--usage-counts available` shows Share usage counts in Settings and the
-tour as available and off, the Mac's states, as Windows will show them once the
+tutorial as available and off, the Mac's states, as Windows will show them once the
 owner turns on `UsageMetrics.ServiceAcceptsWindows` (WIN-PRV-01), and compares
 them with the Mac's words. By default they show as unavailable, as this build
 has them, and the tool expects the unavailable words.
@@ -171,12 +171,11 @@ The pointer pictures (`pointer/*` and `pointer/motion/*`) have no
 accessibility tree; `Annotator.RenderHarness pointer --evidence <folder>` draws
 them with the Windows renderer and compares their pixels with the Mac's.
 
-Tour states (`tour/<state>`) show the tour's content without its title bar, 520
-by 530 points, each story at its end, as the Mac capture does; the
-illustrations draw into bitmaps there, which the capture can read. Page 4's
-Mac states are its permission states; Windows needs no permission, so
-`4-setup` and `4-setup-allowed` show the shortcuts working and
-`4-setup-not-allowed` shows Show / hide taken by another app.
+Tutorial states (`tutorial/<state>`) show the card itself, without its window
+or the ghost: `welcome`, `coach-<step>` for every step with nothing done,
+`coach-arrow-curved`, `coach-shape-done` and `finish`, as the Mac capture does.
+The finish card also carries the tray icon and shortcut cards, so it is taller
+and 400 points wide (WIN-UI-04, DV-4, DV-10).
 `dialogs/canvas-hint` draws the on-screen tip in the Mac's 540 by 130-point
 view, and `dialogs/coffee-reminder` the reminder at the Mac's place in a 460 by
 135-point window.

@@ -21,6 +21,10 @@ final class NativeCanvasFixture: NSObject, NSWindowDelegate {
          pasteboard: NSPasteboard = .general) {
         model = WorkspaceModel(defaults: settingsOwner?.preferenceDefaults ?? defaults, imagePasteboard: pasteboard)
         model.connectSettingsOwner(settingsOwner)
+        // Fixture tests were written for quick controls, the default before full properties; keep their meaning.
+        if model.preferences.inspectorPinned == nil, model.preferenceDefaults !== UserDefaults.standard {
+            model.setInspectorPinned(false)
+        }
         let visible = NSScreen.main?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1200, height: 900)
         let frame = CGRect(x: visible.midX - min(1100, visible.width - 80)/2,
                            y: visible.midY - min(820, visible.height - 80)/2,

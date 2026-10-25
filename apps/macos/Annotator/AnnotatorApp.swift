@@ -49,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var library: ToolLibraryWindowController?
     private var menuPopover: MenuBarPopoverController?
     private var errorController: WorkspaceErrorController?
-    private(set) var introduction: IntroductionController?
+    private(set) var tutorial: TutorialController?
     private(set) var whatsChanged: WhatsChangedController?
 
     override init() {
@@ -150,7 +150,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func finishLaunchPresentation(isLoginItem: Bool) {
         if !isLoginItem { showToolbar() }
-        introduction?.showAutomatically(isLoginItem: isLoginItem)
+        tutorial?.showAutomatically(isLoginItem: isLoginItem)
         whatsChanged?.start(isLoginItem: isLoginItem)
     }
 
@@ -183,9 +183,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func wireWorkspaceCallbacks() {
         errorController = WorkspaceErrorController(model: model)
-        introduction = IntroductionController(model: model)
+        tutorial = TutorialController(model: model,
+                                      presented: { [weak self] in self?.drawingToolsArePresented ?? false },
+                                      toolbarWindow: { [weak self] in self?.toolbarWindow },
+                                      startDrawing: { [weak self] in self?.resumeDrawing() })
         whatsChanged = WhatsChangedController(model: model)
-        model.onShowIntroduction = { [weak self] in self?.introduction?.showManually() }
+        model.onShowIntroduction = { [weak self] in self?.tutorial?.showManually() }
         model.onDismissMenuBar = { [weak self] in
             guard let self else { return false }
             if self.errorController?.dismissIfShown() == true { return true }
@@ -336,8 +339,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        introduction?.close()
-        introduction = nil
+        tutorial?.shutdown()
+        tutorial = nil
         whatsChanged?.close()
         whatsChanged = nil
         model.onShowIntroduction = nil

@@ -3,7 +3,7 @@ using Annotator.Workspace.Metrics;
 
 namespace Annotator.App.Reference;
 
-/// <summary>Usage counts for the Settings and tour states (WIN-PRV-01).</summary>
+/// <summary>Usage counts for the Settings and tutorial states (WIN-PRV-01).</summary>
 internal sealed partial class ReferenceHost
 {
     /// <summary>

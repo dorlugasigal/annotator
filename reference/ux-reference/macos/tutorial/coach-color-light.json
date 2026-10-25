@@ -1,0 +1,118 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      24,
+      207.5,
+      4
+     ],
+     "label": "Tutorial progress",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      233.5,
+      19.5,
+      60.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Step 3 of 10"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      304,
+      16,
+      20,
+      20
+     ],
+     "help": "End tutorial",
+     "identifier": "tutorial-end",
+     "label": "End tutorial",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      49.5,
+      86.5,
+      19
+     ],
+     "role": "AXStaticText",
+     "value": "Make it blue"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      76,
+      254,
+      18
+     ],
+     "label": "Press B, or pick any color in the toolbar.",
+     "role": "AXUnknown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16,
+      108,
+      79.5,
+      24
+     ],
+     "identifier": "tutorial-show-me",
+     "label": "Show me",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      243.5,
+      108,
+      80.5,
+      24
+     ],
+     "identifier": "tutorial-skip",
+     "label": "Skip step",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    16,
+    16,
+    308,
+    116
+   ],
+   "identifier": "tutorial-coach",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "tutorial/coach-color-light.png",
+ "kind": "view",
+ "notes": "Coach card, step 3 of 10: the first goal is current and nothing is done.",
+ "pixels": [
+  680,
+  296
+ ],
+ "scale": 2,
+ "size": [
+  340,
+  148
+ ],
+ "spec": [
+  "005 guided first use",
+  "WIN-UI-04"
+ ],
+ "state": "coach-color",
+ "surface": "tutorial"
+}

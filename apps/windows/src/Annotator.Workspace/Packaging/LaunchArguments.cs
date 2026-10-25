@@ -11,7 +11,7 @@ public sealed record LaunchArguments(string? Board, bool StartupTask)
     public const string StartupTaskSwitch = "--startup-task";
 
     /// <summary>
-    /// A quiet launch shows no toolbar and no tour, only the tray icon and the global shortcuts (the Mac's login item). A
+    /// A quiet launch shows no toolbar and no tutorial, only the tray icon and the global shortcuts (the Mac's login item). A
     /// launch that names a board is never quiet: opening it starts drawing.
     /// </summary>
     public bool Quiet => StartupTask && Board is null;

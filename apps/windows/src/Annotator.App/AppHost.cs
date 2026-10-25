@@ -1,4 +1,4 @@
-using Annotator.App.Introduction;
+using Annotator.App.Tutorial;
 using Annotator.App.Files;
 using Annotator.App.Library;
 using Annotator.App.Motion;
@@ -58,12 +58,15 @@ internal sealed partial class AppHost
     private readonly ShapeThumbnails _thumbnails = new();
     private readonly AppDefaults _defaults;
     private readonly SupportReminder _reminder;
-    private readonly IntroductionController _introduction;
+    private readonly TutorialController _tutorial;
     private readonly WhatsChangedTracker _whatsChangedTracker;
     /// <summary>This launch follows an update and What's changed has not shown yet.</summary>
     private ReleaseNotesEntry? _whatsChangedDue;
     /// <summary>A quiet sign-in launch: What's changed waits until the person opens Annotator.</summary>
     private bool _whatsChangedWaits;
+
+    /// <summary>The launch presentation happened (Mac WhatsChangedController.start): What's changed may show from now on.</summary>
+    private bool _whatsChangedStarted;
     private WhatsChangedWindow? _whatsChanged;
     private SupportReminderPopover? _reminderPopover;
     private WorkspaceMode _lastMode;
@@ -173,7 +176,7 @@ internal sealed partial class AppHost
                 // The live check's Settings never open file dialogs, links or the clipboard.
                 Live = check is null,
             });
-        _settingsActions.ShowIntroduction = ShowIntroduction;
+        _settingsActions.ShowTutorial = ShowTutorial;
         // One capture service for every display's effect regions; it runs only while a region needs pixels (WIN-CAP-01).
         // Frames that change nothing are skipped, and a still screen is captured at 60 frames a second (WIN-PERF-03).
         _capture = CaptureService.Create(new CaptureServiceOptions { Registry = _registry, FrameComparer = new Rendering.Effects.CaptureFrameComparer() });
@@ -219,16 +222,20 @@ internal sealed partial class AppHost
         // First-use state lives in _defaults, made with the update settings above.
         _reminder = new SupportReminder(_defaults);
         _reminder.Changed += UpdateSupportReminder;
-        // Usage counts (WIN-PRV-01): the workspace reports what the Mac's model records; Settings and the tour show the switch.
+        // Usage counts (WIN-PRV-01): the workspace reports what the Mac's model records; Settings and the tutorial show the switch.
         _usage = CreateUsageMetrics(live: check is null);
         _model.UsageRecorded += _usage.Record;
         _settingsActions.UsageMetrics = _usage;
-        _introduction = new IntroductionController(_defaults, () => _model.Snapshot, _model.ShowStatus, _usage);
-        _introduction.VisibilityChanged += UpdateSupportReminder;
-        // Settings floats again once the tour that opened in front of it hides.
-        _introduction.VisibilityChanged += () =>
+        _tutorial = new TutorialController(_registry, _queue, _defaults, () => _model.Snapshot, _model.ShowStatus, _usage,
+            () => _model.Snapshot.ToolbarVisible ? _toolbar.Frame : null, _toolbar.Control, () => OpenSettings(SettingsTab.Toolbar),
+            _model.ResumeDrawing);
+        _tutorial.VisibilityChanged += UpdateSupportReminder;
+        // What's changed follows once the tutorial's card goes (Mac showIfReady on the model's change).
+        _tutorial.VisibilityChanged += UpdateWhatsChanged;
+        // Settings floats again once the tutorial card that opened in front of it hides.
+        _tutorial.VisibilityChanged += () =>
         {
-            if (!_introduction.IsVisible)
+            if (!_tutorial.IsVisible)
             {
                 _settings?.Float();
             }
@@ -240,7 +247,7 @@ internal sealed partial class AppHost
     /// <param name="board">A board file the launch named, opened once the toolbar has drawn its first frame (WIN-SYS-04).</param>
     /// <param name="quiet">
     /// The startup task started Annotator at sign-in (WIN-SYS-01): the tray icon and global shortcuts only, without the
-    /// toolbar or the tour, like the Mac's login item (finishLaunchPresentation).
+    /// toolbar or the tutorial, like the Mac's login item (finishLaunchPresentation).
     /// </param>
     public static AppHost Start(string? board = null, bool quiet = false)
     {

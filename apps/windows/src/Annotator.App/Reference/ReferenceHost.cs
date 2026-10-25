@@ -184,7 +184,7 @@ internal sealed partial class ReferenceHost
                 case ReferenceSurface.Keycaps:
                     ShowKeycaps(model);
                     break;
-                case ReferenceSurface.Tour or ReferenceSurface.CanvasHint or ReferenceSurface.CoffeeReminder or ReferenceSurface.WhatsChanged:
+                case ReferenceSurface.Tutorial or ReferenceSurface.CanvasHint or ReferenceSurface.CoffeeReminder or ReferenceSurface.WhatsChanged:
                     ShowFirstUse(model, scenario);
                     break;
                 case ReferenceSurface.ZoomControls:

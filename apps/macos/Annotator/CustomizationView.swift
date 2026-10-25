@@ -82,7 +82,7 @@ struct CustomizationView: View {
                 }
                 Toggle("Show menu-bar icon", isOn: Binding(get: { model.preferences.showMenuBarIcon ?? true }, set: { model.setMenuBarVisible($0) }))
                     .help("If the menu bar is full, macOS may hide the icon. You can still show the tools with your Show / hide shortcut.")
-                Button("Show introduction") { model.onShowIntroduction?() }
+                Button("Show tutorial") { model.onShowIntroduction?() }
             }
             Section("Drawing") {
                 Toggle("Share style between tools", isOn: Binding(
