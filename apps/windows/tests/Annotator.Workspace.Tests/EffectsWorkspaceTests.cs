@@ -128,7 +128,7 @@ public sealed class EffectsWorkspaceTests
     }
 
     [Fact]
-    public void TheToolbarWarnsWhileTheActiveDisplaysRegionsWaitOrCaptureFailed()
+    public void TheToolbarWarnsOnlyWhenCaptureFailed()
     {
         WorkspaceModel model = Drawing();
         Assert.Equal(Primary, model.Snapshot.ActiveDisplay);
@@ -141,7 +141,7 @@ public sealed class EffectsWorkspaceTests
 
         model.SetEffectsState(Primary, regions: true, ready: false);
         Assert.True(model.Snapshot.CensorFallbackActive);
-        Assert.Equal(WorkspaceModel.CaptureCoveredWarning, model.Snapshot.CaptureWarning);
+        Assert.Null(model.Snapshot.CaptureWarning);
         revision = model.Snapshot.Revision;
         model.SetEffectsState(Primary, regions: true, ready: false);
         Assert.Equal(revision, model.Snapshot.Revision);

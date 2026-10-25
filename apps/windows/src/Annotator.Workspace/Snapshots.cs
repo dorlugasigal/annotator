@@ -351,12 +351,11 @@ public sealed class WorkspaceSnapshot
     public ulong EffectsRetry { get; internal init; }
 
     /// <summary>
-    /// The toolbar's capture warning (Mac ToolbarView needsCaptureRecovery), or null: capture failed, or effect regions wait
-    /// for capture.
+    /// The toolbar's capture warning (Mac ToolbarView needsCaptureRecovery), or null: zoom or capture failed. Effect regions
+    /// that briefly wait for capture show no warning.
     /// </summary>
     public string? CaptureWarning => ZoomStart.Phase == Zoom.ZoomStartPhase.Failed ? ZoomStart.Message
-        : CaptureFailureMessage is not null ? WorkspaceModel.CaptureUnavailableWarning
-        : CensorFallbackActive ? WorkspaceModel.CaptureCoveredWarning : null;
+        : CaptureFailureMessage is not null ? WorkspaceModel.CaptureUnavailableWarning : null;
 
     /// <summary>Mac <c>spotlight</c>: the overlays dim everything but a circle around the pointer while the workspace shows.</summary>
     public bool Spotlight { get; internal init; }
