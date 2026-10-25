@@ -1,23 +1,52 @@
 {
   "schemaVersion": 1,
-  "unreleased": {
-    "Changed": [
-      "With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.",
-      "The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).",
-      "The on-screen tips are shorter and easier to read. They show for a few seconds when you start drawing or switch mode, then fade away. Click ✕ on a tip to turn tips off. You can turn them back on in Settings > General.",
-      "New drawings start with a gradient. When you first open Annotator, shapes, lines, arrows, the pen and text use the Sunset gradient. If you already use Annotator, your colors stay the same.",
-      "The Roughness and Edges buttons in Properties have clearer pictures: a hand-drawn squiggle that gets looser for Clean, Sketchy and Wild, and a square that shows a sharp or rounded corner.",
-      "The pen's Tablet pressure is now Ink, and it works with a mouse or trackpad: the line gets thinner when you move fast, thicker when you move slowly, and narrows at the start and end. A pressure-sensitive pen still uses its own pressure."
-    ],
-    "Fixed": [
-      "On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.",
-      "On a Mac, the menu-bar menu now takes a click as soon as it opens. Before, a quick click on a button such as 5 min or Show drawings and tools sometimes did nothing."
-    ],
-    "Added": [
-      "Seven more gradients to choose from: Aurora, Cherry, Forest, Copper, Neon, Tropic and Steel. The color picker now shows Gradient before Solid."
-    ]
-  },
+  "unreleased": {},
   "releases": [
+    {
+      "version": "0.1.0-beta.14",
+      "build": 32,
+      "date": "2026-10-25",
+      "changes": {
+        "Changed": [
+          "With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.",
+          "The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).",
+          "The on-screen tips are shorter and easier to read. They show for a few seconds when you start drawing or switch mode, then fade away. Click ✕ on a tip to turn tips off. You can turn them back on in Settings > General.",
+          "New drawings start with a gradient. When you first open Annotator, shapes, lines, arrows, the pen and text use the Sunset gradient. If you already use Annotator, your colors stay the same.",
+          "The Roughness and Edges buttons in Properties have clearer pictures: a hand-drawn squiggle that gets looser for Clean, Sketchy and Wild, and a square that shows a sharp or rounded corner.",
+          "The pen's Tablet pressure is now Ink, and it works with a mouse or trackpad: the line gets thinner when you move fast, thicker when you move slowly, and narrows at the start and end. A pressure-sensitive pen still uses its own pressure."
+        ],
+        "Fixed": [
+          "On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.",
+          "On a Mac, the menu-bar menu now takes a click as soon as it opens. Before, a quick click on a button such as 5 min or Show drawings and tools sometimes did nothing."
+        ],
+        "Added": [
+          "Seven more gradients to choose from: Aurora, Cherry, Forest, Copper, Neon, Tropic and Steel. The color picker now shows Gradient before Solid."
+        ]
+      },
+      "knownIssues": [
+        "The menu-bar click fix comes from a tester report we couldn't reproduce. The menu now takes a click as soon as it opens; tell us if a click still does nothing.",
+        "Ink pressure was tuned with a mouse and a trackpad. Drawing with a pressure-sensitive pen still needs a hands-on check.",
+        "The on-screen tips, Ink pressure and the new gradients were checked on Windows with automated and live checks. On the Mac they passed automated checks; VoiceOver for the tip's ✕ still needs a hands-on check.",
+        "The daily update check and What's changed passed automated checks. A real update from beta.13 to this version still needs a hands-on check on both platforms.",
+        "The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.",
+        "The animations added in beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.",
+        "The new names of the three toolbar menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.",
+        "The screen zoom ramp was checked with automated state tests only. The live-capture zoom tests did not run on the validation Mac because the test build had no Screen Recording permission.",
+        "In the Shared Region window, the spotlight still turns on and off at once instead of fading.",
+        "Shared animations passed controlled local capture checks. Their appearance in a Teams, Meet or Zoom receiver still needs a hands-on check.",
+        "The controlled toolbar-sharing check has been inconsistent on this Mac. Check that the toolbar appears in your meeting's shared window before relying on it.",
+        "The owner confirmed the region highlight works on the current monitor setup. Full-screen browser transitions, Stage Manager and unplugging or reconnecting monitors still need separate checks.",
+        "Choosing a different area in the configuration window or changing the display setup turns region sharing off. Check the outline before starting it again.",
+        "Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.",
+        "The Intel app and tests compiled, but runtime tests could not run because Rosetta is missing on the validation Mac. No Intel Mac has run this version yet.",
+        "Installing on another Mac and updating from an earlier version still need a hands-on check.",
+        "VoiceOver and Full Keyboard Access checks remain incomplete.",
+        "With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.",
+        "Cross-monitor dragging still needs a hands-on check.",
+        "Effects do not follow moving windows or scrolling content and are not secure redaction.",
+        "Heavy gradient scenes and long-session resource use still need native performance checks."
+      ]
+    },
     {
       "version": "0.1.0-beta.13",
       "build": 31,
