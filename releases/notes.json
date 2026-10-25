@@ -7,7 +7,8 @@
       "New drawings start with a gradient. When you first open Annotator, shapes, lines, arrows, the pen and text use the Sunset gradient. If you already use Annotator, your colors stay the same."
     ],
     "Fixed": [
-      "On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only."
+      "On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.",
+      "On a Mac, the menu-bar menu now takes a click as soon as it opens. Before, a quick click on a button such as 5 min or Show drawings and tools sometimes did nothing."
     ],
     "Added": [
       "Seven more gradients to choose from: Aurora, Cherry, Forest, Copper, Neon, Tropic and Steel. The color picker now shows Gradient before Solid."

@@ -40,20 +40,24 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
         let identifier = UUID()
         presentationID = identifier
         let preview = Bundle.main.bundleIdentifier?.hasSuffix(".dev") == true
+        let natural = MenuBarPopoverView.naturalHeight(model: model, developerPreview: preview, toolsVisible: toolsVisible)
         let host = NSHostingController(rootView: MenuBarPopoverView(model: model, developerPreview: preview,
             perform: { [weak self] in self?.perform($0) },
             resized: { [weak self] size in
                 guard let self, presentationID == identifier, size.width > 0, size.height > 0 else { return }
                 measuredContentSize = size
+                guard popover.contentSize != size else { return }
                 popover.contentSize = size
                 popover.contentViewController?.preferredContentSize = size
-            }, maximumHeight: maximumHeight, toolsVisible: toolsVisible))
+            }, maximumHeight: maximumHeight, toolsVisible: toolsVisible, initialContentHeight: natural))
+        host.sizingOptions = []
         popover.contentViewController = host
-        popover.contentSize = CGSize(width: 320, height: min(380, maximumHeight))
-        // Only the opening uses the system animation; later content-size updates and closing stay immediate.
-        popover.animates = !Motion.systemReducesMotion
-        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        popover.contentSize = CGSize(width: 320, height: min(natural, maximumHeight))
+        // No opening animation: while NSPopover animates in, its window lets clicks through to whatever is under it, so
+        // a quick click on 5 min or Show drawings and tools did nothing. It also opens at its measured size, so nothing
+        // moves under the pointer after it appears.
         popover.animates = false
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popover.contentViewController?.view.window?.level = .popUpMenu
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
             NSApp.activate(ignoringOtherApps: true)
