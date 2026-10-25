@@ -21,10 +21,10 @@
       77,
       24
      ],
-     "label": "Solid",
+     "label": "Gradient",
      "role": "AXRadioButton",
      "subrole": "AXSegment",
-     "value": 0
+     "value": 1
     },
     {
      "enabled": true,
@@ -34,10 +34,10 @@
       77,
       24
      ],
-     "label": "Gradient",
+     "label": "Solid",
      "role": "AXRadioButton",
      "subrole": "AXSegment",
-     "value": 1
+     "value": 0
     }
    ],
    "enabled": true,
@@ -147,6 +147,30 @@
      ],
      "help": "Orchid",
      "label": "Orchid gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      136,
+      38,
+      38
+     ],
+     "help": "Aurora",
+     "label": "Aurora gradient",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      136,
+      38,
+      38
+     ],
+     "help": "Cherry",
+     "label": "Cherry gradient",
      "role": "AXButton"
     }
    ],

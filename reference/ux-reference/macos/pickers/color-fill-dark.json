@@ -45,10 +45,10 @@
       76.5,
       24
      ],
-     "label": "Solid",
+     "label": "Gradient",
      "role": "AXRadioButton",
      "subrole": "AXSegment",
-     "value": 1
+     "value": 0
     },
     {
      "enabled": true,
@@ -58,10 +58,10 @@
       76.5,
       24
      ],
-     "label": "Gradient",
+     "label": "Solid",
      "role": "AXRadioButton",
      "subrole": "AXSegment",
-     "value": 0
+     "value": 1
     }
    ],
    "enabled": true,
