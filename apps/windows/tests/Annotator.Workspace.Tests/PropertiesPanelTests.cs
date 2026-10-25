@@ -321,9 +321,8 @@ public sealed class PropertiesPanelTests
         Assert.Equal(7 / 1.5, thick.Style.Width, 12);
         Assert.Equal(1, thick.Style.Color.Alpha);
         Assert.Equal(InspectorSample.Seed, thick.Seed);
-        Assert.Equal(1.2, InspectorSample.Roughness(6).Element(ink).Style.Roughness, 12);
-        Assert.Equal(0.6, InspectorSample.Roughness(2).Element(ink).Style.Roughness, 12);
-        Assert.Equal(7, InspectorSample.Edges(rounded: true).Element(ink).Style.CornerRadius);
+        Assert.Throws<InvalidOperationException>(() => InspectorSample.Roughness(6).Element(ink));
+        Assert.Throws<InvalidOperationException>(() => InspectorSample.Edges(rounded: true).Element(ink));
         Element solid = InspectorSample.Fill(FillPattern.Solid).Element(ink);
         Assert.Equal(0.5, solid.Style.Fill!.Value.Alpha);
         Element start = InspectorSample.ForHead(ArrowHead.Filled, start: true).Element(ink);
@@ -349,6 +348,30 @@ public sealed class PropertiesPanelTests
         Assert.Contains(InspectorSample.ForHead(ArrowHead.TriangleOutline, start: false).Draw(ink, builder),
             item => item.Op == DisplayOp.PushLayer && item.Path is not null);
         Assert.Contains(InspectorSample.Pressure(variable: true).Draw(ink, builder), item => item.Op == DisplayOp.StrokeSegments);
+    }
+
+    [Fact]
+    public void RoughnessAndEdgesSamplesAreTheMacHandDrawnStrokes()
+    {
+        RGBA ink = new(0, 0, 0, 0.85);
+        var builder = new SceneBuilder(new FixedMeasurer());
+        Assert.Single(InspectorGlyph.Roughness(0));
+        Assert.Equal(2, InspectorGlyph.Roughness(2).Length);
+        Assert.Equal(InspectorGlyph.Roughness(0)[0].Start, InspectorGlyph.Roughness(2)[0].Start);
+        GlyphStroke wild = Assert.Single(InspectorGlyph.Roughness(6));
+        Assert.Equal(5, wild.Segments.Length);
+        Assert.Equal(2, InspectorSample.Roughness(2).Draw(ink, builder).Length);
+        foreach (bool rounded in new[] { false, true })
+        {
+            GlyphStroke[] edges = InspectorGlyph.Edges(rounded);
+            Assert.Equal(new[] { true, false }, edges.Select(stroke => stroke.Dotted));
+            Assert.Equal(rounded, edges[1].Segments.Any(segment => segment.IsCurve));
+            DisplayItem[] items = InspectorSample.Edges(rounded).Draw(ink, builder);
+            Assert.Equal(2, items.Length);
+            Assert.True(items[0].Stroke!.IsDashed);
+            Assert.False(items[1].Stroke!.IsDashed);
+            Assert.All(items, item => Assert.Equal(1, item.Paint!.Color.Alpha));
+        }
     }
 
     [Fact]
