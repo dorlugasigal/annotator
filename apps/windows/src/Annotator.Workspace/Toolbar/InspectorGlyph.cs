@@ -27,24 +27,25 @@ public static class InspectorGlyph
     public const double Width = 1.5;
     public const double DotPhase = 1.5;
 
-    /// <summary>A wavy line that gets looser: one smooth wave, a doubled wave, then a doubled wave whose strokes drift apart.</summary>
+    /// <summary>
+    /// A short hand-drawn squiggle that gets looser: one stroke, the stroke drawn twice, then two strokes further apart with
+    /// sharper turns.
+    /// </summary>
     public static GlyphStroke[] Roughness(double value)
     {
-        var wave = new GlyphStroke(new Point(7, 21),
-            [GlyphSegment.Curve(11, 11, 15, 11, 18, 18), GlyphSegment.Curve(21, 25, 25, 25, 29, 15)]);
+        var squiggle = new GlyphStroke(new Point(8, 21.5), [GlyphSegment.Curve(12, 20, 16.5, 16, 19.5, 15.5), GlyphSegment.Curve(22, 15, 18, 19.5, 20, 20), GlyphSegment.Curve(21.5, 20.5, 25, 18.5, 28, 17.5)]);
         if (value <= 0)
         {
-            return [wave];
+            return [squiggle];
         }
         if (value < 4)
         {
-            return [wave, new GlyphStroke(new Point(8, 23),
-                [GlyphSegment.Curve(12, 14, 16, 14, 19, 20), GlyphSegment.Curve(22, 26, 26, 24, 28, 17)])];
+            return [squiggle, new GlyphStroke(new Point(8.3, 23), [GlyphSegment.Curve(12.5, 21, 16.5, 17.5, 19.8, 17), GlyphSegment.Curve(22, 16.6, 19, 20.8, 20.8, 21.2), GlyphSegment.Curve(22.5, 21.6, 25.5, 19.6, 28.2, 18.6)])];
         }
         return
         [
-            new GlyphStroke(new Point(6, 20), [GlyphSegment.Curve(10, 9, 15, 10, 18, 18), GlyphSegment.Curve(21, 26, 26, 25, 30, 13)]),
-            new GlyphStroke(new Point(9, 25), [GlyphSegment.Curve(11, 13, 17, 12, 19, 19), GlyphSegment.Curve(21, 25, 24, 28, 29, 19)]),
+            new GlyphStroke(new Point(7.5, 20), [GlyphSegment.Curve(10, 19, 17, 14.5, 20.5, 13.5), GlyphSegment.Curve(21.5, 13.2, 18.2, 18.6, 19, 19), GlyphSegment.Curve(20, 19.5, 26, 16.5, 28.5, 15.5)]),
+            new GlyphStroke(new Point(8.5, 23.5), [GlyphSegment.Curve(11, 22.5, 18, 17.8, 22, 17.2), GlyphSegment.Curve(23, 17, 19.8, 21.8, 20.6, 22.3), GlyphSegment.Curve(21.6, 22.8, 27, 20, 29.5, 19)]),
         ];
     }
 

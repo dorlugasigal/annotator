@@ -355,12 +355,14 @@ public sealed class PropertiesPanelTests
     {
         RGBA ink = new(0, 0, 0, 0.85);
         var builder = new SceneBuilder(new FixedMeasurer());
-        Assert.Single(InspectorGlyph.Roughness(0));
+        GlyphStroke clean = Assert.Single(InspectorGlyph.Roughness(0));
         Assert.Equal(2, InspectorGlyph.Roughness(2).Length);
-        Assert.Equal(InspectorGlyph.Roughness(0)[0].Start, InspectorGlyph.Roughness(2)[0].Start);
+        Assert.Equal(clean.Start, InspectorGlyph.Roughness(2)[0].Start);
+        Assert.Equal(clean.Segments, InspectorGlyph.Roughness(2)[0].Segments);
         GlyphStroke[] wild = InspectorGlyph.Roughness(6);
         Assert.Equal(2, wild.Length);
-        Assert.All(wild, stroke => Assert.Equal(2, stroke.Segments.Length));
+        Assert.DoesNotContain(clean.Start, wild.Select(stroke => stroke.Start));
+        Assert.All(InspectorGlyph.Roughness(2).Concat(wild).Append(clean), stroke => Assert.Equal(3, stroke.Segments.Length));
         Assert.NotEqual(InspectorGlyph.Roughness(2)[0].Start, wild[0].Start);
         Assert.Equal(2, InspectorSample.Roughness(6).Draw(ink, builder).Length);
         Assert.Equal(2, InspectorSample.Roughness(2).Draw(ink, builder).Length);

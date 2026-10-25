@@ -8,7 +8,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 - With the minimal toolbar, full properties now stay on one row, a little smaller, instead of wrapping onto a second row.
 - The tutorial's last card now also lists Zoom (Control-1 on a Mac, Ctrl+1 on Windows) and Break timer (Control-3, Ctrl+3).
-- The Roughness and Edges buttons in Properties have clearer pictures: a wavy line that gets looser for Clean, Sketchy and Wild, and a square that shows a sharp or rounded corner.
+- The Roughness and Edges buttons in Properties have clearer pictures: a hand-drawn squiggle that gets looser for Clean, Sketchy and Wild, and a square that shows a sharp or rounded corner.
 
 ### Fixed
 

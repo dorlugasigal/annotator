@@ -38,19 +38,24 @@ enum InspectorGlyph {
     static let dots: [CGFloat] = [1.5, 2]
     static let dotPhase: CGFloat = 1.5
 
-    /// A wavy line that gets looser: one smooth wave, a doubled wave, then a doubled wave whose strokes drift apart.
+    /// A short hand-drawn squiggle that gets looser: one stroke, the stroke drawn twice, then two strokes further apart
+    /// with sharper turns.
     static func roughness(_ value: Double) -> [Stroke] {
-        let wave = Stroke(start: p(7, 21), segments: [.curve(p(11, 11), p(15, 11), p(18, 18)),
-                                                      .curve(p(21, 25), p(25, 25), p(29, 15))])
-        if value <= 0 { return [wave] }
+        let squiggle = Stroke(start: p(8, 21.5), segments: [.curve(p(12, 20), p(16.5, 16), p(19.5, 15.5)),
+                                                            .curve(p(22, 15), p(18, 19.5), p(20, 20)),
+                                                            .curve(p(21.5, 20.5), p(25, 18.5), p(28, 17.5))])
+        if value <= 0 { return [squiggle] }
         if value < 4 {
-            return [wave, Stroke(start: p(8, 23), segments: [.curve(p(12, 14), p(16, 14), p(19, 20)),
-                                                             .curve(p(22, 26), p(26, 24), p(28, 17))])]
+            return [squiggle, Stroke(start: p(8.3, 23), segments: [.curve(p(12.5, 21), p(16.5, 17.5), p(19.8, 17)),
+                                                                   .curve(p(22, 16.6), p(19, 20.8), p(20.8, 21.2)),
+                                                                   .curve(p(22.5, 21.6), p(25.5, 19.6), p(28.2, 18.6))])]
         }
-        return [Stroke(start: p(6, 20), segments: [.curve(p(10, 9), p(15, 10), p(18, 18)),
-                                                   .curve(p(21, 26), p(26, 25), p(30, 13))]),
-                Stroke(start: p(9, 25), segments: [.curve(p(11, 13), p(17, 12), p(19, 19)),
-                                                   .curve(p(21, 25), p(24, 28), p(29, 19))])]
+        return [Stroke(start: p(7.5, 20), segments: [.curve(p(10, 19), p(17, 14.5), p(20.5, 13.5)),
+                                                     .curve(p(21.5, 13.2), p(18.2, 18.6), p(19, 19)),
+                                                     .curve(p(20, 19.5), p(26, 16.5), p(28.5, 15.5))]),
+                Stroke(start: p(8.5, 23.5), segments: [.curve(p(11, 22.5), p(18, 17.8), p(22, 17.2)),
+                                                       .curve(p(23, 17), p(19.8, 21.8), p(20.6, 22.3)),
+                                                       .curve(p(21.6, 22.8), p(27, 20), p(29.5, 19))])]
     }
 
     /// A dotted square with its top-left corner drawn solid, sharp or rounded.

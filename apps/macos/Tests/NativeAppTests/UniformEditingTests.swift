@@ -157,13 +157,14 @@ final class UniformEditingTests: XCTestCase {
     }
 
     func testRoughnessAndEdgesIconsAreHandDrawnStrokes() {
-        XCTAssertEqual(InspectorGlyph.roughness(0).count, 1)
+        let clean = InspectorGlyph.roughness(0)
+        XCTAssertEqual(clean.count, 1)
         XCTAssertEqual(InspectorGlyph.roughness(2).count, 2)
-        XCTAssertEqual(InspectorGlyph.roughness(2).first, InspectorGlyph.roughness(0).first)
+        XCTAssertEqual(InspectorGlyph.roughness(2).first, clean.first)
         let wild = InspectorGlyph.roughness(6)
         XCTAssertEqual(wild.count, 2)
-        XCTAssertNotEqual(wild, InspectorGlyph.roughness(2))
-        XCTAssertTrue(wild.allSatisfy { $0.segments.count == 2 })
+        XCTAssertFalse(wild.contains(clean[0]))
+        XCTAssertTrue((clean + InspectorGlyph.roughness(2) + wild).allSatisfy { $0.segments.count == 3 })
         XCTAssertTrue(InspectorGlyph.roughness(6).allSatisfy { !$0.dotted })
         for rounded in [false, true] {
             let edges = InspectorGlyph.edges(rounded: rounded)
