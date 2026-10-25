@@ -48,11 +48,14 @@ public class FirstUseStyleTests
     }
 
     [Fact]
-    public void GradientPresetsKeepTheirOrderAndAddTwoMore()
+    public void GradientPresetsKeepTheirOrderAndAddSevenMore()
     {
         Assert.Equal(
-            ["sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry"],
+            ["sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry",
+             "forest", "copper", "neon", "tropic", "steel"],
             GradientPreset.AllCases.Select(preset => preset.RawValue).ToArray());
-        Assert.Equal(["Aurora", "Cherry"], new[] { GradientPreset.Aurora.Label, GradientPreset.Cherry.Label });
+        Assert.Equal(
+            ["Aurora", "Cherry", "Forest", "Copper", "Neon", "Tropic", "Steel"],
+            new[] { GradientPreset.Aurora, GradientPreset.Cherry, GradientPreset.Forest, GradientPreset.Copper, GradientPreset.Neon, GradientPreset.Tropic, GradientPreset.Steel }.Select(preset => preset.Label).ToArray());
     }
 }

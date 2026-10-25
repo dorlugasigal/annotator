@@ -6,7 +6,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Added
 
-- Two more gradients to choose from, Aurora and Cherry. The color picker now shows Gradient before Solid.
+- Seven more gradients to choose from: Aurora, Cherry, Forest, Copper, Neon, Tropic and Steel. The color picker now shows Gradient before Solid.
 
 ### Changed
 

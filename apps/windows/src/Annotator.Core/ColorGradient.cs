@@ -22,12 +22,13 @@ public readonly record struct ColorGradient(ValueList<RGBA> Colors, double Angle
     public override int GetHashCode() => HashCode.Combine(Colors, Angle);
 }
 
-public enum GradientPreset { Sunset, Lagoon, Ember, Spectrum, Dusk, Citrus, Ocean, Orchid, Aurora, Cherry }
+public enum GradientPreset { Sunset, Lagoon, Ember, Spectrum, Dusk, Citrus, Ocean, Orchid, Aurora, Cherry, Forest, Copper, Neon, Tropic, Steel }
 
 public static class GradientPresetExtensions
 {
     internal static readonly RawValueMap<GradientPreset> RawValues =
-        new("sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry");
+        new("sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry",
+        "forest", "copper", "neon", "tropic", "steel");
 
     extension(GradientPreset)
     {
@@ -53,6 +54,11 @@ public static class GradientPresetExtensions
             GradientPreset.Orchid => "Orchid",
             GradientPreset.Aurora => "Aurora",
             GradientPreset.Cherry => "Cherry",
+            GradientPreset.Forest => "Forest",
+            GradientPreset.Copper => "Copper",
+            GradientPreset.Neon => "Neon",
+            GradientPreset.Tropic => "Tropic",
+            GradientPreset.Steel => "Steel",
             _ => throw new ArgumentOutOfRangeException(nameof(preset)),
         };
 
@@ -76,6 +82,11 @@ public static class GradientPresetExtensions
                     GradientPreset.Orchid => [new(0.98, 0.43, 0.69), new(0.7, 0.44, 0.91), new(0.38, 0.63, 0.97)],
                     GradientPreset.Aurora => [new(0.13, 0.72, 0.47), new(0.25, 0.55, 0.95), new(0.82, 0.33, 0.88)],
                     GradientPreset.Cherry => [new(0.86, 0.1, 0.22), new(0.95, 0.27, 0.47), new(0.6, 0.17, 0.76)],
+                    GradientPreset.Forest => [new(0.07, 0.55, 0.33), new(0.25, 0.7, 0.3), new(0.62, 0.8, 0.18)],
+                    GradientPreset.Copper => [new(0.72, 0.33, 0.16), new(0.88, 0.5, 0.25), new(0.86, 0.66, 0.38)],
+                    GradientPreset.Neon => [new(0.95, 0.2, 0.75), new(0.35, 0.45, 1), new(0.1, 0.82, 0.78)],
+                    GradientPreset.Tropic => [new(0.98, 0.62, 0.12), new(0.94, 0.3, 0.48), new(0.42, 0.3, 0.9)],
+                    GradientPreset.Steel => [new(0.33, 0.4, 0.5), new(0.52, 0.6, 0.7), new(0.4, 0.5, 0.65)],
                     _ => throw new ArgumentOutOfRangeException(nameof(preset)),
                 };
                 return new ColorGradient(colors, 25);

@@ -16,7 +16,8 @@ public struct ColorGradient: Codable, Hashable, Sendable {
 }
 
 public enum GradientPreset: String, CaseIterable, Sendable {
-    case sunset, lagoon, ember, spectrum, dusk, citrus, ocean, orchid, aurora, cherry
+    case sunset, lagoon, ember, spectrum, dusk, citrus, ocean, orchid, aurora, cherry,
+        forest, copper, neon, tropic, steel
 
     public var label: String { rawValue.capitalized }
     public var gradient: ColorGradient {
@@ -34,6 +35,11 @@ public enum GradientPreset: String, CaseIterable, Sendable {
         case .orchid: [RGBA(0.98, 0.43, 0.69), RGBA(0.7, 0.44, 0.91), RGBA(0.38, 0.63, 0.97)]
         case .aurora: [RGBA(0.13, 0.72, 0.47), RGBA(0.25, 0.55, 0.95), RGBA(0.82, 0.33, 0.88)]
         case .cherry: [RGBA(0.86, 0.1, 0.22), RGBA(0.95, 0.27, 0.47), RGBA(0.6, 0.17, 0.76)]
+        case .forest: [RGBA(0.07, 0.55, 0.33), RGBA(0.25, 0.7, 0.3), RGBA(0.62, 0.8, 0.18)]
+        case .copper: [RGBA(0.72, 0.33, 0.16), RGBA(0.88, 0.5, 0.25), RGBA(0.86, 0.66, 0.38)]
+        case .neon: [RGBA(0.95, 0.2, 0.75), RGBA(0.35, 0.45, 1), RGBA(0.1, 0.82, 0.78)]
+        case .tropic: [RGBA(0.98, 0.62, 0.12), RGBA(0.94, 0.3, 0.48), RGBA(0.42, 0.3, 0.9)]
+        case .steel: [RGBA(0.33, 0.4, 0.5), RGBA(0.52, 0.6, 0.7), RGBA(0.4, 0.5, 0.65)]
         }
         return ColorGradient(colors: colors, angle: 25)
     }

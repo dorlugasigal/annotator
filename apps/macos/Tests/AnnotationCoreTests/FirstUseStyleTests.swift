@@ -34,9 +34,10 @@ import AnnotationCore
     #expect(Style.defaults(for: .pen).color == .coral)
 }
 
-@Test func gradientPresetsKeepTheirOrderAndAddTwoMore() throws {
+@Test func gradientPresetsKeepTheirOrderAndAddSevenMore() throws {
     #expect(GradientPreset.allCases.map(\.rawValue) == [
-        "sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry"
+        "sunset", "lagoon", "ember", "spectrum", "dusk", "citrus", "ocean", "orchid", "aurora", "cherry",
+        "forest", "copper", "neon", "tropic", "steel"
     ])
     for preset in GradientPreset.allCases { try preset.gradient.validate() }
 }

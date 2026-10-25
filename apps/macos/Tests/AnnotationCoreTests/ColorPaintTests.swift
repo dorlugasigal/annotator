@@ -49,7 +49,7 @@ import AnnotationCore
 }
 
 @Test func gradientsValidateAndRequireTheNewBoardFormat() throws {
-    #expect(GradientPreset.allCases.count == 10)
+    #expect(GradientPreset.allCases.count == 15)
     for preset in GradientPreset.allCases {
         #expect(preset.gradient.angle == 25)
         #expect(preset.gradient.colors.count == (preset == .spectrum ? 6 : 3))
