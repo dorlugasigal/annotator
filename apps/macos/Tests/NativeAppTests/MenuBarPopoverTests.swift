@@ -150,6 +150,75 @@ final class MenuBarPopoverTests: XCTestCase {
         XCTAssertEqual(received.count, 1)
     }
 
+    /// Tester report: click 5 min, reopen the menu and click 10 min straight away, and nothing happens. While NSPopover
+    /// animated in, its window let clicks through, and it resized once after it appeared, moving the buttons.
+    func testMenuTakesAClickAsSoonAsItOpensAndButtonsStayPut() async throws {
+        let (model, defaults, suite) = try model()
+        var received: [MenuBarAction] = []
+        let controller = MenuBarPopoverController(model: model, monitorsEnabled: false) { received.append($0) }
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        item.button?.title = "A"
+        defer {
+            controller.close(); NSStatusBar.system.removeStatusItem(item); model.closeAll()
+            defaults.removePersistentDomain(forName: suite)
+        }
+        let button = try XCTUnwrap(item.button)
+        NativeAccessibilityNode.enable()
+        try await Task.sleep(for: .milliseconds(200))
+        func frame(_ identifier: String) throws -> CGRect {
+            let content = try XCTUnwrap(controller.popover.contentViewController?.view)
+            return try XCTUnwrap(NativeAccessibilityNode.nodes(in: content).first { $0.accessibilityIdentifier() == identifier },
+                                 identifier).accessibilityFrame()
+        }
+        func click(_ identifier: String) throws {
+            let window = try XCTUnwrap(controller.popover.contentViewController?.view.window)
+            let target = try frame(identifier)
+            let point = CGPoint(x: target.midX, y: target.midY)
+            XCTAssertEqual(NSWindow.windowNumber(at: point, belowWindowWithWindowNumber: 0), window.windowNumber,
+                           "\(identifier) is not under the pointer yet")
+            for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+                NSApp.sendEvent(try XCTUnwrap(NSEvent.mouseEvent(with: type, location: window.convertPoint(fromScreen: point),
+                    modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
+                    context: nil, eventNumber: 0, clickCount: 1, pressure: 1)))
+            }
+        }
+        for (identifier, expected) in [("menu-breakFive", MenuBarAction.breakFive), ("menu-breakTen", .breakTen),
+                                       ("menu-show-tools", .showTools)] {
+            controller.toggle(relativeTo: button)
+            // Well inside the 100–150 ms the opening animation let clicks through.
+            try await Task.sleep(for: .milliseconds(50))
+            let opened = controller.popover.contentSize
+            let window = try XCTUnwrap(controller.popover.contentViewController?.view.window)
+            window.contentView?.layoutSubtreeIfNeeded()
+            let tools = try frame("menu-show-tools")
+            let five = try frame("menu-breakFive")
+            try click(identifier)
+            XCTAssertEqual(received.last, expected)
+            XCTAssertFalse(controller.popover.isShown)
+
+            // Open again and leave it: it doesn't resize or move once it's on screen.
+            controller.toggle(relativeTo: button)
+            try await Task.sleep(for: .milliseconds(250))
+            XCTAssertEqual(controller.popover.contentSize, opened)
+            XCTAssertEqual(try frame("menu-show-tools"), tools)
+            XCTAssertEqual(try frame("menu-breakFive"), five)
+            controller.close()
+        }
+        XCTAssertEqual(received, [.breakFive, .breakTen, .showTools])
+
+        // Under the menu bar the menu grows and shrinks at the bottom, so the rows above a change stay put.
+        controller.toggle(relativeTo: button)
+        try await Task.sleep(for: .milliseconds(250))
+        let tools = try frame("menu-show-tools")
+        let five = try frame("menu-breakFive")
+        let before = controller.popover.contentSize.height
+        model.updateReminderVersion = "9.9.9"
+        try await Task.sleep(for: .milliseconds(250))
+        XCTAssertNotEqual(controller.popover.contentSize.height, before)
+        XCTAssertEqual(try frame("menu-show-tools"), tools)
+        XCTAssertEqual(try frame("menu-breakFive"), five)
+    }
+
     func testPopoverExpandsForBoardsAndEscapeDismissesIt() async throws {
         let (model, defaults, suite) = try model()
         let (panel, button) = anchor()

@@ -483,7 +483,8 @@ public sealed class ShortcutPreferenceTests
     [Fact]
     public void SharedStyleIsOffByDefaultAndCopiesOnlyChangesWhenOn()
     {
-        var store = new MemoryPreferencesStore();
+        // An existing profile with no tool styles, so every tool starts from its solid defaults.
+        var store = new MemoryPreferencesStore(new WorkspacePreferences().Data());
         WorkspaceModel model = Create(store: store);
         model.ShowToolbar();
         model.Choose(Tool.Pen);

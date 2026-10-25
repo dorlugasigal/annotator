@@ -21,6 +21,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | A lone unlocked arrow or line shows point handles without a box | Overlay adornments | I | Render corpus |
 | Independent stroke and fill opacity; first fill at 40%; Match outline | Core and properties | I | Corpus |
 | Two-color and multicolor gradients, 25-degree presets, format 3 | Core and Direct2D gradients | I | Render corpus |
+| A new profile starts shapes, lines, arrows, pen and text with the Sunset gradient and saves it; saved profiles keep their colors; the color picker lists Gradient before Solid | Core `WorkspacePreferences.FirstUse`, color popover | I | Core and workspace tests, UX reference |
 | Labels follow owner paint, inherit gradients while typing | Core, renderer, text editor | I | S-7 |
 
 ## 002 Desktop overlay and toolbar design
