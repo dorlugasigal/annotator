@@ -4,6 +4,8 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+## 0.1.0-beta.13 (build 31) - 2026-10-25
+
 ### Added
 
 - After an update, a What's changed window shows the new version's notes once, with an optional Buy me a coffee link. It waits until you stop drawing, zooming, sharing a region or taking a break.
@@ -25,6 +27,28 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 ### Removed
 
 - Removed the four-page Quick start tour. The hands-on tutorial replaces it.
+
+### Known limits
+
+- The hands-on tutorial was checked step by step on Windows, with automated and live checks. On the Mac, doing each step once by key and once by mouse, the confetti, Reduce Motion and VoiceOver still need a hands-on check.
+- The daily update check and What's changed passed automated checks. A real update from beta.12 to this version still needs a hands-on check on both platforms.
+- The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.
+- The animations added in beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.
+- The new names of the three toolbar menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.
+- The screen zoom ramp was checked with automated state tests only. The live-capture zoom tests did not run on the validation Mac because the test build had no Screen Recording permission.
+- In the Shared Region window, the spotlight still turns on and off at once instead of fading.
+- Shared animations passed controlled local capture checks. Their appearance in a Teams, Meet or Zoom receiver still needs a hands-on check.
+- The controlled toolbar-sharing check has been inconsistent on this Mac. Check that the toolbar appears in your meeting's shared window before relying on it.
+- The owner confirmed the region highlight works on the current monitor setup. Full-screen browser transitions, Stage Manager and unplugging or reconnecting monitors still need separate checks.
+- Choosing a different area in the configuration window or changing the display setup turns region sharing off. Check the outline before starting it again.
+- Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
+- The Intel app and tests compiled, but runtime tests could not run because Rosetta is missing on the validation Mac. No Intel Mac has run this version yet.
+- Installing on another Mac and updating from an earlier version still need a hands-on check.
+- VoiceOver and Full Keyboard Access checks remain incomplete.
+- With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.
+- Cross-monitor dragging still needs a hands-on check.
+- Effects do not follow moving windows or scrolling content and are not secure redaction.
+- Heavy gradient scenes and long-session resource use still need native performance checks.
 
 ## 0.1.0-beta.12 (build 30) - 2026-10-23
 
