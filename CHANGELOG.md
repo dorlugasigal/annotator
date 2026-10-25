@@ -12,6 +12,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 ### Fixed
 
 - On Windows, Annotator opens again by itself after Windows closes it to install an update. A background update brings back the tray icon only.
+- On a Mac, the menu-bar menu now takes a click as soon as it opens. Before, a quick click on a button such as 5 min or Show drawings and tools sometimes did nothing.
 
 ## 0.1.0-beta.13 (build 31) - 2026-10-25
 
