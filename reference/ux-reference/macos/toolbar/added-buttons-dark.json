@@ -206,7 +206,59 @@
   {
    "enabled": true,
    "frame": [
-    802,
+    805,
+    20.5,
+    20,
+    17
+   ],
+   "help": "Spotlight menu. Spotlight, cursor halo and cleanup, in one menu.",
+   "identifier": "toolbar-action-focusMenu",
+   "role": "AXMenuButton",
+   "value": "Off"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    853,
+    21,
+    16.5,
+    16.5
+   ],
+   "help": "Zoom menu. Pointer lens, screen zoom and zoom levels, in one menu.",
+   "identifier": "toolbar-action-zoomMenu",
+   "role": "AXMenuButton",
+   "value": "Off"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    812,
+    47,
+    6.5,
+    4
+   ],
+   "help": "Spotlight menu. Spotlight, cursor halo and cleanup, in one menu.",
+   "identifier": "toolbar-action-focusMenu",
+   "role": "AXMenuButton",
+   "value": "Off"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    858,
+    47,
+    6.5,
+    4
+   ],
+   "help": "Zoom menu. Pointer lens, screen zoom and zoom levels, in one menu.",
+   "identifier": "toolbar-action-zoomMenu",
+   "role": "AXMenuButton",
+   "value": "Off"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    894,
     12,
     44,
     48
@@ -218,7 +270,7 @@
   {
    "enabled": true,
    "frame": [
-    848,
+    940,
     12,
     44,
     48
@@ -230,7 +282,7 @@
   {
    "enabled": true,
    "frame": [
-    898,
+    990,
     12,
     44,
     48
@@ -242,7 +294,7 @@
   {
    "enabled": true,
    "frame": [
-    966,
+    1073,
     20.5,
     22.5,
     32.5
@@ -255,7 +307,7 @@
   {
    "enabled": true,
    "frame": [
-    1005,
+    1112,
     12,
     60,
     48
@@ -268,7 +320,7 @@
   {
    "enabled": false,
    "frame": [
-    1077,
+    1184,
     30,
     12,
     12
@@ -281,7 +333,7 @@
   {
    "enabled": false,
    "frame": [
-    1107,
+    1214,
     30,
     12,
     12
@@ -294,7 +346,7 @@
   {
    "enabled": false,
    "frame": [
-    1137,
+    1244,
     29,
     12.5,
     14.5
@@ -307,7 +359,7 @@
   {
    "enabled": true,
    "frame": [
-    1161,
+    1268,
     23,
     24,
     26
@@ -321,7 +373,7 @@
   {
    "enabled": true,
    "frame": [
-    1196,
+    1303,
     29,
     14,
     14
@@ -334,7 +386,7 @@
   {
    "enabled": true,
    "frame": [
-    1228,
+    1335,
     31,
     10.5,
     10.5
@@ -347,7 +399,7 @@
   {
    "enabled": true,
    "frame": [
-    369.5,
+    449,
     87,
     20.5,
     14
@@ -358,7 +410,7 @@
   {
    "enabled": true,
    "frame": [
-    439.5,
+    519,
     89,
     26.5,
     10
@@ -369,7 +421,7 @@
   {
    "enabled": true,
    "frame": [
-    469,
+    548.5,
     80,
     28,
     28
@@ -382,7 +434,7 @@
   {
    "enabled": true,
    "frame": [
-    593.5,
+    673,
     87.5,
     28.5,
     13
@@ -395,7 +447,7 @@
     {
      "enabled": true,
      "frame": [
-      631.5,
+      711,
       86,
       20,
       16
@@ -405,7 +457,7 @@
    ],
    "enabled": true,
    "frame": [
-    628,
+    707.5,
     86,
     90,
     16
@@ -417,7 +469,7 @@
   {
    "enabled": true,
    "frame": [
-    724,
+    803.5,
     83.5,
     48,
     21
@@ -431,7 +483,7 @@
   {
    "enabled": true,
    "frame": [
-    778,
+    857.5,
     87.5,
     10,
     13
@@ -442,7 +494,7 @@
   {
    "enabled": true,
    "frame": [
-    804,
+    883.5,
     78,
     32,
     32
@@ -452,43 +504,20 @@
    "label": "Smart Draw",
    "role": "AXButton",
    "value": "Off"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    846,
-    86.5,
-    26,
-    15
-   ],
-   "label": "Focus and cleanup",
-   "role": "AXMenuButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    882,
-    86.5,
-    21,
-    15
-   ],
-   "help": "Lens and full-screen zoom",
-   "label": "Zoom tools",
-   "role": "AXMenuButton"
   }
  ],
  "appearance": "dark",
  "background": "none",
  "image": "toolbar/added-buttons-dark.png",
  "kind": "view",
- "notes": "Spotlight, Cursor halo, Pointer lens, Smart draw, Share region, Blur and Pixelate added.",
+ "notes": "Spotlight, Cursor halo, Pointer lens, Smart draw, Share region, the Spotlight and Zoom menus, Blur and Pixelate added.",
  "pixels": [
-  2544,
+  2728,
   246
  ],
  "scale": 2,
  "size": [
-  1272,
+  1364,
   123
  ],
  "spec": [

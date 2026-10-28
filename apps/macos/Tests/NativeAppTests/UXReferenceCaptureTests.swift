@@ -179,7 +179,50 @@ final class UXReferenceCaptureTests: XCTestCase {
                                     notes: "Minimal toolbar: full properties keep the expanded layout, drawn at the minimal button size, on one row.",
                                     spec: spec)
             model.setToolbarSize(.expanded)
+            for (tool, choices) in [(Tool.rectangle, [PropertyChoice.pattern, .roughness, .fillStyle, .edges]),
+                                    (.arrow, [.pattern, .roughness, .arrowType]), (.text, [.font, .alignment]), (.pen, [.pressure])] {
+                use(model, tool: tool)
+                if tool == .rectangle { model.applyStyle { $0.setFillEnabled(true) } }
+                for choice in choices { model.setShowsAllChoices(choice, true) }
+                try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 1600, height: 900)),
+                                        state: "full-properties-all-choices-\(tool.rawValue)", dark: dark,
+                                        notes: "Full properties with every choice side by side (Settings > Your properties). The toolbar grows sideways to keep one row.",
+                                        spec: spec)
+                model.resetPropertyChoices()
+            }
             model.setInspectorPinned(false)
+
+            use(model, tool: .pen)
+            for control in [ToolbarControl.undo, .redo, .settings, .hide] { model.setToolbarControl(control, shown: false) }
+            try await recorder.view(ToolbarView(model: model), state: "hidden-buttons", dark: dark,
+                                    notes: "Undo, Redo, Settings and Hide turned off in Settings; their room goes back to the tools.",
+                                    spec: spec + ["005 Toolbar & Shortcuts"])
+            for control in ToolbarControl.allCases { model.setToolbarControl(control, shown: false) }
+            try await recorder.view(ToolbarView(model: model), state: "hidden-buttons-all", dark: dark,
+                                    notes: "Every toolbar button turned off: only the tools and their properties stay.",
+                                    spec: spec + ["005 Toolbar & Shortcuts"])
+            model.showAllToolbarControls()
+
+            model.setToolbarCollapseDelay(5)
+            model.setToolbarCollapsed(true)
+            for size in [ToolbarSize.expanded, .minimal] {
+                model.setToolbarSize(size)
+                for orientation in [ToolbarOrientation.horizontal, .vertical] {
+                    model.setToolbarOrientation(orientation)
+                    for drawing in [true, false] {
+                        if drawing { model.adoptReferenceSession(session) } else { model.interact() }
+                        try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 1000, height: 900)),
+                            state: "collapsed-\(size.rawValue)-\(orientation.rawValue)-\(drawing ? "draw" : "apps")", dark: dark,
+                            notes: "The toolbar shrunk to one button after the Shrink delay: the Annotator mark and \(drawing ? "Draw" : "Apps").",
+                            spec: spec)
+                    }
+                }
+            }
+            model.adoptReferenceSession(session)
+            model.setToolbarCollapsed(false)
+            model.setToolbarCollapseDelay(nil)
+            model.setToolbarSize(.expanded)
+            model.setToolbarOrientation(.horizontal)
 
             use(model, tool: .arrow)
             for (name, available) in [("narrow", CGSize(width: 400, height: 600)), ("short", CGSize(width: 648, height: 230))] {

@@ -10,6 +10,18 @@
       44,
       48
      ],
+     "help": "Shortcut 3",
+     "label": "Diamond",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      63,
+      44,
+      48
+     ],
      "help": "Shortcut 4",
      "label": "Ellipse",
      "role": "AXButton"
@@ -18,7 +30,7 @@
      "enabled": true,
      "frame": [
       12,
-      63,
+      114,
       44,
       48
      ],
@@ -30,7 +42,7 @@
      "enabled": true,
      "frame": [
       12,
-      114,
+      165,
       44,
       48
      ],
@@ -42,7 +54,7 @@
      "enabled": true,
      "frame": [
       12,
-      165,
+      216,
       44,
       48
      ],
@@ -55,7 +67,7 @@
      "enabled": true,
      "frame": [
       22,
-      224,
+      275,
       24,
       26
      ],
@@ -69,7 +81,7 @@
      "enabled": true,
      "frame": [
       23,
-      257.5,
+      308.5,
       22.5,
       32.5
      ],
@@ -82,7 +94,7 @@
      "enabled": true,
      "frame": [
       12,
-      296,
+      347,
       44,
       36
      ],
@@ -92,22 +104,10 @@
      "value": "Drawing is active"
     },
     {
-     "enabled": true,
-     "frame": [
-      23.5,
-      337,
-      21,
-      15
-     ],
-     "help": "Lens and full-screen zoom",
-     "label": "Zoom tools",
-     "role": "AXMenuButton"
-    },
-    {
      "enabled": false,
      "frame": [
       16,
-      364,
+      395,
       12,
       12
      ],
@@ -120,7 +120,7 @@
      "enabled": false,
      "frame": [
       40,
-      364,
+      395,
       12,
       12
      ],
@@ -133,7 +133,7 @@
      "enabled": true,
      "frame": [
       12,
-      388,
+      419,
       44,
       48
      ],
@@ -145,7 +145,7 @@
      "enabled": false,
      "frame": [
       28,
-      447,
+      478,
       12.5,
       14.5
      ],
@@ -158,7 +158,7 @@
      "enabled": true,
      "frame": [
       27,
-      478,
+      509,
       14,
       14
      ],
@@ -171,7 +171,7 @@
      "enabled": true,
      "frame": [
       29,
-      511,
+      542,
       10.5,
       10.5
      ],
@@ -186,7 +186,7 @@
     0,
     0,
     68,
-    541
+    572
    ],
    "label": "Drawing tool rail",
    "role": "AXGroup"
@@ -271,12 +271,12 @@
  "notes": "Expanded toolbar, vertical, quick properties. Pen selected.",
  "pixels": [
   752,
-  1082
+  1144
  ],
  "scale": 2,
  "size": [
   376,
-  541
+  572
  ],
  "spec": [
   "002 design.md",

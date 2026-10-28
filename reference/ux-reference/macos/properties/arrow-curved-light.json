@@ -2,20 +2,14 @@
  "accessibility": [
   {
    "enabled": true,
-   "frame": [
-    16,
-    16,
-    65.5,
-    14
-   ],
    "role": "AXStaticText",
    "value": "Stroke color"
   },
   {
    "enabled": true,
    "frame": [
-    97,
-    16,
+    8,
+    156,
     51,
     14
    ],
@@ -25,8 +19,8 @@
   {
    "enabled": true,
    "frame": [
-    261,
-    16,
+    158,
+    156,
     60.5,
     14
    ],
@@ -36,8 +30,8 @@
   {
    "enabled": true,
    "frame": [
-    392.5,
-    16,
+    233.5,
+    156,
     80,
     14
    ],
@@ -47,8 +41,8 @@
   {
    "enabled": true,
    "frame": [
-    16,
-    36,
+    -43.5,
+    176,
     36,
     36
    ],
@@ -58,122 +52,12 @@
    "value": "#F04538FF"
   },
   {
-   "enabled": true,
-   "frame": [
-    95.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 2",
-   "label": "Width 2",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    136.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 4",
-   "label": "Width 4",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    177.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 7",
-   "label": "Width 7",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    259.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Solid",
-   "label": "Solid",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    300.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Dashed",
-   "label": "Dashed",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    341.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Dotted",
-   "label": "Dotted",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    391.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Clean",
-   "label": "Clean",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    432.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Sketchy",
-   "label": "Sketchy",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    473.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Wild",
-   "label": "Wild",
-   "role": "AXButton"
-  },
-  {
    "children": [
     {
      "enabled": true,
      "frame": [
-      98.5,
-      81.5,
+      10.5,
+      187,
       18,
       14
      ],
@@ -182,9 +66,9 @@
    ],
    "enabled": true,
    "frame": [
-    95.5,
-    81.5,
-    80,
+    6.5,
+    187,
+    96,
     14
    ],
    "label": "Width",
@@ -194,35 +78,36 @@
   {
    "enabled": true,
    "frame": [
-    181.5,
-    78,
-    48,
-    21
+    156.5,
+    176,
+    36,
+    36
    ],
-   "help": "Width: 1–40 pt",
-   "label": "Precise width",
-   "placeholder": "Width",
-   "role": "AXTextField",
-   "value": "3"
+   "help": "Changes to dashed",
+   "label": "Pattern",
+   "role": "AXButton",
+   "value": "Solid"
   },
   {
    "enabled": true,
    "frame": [
-    235.5,
-    82,
-    10,
-    13
+    232.5,
+    176,
+    36,
+    36
    ],
-   "role": "AXStaticText",
-   "value": "pt"
+   "help": "Changes to sketchy",
+   "label": "Roughness",
+   "role": "AXButton",
+   "value": "Clean"
   },
   {
    "children": [
     {
      "enabled": true,
      "frame": [
-      17.5,
-      113,
+      329,
+      156,
       47,
       14
      ],
@@ -232,8 +117,8 @@
     {
      "enabled": true,
      "frame": [
-      16,
-      133,
+      327.5,
+      176,
       68,
       36
      ],
@@ -245,8 +130,8 @@
     {
      "enabled": true,
      "frame": [
-      99.5,
-      113,
+      411,
+      156,
       40.5,
       14
      ],
@@ -256,8 +141,8 @@
     {
      "enabled": true,
      "frame": [
-      98,
-      133,
+      409.5,
+      176,
       68,
       36
      ],
@@ -269,57 +154,10 @@
     {
      "enabled": true,
      "frame": [
-      181.5,
-      113,
-      77,
+      493,
+      156,
+      59,
       14
-     ],
-     "role": "AXStaticText",
-     "value": "Arrow type"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      181.5,
-      133,
-      36,
-      36
-     ],
-     "help": "Straight arrow",
-     "label": "Straight arrow",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      180,
-      173,
-      38.5,
-      13
-     ],
-     "role": "AXStaticText",
-     "value": "Straight"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      225.5,
-      133,
-      36,
-      36
-     ],
-     "help": "Curved arrow",
-     "label": "Curved arrow",
-     "role": "AXButton",
-     "selected": true
-    },
-    {
-     "enabled": true,
-     "frame": [
-      226,
-      173,
-      35,
-      13
      ],
      "role": "AXStaticText",
      "value": "Curved"
@@ -327,8 +165,22 @@
     {
      "enabled": true,
      "frame": [
-      277,
-      113,
+      491.5,
+      176,
+      36,
+      36
+     ],
+     "help": "Curved arrow is on. Click for a straight arrow.",
+     "label": "Curved arrow",
+     "role": "AXButton",
+     "selected": true,
+     "value": "On"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      567.5,
+      156,
       73,
       14
      ],
@@ -336,49 +188,12 @@
      "value": "Head size"
     },
     {
-     "enabled": true,
-     "frame": [
-      275.5,
-      133,
-      36,
-      36
-     ],
-     "help": "50% arrowhead",
-     "label": "50% arrowhead",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      316.5,
-      133,
-      36,
-      36
-     ],
-     "help": "75% arrowhead",
-     "label": "75% arrowhead",
-     "role": "AXButton",
-     "selected": true
-    },
-    {
-     "enabled": true,
-     "frame": [
-      357.5,
-      133,
-      36,
-      36
-     ],
-     "help": "100% arrowhead",
-     "label": "100% arrowhead",
-     "role": "AXButton"
-    },
-    {
      "children": [
       {
        "enabled": true,
        "frame": [
-        287,
-        175,
+        577.5,
+        187,
         18,
         14
        ],
@@ -387,8 +202,8 @@
      ],
      "enabled": true,
      "frame": [
-      275.5,
-      175,
+      566,
+      187,
       86,
       14
      ],
@@ -399,8 +214,8 @@
     {
      "enabled": true,
      "frame": [
-      377,
-      175.5,
+      658,
+      187.5,
       22.5,
       13
      ],
@@ -410,10 +225,10 @@
    ],
    "enabled": true,
    "frame": [
-    16,
-    113,
-    383.5,
-    76
+    327.5,
+    156,
+    353,
+    56
    ],
    "label": "Arrow properties",
    "role": "AXGroup"
@@ -426,12 +241,12 @@
  "notes": "Curved arrow.",
  "pixels": [
   1296,
-  410
+  456
  ],
  "scale": 2,
  "size": [
   648,
-  205
+  228
  ],
  "spec": [
   "002 design.md",

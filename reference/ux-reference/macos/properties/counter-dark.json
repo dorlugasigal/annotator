@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    16,
+    72.5,
     16,
     65.5,
     14
@@ -14,8 +14,21 @@
   {
    "enabled": true,
    "frame": [
-    95.5,
-    20,
+    72.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    152,
+    47.5,
     37.5,
     13
    ],
@@ -27,8 +40,8 @@
     {
      "enabled": true,
      "frame": [
-      211,
-      19.5,
+      267.5,
+      47,
       18,
       14
      ],
@@ -37,8 +50,8 @@
    ],
    "enabled": true,
    "frame": [
-    139,
-    19.5,
+    195.5,
+    47,
     90,
     14
    ],
@@ -49,8 +62,8 @@
   {
    "enabled": true,
    "frame": [
-    235,
-    16,
+    291.5,
+    43.5,
     48,
     21
    ],
@@ -63,8 +76,8 @@
   {
    "enabled": true,
    "frame": [
-    289,
-    20,
+    345.5,
+    47.5,
     9.5,
     13
    ],
@@ -74,26 +87,13 @@
   {
    "enabled": true,
    "frame": [
-    312.5,
-    16,
+    369,
+    47.5,
     206.5,
     13
    ],
    "role": "AXStaticText",
    "value": "Click to add sequential numbered markers."
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    36,
-    36,
-    36
-   ],
-   "help": "Stroke color",
-   "label": "Stroke color",
-   "role": "AXButton",
-   "value": "#F04538FF"
   }
  ],
  "appearance": "dark",

@@ -10,6 +10,18 @@
       34,
       36
      ],
+     "help": "Shortcut 1",
+     "label": "Select",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      47,
+      34,
+      36
+     ],
      "help": "Shortcut 2",
      "label": "Rectangle",
      "role": "AXButton"
@@ -18,7 +30,7 @@
      "enabled": true,
      "frame": [
       8,
-      47,
+      86,
       34,
       36
      ],
@@ -30,7 +42,7 @@
      "enabled": true,
      "frame": [
       8,
-      86,
+      125,
       34,
       36
      ],
@@ -42,7 +54,7 @@
      "enabled": true,
      "frame": [
       8,
-      125,
+      164,
       34,
       36
      ],
@@ -54,7 +66,7 @@
      "enabled": true,
      "frame": [
       8,
-      164,
+      203,
       34,
       36
      ],
@@ -66,7 +78,7 @@
      "enabled": true,
      "frame": [
       8,
-      203,
+      242,
       34,
       36
      ],
@@ -79,7 +91,7 @@
      "enabled": true,
      "frame": [
       14,
-      246,
+      285,
       22,
       24
      ],
@@ -93,7 +105,7 @@
      "enabled": true,
      "frame": [
       16.5,
-      280.5,
+      319.5,
       17.5,
       15
      ],
@@ -107,7 +119,7 @@
      "enabled": true,
      "frame": [
       8,
-      306,
+      345,
       34,
       36
      ],
@@ -117,22 +129,10 @@
      "value": "Drawing is active"
     },
     {
-     "enabled": true,
-     "frame": [
-      14.5,
-      345,
-      21,
-      15
-     ],
-     "help": "Lens and full-screen zoom",
-     "label": "Zoom tools",
-     "role": "AXMenuButton"
-    },
-    {
      "enabled": false,
      "frame": [
       19,
-      369,
+      390,
       12,
       12
      ],
@@ -145,7 +145,7 @@
      "enabled": false,
      "frame": [
       19,
-      396,
+      417,
       12,
       12
      ],
@@ -158,7 +158,7 @@
      "enabled": true,
      "frame": [
       8,
-      417,
+      438,
       34,
       36
      ],
@@ -171,7 +171,7 @@
      "enabled": false,
      "frame": [
       19,
-      461,
+      482,
       12.5,
       14.5
      ],
@@ -184,7 +184,7 @@
      "enabled": true,
      "frame": [
       18,
-      488,
+      509,
       14,
       14
      ],
@@ -197,7 +197,7 @@
      "enabled": true,
      "frame": [
       20,
-      517,
+      538,
       10.5,
       10.5
      ],
@@ -212,7 +212,7 @@
     0,
     0,
     50,
-    542
+    563
    ],
    "label": "Drawing tool rail",
    "role": "AXGroup"
@@ -297,12 +297,12 @@
  "notes": "Minimal toolbar, vertical, quick properties. Pen selected.",
  "pixels": [
   716,
-  1084
+  1126
  ],
  "scale": 2,
  "size": [
   358,
-  542
+  563
  ],
  "spec": [
   "002 design.md",

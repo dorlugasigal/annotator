@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    16,
+    214,
     16,
     65.5,
     14
@@ -14,7 +14,7 @@
   {
    "enabled": true,
    "frame": [
-    91.5,
+    289.5,
     16,
     15.5,
     14
@@ -25,7 +25,7 @@
   {
    "enabled": true,
    "frame": [
-    143,
+    341,
     16,
     51,
     14
@@ -36,7 +36,7 @@
   {
    "enabled": true,
    "frame": [
-    307,
+    491,
     16,
     60.5,
     14
@@ -47,7 +47,7 @@
   {
    "enabled": true,
    "frame": [
-    438.5,
+    566.5,
     16,
     80,
     14
@@ -58,7 +58,7 @@
   {
    "enabled": true,
    "frame": [
-    571,
+    662,
     16,
     56,
     14
@@ -69,7 +69,7 @@
   {
    "enabled": true,
    "frame": [
-    16,
+    214,
     36,
     36,
     36
@@ -82,7 +82,7 @@
   {
    "enabled": true,
    "frame": [
-    91.5,
+    289.5,
     36,
     36,
     36
@@ -93,147 +93,12 @@
    "value": "Transparent"
   },
   {
-   "enabled": true,
-   "frame": [
-    141.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 2",
-   "label": "Width 2",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    182.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 4",
-   "label": "Width 4",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    223.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 7",
-   "label": "Width 7",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    305.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Solid",
-   "label": "Solid",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    346.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Dashed",
-   "label": "Dashed",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    387.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Dotted",
-   "label": "Dotted",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    437.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Clean",
-   "label": "Clean",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    478.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Sketchy",
-   "label": "Sketchy",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    519.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Wild",
-   "label": "Wild",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    569.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Sharp corners",
-   "label": "Sharp corners",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    610.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Rounded corners",
-   "label": "Rounded corners",
-   "role": "AXButton"
-  },
-  {
    "children": [
     {
      "enabled": true,
      "frame": [
-      144.5,
-      81.5,
+      343.5,
+      47,
       18,
       14
      ],
@@ -242,9 +107,9 @@
    ],
    "enabled": true,
    "frame": [
-    141.5,
-    81.5,
-    80,
+    339.5,
+    47,
+    96,
     14
    ],
    "label": "Width",
@@ -254,27 +119,41 @@
   {
    "enabled": true,
    "frame": [
-    227.5,
-    78,
-    48,
-    21
+    489.5,
+    36,
+    36,
+    36
    ],
-   "help": "Width: 1–40 pt",
-   "label": "Precise width",
-   "placeholder": "Width",
-   "role": "AXTextField",
-   "value": "3"
+   "help": "Changes to dashed",
+   "label": "Pattern",
+   "role": "AXButton",
+   "value": "Solid"
   },
   {
    "enabled": true,
    "frame": [
-    281.5,
-    82,
-    10,
-    13
+    565.5,
+    36,
+    36,
+    36
    ],
-   "role": "AXStaticText",
-   "value": "pt"
+   "help": "Changes to sketchy",
+   "label": "Roughness",
+   "role": "AXButton",
+   "value": "Clean"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    660.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Sharp corners. Click to round them.",
+   "label": "Rounded corners",
+   "role": "AXButton",
+   "value": "Off"
   }
  ],
  "appearance": "light",
@@ -284,12 +163,12 @@
  "notes": "Wide layout: one row.",
  "pixels": [
   1864,
-  230
+  176
  ],
  "scale": 2,
  "size": [
   932,
-  115
+  88
  ],
  "spec": [
   "002 design.md",

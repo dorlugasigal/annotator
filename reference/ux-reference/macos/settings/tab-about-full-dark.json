@@ -35,7 +35,7 @@
       {
        "enabled": true,
        "frame": [
-        372,
+        662,
         75,
         96,
         96
@@ -47,7 +47,7 @@
       {
        "enabled": true,
        "frame": [
-        358.5,
+        648.5,
         187,
         123,
         31
@@ -58,18 +58,18 @@
       {
        "enabled": true,
        "frame": [
-        342.5,
+        631.5,
         224,
-        155,
+        157.5,
         16
        ],
        "role": "AXStaticText",
-       "value": "Version 0.1.0-beta.13 (31)"
+       "value": "Version 0.1.0-beta.16 (34)"
       },
       {
        "enabled": true,
        "frame": [
-        393.5,
+        683.5,
         250,
         53.5,
         13
@@ -80,7 +80,7 @@
       {
        "enabled": true,
        "frame": [
-        296.5,
+        586.5,
         283,
         247.5,
         15
@@ -91,7 +91,7 @@
       {
        "enabled": false,
        "frame": [
-        276.5,
+        566.5,
         314,
         147,
         24
@@ -102,7 +102,7 @@
       {
        "enabled": true,
        "frame": [
-        431.5,
+        721.5,
         314,
         132.5,
         24
@@ -113,7 +113,7 @@
       {
        "enabled": true,
        "frame": [
-        243,
+        533,
         354,
         354.5,
         13
@@ -124,7 +124,7 @@
       {
        "enabled": true,
        "frame": [
-        346,
+        636,
         383,
         148.5,
         16
@@ -135,7 +135,7 @@
       {
        "enabled": true,
        "frame": [
-        157.5,
+        447.5,
         436,
         132.5,
         16
@@ -148,7 +148,7 @@
       {
        "enabled": true,
        "frame": [
-        157.5,
+        447.5,
         476,
         171.5,
         16
@@ -162,7 +162,7 @@
      "frame": [
       23,
       47,
-      794,
+      1374,
       1392
      ],
      "role": "AXScrollArea"
@@ -172,7 +172,7 @@
    "frame": [
     20,
     20,
-    800,
+    1380,
     1422
    ],
    "role": "AXTabGroup"
@@ -195,12 +195,12 @@
  "kind": "view",
  "notes": "Settings, about tab, stretched to 1500 points so the whole scrolling content shows.",
  "pixels": [
-  1680,
+  2840,
   3000
  ],
  "scale": 2,
  "size": [
-  840,
+  1420,
   1500
  ],
  "spec": [

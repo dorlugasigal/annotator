@@ -80,7 +80,7 @@
       {
        "enabled": true,
        "frame": [
-        575,
+        1155,
         125,
         220,
         24
@@ -136,7 +136,7 @@
       {
        "enabled": true,
        "frame": [
-        607,
+        1187,
         236,
         188,
         24
@@ -195,7 +195,7 @@
      "frame": [
       23,
       47,
-      794,
+      1374,
       1392
      ],
      "role": "AXScrollArea"
@@ -205,7 +205,7 @@
    "frame": [
     20,
     20,
-    800,
+    1380,
     1422
    ],
    "role": "AXTabGroup"
@@ -228,12 +228,12 @@
  "kind": "view",
  "notes": "Settings, permissions tab, stretched to 1500 points so the whole scrolling content shows.",
  "pixels": [
-  1680,
+  2840,
   3000
  ],
  "scale": 2,
  "size": [
-  840,
+  1420,
   1500
  ],
  "spec": [

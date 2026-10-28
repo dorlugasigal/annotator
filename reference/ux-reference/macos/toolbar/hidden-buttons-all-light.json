@@ -1,0 +1,269 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    12,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 1",
+   "label": "Select",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    67,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 2",
+   "label": "Rectangle",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    113,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 3",
+   "label": "Diamond",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    159,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 4",
+   "label": "Ellipse",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    205,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 5",
+   "label": "Arrow",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    251,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 6",
+   "label": "Line",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    306,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 7",
+   "label": "Pen",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    352,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 8",
+   "label": "Text",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    398,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 9",
+   "label": "Highlighter",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    453,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 0",
+   "label": "Eraser",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    508,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut S",
+   "label": "Effects",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    117,
+    87,
+    20.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Pen"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    187,
+    89,
+    26.5,
+    10
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    216.5,
+    80,
+    28,
+    28
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    341,
+    87.5,
+    28.5,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Width"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      379,
+      86,
+      20,
+      16
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    375.5,
+    86,
+    90,
+    16
+   ],
+   "label": "Width",
+   "role": "AXSlider",
+   "value": 3
+  },
+  {
+   "enabled": true,
+   "frame": [
+    471.5,
+    83.5,
+    48,
+    21
+   ],
+   "help": "Width: 1–40 pt",
+   "label": "Precise width",
+   "placeholder": "Width",
+   "role": "AXTextField",
+   "value": "3"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    525.5,
+    87.5,
+    10,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "pt"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    551.5,
+    78,
+    32,
+    32
+   ],
+   "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
+   "identifier": "wand.and.stars",
+   "label": "Smart Draw",
+   "role": "AXButton",
+   "value": "Off"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "toolbar/hidden-buttons-all-light.png",
+ "kind": "view",
+ "notes": "Every toolbar button turned off: only the tools and their properties stay.",
+ "pixels": [
+  1400,
+  246
+ ],
+ "scale": 2,
+ "size": [
+  700,
+  123
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02",
+  "005 Toolbar & Shortcuts"
+ ],
+ "state": "hidden-buttons-all",
+ "surface": "toolbar"
+}

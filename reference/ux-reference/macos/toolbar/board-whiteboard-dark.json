@@ -148,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    615,
+    630,
     12,
     44,
     48
@@ -161,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    665,
+    680,
     12,
     60,
     48
@@ -174,7 +174,7 @@
   {
    "enabled": false,
    "frame": [
-    737,
+    752,
     30,
     12,
     12
@@ -187,7 +187,7 @@
   {
    "enabled": false,
    "frame": [
-    767,
+    782,
     30,
     12,
     12
@@ -200,7 +200,7 @@
   {
    "enabled": false,
    "frame": [
-    797,
+    812,
     29,
     12.5,
     14.5
@@ -213,7 +213,7 @@
   {
    "enabled": true,
    "frame": [
-    821,
+    836,
     23,
     24,
     26
@@ -227,7 +227,7 @@
   {
    "enabled": true,
    "frame": [
-    856,
+    871,
     29,
     14,
     14
@@ -240,7 +240,7 @@
   {
    "enabled": true,
    "frame": [
-    888,
+    903,
     31,
     10.5,
     10.5
@@ -280,7 +280,7 @@
   {
    "enabled": true,
    "frame": [
-    199.5,
+    233,
     139,
     20.5,
     14
@@ -291,7 +291,7 @@
   {
    "enabled": true,
    "frame": [
-    269.5,
+    303,
     141,
     26.5,
     10
@@ -302,7 +302,7 @@
   {
    "enabled": true,
    "frame": [
-    299,
+    332.5,
     132,
     28,
     28
@@ -315,7 +315,7 @@
   {
    "enabled": true,
    "frame": [
-    423.5,
+    457,
     139.5,
     28.5,
     13
@@ -328,7 +328,7 @@
     {
      "enabled": true,
      "frame": [
-      461.5,
+      495,
       138,
       20,
       16
@@ -338,7 +338,7 @@
    ],
    "enabled": true,
    "frame": [
-    458,
+    491.5,
     138,
     90,
     16
@@ -350,7 +350,7 @@
   {
    "enabled": true,
    "frame": [
-    554,
+    587.5,
     135.5,
     48,
     21
@@ -364,7 +364,7 @@
   {
    "enabled": true,
    "frame": [
-    608,
+    641.5,
     139.5,
     10,
     13
@@ -375,7 +375,7 @@
   {
    "enabled": true,
    "frame": [
-    634,
+    667.5,
     130,
     32,
     32
@@ -385,29 +385,6 @@
    "label": "Smart Draw",
    "role": "AXButton",
    "value": "Off"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    676,
-    138.5,
-    26,
-    15
-   ],
-   "label": "Focus and cleanup",
-   "role": "AXMenuButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    712,
-    138.5,
-    21,
-    15
-   ],
-   "help": "Lens and full-screen zoom",
-   "label": "Zoom tools",
-   "role": "AXMenuButton"
   }
  ],
  "appearance": "dark",

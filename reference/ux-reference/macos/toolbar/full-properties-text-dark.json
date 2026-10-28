@@ -148,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    626,
+    641,
     20.5,
     22.5,
     32.5
@@ -161,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    665,
+    680,
     12,
     60,
     48
@@ -174,7 +174,7 @@
   {
    "enabled": false,
    "frame": [
-    737,
+    752,
     30,
     12,
     12
@@ -187,7 +187,7 @@
   {
    "enabled": false,
    "frame": [
-    767,
+    782,
     30,
     12,
     12
@@ -200,7 +200,7 @@
   {
    "enabled": false,
    "frame": [
-    797,
+    812,
     29,
     12.5,
     14.5
@@ -213,7 +213,7 @@
   {
    "enabled": true,
    "frame": [
-    821,
+    836,
     23,
     24,
     26
@@ -227,7 +227,7 @@
   {
    "enabled": true,
    "frame": [
-    856,
+    871,
     29,
     14,
     14
@@ -240,7 +240,7 @@
   {
    "enabled": true,
    "frame": [
-    888,
+    903,
     31,
     10.5,
     10.5
@@ -266,50 +266,6 @@
     {
      "enabled": true,
      "frame": [
-      93,
-      77,
-      47,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Font"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      184,
-      77,
-      45.5,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Size"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      348,
-      77,
-      54.5,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Weight"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      418,
-      77,
-      76,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Alignment"
-    },
-    {
-     "enabled": true,
-     "frame": [
       12,
       97,
       36,
@@ -323,69 +279,77 @@
     {
      "enabled": true,
      "frame": [
+      93,
+      77,
+      47,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Font"
+    },
+    {
+     "enabled": true,
+     "frame": [
       91.5,
       97,
       36,
       36
      ],
-     "help": "System font",
-     "label": "System font",
+     "help": "Changes to mono",
+     "label": "Font",
      "role": "AXButton",
-     "selected": true
+     "value": "System"
     },
     {
      "enabled": true,
      "frame": [
-      132.5,
-      97,
-      36,
-      36
+      155.5,
+      77,
+      45.5,
+      14
      ],
-     "help": "Mono font",
-     "label": "Mono font",
-     "role": "AXButton"
+     "role": "AXStaticText",
+     "value": "Size"
     },
     {
-     "enabled": true,
-     "frame": [
-      182.5,
-      97,
-      36,
-      36
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        168,
+        108,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
      ],
-     "help": "Font size 18",
-     "label": "Font size 18",
-     "role": "AXButton"
-    },
-    {
      "enabled": true,
      "frame": [
-      222.5,
-      97,
-      36,
-      36
+      154,
+      108,
+      96,
+      14
      ],
-     "help": "Font size 28",
-     "label": "Font size 28",
-     "role": "AXButton",
-     "selected": true
+     "label": "Text size",
+     "role": "AXSlider",
+     "value": 28
     },
     {
      "enabled": true,
      "frame": [
-      262.5,
-      97,
-      36,
-      36
+      305.5,
+      77,
+      54.5,
+      14
      ],
-     "help": "Font size 44",
-     "label": "Font size 44",
-     "role": "AXButton"
+     "role": "AXStaticText",
+     "value": "Weight"
     },
     {
      "enabled": true,
      "frame": [
-      346.5,
+      304,
       97,
       36,
       36
@@ -399,135 +363,38 @@
     {
      "enabled": true,
      "frame": [
-      416.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Align left",
-     "identifier": "text.alignleft",
-     "label": "Align left",
-     "role": "AXButton",
-     "selected": true
-    },
-    {
-     "enabled": true,
-     "frame": [
-      457.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Align center",
-     "identifier": "text.aligncenter",
-     "label": "Align center",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      498.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Align right",
-     "identifier": "text.alignright",
-     "label": "Align right",
-     "role": "AXButton"
-    },
-    {
-     "children": [
-      {
-       "enabled": true,
-       "frame": [
-        193.5,
-        142.5,
-        18,
-        14
-       ],
-       "role": "AXValueIndicator"
-      }
-     ],
-     "enabled": true,
-     "frame": [
-      182.5,
-      142.5,
-      80,
+      375.5,
+      77,
+      76,
       14
      ],
-     "label": "Text size",
-     "role": "AXSlider",
-     "value": 28
-    },
-    {
-     "enabled": true,
-     "frame": [
-      268.5,
-      139,
-      48,
-      21
-     ],
-     "help": "Text size: 8–120 pt",
-     "label": "Precise text size",
-     "placeholder": "Text size",
-     "role": "AXTextField",
-     "value": "28"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      322.5,
-      143,
-      10,
-      13
-     ],
      "role": "AXStaticText",
-     "value": "pt"
+     "value": "Alignment"
     },
     {
-     "enabled": false,
+     "enabled": true,
      "frame": [
-      906,
-      76,
-      15,
-      85
+      374,
+      97,
+      36,
+      36
      ],
-     "role": "AXScrollBar",
-     "value": 0
+     "help": "Changes to center",
+     "label": "Alignment",
+     "role": "AXButton",
+     "value": "Left"
     }
    ],
-   "enabled": false,
+   "enabled": true,
    "frame": [
     12,
     77,
     908,
-    83
+    56
    ],
-   "role": "AXScrollArea"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    863,
-    168.5,
-    26,
-    15
-   ],
-   "label": "Focus and cleanup",
-   "role": "AXMenuButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    899,
-    168.5,
-    21,
-    15
-   ],
-   "help": "Lens and full-screen zoom",
-   "label": "Zoom tools",
-   "role": "AXMenuButton"
+   "identifier": "contextual-inspector-viewport",
+   "label": "Tool properties",
+   "role": "AXGroup"
   }
  ],
  "appearance": "dark",
@@ -537,12 +404,12 @@
  "notes": "Full properties open inside the toolbar panel, below the rail.",
  "pixels": [
   1864,
-  392
+  290
  ],
  "scale": 2,
  "size": [
   932,
-  196
+  145
  ],
  "spec": [
   "002 design.md",

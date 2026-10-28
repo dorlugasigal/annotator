@@ -1,0 +1,40 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    0,
+    0,
+    68,
+    88
+   ],
+   "help": "Shows all tools",
+   "identifier": "collapsed-toolbar",
+   "label": "Annotator toolbar",
+   "role": "AXButton",
+   "value": "Drawing is active"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "toolbar/collapsed-expanded-vertical-draw-light.png",
+ "kind": "view",
+ "notes": "The toolbar shrunk to one button after the Shrink delay: the Annotator mark and Draw.",
+ "pixels": [
+  136,
+  176
+ ],
+ "scale": 2,
+ "size": [
+  68,
+  88
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "collapsed-expanded-vertical-draw",
+ "surface": "toolbar"
+}
