@@ -122,6 +122,7 @@ struct ContextualInspector: View {
                                     set: { value in model.applyStyle { $0.negativeAxes = value } })
                             ).font(.caption)
                                 .help("Centered axes also go in the negative directions.")
+                                .accessibilityLabel("Centered axes with negative directions")
                             StyleValueControl(model: model, parameter: .axisTickCount, sliderWidth: 0)
                                 .help(model.style.axisTickCount == nil
                                     ? "Legacy tick spacing. Set a count for equal intervals from the origin; 0 hides ticks."

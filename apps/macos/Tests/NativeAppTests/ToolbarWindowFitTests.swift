@@ -203,13 +203,26 @@ final class ToolbarWindowFitTests: XCTestCase {
         var moves = 0
         let callback = panel.onUserDragMoved
         panel.onUserDragMoved = { point in moves += 1; callback?(point) }
+        NativeAccessibilityNode.enable()
         for orientation in [ToolbarOrientation.horizontal, .vertical] {
             model.setToolbarOrientation(orientation)
-            try await Task.sleep(for: .milliseconds(150))
+            try await Task.sleep(for: .milliseconds(300))
             panel.contentView?.layoutSubtreeIfNeeded()
-            let scroll = try XCTUnwrap(scrollView(in: try XCTUnwrap(panel.contentView)))
-            let document = try XCTUnwrap(scroll.documentView)
-            let start = document.convert(CGPoint(x: document.bounds.maxX - 2, y: 8), to: nil)
+            let content = try XCTUnwrap(panel.contentView)
+            // Horizontal properties are one row: its top-right corner, above the menus, is empty. Vertical properties
+            // scroll in a column without a scroll bar.
+            let scroll = scrollView(in: content)
+            let start: CGPoint
+            if orientation == .horizontal {
+                XCTAssertNil(scroll, "One row of properties needs no scroll view")
+                let row = try XCTUnwrap(NativeAccessibilityNode.nodes(in: content).first {
+                    $0.accessibilityIdentifier() == "contextual-inspector-viewport"
+                }).accessibilityFrame()
+                start = panel.convertPoint(fromScreen: CGPoint(x: row.maxX - 2, y: row.maxY - 4))
+            } else {
+                let document = try XCTUnwrap(try XCTUnwrap(scroll).documentView)
+                start = document.convert(CGPoint(x: document.bounds.maxX - 2, y: 8), to: nil)
+            }
             func event(_ type: NSEvent.EventType, _ offset: CGFloat) throws -> NSEvent {
                 try XCTUnwrap(NSEvent.mouseEvent(with: type,
                     location: CGPoint(x: start.x + offset, y: start.y), modifierFlags: [],
@@ -217,7 +230,7 @@ final class ToolbarWindowFitTests: XCTestCase {
                     context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
             }
             let before = moves
-            let scrollOffset = scroll.contentView.bounds.origin
+            let scrollOffset = scroll?.contentView.bounds.origin
             for offset in [5.0, 10.0, 15.0] {
                 NSApp.postEvent(try event(.leftMouseDragged, offset), atStart: false)
             }
@@ -230,7 +243,7 @@ final class ToolbarWindowFitTests: XCTestCase {
             try await Task.sleep(for: .milliseconds(30))
             XCTAssertGreaterThan(moves, before, "\(orientation)")
             XCTAssertFalse(panel.isTrackingToolbarDrag)
-            XCTAssertEqual(scroll.contentView.bounds.origin, scrollOffset)
+            XCTAssertEqual(scroll?.contentView.bounds.origin, scrollOffset)
         }
     }
 
@@ -521,12 +534,15 @@ final class ToolbarWindowFitTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(100))
         let originalWidth = try XCTUnwrap(app.toolbarFrame).width
         model.configureToolbar([.select, .pen])
+        // The toolbar grows and shrinks sideways in a short animation.
         try await Task.sleep(for: .milliseconds(150))
+        for _ in 0..<20 where app.toolbarIsAnimating { try await Task.sleep(for: .milliseconds(25)) }
         let fewerTools = try XCTUnwrap(app.toolbarFrame)
         XCTAssertLessThan(fewerTools.width, originalWidth)
         XCTAssertEqual(fewerTools.midX, safe.midX, accuracy: 1)
         model.configureToolbar(WorkspacePreferences.defaultToolbar)
         try await Task.sleep(for: .milliseconds(150))
+        for _ in 0..<20 where app.toolbarIsAnimating { try await Task.sleep(for: .milliseconds(25)) }
         XCTAssertEqual(try XCTUnwrap(app.toolbarFrame).width, originalWidth, accuracy: 1)
     }
 }

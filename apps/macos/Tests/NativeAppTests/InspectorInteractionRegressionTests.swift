@@ -88,11 +88,11 @@ final class InspectorInteractionRegressionTests: XCTestCase {
                 XCTAssertEqual(editor.model.tool, .select)
                 XCTAssertEqual(editor.model.effectiveTool, .axes)
                 let deadline = Date().addingTimeInterval(1)
-                while fields(in: host).count != 2 && Date() < deadline {
+                while fields(in: host).count != 1 && Date() < deadline {
                     host.layoutSubtreeIfNeeded()
                     settle()
                 }
-                XCTAssertEqual(fields(in: host).count, 2, "Axes expose width and tick count without fill.")
+                XCTAssertEqual(fields(in: host).count, 1, "Axes expose the tick count; width is just a slider.")
                 editor.session.document.select([])
                 editor.model.synchronize()
                 settle()
@@ -109,8 +109,8 @@ final class InspectorInteractionRegressionTests: XCTestCase {
             select(grid, in: editor)
             try withPanel(ContextualInspector(model: editor.model).frame(width: 700)) { panel, host in
                 let gridFields = fields(in: host)
-                XCTAssertEqual(gridFields.count, 3, "Unfilled grids expose width, rows and columns.")
-                _ = try enter("7", in: XCTUnwrap(gridFields.dropFirst().first), panel: panel)
+                XCTAssertEqual(gridFields.count, 2, "Unfilled grids expose rows and columns; width is just a slider.")
+                _ = try enter("7", in: XCTUnwrap(gridFields.first), panel: panel)
                 XCTAssertTrue(panel.makeFirstResponder(nil))
                 settle()
                 XCTAssertEqual(editor.session.document.elements[0].style.gridRows, 7)
@@ -299,7 +299,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
             editor.model.choose(.arrow)
             for compact in [false, true] {
                 try withPanel(ContextualInspector(model: editor.model, compact: compact)
-                    .frame(width: compact ? 276 : 640)) { panel, host in
+                    .frame(width: compact ? 276 : 900)) { panel, host in
                     panel.setContentSize(host.fittingSize)
                     settle()
                     let nodes = accessibilityNodes(in: host)
@@ -307,7 +307,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
                         .accessibilityFrame()
                     let end = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "End arrowhead" && $0.accessibilityRole() == .button })
                         .accessibilityFrame()
-                    let routing = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Straight arrow" })
+                    let routing = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Curved arrow" })
                         .accessibilityFrame()
                     XCTAssertEqual(start.width, 68, accuracy: 1)
                     XCTAssertEqual(end.width, 68, accuracy: 1)
@@ -325,7 +325,8 @@ final class InspectorInteractionRegressionTests: XCTestCase {
         }
     }
 
-    func testNarrowHorizontalPropertiesKeepArrowheadTriggersVisible() throws {
+    /// A screen too narrow for the arrow's row keeps it on one row that scrolls sideways, without a scroll bar.
+    func testNarrowHorizontalPropertiesStayOnOneRowAndScrollSideways() throws {
         try withWorkspace { editor in
             editor.model.choose(.arrow)
             editor.model.setToolbarOrientation(.horizontal)
@@ -334,6 +335,8 @@ final class InspectorInteractionRegressionTests: XCTestCase {
                                       availableSize: CGSize(width: 400, height: 900))) { panel, host in
                 panel.setContentSize(host.fittingSize)
                 settle()
+                // The panel helper adds 12 points of padding on each side.
+                XCTAssertLessThanOrEqual(host.fittingSize.width, 400 + 24 + 1, "The toolbar stays within the screen")
                 let nodes = accessibilityNodes(in: host)
                 let start = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Start arrowhead" && $0.accessibilityRole() == .button })
                     .accessibilityFrame()
@@ -341,10 +344,19 @@ final class InspectorInteractionRegressionTests: XCTestCase {
                     .accessibilityFrame()
                 XCTAssertEqual(start.width, 68, accuracy: 1)
                 XCTAssertEqual(end.width, 68, accuracy: 1)
-                XCTAssertEqual(start.minX, end.minX, accuracy: 1)
-                XCTAssertLessThan(end.maxY, start.minY)
+                XCTAssertEqual(start.midY, end.midY, accuracy: 1, "One row, never two")
+                XCTAssertGreaterThan(end.minX, start.maxX)
+                let scroll = try XCTUnwrap(scrollViews(in: host).first { scroll in
+                    (scroll.documentView?.frame.width ?? 0) > scroll.contentView.bounds.width + 1
+                }, "The row scrolls sideways")
+                XCTAssertFalse(scroll.hasHorizontalScroller && !(scroll.horizontalScroller?.isHidden ?? true),
+                               "No scroll bar shows")
             }
         }
+    }
+
+    private func scrollViews(in view: NSView) -> [NSScrollView] {
+        (view as? NSScrollView).map { [$0] } ?? view.subviews.flatMap { scrollViews(in: $0) }
     }
 
     func testActiveModesStayVisibleAndStopInEveryToolbarLayout() throws {
@@ -497,26 +509,22 @@ final class InspectorInteractionRegressionTests: XCTestCase {
         }
     }
 
-    func testDiamondPropertiesShareOneRowAndWrapWithoutClipping() throws {
+    func testDiamondPropertiesShareOneRowWithoutClipping() throws {
         try withWorkspace { editor in
             editor.model.choose(.diamond)
-            for width in [CGFloat(900), 320] {
-                try withPanel(ContextualInspector(model: editor.model).frame(width: width)) { panel, host in
-                    panel.setContentSize(host.fittingSize)
-                    settle()
-                    let nodes = accessibilityNodes(in: host)
-                    let edges = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Sharp corners" })
-                    let strokeWidth = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Width 2" })
-                    if width == 900 {
-                        XCTAssertEqual(edges.accessibilityFrame().maxY, strokeWidth.accessibilityFrame().maxY, accuracy: 2)
-                        XCTAssertLessThan(host.fittingSize.height, 145)
-                    } else {
-                        XCTAssertLessThan(edges.accessibilityFrame().maxY, strokeWidth.accessibilityFrame().maxY)
-                    }
-                    let bounds = panel.convertToScreen(host.convert(host.bounds, to: nil)).insetBy(dx: -1, dy: -1)
-                    for node in nodes where node.accessibilityRole() == .button {
-                        XCTAssertTrue(bounds.contains(node.accessibilityFrame()), node.accessibilityLabel() ?? "Button")
-                    }
+            try withPanel(ContextualInspector(model: editor.model).fixedSize()) { panel, host in
+                panel.setContentSize(host.fittingSize)
+                settle()
+                let nodes = accessibilityNodes(in: host)
+                let edges = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Rounded corners" })
+                let strokeWidth = try XCTUnwrap(nodes.first { $0.accessibilityLabel() == "Width" && $0.accessibilityRole() == .slider })
+                XCTAssertEqual(edges.accessibilityFrame().midY, strokeWidth.accessibilityFrame().midY, accuracy: 2,
+                               "Width is just the slider, on the same row as Edges")
+                XCTAssertLessThan(host.fittingSize.height, 100, "One row of properties, not two")
+                XCTAssertLessThan(host.fittingSize.width, 900)
+                let bounds = panel.convertToScreen(host.convert(host.bounds, to: nil)).insetBy(dx: -1, dy: -1)
+                for node in nodes where node.accessibilityRole() == .button {
+                    XCTAssertTrue(bounds.contains(node.accessibilityFrame()), node.accessibilityLabel() ?? "Button")
                 }
             }
         }
