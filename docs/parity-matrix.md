@@ -45,7 +45,12 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | One Stroke picker, Fill picker for fill tools, inline popover with hex and opacity | XAML color popover | I | UI tests |
 | Pick from screen (the Mac's system `NSColorSampler` loupe) | Windows has no system sampler: a magnifier loupe follows the pointer, a click reads that one composed-screen pixel, Escape cancels; no permission in a development build, screen access in a package (WIN-CAP-04) | E | S-3, UI tests |
 | Rendered samples for width, pattern, roughness, edges, arrows | Shared renderer in XAML | I | Render corpus |
-| Labeled mode control, undo, redo, clear, hide always reachable | XAML | I | UI tests |
+| Labeled mode control, undo, redo, clear, hide reachable unless turned off in Settings; their keys keep working | XAML | I | UI tests |
+| Every toolbar button can be turned off (`hiddenToolbarControls`); the room goes back to the tools | XAML and Workspace layout | I | Corpus, workspace tests |
+| Full properties are one row that never wraps; the toolbar grows sideways to fit it, and a vertical toolbar's column scrolls without a scroll bar | `PropertyRow` and `ToolbarToolLayout.GrownWidth` | I | Workspace tests, UX reference |
+| Few-choice properties are one cycling button or an on and off button, or all choices side by side (`expandedPropertyChoices`); width and text size are a slider with its value | XAML and Workspace `InspectorPlan` | I | Corpus, workspace tests |
+| Spotlight and Zoom menus are tool-sized toolbar items, off by default and without keys | XAML and core | I | Corpus |
+| The toolbar shrinks to one capsule with the mark and Draw or Apps after the chosen delay (`toolbarCollapseDelay`); pointing at it or clicking it opens the toolbar | `ToolbarCollapseTimer` and XAML | I | Core and workspace tests |
 | Settings is a persistent nonmodal window | WinUI window | E | UI tests |
 
 ## 003 Presentation effects
@@ -72,7 +77,9 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 
 | Behavior | Windows mechanism | Level | Gate |
 | --- | --- | --- | --- |
-| Toolbar & Shortcuts tab: your toolbar, more tools, drag to arrange, keys, reset | Settings tab in XAML | I | UI tests |
+| Toolbar & Shortcuts tab: your toolbar on one line with its own buttons, more tools, drag to arrange, keys, reset | Settings tab in XAML | I | UI tests |
+| Your properties: one button or all choices for each few-choice property, with previews | Settings tab in XAML | I | UI tests |
+| Shrink: never, or after 3, 5, 10 or 30 seconds | Settings tab in XAML | I | Corpus |
 | Key recording rules, refusals, moves with Undo | Settings and core | I | Corpus, UI tests |
 | Global keys need Ctrl, Alt or Win; Shift with digits recorded correctly | Hotkey service | E | S-9 |
 | Expanded and Minimal sizes; Share style between tools; Show tips on screen | XAML and core | I | UI tests |
@@ -82,7 +89,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Pointer settings and interactive preview | Settings and overlay renderer | I | UI tests |
 | Inline color wheel inside the palette | Custom XAML control | I | UI tests |
 | Starting a drawing closes the color picker first | Model | I | UI tests |
-| Settings about 840 by 700, resizable | WinUI window | I | UI tests |
+| Settings about 1420 by 700, resizable | WinUI window | I | UI tests |
 | Help, permissions cards, About with the app icon and version | XAML with Windows terms | E | UI tests |
 | Coffee reminders, Not now and cadence | Model | I | Corpus |
 | Named local profiles; versioned editable boards; atomic saves | Core and file service | I | Corpus |

@@ -201,8 +201,9 @@ person would, so the quick row shows the pasted image's properties; the Mac
 capture sets the tool directly.
 
 The tray icon state has no accessibility tree in the reference; compare its
-sheet. The Mac captures toolbar states in a desktop-style session, so the quick
-row shows the Focus and cleanup and Zoom tools menus, as Windows does.
+sheet. The Mac captures toolbar states in a desktop-style session. The Spotlight
+and Zoom menus are toolbar items there only in the `added-buttons` state, as on
+Windows.
 
 The Mac reports frames for the content below the fold. Settings' own pages report
 them too (`SettingsFrames`); for the Toolbar & Shortcuts and Pointer tabs the tool

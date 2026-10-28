@@ -25,12 +25,13 @@
     window; the toolbar's Tool library button opens it again; Edit, Rename... and Delete... rename and delete the saved
     shape (an in-memory library, never the person's shapes); a tile chooses its tool, and Escape hides the window,
     each giving the keyboard back to the canvas;
-  - Focus and cleanup: the toolbar's menu opens with Spotlight, Cursor halo, Clear drawings (keep effects) and Remove all
-    censors available; Remove all censors, with no effect on the canvas, closes the menu and changes nothing;
+  - Spotlight menu: the toolbar's menu, added to the live check's toolbar, opens with Spotlight, Cursor halo, Clear
+    drawings (keep effects) and Remove all censors available; Remove all censors, with no effect on the canvas, closes the
+    menu and changes nothing;
   - Pointer effects: Cursor halo and Spotlight turn on from that menu and show Stop buttons in the toolbar; over the
     canvas the screen shows the yellow ring at the pointer and Spotlight dims the canvas away from it; the Stop buttons
     turn them off; the result shows the raw input watcher's activity and clicks, and both effects off at the end;
-  - live zoom: Zoom tools turns on the pointer lens (its window shows) and full-screen zoom (the strip's level shows,
+  - live zoom: the Zoom menu turns on the pointer lens (its window shows) and full-screen zoom (the strip's level shows,
     and Increase changes 2.0x to 2.5x); during zoom Cursor halo and Spotlight turn on, the pointer watcher starts again
     and the ring shows at the pointer, then their Stop buttons turn them off; the strip's Stop buttons end zoom and
     the lens. No hook is installed unless -ZoomMeasure asks for the zoom measurements;
@@ -725,8 +726,9 @@ try {
     }
     HitTest 'after Tools closed'
 
-    # Focus and cleanup (Mac backgroundMenu): Spotlight, Cursor halo and the effect cleanup are available. Remove all censors
-    # finds no effect on this canvas, so it changes nothing (the result's checks below would see a change).
+    # Spotlight menu (Mac focusMenuItems): Spotlight, Cursor halo and the effect cleanup are available. Remove all censors
+    # finds no effect on this canvas, so it changes nothing (the result's checks below would see a change). The live check's
+    # toolbar has the Spotlight and Zoom menus; a new profile keeps them in More tools.
     function MenuItem([string]$name) {
         $condition = [Windows.Automation.AndCondition]::new(
             [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, $name),
@@ -737,7 +739,7 @@ try {
         }
         return $null
     }
-    Note "click Focus and cleanup: $(ClickButton 'Focus and cleanup')"
+    Note "click Spotlight menu: $(ClickButton 'Spotlight menu')"
     if (WaitFor { $null -ne (MenuItem 'Remove all censors') }) {
         $states = @('Spotlight', 'Cursor halo', 'Clear drawings (keep effects)', 'Remove all censors' | ForEach-Object {
             $item = MenuItem $_
@@ -751,15 +753,15 @@ try {
         Check 'focus-menu-closes' (WaitFor { $null -eq (MenuItem 'Remove all censors') }) "menu still open: $($null -ne (MenuItem 'Remove all censors'))"
     }
     else {
-        Check 'focus-menu-items' $false 'the Focus and cleanup menu did not open'
+        Check 'focus-menu-items' $false 'the Spotlight menu did not open'
     }
-    HitTest 'after Focus and cleanup'
+    HitTest 'after the Spotlight menu'
 
-    # Pointer effects: Cursor halo and Spotlight turn on from Focus and cleanup and show Stop buttons in the toolbar's mode
+    # Pointer effects: Cursor halo and Spotlight turn on from the Spotlight menu and show Stop buttons in the toolbar's mode
     # strip; over the canvas the screen shows the yellow ring at the pointer and Spotlight dims the canvas away from it. The
     # Stop buttons turn them off again. Clicks anywhere (here the Stop buttons) count for the click effect.
     function MenuChoose([string]$item) {
-        Note "click Focus and cleanup: $(ClickButton 'Focus and cleanup')"
+        Note "click Spotlight menu: $(ClickButton 'Spotlight menu')"
         if (-not (WaitFor { $null -ne (MenuItem $item) })) { Note "no menu item $item"; return }
         $c = Center (MenuItem $item)
         $target = [LiveInput]::TopLevelAt($c[0], $c[1])
@@ -804,19 +806,19 @@ try {
     Check 'pointer-spotlight-fades-out' ([Math]::Abs($farOff - $farBefore) -le 12) ("canvas far from the pointer: luma {0:F0} before, {1:F0} after Stop" -f $farBefore, $farOff)
     HitTest 'after the pointer effects'
 
-    # Live zoom (WIN-CAP-05, WIN-CAP-06): Zoom tools turns on the pointer lens, whose own window shows beside the pointer,
+    # Live zoom (WIN-CAP-05, WIN-CAP-06): the Zoom menu turns on the pointer lens, whose own window shows beside the pointer,
     # and full-screen zoom, whose level the strip changes; Stop buttons end both. The live check installs no hooks, so
     # Alt+scroll over other apps and the Escape hook stay with the owner's checks.
     function LensWindow() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::ClassName($_) -eq 'Annotator.Platform.PointerLens' } | Select-Object -First 1 }
     function ChooseZoom([string]$item) {
-        Note "click Zoom tools: $(ClickButton 'Zoom tools')"
+        Note "click Zoom menu: $(ClickButton 'Zoom menu')"
         if (WaitFor { $null -ne (MenuItem $item) }) {
             $c = Center (MenuItem $item)
             $target = [LiveInput]::TopLevelAt($c[0], $c[1])
             if ([LiveInput]::OwnerOf($target) -eq $appPid) { Note "click ${item}: $([LiveInput]::Click($c[0], $c[1], $target))" }
             else { Note "refused: $item is under $([LiveInput]::Describe($target))" }
         }
-        else { Note "the Zoom tools menu did not show $item" }
+        else { Note "the Zoom menu did not show $item" }
     }
     # The lens shows only while the pointer is on its display: the pointer rests on the canvas first.
     $rest = Canvas 300 220
@@ -1227,7 +1229,7 @@ try {
         Check 'settings-permissions-screen-access' ($null -ne (Find 'Open screen recording settings' $settings) -and $null -eq (Find 'Allow screen access' $settings) -and
             $captureStatus.Count -eq 1 -and $captureStatus[0] -ne 'Not allowed') "status: '$($captureStatus -join "', '")'; Allow screen access shown: $($null -ne (Find 'Allow screen access' $settings))"
         # The Pointer tab shows the Pointer page the app sets (SettingsWindow.SetPage): Show halo turns the cursor halo on and
-        # off, as the toolbar's Focus and cleanup menu does.
+        # off, as the toolbar's Spotlight menu does.
         Note "click Pointer: $(ClickTyped 'Pointer' ([Windows.Automation.ControlType]::TabItem) $settings)"
         Check 'settings-pointer-tab' (WaitFor { (Chosen $settings 'Pointer') -and $null -ne (Find 'Show halo' $settings) }) "Pointer chosen: $(Chosen $settings 'Pointer'); Show halo: $($null -ne (Find 'Show halo' $settings))"
         # The page is made when its tab first shows: the switch takes clicks once it is laid out.

@@ -138,6 +138,12 @@ internal sealed partial class AppHost
             DisplayedZoom = _zoomBoard,
             ScreenAccess = _screenAccess,
         });
+        if (check is not null)
+        {
+            // The live check opens the Spotlight and Zoom menus, which a new profile keeps in More tools.
+            _model.ConfigureToolbar([.. _model.Snapshot.ToolbarItems, ShortcutCommand.ForAction(ShortcutAction.FocusMenu),
+                ShortcutCommand.ForAction(ShortcutAction.ZoomMenu)]);
+        }
         // Devices and overlays live on their own thread (S-12). They are created after the toolbar's first frame:
         // setting up both threads' composition at the same moment sometimes left the toolbar black until it redrew.
         Action<OverlayEvent> report = overlayEvent => _queue.TryEnqueue(() => OnOverlayEvent(overlayEvent));
