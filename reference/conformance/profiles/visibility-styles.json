@@ -75,5 +75,90 @@
     "reveal" : "fade",
     "rise" : "fade",
     "slide" : "slide"
-  }
+  },
+  "toolbarCollapseDelays" : [
+    3,
+    5,
+    10,
+    30
+  ],
+  "toolbarControls" : [
+    {
+      "action" : null,
+      "detail" : "Every shape and tool in one place.",
+      "id" : "library",
+      "label" : "More tools",
+      "symbol" : "square.grid.2x2"
+    },
+    {
+      "action" : "board",
+      "detail" : "Desktop, whiteboard or blackboard.",
+      "id" : "board",
+      "label" : "Board",
+      "symbol" : "desktopcomputer"
+    },
+    {
+      "action" : null,
+      "detail" : "Switch between drawing and clicking your apps.",
+      "id" : "mode",
+      "label" : "Draw and Use apps",
+      "symbol" : "pencil.tip"
+    },
+    {
+      "action" : null,
+      "detail" : "Take back your last change.",
+      "id" : "undo",
+      "label" : "Undo",
+      "symbol" : "arrow.uturn.backward"
+    },
+    {
+      "action" : null,
+      "detail" : "Bring back what Undo took.",
+      "id" : "redo",
+      "label" : "Redo",
+      "symbol" : "arrow.uturn.forward"
+    },
+    {
+      "action" : "clearAll",
+      "detail" : "Remove all drawings. You can undo it.",
+      "id" : "clearAll",
+      "label" : "Clear all",
+      "symbol" : "trash"
+    },
+    {
+      "action" : "properties",
+      "detail" : "Quick controls, full properties or tools only.",
+      "id" : "properties",
+      "label" : "Properties",
+      "symbol" : "slider.horizontal.3"
+    },
+    {
+      "action" : null,
+      "detail" : "Open Settings.",
+      "id" : "settings",
+      "label" : "Settings",
+      "symbol" : "gearshape"
+    },
+    {
+      "action" : null,
+      "detail" : "Hide drawings and tools.",
+      "id" : "hide",
+      "label" : "Hide",
+      "symbol" : "xmark"
+    },
+    {
+      "action" : null,
+      "detail" : "Spotlight, cursor halo and cleanup.",
+      "id" : "focusMenu",
+      "label" : "Spotlight and cleanup menu",
+      "symbol" : "light.beacon.max"
+    },
+    {
+      "action" : null,
+      "detail" : "Pointer lens and screen zoom.",
+      "id" : "zoomMenu",
+      "label" : "Zoom menu",
+      "symbol" : "plus.magnifyingglass"
+    }
+  ]
 }

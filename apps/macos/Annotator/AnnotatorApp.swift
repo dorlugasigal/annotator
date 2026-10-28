@@ -18,7 +18,7 @@ struct AnnotatorApp: App {
                     delegate.model.stopZoom()
                 }
         }
-        .defaultSize(width: 840, height: 700)
+        .defaultSize(SettingsSurfaceView.defaultContentSize)
         .windowResizability(.contentMinSize)
     }
 }
@@ -1238,6 +1238,8 @@ struct SettingsWindowSurface: NSViewRepresentable {
 
 final class SettingsSurfaceView: NSView {
     static let minimumContentSize = NSSize(width: 720, height: 620)
+    /// Wide enough for "Your toolbar" to show 15 tools and every toolbar button on one line.
+    static let defaultContentSize = CGSize(width: 1420, height: 700)
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()

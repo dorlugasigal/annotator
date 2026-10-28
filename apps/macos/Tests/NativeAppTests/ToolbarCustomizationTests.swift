@@ -420,6 +420,36 @@ final class ToolbarCustomizationTests: XCTestCase {
         try save(host, name: "settings-arranger", dark: false)
     }
 
+    /// Settings opens wide enough for 15 tools and every toolbar button on one line, like the toolbar itself.
+    func testSettingsShowFifteenToolsAndEveryButtonOnOneLine() async throws {
+        let (model, cleanup) = try makeModel("one-line")
+        defer { cleanup() }
+        model.configureToolbar(WorkspacePreferences.defaultToolbar + [.triangle, .hexagon, .star, .counter])
+        XCTAssertEqual(model.toolbarTools.count, 15)
+        let size = SettingsSurfaceView.defaultContentSize
+        let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
+        let window = NSWindow(contentRect: NSRect(origin: CGPoint(x: 40, y: 40), size: size),
+                              styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = host
+        window.orderFrontRegardless()
+        defer { window.orderOut(nil); window.contentView = nil; window.close() }
+        try await Task.sleep(for: .milliseconds(300))
+        let strip = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "toolbar-arrangement" })
+        let visible = strip.accessibilityFrame()
+        let tiles = NativeAccessibilityNode.nodes(in: strip.object).filter {
+            let id = $0.accessibilityIdentifier() ?? ""
+            return id.hasPrefix("toolbar-tool-") || id.hasPrefix("toolbar-action-") || id.hasPrefix("toolbar-control-")
+        }
+        XCTAssertEqual(tiles.count, 15 + ToolbarControl.allCases.count)
+        let middles = tiles.map { $0.accessibilityFrame().midY }
+        XCTAssertLessThanOrEqual((middles.max() ?? 0) - (middles.min() ?? 0), 1, "Your toolbar stays on one line")
+        for tile in tiles {
+            XCTAssertTrue(visible.insetBy(dx: -1, dy: -1).contains(tile.accessibilityFrame()),
+                          "\(tile.accessibilityIdentifier() ?? "A tile") needs scrolling at the default width: \(tile.accessibilityFrame()) outside \(visible)")
+        }
+    }
+
     private func perform(_ name: String, on node: NativeAccessibilityNode) -> Bool {
         guard let actions = node.object.value(forKey: "accessibilityCustomActions") as? [NSAccessibilityCustomAction],
               let action = actions.first(where: { $0.name == name }) else { return false }

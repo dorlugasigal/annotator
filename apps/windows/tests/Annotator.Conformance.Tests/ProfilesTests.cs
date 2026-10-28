@@ -45,6 +45,15 @@ public class ProfilesTests
             ["legacyToolShortcuts"] = Strings(WorkspacePreferences.LegacyToolShortcuts),
             ["resolved"] = new JsonObject(VisibilityAnimationStyle.AllCases.Select(style =>
                 KeyValuePair.Create(style.RawValue, (JsonNode?)style.Resolved.RawValue))),
+            ["toolbarCollapseDelays"] = new JsonArray(WorkspacePreferences.ToolbarCollapseDelays.Select(delay => (JsonNode)delay).ToArray()),
+            ["toolbarControls"] = new JsonArray(ToolbarControl.AllCases.Select(control => (JsonNode)new JsonObject
+            {
+                ["action"] = control.Action is { } action ? action.RawValue : null,
+                ["detail"] = control.Detail,
+                ["id"] = control.RawValue,
+                ["label"] = control.Label,
+                ["symbol"] = control.Symbol,
+            }).ToArray()),
         };
         JsonDiff.Equal(expected, actual, NumberRule.Exact);
     }

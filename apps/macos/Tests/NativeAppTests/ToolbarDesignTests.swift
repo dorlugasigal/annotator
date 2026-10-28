@@ -121,8 +121,8 @@ final class ToolbarDesignTests: XCTestCase {
             for tab in CustomizationTab.allCases {
                 let size = try render(CustomizationView(model: model, showDone: false, initialTab: tab),
                                       name: "settings-\(tab.rawValue)", dark: dark)
-                XCTAssertGreaterThanOrEqual(size.width, 720)
-                XCTAssertLessThanOrEqual(size.width, 960)
+                XCTAssertGreaterThanOrEqual(size.width, SettingsSurfaceView.minimumContentSize.width)
+                XCTAssertLessThanOrEqual(size.width, SettingsSurfaceView.defaultContentSize.width + 20)
                 XCTAssertGreaterThanOrEqual(size.height, 620)
                 XCTAssertLessThanOrEqual(size.height, 760)
             }

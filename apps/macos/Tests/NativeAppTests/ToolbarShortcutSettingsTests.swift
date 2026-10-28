@@ -117,12 +117,12 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
 
     func testPresentingButtonsAndSingleEffectsCanBePutInTheToolbar() async throws {
         try await withSettings { _, host in
-            let strip = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
-                $0.accessibilityIdentifier() == "toolbar-arrangement"
+            let fixed = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
+                $0.accessibilityIdentifier() == "toolbar-button-keys"
             })
-            let stripText = NativeAccessibilityNode.nodes(in: strip.object).compactMap { $0.accessibilityLabel() }.joined(separator: "\n")
-            XCTAssertTrue(stripText.contains("Board key"), "The toolbar's own buttons keep their keys in the preview.")
-            XCTAssertFalse(stripText.contains("Spotlight key"), "Spotlight lives in More tools now.")
+            let fixedText = NativeAccessibilityNode.nodes(in: fixed.object).compactMap { $0.accessibilityLabel() }.joined(separator: "\n")
+            XCTAssertTrue(fixedText.contains("Board key"))
+            XCTAssertFalse(fixedText.contains("Spotlight key"), "Spotlight lives in More tools now.")
             for id in ["more-action-spotlight", "more-tool-blur"] {
                 let node = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first { $0.accessibilityIdentifier() == id }, id)
                 XCTAssertTrue(perform("Add to toolbar", on: node), id)
@@ -156,7 +156,7 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
     }
 
     func testSettingsTabsStayVisibleAtTheDefaultAndMinimumWidths() async throws {
-        for width in [720.0, 840] {
+        for width in [SettingsSurfaceView.minimumContentSize.width, SettingsSurfaceView.defaultContentSize.width] {
             let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
             let window = NSWindow(contentRect: NSRect(x: 120, y: 80, width: width, height: 700),
                                   styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)

@@ -61,8 +61,10 @@ struct CustomizationView: View {
                 if showDone { Button("Done") { model.showCustomization = false } }
             }
         }.padding(20)
-            .frame(minWidth: 720, idealWidth: 840, maxWidth: .infinity,
-                   minHeight: 620, idealHeight: 700, maxHeight: .infinity)
+            .frame(minWidth: SettingsSurfaceView.minimumContentSize.width,
+                   idealWidth: SettingsSurfaceView.defaultContentSize.width, maxWidth: .infinity,
+                   minHeight: SettingsSurfaceView.minimumContentSize.height,
+                   idealHeight: SettingsSurfaceView.defaultContentSize.height, maxHeight: .infinity)
             .onAppear {
                 if let initialTab { model.settingsTab = initialTab }
                 model.settingsVisible = true
