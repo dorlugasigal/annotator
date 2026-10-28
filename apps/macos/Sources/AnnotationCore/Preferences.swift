@@ -99,6 +99,8 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var hiddenToolbarControls: [String]?
     /// Seconds the pointer can stay off the toolbar before it shrinks to one button. `nil` keeps it open.
     public var toolbarCollapseDelay: Double?
+    /// Properties that show all their choices side by side instead of one button (`PropertyChoice` raw values).
+    public var expandedPropertyChoices: [String]?
     public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter, .eraser, .cover]
 
     public init() {}

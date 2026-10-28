@@ -1170,6 +1170,9 @@ final class WorkspaceModel: ObservableObject {
             openRegionSharing()
         case .clearAll:
             clearCanvas()
+        case .focusMenu, .zoomMenu:
+            // Menus open with a click and have no key.
+            break
         }
     }
 
@@ -1192,6 +1195,27 @@ final class WorkspaceModel: ObservableObject {
             persistPreferences()
             onToolbarLayoutChanged?()
         } catch { report(error) }
+    }
+
+    /// Whether a property shows all its choices side by side instead of one button.
+    func showsAllChoices(_ choice: PropertyChoice) -> Bool { preferences.showsAllChoices(choice) }
+
+    func setShowsAllChoices(_ choice: PropertyChoice, _ shown: Bool) {
+        if let owner = globalSettingsOwner { owner.setShowsAllChoices(choice, shown); return }
+        do {
+            var updated = preferences
+            updated.setShowsAllChoices(choice, shown)
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+        } catch { report(error) }
+    }
+
+    func resetPropertyChoices() {
+        if let owner = globalSettingsOwner { owner.resetPropertyChoices(); return }
+        guard preferences.expandedPropertyChoices != nil else { return }
+        preferences.expandedPropertyChoices = nil
+        persistPreferences()
     }
 
     func showAllToolbarControls() {
@@ -1654,6 +1678,8 @@ final class WorkspaceModel: ObservableObject {
         case .pointerLens: magnifierEnabled
         case .smartDraw: smartDraw
         case .shareRegion: regionSharingState.isCapturing
+        case .focusMenu: spotlight || cursorHalo
+        case .zoomMenu: magnifierEnabled || screenZoomEnabled
         case .properties, .board, .clearAll: false
         }
     }

@@ -110,6 +110,7 @@ struct ToolbarShortcutSettings: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 ToolbarArranger(model: model, editor: editor)
+                PropertyChoicesEditor(model: model)
                 layoutSection
                 buttonKeysSection
                 globalKeysSection
@@ -704,8 +705,7 @@ struct ToolbarArranger: View {
     /// narrower window scrolls the line sideways instead of wrapping it.
     private var strip: some View {
         let shown = controls
-        let rightSide = shown.filter { Self.group($0) == 1 }
-        let menus = shown.filter { Self.group($0) == 2 }
+        let rightSide = shown.filter { $0 != .library }
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 3) {
                 ForEach(Array(order.enumerated()), id: \.element) { index, command in
@@ -721,9 +721,8 @@ struct ToolbarArranger: View {
                         .reportFrame("strip.\(ArrangerItem.control(.library).id)")
                         .matchedGeometryEffect(id: ArrangerItem.control(.library), in: namespace)
                 }
-                // The buttons on the toolbar's right and the property menus stay small and together, as on the toolbar.
+                // The buttons on the toolbar's right stay small and together, as on the toolbar.
                 if !rightSide.isEmpty { cluster(rightSide) }
-                if !menus.isEmpty { cluster(menus) }
             }
             .fixedSize()
             .padding(metrics.padding)
@@ -766,16 +765,6 @@ struct ToolbarArranger: View {
     private var separator: some View {
         Rectangle().fill(Color.primary.opacity(0.12)).frame(width: 1, height: 26).offset(x: 3)
             .accessibilityHidden(true)
-    }
-
-    /// The toolbar's own buttons in three groups: More tools beside the tools, the buttons on the right, and the menus
-    /// at the end of the properties row.
-    private static func group(_ control: ToolbarControl) -> Int {
-        switch control {
-        case .library: 0
-        case .focusMenu, .zoomMenu: 2
-        default: 1
-        }
     }
 
     private var trayHeader: some View {
@@ -837,6 +826,10 @@ struct ToolbarArranger: View {
 
     private func title(_ item: ArrangerItem) -> String { item.label }
 
+    private static func isMenu(_ command: ShortcutCommand) -> Bool {
+        if case .action(let action) = command { action.isMenu } else { false }
+    }
+
     private func identifier(_ item: ArrangerItem, inToolbar: Bool) -> String {
         (inToolbar ? "toolbar-" : "more-") + item.id.replacingOccurrences(of: ".", with: "-")
     }
@@ -851,9 +844,9 @@ struct ToolbarArranger: View {
     }
 
     /// Tools and added buttons show their key under them. The toolbar's own buttons don't; Properties, Board and Clear all
-    /// keep theirs in "Keys for toolbar buttons".
+    /// keep theirs in "Keys for toolbar buttons". The Spotlight and Zoom menus open with a click and have no key.
     private func keyChip(_ item: ArrangerItem) -> KeyChip? {
-        guard case .command(let command) = item else { return nil }
+        guard case .command(let command) = item, !Self.isMenu(command) else { return nil }
         return KeyChip(target: .local(command), shortcut: model.shortcut(for: command), name: title(item), editor: editor,
                        compact: true)
     }
@@ -883,7 +876,7 @@ struct ToolbarArranger: View {
                 Button("Move Left") { move(command, by: -1) }.disabled(index == 0)
                 Button("Move Right") { move(command, by: 1) }.disabled(index == order.count - 1)
                 Divider()
-                Button("Change Key…") { editor.toggle(.local(command)) }
+                if !Self.isMenu(command) { Button("Change Key…") { editor.toggle(.local(command)) } }
                 if item != Self.select { Button("Remove from Toolbar") { remove(item) } }
             }
             .accessibilityElement(children: .contain)
@@ -927,7 +920,9 @@ struct ToolbarArranger: View {
             .onKeyPress(.return) { add(item); return .handled }
             .contextMenu {
                 Button("Add to Toolbar") { add(item) }
-                if case .command(let command) = item { Button("Change Key…") { editor.toggle(.local(command)) } }
+                if case .command(let command) = item, !Self.isMenu(command) {
+                    Button("Change Key…") { editor.toggle(.local(command)) }
+                }
             }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(title(item))
@@ -1145,6 +1140,10 @@ private struct ArrangerTile: View {
             switch style {
             case .toolbar(let metrics):
                 glyph(size: metrics.glyphSize).frame(height: metrics.minimal ? 24 : 30)
+                if key == nil, metrics.showsKeyLabels, case .command(.action(let action)) = item, action.isMenu {
+                    Image(systemName: "chevron.down").font(.system(size: 7, weight: .semibold)).foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+                }
             case .tray:
                 glyph(size: 20).frame(height: 24)
                 Text(title).font(.system(size: 10, weight: .medium)).lineLimit(2)
@@ -1215,7 +1214,7 @@ private struct ArrangerTile: View {
 }
 
 /// One of the toolbar's own buttons in the arranger, drawn small as on the toolbar: Undo, Redo, Clear all, Properties,
-/// Settings and Hide as icons, the menus as icons, More tools with its key label, and Board and Draw as their buttons.
+/// Settings and Hide as icons, More tools with its key label, and Board and Draw as their buttons.
 private struct ArrangerControlTile: View {
     let control: ToolbarControl
     let metrics: ToolbarMetrics
@@ -1232,7 +1231,6 @@ private struct ArrangerControlTile: View {
         case .library: CGSize(width: metrics.buttonWidth, height: metrics.buttonHeight)
         case .board: CGSize(width: metrics.boardWidth, height: metrics.buttonHeight)
         case .mode: CGSize(width: metrics.modeWidth, height: metrics.buttonHeight)
-        case .focusMenu, .zoomMenu: CGSize(width: 25, height: 26)
         default: metrics.actionSize
         }
     }

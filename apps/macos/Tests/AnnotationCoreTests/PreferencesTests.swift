@@ -115,3 +115,22 @@ func legacyDrawingCursorPreferencesStillRoundTrip(_ style: ToolCursorStyle) thro
         #expect(throws: Never.self) { try preferences.data() }
     }
 }
+
+@Test func propertiesCanShowAllTheirChoicesAndRoundTrip() throws {
+    var preferences = WorkspacePreferences()
+    #expect(PropertyChoice.allCases.allSatisfy { !preferences.showsAllChoices($0) }, "One button is the default.")
+    preferences.setShowsAllChoices(.font, true)
+    preferences.setShowsAllChoices(.pattern, true)
+    preferences.setShowsAllChoices(.font, true)
+    #expect(preferences.expandedPropertyChoices == ["pattern", "font"])
+    #expect(try WorkspacePreferences.read(preferences.data()) == preferences)
+    preferences.setShowsAllChoices(.pattern, false)
+    preferences.setShowsAllChoices(.font, false)
+    #expect(preferences.expandedPropertyChoices == nil)
+    #expect(PropertyChoice.allCases.map(\.choiceCount) == [3, 3, 3, 2, 2, 2, 2, 3])
+    var object = try #require(JSONSerialization.jsonObject(with: WorkspacePreferences().data()) as? [String: Any])
+    object["expandedPropertyChoices"] = ["roughness", "sparkle", "roughness"]
+    #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).expandedPropertyChoices == ["roughness"])
+    preferences.expandedPropertyChoices = ["sparkle"]
+    #expect(throws: CanvasError.self) { try preferences.data() }
+}

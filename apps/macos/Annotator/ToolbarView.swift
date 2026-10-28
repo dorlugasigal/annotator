@@ -411,13 +411,9 @@ struct ToolbarView: View {
         .accessibilityLabel("Active and pending modes")
     }
 
-    /// Selection, Spotlight and Zoom menus. They close the properties row instead of taking a line of their own.
+    /// The selection's actions close the properties row instead of taking a line of their own.
     @ViewBuilder private var propertiesMenus: some View {
         if model.selectionCount > 0 { selectionMenu }
-        if !model.hasReferenceImage {
-            if shows(.focusMenu) { backgroundMenu }
-            if shows(.zoomMenu) { zoomMenu }
-        }
     }
 
     /// Full properties on one row, with the menus at its end. The toolbar grows sideways to fit the row; on a screen
@@ -577,7 +573,6 @@ struct ToolbarView: View {
             if shows(.properties) { propertiesButton }
             if shows(.board) { boardMenu }
             if shows(.mode) { modeButton }
-            if shows(.zoomMenu) { zoomMenu }
             if shows(.undo) || shows(.redo) {
                 let history = metrics.minimal ? AnyLayout(VStackLayout(spacing: 3)) : AnyLayout(HStackLayout(spacing: 0))
                 history {
@@ -625,31 +620,55 @@ struct ToolbarView: View {
         }
     }
 
-    private var zoomMenu: some View {
-        Menu {
-            Button(model.magnifierEnabled ? "Stop lens" : "Pointer lens") { model.toggleMagnifier() }
-            Button(model.screenZoomEnabled ? "Stop screen zoom" : "Full-screen zoom") { model.toggleScreenZoom() }
-            ForEach([2.0, 3, 4], id: \.self) { level in
-                Button("\(Int(level))×") { model.magnification = level }
-            }
-            if model.magnifierEnabled || model.screenZoomEnabled {
-                Divider()
-                Button("Stop zoom") { model.stopZoom() }
-            }
-        } label: {
-            Self.menuSymbol("plus.magnifyingglass", named: "Zoom tools")
-                .foregroundStyle(model.magnifierEnabled || model.screenZoomEnabled ? Color.accentColor : .primary)
-                .frame(width: 25, height: 26)
+    @ViewBuilder private var zoomMenuItems: some View {
+        Button(model.magnifierEnabled ? "Stop lens" : "Pointer lens") { model.toggleMagnifier() }
+        Button(model.screenZoomEnabled ? "Stop screen zoom" : "Full-screen zoom") { model.toggleScreenZoom() }
+        ForEach([2.0, 3, 4], id: \.self) { level in
+            Button("\(Int(level))×") { model.magnification = level }
         }
-        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-        .help("Lens and full-screen zoom").accessibilityLabel("Zoom tools")
+        if model.magnifierEnabled || model.screenZoomEnabled {
+            Divider()
+            Button("Stop zoom") { model.stopZoom() }
+        }
     }
 
     @ViewBuilder private func itemButton(_ item: ShortcutCommand) -> some View {
         switch item {
         case .tool(let tool): toolButton(tool)
+        case .action(let action) where action.isMenu: menuButton(action)
         case .action(let action): actionButton(action)
         }
+    }
+
+    /// The Spotlight and Zoom menus as toolbar buttons beside the tools, the size of a tool. They light up while
+    /// something in them is on.
+    private func menuButton(_ action: ShortcutAction) -> some View {
+        let on = model.isOn(action)
+        let radius: CGFloat = metrics.minimal ? 8 : 10
+        return Menu {
+            if action == .focusMenu { focusMenuItems } else { zoomMenuItems }
+        } label: {
+            VStack(spacing: 2) {
+                Image(systemName: action.symbol)
+                    .font(.system(size: metrics.minimal ? 15 : 17))
+                    .foregroundStyle(on ? Color.accentColor : .primary)
+                    .frame(height: metrics.minimal ? 22 : 24)
+                if metrics.showsKeyLabels {
+                    Image(systemName: "chevron.down").font(.system(size: 7, weight: .semibold)).foregroundStyle(.secondary)
+                        .frame(height: 12)
+                }
+            }
+            .frame(width: metrics.buttonWidth, height: metrics.buttonHeight)
+            .background(on ? Color.accentColor.opacity(0.17) : .clear, in: RoundedRectangle(cornerRadius: radius))
+            .contentShape(RoundedRectangle(cornerRadius: radius))
+            .animation(selectionAnimation, value: on)
+        }
+        // The button menu style draws the whole label; the borderless one keeps only its first image.
+        .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).fixedSize()
+        .help("\(action.label). \(action.detail)")
+        .accessibilityLabel(action.label)
+        .accessibilityValue(on ? "On" : "Off")
+        .accessibilityIdentifier("toolbar-action-\(action.rawValue)")
     }
 
     /// Effects light up for any effect, unless that effect has its own button.
@@ -741,17 +760,12 @@ struct ToolbarView: View {
             .disabled(model.selectionCount == 0).accessibilityLabel("Selection actions")
     }
 
-    private var backgroundMenu: some View {
-            Menu {
-                Toggle("Spotlight", isOn: $model.spotlight)
-                Toggle("Cursor halo", isOn: $model.cursorHalo)
-                Divider()
-                Button("Clear drawings (keep effects)") { model.clearDrawingsKeepingProtection() }
-                Button("Remove all censors") { model.clearProtection() }
-            } label: {
-                Self.menuSymbol("light.beacon.max", named: "Focus and cleanup").frame(width: 25, height: 26)
-            }
-                .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().accessibilityLabel("Focus and cleanup")
+    @ViewBuilder private var focusMenuItems: some View {
+        Toggle("Spotlight", isOn: $model.spotlight)
+        Toggle("Cursor halo", isOn: $model.cursorHalo)
+        Divider()
+        Button("Clear drawings (keep effects)") { model.clearDrawingsKeepingProtection() }
+        Button("Remove all censors") { model.clearProtection() }
     }
 
     private var boardMenu: some View {

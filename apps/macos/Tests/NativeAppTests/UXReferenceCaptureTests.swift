@@ -193,7 +193,7 @@ final class UXReferenceCaptureTests: XCTestCase {
             use(model, tool: .pen)
             try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 1600, height: 900)),
                                     state: "added-buttons", dark: dark,
-                                    notes: "Spotlight, Cursor halo, Pointer lens, Smart draw, Share region, Blur and Pixelate added.",
+                                    notes: "Spotlight, Cursor halo, Pointer lens, Smart draw, Share region, the Spotlight and Zoom menus, Blur and Pixelate added.",
                                     spec: spec + ["005 Toolbar & Shortcuts"])
             model.configureToolbar(items: defaultItems)
 

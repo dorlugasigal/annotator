@@ -90,20 +90,32 @@ struct ContextualInspector: View {
                     }
                     if tool.supportsFill && fillVisible {
                         PropertyBlock(name: "Fill style", symbol: "square.lefthalf.filled") {
-                            CycleOptions(
-                                name: "Fill style",
-                                values: FillPattern.allCases.map { ($0, $0.rawValue.capitalized, .fill($0)) },
-                                selection: model.style.fillPattern
-                            ) { value in model.applyStyle { $0.fillPattern = value } }
+                            let values = FillPattern.allCases.map { ($0, $0.rawValue.capitalized, InspectorSample.fill($0)) }
+                            if model.showsAllChoices(.fillStyle) {
+                                SampleOptions(values: values, selection: model.style.fillPattern) { value in
+                                    model.applyStyle { $0.fillPattern = value }
+                                }
+                            } else {
+                                CycleOptions(name: "Fill style", values: values, selection: model.style.fillPattern) { value in
+                                    model.applyStyle { $0.fillPattern = value }
+                                }
+                            }
                         }.fixedSize(horizontal: true, vertical: false)
                     }
                     if tool == .rectangle || tool == .diamond {
                         PropertyBlock(name: "Edges", symbol: "rectangle") {
-                            InspectorToggle(name: "Rounded corners", sample: .edges(true), isOn: model.style.cornerRadius > 0,
-                                            onHelp: "Rounded corners are on. Click for sharp corners.",
-                                            offHelp: "Sharp corners. Click to round them.") {
-                                let rounded = model.style.cornerRadius > 0
-                                model.applyStyle { $0.cornerRadius = rounded ? 0 : 14 }
+                            if model.showsAllChoices(.edges) {
+                                SampleOptions(
+                                    values: [(false, "Sharp corners", .edges(false)), (true, "Rounded corners", .edges(true))],
+                                    selection: model.style.cornerRadius > 0
+                                ) { rounded in model.applyStyle { $0.cornerRadius = rounded ? 14 : 0 } }
+                            } else {
+                                InspectorToggle(name: "Rounded corners", sample: .edges(true), isOn: model.style.cornerRadius > 0,
+                                                onHelp: "Rounded corners are on. Click for sharp corners.",
+                                                offHelp: "Sharp corners. Click to round them.") {
+                                    let rounded = model.style.cornerRadius > 0
+                                    model.applyStyle { $0.cornerRadius = rounded ? 0 : 14 }
+                                }
                             }
                         }.fixedSize(horizontal: true, vertical: false)
                     }
@@ -132,11 +144,18 @@ struct ContextualInspector: View {
                     }
                     if tool == .pen {
                         PropertyBlock(name: "Pressure", symbol: "pencil.tip") {
-                            InspectorToggle(name: "Ink pressure", sample: .pressure(true), isOn: model.style.pressure,
-                                            onHelp: "Ink pressure is on: lines get thinner and thicker. Click for one width.",
-                                            offHelp: "One width all along. Click for ink pressure.") {
-                                let pressure = model.style.pressure
-                                model.applyStyle { $0.pressure = !pressure }
+                            if model.showsAllChoices(.pressure) {
+                                SampleOptions(
+                                    values: [(false, "Constant pressure", .pressure(false)), (true, "Ink pressure", .pressure(true))],
+                                    selection: model.style.pressure
+                                ) { pressure in model.applyStyle { $0.pressure = pressure } }
+                            } else {
+                                InspectorToggle(name: "Ink pressure", sample: .pressure(true), isOn: model.style.pressure,
+                                                onHelp: "Ink pressure is on: lines get thinner and thicker. Click for one width.",
+                                                offHelp: "One width all along. Click for ink pressure.") {
+                                    let pressure = model.style.pressure
+                                    model.applyStyle { $0.pressure = !pressure }
+                                }
                             }
                         }.fixedSize(horizontal: true, vertical: false)
                         PropertyBlock(name: "Smart Draw", symbol: "wand.and.stars") {
@@ -168,12 +187,17 @@ struct ContextualInspector: View {
                 PropertyBlock(name: "End", symbol: "arrow.right") {
                     ArrowEndControl(model: model, start: false)
                 }.fixedSize(horizontal: true, vertical: false)
-                PropertyBlock(name: "Curved", symbol: "arrow.turn.up.right") {
-                    InspectorToggle(name: "Curved arrow", sample: .route(true), isOn: model.style.curved,
-                                    onHelp: "Curved arrow is on. Click for a straight arrow.",
-                                    offHelp: "Straight arrow. Click to curve it.") {
-                        let curved = model.style.curved
-                        model.applyStyle { $0.curved = !curved }
+                PropertyBlock(name: model.showsAllChoices(.arrowType) ? "Arrow type" : "Curved", symbol: "arrow.turn.up.right") {
+                    if model.showsAllChoices(.arrowType) {
+                        SampleOptions(values: [(false, "Straight arrow", .route(false)), (true, "Curved arrow", .route(true))],
+                                      selection: model.style.curved) { curved in model.applyStyle { $0.curved = curved } }
+                    } else {
+                        InspectorToggle(name: "Curved arrow", sample: .route(true), isOn: model.style.curved,
+                                        onHelp: "Curved arrow is on. Click for a straight arrow.",
+                                        offHelp: "Straight arrow. Click to curve it.") {
+                            let curved = model.style.curved
+                            model.applyStyle { $0.curved = !curved }
+                        }
                     }
                 }.fixedSize(horizontal: true, vertical: false)
                 PropertyBlock(name: "Head size", symbol: "arrow.up.left.and.arrow.down.right") {
@@ -189,31 +213,45 @@ struct ContextualInspector: View {
     }
     private var patternControls: some View {
         PropertyBlock(name: "Pattern", symbol: "line.3.horizontal") {
-            CycleOptions(
-                name: "Pattern",
-                values: StrokePattern.allCases.map { ($0, $0.rawValue.capitalized, .pattern($0)) },
-                selection: model.style.pattern
-            ) { value in model.applyStyle { $0.pattern = value } }
+            let values = StrokePattern.allCases.map { ($0, $0.rawValue.capitalized, InspectorSample.pattern($0)) }
+            if model.showsAllChoices(.pattern) {
+                SampleOptions(values: values, selection: model.style.pattern) { value in model.applyStyle { $0.pattern = value } }
+            } else {
+                CycleOptions(name: "Pattern", values: values, selection: model.style.pattern) { value in
+                    model.applyStyle { $0.pattern = value }
+                }
+            }
         }.fixedSize(horizontal: true, vertical: false)
     }
     private var roughnessControls: some View {
         PropertyBlock(name: "Roughness", symbol: "scribble") {
-            CycleOptions(
-                name: "Roughness",
-                values: [(0.0, "Clean", .roughness(0)), (2.0, "Sketchy", .roughness(2)), (6.0, "Wild", .roughness(6))],
-                selection: model.style.roughness
-            ) { value in model.applyStyle { $0.roughness = value } }
+            let values: [(Double, String, InspectorSample)] =
+                [(0, "Clean", .roughness(0)), (2, "Sketchy", .roughness(2)), (6, "Wild", .roughness(6))]
+            if model.showsAllChoices(.roughness) {
+                SampleOptions(values: values, selection: model.style.roughness) { value in model.applyStyle { $0.roughness = value } }
+            } else {
+                CycleOptions(name: "Roughness", values: values, selection: model.style.roughness) { value in
+                    model.applyStyle { $0.roughness = value }
+                }
+            }
         }.fixedSize(horizontal: true, vertical: false)
     }
     private var textControls: some View {
         propertyLayout {
             InspectorColorPicker(model: model)
             PropertyBlock(name: "Font", symbol: "textformat") {
-                CycleOptions(
-                    name: "Font",
-                    choices: [("system", "System", .text("Aa", .default)), ("monospace", "Mono", .text("Aa", .monospaced))],
-                    selection: model.style.fontName == "monospace" ? "monospace" : "system"
-                ) { name in model.applyStyle { $0.fontName = name } }
+                if model.showsAllChoices(.font) {
+                    HStack(spacing: 5) {
+                        fontChoice("System", name: "system", design: .default)
+                        fontChoice("Mono", name: "monospace", design: .monospaced)
+                    }
+                } else {
+                    CycleOptions(
+                        name: "Font",
+                        choices: [("system", "System", .text("Aa", .default)), ("monospace", "Mono", .text("Aa", .monospaced))],
+                        selection: model.style.fontName == "monospace" ? "monospace" : "system"
+                    ) { name in model.applyStyle { $0.fontName = name } }
+                }
             }.fixedSize(horizontal: true, vertical: false)
             PropertyBlock(name: "Size", symbol: "textformat.size") {
                 StyleValueControl(model: model, parameter: .textSize, sliderWidth: 96, showLabel: false, showsField: false)
@@ -225,15 +263,35 @@ struct ContextualInspector: View {
                 }.accessibilityValue(model.style.bold ? "On" : "Off")
             }.fixedSize(horizontal: true, vertical: false)
             PropertyBlock(name: "Alignment", symbol: "text.alignleft") {
-                CycleOptions(
-                    name: "Alignment",
-                    choices: AnnotationCore.TextAlignment.allCases.map { alignment in
-                        (alignment, alignment.rawValue.capitalized, .symbol(
-                            alignment == .left ? "text.alignleft" : alignment == .center ? "text.aligncenter" : "text.alignright"))
-                    },
-                    selection: model.style.alignment
-                ) { alignment in model.applyStyle { $0.alignment = alignment } }
+                if model.showsAllChoices(.alignment) {
+                    HStack(spacing: 5) {
+                        ForEach(AnnotationCore.TextAlignment.allCases, id: \.self) { alignment in
+                            InspectorControlButton(name: "Align \(alignment.rawValue)", selected: model.style.alignment == alignment,
+                                                   action: { model.applyStyle { $0.alignment = alignment } }) {
+                                Image(systemName: Self.alignmentSymbol(alignment))
+                            }
+                        }
+                    }
+                } else {
+                    CycleOptions(
+                        name: "Alignment",
+                        choices: AnnotationCore.TextAlignment.allCases.map { alignment in
+                            (alignment, alignment.rawValue.capitalized, .symbol(Self.alignmentSymbol(alignment)))
+                        },
+                        selection: model.style.alignment
+                    ) { alignment in model.applyStyle { $0.alignment = alignment } }
+                }
             }.fixedSize(horizontal: true, vertical: false)
+        }
+    }
+    static func alignmentSymbol(_ alignment: AnnotationCore.TextAlignment) -> String {
+        alignment == .left ? "text.alignleft" : alignment == .center ? "text.aligncenter" : "text.alignright"
+    }
+    private func fontChoice(_ title: String, name: String, design: Font.Design) -> some View {
+        InspectorControlButton(name: "\(title) font", selected: model.style.fontName == name, action: {
+            model.applyStyle { $0.fontName = name }
+        }) {
+            Text("Aa").font(.system(size: 17, design: design))
         }
     }
     private func styleEditing(_ editing: Bool) {

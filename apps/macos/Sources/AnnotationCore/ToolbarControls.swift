@@ -1,9 +1,9 @@
 import Foundation
 
-/// The toolbar's own buttons and menus, next to the tools. People can turn each one off in Settings; the tools and
-/// added buttons such as Spotlight are arranged separately (`toolbarItems`).
+/// The toolbar's own buttons, next to the tools. People can turn each one off in Settings; the tools and added buttons
+/// such as Spotlight and the Zoom menu are arranged separately (`toolbarItems`).
 public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
-    case library, board, mode, undo, redo, clearAll, properties, settings, hide, focusMenu, zoomMenu
+    case library, board, mode, undo, redo, clearAll, properties, settings, hide
 
     public var label: String {
         switch self {
@@ -16,8 +16,6 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
         case .properties: "Properties"
         case .settings: "Settings"
         case .hide: "Hide"
-        case .focusMenu: "Spotlight and cleanup menu"
-        case .zoomMenu: "Zoom menu"
         }
     }
 
@@ -32,8 +30,6 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
         case .properties: "Quick controls, full properties or tools only."
         case .settings: "Open Settings."
         case .hide: "Hide drawings and tools."
-        case .focusMenu: "Spotlight, cursor halo and cleanup."
-        case .zoomMenu: "Pointer lens and screen zoom."
         }
     }
 
@@ -48,8 +44,6 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
         case .properties: "slider.horizontal.3"
         case .settings: "gearshape"
         case .hide: "xmark"
-        case .focusMenu: "light.beacon.max"
-        case .zoomMenu: "plus.magnifyingglass"
         }
     }
 
@@ -62,6 +56,42 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
         default: nil
         }
     }
+}
+
+/// Properties with a few choices. Each shows as one button that steps through its choices, which is the default, or as all
+/// its choices side by side.
+public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
+    case pattern, roughness, fillStyle, edges, arrowType, pressure, font, alignment
+
+    public var label: String {
+        switch self {
+        case .pattern: "Pattern"
+        case .roughness: "Roughness"
+        case .fillStyle: "Fill style"
+        case .edges: "Edges"
+        case .arrowType: "Arrow type"
+        case .pressure: "Pressure"
+        case .font: "Font"
+        case .alignment: "Alignment"
+        }
+    }
+
+    /// The property's choices, in order. One button starts at the first and steps through them.
+    public var choices: [String] {
+        switch self {
+        case .pattern: ["Solid", "Dashed", "Dotted"]
+        case .roughness: ["Clean", "Sketchy", "Wild"]
+        case .fillStyle: ["Solid", "Hatch", "Crosshatch"]
+        case .edges: ["Sharp corners", "Rounded corners"]
+        case .arrowType: ["Straight arrow", "Curved arrow"]
+        case .pressure: ["Constant pressure", "Ink pressure"]
+        case .font: ["System", "Mono"]
+        case .alignment: ["Left", "Center", "Right"]
+        }
+    }
+
+    /// How many choices the property has.
+    public var choiceCount: Int { choices.count }
 }
 
 extension WorkspacePreferences {
@@ -81,6 +111,18 @@ extension WorkspacePreferences {
         hiddenToolbarControls = ordered.isEmpty ? nil : ordered
     }
 
+    /// Whether a property shows all its choices side by side instead of one button.
+    public func showsAllChoices(_ choice: PropertyChoice) -> Bool {
+        (expandedPropertyChoices ?? []).contains(choice.rawValue)
+    }
+
+    public mutating func setShowsAllChoices(_ choice: PropertyChoice, _ shown: Bool) {
+        var expanded = Set(expandedPropertyChoices ?? [])
+        if shown { expanded.insert(choice.rawValue) } else { expanded.remove(choice.rawValue) }
+        let ordered = PropertyChoice.allCases.map(\.rawValue).filter(expanded.contains)
+        expandedPropertyChoices = ordered.isEmpty ? nil : ordered
+    }
+
     func validateToolbarControls() throws {
         if let hiddenToolbarControls {
             guard hiddenToolbarControls.count <= ToolbarControl.allCases.count,
@@ -94,13 +136,26 @@ extension WorkspacePreferences {
                 throw CanvasError.invalidDocument("The toolbar can shrink after 1 to 600 seconds.")
             }
         }
+        if let expandedPropertyChoices {
+            guard expandedPropertyChoices.count <= PropertyChoice.allCases.count,
+                  Set(expandedPropertyChoices).count == expandedPropertyChoices.count,
+                  expandedPropertyChoices.allSatisfy({ PropertyChoice(rawValue: $0) != nil }) else {
+                throw CanvasError.invalidDocument("Properties that show all their choices must be known properties, each listed once.")
+            }
+        }
     }
 
-    /// Buttons from a newer version are dropped, so a profile with them still opens.
+    /// Buttons and properties from a newer version are dropped, so a profile with them still opens.
     mutating func normalizeToolbarControls() {
-        guard let hidden = hiddenToolbarControls else { return }
-        var seen = Set<String>()
-        let known = hidden.filter { ToolbarControl(rawValue: $0) != nil && seen.insert($0).inserted }
-        hiddenToolbarControls = known.isEmpty ? nil : known
+        if let hidden = hiddenToolbarControls {
+            var seen = Set<String>()
+            let known = hidden.filter { ToolbarControl(rawValue: $0) != nil && seen.insert($0).inserted }
+            hiddenToolbarControls = known.isEmpty ? nil : known
+        }
+        if let expanded = expandedPropertyChoices {
+            var seen = Set<String>()
+            let known = expanded.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
+            expandedPropertyChoices = known.isEmpty ? nil : known
+        }
     }
 }

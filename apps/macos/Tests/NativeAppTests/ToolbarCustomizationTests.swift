@@ -123,6 +123,8 @@ final class ToolbarCustomizationTests: XCTestCase {
         model.setInspectorPinned(true)
         model.setToolbarSize(.minimal)
         model.configureToolbar([.select, .arrow, .pen])
+        // Every choice side by side takes more room than the tools.
+        for choice in [PropertyChoice.pattern, .roughness, .arrowType] { model.setShowsAllChoices(choice, true) }
         model.beginDrawing()
         let base = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400, propertiesVisible: true,
                                                      size: .minimal)
@@ -133,10 +135,12 @@ final class ToolbarCustomizationTests: XCTestCase {
         try save(host, name: "grow-arrow-minimal", dark: false)
         let wide = host.fittingSize.width
         XCTAssertGreaterThan(wide, base, "The arrow's properties need more room than the tools")
-        let zoom = try XCTUnwrap(nodes(host).first { $0.accessibilityLabel() == "Zoom tools" })
-        let toolbarFrame = panel.convertToScreen(host.convert(host.bounds, to: nil))
-        XCTAssertTrue(toolbarFrame.insetBy(dx: -1, dy: -1).contains(zoom.accessibilityFrame()),
-                      "The row's menus end inside the toolbar instead of on another line")
+        let toolbarFrame = panel.convertToScreen(host.convert(host.bounds, to: nil)).insetBy(dx: -1, dy: -1)
+        let row = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "contextual-inspector-viewport" })
+        for control in NativeAccessibilityNode.nodes(in: row.object) where !control.accessibilityFrame().isEmpty {
+            XCTAssertTrue(toolbarFrame.contains(control.accessibilityFrame()),
+                          "\(control.accessibilityLabel() ?? "A control") ends outside the toolbar instead of fitting the row")
+        }
         model.tool = .select
         try await settle(host)
         XCTAssertLessThan(host.fittingSize.width, wide, "Select needs less room, so the toolbar shrinks back")
@@ -195,13 +199,98 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertFalse(nodes(host).contains { $0.accessibilityLabel() == "Font size 28" }, "Text size is just the slider")
     }
 
+    /// Each property with a few choices can show all of them side by side instead of one button.
+    func testPropertiesCanShowAllTheirChoices() async throws {
+        let (model, cleanup) = try makeModel("all-choices")
+        defer { cleanup() }
+        model.setInspectorPinned(true)
+        model.beginDrawing()
+        typealias Case = (PropertyChoice, Tool, (inout Style) -> Void, String, [String], String, (Style) -> Bool)
+        let cases: [Case] = [
+            (.pattern, .rectangle, { _ in }, "Pattern", ["Solid", "Dashed", "Dotted"], "Dotted", { $0.pattern == .dotted }),
+            (.roughness, .rectangle, { _ in }, "Roughness", ["Clean", "Sketchy", "Wild"], "Wild", { $0.roughness == 6 }),
+            (.fillStyle, .rectangle, { $0.fill = .blue }, "Fill style", ["Solid", "Hatch", "Crosshatch"], "Hatch",
+             { $0.fillPattern == .hatch }),
+            (.edges, .rectangle, { $0.cornerRadius = 14 }, "Rounded corners", ["Sharp corners", "Rounded corners"],
+             "Sharp corners", { $0.cornerRadius == 0 }),
+            (.arrowType, .arrow, { $0.curved = false }, "Curved arrow", ["Straight arrow", "Curved arrow"], "Curved arrow",
+             { $0.curved }),
+            (.pressure, .pen, { $0.pressure = true }, "Ink pressure", ["Constant pressure", "Ink pressure"],
+             "Constant pressure", { !$0.pressure }),
+            (.font, .text, { _ in }, "Font", ["System font", "Mono font"], "Mono font", { $0.fontName == "monospace" }),
+            (.alignment, .text, { _ in }, "Alignment", ["Align left", "Align center", "Align right"], "Align right",
+             { $0.alignment == .right })
+        ]
+        for (choice, tool, prepare, one, all, pick, picked) in cases {
+            model.tool = tool
+            model.applyStyle { $0 = .defaults(for: tool); prepare(&$0) }
+            let (onePanel, oneHost) = try await show(model)
+            let oneLabels = nodes(oneHost).compactMap { $0.accessibilityLabel() }
+            XCTAssertTrue(oneLabels.contains(one), "\(choice) is one button by default")
+            XCTAssertFalse(Set(all).subtracting([one]).contains { oneLabels.contains($0) }, "\(choice) hides its other choices")
+            let oneWidth = oneHost.fittingSize.width
+            close(onePanel)
+
+            model.setShowsAllChoices(choice, true)
+            XCTAssertEqual(model.preferences.expandedPropertyChoices, [choice.rawValue])
+            let (panel, host) = try await show(model)
+            let labels = nodes(host).compactMap { $0.accessibilityLabel() }
+            for label in all { XCTAssertTrue(labels.contains(label), "\(choice) shows \(label)") }
+            if !all.contains(one) { XCTAssertFalse(labels.contains(one), "\(choice) has no one-button control as well") }
+            XCTAssertGreaterThanOrEqual(host.fittingSize.width, oneWidth - 1)
+            if choice == .pattern { try save(host, name: "all-choices-pattern", dark: false) }
+            try await press(pick, in: host)
+            XCTAssertTrue(picked(model.style), "\(pick) applies to \(choice)")
+            close(panel)
+            model.setShowsAllChoices(choice, false)
+        }
+        XCTAssertNil(model.preferences.expandedPropertyChoices)
+    }
+
+    func testSettingsPreviewChoosesHowPropertiesLook() async throws {
+        let (model, cleanup) = try makeModel("choices-settings")
+        defer { cleanup() }
+        let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
+        let window = NSWindow(contentRect: NSRect(origin: CGPoint(x: 40, y: 40), size: SettingsSurfaceView.defaultContentSize),
+                              styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = host
+        window.orderFrontRegardless()
+        defer { window.orderOut(nil); window.contentView = nil; window.close() }
+        var cards: [NativeAccessibilityNode] = []
+        for _ in 0..<30 where cards.count < PropertyChoice.allCases.count {
+            try await Task.sleep(for: .milliseconds(100))
+            cards = nodes(host).filter { ($0.accessibilityIdentifier() ?? "").hasPrefix("property-choice-") &&
+                !($0.accessibilityIdentifier() ?? "").hasSuffix("-one") && !($0.accessibilityIdentifier() ?? "").hasSuffix("-all") }
+        }
+        XCTAssertEqual(Set(cards.compactMap { $0.accessibilityIdentifier() }),
+                       Set(PropertyChoice.allCases.map { "property-choice-\($0.rawValue)" }))
+        for choice in PropertyChoice.allCases {
+            let one = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-\(choice.rawValue)-one" })
+            XCTAssertEqual(one.accessibilityValue() as? String, "Selected", "\(choice) starts as one button")
+        }
+        let all = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-roughness-all" })
+        XCTAssertTrue(all.accessibilityPerformPress())
+        try await Task.sleep(for: .milliseconds(80))
+        XCTAssertTrue(model.showsAllChoices(.roughness))
+        XCTAssertEqual(try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-roughness-all" })
+            .accessibilityValue() as? String, "Selected")
+        let reset = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "reset-property-choices" })
+        XCTAssertTrue(reset.accessibilityPerformPress())
+        try await Task.sleep(for: .milliseconds(80))
+        XCTAssertFalse(model.showsAllChoices(.roughness))
+        model.setShowsAllChoices(.pattern, true)
+        try await Task.sleep(for: .milliseconds(150))
+        try save(host, name: "settings-properties", dark: false)
+        model.resetPropertyChoices()
+    }
+
     // MARK: Removable buttons
 
     private static let controlLabels: [ToolbarControl: [String]] = [
         .library: ["Tool library"], .board: ["Board background"], .mode: ["Use apps", "Resume drawing"],
         .undo: ["Undo"], .redo: ["Redo"], .clearAll: ["Clear all drawings — undoable"], .properties: ["Properties"],
-        .settings: ["Settings and shortcuts"], .hide: ["Hide drawings and tools"], .focusMenu: ["Focus and cleanup"],
-        .zoomMenu: ["Zoom tools"]
+        .settings: ["Settings and shortcuts"], .hide: ["Hide drawings and tools"]
     ]
 
     func testEveryToolbarButtonCanBeTurnedOff() async throws {
@@ -215,8 +304,6 @@ final class ToolbarCustomizationTests: XCTestCase {
                 model.setInspectorPinned(pinned)
                 if !pinned { model.setQuickPreferencesExpanded(true) }
                 for control in ToolbarControl.allCases {
-                    // The vertical rail has no Spotlight menu; the horizontal quick row and full properties do.
-                    if orientation == .vertical && control == .focusMenu { continue }
                     let labels = try XCTUnwrap(Self.controlLabels[control])
                     let (shownPanel, shownHost) = try await show(model)
                     XCTAssertTrue(nodes(shownHost).contains { labels.contains($0.accessibilityLabel() ?? "") },
@@ -231,6 +318,58 @@ final class ToolbarCustomizationTests: XCTestCase {
                 }
             }
         }
+    }
+
+    /// Spotlight and Zoom are menus the size of a tool. They wait in More tools until someone adds them.
+    func testSpotlightAndZoomMenusAreToolSizedToolbarItems() async throws {
+        let (model, cleanup) = try makeModel("menus")
+        defer { cleanup() }
+        model.beginDrawing()
+        model.tool = .pen
+        model.setInspectorPinned(true)
+        let menuIDs = ["toolbar-action-focusMenu", "toolbar-action-zoomMenu"]
+        let (plainPanel, plainHost) = try await show(model)
+        XCTAssertFalse(nodes(plainHost).contains { menuIDs.contains($0.accessibilityIdentifier() ?? "") },
+                       "The default toolbar has no Spotlight or Zoom menu")
+        XCTAssertFalse(nodes(plainHost).contains { ["Zoom tools", "Focus and cleanup"].contains($0.accessibilityLabel() ?? "") },
+                       "The properties row has no menus of its own")
+        close(plainPanel)
+        XCTAssertTrue(WorkspaceModel.toolbarCandidates.contains(.action(.focusMenu)))
+        XCTAssertTrue(WorkspaceModel.toolbarCandidates.contains(.action(.zoomMenu)))
+        model.configureToolbar(items: [.tool(.select), .tool(.rectangle), .tool(.ellipse), .action(.focusMenu), .action(.zoomMenu)])
+        for size in ToolbarSize.allCases {
+            for orientation in [ToolbarOrientation.horizontal, .vertical] {
+                model.setToolbarSize(size)
+                model.setToolbarOrientation(orientation)
+                let (panel, host) = try await show(model)
+                let all = nodes(host)
+                let name = "\(size) \(orientation)"
+                let rectangle = try XCTUnwrap(all.first { $0.accessibilityLabel() == "Rectangle" }, name).accessibilityFrame()
+                let ellipse = try XCTUnwrap(all.first { $0.accessibilityLabel() == "Ellipse" }, name).accessibilityFrame()
+                let focus = try XCTUnwrap(all.first { $0.accessibilityIdentifier() == menuIDs[0] }, name).accessibilityFrame()
+                let zoom = try XCTUnwrap(all.first { $0.accessibilityIdentifier() == menuIDs[1] }, name).accessibilityFrame()
+                // Neighbouring menus sit one tool apart, like neighbouring tools, so each one takes a tool's room.
+                if orientation == .horizontal {
+                    XCTAssertEqual(zoom.midX - focus.midX, ellipse.midX - rectangle.midX, accuracy: 1, name)
+                    XCTAssertEqual(rectangle.width, ToolbarMetrics(size).buttonWidth, accuracy: 1, name)
+                } else {
+                    XCTAssertEqual(abs(zoom.midY - focus.midY), abs(ellipse.midY - rectangle.midY), accuracy: 1, name)
+                }
+                if size == .expanded && orientation == .horizontal { try save(host, name: "presenting-menus", dark: false) }
+                close(panel)
+            }
+        }
+        model.setToolbarSize(.expanded)
+        model.setToolbarOrientation(.horizontal)
+        model.spotlight = true
+        let (panel, host) = try await show(model)
+        defer { close(panel) }
+        try save(host, name: "presenting-menus-on", dark: true)
+        let focus = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == menuIDs[0] })
+        XCTAssertEqual(focus.accessibilityValue() as? String, "On", "The Spotlight menu lights up while the spotlight is on")
+        let zoom = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == menuIDs[1] })
+        XCTAssertEqual(zoom.accessibilityValue() as? String, "Off")
+        model.spotlight = false
     }
 
     func testTurningButtonsOffGivesTheirRoomBack() async throws {
@@ -434,8 +573,12 @@ final class ToolbarCustomizationTests: XCTestCase {
         window.contentView = host
         window.orderFrontRegardless()
         defer { window.orderOut(nil); window.contentView = nil; window.close() }
-        try await Task.sleep(for: .milliseconds(300))
-        let strip = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "toolbar-arrangement" })
+        var found: NativeAccessibilityNode?
+        for _ in 0..<30 where found == nil {
+            try await Task.sleep(for: .milliseconds(100))
+            found = nodes(host).first { $0.accessibilityIdentifier() == "toolbar-arrangement" }
+        }
+        let strip = try XCTUnwrap(found, "Settings shows your toolbar")
         let visible = strip.accessibilityFrame()
         let tiles = NativeAccessibilityNode.nodes(in: strip.object).filter {
             let id = $0.accessibilityIdentifier() ?? ""

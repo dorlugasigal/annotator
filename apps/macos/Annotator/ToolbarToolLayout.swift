@@ -34,15 +34,13 @@ struct ToolbarMetrics: Equatable {
     var verticalToolPitch: CGFloat { minimal ? 39 : 51 }
     var verticalReserve: CGFloat { minimal ? 364 : 374 }
 
-    /// The width one of the toolbar's own controls takes in the horizontal row, with its gap. The menus sit with the
-    /// properties instead.
+    /// The width one of the toolbar's own controls takes in the horizontal row, with its gap.
     func horizontalRoom(_ control: ToolbarControl) -> CGFloat {
         switch control {
         case .library: buttonWidth + spacing
         case .board: boardWidth + spacing
         case .mode: modeWidth + spacing
         case .undo, .redo, .clearAll, .properties, .settings, .hide: actionSize.width + spacing
-        case .focusMenu, .zoomMenu: 0
         }
     }
 
@@ -77,12 +75,11 @@ struct ToolbarMetrics: Equatable {
         case .library: return buttonHeight + gap
         case .board: return (minimal ? 30 : 36) + gap
         case .mode: return 36 + gap
-        case .properties, .clearAll, .settings, .hide, .zoomMenu: return actionSize.height + gap
+        case .properties, .clearAll, .settings, .hide: return actionSize.height + gap
         // Undo and Redo share a row in the expanded rail and stack in the minimal one.
         case .undo, .redo:
             if minimal { return actionSize.height + 3 }
             return control == .redo && hidden.isSuperset(of: [.undo, .redo]) ? actionSize.height + gap : 0
-        case .focusMenu: return 0
         }
     }
 

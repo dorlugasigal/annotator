@@ -43,6 +43,7 @@
 		282817F496C6CF0E32FF117F /* PointerOverlayInvalidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B41206C2CC72C6C56BB0F95 /* PointerOverlayInvalidationTests.swift */; };
 		295B1EEC59339BC40696C388 /* ToolGlyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD326155D281005AF0FFB96 /* ToolGlyph.swift */; };
 		2CD113F591610F8AF68ECC42 /* AdvancedEditingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFECF592B8162D2B2669E5A /* AdvancedEditingTests.swift */; };
+		2D3953AB159F589474AB4993 /* PropertyChoicesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3349982CAC1D3CE89DBCB3 /* PropertyChoicesEditor.swift */; };
 		2DB146942D13E223BA43C5DB /* VisibilityImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F7DDB13C8385FAB5FCDAF9 /* VisibilityImageView.swift */; };
 		2E01CF2C95C276AE4A829DEA /* ApplicationsMoveOfferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E5707613FE728E20D8B814 /* ApplicationsMoveOfferTests.swift */; };
 		2F7D016C47916FED62DC3D79 /* FeedbackSupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86A556E82AFF0602832BC5 /* FeedbackSupportTests.swift */; };
@@ -241,6 +242,7 @@
 		3921CA5AB28D7D5483820701 /* TutorialCoachTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialCoachTests.swift; sourceTree = "<group>"; };
 		3A42548D82D8D39B7129013D /* BreakTimerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreakTimerController.swift; sourceTree = "<group>"; };
 		3E416DA7EC11BDEBC50F2B32 /* ResumeDrawingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeDrawingTests.swift; sourceTree = "<group>"; };
+		3F3349982CAC1D3CE89DBCB3 /* PropertyChoicesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyChoicesEditor.swift; sourceTree = "<group>"; };
 		420839945BA81FEA152BC169 /* BreakScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreakScreenView.swift; sourceTree = "<group>"; };
 		42BC803902C9A2DB2F5C106D /* annotator */ = {isa = PBXFileReference; lastKnownFileType = folder; name = annotator; path = "../../integrations/computer-use/annotator"; sourceTree = SOURCE_ROOT; };
 		43163F2AAF1FE4ED67D82D80 /* ContextualInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextualInspector.swift; sourceTree = "<group>"; };
@@ -522,6 +524,7 @@
 				9C25B2F3D39B43ED92D7526C /* NativeArrowHeadPicker.swift */,
 				68EB274B5DCB71DC0C8B2ACF /* NativeInspectorComponents.swift */,
 				66A2182EC40974796D14AC85 /* PaintTextLayoutManager.swift */,
+				3F3349982CAC1D3CE89DBCB3 /* PropertyChoicesEditor.swift */,
 				16FAA133DFEABA4A39FC11C1 /* RegionSharingController.swift */,
 				E85771B93A7702B9B9D1727F /* RegionSharingControls.swift */,
 				08C3F7101F8CE9BB194647B5 /* RegionSharingGuide.swift */,
@@ -797,6 +800,7 @@
 				FEC34B24D774C84CF904D753 /* NativeArrowHeadPicker.swift in Sources */,
 				47E5DB836968E938BDFA4BE6 /* NativeInspectorComponents.swift in Sources */,
 				B1408F31BC0535C87138A0FE /* PaintTextLayoutManager.swift in Sources */,
+				2D3953AB159F589474AB4993 /* PropertyChoicesEditor.swift in Sources */,
 				2FA76B57EEEF240455C68317 /* RegionSharingController.swift in Sources */,
 				21199A3643DAD5733D2E1520 /* RegionSharingControls.swift in Sources */,
 				0AE828D35D0246594D50F55D /* RegionSharingGuide.swift in Sources */,

@@ -110,11 +110,15 @@ enum ProfilesExport {
             $0.hiddenToolbarControls = ToolbarControl.allCases.map(\.rawValue)
         }
         try add("hidden-controls-future", "Hidden toolbar buttons from a newer version and repeats are dropped when reading.") {
-            $0.hiddenToolbarControls = ["undo", "lasso", "undo", "zoomMenu"]
+            $0.hiddenToolbarControls = ["undo", "lasso", "undo", "zoomMenu", "hide"]
         }
         try add("hidden-controls-only-future", "Only unknown hidden toolbar buttons: the list goes away.") {
             $0.hiddenToolbarControls = ["lasso"]
         }
+        try add("property-choices-future", "Properties from a newer version and repeats are dropped when reading.") {
+            $0.expandedPropertyChoices = ["roughness", "sparkle", "roughness", "alignment"]
+        }
+        try add("menu-key", "A key for the Zoom menu, which opens with a click.") { $0.commandShortcuts = ["j": "action.zoomMenu"] }
         try add("collapse-delay-1", "The shortest toolbar shrink delay.") { $0.toolbarCollapseDelay = 1 }
         try add("collapse-delay-600", "The longest toolbar shrink delay.") { $0.toolbarCollapseDelay = 600 }
         try add("collapse-delay-0.5", "A toolbar shrink delay below 1 second.") { $0.toolbarCollapseDelay = 0.5 }
@@ -145,6 +149,10 @@ enum ProfilesExport {
                          "symbol": .string(control.symbol), "action": control.action.map { .string($0.rawValue) } ?? .null])
             }),
             "toolbarCollapseDelays": .array(WorkspacePreferences.toolbarCollapseDelays.map { .double($0) }),
+            "propertyChoices": .array(PropertyChoice.allCases.map { choice in
+                .object(["id": .string(choice.rawValue), "label": .string(choice.label),
+                         "choices": .array(choice.choices.map { .string($0) })])
+            }),
             "defaultToolShortcuts": .object(WorkspacePreferences.defaultToolShortcuts.mapValues { .string($0) }),
             "legacyToolShortcuts": .object(WorkspacePreferences.legacyToolShortcuts.mapValues { .string($0) })
         ])
@@ -182,8 +190,10 @@ enum ProfilesExport {
         preferences.commandShortcuts = ["⇧a": "tool.arrow", "j": "action.spotlight", "⇧l": "action.pointerLens"]
         preferences.toolbarSize = .minimal
         preferences.shareToolStyles = true
-        preferences.toolbarItems = ["tool.select", "tool.pen", "action.spotlight", "tool.text", "action.shareRegion"]
-        preferences.hiddenToolbarControls = ["redo", "settings", "zoomMenu"]
+        preferences.toolbarItems = ["tool.select", "tool.pen", "action.spotlight", "tool.text", "action.shareRegion",
+                                    "action.zoomMenu"]
+        preferences.hiddenToolbarControls = ["redo", "settings", "hide"]
+        preferences.expandedPropertyChoices = ["pattern", "font"]
         preferences.toolbarCollapseDelay = 5
         var pen = Style.defaults(for: .pen)
         pen.width = 5; pen.color = .blue
