@@ -578,7 +578,7 @@ internal static partial class ReferenceStates
                 [
                     .. WorkspacePreferences.DefaultToolbar.Select(tool => ShortcutCommand.ForTool(tool).Id),
                     "action.spotlight", "action.cursorHalo", "action.pointerLens", "action.smartDraw", "action.shareRegion",
-                    "tool.blur", "tool.pixelate",
+                    "action.focusMenu", "action.zoomMenu", "tool.blur", "tool.pixelate",
                 ],
             },
             // UXReferenceCaptureTests: the Blur tool, then reportCaptureFailure(.streamStopped("Synthetic reference fixture")).
@@ -597,6 +597,21 @@ internal static partial class ReferenceStates
                 Available = VerticalAvailable,
             },
             "minimal-full-properties-arrow" => Drawing(Tool.Arrow) with { Profile = profile => { Minimal(profile); Pinned(profile); } },
+            // UXReferenceCaptureTests: full properties with every choice side by side (Settings > Your properties).
+            "full-properties-all-choices-rectangle" => AllChoices(Tool.Rectangle, fill: true, "pattern", "roughness", "fillStyle", "edges"),
+            "full-properties-all-choices-arrow" => AllChoices(Tool.Arrow, fill: false, "pattern", "roughness", "arrowType"),
+            "full-properties-all-choices-text" => AllChoices(Tool.Text, fill: false, "font", "alignment"),
+            "full-properties-all-choices-pen" => AllChoices(Tool.Pen, fill: false, "pressure"),
+            // Buttons turned off in Settings: Undo, Redo, Settings and Hide, then every one of the toolbar's own buttons.
+            "hidden-buttons" => Drawing(Tool.Pen) with
+            {
+                Profile = profile => profile.Preferences.HiddenToolbarControls = ["undo", "redo", "settings", "hide"],
+            },
+            "hidden-buttons-all" => Drawing(Tool.Pen) with
+            {
+                Profile = profile => profile.Preferences.HiddenToolbarControls = [.. ToolbarControl.AllCases.Select(control => control.RawValue)],
+            },
+            _ when state.StartsWith("collapsed-", StringComparison.Ordinal) => Collapsed(state["collapsed-".Length..]),
             _ when state.StartsWith("full-properties-", StringComparison.Ordinal) &&
                    Tool.FromRawValue(state["full-properties-".Length..]) is { } tool => Drawing(tool) with { Profile = Pinned },
             _ => null,
@@ -658,6 +673,67 @@ internal static partial class ReferenceStates
     };
 
     private static ReferenceScenario Unavailable(string reason) => new(ReferenceSurface.Toolbar) { Unavailable = reason };
+
+    /// <summary>UXReferenceCaptureTests' full-properties-all-choices states: pinned, 1600 points available, the choices shown side by side.</summary>
+    private static ReferenceScenario AllChoices(Tool tool, bool fill, params string[] choices) => Drawing(tool) with
+    {
+        Available = new Size(1600, 900),
+        Profile = profile =>
+        {
+            Pinned(profile);
+            profile.Preferences.ExpandedPropertyChoices = [.. choices];
+        },
+        Setup = model =>
+        {
+            model.ShowToolbar();
+            model.Choose(tool);
+            if (fill)
+            {
+                model.ApplyStyle((ref Style style) => style.SetFillEnabled(true));
+            }
+        },
+    };
+
+    /// <summary>
+    /// UXReferenceCaptureTests' collapsed-&lt;size&gt;-&lt;orientation&gt;-&lt;draw|apps&gt; states: the toolbar shrunk to one button
+    /// after the Shrink delay, with Draw or Apps.
+    /// </summary>
+    private static ReferenceScenario? Collapsed(string name)
+    {
+        string[] parts = name.Split('-');
+        if (parts.Length != 3 || ToolbarSize.FromRawValue(parts[0]) is not { } size || parts[1] is not ("horizontal" or "vertical")
+            || parts[2] is not ("draw" or "apps"))
+        {
+            return null;
+        }
+        bool vertical = parts[1] == "vertical";
+        bool apps = parts[2] == "apps";
+        return Drawing(Tool.Pen) with
+        {
+            Profile = profile =>
+            {
+                if (size == ToolbarSize.Minimal)
+                {
+                    Minimal(profile);
+                }
+                if (vertical)
+                {
+                    Vertical(profile);
+                }
+                profile.Preferences.ToolbarCollapseDelay = 5;
+            },
+            Setup = model =>
+            {
+                model.ShowToolbar();
+                model.Choose(Tool.Pen);
+                if (apps)
+                {
+                    model.UseApps();
+                }
+                model.SetToolbarCollapsed(true);
+            },
+        };
+    }
 
     private static ReferenceScenario Drawing(Tool tool) => new(ReferenceSurface.Toolbar)
     {
