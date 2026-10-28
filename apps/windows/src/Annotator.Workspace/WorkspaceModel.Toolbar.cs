@@ -213,4 +213,3 @@ public sealed partial class WorkspaceModel
         _toolbarCollapsed = collapsed;
     }
 }
-
