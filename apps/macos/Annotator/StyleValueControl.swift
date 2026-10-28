@@ -89,6 +89,8 @@ struct StyleValueControl: View {
     let parameter: StyleParameter
     var sliderWidth: CGFloat = 90
     var showLabel = true
+    /// Without the number field, the slider shows its value beside it.
+    var showsField = true
     @State private var draft = ""
     @State private var originalDraft = ""
     @State private var validation: String?
@@ -140,6 +142,13 @@ struct StyleValueControl: View {
                         ? "Slider: \(Int(sliderRange.lowerBound))–\(Int(sliderRange.upperBound)). Enter up to 100 in the number field for a stronger effect."
                         : "\(title): \(Int(sliderRange.lowerBound))–\(Int(sliderRange.upperBound)).")
             }
+            if !showsField {
+                Text(parameter.unit.isEmpty ? formatted : "\(formatted) \(parameter.unit)")
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    .frame(minWidth: 34, alignment: .leading)
+                    .contentTransition(.numericText())
+                    .accessibilityHidden(true)
+            } else {
             TextField(title, text: $draft, onEditingChanged: { active in
                 if active {
                     editingTarget = target
@@ -177,6 +186,7 @@ struct StyleValueControl: View {
             if let validation {
                 Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.red)
                     .help(validation).accessibilityLabel(validation)
+            }
             }
         }
         .fixedSize(horizontal: true, vertical: false)

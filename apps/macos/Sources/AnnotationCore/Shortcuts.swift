@@ -40,7 +40,7 @@ public struct LocalShortcut: Hashable, Sendable {
 public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
     case properties, board, spotlight, cursorHalo, pointerLens, smartDraw, shareRegion, clearAll
 
-    /// Buttons people can add to the toolbar. Properties, Board and Clear all are always there.
+    /// Buttons people can add to the toolbar. Properties, Board and Clear all have fixed places (`ToolbarControl`).
     public static let toolbarChoices: [ShortcutAction] = [.spotlight, .cursorHalo, .pointerLens, .smartDraw, .shareRegion]
     public var canBeInToolbar: Bool { Self.toolbarChoices.contains(self) }
 

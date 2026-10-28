@@ -111,7 +111,6 @@ struct ToolbarShortcutSettings: View {
             VStack(alignment: .leading, spacing: 28) {
                 ToolbarArranger(model: model, editor: editor)
                 layoutSection
-                buttonKeysSection
                 globalKeysSection
                 fixedKeysSection
             }
@@ -177,29 +176,33 @@ struct ToolbarShortcutSettings: View {
                         ForEach(ToolbarPropertiesMode.allCases, id: \.self) { mode in Text(mode.rawValue).tag(mode) }
                     }.labelsHidden().fixedSize()
                 }
+                GridRow {
+                    Text("Shrink")
+                    Picker("Shrink", selection: Binding(
+                        get: { model.toolbarCollapseDelay ?? 0 }, set: { model.setToolbarCollapseDelay($0 > 0 ? $0 : nil) })) {
+                        Text("Never").tag(0.0)
+                        ForEach(collapseDelays, id: \.self) { delay in
+                            Text("After \(delay.formatted()) seconds").tag(delay)
+                        }
+                    }
+                    .labelsHidden().fixedSize()
+                    .accessibilityIdentifier("toolbar-collapse-delay")
+                }
             }
             Label("Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical.",
                   systemImage: "hand.draw")
                 .font(.caption).foregroundStyle(.secondary)
+            Label("A shrunk toolbar is one button that shows Draw or Apps. Point at it or click it to get your tools back.",
+                  systemImage: "capsule")
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 
-    private var buttonKeysSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Buttons that are always there",
-                         detail: "These buttons are always in the toolbar. Their keys work while you draw, like the keys above.")
-            let commands = ShortcutAction.allCases.filter { !$0.canBeInToolbar }.map(ShortcutCommand.action)
-            Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                ForEach(Array(stride(from: 0, to: commands.count, by: 2)), id: \.self) { index in
-                    GridRow {
-                        commandRow(commands[index])
-                        if index + 1 < commands.count { commandRow(commands[index + 1]) } else { Color.clear }
-                    }
-                }
-            }
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("toolbar-button-keys")
-        }
+    /// The delay choices, plus a delay from an imported profile that isn't one of them.
+    private var collapseDelays: [Double] {
+        let choices = WorkspacePreferences.toolbarCollapseDelays
+        guard let current = model.toolbarCollapseDelay, !choices.contains(current) else { return choices }
+        return (choices + [current]).sorted()
     }
 
     private var globalKeysSection: some View {
@@ -251,41 +254,6 @@ struct ToolbarShortcutSettings: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(title).font(.title3.weight(.semibold))
             Text(detail).font(.callout).foregroundStyle(.secondary)
-        }
-    }
-
-    private func commandRow(_ command: ShortcutCommand) -> some View {
-        let title: String, detail: String
-        switch command {
-        case .action(let action): title = action.label; detail = action.detail
-        case .tool(let tool): title = tool.label; detail = effectDetail(tool)
-        }
-        return HStack(alignment: .center, spacing: 10) {
-            Group {
-                switch command {
-                case .action(let action): Image(systemName: action.symbol).font(.system(size: 15))
-                case .tool(let tool): ToolGlyph(tool: tool, size: 16)
-                }
-            }
-            .frame(width: 24).foregroundStyle(.secondary).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.body.weight(.medium)).lineLimit(1)
-                Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 6)
-            KeyChip(target: .local(command), shortcut: model.shortcut(for: command), name: title, editor: editor)
-        }
-        .padding(.horizontal, 12).padding(.vertical, 9)
-        .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.035)))
-    }
-
-    private func effectDetail(_ tool: Tool) -> String {
-        switch tool {
-        case .blur: "Blur an area of the screen."
-        case .pixelate: "Turn an area into large pixels."
-        default: "Warp an area of the screen."
         }
     }
 
@@ -562,6 +530,27 @@ private struct GlobalKeyButton: View {
 
 // MARK: - Toolbar arranger
 
+/// A tile in the arranger: a tool or added button you can put anywhere, or one of the toolbar's own buttons, which keep
+/// their places and can be taken off and put back.
+enum ArrangerItem: Hashable {
+    case command(ShortcutCommand)
+    case control(ToolbarControl)
+
+    var id: String {
+        switch self {
+        case .command(let command): command.id
+        case .control(let control): "control.\(control.rawValue)"
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .command(let command): command.label
+        case .control(let control): control.label
+        }
+    }
+}
+
 /// Drag tools and buttons between "Your toolbar" and "More tools", like customizing a Mac app toolbar.
 struct ToolbarArranger: View {
     @ObservedObject var model: WorkspaceModel
@@ -571,29 +560,31 @@ struct ToolbarArranger: View {
     @State private var ignoringGesture = false
     @State private var frames: [String: CGRect] = [:]
     @State private var settle: Task<Void, Never>?
-    @FocusState private var focused: ShortcutCommand?
+    @FocusState private var focused: ArrangerItem?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static let space = "toolbar-arranger"
-    private static let select = ShortcutCommand.tool(.select)
+    private static let select = ArrangerItem.command(.tool(.select))
 
     private struct ArrangerDrag: Equatable {
-        var item: ShortcutCommand
+        var item: ArrangerItem
         var fromToolbar: Bool
         var location: CGPoint
         var grabOffset: CGSize
         var order: [ShortcutCommand]
+        var controls: [ToolbarControl]
         var overStrip: Bool
         var settling = false
     }
 
     private enum TrayGroup: String, CaseIterable {
-        case drawing = "Drawing", effects = "Effects", presenting = "Presenting", shapes = "Shapes"
+        case drawing = "Drawing", effects = "Effects", presenting = "Presenting", shapes = "Shapes", buttons = "Toolbar buttons"
 
-        func contains(_ item: ShortcutCommand) -> Bool {
+        func contains(_ item: ArrangerItem) -> Bool {
             switch item {
-            case .action: self == .presenting
-            case .tool(let tool):
+            case .control: self == .buttons
+            case .command(.action): self == .presenting
+            case .command(.tool(let tool)):
                 tool.isProtection ? self == .effects : tool.isShape ? self == .shapes : self == .drawing
             }
         }
@@ -601,7 +592,12 @@ struct ToolbarArranger: View {
 
     private var metrics: ToolbarMetrics { ToolbarMetrics(model.toolbarSize) }
     private var order: [ShortcutCommand] { drag?.order ?? model.toolbarItems }
-    private var tray: [ShortcutCommand] { WorkspaceModel.toolbarCandidates.filter { !order.contains($0) } }
+    private var controls: [ToolbarControl] { drag?.controls ?? ToolbarControl.allCases.filter(model.showsToolbarControl) }
+    private var stripItems: [ArrangerItem] { order.map(ArrangerItem.command) + controls.map(ArrangerItem.control) }
+    private var tray: [ArrangerItem] {
+        WorkspaceModel.toolbarCandidates.filter { !order.contains($0) }.map(ArrangerItem.command) +
+            ToolbarControl.allCases.filter { !controls.contains($0) }.map(ArrangerItem.control)
+    }
     private var reorder: Animation? {
         Motion.resolve(Motion.snappy, reduceMotion: reduceMotion)
     }
@@ -613,14 +609,19 @@ struct ToolbarArranger: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Your toolbar").font(.title3.weight(.semibold))
-                    Text("Drag tools and buttons to arrange them. Click the key under one, then press a new key.")
+                    Text("Drag tools to arrange them. Drag any tool or button down to take it off. Click the key under one, then press a new key.")
                         .font(.callout).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 Menu("Reset") {
                     Button("Default tools and order") {
                         withAnimation(reorder) { model.configureToolbar(WorkspacePreferences.defaultToolbar) }
                         editor.say("Your toolbar has the default tools again.")
+                    }
+                    Button("Show every toolbar button") {
+                        withAnimation(reorder) { model.showAllToolbarControls() }
+                        editor.say("Every toolbar button is back.")
                     }
                     Button("Default keys for tools and buttons") {
                         model.resetLocalShortcuts()
@@ -654,13 +655,14 @@ struct ToolbarArranger: View {
     }
 
     private var strip: some View {
-        FlowLayout(spacing: 3, lineSpacing: 6) {
-            ForEach(Array(order.enumerated()), id: \.element) { index, item in
-                let familyBreak = index > 0 && ToolbarToolLayout.family(order[index - 1]) != ToolbarToolLayout.family(item)
+        let items = stripItems
+        return FlowLayout(spacing: 3, lineSpacing: 6) {
+            ForEach(Array(items.enumerated()), id: \.element) { index, item in
+                let separated = index > 0 && separates(items[index - 1], item)
                 stripItem(item)
-                    .padding(.leading, familyBreak ? 9 : 0)
+                    .padding(.leading, separated ? 9 : 0)
                     .overlay(alignment: .leading) {
-                        if familyBreak {
+                        if separated {
                             Rectangle().fill(Color.primary.opacity(0.12)).frame(width: 1, height: 26).offset(x: 3)
                                 .accessibilityHidden(true)
                         }
@@ -686,12 +688,30 @@ struct ToolbarArranger: View {
         .accessibilityIdentifier("toolbar-arrangement")
     }
 
+    /// Lines between tool families, and between the tools, the buttons beside them and the property menus.
+    private func separates(_ previous: ArrangerItem, _ item: ArrangerItem) -> Bool {
+        switch (previous, item) {
+        case (.command(let before), .command(let after)): ToolbarToolLayout.family(before) != ToolbarToolLayout.family(after)
+        case (.command, .control): true
+        case (.control(let before), .control(let after)): Self.group(before) != Self.group(after)
+        default: false
+        }
+    }
+
+    private static func group(_ control: ToolbarControl) -> Int {
+        switch control {
+        case .library: 0
+        case .focusMenu, .zoomMenu: 2
+        default: 1
+        }
+    }
+
     private var trayHeader: some View {
         HStack(spacing: 8) {
             Text("More tools").font(.headline)
             Group {
                 if removing {
-                    Label("Let go to remove it from your toolbar", systemImage: "minus.circle.fill")
+                    Label("Let go to take it off your toolbar", systemImage: "minus.circle.fill")
                         .foregroundStyle(.red)
                 } else if drag?.item == Self.select && drag?.overStrip == false {
                     Label("Select always stays in the toolbar", systemImage: "lock.fill")
@@ -743,42 +763,72 @@ struct ToolbarArranger: View {
         .accessibilityLabel("More tools")
     }
 
-    private func title(_ item: ShortcutCommand) -> String { item.label }
+    private func title(_ item: ArrangerItem) -> String { item.label }
 
-    private func identifier(_ item: ShortcutCommand, inToolbar: Bool) -> String {
+    private func identifier(_ item: ArrangerItem, inToolbar: Bool) -> String {
         (inToolbar ? "toolbar-" : "more-") + item.id.replacingOccurrences(of: ".", with: "-")
     }
 
-    private func detail(_ item: ShortcutCommand) -> String {
+    private func detail(_ item: ArrangerItem) -> String {
         switch item {
-        case .action(let action): action.detail
-        case .tool(.cover): "Uses the last effect you chose: Blur, Pixelate or Distort."
-        case .tool(let tool): tool.label
+        case .command(.action(let action)): action.detail
+        case .command(.tool(.cover)): "Uses the last effect you chose: Blur, Pixelate or Distort."
+        case .command(.tool(let tool)): tool.label
+        case .control(let control): control.detail
         }
     }
 
-    private func keyChip(_ item: ShortcutCommand) -> KeyChip {
-        KeyChip(target: .local(item), shortcut: model.shortcut(for: item), name: title(item), editor: editor, compact: true)
+    private func keyChip(_ item: ArrangerItem) -> KeyChip? {
+        let command: ShortcutCommand
+        switch item {
+        case .command(let value): command = value
+        case .control(let control):
+            guard let action = control.action else { return nil }
+            command = .action(action)
+        }
+        return KeyChip(target: .local(command), shortcut: model.shortcut(for: command), name: title(item), editor: editor,
+                       compact: true)
     }
 
-    private func stripItem(_ item: ShortcutCommand) -> some View {
+    /// Keys that belong to a button but can't change here, shown under it.
+    private func fixedKey(_ item: ArrangerItem) -> String? {
+        guard case .control(let control) = item else { return nil }
+        switch control {
+        case .library: return model.toolLibraryShortcut?.label
+        case .mode: return "Esc"
+        case .undo: return "⌘Z"
+        case .redo: return "⇧⌘Z"
+        case .hide: return (model.preferences.hideShortcut ?? .hideTools).label
+        default: return nil
+        }
+    }
+
+    @ViewBuilder private func stripItem(_ item: ArrangerItem) -> some View {
+        switch item {
+        case .command(let command): commandStripItem(command)
+        case .control(let control): controlStripItem(control)
+        }
+    }
+
+    private func commandStripItem(_ command: ShortcutCommand) -> some View {
+        let item = ArrangerItem.command(command)
         let placeholder = drag?.item == item
-        let index = order.firstIndex(of: item) ?? 0
-        return ArrangerTile(command: item, title: title(item), style: .toolbar(metrics), placeholder: placeholder,
+        let index = order.firstIndex(of: command) ?? 0
+        return ArrangerTile(item: item, title: title(item), style: .toolbar(metrics), placeholder: placeholder,
                             focused: focused == item, badge: item == Self.select ? nil : .remove,
                             key: keyChip(item), badgeAction: { remove(item) })
             // Only keyboard navigation focuses tiles; clicks and drags don't leave a focus ring behind.
             .focusable(interactions: .activate)
             .focusEffectDisabled()
             .focused($focused, equals: item)
-            .onKeyPress(.leftArrow) { move(item, by: -1); return .handled }
-            .onKeyPress(.rightArrow) { move(item, by: 1); return .handled }
+            .onKeyPress(.leftArrow) { move(command, by: -1); return .handled }
+            .onKeyPress(.rightArrow) { move(command, by: 1); return .handled }
             .onKeyPress(.delete) { remove(item); return .handled }
             .contextMenu {
-                Button("Move Left") { move(item, by: -1) }.disabled(index == 0)
-                Button("Move Right") { move(item, by: 1) }.disabled(index == order.count - 1)
+                Button("Move Left") { move(command, by: -1) }.disabled(index == 0)
+                Button("Move Right") { move(command, by: 1) }.disabled(index == order.count - 1)
                 Divider()
-                Button("Change Key…") { editor.toggle(.local(item)) }
+                Button("Change Key…") { editor.toggle(.local(command)) }
                 if item != Self.select { Button("Remove from Toolbar") { remove(item) } }
             }
             .accessibilityElement(children: .contain)
@@ -786,23 +836,51 @@ struct ToolbarArranger: View {
             .accessibilityValue("Position \(index + 1) of \(order.count)")
             .accessibilityHint("In your toolbar, position \(index + 1) of \(order.count). Use the actions to move or remove it.")
             .accessibilityIdentifier(identifier(item, inToolbar: true))
-            .accessibilityAction(named: "Move left") { move(item, by: -1) }
-            .accessibilityAction(named: "Move right") { move(item, by: 1) }
+            .accessibilityAction(named: "Move left") { move(command, by: -1) }
+            .accessibilityAction(named: "Move right") { move(command, by: 1) }
             .accessibilityAction(named: "Remove from toolbar") { remove(item) }
             .help(item == Self.select ? "Select always stays in the toolbar. Drag it to change its place." :
                     "Drag to move \(title(item)). Drag it down to remove it.")
     }
 
-    private func trayTile(_ item: ShortcutCommand) -> some View {
-        ArrangerTile(command: item, title: title(item), style: .tray, placeholder: drag?.item == item,
-                     focused: focused == item, badge: .add, key: keyChip(item), badgeAction: { add(item) })
+    /// The toolbar's own buttons keep their places; they can only come off and go back.
+    private func controlStripItem(_ control: ToolbarControl) -> some View {
+        let item = ArrangerItem.control(control)
+        return ArrangerTile(item: item, title: title(item), style: .toolbar(metrics), placeholder: drag?.item == item,
+                            focused: focused == item, badge: .remove, key: keyChip(item), fixedKey: fixedKey(item),
+                            badgeAction: { remove(item) })
+            .focusable(interactions: .activate)
+            .focusEffectDisabled()
+            .focused($focused, equals: item)
+            .onKeyPress(.delete) { remove(item); return .handled }
+            .contextMenu {
+                if let action = control.action { Button("Change Key…") { editor.toggle(.local(.action(action))) } }
+                Button("Remove from Toolbar") { remove(item) }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(title(item))
+            .accessibilityValue("In your toolbar")
+            .accessibilityHint("It keeps its place in your toolbar. Use the Remove from toolbar action to take it off.")
+            .accessibilityIdentifier(identifier(item, inToolbar: true))
+            .accessibilityAction(named: "Remove from toolbar") { remove(item) }
+            .help("\(control.detail) Drag it down to take it off your toolbar.")
+    }
+
+    private func trayTile(_ item: ArrangerItem) -> some View {
+        ArrangerTile(item: item, title: title(item), style: .tray, placeholder: drag?.item == item,
+                     focused: focused == item, badge: .add, key: keyChip(item), fixedKey: fixedKey(item),
+                     badgeAction: { add(item) })
             .focusable(interactions: .activate)
             .focusEffectDisabled()
             .focused($focused, equals: item)
             .onKeyPress(.return) { add(item); return .handled }
             .contextMenu {
                 Button("Add to Toolbar") { add(item) }
-                Button("Change Key…") { editor.toggle(.local(item)) }
+                switch item {
+                case .command(let command): Button("Change Key…") { editor.toggle(.local(command)) }
+                case .control(let control):
+                    if let action = control.action { Button("Change Key…") { editor.toggle(.local(.action(action))) } }
+                }
             }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(title(item))
@@ -816,11 +894,11 @@ struct ToolbarArranger: View {
     @ViewBuilder private var floatingItem: some View {
         if let drag {
             let removable = drag.item != Self.select
-            ArrangerTile(command: drag.item, title: title(drag.item),
+            ArrangerTile(item: drag.item, title: title(drag.item),
                          style: drag.overStrip || !removable ? .toolbar(metrics) : .tray,
                          placeholder: false, focused: false,
                          badge: !drag.overStrip && drag.fromToolbar && removable && !drag.settling ? .removing : nil,
-                         key: keyChip(drag.item), badgeAction: {})
+                         key: keyChip(drag.item), fixedKey: fixedKey(drag.item), badgeAction: {})
                 .background {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color(nsColor: .windowBackgroundColor))
@@ -844,8 +922,8 @@ struct ToolbarArranger: View {
             .onEnded(dragEnded)
     }
 
-    private func hit(_ point: CGPoint) -> (ShortcutCommand, Bool, CGRect)? {
-        for item in order {
+    private func hit(_ point: CGPoint) -> (ArrangerItem, Bool, CGRect)? {
+        for item in stripItems {
             if let frame = frames["strip.\(item.id)"], frame.contains(point) { return (item, true, frame) }
         }
         for item in tray {
@@ -874,7 +952,9 @@ struct ToolbarArranger: View {
             let start = ArrangerDrag(item: item, fromToolbar: fromToolbar, location: value.location,
                                      grabOffset: CGSize(width: value.startLocation.x - frame.midX,
                                                         height: value.startLocation.y - frame.midY),
-                                     order: model.toolbarItems, overStrip: fromToolbar)
+                                     order: model.toolbarItems,
+                                     controls: ToolbarControl.allCases.filter(model.showsToolbarControl),
+                                     overStrip: fromToolbar)
             withAnimation(reduceMotion ? nil : Motion.snappy) { drag = start }
             NSCursor.closedHand.push()
         }
@@ -882,18 +962,29 @@ struct ToolbarArranger: View {
         current.location = value.location
         current.overStrip = (frames["strip"] ?? .zero).insetBy(dx: -18, dy: -18).contains(value.location)
         var next = current.order
-        if current.overStrip {
-            var others = next.filter { $0 != current.item }
-            others.insert(current.item, at: insertionIndex(for: value.location, among: others))
-            next = others
-        } else if current.item != Self.select {
-            next.removeAll { $0 == current.item }
+        var nextControls = current.controls
+        switch current.item {
+        case .command(let command):
+            if current.overStrip {
+                var others = next.filter { $0 != command }
+                others.insert(command, at: insertionIndex(for: value.location, among: others))
+                next = others
+            } else if current.item != Self.select {
+                next.removeAll { $0 == command }
+            }
+        case .control(let control):
+            // The toolbar's own buttons go back to their places, whatever the drop point.
+            let shown = current.overStrip
+            nextControls = ToolbarControl.allCases.filter { $0 == control ? shown : current.controls.contains($0) }
         }
         var still = Transaction()
         still.disablesAnimations = true
         withTransaction(still) { drag = current }
-        if next != current.order {
-            withAnimation(reorder) { drag?.order = next }
+        if next != current.order || nextControls != current.controls {
+            withAnimation(reorder) {
+                drag?.order = next
+                drag?.controls = nextControls
+            }
         }
     }
 
@@ -901,19 +992,30 @@ struct ToolbarArranger: View {
         defer { ignoringGesture = false }
         guard var current = drag, !current.settling else { return }
         NSCursor.pop()
-        let result = current.order
-        let before = model.toolbarItems
-        if result != before, result.contains(Self.select) {
-            withAnimation(reorder) { model.configureToolbar(items: result) }
+        switch current.item {
+        case .command(let command):
+            let result = current.order
+            let before = model.toolbarItems
+            if result != before, result.contains(.tool(.select)) {
+                withAnimation(reorder) { model.configureToolbar(items: result) }
+            }
+            let added = !before.contains(command) && result.contains(command)
+            let removed = before.contains(command) && !result.contains(command)
+            if current.item == Self.select && !current.overStrip { editor.say("Select always stays in the toolbar.") }
+            else if added { editor.say("\(title(current.item)) is in your toolbar now.") }
+            else if removed { editor.say("\(title(current.item)) moved to More tools.") }
+            current.overStrip = result.contains(command)
+        case .control(let control):
+            let shown = current.controls.contains(control)
+            if shown != model.showsToolbarControl(control) {
+                withAnimation(reorder) { model.setToolbarControl(control, shown: shown) }
+                editor.say(shown ? "\(control.label) is back in your toolbar." :
+                            "\(control.label) moved to More tools. Its key still works.")
+            }
+            current.overStrip = shown
         }
-        let added = !before.contains(current.item) && result.contains(current.item)
-        let removed = before.contains(current.item) && !result.contains(current.item)
-        if current.item == Self.select && !current.overStrip { editor.say("Select always stays in the toolbar.") }
-        else if added { editor.say("\(title(current.item)) is in your toolbar now.") }
-        else if removed { editor.say("\(title(current.item)) moved to More tools.") }
-        let key = result.contains(current.item) ? "strip.\(current.item.id)" : "tray.\(current.item.id)"
+        let key = current.overStrip ? "strip.\(current.item.id)" : "tray.\(current.item.id)"
         current.settling = true
-        current.overStrip = result.contains(current.item)
         if let target = frames[key] {
             current.location = CGPoint(x: target.midX + current.grabOffset.width, y: target.midY + current.grabOffset.height)
         }
@@ -928,16 +1030,30 @@ struct ToolbarArranger: View {
 
     // MARK: Commands
 
-    private func add(_ item: ShortcutCommand) {
-        guard !model.toolbarItems.contains(item) else { return }
-        withAnimation(reorder) { model.configureToolbar(items: model.toolbarItems + [item]) }
-        editor.say("\(title(item)) is in your toolbar now.")
+    private func add(_ item: ArrangerItem) {
+        switch item {
+        case .command(let command):
+            guard !model.toolbarItems.contains(command) else { return }
+            withAnimation(reorder) { model.configureToolbar(items: model.toolbarItems + [command]) }
+            editor.say("\(title(item)) is in your toolbar now.")
+        case .control(let control):
+            guard !model.showsToolbarControl(control) else { return }
+            withAnimation(reorder) { model.setToolbarControl(control, shown: true) }
+            editor.say("\(control.label) is back in your toolbar.")
+        }
     }
 
-    private func remove(_ item: ShortcutCommand) {
-        guard item != Self.select else { editor.say("Select always stays in the toolbar."); return }
-        withAnimation(reorder) { model.configureToolbar(items: model.toolbarItems.filter { $0 != item }) }
-        editor.say("\(title(item)) moved to More tools.")
+    private func remove(_ item: ArrangerItem) {
+        switch item {
+        case .command(let command):
+            guard item != Self.select else { editor.say("Select always stays in the toolbar."); return }
+            withAnimation(reorder) { model.configureToolbar(items: model.toolbarItems.filter { $0 != command }) }
+            editor.say("\(title(item)) moved to More tools.")
+        case .control(let control):
+            guard model.showsToolbarControl(control) else { return }
+            withAnimation(reorder) { model.setToolbarControl(control, shown: false) }
+            editor.say("\(control.label) moved to More tools. Its key still works.")
+        }
     }
 
     private func move(_ item: ShortcutCommand, by delta: Int) {
@@ -948,17 +1064,18 @@ struct ToolbarArranger: View {
     }
 }
 
-/// One tool in the arranger: a toolbar button or a "More tools" tile.
+/// One tool or button in the arranger: a toolbar button or a "More tools" tile.
 private struct ArrangerTile: View {
     enum Style: Equatable { case toolbar(ToolbarMetrics), tray }
     enum Badge { case add, remove, removing }
-    let command: ShortcutCommand
+    let item: ArrangerItem
     let title: String
     let style: Style
     let placeholder: Bool
     let focused: Bool
     let badge: Badge?
-    let key: KeyChip
+    let key: KeyChip?
+    var fixedKey: String?
     let badgeAction: () -> Void
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -974,13 +1091,20 @@ private struct ArrangerTile: View {
         VStack(spacing: 4) {
             switch style {
             case .toolbar(let metrics):
-                CommandGlyph(command: command, size: metrics.glyphSize).frame(height: metrics.minimal ? 24 : 30)
+                glyph(size: metrics.glyphSize).frame(height: metrics.minimal ? 24 : 30)
             case .tray:
-                CommandGlyph(command: command, size: 20).frame(height: 24)
+                glyph(size: 20).frame(height: 24)
                 Text(title).font(.system(size: 10, weight: .medium)).lineLimit(2)
                     .multilineTextAlignment(.center).frame(height: 26)
             }
-            key
+            if let key {
+                key
+            } else {
+                Text(fixedKey ?? " ")
+                    .font(.system(size: 10, weight: .semibold, design: .rounded)).foregroundStyle(.secondary)
+                    .frame(minHeight: 17)
+                    .accessibilityHidden(true)
+            }
         }
         .frame(width: size.width, height: size.height)
         .background {
@@ -1012,6 +1136,21 @@ private struct ArrangerTile: View {
         .contentShape(RoundedRectangle(cornerRadius: 10))
         .onHover { value in
             withAnimation(reduceMotion ? nil : Motion.snappy) { hovering = value }
+        }
+    }
+
+    @ViewBuilder private func glyph(size: CGFloat) -> some View {
+        switch item {
+        case .command(let command): CommandGlyph(command: command, size: size)
+        case .control(.mode):
+            // The Draw button's look: its pen and the green dot.
+            Image(systemName: "pencil.tip").font(.system(size: size * 0.82))
+                .frame(width: size, height: size)
+                .overlay(alignment: .bottomTrailing) { Circle().fill(Color.green).frame(width: 6, height: 6) }
+                .accessibilityHidden(true)
+        case .control(let control):
+            Image(systemName: control.symbol).font(.system(size: size * 0.82))
+                .frame(width: size, height: size).accessibilityHidden(true)
         }
     }
 

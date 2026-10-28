@@ -50,6 +50,7 @@ struct InspectorColorPicker: View {
                     .overlay { RoundedRectangle(cornerRadius: 7).strokeBorder(Color.primary.opacity(0.14)) }
             }
             .buttonStyle(.plain)
+            .alignmentGuide(.propertyControl) { $0[VerticalAlignment.center] }
             .onChange(of: model.workspaceHidden) { _, hidden in
                 if hidden { open = false }
             }

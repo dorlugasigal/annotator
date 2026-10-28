@@ -117,12 +117,12 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
 
     func testPresentingButtonsAndSingleEffectsCanBePutInTheToolbar() async throws {
         try await withSettings { _, host in
-            let fixed = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
-                $0.accessibilityIdentifier() == "toolbar-button-keys"
+            let strip = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
+                $0.accessibilityIdentifier() == "toolbar-arrangement"
             })
-            let fixedText = NativeAccessibilityNode.nodes(in: fixed.object).compactMap { $0.accessibilityLabel() }.joined(separator: "\n")
-            XCTAssertTrue(fixedText.contains("Board key"))
-            XCTAssertFalse(fixedText.contains("Spotlight key"), "Spotlight lives in More tools now.")
+            let stripText = NativeAccessibilityNode.nodes(in: strip.object).compactMap { $0.accessibilityLabel() }.joined(separator: "\n")
+            XCTAssertTrue(stripText.contains("Board key"), "The toolbar's own buttons keep their keys in the preview.")
+            XCTAssertFalse(stripText.contains("Spotlight key"), "Spotlight lives in More tools now.")
             for id in ["more-action-spotlight", "more-tool-blur"] {
                 let node = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first { $0.accessibilityIdentifier() == id }, id)
                 XCTAssertTrue(perform("Add to toolbar", on: node), id)
@@ -489,7 +489,10 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
 
     private func withSettings(_ body: (NSPanel, NSView) async throws -> Void) async throws {
         let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
-        let panel = NSPanel(contentRect: NSRect(x: 120, y: 80, width: 840, height: 760),
+        // Tall enough to show the tray's shapes below a toolbar preview that wraps onto two lines.
+        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        let height = min(880, screen.height - 40)
+        let panel = NSPanel(contentRect: NSRect(x: screen.minX + 120, y: screen.maxY - height - 20, width: 840, height: height),
                             styleMask: [.titled, .resizable, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isReleasedWhenClosed = false
         panel.contentView = host

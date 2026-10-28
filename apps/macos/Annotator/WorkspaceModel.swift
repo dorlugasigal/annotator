@@ -238,6 +238,10 @@ final class WorkspaceModel: ObservableObject {
     var onRegionSharingToolbar: (() -> NSWindow?)?
     var onThemeChanged: ((AppTheme) -> Void)?
     var onToolbarLayoutChanged: (() -> Void)?
+    /// The toolbar shows as one button: the Annotator mark and whether you draw or use apps.
+    @Published private(set) var toolbarCollapsed = false
+    var onExpandToolbarRequested: (() -> Void)?
+    var onToolbarCollapseSettingChanged: (() -> Void)?
     var onDisplaysChanged: (() -> Void)?
     var onOpenPreferences: (() -> Void)?
     var onInspectorVisibilityChanged: (() -> Void)?
@@ -1170,6 +1174,60 @@ final class WorkspaceModel: ObservableObject {
     }
 
     var toolbarSize: ToolbarSize { preferences.toolbarSize ?? .expanded }
+
+    /// The toolbar's own buttons and menus that are turned off in Settings.
+    var hiddenToolbarControls: Set<ToolbarControl> {
+        Set((preferences.hiddenToolbarControls ?? []).compactMap(ToolbarControl.init(rawValue:)))
+    }
+
+    func showsToolbarControl(_ control: ToolbarControl) -> Bool { preferences.showsToolbarControl(control) }
+
+    func setToolbarControl(_ control: ToolbarControl, shown: Bool) {
+        if let owner = globalSettingsOwner { owner.setToolbarControl(control, shown: shown); return }
+        do {
+            var updated = preferences
+            updated.setToolbarControl(control, shown: shown)
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+            onToolbarLayoutChanged?()
+        } catch { report(error) }
+    }
+
+    func showAllToolbarControls() {
+        if let owner = globalSettingsOwner { owner.showAllToolbarControls(); return }
+        guard preferences.hiddenToolbarControls != nil else { return }
+        preferences.hiddenToolbarControls = nil
+        persistPreferences()
+        onToolbarLayoutChanged?()
+    }
+
+    /// Seconds the pointer can stay off the toolbar before it shrinks to one button. `nil` keeps it open.
+    var toolbarCollapseDelay: Double? { preferences.toolbarCollapseDelay }
+
+    func setToolbarCollapseDelay(_ delay: Double?) {
+        if let owner = globalSettingsOwner { owner.setToolbarCollapseDelay(delay); return }
+        do {
+            var updated = preferences
+            updated.toolbarCollapseDelay = delay
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+            if delay == nil && toolbarCollapsed { requestToolbarExpansion() }
+            onToolbarCollapseSettingChanged?()
+        } catch { report(error) }
+    }
+
+    /// Asks the toolbar to open from its one-button form. The app animates the change; without it, it happens at once.
+    func requestToolbarExpansion() {
+        guard toolbarCollapsed else { return }
+        if let onExpandToolbarRequested { onExpandToolbarRequested() } else { setToolbarCollapsed(false) }
+    }
+
+    func setToolbarCollapsed(_ collapsed: Bool) {
+        guard toolbarCollapsed != collapsed else { return }
+        toolbarCollapsed = collapsed
+    }
 
     func setToolbarSize(_ size: ToolbarSize) {
         if let owner = globalSettingsOwner {

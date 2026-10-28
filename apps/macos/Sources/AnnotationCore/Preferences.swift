@@ -95,6 +95,10 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     /// Break screen choices (specification 014). `nil` means the defaults.
     public var breakTimer: BreakTimerSettings?
     public var breakShortcut: ActivationShortcut?
+    /// The toolbar's own buttons and menus that are turned off (`ToolbarControl` raw values).
+    public var hiddenToolbarControls: [String]?
+    /// Seconds the pointer can stay off the toolbar before it shrinks to one button. `nil` keeps it open.
+    public var toolbarCollapseDelay: Double?
     public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter, .eraser, .cover]
 
     public init() {}
@@ -146,6 +150,7 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
         }
         try validateCommandShortcuts()
         try validateToolbarItems()
+        try validateToolbarControls()
     }
 
     public mutating func assignShortcut(_ key: String, to tool: Tool) throws {
@@ -176,6 +181,7 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
             throw CanvasError.invalidDocument("Gradient colors need a newer profile format.")
         }
         if preferences.visibilityAnimationStyle == .fluid { preferences.visibilityAnimationStyle = .slide }
+        preferences.normalizeToolbarControls()
         if preferences.shortcutVersion == nil || preferences.shortcutVersion == 1 {
             let custom = preferences.toolShortcuts.filter { key, tool in
                 legacyToolShortcuts[key] != tool && InkShortcut.choices[key] == nil

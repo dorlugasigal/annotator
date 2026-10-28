@@ -165,6 +165,14 @@ public enum MotionTiming {
     public static let hintTextCrossfadeDuration = 0.14
     /// How long the on-screen tip stays after it wakes, before it fades out.
     public static let hintDwellDuration = 5.0
+    /// The toolbar grows or shrinks sideways to fit a tool's properties, with `MotionCurves.standard`.
+    public static let toolbarResizeDuration = 0.22
+    /// The toolbar shrinks into one button, and grows back, with `MotionCurves.standard`. The outgoing face fades
+    /// out and the incoming face fades in as `ToolbarMorph` describes.
+    public static let toolbarCollapseDuration = 0.3
+    public static let toolbarExpandDuration = 0.34
+    /// Resting the pointer on the one-button toolbar this long opens it.
+    public static let toolbarExpandHoverDelay = 0.25
 
     /// Seconds for one shape's or the toolbar's show (`appearing`) or hide in each workspace style.
     public static func visibilityDuration(_ style: VisibilityAnimationStyle, appearing: Bool) -> Double {
@@ -180,5 +188,27 @@ public enum MotionTiming {
         case .focus: appearing ? 0.36 : 0.28
         default: appearing ? toolbarShowDuration : toolbarHideDuration
         }
+    }
+}
+
+/// The toolbar's change between its full face and its one-button face: the background's frame and corner radius
+/// follow `MotionCurves.standard`, while the faces cross-fade so the old one is gone before the new one settles.
+public enum ToolbarMorph {
+    /// The share of the morph after which the outgoing face is gone.
+    public static let outgoingEnd = 0.5
+    /// The share of the morph after which the incoming face starts to appear.
+    public static let incomingStart = 0.35
+
+    /// Progress of the background's frame and corner radius at linear time `t` in 0...1.
+    public static func shape(_ t: Double) -> Double { MotionCurves.standard.progress(at: t) }
+
+    /// Opacity of the face that is leaving at linear time `t` in 0...1.
+    public static func outgoingOpacity(_ t: Double) -> Double {
+        1 - MotionCurves.fade.progress(at: t / outgoingEnd)
+    }
+
+    /// Opacity of the face that is arriving at linear time `t` in 0...1.
+    public static func incomingOpacity(_ t: Double) -> Double {
+        MotionCurves.fade.progress(at: (t - incomingStart) / (1 - incomingStart))
     }
 }

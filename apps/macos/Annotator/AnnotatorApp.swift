@@ -1,6 +1,8 @@
 import AppKit
+import Combine
 import SwiftUI
 import AnnotationCore
+import MotionCore
 import NativePlatform
 
 @main
@@ -34,6 +36,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var previewScreen: CGRect?
     private(set) var dockPreviewFrame: CGRect?
     private var pendingToolbarSize: CGSize?
+    private let frameAnimator = ToolbarFrameAnimator()
+    /// A collapse or expansion waiting for the new face's measured size.
+    private var pendingMorph: PendingToolbarMorph?
+    private var morphing = false
+    private var openMenus = 0
+    private var tutorialSurface: AnyCancellable?
+    private(set) lazy var collapse = ToolbarCollapseController(model: model)
+    /// Where the pointer is, for deciding whether the toolbar may shrink. Tests move it away.
+    var pointerLocation: @MainActor () -> CGPoint = { NSEvent.mouseLocation }
+    var toolbarIsAnimating: Bool { frameAnimator.isRunning || pendingMorph != nil || morphing }
     private var resumeAfterShowing = false
     private let visibility: WorkspaceVisibilityAnimator
     private var hotkey: GlobalHotkey?
@@ -206,14 +218,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.resumeAfterShowing = false
             self.stopZoomActivationMonitor()
             self.library?.hide()
+            self.finishToolbarAnimations()
+            self.collapse.cancel()
             self.visibility.cancel()
             self.model.visibilityAnimating = false
             self.applyPendingToolbarSize()
-            if self.model.workspaceHidden { self.toolbar?.orderOut(nil) }
+            if self.model.workspaceHidden { self.toolbar?.orderOut(nil); self.model.setToolbarCollapsed(false) }
         }
         model.onFocusToolbar = { [weak self] in
             guard let self else { return }
             self.showToolbar()
+            self.expandToolbar()
             self.toolbar?.makeKeyAndOrderFront(nil)
         }
         model.onActivationRequested = { [weak self] in self?.activateTools() }
@@ -229,11 +244,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.resumeAfterShowing = false
             self.stopZoomActivationMonitor()
             self.library?.hide()
+            self.finishToolbarAnimations()
+            self.collapse.cancel()
             self.visibility.cancel()
             self.model.visibilityAnimating = false
             self.applyPendingToolbarSize()
             self.toolbar?.orderOut(nil)
             self.toolbar?.alphaValue = 1
+            self.model.setToolbarCollapsed(false)
         }
         model.onToolbarSizeChanged = { [weak self] size in self?.resizeToolbar(to: size) }
         model.onToolbarBackgroundDrag = { [weak self] translation, ended in
@@ -258,10 +276,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         model.onToolbarLayoutChanged = { [weak self] in self?.updateToolbarLayout() }
+        model.onExpandToolbarRequested = { [weak self] in self?.expandToolbar() }
+        model.onToolbarCollapseSettingChanged = { [weak self] in self?.collapse.restart() }
+        collapse.isHeldOpen = { [weak self] in self?.toolbarMustStayOpen ?? true }
+        collapse.collapse = { [weak self] in self?.collapseToolbar() }
+        collapse.expand = { [weak self] in self?.expandToolbar() }
+        for (name, change) in [(NSMenu.didBeginTrackingNotification, 1), (NSMenu.didEndTrackingNotification, -1)] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    self.openMenus = max(0, self.openMenus + change)
+                    if self.openMenus == 0 { self.collapse.restart() }
+                }
+            })
+        }
+        tutorialSurface = tutorial?.$surface.sink { [weak self] surface in
+            guard surface != .hidden else { return }
+            Task { @MainActor [weak self] in self?.expandToolbar() }
+        }
         model.onDisplaysChanged = { [weak self] in
             guard let self else { return }
             (self.toolbar as? InspectorPanel)?.cancelToolbarDrag()
             self.hideDockPreview()
+            self.finishToolbarAnimations()
             self.visibility.cancel()
             self.resumeAfterShowing = false
             self.recoverToolbarPlacement()
@@ -459,8 +496,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         resumeAfterShowing = false
         stopZoomActivationMonitor()
         library?.hide()
+        finishToolbarAnimations()
+        collapse.cancel()
         guard let toolbar else { model.interact(); model.concealWorkspaceSurfaces(); return }
-        visibility.hide(toolbar: toolbar, model: model) { [weak self] in self?.applyPendingToolbarSize() }
+        visibility.hide(toolbar: toolbar, model: model) { [weak self] in
+            guard let self else { return }
+            // The tools come back open next time; the one button returns after the delay.
+            if self.model.workspaceHidden { self.model.setToolbarCollapsed(false) }
+            self.applyPendingToolbarSize()
+        }
     }
 
     private func registerHideShortcut(_ shortcut: ActivationShortcut) throws {
@@ -483,6 +527,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateToolbarLayout() {
         guard let toolbar else { return }
+        finishToolbarAnimations()
         toolbar.contentView?.invalidateIntrinsicContentSize()
         toolbar.contentView?.needsLayout = true
         dockToolbar(toolbar, size: toolbar.frame.size)
@@ -519,8 +564,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dockedFrame = nil
         edgeDocked = false
         pendingToolbarSize = nil
-        toolbar.contentView = ToolbarContentView(model: model,
-            availableSize: CGSize(width: target.width - 32, height: target.height - 64))
+        finishToolbarAnimations()
+        toolbar.contentView = makeToolbarContent(availableSize: CGSize(width: target.width - 32, height: target.height - 64))
         toolbar.setFrame(frame, display: true)
     }
 
@@ -539,7 +584,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             edgeDocked = true
             pendingToolbarSize = nil
             model.dockToolbar(to: edge)
-            toolbar.contentView = ToolbarContentView(model: model, availableSize: available)
+            toolbar.contentView = makeToolbarContent(availableSize: available)
             toolbar.setFrame(targetFrame, display: true)
             dockedFrame = targetFrame
             toolbar.contentView?.layoutSubtreeIfNeeded()
@@ -549,7 +594,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             dockedFrame = nil
             if let content = toolbar.contentView as? ToolbarContentView,
                content.host.rootView.availableSize != available {
-                content.host.rootView = ToolbarView(model: model, availableSize: available)
+                content.host.rootView = ToolbarContentView.toolbar(model: model, availableSize: available)
             }
         }
         applyPendingToolbarSize()
@@ -623,6 +668,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } else {
                 toolbar.orderFrontRegardless()
                 refreshZoomActivationMonitor()
+                collapse.restart()
             }
             return
         }
@@ -635,6 +681,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.onUserDragEnded = { [weak self] point in self?.finishToolbarDrag(at: point) }
         panel.onUserDragMoved = { [weak self] point in self?.updateDockPreview(at: point) }
         panel.onUserDragCancelled = { [weak self] in self?.hideDockPreview() }
+        panel.onUserDragWillStart = { [weak self] in self?.finishToolbarAnimations() }
         panel.onUserDragStarted = { [weak self] in
             self?.dockedFrame = nil
             self?.toolbarDockDisplayID = nil
@@ -651,7 +698,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.hasShadow = true
         panel.level = PresentationWindowLevels.toolbar(screenZoom: model.screenZoomEnabled)
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.contentView = ToolbarContentView(model: model, availableSize: available)
+        panel.contentView = makeToolbarContent(availableSize: available)
         panel.isReleasedWhenClosed = false
         if let screen {
             toolbarDockDisplayID = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value
@@ -669,7 +716,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             panel.orderFrontRegardless()
             refreshZoomActivationMonitor()
+            collapse.restart()
         }
+    }
+
+    private func makeToolbarContent(availableSize: CGSize) -> ToolbarContentView {
+        let content = ToolbarContentView(model: model, availableSize: availableSize)
+        content.onPointerInside = { [weak self] inside in self?.collapse.pointerChanged(inside: inside) }
+        return content
     }
 
     private func finishShowingToolbar() {
@@ -678,6 +732,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if resume && model.mode != .draw { model.beginDrawing() }
         applyPendingToolbarSize()
         refreshZoomActivationMonitor()
+        collapse.restart()
     }
 
     private func refreshZoomActivationMonitor() {
@@ -737,22 +792,162 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             pendingToolbarSize = size
             return
         }
-        let screen = toolbarDockScreen(for: toolbar)
-        let old = toolbar.frame
-        if edgeDocked { dockToolbar(toolbar, size: size); return }
-        // Hosting can resize the window around its top-left before this callback.
-        // That is still a docked window, even when its new size already matches.
-        if let dockedFrame, abs(old.minX - dockedFrame.minX) < 1,
-           abs(old.minY - dockedFrame.minY) < 1 || abs(old.maxY - dockedFrame.maxY) < 1 {
-            dockToolbar(toolbar, size: size)
+        if let morph = pendingMorph {
+            pendingMorph = nil
+            morph.deadline.cancel()
+            runToolbarMorph(morph, size: size)
             return
         }
-        var frame = CGRect(x: old.minX, y: old.maxY - size.height, width: size.width, height: size.height)
-        if let bounds = screen?.visibleFrame {
+        if morphing {
+            pendingToolbarSize = size
+            return
+        }
+        // While the window animates, it is already on its way to the animation's frame.
+        let old = frameAnimator.target ?? toolbar.frame
+        let frame = toolbarFrame(size: size, from: old, pin: .topLeading)
+        let content = toolbar.contentView as? ToolbarContentView
+        // A horizontal toolbar grows or shrinks sideways in a short animation when a tool's properties need more or less room.
+        let animated = !Motion.systemReducesMotion && toolbar.isVisible && !model.workspaceHidden && !model.toolbarCollapsed &&
+            model.preferences.toolbarOrientation != .vertical && abs(frame.height - old.height) < 1 && abs(frame.width - old.width) >= 1
+        if animated {
+            frameAnimator.animate(toolbar, to: frame, duration: MotionTiming.toolbarResizeDuration,
+                                  completion: { [weak content] in content?.contentSize = nil })
+            content?.pin = .topLeading
+            content?.contentSize = size
+        } else {
+            frameAnimator.finishNow(nil)
+            content?.contentSize = nil
+            if toolbar.frame != frame { toolbar.setFrame(frame, display: true, animate: false) }
+        }
+    }
+
+    /// The frame for a toolbar of `size`: docked frames stay docked; a floating toolbar keeps the `pin` point of `old` and
+    /// stays on its screen.
+    private func toolbarFrame(size: CGSize, from old: CGRect, pin: ToolbarPin) -> CGRect {
+        guard let toolbar else { return CGRect(origin: old.origin, size: size) }
+        // Hosting can resize the window around its top-left before this callback.
+        // That is still a docked window, even when its new size already matches.
+        let docked = edgeDocked || dockedFrame.map { dockedFrame in
+            abs(old.minX - dockedFrame.minX) < 1 && (abs(old.minY - dockedFrame.minY) < 1 || abs(old.maxY - dockedFrame.maxY) < 1)
+        } == true
+        if docked, let screen = toolbarDockScreen(for: toolbar) {
+            let frame = ToolbarPlacement.frame(size: size, visibleFrame: screen.visibleFrame,
+                                                orientation: model.preferences.toolbarOrientation ?? .horizontal,
+                                                edge: model.preferences.toolbarDockEdge ?? .automatic,
+                                                inset: edgeDocked ? 0 : 12)
+            dockedFrame = frame
+            return frame
+        }
+        var frame = pin.frame(size: size, keeping: old)
+        if let bounds = toolbarDockScreen(for: toolbar)?.visibleFrame {
             frame.origin.x = max(bounds.minX, min(frame.minX, bounds.maxX - frame.width))
             frame.origin.y = max(bounds.minY, min(frame.minY, bounds.maxY - frame.height))
         }
-        if toolbar.frame != frame { toolbar.setFrame(frame, display: true, animate: false) }
+        return frame
+    }
+
+    /// Where the toolbar's content stays while the window changes: the docked edge's middle, or a floating toolbar's
+    /// top-left corner.
+    private var toolbarPin: ToolbarPin {
+        guard let toolbar else { return .topLeading }
+        let frame = frameAnimator.target ?? toolbar.frame
+        let docked = edgeDocked || dockedFrame.map { abs(frame.minX - $0.minX) < 1 && abs(frame.minY - $0.minY) < 1 } == true
+        guard docked else { return .topLeading }
+        return .docked(orientation: model.preferences.toolbarOrientation ?? .horizontal,
+                       edge: model.preferences.toolbarDockEdge ?? .automatic)
+    }
+
+    /// Ends any resize or morph at once, for example before a drag, a hide or a new layout.
+    private func finishToolbarAnimations() {
+        let content = toolbar?.contentView as? ToolbarContentView
+        if let morph = pendingMorph {
+            pendingMorph = nil
+            morph.deadline.cancel()
+            content?.endMorph()
+            content?.contentSize = nil
+        }
+        frameAnimator.finishNow(toolbar)
+    }
+
+    /// Reasons the toolbar stays open: the pointer, a menu or popover, a drag, typing, the tutorial or a pending step.
+    private var toolbarMustStayOpen: Bool {
+        guard let toolbar, toolbar.isVisible, !model.workspaceHidden, !model.visibilityAnimating else { return true }
+        if (toolbar as? InspectorPanel)?.isTrackingToolbarDrag == true || openMenus > 0 || morphing || pendingMorph != nil {
+            return true
+        }
+        let pointer = pointerLocation()
+        if toolbar.frame.contains(pointer) { return true }
+        if let surface = tutorial?.surface, surface != .hidden { return true }
+        if model.isConstructingArrow || PendingZoomPresentation(state: model.zoomStartState) != nil { return true }
+        if toolbar.isKeyWindow, toolbar.firstResponder is NSText { return true }
+        if let window = library?.window, window.isVisible, window.frame.contains(pointer) { return true }
+        return NSApp.windows.contains { $0.isVisible && $0 !== toolbar && NSStringFromClass(type(of: $0)).contains("Popover") }
+    }
+
+    private func collapseToolbar() {
+        guard model.toolbarCollapseDelay != nil, !model.toolbarCollapsed, !toolbarMustStayOpen else { return }
+        beginToolbarMorph(collapsing: true)
+    }
+
+    private func expandToolbar() {
+        guard model.toolbarCollapsed else { return }
+        guard let toolbar, toolbar.isVisible, !model.workspaceHidden, !model.visibilityAnimating else {
+            model.setToolbarCollapsed(false)
+            return
+        }
+        beginToolbarMorph(collapsing: false)
+    }
+
+    /// Covers the toolbar with a picture of its face, then switches to the other face; the morph starts when the new face
+    /// reports its size (`runToolbarMorph`).
+    private func beginToolbarMorph(collapsing: Bool) {
+        guard let toolbar, let content = toolbar.contentView as? ToolbarContentView else {
+            model.setToolbarCollapsed(collapsing)
+            return
+        }
+        finishToolbarAnimations()
+        let vertical = model.preferences.toolbarOrientation == .vertical
+        let metrics = ToolbarMetrics(model.toolbarSize)
+        let pill = CollapsedToolbarButton.size(vertical: vertical, toolbarSize: model.toolbarSize)
+        let pillRadius = min(pill.width, pill.height) / 2
+        let pin = toolbarPin
+        content.beginMorph(outgoing: content.snapshotHost(), outgoingSize: content.host.frame.size, pin: pin,
+                           radii: collapsing ? (metrics.cornerRadius, pillRadius) : (pillRadius, metrics.cornerRadius),
+                           chromeFade: vertical ? (collapsing ? (0, 1, 0, 0.35) : (1, 0, 0.65, 1)) : nil)
+        let deadline = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled, let self, self.pendingMorph != nil else { return }
+            // The new face kept the same size, so there is nothing to move.
+            self.pendingMorph = nil
+            content.endMorph()
+            if !collapsing { self.collapse.restart() }
+        }
+        pendingMorph = PendingToolbarMorph(start: toolbar.frame, pin: pin, collapsing: collapsing, deadline: deadline)
+        model.setToolbarCollapsed(collapsing)
+    }
+
+    private func runToolbarMorph(_ morph: PendingToolbarMorph, size: CGSize) {
+        guard let toolbar, let content = toolbar.contentView as? ToolbarContentView else { return }
+        let target = toolbarFrame(size: size, from: morph.start, pin: morph.pin)
+        let reduced = Motion.systemReducesMotion
+        // Reduce Motion: the window changes at once and the faces only cross-fade.
+        if reduced { toolbar.setFrame(target, display: true) }
+        morphing = true
+        frameAnimator.animate(toolbar, to: target,
+                              duration: reduced ? MotionTiming.reduced.duration :
+                                morph.collapsing ? MotionTiming.toolbarCollapseDuration : MotionTiming.toolbarExpandDuration,
+                              step: { [weak content] time in content?.updateMorph(time) },
+                              completion: { [weak self, weak content] in
+            content?.endMorph()
+            content?.contentSize = nil
+            content?.pin = .topLeading
+            guard let self else { return }
+            self.morphing = false
+            self.applyPendingToolbarSize()
+            if !morph.collapsing { self.collapse.restart() }
+        })
+        content.pin = morph.pin
+        content.contentSize = size
     }
 
     private func applyPendingToolbarSize() {
@@ -760,6 +955,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         pendingToolbarSize = nil
         resizeToolbar(to: size)
     }
+}
+
+/// A collapse or expansion that has its starting picture and waits for the new face's size.
+private struct PendingToolbarMorph {
+    let start: CGRect
+    let pin: ToolbarPin
+    let collapsing: Bool
+    let deadline: Task<Void, Never>
 }
 
 @MainActor
@@ -785,6 +988,8 @@ final class InspectorPanel: AnnotationPanel {
     var onUserDragMoved: ((CGPoint) -> Void)?
     var onUserDragCancelled: (() -> Void)?
     var onUserDragStarted: (() -> Void)?
+    /// Runs before the drag records the frame, so an animation can finish first.
+    var onUserDragWillStart: (() -> Void)?
     var onUserDragEnded: ((CGPoint) -> Void)?
     private var dragOrigin: CGPoint?
     private var dragFrame: CGRect?
@@ -800,6 +1005,7 @@ final class InspectorPanel: AnnotationPanel {
 
     func beginToolbarDrag(at point: CGPoint, gestureOwned: Bool = false) {
         guard !isTrackingToolbarDrag, onUserDragEnded != nil else { return }
+        onUserDragWillStart?()
         dragOrigin = point
         dragFrame = frame
         gestureOwnsDrag = gestureOwned
@@ -890,28 +1096,138 @@ final class MovableToolbarHost: NSHostingView<ToolbarView> {
 }
 
 // Window geometry belongs to the controller, not the hosting view's sizing constraints.
+/// The toolbar window's content: the SwiftUI toolbar over a background AppKit draws, so the window can grow, shrink or
+/// morph smoothly while the toolbar keeps its final layout, pinned where the old and new frames meet.
 final class ToolbarContentView: NSView {
     let host: MovableToolbarHost
+    let chrome = ToolbarChromeView()
+    /// The toolbar's measured size while the window animates toward it; `nil` fills the window.
+    var contentSize: CGSize? { didSet { if contentSize != oldValue { placeSubviews() } } }
+    var pin = ToolbarPin.topLeading { didSet { if pin != oldValue { placeSubviews() } } }
+    var onPointerInside: ((Bool) -> Void)?
+    private var pointerTracking: NSTrackingArea?
+    private var outgoing: CALayer?
+    private var outgoingSize = CGSize.zero
+    private var morphRadii: (from: CGFloat, to: CGFloat)?
+    /// A vertical toolbar has no background of its own, so the morph fades one in or out between `start` and `end`.
+    private var chromeFade: (from: CGFloat, to: CGFloat, start: Double, end: Double)?
+    private var state: (vertical: Bool, minimal: Bool, collapsed: Bool) = (false, false, false)
+    private var changes: AnyCancellable?
+    var isMorphing: Bool { morphRadii != nil }
 
     init(model: WorkspaceModel, availableSize: CGSize) {
-        host = MovableToolbarHost(rootView: ToolbarView(model: model, availableSize: availableSize))
+        host = MovableToolbarHost(rootView: Self.toolbar(model: model, availableSize: availableSize))
         host.sizingOptions = []
         super.init(frame: .zero)
+        wantsLayer = true
+        addSubview(chrome)
         addSubview(host)
-        host.autoresizingMask = [.width, .height]
+        changes = model.$preferences.combineLatest(model.$toolbarCollapsed).sink { [weak self] preferences, collapsed in
+            self?.state = (preferences.toolbarOrientation == .vertical, preferences.toolbarSize == .minimal, collapsed)
+            self?.refreshChrome()
+        }
+    }
+
+    static func toolbar(model: WorkspaceModel, availableSize: CGSize) -> ToolbarView {
+        ToolbarView(model: model, availableSize: availableSize, drawsChrome: false)
     }
 
     required init?(coder: NSCoder) { nil }
     override var mouseDownCanMoveWindow: Bool { false }
     override func layout() {
         super.layout()
-        host.frame = bounds
+        placeSubviews()
         host.layoutSubtreeIfNeeded()
     }
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        host.frame = bounds
+        placeSubviews()
         needsLayout = true
+    }
+
+    private func placeSubviews() {
+        chrome.frame = bounds
+        let frame = pin.rect(size: contentSize ?? bounds.size, in: bounds)
+        if host.frame != frame { host.frame = frame }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        outgoing?.frame = pin.rect(size: outgoingSize, in: bounds)
+        CATransaction.commit()
+    }
+
+    /// A vertical toolbar draws its own surfaces; the horizontal toolbar and the one button use this background.
+    private func refreshChrome() {
+        guard !isMorphing else { return }
+        chrome.isHidden = state.vertical && !state.collapsed
+        chrome.alphaValue = 1
+        chrome.cornerRadius = state.collapsed ? .greatestFiniteMagnitude : state.minimal ? 13 : 15
+    }
+
+    override func updateTrackingAreas() {
+        if let pointerTracking { removeTrackingArea(pointerTracking) }
+        let tracking = NSTrackingArea(rect: .zero, options: [.inVisibleRect, .activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(tracking)
+        pointerTracking = tracking
+        super.updateTrackingAreas()
+    }
+
+    override func mouseEntered(with event: NSEvent) { onPointerInside?(true) }
+    override func mouseExited(with event: NSEvent) { onPointerInside?(false) }
+
+    /// A picture of the toolbar's controls, without the background, for the morph.
+    func snapshotHost() -> CGImage? {
+        host.layoutSubtreeIfNeeded()
+        guard host.bounds.width >= 1, host.bounds.height >= 1,
+              let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return nil }
+        host.cacheDisplay(in: host.bounds, to: bitmap)
+        return bitmap.cgImage
+    }
+
+    /// Shows `image` (the face that leaves) over the background and hides the new face until `updateMorph` fades it in.
+    func beginMorph(outgoing image: CGImage?, outgoingSize: CGSize, pin: ToolbarPin,
+                    radii: (from: CGFloat, to: CGFloat),
+                    chromeFade: (from: CGFloat, to: CGFloat, start: Double, end: Double)?) {
+        endMorph()
+        self.pin = pin
+        self.outgoingSize = outgoingSize
+        morphRadii = radii
+        self.chromeFade = chromeFade
+        if let image {
+            let layer = CALayer()
+            layer.contents = image
+            layer.contentsGravity = .resize
+            layer.contentsScale = window?.backingScaleFactor ?? 2
+            layer.actions = ["position": NSNull(), "bounds": NSNull(), "frame": NSNull(), "opacity": NSNull()]
+            self.layer?.addSublayer(layer)
+            outgoing = layer
+        }
+        chrome.isHidden = false
+        updateMorph(0)
+        placeSubviews()
+    }
+
+    func updateMorph(_ time: Double) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        outgoing?.opacity = Float(ToolbarMorph.outgoingOpacity(time))
+        CATransaction.commit()
+        host.alphaValue = ToolbarMorph.incomingOpacity(time)
+        if let morphRadii {
+            chrome.cornerRadius = morphRadii.from + (morphRadii.to - morphRadii.from) * ToolbarMorph.shape(time)
+        }
+        if let chromeFade {
+            let share = min(1, max(0, (time - chromeFade.start) / (chromeFade.end - chromeFade.start)))
+            chrome.alphaValue = chromeFade.from + (chromeFade.to - chromeFade.from) * share
+        }
+    }
+
+    func endMorph() {
+        outgoing?.removeFromSuperlayer()
+        outgoing = nil
+        morphRadii = nil
+        chromeFade = nil
+        host.alphaValue = 1
+        refreshChrome()
     }
 }
 
