@@ -9,8 +9,8 @@ using static Annotator.Workspace.Tests.TestWorkspace;
 namespace Annotator.Workspace.Tests;
 
 /// <summary>
-/// The full properties panel's model (ContextualInspector.swift, AdaptivePropertyLayout.swift, StyleValueControl.swift
-/// and NativeInspectorComponents.swift): which controls show, where the adaptive layout puts them, what the fields
+/// The full properties panel's model (ContextualInspector.swift, StyleValueControl.swift and
+/// NativeInspectorComponents.swift): which controls show, how the one row lines them up, what the fields
 /// accept and how a change reaches the tool, the selection and history.
 /// </summary>
 public sealed class PropertiesPanelTests
@@ -120,20 +120,36 @@ public sealed class PropertiesPanelTests
     }
 
     [Fact]
-    public void AdaptiveLayoutFlowsAndWrapsLikeTheMac()
+    public void PropertiesStayOnOneRowWithTheirControlsLinedUp()
     {
-        // properties/pen at 648 points with 16-point padding: Stroke color, Width (sample row and value row), Pattern,
-        // Roughness and Pressure share the first row; Smart Draw wraps below the 83-point row.
-        (double, double)[] pen = [(65.5, 56), (150, 83), (118, 56), (118, 56), (96, 73), (84.5, 56)];
-        Rect[] frames = PropertyLayout.Frames(pen, 616);
-        Assert.Equal([0, 79.5, 243.5, 375.5, 507.5, 0], frames.Select(frame => frame.X));
-        Assert.Equal([0, 0, 0, 0, 0, 97], frames.Select(frame => frame.Y));
-        // toolbar/full-properties-pen: the toolbar's wider panel keeps Smart Draw on the first row.
-        Assert.Equal(617.5, PropertyLayout.Frames(pen, 893)[5].X);
-        // An item wider than the panel takes the whole width on its own row.
-        Rect[] wide = PropertyLayout.Frames([(40, 10), (300, 20), (10, 10)], 200);
-        Assert.Equal(new Rect(0, 24, 200, 20), wide[1]);
-        Assert.Equal(new Rect(0, 58, 10, 10), wide[2]);
+        // Stroke color (its swatch's middle 38 points down), Width (a named slider), Pattern and the axes' unnamed switch:
+        // one row, 14 points apart, never wrapping, with every control's middle on one line.
+        (double, double, double)[] items = [(65.5, 56, 38), (150, 56, 38), (60, 56, 38), (90, 20, 10)];
+        var (frames, width, height) = PropertyLayout.Row(items);
+        Assert.Equal([0, 79.5, 243.5, 317.5], frames.Select(frame => frame.X));
+        Assert.Equal([0, 0, 0, 28], frames.Select(frame => frame.Y));
+        Assert.Equal(407.5, width);
+        Assert.Equal(56, height);
+        Assert.All(frames.Zip(items), pair => Assert.Equal(38, pair.First.Y + pair.Second.Item3));
+        // A short item above the line makes the row taller only as much as it reaches past the others.
+        var (_, _, taller) = PropertyLayout.Row([(40, 56, 38), (40, 80, 60)]);
+        Assert.Equal(60 + 20, taller);
+    }
+
+    [Fact]
+    public void ChoicesAreSingleButtonsThatStepToTheNextOne()
+    {
+        Assert.Equal(["Solid", "Dashed", "Dotted"], InspectorPlan.PatternChoices.Select(choice => choice.Name));
+        Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.PatternChoices, StrokePattern.Solid));
+        Assert.Equal(0, InspectorPlan.NextChoice(InspectorPlan.PatternChoices, StrokePattern.Dotted));
+        Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.RoughnessChoices, 0.0));
+        // An unknown value shows as the first choice.
+        Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.RoughnessChoices, 1.5));
+        Assert.Equal(["System", "Mono"], InspectorPlan.FontChoices.Select(choice => choice.Name));
+        Assert.Equal(["Left", "Center", "Right"], InspectorPlan.AlignmentChoices.Select(choice => choice.Name));
+        Assert.Equal(["Solid", "Hatch", "Crosshatch"], InspectorPlan.FillStyleChoices.Select(choice => choice.Name));
+        Assert.Equal("Pattern: Solid. Click for dashed.", InspectorPlan.CycleHelp("Pattern", "Solid", "Dashed"));
+        Assert.Equal("Blurred details can still be readable. Remove private info before you share.", InspectorPlan.CoverCaption);
     }
 
     [Fact]

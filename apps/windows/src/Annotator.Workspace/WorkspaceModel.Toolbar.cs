@@ -110,4 +110,73 @@ public sealed partial class WorkspaceModel
         }
         PersistPreferences();
     }
+
+    /// <summary>Mac setToolbarControl: shows or hides one of the toolbar's own buttons or menus. Its key keeps working.</summary>
+    public void SetToolbarControl(ToolbarControl control, bool shown)
+    {
+        using ChangeScope scope = Change();
+        WorkspacePreferences updated = _preferences;
+        updated.SetToolbarControl(control, shown);
+        try
+        {
+            updated.Validate();
+        }
+        catch (Exception error) when (IsReportable(error))
+        {
+            Report(error);
+            return;
+        }
+        _preferences = updated;
+        PersistPreferences();
+    }
+
+    /// <summary>Mac showAllToolbarControls: Reset > Show every toolbar button.</summary>
+    public void ShowAllToolbarControls()
+    {
+        using ChangeScope scope = Change();
+        if (_preferences.HiddenToolbarControls is null)
+        {
+            return;
+        }
+        _preferences.HiddenToolbarControls = null;
+        PersistPreferences();
+    }
+
+    /// <summary>
+    /// Mac setToolbarCollapseDelay: how many seconds the pointer can stay off the toolbar before it shrinks to one button;
+    /// null keeps it open. Turning it off opens a shrunk toolbar.
+    /// </summary>
+    public void SetToolbarCollapseDelay(double? delay)
+    {
+        using ChangeScope scope = Change();
+        WorkspacePreferences updated = _preferences;
+        updated.ToolbarCollapseDelay = delay;
+        try
+        {
+            updated.Validate();
+        }
+        catch (Exception error) when (IsReportable(error))
+        {
+            Report(error);
+            return;
+        }
+        _preferences = updated;
+        PersistPreferences();
+        if (delay is null)
+        {
+            _toolbarCollapsed = false;
+        }
+    }
+
+    /// <summary>
+    /// Mac setToolbarCollapsed: the toolbar shows as one button, or as every tool again. The host animates the change
+    /// (Core <c>ToolbarMorph</c>) and decides when with <see cref="Toolbar.ToolbarCollapseTimer"/>. Hiding the toolbar
+    /// opens it again for the next time it shows.
+    /// </summary>
+    public void SetToolbarCollapsed(bool collapsed)
+    {
+        using ChangeScope scope = Change();
+        _toolbarCollapsed = collapsed;
+    }
 }
+

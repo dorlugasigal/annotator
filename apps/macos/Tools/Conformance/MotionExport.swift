@@ -108,6 +108,16 @@ enum MotionExport {
             1 - 0.03 * MotionCurves.exit.progress(at: $0) })
         records.append(timeline("pointer click pulse scale", duration: CursorHighlightSettings.clickDuration,
                                 source: "CursorHighlightRenderer.pulseScale") { CursorHighlightRenderer.pulseScale($0) })
+        records.append(timeline("toolbar resize", duration: MotionTiming.toolbarResizeDuration,
+                                source: "ToolbarFrameAnimator: standard") { ToolbarMorph.shape($0) })
+        for (name, duration) in [("collapse", MotionTiming.toolbarCollapseDuration), ("expand", MotionTiming.toolbarExpandDuration)] {
+            records.append(timeline("toolbar \(name) shape", duration: duration, source: "ToolbarMorph.shape: standard") {
+                ToolbarMorph.shape($0) })
+            records.append(timeline("toolbar \(name) outgoing face", duration: duration,
+                                    source: "ToolbarMorph.outgoingOpacity: 1 − fade(t / 0.5)") { ToolbarMorph.outgoingOpacity($0) })
+            records.append(timeline("toolbar \(name) incoming face", duration: duration,
+                                    source: "ToolbarMorph.incomingOpacity: fade((t − 0.35) / 0.65)") { ToolbarMorph.incomingOpacity($0) })
+        }
         try corpus.lines("motion/timelines.jsonl", records)
     }
 
@@ -130,10 +140,17 @@ enum MotionExport {
             "hintTextCrossfadeDuration": .double(MotionTiming.hintTextCrossfadeDuration),
             "hintDwellDuration": .double(MotionTiming.hintDwellDuration),
             "pointerClickDuration": .double(CursorHighlightSettings.clickDuration),
+            "toolbarResizeDuration": .double(MotionTiming.toolbarResizeDuration),
+            "toolbarCollapseDuration": .double(MotionTiming.toolbarCollapseDuration),
+            "toolbarExpandDuration": .double(MotionTiming.toolbarExpandDuration),
+            "toolbarExpandHoverDelay": .double(MotionTiming.toolbarExpandHoverDelay),
+            "toolbarMorphOutgoingEnd": .double(ToolbarMorph.outgoingEnd),
+            "toolbarMorphIncomingStart": .double(ToolbarMorph.incomingStart),
             "notes": .array([
                 "Visibility durations apply to the toolbar and to each shape (WorkspaceLayerMotion in ToolbarSlideMotion.swift). Reversals take max(minimumReversalShare, distance left) of the duration and use the standard curve.",
                 "Pop, Drop and Focus drive a pose from VisibilityPose.hidden (timelines.jsonl). The other styles move the layer with enter when appearing and exit when hiding (Slide and Corners along a bent keyframe path). Their opacity uses the fade curve when appearing and linear time when hiding; when the layer also moves, opacity reaches full at 20% of the time when appearing and holds until 72% when hiding (Magic: 15% and 82% with its own flight curve). Port these rules from WorkspaceLayerMotion.",
                 "The spotlight scales its fade duration by the share of the change still to go, at least 0.001.",
+                "The toolbar's window frame follows MotionCurves.standard when it grows or shrinks sideways and when it morphs into its one-button form and back. During a morph the background's corner radius follows the same curve, the outgoing face fades out by 50% of the time and the incoming face fades in from 35%. Reduce Motion changes the frame at once and keeps only the fades, over the reduced duration.",
                 "Magic flights and Dissolve particles keep their own art-directed curves in the app and are not part of this export.",
                 "SwiftUI springs use the published spring model, not SwiftUI's implementation; compare with a tolerance."
             ])

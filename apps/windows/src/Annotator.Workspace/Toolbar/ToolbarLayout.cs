@@ -99,6 +99,82 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
     public double VerticalToolPitch => Minimal ? 39 : 51;
 
     public double VerticalReserve => Minimal ? 364 : 374;
+
+    /// <summary>
+    /// The width one of the toolbar's own controls takes in the horizontal row, with its gap. The menus sit with the
+    /// properties instead.
+    /// </summary>
+    public double HorizontalRoom(ToolbarControl control) => control switch
+    {
+        ToolbarControl.Library => ButtonWidth + Spacing,
+        ToolbarControl.Board => BoardWidth + Spacing,
+        ToolbarControl.Mode => ModeWidth + Spacing,
+        ToolbarControl.FocusMenu or ToolbarControl.ZoomMenu => 0,
+        _ => ActionSize.Width + Spacing,
+    };
+
+    /// <summary>The divider before Board and Draw, which goes when both of them do.</summary>
+    public double DividerRoom(IReadOnlySet<ToolbarControl> hidden) =>
+        hidden.Contains(ToolbarControl.Board) && hidden.Contains(ToolbarControl.Mode) ? 1 + Spacing : 0;
+
+    public double RegularReserveHiding(IReadOnlySet<ToolbarControl> hidden)
+    {
+        var room = 0.0;
+        foreach (var control in hidden)
+        {
+            room += HorizontalRoom(control);
+        }
+        return RegularReserve - room - DividerRoom(hidden);
+    }
+
+    /// <summary>A narrow toolbar keeps More tools, Board and Draw beside the tools and moves the other buttons below them.</summary>
+    public double CompactReserveHiding(IReadOnlySet<ToolbarControl> hidden) => CompactReserve - FirstRowRoom(hidden);
+
+    public double RailReserveHiding(IReadOnlySet<ToolbarControl> hidden) => RegularReserveHiding(hidden) - 16;
+
+    public double CompactRailReserveHiding(IReadOnlySet<ToolbarControl> hidden) => CompactRailReserve - FirstRowRoom(hidden);
+
+    private double FirstRowRoom(IReadOnlySet<ToolbarControl> hidden)
+    {
+        var room = 0.0;
+        foreach (var control in (ReadOnlySpan<ToolbarControl>)[ToolbarControl.Library, ToolbarControl.Board, ToolbarControl.Mode])
+        {
+            if (hidden.Contains(control))
+            {
+                room += HorizontalRoom(control);
+            }
+        }
+        return room + DividerRoom(hidden);
+    }
+
+    /// <summary>The height one of the toolbar's own controls takes in the vertical rail, with its gap.</summary>
+    public double VerticalRoom(ToolbarControl control, IReadOnlySet<ToolbarControl> hidden)
+    {
+        double gap = Minimal ? 3 : 5;
+        return control switch
+        {
+            ToolbarControl.Library => ButtonHeight + gap,
+            ToolbarControl.Board => (Minimal ? 30 : 36) + gap,
+            ToolbarControl.Mode => 36 + gap,
+            ToolbarControl.Properties or ToolbarControl.ClearAll or ToolbarControl.Settings or ToolbarControl.Hide
+                or ToolbarControl.ZoomMenu => ActionSize.Height + gap,
+            // Undo and Redo share a row in the expanded rail and stack in the minimal one.
+            ToolbarControl.Undo or ToolbarControl.Redo => Minimal ? ActionSize.Height + 3
+                : control == ToolbarControl.Redo && hidden.Contains(ToolbarControl.Undo) && hidden.Contains(ToolbarControl.Redo)
+                    ? ActionSize.Height + gap : 0,
+            _ => 0,
+        };
+    }
+
+    public double VerticalReserveHiding(IReadOnlySet<ToolbarControl> hidden)
+    {
+        var room = 0.0;
+        foreach (var control in hidden)
+        {
+            room += VerticalRoom(control, hidden);
+        }
+        return VerticalReserve - room;
+    }
 }
 
 /// <summary>Port of ToolbarToolLayout.swift: tool families, widths and the visible part of the tool rail.</summary>
@@ -106,15 +182,35 @@ public static class ToolbarToolLayout
 {
     public const double ButtonWidth = 44;
 
-    public static double HorizontalWidth(ReadOnlySpan<ShortcutCommand> items, double available, bool propertiesVisible,
-                                         ToolbarSize size = ToolbarSize.Expanded)
+    /// <summary>The buttons a narrow toolbar moves below its tools.</summary>
+    public static IReadOnlySet<ToolbarControl> SecondRowControls { get; } = new HashSet<ToolbarControl>
     {
+        ToolbarControl.Undo, ToolbarControl.Redo, ToolbarControl.ClearAll, ToolbarControl.Properties, ToolbarControl.Settings,
+        ToolbarControl.Hide,
+    };
+
+    private static readonly IReadOnlySet<ToolbarControl> NoneHidden = new HashSet<ToolbarControl>();
+
+    /// <summary>The toolbar's width for its tools and buttons. Full properties can make it wider (Mac ToolbarWidthLayout).</summary>
+    public static double HorizontalWidth(ReadOnlySpan<ShortcutCommand> items, double available, bool propertiesVisible,
+                                         ToolbarSize size = ToolbarSize.Expanded, IReadOnlySet<ToolbarControl>? hidden = null)
+    {
+        hidden ??= NoneHidden;
         var metrics = new ToolbarMetrics(size);
         double toolWidth = Width(items, size);
-        double regular = toolWidth + metrics.RegularReserve;
-        double desired = regular >= metrics.CompactThreshold ? regular : toolWidth + metrics.CompactReserve;
+        double regular = toolWidth + metrics.RegularReserveHiding(hidden);
+        // A narrow toolbar moves Undo, Redo and the other buttons to a second row; without them it keeps one row.
+        double desired = regular >= metrics.CompactThreshold || hidden.IsSupersetOf(SecondRowControls) ? regular
+            : toolWidth + metrics.CompactReserveHiding(hidden);
         return Math.Min(Math.Max(320, available), Math.Max(propertiesVisible ? metrics.PropertiesWidth : metrics.MinimumWidth, desired));
     }
+
+    /// <summary>Mac ToolbarWidthLayout: a horizontal toolbar is as wide as its tools and buttons need, or wider when its
+    /// content, such as one row of full properties, needs more room, up to <paramref name="limit"/>.</summary>
+    public static double GrownWidth(double baseWidth, double limit, double idealContentWidth) =>
+        double.IsFinite(idealContentWidth)
+            ? Math.Min(Math.Max(baseWidth, Math.Ceiling(idealContentWidth)), Math.Max(baseWidth, limit))
+            : baseWidth;
 
     /// <summary>The button that stands for <paramref name="tool"/>. Effects share one button unless they have their own.</summary>
     public static Tool Identity(Tool tool, ReadOnlySpan<ShortcutCommand> items)

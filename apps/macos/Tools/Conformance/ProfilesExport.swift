@@ -106,6 +106,19 @@ enum ProfilesExport {
             $0.cursorHighlight = halo
         }
         try add("cover-mode-pen", "A last cover mode that is not a cover or effect.") { $0.lastCoverMode = .pen }
+        try add("hidden-controls-all", "Every toolbar button and menu turned off.") {
+            $0.hiddenToolbarControls = ToolbarControl.allCases.map(\.rawValue)
+        }
+        try add("hidden-controls-future", "Hidden toolbar buttons from a newer version and repeats are dropped when reading.") {
+            $0.hiddenToolbarControls = ["undo", "lasso", "undo", "zoomMenu"]
+        }
+        try add("hidden-controls-only-future", "Only unknown hidden toolbar buttons: the list goes away.") {
+            $0.hiddenToolbarControls = ["lasso"]
+        }
+        try add("collapse-delay-1", "The shortest toolbar shrink delay.") { $0.toolbarCollapseDelay = 1 }
+        try add("collapse-delay-600", "The longest toolbar shrink delay.") { $0.toolbarCollapseDelay = 600 }
+        try add("collapse-delay-0.5", "A toolbar shrink delay below 1 second.") { $0.toolbarCollapseDelay = 0.5 }
+        try add("collapse-delay-601", "A toolbar shrink delay above 600 seconds.") { $0.toolbarCollapseDelay = 601 }
 
         var records: [J] = []
         for (name, note, input) in cases {
@@ -127,6 +140,11 @@ enum ProfilesExport {
             "available": .array(VisibilityAnimationStyle.available.map { .string($0.rawValue) }),
             "resolved": .object(Dictionary(uniqueKeysWithValues: VisibilityAnimationStyle.allCases.map { ($0.rawValue, J.string($0.resolved.rawValue)) })),
             "defaultToolbar": .array(WorkspacePreferences.defaultToolbar.map { .string($0.rawValue) }),
+            "toolbarControls": .array(ToolbarControl.allCases.map { control in
+                .object(["id": .string(control.rawValue), "label": .string(control.label), "detail": .string(control.detail),
+                         "symbol": .string(control.symbol), "action": control.action.map { .string($0.rawValue) } ?? .null])
+            }),
+            "toolbarCollapseDelays": .array(WorkspacePreferences.toolbarCollapseDelays.map { .double($0) }),
             "defaultToolShortcuts": .object(WorkspacePreferences.defaultToolShortcuts.mapValues { .string($0) }),
             "legacyToolShortcuts": .object(WorkspacePreferences.legacyToolShortcuts.mapValues { .string($0) })
         ])
@@ -165,6 +183,8 @@ enum ProfilesExport {
         preferences.toolbarSize = .minimal
         preferences.shareToolStyles = true
         preferences.toolbarItems = ["tool.select", "tool.pen", "action.spotlight", "tool.text", "action.shareRegion"]
+        preferences.hiddenToolbarControls = ["redo", "settings", "zoomMenu"]
+        preferences.toolbarCollapseDelay = 5
         var pen = Style.defaults(for: .pen)
         pen.width = 5; pen.color = .blue
         var arrow = Style.defaults(for: .arrow)

@@ -175,6 +175,7 @@ public sealed partial class WorkspaceModel
             Mode = _mode,
             WorkspaceHidden = _hidden,
             ToolbarVisible = _toolbarVisible,
+            ToolbarCollapsed = _toolbarCollapsed,
             Visibility = _transition,
             Tool = _tool,
             EffectiveTool = effective,

@@ -102,7 +102,7 @@ public static class ShortcutActionExtensions
     {
         public static ValueList<ShortcutAction> AllCases => RawValues.AllCases;
 
-        /// <summary>Buttons people can add to the toolbar. Properties, Board and Clear all are always there.</summary>
+        /// <summary>Buttons people can add to the toolbar. Properties, Board and Clear all have fixed places (<see cref="ToolbarControl"/>).</summary>
         public static ValueList<ShortcutAction> ToolbarChoices => Choices;
 
         public static ShortcutAction? FromRawValue(string rawValue) => RawValues.Parse(rawValue);
