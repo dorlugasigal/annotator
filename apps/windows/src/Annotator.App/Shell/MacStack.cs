@@ -157,7 +157,7 @@ internal sealed partial class MacStack : Panel
                     passX &= Grid.GetColumn(cell) == 0;
                     passY &= Grid.GetRow(cell) == 0;
                     break;
-                case Panel and not MacStack and not MacFlow:
+                case Panel and not MacStack and not PropertyRow:
                     passX = passY = false;
                     break;
             }
@@ -216,10 +216,6 @@ internal sealed partial class MacStack : Panel
         if (element is MacStack { _exact: { } measured })
         {
             size = measured;
-        }
-        else if (element is MacFlow { ExactSize: { } flowed })
-        {
-            size = flowed;
         }
         else if (element is IExactSize { ExactSize: { } known })
         {

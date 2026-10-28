@@ -78,6 +78,9 @@ internal sealed partial class ShortcutsPageBody : Grid
     private readonly DirectionPicker _direction;
     private readonly ChoicePopUp _startAt = new("Start at", 126);
     private readonly ChoicePopUp _properties = new("Properties", 135.5);
+    /// <summary>Mac Picker("Shrink"): Never, or after 3, 5, 10 or 30 seconds with the pointer off the toolbar.</summary>
+    private readonly ChoicePopUp _shrink = new("Shrink", 170);
+    private readonly PropertyChoicesEditor _choices;
     private readonly List<KeyChip> _rowChips = [];
     private readonly List<GlobalKeyButton> _globals = [];
     private readonly AccessibleGroup _fixedGroup = new("Keys that stay the same") { HorizontalAlignment = HorizontalAlignment.Left };
@@ -105,8 +108,11 @@ internal sealed partial class ShortcutsPageBody : Grid
             _model.SetToolbarSize(size);
         });
         _direction = new DirectionPicker(model.SetToolbarOrientation);
+        AutomationProperties.SetAutomationId(_shrink, "toolbar-collapse-delay");
+        _choices = new PropertyChoicesEditor(model);
         var stack = new MacStack { Orientation = Orientation.Vertical, Spacing = 28 };
         stack.Children.Add(_arranger.Root);
+        stack.Children.Add(_choices.Root);
         stack.Children.Add(LayoutSection());
         stack.Children.Add(ButtonKeysSection());
         stack.Children.Add(GlobalKeysSection());
@@ -196,7 +202,8 @@ internal sealed partial class ShortcutsPageBody : Grid
         section.Children.Add(_sizes.Root);
         // Mac Form rows: the label column as wide as the widest label, labels trailing, 16 points before each control.
         var form = new MacStack { Orientation = Orientation.Vertical, Spacing = 12, HorizontalAlignment = HorizontalAlignment.Left };
-        (string Label, FrameworkElement Control)[] rows = [("Direction", _direction.Root), ("Start at", _startAt), ("Properties", _properties)];
+        (string Label, FrameworkElement Control)[] rows =
+            [("Direction", _direction.Root), ("Start at", _startAt), ("Properties", _properties), ("Shrink", _shrink)];
         foreach ((string text, FrameworkElement control) in rows)
         {
             var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16, HorizontalAlignment = HorizontalAlignment.Left };
@@ -208,25 +215,47 @@ internal sealed partial class ShortcutsPageBody : Grid
             form.Children.Add(row);
         }
         section.Children.Add(form);
-        const string drag = "Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical.";
-        var caption = new AccessibleText(drag);
+        section.Children.Add(Caption("hand.draw",
+            "Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical."));
+        section.Children.Add(Caption("capsule",
+            "A shrunk toolbar is one button that shows Draw or Apps. Point at it or click it to get your tools back."));
+        return section;
+    }
+
+    /// <summary>Mac Label(_:systemImage:) in the caption font and the secondary color.</summary>
+    private static FrameworkElement Caption(string symbol, string text)
+    {
+        var caption = new AccessibleText(text);
         var line = new MacStack { Orientation = Orientation.Horizontal, Spacing = 5 };
-        FrameworkElement hand = Glyphs.ForSymbol("hand.draw", 12, "AnnotatorGlyphSecondary");
-        hand.VerticalAlignment = VerticalAlignment.Center;
-        line.Children.Add(hand);
-        line.Children.Add(SettingsText.Label(drag, 10, "AnnotatorSecondaryText"));
+        FrameworkElement icon = Glyphs.ForSymbol(symbol, 12, "AnnotatorGlyphSecondary");
+        icon.VerticalAlignment = VerticalAlignment.Center;
+        line.Children.Add(icon);
+        line.Children.Add(SettingsText.Label(text, 10, "AnnotatorSecondaryText"));
         caption.Children.Add(line);
         caption.HorizontalAlignment = HorizontalAlignment.Left;
         caption.SizeChanged += (_, _) => caption.Bounds = new Windows.Foundation.Rect(1, 0, Math.Max(0, caption.ActualWidth - 1), caption.ActualHeight);
-        section.Children.Add(caption);
-        return section;
+        return caption;
     }
+
+    /// <summary>The delay choices, plus a delay from an imported profile that isn't one of them (Mac collapseDelays).</summary>
+    private static IReadOnlyList<double> CollapseDelays(double? current)
+    {
+        ValueList<double> choices = WorkspacePreferences.ToolbarCollapseDelays;
+        if (current is not { } delay || choices.Contains(delay))
+        {
+            return [.. choices];
+        }
+        return [.. choices.Append(delay).Order()];
+    }
+
+    private static string DelayTitle(double? delay) => delay is { } seconds
+        ? $"After {seconds.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)} seconds" : "Never";
 
     private FrameworkElement ButtonKeysSection()
     {
         var section = new MacStack { Orientation = Orientation.Vertical, Spacing = 12 };
-        section.Children.Add(SectionTitle("Buttons that are always there",
-            "These buttons are always in the toolbar. Their keys work while you draw, like the keys above."));
+        section.Children.Add(SectionTitle("Keys for toolbar buttons",
+            "These keys work while you draw, even when you take the button off your toolbar."));
         var grid = new ColumnsPanel { Columns = 2, Spacing = 10 };
         foreach (ShortcutCommand command in ShortcutPage.AlwaysThere)
         {
@@ -373,6 +402,10 @@ internal sealed partial class ShortcutsPageBody : Grid
         ToolbarPropertiesMode mode = ToolbarPropertiesMode.From(preferences);
         _properties.Show(mode.RawValue, [.. new[] { ToolbarPropertiesMode.ToolsOnly, ToolbarPropertiesMode.Quick, ToolbarPropertiesMode.Full }
             .Select(choice => (choice.RawValue, (Action)(() => _model.ApplyPropertiesMode(choice))))]);
+        double? collapse = preferences.ToolbarCollapseDelay;
+        _shrink.Show(DelayTitle(collapse), [(DelayTitle(null), (Action)(() => _model.SetToolbarCollapseDelay(null))),
+            .. CollapseDelays(collapse).Select(delay => (DelayTitle(delay), (Action)(() => _model.SetToolbarCollapseDelay(delay))))]);
+        _choices.Apply(snapshot);
         _fixedKeys.Children.Clear();
         foreach (FixedKey key in ShortcutPage.FixedKeys(preferences, _model.SupportsGlobalShortcut(GlobalShortcutAction.LiveZoom)))
         {
@@ -399,7 +432,10 @@ internal sealed partial class ShortcutsPageBody : Grid
             state.Append(key).Append('=').Append(id).Append(',');
         }
         state.Append('|').Append(preferences.ToolbarSize).Append('|').Append(preferences.ToolbarOrientation).Append('|')
-            .Append(preferences.ToolbarDockEdge).Append('|').Append(ToolbarPropertiesMode.From(preferences));
+            .Append(preferences.ToolbarDockEdge).Append('|').Append(ToolbarPropertiesMode.From(preferences))
+            .Append('|').Append(string.Join(',', (IEnumerable<string>?)preferences.HiddenToolbarControls ?? []))
+            .Append('|').Append(preferences.ToolbarCollapseDelay)
+            .Append('|').Append(string.Join(',', (IEnumerable<string>?)preferences.ExpandedPropertyChoices ?? []));
         foreach (GlobalShortcutKind kind in GlobalShortcutKind.AllCases)
         {
             state.Append('|').Append(WindowsShortcuts.Label(kind.Value(preferences)))

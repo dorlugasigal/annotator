@@ -82,8 +82,57 @@ public static class ToolbarArranger
     }
 
     /// <summary>The tray's words next to "More tools": the idle hint, or that everything is in the toolbar.</summary>
-    public static string TrayHint(IReadOnlyList<ShortcutCommand> order) =>
-        Tray(order).Count == 0 ? "Everything is in your toolbar." : "Drag one up to add it, or click its plus button.";
+    public static string TrayHint(IReadOnlyList<ShortcutCommand> order, IReadOnlySet<ToolbarControl>? hidden = null) =>
+        Tray(order).Count == 0 && (hidden is null || hidden.Count == 0)
+            ? "Everything is in your toolbar." : "Drag one up to add it, or click its plus button.";
+
+    /// <summary>The heading of the tray's group of the toolbar's own buttons that are off (Mac TrayGroup.buttons).</summary>
+    public const string ButtonsHeading = "Toolbar buttons";
+
+    public const string AllButtonsBack = "Every toolbar button is back.";
+
+    /// <summary>The toolbar's own buttons that are off, in their toolbar order, for the tray's "Toolbar buttons" group.</summary>
+    public static IReadOnlyList<ToolbarControl> HiddenControls(IReadOnlySet<ToolbarControl> hidden) =>
+        [.. ToolbarControl.AllCases.Where(hidden.Contains)];
+
+    /// <summary>
+    /// The accessibility identifier of one of the toolbar's own buttons in the arranger, such as "toolbar-control-undo" or
+    /// "more-control-undo" (Mac ArrangerItem.control's id "control.undo").
+    /// </summary>
+    public static string ControlIdentifier(ToolbarControl control, bool inToolbar) =>
+        (inToolbar ? "toolbar-" : "more-") + "control-" + control.RawValue;
+
+    /// <summary>The help of one of the toolbar's own buttons in the strip (Mac controlStripItem .help).</summary>
+    public static string ControlHelp(ToolbarControl control) =>
+        $"{control.Label}: {control.Detail} Drag it down to take it off your toolbar.";
+
+    /// <summary>The help of a turned-off button's tile in the tray.</summary>
+    public static string ControlTrayHelp(ToolbarControl control) =>
+        $"{control.Detail} Drag it into your toolbar, or click the plus button.";
+
+    /// <summary>Mac add(.control): puts a button back; the words to say, or null when it is already there.</summary>
+    public static string? AddControl(WorkspaceModel model, ToolbarControl control)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        if (!model.Snapshot.HiddenToolbarControls.Contains(control))
+        {
+            return null;
+        }
+        model.SetToolbarControl(control, shown: true);
+        return $"{control.Label} is back in your toolbar.";
+    }
+
+    /// <summary>Mac remove(.control): takes a button off; its key keeps working.</summary>
+    public static string? RemoveControl(WorkspaceModel model, ToolbarControl control)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        if (model.Snapshot.HiddenToolbarControls.Contains(control))
+        {
+            return null;
+        }
+        model.SetToolbarControl(control, shown: false);
+        return $"{control.Label} moved to More tools. Its key still works.";
+    }
 
     /// <summary>The accessibility identifier of a toolbar item or a tray tile, such as "toolbar-tool-select" or "more-action-spotlight".</summary>
     public static string Identifier(ShortcutCommand item, bool inToolbar) =>

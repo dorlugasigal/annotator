@@ -16,14 +16,15 @@ using Windows.Win32.Foundation;
 namespace Annotator.App.Settings;
 
 /// <summary>
-/// The Settings window (WIN-UI-03; the Mac's Settings scene with SettingsWindowSurface): resizable and nonmodal, 840 by
+/// The Settings window (WIN-UI-03; the Mac's Settings scene with SettingsWindowSurface): resizable and nonmodal, 1420 by
 /// 700 points at first, at least 720 by 620 and at most the work area, centered on the display with the toolbar. Like the
 /// Mac's window it stays above other windows at the toolbar's level; it has a taskbar button and shows in Alt+Tab. The
 /// close button hides it, keeping its size, place and tab. Report a problem and Share feedback open over it.
 /// </summary>
 internal sealed class SettingsWindow : Window
 {
-    public const double DefaultWidth = 840;
+    /// <summary>Wide enough for 15 tools and every toolbar button on one line in Toolbar and Shortcuts (Mac defaultContentSize).</summary>
+    public const double DefaultWidth = 1420;
     public const double DefaultHeight = 700;
     public const double MinimumWidth = 720;
     public const double MinimumHeight = 620;
@@ -278,7 +279,7 @@ internal sealed class SettingsWindow : Window
     }
 
     /// <summary>
-    /// The first placement: 840 by 700 points, or the work area when it is smaller, centered on the display with the
+    /// The first placement: 1420 by 700 points, or the work area when it is smaller, centered on the display with the
     /// toolbar (or the pointer); at least 720 by 620 points.
     /// </summary>
     private void Place()

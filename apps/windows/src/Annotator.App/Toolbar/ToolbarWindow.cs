@@ -172,6 +172,7 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         if (!snapshot.ToolbarVisible)
         {
             _settledProperties = null;
+            StopCollapse();
             if (_shown)
             {
                 // Mac hideTools and orderOut end a drag.
@@ -224,6 +225,10 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         foreach (Action<WorkspaceSnapshot> update in _updates)
         {
             update(snapshot);
+        }
+        if (FollowCollapse(snapshot, appearing: !_shown) && rebuilt && moves)
+        {
+            RevealMorph();
         }
         _markers.Settle(_controlMotion);
         if (!_shown)

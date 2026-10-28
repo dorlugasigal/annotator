@@ -84,6 +84,26 @@ public sealed class ToolbarCustomizationTests
     }
 
     [Fact]
+    public void SettingsTakesButtonsOffAndPutsThemBack()
+    {
+        WorkspaceModel model = Drawing();
+        IReadOnlyList<ShortcutCommand> order = [.. model.Snapshot.ToolbarItems];
+        Assert.Equal("Undo moved to More tools. Its key still works.", Annotator.Workspace.Settings.ToolbarArranger.RemoveControl(model, ToolbarControl.Undo));
+        Assert.Null(Annotator.Workspace.Settings.ToolbarArranger.RemoveControl(model, ToolbarControl.Undo));
+        Assert.Equal([ToolbarControl.Undo], Annotator.Workspace.Settings.ToolbarArranger.HiddenControls(model.Snapshot.HiddenToolbarControls));
+        Assert.Equal("toolbar-control-undo", Annotator.Workspace.Settings.ToolbarArranger.ControlIdentifier(ToolbarControl.Undo, inToolbar: true));
+        Assert.Equal("more-control-undo", Annotator.Workspace.Settings.ToolbarArranger.ControlIdentifier(ToolbarControl.Undo, inToolbar: false));
+        Assert.Equal("Drag one up to add it, or click its plus button.",
+            Annotator.Workspace.Settings.ToolbarArranger.TrayHint(WorkspaceModel.ToolbarCandidates, model.Snapshot.HiddenToolbarControls));
+        Assert.Equal("Undo is back in your toolbar.", Annotator.Workspace.Settings.ToolbarArranger.AddControl(model, ToolbarControl.Undo));
+        Assert.Null(Annotator.Workspace.Settings.ToolbarArranger.AddControl(model, ToolbarControl.Undo));
+        Assert.Empty(model.Snapshot.HiddenToolbarControls);
+        Assert.Equal("Everything is in your toolbar.",
+            Annotator.Workspace.Settings.ToolbarArranger.TrayHint(WorkspaceModel.ToolbarCandidates, model.Snapshot.HiddenToolbarControls));
+        Assert.Equal(order, model.Snapshot.ToolbarItems.ToArray());
+    }
+
+    [Fact]
     public void PropertiesMakeTheToolbarWiderUpToTheScreen()
     {
         Assert.Equal(932, ToolbarToolLayout.GrownWidth(932, 1400, 850));
