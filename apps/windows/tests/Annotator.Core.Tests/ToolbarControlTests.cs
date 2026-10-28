@@ -58,6 +58,53 @@ public class ToolbarControlTests
     }
 
     [Fact]
+    public void PropertiesCanShowAllTheirChoicesAndRoundTrip()
+    {
+        var preferences = new WorkspacePreferences();
+        Assert.All(PropertyChoice.AllCases, choice => Assert.False(preferences.ShowsAllChoices(choice)));
+        preferences.SetShowsAllChoices(PropertyChoice.Font, shown: true);
+        preferences.SetShowsAllChoices(PropertyChoice.Pattern, shown: true);
+        preferences.SetShowsAllChoices(PropertyChoice.Font, shown: true);
+        Assert.Equal(["pattern", "font"], preferences.ExpandedPropertyChoices!.Value.ToArray());
+        Assert.True(preferences.ShowsAllChoices(PropertyChoice.Pattern));
+        Assert.Equal(preferences, WorkspacePreferences.Read(preferences.Data()));
+        preferences.SetShowsAllChoices(PropertyChoice.Pattern, shown: false);
+        preferences.SetShowsAllChoices(PropertyChoice.Font, shown: false);
+        Assert.Null(preferences.ExpandedPropertyChoices);
+        Assert.Equal([3, 3, 3, 2, 2, 2, 2, 3], PropertyChoice.AllCases.Select(choice => choice.ChoiceCount).ToArray());
+
+        string json = Encoding.UTF8.GetString(new WorkspacePreferences().Data());
+        string future = json.Insert(1, "\"expandedPropertyChoices\":[\"roughness\",\"sparkle\",\"roughness\"],");
+        Assert.Equal(["roughness"], WorkspacePreferences.Read(Encoding.UTF8.GetBytes(future)).ExpandedPropertyChoices!.Value.ToArray());
+        var invalid = new WorkspacePreferences { ExpandedPropertyChoices = ["font", "font"] };
+        Assert.Throws<CanvasError>(() => invalid.Data());
+        invalid.ExpandedPropertyChoices = ["sparkle"];
+        Assert.Throws<CanvasError>(() => invalid.Data());
+    }
+
+    [Fact]
+    public void SpotlightAndZoomMenusAreToolbarItemsWithoutKeys()
+    {
+        Assert.Equal([ShortcutAction.Spotlight, ShortcutAction.CursorHalo, ShortcutAction.PointerLens, ShortcutAction.SmartDraw,
+                      ShortcutAction.ShareRegion, ShortcutAction.FocusMenu, ShortcutAction.ZoomMenu],
+                     ShortcutAction.ToolbarChoices.ToArray());
+        Assert.True(ShortcutAction.FocusMenu.IsMenu);
+        Assert.False(ShortcutAction.Spotlight.IsMenu);
+        var preferences = new WorkspacePreferences
+        {
+            ToolbarItems = ["tool.select", "action.focusMenu", "tool.pen", "action.zoomMenu"],
+            ToolbarTools = ["select", "pen"],
+        };
+        Assert.Equal(preferences, WorkspacePreferences.Read(preferences.Data()));
+        var error = Assert.Throws<CanvasError>(() =>
+            preferences.Bind(LocalShortcut.Create("j"), ShortcutCommand.ForAction(ShortcutAction.ZoomMenu)));
+        Assert.Contains("Zoom menu opens with a click, so it has no key. J stays free.", error.Message, StringComparison.Ordinal);
+        Assert.Null(preferences.CommandShortcuts);
+        preferences.CommandShortcuts = WorkspacePreferences.EmptyStrings.SetItem("j", "action.focusMenu");
+        Assert.Throws<CanvasError>(() => preferences.Data());
+    }
+
+    [Fact]
     public void ToolbarMorphHandsOverBetweenFaces()
     {
         Assert.Equal(0, ToolbarMorph.Shape(0));

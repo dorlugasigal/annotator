@@ -169,7 +169,11 @@ public class ShortcutBindingTests
             Assert.Throws<CanvasError>(() => candidate.Validate());
         }
         Assert.Equal(
-            new[] { ShortcutAction.Spotlight, ShortcutAction.CursorHalo, ShortcutAction.PointerLens, ShortcutAction.SmartDraw, ShortcutAction.ShareRegion },
+            new[]
+            {
+                ShortcutAction.Spotlight, ShortcutAction.CursorHalo, ShortcutAction.PointerLens, ShortcutAction.SmartDraw,
+                ShortcutAction.ShareRegion, ShortcutAction.FocusMenu, ShortcutAction.ZoomMenu,
+            },
             ShortcutAction.ToolbarChoices);
         preferences.ToolbarItems = Strings("tool.select", "action.shareRegion");
         preferences.ToolbarTools = Strings("select");

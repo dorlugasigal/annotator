@@ -234,7 +234,7 @@ public sealed class WorkspaceSnapshot
     /// <summary>The toolbar shows as one button: the Annotator mark and whether you draw or use apps (Mac toolbarCollapsed).</summary>
     public bool ToolbarCollapsed { get; internal init; }
 
-    /// <summary>The toolbar's own buttons and menus that are turned off in Settings (Mac hiddenToolbarControls).</summary>
+    /// <summary>The toolbar's own buttons that are turned off in Settings (Mac hiddenToolbarControls).</summary>
     public IReadOnlySet<ToolbarControl> HiddenToolbarControls
     {
         get
@@ -327,6 +327,9 @@ public sealed class WorkspaceSnapshot
 
     /// <summary>A copy of the preferences; immutable contents.</summary>
     public WorkspacePreferences Preferences { get; internal init; }
+
+    /// <summary>Mac showsAllChoices(_:): whether a property shows all its choices instead of one button.</summary>
+    public bool ShowsAllChoices(PropertyChoice choice) => Preferences.ShowsAllChoices(choice);
 
     /// <summary>The editing target's board (Mac board), or the board the first display gets.</summary>
     public Board Board { get; internal init; }
@@ -444,6 +447,8 @@ public sealed class WorkspaceSnapshot
         ShortcutAction.PointerLens => MagnifierEnabled,
         ShortcutAction.SmartDraw => SmartDraw,
         ShortcutAction.ShareRegion => RegionSharing.IsCapturing,
+        ShortcutAction.FocusMenu => Spotlight || CursorHalo,
+        ShortcutAction.ZoomMenu => MagnifierEnabled || ScreenZoomEnabled,
         _ => false,
     };
 

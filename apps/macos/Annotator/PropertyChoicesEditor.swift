@@ -44,7 +44,6 @@ struct PropertyChoicesEditor: View {
         return VStack(alignment: .leading, spacing: 8) {
             Label(choice.label, systemImage: Self.symbol(choice))
                 .font(.system(size: 12, weight: .semibold))
-                .accessibilityAddTraits(.isHeader)
             HStack(alignment: .top, spacing: 8) {
                 option(choice, all: false, selected: !all)
                 option(choice, all: true, selected: all)

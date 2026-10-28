@@ -38,16 +38,20 @@ public enum InspectorItem
     /// <summary>The opacity slider and field with its caption.</summary>
     Opacity,
 
-    /// <summary>One button that steps through Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>).</summary>
+    /// <summary>One button that steps through Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>), or the
+    /// three side by side (<see cref="InspectorPlan.ShowsAllChoices"/>).</summary>
     Pattern,
 
-    /// <summary>One button that steps through Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>).</summary>
+    /// <summary>One button that steps through Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>), or the
+    /// three side by side.</summary>
     Roughness,
 
-    /// <summary>"Fill style": one button that steps through the fill patterns; only while a visible fill is set.</summary>
+    /// <summary>"Fill style": one button that steps through the fill patterns, or all of them side by side; only while a
+    /// visible fill is set.</summary>
     FillStyle,
 
-    /// <summary>"Edges": the Rounded corners switch of rectangles and diamonds.</summary>
+    /// <summary>"Edges": the Rounded corners switch of rectangles and diamonds, or Sharp corners and Rounded corners side
+    /// by side.</summary>
     Edges,
 
     /// <summary>The grid's rows and columns fields.</summary>
@@ -56,7 +60,7 @@ public enum InspectorItem
     /// <summary>The axes' centered switch and tick count; the explanation is the tick count's help.</summary>
     Axes,
 
-    /// <summary>"Pressure": the Ink pressure switch.</summary>
+    /// <summary>"Pressure": the Ink pressure switch, or Constant pressure and Ink pressure side by side.</summary>
     Pressure,
 
     SmartDraw,
@@ -64,7 +68,8 @@ public enum InspectorItem
     /// <summary>The counter's or ruler's hint (<see cref="InspectorPlan.Caption"/>).</summary>
     Caption,
 
-    /// <summary>One button that switches between System and Mono (<see cref="InspectorPlan.FontChoices"/>).</summary>
+    /// <summary>One button that switches between System and Mono (<see cref="InspectorPlan.FontChoices"/>), or the two
+    /// side by side.</summary>
     Font,
 
     /// <summary>"Size": just the slider, with its value beside it ("28 pt").</summary>
@@ -72,7 +77,7 @@ public enum InspectorItem
 
     Weight,
 
-    /// <summary>One button that steps through Left, Center and Right.</summary>
+    /// <summary>One button that steps through Left, Center and Right, or the three side by side.</summary>
     Alignment,
 }
 
@@ -81,8 +86,8 @@ public enum InspectorItem
 /// The app turns the plan into controls; the plan changes only when the set of controls changes.
 /// </summary>
 /// <param name="Context">"Editing …" while objects are selected (Mac selected-object-context), or null.</param>
-/// <param name="Arrow">The arrow controls (Start, End, the Curved arrow switch and the Head size slider) end the row as
-/// one group, or follow the column when compact.</param>
+/// <param name="Arrow">The arrow controls (Start, End, the Curved arrow switch or both arrow types, and the Head size
+/// slider) end the row as one group, or follow the column when compact.</param>
 /// <param name="Caption">The counter's or ruler's hint for <see cref="InspectorItem.Caption"/>.</param>
 public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Body, ImmutableArray<InspectorItem> Items, bool Arrow,
                                    string? Caption)
@@ -93,8 +98,28 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
     public const string CounterCaption = "Click to add sequential numbered markers.";
     public const string RulerCaption = "Drag to measure the distance in source pixels.";
 
+    /// <summary>Properties that show all their choices side by side instead of one button (Mac showsAllChoices).</summary>
+    public ImmutableArray<PropertyChoice> AllChoices { get; init; } = [];
+
     /// <summary>A key that changes exactly when the controls change, for rebuilding them.</summary>
-    public string Key => $"{Tool}|{Context is not null}|{Body}|{string.Join(',', Items)}|{Arrow}";
+    public string Key => $"{Tool}|{Context is not null}|{Body}|{string.Join(',', Items)}|{Arrow}|{string.Join(',', AllChoices)}";
+
+    /// <summary>Whether <paramref name="choice"/> shows all its choices side by side.</summary>
+    public bool ShowsAllChoices(PropertyChoice choice) => AllChoices.Contains(choice);
+
+    /// <summary>The arrow type block's title: "Curved" for the switch, "Arrow type" for both choices.</summary>
+    public string ArrowTypeTitle => ShowsAllChoices(PropertyChoice.ArrowType) ? "Arrow type" : "Curved";
+
+    /// <summary>
+    /// The names of a property's buttons when it shows all its choices (Mac SampleOptions and the font and alignment
+    /// buttons): "Solid", "Sharp corners", "System font", "Align left".
+    /// </summary>
+    public static ImmutableArray<string> ChoiceNames(PropertyChoice choice) => choice switch
+    {
+        PropertyChoice.Font => [.. choice.Choices.Select(name => $"{name} font")],
+        PropertyChoice.Alignment => [.. choice.Choices.Select(name => $"Align {name.ToLowerInvariant()}")],
+        _ => [.. choice.Choices],
+    };
 
     public static InspectorPlan For(WorkspaceSnapshot snapshot)
     {
@@ -177,7 +202,10 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
                 items.Add(InspectorItem.SmartDraw);
             }
         }
-        return new InspectorPlan(tool, context, body, items.ToImmutable(), tool == Tool.Arrow, caption);
+        return new InspectorPlan(tool, context, body, items.ToImmutable(), tool == Tool.Arrow, caption)
+        {
+            AllChoices = [.. PropertyChoice.AllCases.Where(snapshot.ShowsAllChoices)],
+        };
     }
 
     /// <summary>The "Editing …" line for a selection (Mac selected-object-context), or null without one.</summary>

@@ -32,7 +32,8 @@ struct ToolbarMetrics: Equatable {
     var compactThreshold: CGFloat { minimal ? 420 : 700 }
     var verticalRailWidth: CGFloat { buttonWidth + padding * 2 }
     var verticalToolPitch: CGFloat { minimal ? 39 : 51 }
-    var verticalReserve: CGFloat { minimal ? 364 : 374 }
+    /// Room for the rail's own buttons below the tools, with gaps and padding.
+    var verticalReserve: CGFloat { minimal ? 346 : 354 }
 
     /// The width one of the toolbar's own controls takes in the horizontal row, with its gap.
     func horizontalRoom(_ control: ToolbarControl) -> CGFloat {

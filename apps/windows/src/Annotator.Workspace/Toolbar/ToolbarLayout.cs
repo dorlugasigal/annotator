@@ -98,18 +98,15 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
 
     public double VerticalToolPitch => Minimal ? 39 : 51;
 
-    public double VerticalReserve => Minimal ? 364 : 374;
+    /// <summary>Room for the rail's own buttons below the tools, with gaps and padding.</summary>
+    public double VerticalReserve => Minimal ? 346 : 354;
 
-    /// <summary>
-    /// The width one of the toolbar's own controls takes in the horizontal row, with its gap. The menus sit with the
-    /// properties instead.
-    /// </summary>
+    /// <summary>The width one of the toolbar's own controls takes in the horizontal row, with its gap.</summary>
     public double HorizontalRoom(ToolbarControl control) => control switch
     {
         ToolbarControl.Library => ButtonWidth + Spacing,
         ToolbarControl.Board => BoardWidth + Spacing,
         ToolbarControl.Mode => ModeWidth + Spacing,
-        ToolbarControl.FocusMenu or ToolbarControl.ZoomMenu => 0,
         _ => ActionSize.Width + Spacing,
     };
 
@@ -157,7 +154,7 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
             ToolbarControl.Board => (Minimal ? 30 : 36) + gap,
             ToolbarControl.Mode => 36 + gap,
             ToolbarControl.Properties or ToolbarControl.ClearAll or ToolbarControl.Settings or ToolbarControl.Hide
-                or ToolbarControl.ZoomMenu => ActionSize.Height + gap,
+                => ActionSize.Height + gap,
             // Undo and Redo share a row in the expanded rail and stack in the minimal one.
             ToolbarControl.Undo or ToolbarControl.Redo => Minimal ? ActionSize.Height + 3
                 : control == ToolbarControl.Redo && hidden.Contains(ToolbarControl.Undo) && hidden.Contains(ToolbarControl.Redo)

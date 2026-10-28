@@ -377,6 +377,9 @@ public sealed partial class WorkspaceModel
             case ShortcutAction.PointerLens:
                 ToggleMagnifier();
                 return true;
+            case ShortcutAction.FocusMenu or ShortcutAction.ZoomMenu:
+                // Menus open with a click and have no key.
+                return false;
             default:
                 return false;
         }

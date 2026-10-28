@@ -230,6 +230,10 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
     /// <summary>Seconds the pointer can stay off the toolbar before it shrinks to one button. <c>null</c> keeps it open.</summary>
     public double? ToolbarCollapseDelay;
 
+    /// <summary>Properties that show all their choices side by side (<see cref="PropertyChoice"/> raw values). <c>null</c>
+    /// means every property is one button.</summary>
+    public ValueList<string>? ExpandedPropertyChoices;
+
     private const int MaximumBytes = 256 * 1_024;
 
     public WorkspacePreferences()
@@ -473,7 +477,8 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         && OptionalDictionaryEquals(CommandShortcuts, other.CommandShortcuts) && ToolbarSize == other.ToolbarSize
         && ShareToolStyles == other.ShareToolStyles && ToolbarItems == other.ToolbarItems
         && BreakTimer == other.BreakTimer && BreakShortcut == other.BreakShortcut
-        && HiddenToolbarControls == other.HiddenToolbarControls && ToolbarCollapseDelay == other.ToolbarCollapseDelay;
+        && HiddenToolbarControls == other.HiddenToolbarControls && ToolbarCollapseDelay == other.ToolbarCollapseDelay
+        && ExpandedPropertyChoices == other.ExpandedPropertyChoices;
 
     public override readonly bool Equals(object? obj) => obj is WorkspacePreferences other && Equals(other);
 

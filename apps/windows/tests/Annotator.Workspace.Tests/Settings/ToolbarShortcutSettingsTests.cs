@@ -629,9 +629,10 @@ public sealed class ShortcutPreferenceTests
     {
         IReadOnlyList<ShortcutCommand> candidates = WorkspaceModel.ToolbarCandidates;
         Assert.Equal(ShortcutCommand.ForTool(Tool.Select), candidates[0]);
-        Assert.DoesNotContain(ShortcutCommand.ForTool(Tool.Blur), candidates.Take(candidates.Count - 8));
-        Assert.Equal([Tool.Blur, Tool.Pixelate, Tool.Distort], candidates.Skip(candidates.Count - 8).Take(3).Select(item => item.Tool!.Value));
-        Assert.Equal(ShortcutAction.ToolbarChoices, candidates.TakeLast(5).Select(item => item.Action!.Value));
+        int added = 3 + ShortcutAction.ToolbarChoices.Count;
+        Assert.DoesNotContain(ShortcutCommand.ForTool(Tool.Blur), candidates.Take(candidates.Count - added));
+        Assert.Equal([Tool.Blur, Tool.Pixelate, Tool.Distort], candidates.Skip(candidates.Count - added).Take(3).Select(item => item.Tool!.Value));
+        Assert.Equal(ShortcutAction.ToolbarChoices, candidates.TakeLast(ShortcutAction.ToolbarChoices.Count).Select(item => item.Action!.Value));
         Assert.Equal(candidates.Count, candidates.Distinct().Count());
     }
 }

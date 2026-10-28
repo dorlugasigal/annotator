@@ -1,16 +1,16 @@
 namespace Annotator.Core;
 
 /// <summary>
-/// Swift `ToolbarControl` (ToolbarControls.swift): the toolbar's own buttons and menus, next to the tools. People can
-/// turn each one off in Settings; the tools and added buttons such as Spotlight are arranged separately
+/// Swift `ToolbarControl` (ToolbarControls.swift): the toolbar's own buttons, next to the tools. People can turn each
+/// one off in Settings; the tools and added buttons such as Spotlight and the Zoom menu are arranged separately
 /// (<see cref="WorkspacePreferences.ToolbarItems"/>).
 /// </summary>
-public enum ToolbarControl { Library, Board, Mode, Undo, Redo, ClearAll, Properties, Settings, Hide, FocusMenu, ZoomMenu }
+public enum ToolbarControl { Library, Board, Mode, Undo, Redo, ClearAll, Properties, Settings, Hide }
 
 public static class ToolbarControlExtensions
 {
     internal static readonly RawValueMap<ToolbarControl> RawValues = new(
-        "library", "board", "mode", "undo", "redo", "clearAll", "properties", "settings", "hide", "focusMenu", "zoomMenu");
+        "library", "board", "mode", "undo", "redo", "clearAll", "properties", "settings", "hide");
 
     extension(ToolbarControl)
     {
@@ -34,8 +34,6 @@ public static class ToolbarControlExtensions
             ToolbarControl.Properties => "Properties",
             ToolbarControl.Settings => "Settings",
             ToolbarControl.Hide => "Hide",
-            ToolbarControl.FocusMenu => "Spotlight and cleanup menu",
-            ToolbarControl.ZoomMenu => "Zoom menu",
             _ => throw new ArgumentOutOfRangeException(nameof(control)),
         };
 
@@ -50,8 +48,6 @@ public static class ToolbarControlExtensions
             ToolbarControl.Properties => "Quick controls, full properties or tools only.",
             ToolbarControl.Settings => "Open Settings.",
             ToolbarControl.Hide => "Hide drawings and tools.",
-            ToolbarControl.FocusMenu => "Spotlight, cursor halo and cleanup.",
-            ToolbarControl.ZoomMenu => "Pointer lens and screen zoom.",
             _ => throw new ArgumentOutOfRangeException(nameof(control)),
         };
 
@@ -67,8 +63,6 @@ public static class ToolbarControlExtensions
             ToolbarControl.Properties => "slider.horizontal.3",
             ToolbarControl.Settings => "gearshape",
             ToolbarControl.Hide => "xmark",
-            ToolbarControl.FocusMenu => "light.beacon.max",
-            ToolbarControl.ZoomMenu => "plus.magnifyingglass",
             _ => throw new ArgumentOutOfRangeException(nameof(control)),
         };
 
@@ -80,6 +74,59 @@ public static class ToolbarControlExtensions
             ToolbarControl.Properties => ShortcutAction.Properties,
             _ => null,
         };
+    }
+}
+
+/// <summary>
+/// Swift `PropertyChoice`: properties with a few choices. Each shows as one button that steps through its choices, which
+/// is the default, or as all its choices side by side.
+/// </summary>
+public enum PropertyChoice { Pattern, Roughness, FillStyle, Edges, ArrowType, Pressure, Font, Alignment }
+
+public static class PropertyChoiceExtensions
+{
+    internal static readonly RawValueMap<PropertyChoice> RawValues = new(
+        "pattern", "roughness", "fillStyle", "edges", "arrowType", "pressure", "font", "alignment");
+
+    extension(PropertyChoice)
+    {
+        public static ValueList<PropertyChoice> AllCases => RawValues.AllCases;
+
+        public static PropertyChoice? FromRawValue(string rawValue) => RawValues.Parse(rawValue);
+    }
+
+    extension(PropertyChoice choice)
+    {
+        public string RawValue => RawValues.RawValue(choice);
+
+        public string Label => choice switch
+        {
+            PropertyChoice.Pattern => "Pattern",
+            PropertyChoice.Roughness => "Roughness",
+            PropertyChoice.FillStyle => "Fill style",
+            PropertyChoice.Edges => "Edges",
+            PropertyChoice.ArrowType => "Arrow type",
+            PropertyChoice.Pressure => "Pressure",
+            PropertyChoice.Font => "Font",
+            PropertyChoice.Alignment => "Alignment",
+            _ => throw new ArgumentOutOfRangeException(nameof(choice)),
+        };
+
+        /// <summary>The property's choices, in order. One button starts at the first and steps through them.</summary>
+        public ValueList<string> Choices => choice switch
+        {
+            PropertyChoice.Pattern => ["Solid", "Dashed", "Dotted"],
+            PropertyChoice.Roughness => ["Clean", "Sketchy", "Wild"],
+            PropertyChoice.FillStyle => ["Solid", "Hatch", "Crosshatch"],
+            PropertyChoice.Edges => ["Sharp corners", "Rounded corners"],
+            PropertyChoice.ArrowType => ["Straight arrow", "Curved arrow"],
+            PropertyChoice.Pressure => ["Constant pressure", "Ink pressure"],
+            PropertyChoice.Font => ["System", "Mono"],
+            PropertyChoice.Alignment => ["Left", "Center", "Right"],
+            _ => throw new ArgumentOutOfRangeException(nameof(choice)),
+        };
+
+        public int ChoiceCount => choice.Choices.Count;
     }
 }
 
@@ -118,6 +165,32 @@ public partial struct WorkspacePreferences
         HiddenToolbarControls = ordered.Count == 0 ? null : ordered.ToValueList();
     }
 
+    /// <summary>Whether a property shows all its choices side by side instead of one button.</summary>
+    public readonly bool ShowsAllChoices(PropertyChoice choice) =>
+        ExpandedPropertyChoices is { } expanded && expanded.AsSpan().Contains(choice.RawValue);
+
+    public void SetShowsAllChoices(PropertyChoice choice, bool shown)
+    {
+        var expanded = new HashSet<string>(ExpandedPropertyChoices?.AsSpan().ToArray() ?? [], StringComparer.Ordinal);
+        if (shown)
+        {
+            expanded.Add(choice.RawValue);
+        }
+        else
+        {
+            expanded.Remove(choice.RawValue);
+        }
+        var ordered = new List<string>();
+        foreach (var candidate in PropertyChoice.AllCases)
+        {
+            if (expanded.Contains(candidate.RawValue))
+            {
+                ordered.Add(candidate.RawValue);
+            }
+        }
+        ExpandedPropertyChoices = ordered.Count == 0 ? null : ordered.ToValueList();
+    }
+
     internal readonly void ValidateToolbarControls()
     {
         if (HiddenToolbarControls is { } hidden)
@@ -140,24 +213,49 @@ public partial struct WorkspacePreferences
         {
             throw CanvasError.InvalidDocument("The toolbar can shrink after 1 to 600 seconds.");
         }
+        if (ExpandedPropertyChoices is { } expanded)
+        {
+            var unique = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in expanded)
+            {
+                if (PropertyChoice.FromRawValue(item) is null || !unique.Add(item))
+                {
+                    throw CanvasError.InvalidDocument(
+                        "Properties that show all their choices must be known properties, each listed once.");
+                }
+            }
+            if (expanded.Count > PropertyChoice.AllCases.Count)
+            {
+                throw CanvasError.InvalidDocument(
+                    "Properties that show all their choices must be known properties, each listed once.");
+            }
+        }
     }
 
-    /// <summary>Buttons from a newer version are dropped, so a profile with them still opens.</summary>
+    /// <summary>Buttons and properties from a newer version are dropped, so a profile with them still opens.</summary>
     internal void NormalizeToolbarControls()
     {
-        if (HiddenToolbarControls is not { } hidden)
+        if (HiddenToolbarControls is { } hidden)
         {
-            return;
+            HiddenToolbarControls = Known(hidden, item => ToolbarControl.FromRawValue(item) is not null);
         }
+        if (ExpandedPropertyChoices is { } expanded)
+        {
+            ExpandedPropertyChoices = Known(expanded, item => PropertyChoice.FromRawValue(item) is not null);
+        }
+    }
+
+    private static ValueList<string>? Known(ValueList<string> items, Func<string, bool> isKnown)
+    {
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var known = new List<string>();
-        foreach (var item in hidden)
+        foreach (var item in items)
         {
-            if (ToolbarControl.FromRawValue(item) is not null && seen.Add(item))
+            if (isKnown(item) && seen.Add(item))
             {
                 known.Add(item);
             }
         }
-        HiddenToolbarControls = known.Count == 0 ? null : known.ToValueList();
+        return known.Count == 0 ? null : known.ToValueList();
     }
 }

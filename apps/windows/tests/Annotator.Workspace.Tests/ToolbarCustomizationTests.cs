@@ -41,11 +41,46 @@ public sealed class ToolbarCustomizationTests
         Assert.True(bare < full - 300, $"{bare}");
         var metrics = new ToolbarMetrics(ToolbarSize.Expanded);
         Assert.Equal(metrics.RegularReserve - 30, metrics.RegularReserveHiding(new HashSet<ToolbarControl> { ToolbarControl.Undo }));
-        Assert.Equal(metrics.RegularReserve, metrics.RegularReserveHiding(new HashSet<ToolbarControl> { ToolbarControl.ZoomMenu }));
         // Undo shares its row with Redo in the expanded rail.
         Assert.Equal(metrics.VerticalReserve, metrics.VerticalReserveHiding(new HashSet<ToolbarControl> { ToolbarControl.Undo }));
         Assert.True(metrics.VerticalReserveHiding(new HashSet<ToolbarControl> { ToolbarControl.Undo, ToolbarControl.Redo })
                     < metrics.VerticalReserve);
+    }
+
+    [Fact]
+    public void PropertiesCanShowAllTheirChoices()
+    {
+        WorkspaceModel model = Drawing();
+        model.SetInspectorPinned(true);
+        model.Choose(Tool.Arrow);
+        InspectorPlan one = InspectorPlan.For(model.Snapshot);
+        Assert.Empty(one.AllChoices);
+        Assert.Equal("Curved", one.ArrowTypeTitle);
+        model.SetShowsAllChoices(PropertyChoice.ArrowType, shown: true);
+        model.SetShowsAllChoices(PropertyChoice.Pattern, shown: true);
+        InspectorPlan all = InspectorPlan.For(model.Snapshot);
+        Assert.Equal([PropertyChoice.Pattern, PropertyChoice.ArrowType], all.AllChoices.ToArray());
+        Assert.True(all.ShowsAllChoices(PropertyChoice.Pattern));
+        Assert.Equal("Arrow type", all.ArrowTypeTitle);
+        Assert.NotEqual(one.Key, all.Key);
+        Assert.Equal(["Straight arrow", "Curved arrow"], InspectorPlan.ChoiceNames(PropertyChoice.ArrowType).ToArray());
+        Assert.Equal(["System font", "Mono font"], InspectorPlan.ChoiceNames(PropertyChoice.Font).ToArray());
+        Assert.Equal(["Align left", "Align center", "Align right"], InspectorPlan.ChoiceNames(PropertyChoice.Alignment).ToArray());
+        model.ResetPropertyChoices();
+        Assert.Null(model.Snapshot.Preferences.ExpandedPropertyChoices);
+        Assert.Equal(one.Key, InspectorPlan.For(model.Snapshot).Key);
+    }
+
+    [Fact]
+    public void SpotlightAndZoomMenusLightUpAndHaveNoKey()
+    {
+        WorkspaceModel model = Drawing();
+        Assert.False(model.Snapshot.IsOn(ShortcutAction.FocusMenu));
+        model.SetSpotlight(true);
+        Assert.True(model.Snapshot.IsOn(ShortcutAction.FocusMenu));
+        Assert.False(model.Snapshot.IsOn(ShortcutAction.ZoomMenu));
+        Assert.False(model.PerformShortcutAction(ShortcutAction.ZoomMenu));
+        Assert.DoesNotContain(ShortcutCommand.ForAction(ShortcutAction.FocusMenu), model.Snapshot.ToolbarItems);
     }
 
     [Fact]

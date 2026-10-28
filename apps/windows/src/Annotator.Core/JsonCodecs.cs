@@ -88,7 +88,7 @@ internal static class Codecs
         "lastCoverMode", "toolbarTools", "showMenuBarIcon", "cursorStyle", "quickPreferencesExpanded", "inspectorPinned",
         "animateVisibility", "visibilityAnimationStyle", "theme", "showShortcutHints", "cursorHighlight",
         "commandShortcuts", "toolbarSize", "shareToolStyles", "toolbarItems", "breakTimer", "breakShortcut",
-        "hiddenToolbarControls", "toolbarCollapseDelay");
+        "hiddenToolbarControls", "toolbarCollapseDelay", "expandedPropertyChoices");
     private static readonly JsonKeys BreakTimerKeys = new(
         "minutes", "title", "background", "palette", "showEndTime", "chime", "countOver", "allDisplays", "lockWhenTouched");
 
@@ -783,6 +783,7 @@ internal static class Codecs
                 case 28: preferences.BreakShortcut = isNull ? null : state.Read(ref reader, key, count, ReadShortcut); break;
                 case 29: preferences.HiddenToolbarControls = isNull ? null : state.Read(ref reader, key, count, ReadStringArray); break;
                 case 30: preferences.ToolbarCollapseDelay = isNull ? null : state.Read(ref reader, key, count, Json.ReadDouble); break;
+                case 31: preferences.ExpandedPropertyChoices = isNull ? null : state.Read(ref reader, key, count, ReadStringArray); break;
             }
         }
         state.Finish(PreferenceKeys, 0b111_0111);
@@ -815,6 +816,7 @@ internal static class Codecs
         {
             writer.WriteString("cursorStyle"u8, cursorStyle.RawValue);
         }
+        WriteOptional(writer, "expandedPropertyChoices"u8, value.ExpandedPropertyChoices);
         WriteOptional(writer, "hiddenToolbarControls"u8, value.HiddenToolbarControls);
         WriteOptional(writer, "hideShortcut"u8, value.HideShortcut);
         WriteOptional(writer, "inspectorPinned"u8, value.InspectorPinned);

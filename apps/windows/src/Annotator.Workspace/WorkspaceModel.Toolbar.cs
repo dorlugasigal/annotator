@@ -143,6 +143,40 @@ public sealed partial class WorkspaceModel
     }
 
     /// <summary>
+    /// Mac setShowsAllChoices: a property with a few choices shows all of them side by side, or one button that steps
+    /// through them (Settings > Toolbar > Your properties).
+    /// </summary>
+    public void SetShowsAllChoices(PropertyChoice choice, bool shown)
+    {
+        using ChangeScope scope = Change();
+        WorkspacePreferences updated = _preferences;
+        updated.SetShowsAllChoices(choice, shown);
+        try
+        {
+            updated.Validate();
+        }
+        catch (Exception error) when (IsReportable(error))
+        {
+            Report(error);
+            return;
+        }
+        _preferences = updated;
+        PersistPreferences();
+    }
+
+    /// <summary>Mac resetPropertyChoices: "Use one button everywhere".</summary>
+    public void ResetPropertyChoices()
+    {
+        using ChangeScope scope = Change();
+        if (_preferences.ExpandedPropertyChoices is null)
+        {
+            return;
+        }
+        _preferences.ExpandedPropertyChoices = null;
+        PersistPreferences();
+    }
+
+    /// <summary>
     /// Mac setToolbarCollapseDelay: how many seconds the pointer can stay off the toolbar before it shrinks to one button;
     /// null keeps it open. Turning it off opens a shrunk toolbar.
     /// </summary>
