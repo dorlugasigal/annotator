@@ -59,6 +59,76 @@
     "t" : "text",
     "v" : "select"
   },
+  "propertyChoices" : [
+    {
+      "choices" : [
+        "Solid",
+        "Dashed",
+        "Dotted"
+      ],
+      "id" : "pattern",
+      "label" : "Pattern"
+    },
+    {
+      "choices" : [
+        "Clean",
+        "Sketchy",
+        "Wild"
+      ],
+      "id" : "roughness",
+      "label" : "Roughness"
+    },
+    {
+      "choices" : [
+        "Solid",
+        "Hatch",
+        "Crosshatch"
+      ],
+      "id" : "fillStyle",
+      "label" : "Fill style"
+    },
+    {
+      "choices" : [
+        "Sharp corners",
+        "Rounded corners"
+      ],
+      "id" : "edges",
+      "label" : "Edges"
+    },
+    {
+      "choices" : [
+        "Straight arrow",
+        "Curved arrow"
+      ],
+      "id" : "arrowType",
+      "label" : "Arrow type"
+    },
+    {
+      "choices" : [
+        "Constant pressure",
+        "Ink pressure"
+      ],
+      "id" : "pressure",
+      "label" : "Pressure"
+    },
+    {
+      "choices" : [
+        "System",
+        "Mono"
+      ],
+      "id" : "font",
+      "label" : "Font"
+    },
+    {
+      "choices" : [
+        "Left",
+        "Center",
+        "Right"
+      ],
+      "id" : "alignment",
+      "label" : "Alignment"
+    }
+  ],
   "resolved" : {
     "corners" : "corners",
     "curtain" : "fade",
@@ -145,20 +215,6 @@
       "id" : "hide",
       "label" : "Hide",
       "symbol" : "xmark"
-    },
-    {
-      "action" : null,
-      "detail" : "Spotlight, cursor halo and cleanup.",
-      "id" : "focusMenu",
-      "label" : "Spotlight and cleanup menu",
-      "symbol" : "light.beacon.max"
-    },
-    {
-      "action" : null,
-      "detail" : "Pointer lens and screen zoom.",
-      "id" : "zoomMenu",
-      "label" : "Zoom menu",
-      "symbol" : "plus.magnifyingglass"
     }
   ]
 }

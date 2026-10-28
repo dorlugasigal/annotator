@@ -6,7 +6,7 @@
     "macOS" : "27.2.0",
     "machine" : "arm64"
   },
-  "fileCount" : 259,
+  "fileCount" : 261,
   "files" : [
     {
       "bytes" : 1364,
@@ -904,9 +904,9 @@
       "sha256" : "e9b40ac6fb670050487a430bd55f11a713da8f1e3d411d1c3d8d3e60e84b37f2"
     },
     {
-      "bytes" : 2288,
+      "bytes" : 2347,
       "path" : "profiles/full.json",
-      "sha256" : "6f785905ad9b50d370d76c1f79e512ee3d2146e7da631c0d9a9281e64b79c909"
+      "sha256" : "f50b5981f70df445cf461c9c1b22cbe4b0ccea5e943f547ee4a01e426c8df3d0"
     },
     {
       "bytes" : 615,
@@ -944,14 +944,14 @@
       "sha256" : "f005bcead897cee3f4c2e4ad593af243f96e11d2567817a4d2a71af5452a95f6"
     },
     {
-      "bytes" : 639,
+      "bytes" : 616,
       "path" : "profiles/hidden-controls-all.json",
-      "sha256" : "e9a2cfae1e67ca6569aabdb87b45b9510a14048752c445a83218910d34462386"
+      "sha256" : "09842e747d0a0019f3ae21f42ff2c2fa7c2a94cb3d2097c1b7be9f2bacf5cdf0"
     },
     {
-      "bytes" : 568,
+      "bytes" : 575,
       "path" : "profiles/hidden-controls-future.json",
-      "sha256" : "a362d0bd377fa37f7e76047e76c2d9561d1bc04bc03bdf2ab0aa01a3dc53b9b0"
+      "sha256" : "7643f3f551467ab6b34c6b6609d744c68224ebb2ab020333fe915d66af2d7970"
     },
     {
       "bytes" : 543,
@@ -959,9 +959,9 @@
       "sha256" : "31d5e86a12eeb406dfba581393cd13dd9b104f062d70e7163bc1eb8f9a3490d6"
     },
     {
-      "bytes" : 43626,
+      "bytes" : 45719,
       "path" : "profiles/index.jsonl",
-      "sha256" : "298d4997f4c2ebdf2e13932c258e8703e9c2e489026370f2741d5e0451ff8167"
+      "sha256" : "66ee837863f4ef4c24cc2fdc2b4aa7adc1ddb425de4c982fb287446bbca902f4"
     },
     {
       "bytes" : 359,
@@ -977,6 +977,16 @@
       "bytes" : 368,
       "path" : "profiles/legacy-ink-key.json",
       "sha256" : "fd15165a752381e5e40481e2f64caccced6d12bf06d1ec47d2f910e61946e044"
+    },
+    {
+      "bytes" : 552,
+      "path" : "profiles/menu-key.json",
+      "sha256" : "c040ae7bf6f4a06b7bd09e42e73409bb2d69a6980293348041cb321fed84cc11"
+    },
+    {
+      "bytes" : 583,
+      "path" : "profiles/property-choices-future.json",
+      "sha256" : "6502e68c1530e5edc6ce87172c30ab2e61848a7911fc87f3195e274147c714ed"
     },
     {
       "bytes" : 508,
@@ -1079,9 +1089,9 @@
       "sha256" : "1e260eb2975eefdf25debce1064fbbffdd459947437ba7ba728dce68983aef40"
     },
     {
-      "bytes" : 3437,
+      "bytes" : 4224,
       "path" : "profiles/visibility-styles.json",
-      "sha256" : "f3a35769daac9297d8b41a7cd944100d68aad62292a9550d062a9233ceb3bdf6"
+      "sha256" : "d441b08156c3f651cf524359e378a8062c26181f9ffe6ce96d62c720f3d2a8b8"
     },
     {
       "bytes" : 614,
@@ -1269,19 +1279,19 @@
       "sha256" : "aa82b26e7e9ff5cc51c469e55ac00aa1ae3b49bf5a34b4f0f5738b2df30b279d"
     },
     {
-      "bytes" : 16512,
+      "bytes" : 16888,
       "path" : "shortcuts/assign-script.jsonl",
-      "sha256" : "28eb06ac4643219395bea0a9ab1a29844560cdf6f911167d7b2f4b6bf5d4bd36"
+      "sha256" : "d8def0aa9bf919ba27664c3d2487c4c32fedace9f6e9cd7fa3edb91e4371542c"
     },
     {
-      "bytes" : 28571,
+      "bytes" : 31392,
       "path" : "shortcuts/bind-script.jsonl",
-      "sha256" : "07f2c608a45741e72949f0688da5413437dfdac69b7083d83cf574a34c0d620a"
+      "sha256" : "5552884510daa36d98dfeebefdb1db65c1828080c65a285ac63e92afaec03112"
     },
     {
-      "bytes" : 12847,
+      "bytes" : 13579,
       "path" : "shortcuts/commands.json",
-      "sha256" : "97f0d28b6bce846c47eddd65a2572053b85be3d4afaccdf312955df8ae59ffda"
+      "sha256" : "3081246e2fb3c692c618a19a76156a55e77aa6f454c5c6a7757248ec190a8817"
     },
     {
       "bytes" : 4645,
@@ -1321,9 +1331,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "787cf3b2d38845410fdd462ba8678784a4650f9e",
-    "date" : "2026-10-28",
-    "fingerprint" : "d8a6e532eaef638f0ef303e507d59fe12ec97337097dda71967e92630ce48ef0",
+    "commit" : "e5e918a102f2109b0abdb093d30fec63888bab07",
+    "date" : "2026-10-29",
+    "fingerprint" : "db0c9fdd79e925cca0524c4eeb44701e3905ea541c07c629fe0639baedfc120e",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
