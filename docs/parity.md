@@ -383,18 +383,22 @@ platform that departs from the specifications, unless an ADR changes them.
   icons in the hidden overflow and apps cannot pin themselves; the tutorial's
   finish card shows how to keep the icon visible (DV-4).
 - **WIN-UI-02**: The toolbar and properties match 002 and ADR 0012 in points:
-  up to 1000 wide with default tools, 72 tools-only, 126 with quick
-  controls, 44 by 48 tool targets, 34 for Minimal, a 15-point corner
-  radius, and the same controls, states and separators. The background is the
+  exactly as wide as its tools and buttons on one row (923 with the default
+  tools), 72 with the properties hidden, about 146 with them shown, 44 by 48
+  tool targets, 34 for Minimal, a 15-point corner radius, and the same
+  controls, states and separators. Only a screen narrower than 700 points
+  (420 for Minimal) moves the buttons to a second row. The background is the
   theme's window background color rather than Acrylic, so live and snapshot
   appearances are identical. Every one of the toolbar's own buttons can be
-  turned off in Settings, and full properties stay on one row: the toolbar
-  grows sideways to fit them. After the delay chosen in Settings, the toolbar
-  shrinks to one capsule with the mark and Draw or Apps (Core `ToolbarMorph`
-  timings). Focus rings appear only during keyboard
-  navigation. Pick from screen replaces the Mac's system color sampler with a
-  magnifier loupe that follows the pointer; a click reads only that pixel of
-  the composed screen and Escape cancels. It needs no permission.
+  turned off in Settings without leaving a gap. Properties are shown or
+  hidden, and stay on one row: the toolbar grows sideways to fit them. After
+  the delay chosen in Settings, the toolbar shrinks to one capsule with the
+  mark and Draw or Apps (Core `ToolbarMorph` timings); pointing at it opens it
+  at once, and Settings plays a short demo of it. Focus rings appear only
+  during keyboard navigation. Pick from screen replaces the Mac's system color
+  sampler with a magnifier loupe that follows the pointer; a click reads only
+  that pixel of the composed screen and Escape cancels. It needs no
+  permission.
 - **WIN-UI-03**: Settings is a resizable, nonmodal window opened by Ctrl+, or
   the gear, about 1420 by 700 by default and bounded by the work area. It has the
   same six tabs in the same order: General, Toolbar & Shortcuts, Pointer,

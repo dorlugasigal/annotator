@@ -41,7 +41,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | New text uses saved Text settings | Model | I | Corpus |
 | Resume drawing shortcut rules | Hotkey service | I | S-9 |
 | Profiles reject collisions by physical key | Key table from the corpus | I | S-9 |
-| Toolbar sizes: 1000 wide, 72 tools-only, 126 expanded, Minimal 34 | XAML in points | I | UI tests |
+| Toolbar sizes: hugs its tools and buttons (923 with the defaults), 72 with properties hidden, about 146 with them shown, Minimal 34 | XAML in points | I | UI tests |
 | One Stroke picker, Fill picker for fill tools, inline popover with hex and opacity | XAML color popover | I | UI tests |
 | Pick from screen (the Mac's system `NSColorSampler` loupe) | Windows has no system sampler: a magnifier loupe follows the pointer, a click reads that one composed-screen pixel, Escape cancels; no permission in a development build, screen access in a package (WIN-CAP-04) | E | S-3, UI tests |
 | Rendered samples for width, pattern, roughness, edges, arrows | Shared renderer in XAML | I | Render corpus |
@@ -79,7 +79,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | --- | --- | --- | --- |
 | Toolbar & Shortcuts tab: your toolbar on one line with its own buttons, more tools, drag to arrange, keys, reset | Settings tab in XAML | I | UI tests |
 | Your properties: one button or all choices for each few-choice property, with previews | Settings tab in XAML | I | UI tests |
-| Shrink: never, or after 3, 5, 10 or 30 seconds | Settings tab in XAML | I | Corpus |
+| Shrink: never, or after 3, 5, 10 or 30 seconds; pointing at the button opens it at once; Settings plays a demo | Settings tab in XAML | I | Corpus |
 | Key recording rules, refusals, moves with Undo | Settings and core | I | Corpus, UI tests |
 | Global keys need Ctrl, Alt or Win; Shift with digits recorded correctly | Hotkey service | E | S-9 |
 | Expanded and Minimal sizes; Share style between tools; Show tips on screen | XAML and core | I | UI tests |

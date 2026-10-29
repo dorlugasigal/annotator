@@ -11,7 +11,7 @@
     canvas, after a stroke, after the color popover closed with Done after a choice and with Escape, while a tooltip
     shows, in Use apps and after Resume drawing (the owner's "sometimes i cant press the fill, or any button on the tool
     bar"); as on the Mac, the popover stays open after a choice;
-  - toolbar buttons and the quick row's Fill color take clicks in those states, after hovering a button, and after a
+  - toolbar buttons and the properties row's Fill color take clicks in those states, after hovering a button, and after a
     press on a button that was released elsewhere; a tooltip opens outside the toolbar;
   - the shape drawn is selected and the tool becomes Select, as on the Mac (canvas.png shows its selection chrome);
   - the keyboard (WIN-A11Y-02, WIN-A11Y-04): Shift+F10 on the canvas opens its context menu, and Up and Enter choose its
