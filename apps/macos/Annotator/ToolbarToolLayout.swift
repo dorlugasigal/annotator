@@ -137,7 +137,7 @@ enum ToolbarToolLayout {
         return switch tool {
         case .select: 0
         case .rectangle, .diamond, .ellipse, .triangle, .hexagon, .star, .arrow, .line, .database, .queue, .person, .grid, .axes: 1
-        case .pen, .text, .highlighter: 2
+        case .pen, .text, .highlighter, .laser: 2
         case .eraser: 3
         case .cover, .blur, .pixelate, .distort: 4
         default: 5

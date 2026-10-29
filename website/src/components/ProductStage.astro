@@ -30,7 +30,7 @@ const features = [
 const day = (date: string) => new Date(`${date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 // The tools the clips above do not show, grouped like the tabs of the tool library. Names match the app.
 const toolGroups = [
-  { name: "Draw", tools: ["Select", "Line", "Eraser"] },
+  { name: "Draw", tools: ["Select", "Line", "Laser pointer", "Eraser"] },
   { name: "Shapes", tools: ["Rectangle", "Diamond", "Triangle", "Hexagon", "Star", "Person", "Cylinder", "Queue", "Grid", "Axes"] },
   { name: "Diagram icons", tools: ["Server", "Database", "Messaging", "Web", "Mobile phone", "Desktop", "Laptop", "Document",
     "Configuration", "Load balancer", "API gateway", "Envelope", "Cart", "Bell"] },

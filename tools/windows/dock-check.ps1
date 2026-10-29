@@ -13,13 +13,19 @@
     the pointer moves inward; the drop docks the toolbar at exactly the ghost's frame, flush against the work area and
     centered along the edge, vertical at the left and right edges and horizontal at the top and bottom;
   - a drop three quarters along an edge still docks at its center;
+  - press and hold (ToolbarHold: 0.4 seconds within 3 points): a tool button held still and let go leaves the docked
+    toolbar where it was and never clicks; a short press on a button still clicks it; a button held for 0.6 seconds
+    picks the toolbar up, it follows the pointer from where the press started with Windows' move cursor (the Mac's
+    closed hand), and the button never clicks; the Width slider gets its press at once, so holding and sliding it changes
+    the width and never moves the toolbar;
   - the toolbar never enters a window manager move, so no Snap layout appears (the drag is the app's own).
 
   Safety: every press first checks with WindowFromPoint that the point is the toolbar's own background (UI Automation
-  confirms it is no control). While the button is down the script checks that the toolbar follows the pointer, so the
-  moves and the release reach Annotator; if it ever stops following, the pointer goes back over the toolbar before the
-  button is released. The check moves the pointer for about 15 seconds and puts it back where it was. It takes no
-  keyboard focus. The app quits when the script is done or after its own timeout.
+  confirms it is no control), or, for the press-and-hold steps, that UI Automation finds the named toolbar control
+  there. While the button is down the script checks that the toolbar follows the pointer, so the moves and the release
+  reach Annotator; if it ever stops following, the pointer goes back over the toolbar before the button is released.
+  The check moves the pointer for about 20 seconds and puts it back where it was. It takes no keyboard focus. The app
+  quits when the script is done or after its own timeout.
 
   -Shot names Annotator.RenderHarness.exe: during the top-edge drag the toolbar sits exactly under the ghost, and the
   harness saves that area (Windows.Graphics.Capture) as ghost-top.png, with the pixels outside the toolbar's rounded
@@ -74,6 +80,9 @@ public static class DockInput
     [DllImport("user32.dll")] static extern bool GetMonitorInfo(IntPtr monitor, ref MONITORINFO info);
     [DllImport("user32.dll")] static extern uint GetDpiForWindow(IntPtr hwnd);
     [DllImport("user32.dll")] static extern bool GetGUIThreadInfo(uint thread, ref GUITHREADINFO info);
+    [StructLayout(LayoutKind.Sequential)] struct CURSORINFO { public int cbSize, flags; public IntPtr hCursor; public POINT ptScreenPos; }
+    [DllImport("user32.dll")] static extern bool GetCursorInfo(ref CURSORINFO info);
+    [DllImport("user32.dll")] static extern IntPtr LoadCursor(IntPtr instance, IntPtr name);
 
     const uint Move = 0x1, LeftDown = 0x2, LeftUp = 0x4, Absolute = 0x8000, VirtualDesk = 0x4000;
 
@@ -155,6 +164,15 @@ public static class DockInput
     public static void Press(int x, int y) { Send(Mouse(x, y, LeftDown)); }
 
     public static void Release(int x, int y) { Send(Mouse(x, y, LeftUp)); }
+    /// <summary>Presses and lets go of Escape. Only the toolbar takes it, while it moves; it never reaches another app then.</summary>
+    public static void Escape() { Send(new INPUT { type = 1, u = new UNION { ki = new KEYBDINPUT { wVk = 0x1B } } }); Send(new INPUT { type = 1, u = new UNION { ki = new KEYBDINPUT { wVk = 0x1B, dwFlags = 2 } } }); }
+
+    /// <summary>True while the cursor on screen is Windows' move cursor (IDC_SIZEALL).</summary>
+    public static bool MoveCursorShows()
+    {
+        var info = new CURSORINFO { cbSize = Marshal.SizeOf(typeof(CURSORINFO)) };
+        return GetCursorInfo(ref info) && info.hCursor == LoadCursor(IntPtr.Zero, new IntPtr(32646));
+    }
 }
 '@
 [DockInput]::PerMonitor()
@@ -370,6 +388,132 @@ try {
     $after = [DockInput]::Rect($toolbar)
     Check 'dock-top-three-quarters' ($null -ne $drag.Held -and (Same $after $drag.Held) -and (Near (($after.Left + $after.Right) / 2) (($work.Left + $work.Right) / 2) $scale) -and $after.Width -gt $after.Height) "docked at $after (ghost $($drag.Held))"
 
+    # 5. Press and hold. The toolbar control named $name (UI Automation) and its center in desktop pixels, after checking
+    # that WindowFromPoint finds the toolbar there and UI Automation finds that control (or a part of it) under the point.
+    function ControlAt([string]$name, $type) {
+        $condition = [Windows.Automation.AndCondition]::new(
+            [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, $name),
+            [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, $type))
+        $element = ([Windows.Automation.AutomationElement]::FromHandle($toolbar)).FindFirst([Windows.Automation.TreeScope]::Descendants, $condition)
+        if ($null -eq $element) { throw "Refused: the toolbar has no $($type.ProgrammaticName) named '$name'." }
+        $box = $element.Current.BoundingRectangle
+        $x = [int][Math]::Round($box.X + $box.Width / 2); $y = [int][Math]::Round($box.Y + $box.Height / 2)
+        if ([DockInput]::TopLevelAt($x, $y) -ne $toolbar) { throw "Refused: the toolbar is not under '$name' at $x,$y ($([DockInput]::Describe([DockInput]::TopLevelAt($x, $y))))." }
+        $under = [Windows.Automation.AutomationElement]::FromPoint([System.Windows.Point]::new($x, $y))
+        $walker = [Windows.Automation.TreeWalker]::ControlViewWalker
+        for ($i = 0; $null -ne $under -and $i -lt 4 -and -not [Windows.Automation.Automation]::Compare($under, $element); $i++) { $under = $walker.GetParent($under) }
+        # UI Automation's FromPoint stops at the toolbar's XAML root (also on main); the control's own frame decides then.
+        $inside = $x -ge $box.X -and $x -lt $box.X + $box.Width -and $y -ge $box.Y -and $y -lt $box.Y + $box.Height
+        if (($null -eq $under -or -not [Windows.Automation.Automation]::Compare($under, $element)) -and -not $inside) { throw "Refused: $x,$y is not the toolbar's '$name'." }
+        [pscustomobject]@{ Element = $element; X = $x; Y = $y }
+    }
+    # Whether the toolbar's tool button $name shows its tool as chosen (its SelectionItem pattern).
+    function Chosen([string]$name) {
+        $condition = [Windows.Automation.AndCondition]::new(
+            [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, $name),
+            [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::Button))
+        $element = ([Windows.Automation.AutomationElement]::FromHandle($toolbar)).FindFirst([Windows.Automation.TreeScope]::Descendants, $condition)
+        $item = $null
+        $null -ne $element -and $element.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern, [ref]$item) -and $item.Current.IsSelected
+    }
+    function RangeValue($element) {
+        $range = $null
+        if ($element.TryGetCurrentPattern([Windows.Automation.RangeValuePattern]::Pattern, [ref]$range)) { $range.Current.Value } else { $null }
+    }
+    # Presses $control (from ControlAt), keeps the pointer still for $holdMs, moves through $path (pairs of desktop pixels,
+    # 12 moves between each), runs $during and releases at the last point. When the toolbar did not follow and that point
+    # is not on the toolbar, the pointer goes back to where the press started first.
+    function Hold($control, [int]$holdMs, [int[][]]$path = @(), [scriptblock]$during = $null) {
+        $before = [DockInput]::Rect($toolbar)
+        [DockInput]::MoveTo($control.X, $control.Y)
+        Start-Sleep -Milliseconds 60
+        if ([DockInput]::TopLevelAt($control.X, $control.Y) -ne $toolbar) { throw "Refused: the toolbar left $($control.X),$($control.Y)." }
+        [DockInput]::Press($control.X, $control.Y)
+        $script:pressed = $true
+        Start-Sleep -Milliseconds $holdMs
+        $from = @($control.X, $control.Y)
+        $moved = $false
+        foreach ($point in $path) {
+            for ($i = 1; $i -le 12; $i++) {
+                $x = [int][Math]::Round($from[0] + ($point[0] - $from[0]) * $i / 12)
+                $y = [int][Math]::Round($from[1] + ($point[1] - $from[1]) * $i / 12)
+                [DockInput]::MoveTo($x, $y)
+                Start-Sleep -Milliseconds 12
+                if (-not (Same ([DockInput]::Rect($toolbar)) $before)) { $moved = $true }
+                if ([DockInput]::InMoveSize($toolbar)) { $script:moveLoop = $true }
+            }
+            $from = $point
+            Start-Sleep -Milliseconds 80
+        }
+        $seen = if ($null -ne $during) { & $during } else { $null }
+        $moved = $moved -or -not (Same ([DockInput]::Rect($toolbar)) $before)
+        $last = $from
+        if (-not $moved -and [DockInput]::TopLevelAt($last[0], $last[1]) -ne $toolbar) {
+            Note "the toolbar did not follow the hold; releasing where the press started"
+            $last = @($control.X, $control.Y)
+            [DockInput]::MoveTo($last[0], $last[1])
+            Start-Sleep -Milliseconds 60
+        }
+        [DockInput]::Release($last[0], $last[1])
+        $script:pressed = $false
+        Start-Sleep -Milliseconds 350
+        [pscustomobject]@{ Start = @($control.X, $control.Y); Before = $before; Followed = $moved; During = $seen }
+    }
+    $buttonType = [Windows.Automation.ControlType]::Button
+
+    # 5a. Held still and let go: the toolbar stays docked where it was, and Rectangle never clicks (Pen stays chosen).
+    $hold = Hold (ControlAt 'Rectangle' $buttonType) 700 @() { [DockInput]::MoveCursorShows() }
+    $after = [DockInput]::Rect($toolbar)
+    Check 'hold-still-keeps-dock' ((Same $after $hold.Before) -and $null -eq (GhostRect) -and -not (Chosen 'Rectangle') -and (Chosen 'Pen')) `
+        "held Rectangle for 0.7 s and let go: toolbar $after (was $($hold.Before)); move cursor while held $($hold.During); Rectangle chosen $(Chosen 'Rectangle'), Pen chosen $(Chosen 'Pen')"
+
+    # 5b. A short press is a click: Rectangle, then Pen again.
+    [void](Hold (ControlAt 'Rectangle' $buttonType) 80)
+    $clicked = WaitFor { Chosen 'Rectangle' } 1500
+    [void](Hold (ControlAt 'Pen' $buttonType) 80)
+    $back = WaitFor { Chosen 'Pen' } 1500
+    Check 'short-press-clicks' ($clicked -and $back) "a 0.08 s press chose Rectangle: $clicked; then Pen: $back"
+
+    # 5c. Held for 0.6 s, then moved: the toolbar follows from the press with the move cursor, and Rectangle never clicks.
+    $target = @([int]($midX - 250 * $scale), [int]($midY + 50 * $scale))
+    $hold = Hold (ControlAt 'Rectangle' $buttonType) 600 @(, $target) { [DockInput]::MoveCursorShows() }
+    $after = [DockInput]::Rect($toolbar)
+    $dx = $target[0] - $hold.Start[0]; $dy = $target[1] - $hold.Start[1]
+    Check 'hold-moves-toolbar' ($hold.Followed -and (Near $after.Left ($hold.Before.Left + $dx)) -and (Near $after.Top ($hold.Before.Top + $dy)) -and $null -eq (GhostRect)) `
+        "held Rectangle for 0.6 s and moved to $($target -join ','): toolbar $after, expected $($hold.Before.Left + $dx),$($hold.Before.Top + $dy)"
+    Check 'hold-move-cursor' ([bool]$hold.During) "Windows' move cursor showed while the toolbar moved: $($hold.During)"
+    Check 'hold-never-clicks' (-not (Chosen 'Rectangle') -and (Chosen 'Pen')) "Rectangle chosen $(Chosen 'Rectangle'), Pen chosen $(Chosen 'Pen')"
+
+    # 5d. The Width slider gets its press at once: held for 0.6 s and slid 30 points, it changes and the toolbar stays.
+    $slider = ControlAt 'Width' ([Windows.Automation.ControlType]::Slider)
+    $width = RangeValue $slider.Element
+    $hold = Hold $slider 600 @(, @(($slider.X + [int][Math]::Round(30 * $scale)), $slider.Y)) { RangeValue $slider.Element }
+    $after = [DockInput]::Rect($toolbar)
+    Check 'hold-slider-keeps-press' ((Same $after $hold.Before) -and $null -ne $width -and $null -ne $hold.During -and $hold.During -ne $width) `
+        "held the Width slider for 0.6 s and slid 30 points: width $width, then $($hold.During); toolbar $after (was $($hold.Before))"
+
+    # 5f. Escape during a move (Mac cancelToolbarDrag): the toolbar stays where Escape left it, letting go elsewhere doesn't
+    # move it, and the held button never clicks. Escape is taken by the toolbar only while it moves.
+    $first = @([int]($midX - 150 * $scale), [int]($midY + 30 * $scale))
+    $second = @([int]($midX + 150 * $scale), [int]($midY + 120 * $scale))
+    $control = ControlAt 'Rectangle' $buttonType
+    $before = [DockInput]::Rect($toolbar)
+    [DockInput]::MoveTo($control.X, $control.Y); Start-Sleep -Milliseconds 60
+    [DockInput]::Press($control.X, $control.Y); $script:pressed = $true
+    Start-Sleep -Milliseconds 600
+    for ($i = 1; $i -le 12; $i++) { [DockInput]::MoveTo([int]($control.X + ($first[0] - $control.X) * $i / 12), [int]($control.Y + ($first[1] - $control.Y) * $i / 12)); Start-Sleep -Milliseconds 12 }
+    Start-Sleep -Milliseconds 120
+    $moved = [DockInput]::Rect($toolbar)
+    [DockInput]::Escape()
+    Start-Sleep -Milliseconds 200
+    for ($i = 1; $i -le 12; $i++) { [DockInput]::MoveTo([int]($first[0] + ($second[0] - $first[0]) * $i / 12), [int]($first[1] + ($second[1] - $first[1]) * $i / 12)); Start-Sleep -Milliseconds 12 }
+    $last = if ([DockInput]::TopLevelAt($second[0], $second[1]) -eq $toolbar) { $second } else { @([int](($moved.Left + $moved.Right) / 2), [int]($moved.Top + 10)) }
+    [DockInput]::MoveTo($last[0], $last[1]); Start-Sleep -Milliseconds 60
+    [DockInput]::Release($last[0], $last[1]); $script:pressed = $false
+    Start-Sleep -Milliseconds 350
+    $after = [DockInput]::Rect($toolbar)
+    Check 'hold-escape-stops-move' (-not (Same $moved $before) -and (Same $after $moved) -and $null -eq (GhostRect) -and -not (Chosen 'Rectangle')) `
+        "moved from $before to $moved, Escape, then the pointer went on to $($second -join ','): toolbar $after; Rectangle chosen $(Chosen 'Rectangle')"
     # The drag never enters a window manager move or size loop, so Windows offers no Snap layout.
     Check 'no-system-move-loop' (-not $script:moveLoop) "the toolbar's thread was in a move or size loop at some step: $($script:moveLoop)"
 }

@@ -108,4 +108,10 @@ public sealed record CanvasOptions
 
     /// <summary>True when Windows Animation effects are off (the Mac's Reduce Motion): no ink-to-shape morph, no erase shrink.</summary>
     public Func<bool> ReducesMotion { get; init; } = static () => false;
+
+    /// <summary>
+    /// Seconds on the steady clock that <see cref="CanvasController.AdvanceTransitions"/> gets its frame times from (the Mac's
+    /// CACurrentMediaTime): the laser pointer's trail stamps its points with it.
+    /// </summary>
+    public Func<double> Clock { get; init; } = static () => System.Diagnostics.Stopwatch.GetTimestamp() / (double)System.Diagnostics.Stopwatch.Frequency;
 }

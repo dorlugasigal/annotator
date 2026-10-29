@@ -254,7 +254,7 @@ public static class ToolbarToolLayout
         return tool switch
         {
             Tool.Select => 0,
-            Tool.Pen or Tool.Text or Tool.Highlighter => 2,
+            Tool.Pen or Tool.Text or Tool.Highlighter or Tool.Laser => 2,
             Tool.Eraser => 3,
             Tool.Cover or Tool.Blur or Tool.Pixelate or Tool.Distort => 4,
             _ => 5,

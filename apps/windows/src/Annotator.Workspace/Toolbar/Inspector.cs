@@ -65,7 +65,7 @@ public enum InspectorItem
 
     SmartDraw,
 
-    /// <summary>The counter's or ruler's hint (<see cref="InspectorPlan.Caption"/>).</summary>
+    /// <summary>The counter's, ruler's or laser pointer's hint (<see cref="InspectorPlan.Caption"/>).</summary>
     Caption,
 
     /// <summary>One button that switches between System and Mono (<see cref="InspectorPlan.FontChoices"/>), or the two
@@ -88,7 +88,7 @@ public enum InspectorItem
 /// <param name="Context">"Editing …" while objects are selected (Mac selected-object-context), or null.</param>
 /// <param name="Arrow">The arrow controls (Start, End, the Curved arrow switch or both arrow types, and the Head size
 /// slider) end the row as one group, or follow the column when compact.</param>
-/// <param name="Caption">The counter's or ruler's hint for <see cref="InspectorItem.Caption"/>.</param>
+/// <param name="Caption">The counter's, ruler's or laser pointer's hint for <see cref="InspectorItem.Caption"/>.</param>
 public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Body, ImmutableArray<InspectorItem> Items, bool Arrow,
                                    string? Caption)
 {
@@ -97,6 +97,7 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
     public const string ImageHint = "Drag handles to resize or rotate. Delete removes the selected image.";
     public const string CounterCaption = "Click to add sequential numbered markers.";
     public const string RulerCaption = "Drag to measure the distance in source pixels.";
+    public const string LaserCaption = "Drag to point. The trail fades on its own.";
 
     /// <summary>Properties that show all their choices side by side instead of one button (Mac showsAllChoices).</summary>
     public ImmutableArray<PropertyChoice> AllChoices { get; init; } = [];
@@ -166,6 +167,13 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
         else if (tool == Tool.Eraser)
         {
             items.Add(InspectorItem.Width);
+        }
+        else if (tool == Tool.Laser)
+        {
+            items.Add(InspectorItem.StrokeColor);
+            items.Add(InspectorItem.Width);
+            items.Add(InspectorItem.Caption);
+            caption = LaserCaption;
         }
         else if (tool == Tool.Text)
         {

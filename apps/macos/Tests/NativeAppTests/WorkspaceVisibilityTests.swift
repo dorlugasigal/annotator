@@ -183,7 +183,7 @@ final class WorkspaceVisibilityTests: XCTestCase {
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
         model.beginDrawing()
         let session = try XCTUnwrap(model.active)
-        for tool in Tool.allCases where tool != .image && tool != .select && tool != .eraser {
+        for tool in Tool.allCases where tool != .image && tool != .select && tool != .eraser && tool != .laser {
             try session.document.add(Element(tool: tool, frame: Rect(x: 150, y: 150, width: 80, height: 60)))
         }
         let elements = session.document.elements

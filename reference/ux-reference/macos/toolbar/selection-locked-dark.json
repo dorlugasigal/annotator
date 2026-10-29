@@ -112,7 +112,19 @@
   {
    "enabled": true,
    "frame": [
-    453,
+    444,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut L",
+   "label": "Laser pointer",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    499,
     12,
     44,
     48
@@ -124,7 +136,7 @@
   {
    "enabled": true,
    "frame": [
-    508,
+    554,
     12,
     44,
     48
@@ -136,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    558,
+    604,
     12,
     44,
     48
@@ -148,7 +160,7 @@
   {
    "enabled": true,
    "frame": [
-    632,
+    678,
     20.5,
     22.5,
     32.5
@@ -161,7 +173,7 @@
   {
    "enabled": true,
    "frame": [
-    671,
+    717,
     12,
     60,
     48
@@ -174,7 +186,7 @@
   {
    "enabled": true,
    "frame": [
-    743,
+    789,
     30,
     12,
     12
@@ -187,7 +199,7 @@
   {
    "enabled": false,
    "frame": [
-    773,
+    819,
     30,
     12,
     12
@@ -200,7 +212,7 @@
   {
    "enabled": true,
    "frame": [
-    803,
+    849,
     29,
     12.5,
     14.5
@@ -213,7 +225,7 @@
   {
    "enabled": true,
    "frame": [
-    827,
+    873,
     23,
     24,
     26
@@ -227,7 +239,7 @@
   {
    "enabled": true,
    "frame": [
-    862,
+    908,
     29,
     14,
     14
@@ -240,7 +252,7 @@
   {
    "enabled": true,
    "frame": [
-    894,
+    940,
     31,
     10.5,
     10.5
@@ -315,9 +327,9 @@
     {
      "enabled": false,
      "frame": [
-      264.5,
+      263,
       77,
-      51,
+      32,
       14
      ],
      "role": "AXStaticText",
@@ -350,9 +362,9 @@
     {
      "enabled": false,
      "frame": [
-      414.5,
+      413,
       77,
-      60.5,
+      39.5,
       14
      ],
      "role": "AXStaticText",
@@ -374,9 +386,9 @@
     {
      "enabled": false,
      "frame": [
-      490,
+      466.5,
       77,
-      80,
+      59.5,
       14
      ],
      "role": "AXStaticText",
@@ -385,7 +397,7 @@
     {
      "enabled": false,
      "frame": [
-      489,
+      466.5,
       97,
       36,
       36
@@ -398,9 +410,9 @@
     {
      "enabled": false,
      "frame": [
-      585.5,
+      540,
       77,
-      56,
+      33.5,
       14
      ],
      "role": "AXStaticText",
@@ -409,7 +421,7 @@
     {
      "enabled": false,
      "frame": [
-      584,
+      540,
       97,
       36,
       36
@@ -422,7 +434,7 @@
     {
      "enabled": true,
      "frame": [
-      874,
+      920,
       107,
       37,
       16
@@ -435,7 +447,7 @@
    "frame": [
     12,
     77,
-    899,
+    945,
     56
    ],
    "identifier": "contextual-inspector-viewport",
@@ -449,12 +461,12 @@
  "kind": "view",
  "notes": "A locked object selected: Unlock is offered.",
  "pixels": [
-  1846,
+  1938,
   290
  ],
  "scale": 2,
  "size": [
-  923,
+  969,
   145
  ],
  "spec": [

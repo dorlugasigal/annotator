@@ -69,6 +69,7 @@ For a screenshot, clip or walkthrough the user asked for, follow
 | Circle a detail | Choose **Ellipse**, then drag around the detail inside the drawing area |
 | Draw a box | Choose **Rectangle**, then drag between opposite corners |
 | Point to something | Choose **Arrow**, then drag from the tail toward the target |
+| Point at something for a moment | Choose **Laser pointer** and drag over it. The glowing trail fades on its own and never becomes part of the drawing; use Arrow for a mark that stays |
 | Add words | Choose **Text**, click a clear spot, enter the label and press Command-Return |
 | Label a shape | With Select, double-click inside the shape—even an unfilled one—or click inside it with Text. Type and press Command-Return. The centered label belongs to the shape and follows move, resize and rotation |
 | Highlight words | Locate the actual word bounds, choose **Highlighter**, and drag through their vertical center, slightly beyond the first and last letters. Check the stroke before adding another |
@@ -109,7 +110,7 @@ the newer board format and older apps reject them rather than dropping labels.
 
 Prefer tool buttons to shortcuts. Users can change shortcuts. The defaults
 are 1 Select, 2 Rectangle, 3 Diamond, 4 Ellipse, 5 Arrow, 6 Line, 7 Pen,
-8 Text, 9 Highlighter and 0 Eraser.
+8 Text, 9 Highlighter, 0 Eraser and L Laser pointer.
 
 Drawing works across connected monitors. Clicking a canvas selects that display
 for editing. The main toolbar's **Board background** button cycles only that
@@ -117,8 +118,10 @@ display through Desktop, Whiteboard and Blackboard. Dragging the toolbar
 until the pointer touches a screen edge shows a ghost; releasing docks it
 at the previewed center of the edge and changes orientation. Command-A selects drawings across
 displays; Delete and property changes then apply to the whole selection.
-Drag empty toolbar background rather than a button, field or slider. Workspace controls
-remain on the toolbar when properties are closed.
+To move the toolbar, drag its empty background. A press held still for a moment anywhere on
+the toolbar, even on a button or label, also picks it up, so click buttons with a normal short
+click. Sliders and number fields keep their own drag. Workspace controls remain on the toolbar
+when properties are closed.
 
 For text edits, use the provider's exact-text patch tool on a patchable editor.
 Use whole-field replacement only for a simple field that exposes its full value.

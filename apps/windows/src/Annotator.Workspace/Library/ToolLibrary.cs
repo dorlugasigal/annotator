@@ -23,7 +23,7 @@ public static class ToolLibrarySectionExtensions
         [ToolLibrarySection.Draw, ToolLibrarySection.Shapes, ToolLibrarySection.Focus, ToolLibrarySection.Extras, ToolLibrarySection.MyShapes];
 
     private static readonly ImmutableArray<Tool> s_draw =
-        [Tool.Select, Tool.Pen, Tool.Highlighter, Tool.Text, Tool.Arrow, Tool.Line, Tool.Eraser];
+        [Tool.Select, Tool.Pen, Tool.Highlighter, Tool.Laser, Tool.Text, Tool.Arrow, Tool.Line, Tool.Eraser];
 
     private static readonly ImmutableArray<Tool> s_shapes =
     [
@@ -165,6 +165,7 @@ public static class ToolLibraryTiles
         Tool.Pen => "pencil",
         Tool.Text => "textformat",
         Tool.Highlighter => "highlighter",
+        Tool.Laser => "laser.burst",
         Tool.Eraser => "eraser",
         Tool.Cover => "camera.filters",
         Tool.Blur => "aqi.medium",

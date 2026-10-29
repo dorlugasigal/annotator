@@ -22,14 +22,16 @@ public sealed partial class CanvasController
     private double _fadeProgress;
 
     /// <summary>
-    /// Moves the Smart Draw morph and the eraser fade to <paramref name="now"/> (seconds on any steady clock), as the Mac's
-    /// display-linked ticker does; the first call after a transition starts sets its start time. Returns true while a
-    /// transition still needs frames. Call it only while <see cref="CanvasLiveState.HasTransitions"/> is true.
+    /// Moves the Smart Draw morph, the eraser fade and the laser pointer's trail to <paramref name="now"/> (seconds on
+    /// <see cref="CanvasOptions.Clock"/>), as the Mac's display-linked tickers do; the first call after a transition starts
+    /// sets its start time. Returns true while a transition or the trail still needs frames. Call it only while
+    /// <see cref="CanvasLiveState.HasTransitions"/> is true.
     /// </summary>
     public bool AdvanceTransitions(double now)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        if (_morph is null && _fade is null)
+        bool laser = LaserMoves;
+        if (_morph is null && _fade is null && !laser)
         {
             return false;
         }
@@ -68,8 +70,12 @@ public sealed partial class CanvasController
                 }
             }
         }
+        if (laser && AdvanceLaser(now, out Rect? trail) && trail is { } moved)
+        {
+            dirty = dirty is { } existing ? existing.Union(moved) : moved;
+        }
         Publish(CanvasChangeKinds.Transitions, dirty);
-        return _morph is not null || _fade is not null;
+        return _morph is not null || _fade is not null || LaserMoves;
     }
 
     /// <summary>Mac finishTransitions: jumps every drawing transition to its end state. Document content never changes here.</summary>

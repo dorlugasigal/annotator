@@ -378,8 +378,9 @@ internal static partial class ReferenceStates
 
     /// <summary>
     /// The picker states of UXReferenceCaptureTests.test02PropertiesAndPickers. The color popover: the Rectangle tool with
-    /// its default style, then Fill shape on, then the Spectrum gradient on the stroke, each step keeping the one before.
-    /// The arrowhead choices: the Arrow tool's default style. The zoom controls: screen zoom at its default 2x.
+    /// its default style, then Fill shape on, then the Spectrum gradient on the stroke, each step keeping the one before,
+    /// then the Laser pointer's default style. The arrowhead choices: the Arrow tool's default style. The zoom controls:
+    /// screen zoom at its default 2x.
     /// </summary>
     private static ReferenceScenario? Pickers(string state)
     {
@@ -433,6 +434,17 @@ internal static partial class ReferenceStates
                     Rectangle(model);
                     model.SetFillEnabled(true);
                     model.SetGradient(GradientPreset.Spectrum.Gradient, fill: false);
+                },
+                Picker = ColorPickerRequest.Stroke,
+            },
+            // The Laser pointer's color: solid colors only, without the Gradient and Solid choice.
+            "color-laser" => new ReferenceScenario(ReferenceSurface.Picker)
+            {
+                Setup = model =>
+                {
+                    model.ShowToolbar();
+                    model.Choose(Tool.Laser);
+                    model.ApplyStyle((ref Style style) => style = Style.Defaults(Tool.Laser));
                 },
                 Picker = ColorPickerRequest.Stroke,
             },

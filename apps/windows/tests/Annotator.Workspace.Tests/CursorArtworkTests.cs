@@ -6,7 +6,7 @@ using Annotator.Workspace.Canvas;
 
 namespace Annotator.Workspace.Tests;
 
-/// <summary>The footprint and rotation cursors (Mac ToolCursorFactory), drawn for a monitor scale (WIN-OVR-11).</summary>
+/// <summary>The footprint, laser pointer and rotation cursors (Mac ToolCursorFactory), drawn for a monitor scale (WIN-OVR-11).</summary>
 public sealed class CursorArtworkTests
 {
     [Fact]
@@ -55,6 +55,28 @@ public sealed class CursorArtworkTests
     }
 
     [Fact]
+    public void TheLaserPointerIsADotInAWhiteRingAndAGlow()
+    {
+        // Mac ToolCursorFactory.laserCursor: radius min(250, max(2, width / 2)), side ceil(radius * 2 + 12), hot spot centered.
+        CanvasCursor cursor = CanvasCursor.ForTool(Tool.Laser, 8, new RGBA(0, 0, 1, 0.5));
+        Assert.Equal(new CanvasCursor(CanvasCursorKind.Laser, Tool.Laser, 8, new RGBA(0, 0, 1)), cursor);
+        Assert.Equal(CanvasCursor.ForTool(Tool.Laser, 8, LaserTrail.DefaultColor), CanvasCursor.ForTool(Tool.Laser, 8));
+        Assert.Equal(20, cursor.ImageSide);
+        Assert.Equal(16, CanvasCursor.ForTool(Tool.Laser, 1).ImageSide);
+        Assert.Equal(512, CanvasCursor.ForTool(Tool.Laser, 900).ImageSide);
+        CursorArtwork.Image image = CursorArtwork.Laser(cursor, 1);
+        Assert.Equal((20, 20, 10, 10), (image.Width, image.Height, image.HotspotX, image.HotspotY));
+        // The dot in the solid color (BGRA), the white ring 1.5 points outside it, the glow at 0.28 to 5 points out, then nothing.
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, image.Bgra.AsSpan((10 * 20 + 10) * 4, 4).ToArray());
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, image.Bgra.AsSpan((10 * 20 + 14) * 4, 4).ToArray());
+        Assert.Equal(Math.Round(0.28 * 255), image.Alpha(17, 10));
+        Assert.Equal(0, image.Alpha(19, 10));
+        Assert.Equal(0, image.Alpha(0, 0));
+        Assert.Equal(40, CursorArtwork.Laser(cursor, 2).Width);
+        Assert.Throws<ArgumentException>(() => CursorArtwork.Laser(CanvasCursor.ForTool(Tool.Pen, 4), 1));
+    }
+
+    [Fact]
     public void TheRotationCursorIsAnOpenCircleWithAnArrowhead()
     {
         CursorArtwork.Image image = CursorArtwork.Rotation(1);
@@ -75,8 +97,9 @@ public sealed class CursorArtworkTests
     }
 
     /// <summary>
-    /// WIN-PAR-06: every cursor of the Mac UX reference has the same size and hot spot in points. The drawn ones (footprints
-    /// and rotation) have nearly the same pixels at 2x; the Mac's system crosshair and I-beam are Windows' own.
+    /// WIN-PAR-06: every cursor of the Mac UX reference has the same size and hot spot in points. The drawn ones (footprints,
+    /// the laser pointer and rotation) have nearly the same pixels at 2x; the Mac's system crosshair and I-beam are Windows'
+    /// own.
     /// </summary>
     [Fact]
     public void CursorsMatchTheMacUXReference()
@@ -99,12 +122,19 @@ public sealed class CursorArtworkTests
                 string[] parts = name.Split('-');
                 Tool tool = Tool.FromRawValue(parts[0]) ?? throw new InvalidDataException($"The reference cursor {name} names no tool.");
                 CanvasCursor cursor = CanvasCursor.ForTool(tool, int.Parse(parts[1], CultureInfo.InvariantCulture));
-                if (cursor.Kind != CanvasCursorKind.Footprint)
+                if (cursor.Kind == CanvasCursorKind.Laser)
+                {
+                    ours = CursorArtwork.Laser(cursor, 2);
+                }
+                else if (cursor.Kind != CanvasCursorKind.Footprint)
                 {
                     Assert.Equal(tool == Tool.Text ? CanvasCursorKind.IBeam : CanvasCursorKind.Crosshair, cursor.Kind);
                     continue;
                 }
-                ours = CursorArtwork.Footprint(cursor, 2);
+                else
+                {
+                    ours = CursorArtwork.Footprint(cursor, 2);
+                }
             }
             Assert.Equal((size[0] * 2, size[1] * 2, hotSpot[0] * 2, hotSpot[1] * 2), (ours.Width, ours.Height, ours.HotspotX, ours.HotspotY));
 
@@ -131,6 +161,6 @@ public sealed class CursorArtworkTests
             Assert.True(opaque > 0 && colorDifference / opaque <= 8, $"{name}: mean color difference {colorDifference / Math.Max(1, opaque):F1}");
             drawn++;
         }
-        Assert.Equal(10, drawn);
+        Assert.Equal(13, drawn);
     }
 }

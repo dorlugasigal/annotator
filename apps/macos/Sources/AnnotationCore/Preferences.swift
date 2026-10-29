@@ -64,7 +64,7 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
         "6": "line", "7": "pen", "8": "text", "9": "highlighter", "0": "eraser",
         "u": "blur", "s": "cover", "x": "pixelate", "t": "distort", "m": "ruler",
         "n": "counter", "i": "image", "d": "database", "q": "queue", "h": "person",
-        "f": "grid", "a": "axes"
+        "f": "grid", "a": "axes", "l": "laser"
     ]
     public var toolShortcuts = WorkspacePreferences.defaultToolShortcuts
     public var shortcutVersion: Int? = 2
@@ -103,7 +103,8 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var toolbarCollapseDelay: Double?
     /// Properties that show all their choices side by side instead of one button (`PropertyChoice` raw values).
     public var expandedPropertyChoices: [String]?
-    public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter, .eraser, .cover]
+    public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
+                                                 .laser, .eraser, .cover]
 
     public init() {}
 

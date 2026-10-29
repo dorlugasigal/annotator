@@ -74,6 +74,11 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
     private let eraseTicker = MotionTicker()
     private let morphRenderer = SceneRenderer()
     private let morphShapeRenderer = SceneRenderer()
+    /// The laser pointer's trail on this display. It shows over the drawing and is never part of it.
+    private(set) var laserTrail = LaserTrail()
+    private let laserTicker = MotionTicker()
+    private var laserDrawnRect: CGRect?
+    var isLaserFading: Bool { laserTicker.isRunning }
     var isSnapMorphing: Bool { snapMorph != nil }
     var isEraseFading: Bool { eraseFade != nil }
     var transitionTickersRunning: Bool { morphTicker.isRunning || eraseTicker.isRunning }
@@ -117,7 +122,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
         guard let session, let model, session.sourceImage == nil,
               !session.document.isEditing, !hasActiveEdit, smartPreview == nil, textElement == nil, linearPreview == nil,
               eraseIDs.isEmpty, marquee == nil, attachHints.isEmpty, !model.spotlight, !model.spotlightFade.isVisible,
-              !model.cursorHalo, releasePreview == nil, snapMorph == nil, eraseFade == nil,
+              !model.cursorHalo, releasePreview == nil, snapMorph == nil, eraseFade == nil, laserTrail.isEmpty,
               session.document.presentation.mode == .off,
               !session.document.elements.contains(where: { $0.tool == .image || $0.tool.isPixelEffect }) else { return nil }
         return DisplayKey(document: session.document.identity, generation: session.document.generation,
@@ -188,7 +193,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
                 MainActor.assumeIsolated { self?.model?.focusDrawingTools() ?? false }
             })
         ])
-        if window == nil { finishTransitions() }
+        if window == nil { finishTransitions(); clearLaser() }
         if window != nil && interactButton.superview == nil { addSubview(interactButton) }
         if window != nil && shortcutHint.superview == nil { addSubview(shortcutHint) }
     }
@@ -237,7 +242,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
         let zoom = enclosingScrollView?.magnification ?? 1
         let screenZoom = session?.document.presentation.mode == .screen ? session?.document.presentation.zoom ?? 1 : 1
         currentToolCursor = model.mode == .draw
-            ? ToolCursorFactory.cursor(tool: model.tool, width: model.style.width * zoom * screenZoom)
+            ? ToolCursorFactory.cursor(tool: model.tool, width: model.style.width * zoom * screenZoom, color: model.style.color)
             : .arrow
         window?.invalidateCursorRects(for: self)
         if let window, !window.ignoresMouseEvents,
@@ -450,6 +455,9 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
             context.stroke(element.frame.cgRect.insetBy(dx: -4, dy: -4))
             context.restoreGState()
         }
+        if !laserTrail.isEmpty && !model.workspaceHidden {
+            LaserTrailRenderer.draw(laserTrail, at: CACurrentMediaTime(), in: context)
+        }
         context.restoreGState()
         guard let window else { return }
         let pointer = convert(window.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)
@@ -501,6 +509,11 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
             gesture = .marquee(point)
             marquee = Rect(from: point, to: point)
             needsDisplay = true
+            return
+        }
+        if model.tool == .laser {
+            laserTrail.press(at: point, time: CACurrentMediaTime(), color: model.style.color, width: model.style.width)
+            runLaser()
             return
         }
         do {
@@ -655,6 +668,11 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
     }
 
     override func mouseDragged(with event: NSEvent) {
+        if laserTrail.isDrawing {
+            laserTrail.move(to: Point(convert(event.locationInWindow, from: nil)), time: CACurrentMediaTime())
+            runLaser()
+            return
+        }
         guard let session, let gesture else { return }
         let point = Point(convert(event.locationInWindow, from: nil))
         var inkRect: CGRect?
@@ -795,6 +813,11 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
     }
 
     override func mouseUp(with event: NSEvent) {
+        if laserTrail.isDrawing {
+            laserTrail.release(at: Point(convert(event.locationInWindow, from: nil)), time: CACurrentMediaTime())
+            runLaser()
+            return
+        }
         guard let session, let model, let gesture else { return }
         let heldPreview = model.smartDraw ? smartPreview : nil
         var erased: [Element] = []
@@ -957,6 +980,10 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
     }
 
     func cancelGesture() {
+        if laserTrail.isDrawing {
+            laserTrail.release(at: nil, time: CACurrentMediaTime())
+            runLaser()
+        }
         if case .move = gesture { model?.clearDisplayDragPreviews() }
         let changed = hasActiveEdit || marquee != nil || !eraseIDs.isEmpty || smartPreview != nil ||
             session?.document.isEditing == true
@@ -1187,6 +1214,38 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
                 model?.report(error)
             }
         }
+    }
+
+    // MARK: Laser pointer
+
+    /// Redraws the trail every frame while any of it fades. A held, resting pointer leaves only its dot, which needs no
+    /// frames until the pointer moves or lets go.
+    private func runLaser() {
+        stepLaser(CACurrentMediaTime())
+        guard !laserTicker.isRunning, !laserTrail.isEmpty else { return }
+        laserTicker.start(view: self) { [weak self] now in self?.stepLaser(now) ?? false }
+    }
+
+    @discardableResult
+    private func stepLaser(_ now: CFTimeInterval) -> Bool {
+        guard let model, !model.workspaceHidden, window != nil else { clearLaser(); return false }
+        laserTrail.prune(at: now)
+        let current = laserTrail.bounds(at: now)?.cgRect
+        let dirty = [laserDrawnRect, current].compactMap { $0 }.reduce(CGRect.null) { $0.union($1) }
+        laserDrawnRect = current
+        if !dirty.isNull { invalidateTransition(dirty) }
+        model.refreshSharedLaser()
+        return !laserTrail.isEmpty && !laserTrail.isResting
+    }
+
+    /// Removes the trail at once, for example when the drawings hide.
+    func clearLaser() {
+        laserTicker.stop()
+        guard !laserTrail.isEmpty || laserDrawnRect != nil else { return }
+        laserTrail = LaserTrail()
+        if let laserDrawnRect { invalidateTransition(laserDrawnRect) }
+        laserDrawnRect = nil
+        model?.refreshSharedLaser()
     }
 
     // MARK: Transitions

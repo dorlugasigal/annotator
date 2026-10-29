@@ -16,8 +16,8 @@ namespace Annotator.UXReference;
 
 /// <summary>
 /// Compares the cursors with reference/ux-reference/macos/cursors (cursors.json sizes and hot spots, and the 2x images). The
-/// footprints and the rotation cursor are drawn by Annotator on both platforms (Annotator.Workspace's CursorArtwork,
-/// WIN-OVR-11): size and hot spot must be equal and the pixels nearly so. The crosshair and the I-beam are each system's
+/// footprints, the laser pointer's dot and the rotation cursor are drawn by Annotator on both platforms (Annotator.Workspace's
+/// CursorArtwork, WIN-OVR-11): size and hot spot must be equal and the pixels nearly so. The crosshair and the I-beam are each system's
 /// own cursor; their kind must match, and the sheet shows the Windows cursor beside the Mac's.
 /// </summary>
 internal static class Cursors
@@ -56,14 +56,14 @@ internal static class Cursors
             string[] parts = name.Split('-');
             Tool tool = Tool.FromRawValue(parts[0]) ?? throw new InvalidDataException($"The reference cursor {name} names no tool.");
             CanvasCursor cursor = CanvasCursor.ForTool(tool, double.Parse(parts[1], CultureInfo.InvariantCulture));
-            if (cursor.Kind != CanvasCursorKind.Footprint)
+            if (cursor.Kind is not (CanvasCursorKind.Footprint or CanvasCursorKind.Laser))
             {
                 string kind = cursor.Kind == CanvasCursorKind.IBeam ? "I-beam" : "crosshair";
                 (BitmapSource system, int width, int height, int x, int y) = SystemCursor(cursor.Kind == CanvasCursorKind.IBeam ? IBeam : Cross);
                 return ($"system {kind} on both platforms (platform): Windows {width} x {height} pixels at {Scale():0.##}x, hot spot {x}, {y}; " +
                         $"Mac {F(size[0])} x {F(size[1])}, hot spot {F(hot[0])}, {F(hot[1])}", system);
             }
-            ours = CursorArtwork.Footprint(cursor, 2);
+            ours = cursor.Kind == CanvasCursorKind.Laser ? CursorArtwork.Laser(cursor, 2) : CursorArtwork.Footprint(cursor, 2);
         }
         BitmapSource windows = BitmapSource.Create(ours.Width, ours.Height, 96, 96, PixelFormats.Bgra32, null, ours.Bgra, ours.Width * 4);
         bool geometry = ours.Width == size[0] * 2 && ours.Height == size[1] * 2 && ours.HotspotX == hot[0] * 2 && ours.HotspotY == hot[1] * 2;

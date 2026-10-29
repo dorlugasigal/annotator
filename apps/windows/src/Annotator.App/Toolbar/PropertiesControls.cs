@@ -26,37 +26,30 @@ namespace Annotator.App.Toolbar;
 /// </summary>
 internal static class PropertyMetrics
 {
-    /// <summary>
-    /// A PropertyBlock title (SwiftUI Label): where the Mac's accessibility frame starts after the block's leading edge
-    /// (the drawn bounds of its symbol) and its width, symbol and title together.
-    /// </summary>
-    public static (double Offset, double Width) Label(string name) => name switch
-    {
-        "Width" => (1.5, 51),
-        "Eraser size" => (1.5, 78),
-        "Pattern" => (1.5, 60.5),
-        "Roughness" => (1, 80),
-        "Fill style" => (1.5, 64.5),
-        "Edges" => (1.5, 56),
-        "Pressure" => (1, 64),
-        "Smart Draw" => (1, 83.5),
-        "Start" => (1.5, 47),
-        "End" => (1.5, 40.5),
-        "Arrow type" => (1.5, 79),
-        "Curved" => (1.5, 59),
-        "Head size" => (1.5, 73),
-        "Font" => (1.5, 47),
-        "Size" => (1.5, 45.5),
-        "Weight" => (1.5, 54.5),
-        "Alignment" => (1.5, 76),
-        _ => (1.5, 0),
-    };
-
     /// <summary>The width SF Pro gives the panel's fixed words at their sizes; zero for other text.</summary>
     public static double TextWidth(string text, double size) => (text, size) switch
     {
         ("Stroke color", 11) => 65.5,
         ("Fill", 11) => 15.5,
+        // PropertyBlock names, 11-point medium like the color pickers' names.
+        ("Width", 11) => 32,
+        ("Eraser size", 11) => 59,
+        ("Pattern", 11) => 39.5,
+        ("Roughness", 11) => 59.5,
+        ("Fill style", 11) => 44.5,
+        ("Edges", 11) => 33.5,
+        ("Pressure", 11) => 47.5,
+        ("Smart Draw", 11) => 63,
+        ("Start", 11) => 27,
+        ("End", 11) => 20.5,
+        ("Arrow type", 11) => 59,
+        ("Curved", 11) => 39,
+        ("Head size", 11) => 53,
+        ("Font", 11) => 24.5,
+        ("Size", 11) => 23,
+        ("Weight", 11) => 38,
+        ("Alignment", 11) => 55,
+        ("Image opacity", 11) => 76,
         ("Straight", 10) => 38.5,
         ("Curved", 10) => 35,
         ("Constant", 10) => 44,
@@ -79,6 +72,7 @@ internal static class PropertyMetrics
         (InspectorPlan.CounterCaption, 10) => 206.5,
         (InspectorPlan.RulerCaption, 10) => 223.5,
         (InspectorPlan.CoverCaption, 10) => 483,
+        (InspectorPlan.LaserCaption, 10) => 194,
         ("Editing Rectangle", 11) => 99.5,
         ("Editing Diamond", 11) => 93.5,
         ("Editing 2 selected objects", 11) => 145,
@@ -89,7 +83,17 @@ internal static class PropertyMetrics
     public static TextBlock Text(string text, double size, string style, Windows.UI.Text.FontWeight? weight = null)
     {
         TextBlock block = ToolbarParts.Text(text, size, style, weight);
-        block.MinWidth = TextWidth(text, size);
+        double width = TextWidth(text, size);
+        block.MinWidth = width;
+        if (width > 0 && !Annotator.App.Shell.TextScaling.Scaled)
+        {
+            // Exactly the Mac's width, so the controls after it don't drift by a rounded pixel each (when the words fit).
+            block.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+            if (block.DesiredSize.Width <= width + 0.5)
+            {
+                block.Width = width;
+            }
+        }
         return block;
     }
 }
@@ -102,7 +106,7 @@ internal static class PropertiesInk
 }
 
 /// <summary>
-/// Text that UI Automation reads as one static text with the Mac's frame, such as a PropertyBlock title whose symbol and
+/// Text that UI Automation reads as one static text with the Mac's frame, such as the "Editing …" line whose square and
 /// words SwiftUI reports together.
 /// </summary>
 internal sealed partial class AccessibleText : Grid

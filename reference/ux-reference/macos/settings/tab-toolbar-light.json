@@ -319,7 +319,34 @@
             {
              "enabled": true,
              "frame": [
-              559,
+              550,
+              144,
+              48,
+              60
+             ],
+             "help": "Press, then type a letter or number.",
+             "label": "Laser pointer key",
+             "role": "AXButton",
+             "value": "L"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            550,
+            144,
+            48,
+            60
+           ],
+           "identifier": "toolbar-tool-laser",
+           "label": "Laser pointer",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              610,
               144,
               48,
               60
@@ -332,7 +359,7 @@
            ],
            "enabled": true,
            "frame": [
-            559,
+            610,
             144,
             48,
             60
@@ -346,7 +373,7 @@
             {
              "enabled": true,
              "frame": [
-              619,
+              670,
               144,
               48,
               60
@@ -359,7 +386,7 @@
            ],
            "enabled": true,
            "frame": [
-            619,
+            670,
             144,
             48,
             60
@@ -371,7 +398,7 @@
           {
            "enabled": true,
            "frame": [
-            670,
+            721,
             150,
             44,
             48
@@ -384,7 +411,7 @@
           {
            "enabled": true,
            "frame": [
-            726,
+            777,
             150,
             44,
             48
@@ -397,7 +424,7 @@
           {
            "enabled": true,
            "frame": [
-            776,
+            827,
             150,
             60,
             48
@@ -410,7 +437,7 @@
           {
            "enabled": true,
            "frame": [
-            842,
+            893,
             161,
             24,
             26
@@ -423,7 +450,7 @@
           {
            "enabled": true,
            "frame": [
-            872,
+            923,
             161,
             24,
             26
@@ -436,7 +463,7 @@
           {
            "enabled": true,
            "frame": [
-            902,
+            953,
             161,
             24,
             26
@@ -449,7 +476,7 @@
           {
            "enabled": true,
            "frame": [
-            932,
+            983,
             161,
             24,
             26
@@ -462,7 +489,7 @@
           {
            "enabled": true,
            "frame": [
-            962,
+            1013,
             161,
             24,
             26
@@ -475,7 +502,7 @@
           {
            "enabled": true,
            "frame": [
-            992,
+            1043,
             161,
             24,
             26
@@ -2549,11 +2576,11 @@
        "frame": [
         46,
         1548,
-        577.5,
+        789,
         13
        ],
        "role": "AXStaticText",
-       "value": "Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical."
+       "value": "Press and hold anywhere on the toolbar, then drag it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical."
       },
       {
        "enabled": true,

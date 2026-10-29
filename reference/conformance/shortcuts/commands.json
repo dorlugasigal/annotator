@@ -191,6 +191,16 @@
       "toolLabel" : "Highlighter"
     },
     {
+      "id" : "tool.laser",
+      "isProtection" : false,
+      "isShape" : false,
+      "label" : "Laser pointer",
+      "sharesStyle" : false,
+      "supportsFill" : false,
+      "systemShapeAspectRatio" : null,
+      "toolLabel" : "Laser pointer"
+    },
+    {
       "id" : "tool.line",
       "isProtection" : false,
       "isShape" : false,

@@ -862,7 +862,7 @@ final class WorkspaceModel: ObservableObject {
         tool = value
         if value == .select { usageMetrics.record(.editing) }
         else if value.isProtection { usageMetrics.record(.coverOrEffect) }
-        else if value == .text || (!value.isPixelEffect && value != .pen && value != .highlighter && value != .eraser) {
+        else if value == .text || (!value.isPixelEffect && ![.pen, .highlighter, .laser, .eraser].contains(value)) {
             usageMetrics.record(.textOrShape)
         } else { usageMetrics.record(.drawing) }
         if value.isProtection { preferences.lastCoverMode = value; persistPreferences() }
@@ -2199,6 +2199,9 @@ final class WorkspaceModel: ObservableObject {
             self?.refreshPointerEffectsOnly()
         }
     }
+
+    /// Redraws the laser pointer's trail in the region sharing output, if it is running.
+    func refreshSharedLaser() { regionSharingController?.refreshPointer() }
 
     func refreshPointerEffectsOnly() {
         guard !workspaceHidden else { return }

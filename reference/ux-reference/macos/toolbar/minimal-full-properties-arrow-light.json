@@ -112,7 +112,19 @@
   {
    "enabled": true,
    "frame": [
-    353,
+    346,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut L",
+   "label": "Laser pointer",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    389,
     8,
     34,
     36
@@ -124,7 +136,7 @@
   {
    "enabled": true,
    "frame": [
-    396,
+    432,
     8,
     34,
     36
@@ -136,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    434,
+    470,
     8,
     34,
     36
@@ -149,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    489.5,
+    525.5,
     18.5,
     17.5,
     15
@@ -163,7 +175,7 @@
   {
    "enabled": true,
    "frame": [
-    519,
+    555,
     8,
     46,
     36
@@ -176,7 +188,7 @@
   {
    "enabled": false,
    "frame": [
-    574,
+    610,
     20,
     12,
     12
@@ -189,7 +201,7 @@
   {
    "enabled": false,
    "frame": [
-    600,
+    636,
     20,
     12,
     12
@@ -202,7 +214,7 @@
   {
    "enabled": false,
    "frame": [
-    626,
+    662,
     19,
     12.5,
     14.5
@@ -215,7 +227,7 @@
   {
    "enabled": true,
    "frame": [
-    647,
+    683,
     14,
     22,
     24
@@ -229,7 +241,7 @@
   {
    "enabled": true,
    "frame": [
-    677,
+    713,
     19,
     14,
     14
@@ -242,7 +254,7 @@
   {
    "enabled": true,
    "frame": [
-    705,
+    741,
     21,
     10.5,
     10.5
@@ -281,9 +293,9 @@
     {
      "enabled": true,
      "frame": [
-      70.5,
+      69.5,
       61,
-      39.5,
+      24.5,
       11
      ],
      "role": "AXStaticText",
@@ -316,9 +328,9 @@
     {
      "enabled": true,
      "frame": [
-      186.5,
+      185.5,
       61,
-      47,
+      30.5,
       11
      ],
      "role": "AXStaticText",
@@ -340,9 +352,9 @@
     {
      "enabled": true,
      "frame": [
-      245,
+      226.5,
       61,
-      62,
+      46,
       11
      ],
      "role": "AXStaticText",
@@ -351,7 +363,7 @@
     {
      "enabled": true,
      "frame": [
-      244,
+      226.5,
       76.5,
       28,
       28
@@ -366,9 +378,9 @@
       {
        "enabled": true,
        "frame": [
-        318.5,
+        283.5,
         61,
-        36.5,
+        21,
         11
        ],
        "role": "AXStaticText",
@@ -377,7 +389,7 @@
       {
        "enabled": true,
        "frame": [
-        317.5,
+        283.5,
         76.5,
         52.5,
         28
@@ -390,9 +402,9 @@
       {
        "enabled": true,
        "frame": [
-        382,
+        347,
         61,
-        31.5,
+        16,
         11
        ],
        "role": "AXStaticText",
@@ -401,7 +413,7 @@
       {
        "enabled": true,
        "frame": [
-        381,
+        347,
         76.5,
         52.5,
         28
@@ -414,9 +426,9 @@
       {
        "enabled": true,
        "frame": [
-        445.5,
+        410,
         61,
-        45.5,
+        30,
         11
        ],
        "role": "AXStaticText",
@@ -425,7 +437,7 @@
       {
        "enabled": true,
        "frame": [
-        444,
+        410,
         76.5,
         28,
         28
@@ -438,9 +450,9 @@
       {
        "enabled": true,
        "frame": [
-        503,
+        451,
         61,
-        56.5,
+        41,
         11
        ],
        "role": "AXStaticText",
@@ -451,7 +463,7 @@
         {
          "enabled": true,
          "frame": [
-          510.5,
+          460,
           85,
           14,
           11
@@ -461,7 +473,7 @@
        ],
        "enabled": true,
        "frame": [
-        502,
+        451,
         85,
         66.5,
         11
@@ -473,7 +485,7 @@
       {
        "enabled": true,
        "frame": [
-        573,
+        522.5,
         85.5,
         17.5,
         10
@@ -484,9 +496,9 @@
      ],
      "enabled": true,
      "frame": [
-      317.5,
+      283.5,
       61,
-      273,
+      256,
       43.5
      ],
      "label": "Arrow properties",
@@ -497,7 +509,7 @@
    "frame": [
     8,
     61,
-    713,
+    749,
     43.5
    ],
    "identifier": "contextual-inspector-viewport",
@@ -511,12 +523,12 @@
  "kind": "view",
  "notes": "Minimal toolbar: full properties keep the expanded layout, drawn at the minimal button size, on one row.",
  "pixels": [
-  1458,
+  1530,
   225
  ],
  "scale": 2,
  "size": [
-  729,
+  765,
   112.5
  ],
  "spec": [

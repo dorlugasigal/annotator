@@ -60,6 +60,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | --- | --- | --- | --- |
 | Capture only when pixels are needed; own windows excluded | Method A, else B and C | E | S-1 |
 | Cursor halo shapes, borders, opacity, glow, persisted identifiers | Overlay renderer | I | Render corpus |
+| Laser pointer: trail that fades 0.8 s behind the pointer, six layers, no drawing or Undo step, shown in region sharing; dot cursor | Core, overlay renderer and cursor factory | I | Laser corpus, UX reference |
 | Click effects Off, Pulse, Ripple, Turn with Mac timings | Composition animation | I | Motion corpus |
 | Zoom ramps 260 ms in, 200 ms out | Composition or paced presents | I | S-3 |
 | Lens fade 120 ms; Spotlight 180/140 ms and 120 ms radius easing | Composition | I | Motion corpus |
@@ -134,6 +135,8 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Undo cancels unfinished work first; coordinated clear | Core | I | Corpus |
 | Background cycle button; Ctrl+W and Ctrl+B | Toolbar and keys | I | UI tests |
 | Edge docking with ghost preview and orientation change | App-owned drag | I | S-4 |
+| Press and hold anywhere on the toolbar (0.4 s within 3 points) to move it; the held control gets no click; sliders and fields keep their press; closed hand on the Mac, move cursor on Windows | App-owned drag | E | Unit tests, dock check |
+| Property names as plain text, without icons | Properties | I | UX reference |
 | One Effects tool with three modes | Core and toolbar | I | Corpus |
 | 44 by 48 tool targets; Shift-resize; highlighter Shift straightening | XAML and core | I | Corpus |
 | Footprint cursor on canvas, system cursors on controls | Cursor factory | I | S-5 |

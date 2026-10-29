@@ -346,6 +346,9 @@ internal sealed class DrawingCanvas : IOverlayCanvas
     /// <summary>What the shared region shows of this canvas now (Mac elementsForSharing).</summary>
     internal SharedCanvasContent SharedContent() => _scene.Shared(_controller.State);
 
+    /// <summary>The laser pointer's trail as this canvas last drew it, in its display's points, or null (the shared region draws it too).</summary>
+    internal DisplayList? LaserTrail => _scene.Laser;
+
     /// <summary>The board the canvas shows under its drawings, or null for the desktop.</summary>
     internal RGBA? BoardColor => _shownBoard switch
     {

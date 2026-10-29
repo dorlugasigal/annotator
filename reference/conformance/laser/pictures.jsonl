@@ -1,0 +1,2 @@
+{"images":{"1x":"circle-0.6@1x.png","2x":"circle-0.6@2x.png"},"scenario":"circle","size":{"height":200,"width":320},"time":0.6}
+{"images":{"1x":"line-0.6@1x.png","2x":"line-0.6@2x.png"},"scenario":"line","size":{"height":200,"width":320},"time":0.6}

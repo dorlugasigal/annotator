@@ -225,8 +225,9 @@ extension WorkspacePreferences {
 }
 
 extension Tool {
-    /// Tools that take part when "Share style between tools" is on.
-    public var sharesStyle: Bool { !isProtection && ![.select, .eraser, .image].contains(self) }
+    /// Tools that take part when "Share style between tools" is on. The laser pointer keeps its own color: it points,
+    /// it doesn't draw.
+    public var sharesStyle: Bool { !isProtection && ![.select, .eraser, .image, .laser].contains(self) }
 }
 
 extension Style {

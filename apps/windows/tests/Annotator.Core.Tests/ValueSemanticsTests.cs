@@ -105,7 +105,8 @@ public class ValueSemanticsTests
         AssertRawValues(ToolbarSize.AllCases, size => size.RawValue);
         AssertRawValues(ShortcutAction.AllCases, action => action.RawValue);
         AssertRawValues(ShareRegionPreset.AllCases, preset => preset.RawValue);
-        Assert.Equal(39, Tool.AllCases.Count);
+        Assert.Equal(40, Tool.AllCases.Count);
+        Assert.Equal(Tool.Laser, Tool.FromRawValue("laser"));
         Assert.Equal("apiGateway", Tool.ApiGateway.RawValue);
         Assert.Equal(Tool.DatabaseStack, Tool.FromRawValue("databaseStack"));
         Assert.Null(Tool.FromRawValue("DatabaseStack"));

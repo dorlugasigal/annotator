@@ -155,7 +155,8 @@ Checks on the real desktop, with development builds
   input into Annotator's own windows, one script for every feature. It takes
   the keyboard focus for about 100 seconds. Add short steps for a new feature.
 - `pwsh -NoProfile -File tools/windows/dock-check.ps1 -Out <folder>`: toolbar
-  drags, docking and the ghost; it moves the pointer for about 15 seconds.
+  drags, press and hold, docking and the ghost; it moves the pointer for about
+  20 seconds.
 - `dotnet run --project apps/windows/tools/Annotator.UXReference -- run --out <folder>`
   (`--states`, `--themes`; `list`; `cursors --out <folder>`): compares each
   state's UI Automation tree and pictures with `reference/ux-reference/macos`

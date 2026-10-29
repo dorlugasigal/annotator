@@ -146,12 +146,16 @@ top, left, bottom and right edges and three quarters along the top. It checks
 the ghost (at the edge, gone 4 points inward and after the drop), that each drop
 docks at exactly the ghost's frame, flush and centered in the edge's
 orientation, and that the toolbar's thread never enters a system move loop
-(where Snap layouts appear). Every press is on the toolbar's background
-(WindowFromPoint and UI Automation first), and the release happens only while
-the toolbar follows the pointer. It moves the pointer for about 15 seconds and
-takes no keyboard focus. `-Shot <Annotator.RenderHarness.exe>` also saves the
-ghost over the toolbar at the top edge, with everything outside the toolbar's
-corners blanked.
+(where Snap layouts appear). Then it presses and holds: Rectangle held still and
+let go leaves the docked toolbar where it was, a short press still clicks, a
+0.6-second hold then a move picks the toolbar up with the move cursor and never
+clicks the button, the Width slider gets its press at once and never moves
+the toolbar, and Escape during a move stops the toolbar where it is. Every press is on the toolbar's background or on the named toolbar
+control (WindowFromPoint and UI Automation first), and the release happens only
+while the toolbar follows the pointer or over the toolbar. It moves the pointer
+for about 20 seconds and takes no keyboard focus.
+`-Shot <Annotator.RenderHarness.exe>` also saves the ghost over the toolbar at
+the top edge, with everything outside the toolbar's corners blanked.
 
 Icons: `Assets/icon-map.json` maps every Mac SF Symbol name to the Lucide icon
 that reads the same: a Lucide name, `{ "lucide": name, "fill": true }` where the

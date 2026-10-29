@@ -1,7 +1,7 @@
 import Foundation
 
 public enum Tool: String, Codable, CaseIterable, Sendable {
-    case select, pen, highlighter, line, arrow, rectangle, ellipse, diamond, text, eraser, cover, blur
+    case select, pen, highlighter, laser, line, arrow, rectangle, ellipse, diamond, text, eraser, cover, blur
     case pixelate, distort, ruler, counter, image
     case database, queue, person, grid, axes
     case triangle, hexagon, star
@@ -18,6 +18,7 @@ public enum Tool: String, Codable, CaseIterable, Sendable {
         case .select: "Select"
         case .pen: "Pen"
         case .highlighter: "Highlighter"
+        case .laser: "Laser pointer"
         case .line: "Line"
         case .arrow: "Arrow"
         case .rectangle: "Rectangle"
@@ -60,6 +61,8 @@ public enum Tool: String, Codable, CaseIterable, Sendable {
     public var isPixelEffect: Bool { self == .blur || self == .pixelate || self == .distort }
     public var isProtection: Bool { self == .cover || isPixelEffect }
     public var isFreehand: Bool { self == .pen || self == .highlighter }
+    /// The laser pointer draws a trail that fades by itself (`LaserTrail`); it never adds anything to a drawing.
+    public var isLaser: Bool { self == .laser }
     public var isConnector: Bool { self == .line || self == .arrow }
     public var isShape: Bool {
         [.rectangle, .ellipse, .diamond, .database, .queue, .person, .grid, .axes, .triangle, .hexagon, .star].contains(self)
@@ -240,7 +243,7 @@ public struct Element: Codable, Equatable, Identifiable, Sendable {
         guard frame.isValid, points.allSatisfy(\.isFinite), rotation.isFinite,
               pressures.allSatisfy({ $0.isFinite && (0...1).contains($0) }),
               pressures.isEmpty || pressures.count == points.count,
-              text.utf8.count <= 1_000_000, tool != .select, tool != .eraser else {
+              text.utf8.count <= 1_000_000, tool != .select, tool != .eraser, tool != .laser else {
             throw CanvasError.invalidGeometry
         }
         for anchor in [startAnchor, endAnchor].compactMap({ $0 }) {

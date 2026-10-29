@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    42,
+    83.5,
     16,
     65.5,
     14
@@ -14,9 +14,9 @@
   {
    "enabled": true,
    "frame": [
-    123,
+    163,
     16,
-    51,
+    32,
     14
    ],
    "role": "AXStaticText",
@@ -25,9 +25,9 @@
   {
    "enabled": true,
    "frame": [
-    273,
+    313,
     16,
-    60.5,
+    39.5,
     14
    ],
    "role": "AXStaticText",
@@ -36,9 +36,9 @@
   {
    "enabled": true,
    "frame": [
-    348.5,
+    366.5,
     16,
-    80,
+    59.5,
     14
    ],
    "role": "AXStaticText",
@@ -47,9 +47,9 @@
   {
    "enabled": true,
    "frame": [
-    443.5,
+    440,
     16,
-    64,
+    47.5,
     14
    ],
    "role": "AXStaticText",
@@ -58,9 +58,9 @@
   {
    "enabled": true,
    "frame": [
-    522.5,
+    501.5,
     16,
-    83.5,
+    63,
     14
    ],
    "role": "AXStaticText",
@@ -69,7 +69,7 @@
   {
    "enabled": true,
    "frame": [
-    42,
+    83.5,
     36,
     36,
     36
@@ -84,7 +84,7 @@
     {
      "enabled": true,
      "frame": [
-      125.5,
+      167,
       47,
       18,
       14
@@ -94,7 +94,7 @@
    ],
    "enabled": true,
    "frame": [
-    121.5,
+    163,
     47,
     96,
     14
@@ -106,7 +106,7 @@
   {
    "enabled": true,
    "frame": [
-    271.5,
+    313,
     36,
     36,
     36
@@ -119,7 +119,7 @@
   {
    "enabled": true,
    "frame": [
-    347.5,
+    366.5,
     36,
     36,
     36
@@ -132,7 +132,7 @@
   {
    "enabled": true,
    "frame": [
-    442.5,
+    440,
     36,
     36,
     36
@@ -145,7 +145,7 @@
   {
    "enabled": true,
    "frame": [
-    521.5,
+    501.5,
     36,
     36,
     36

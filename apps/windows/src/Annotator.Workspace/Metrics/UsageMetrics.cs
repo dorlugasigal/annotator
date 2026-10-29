@@ -48,7 +48,7 @@ public static class UsageMetricExtensions
     public static UsageMetric ForTool(Tool tool) =>
         tool == Tool.Select ? UsageMetric.Editing
         : tool.IsProtection ? UsageMetric.CoverOrEffect
-        : tool == Tool.Text || (!tool.IsPixelEffect && tool is not (Tool.Pen or Tool.Highlighter or Tool.Eraser)) ? UsageMetric.TextOrShape
+        : tool == Tool.Text || (!tool.IsPixelEffect && tool is not (Tool.Pen or Tool.Highlighter or Tool.Laser or Tool.Eraser)) ? UsageMetric.TextOrShape
         : UsageMetric.Drawing;
 }
 

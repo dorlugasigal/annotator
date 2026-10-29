@@ -52,6 +52,7 @@ internal sealed class ColorPopover : PopoverWindow
     private readonly ParityButton _matchOutline;
     private readonly ParityCheckBox? _fillToggle;
     private readonly Border? _fillBox;
+    private readonly SegmentGroup _segments;
     private readonly SegmentButton _solid;
     private readonly SegmentButton _gradient;
     private readonly SwatchGrid _palette;
@@ -95,7 +96,7 @@ internal sealed class ColorPopover : PopoverWindow
         _screen = screen;
         _maximumHeight = MaximumHeight();
         WorkspaceSnapshot snapshot = model.Snapshot;
-        _showingGradients = request.Page switch
+        _showingGradients = OffersGradients(snapshot) && request.Page switch
         {
             ColorPickerPage.Gradient => true,
             ColorPickerPage.Solid => false,
@@ -135,8 +136,9 @@ internal sealed class ColorPopover : PopoverWindow
             _content.Children.Add(_fillToggle);
         }
 
-        // Picker("Color options") { Gradient; Solid }.pickerStyle(.segmented)
+        // Picker("Color options") { Gradient; Solid }.pickerStyle(.segmented), unless the paint has no gradients.
         var segments = new SegmentGroup("Color options") { Width = 153.5, Height = 24, HorizontalAlignment = HorizontalAlignment.Left };
+        _segments = segments;
         segments.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         segments.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         var track = new Border { CornerRadius = new CornerRadius(6), Background = PickerColors.ControlFill, IsHitTestVisible = false };
@@ -390,7 +392,14 @@ internal sealed class ColorPopover : PopoverWindow
 
     protected override void FocusFirst()
     {
-        Control first = _matchOutline is { Visibility: Visibility.Visible, IsEnabled: true } match ? match : _fillToggle ?? (Control)(_showingGradients ? _gradient : _solid);
+        Control? first = _matchOutline is { Visibility: Visibility.Visible, IsEnabled: true } match ? match
+            : (Control?)_fillToggle ?? (_segments.Visibility == Visibility.Visible ? (_showingGradients ? _gradient : _solid) : null);
+        if (first is null)
+        {
+            // Without the Gradient and Solid choice the first color comes first.
+            (FocusManager.FindFirstFocusableElement(_content) as Control)?.Focus(FocusState.Programmatic);
+            return;
+        }
         first.Focus(FocusState.Programmatic);
     }
 
@@ -408,6 +417,9 @@ internal sealed class ColorPopover : PopoverWindow
     private CoreStyle CurrentStyle => _model.Snapshot.Style;
 
     private RGBA? Selected(CoreStyle style) => _fill ? style.Fill : style.Color;
+
+    /// <summary>Mac offersGradients: the laser pointer glows in one color, so its stroke picker has no gradients.</summary>
+    private bool OffersGradients(WorkspaceSnapshot snapshot) => _fill || snapshot.EffectiveTool != Tool.Laser;
 
     private ColorGradient? Gradient(CoreStyle style) => _fill ? style.FillGradient : style.StrokeGradient;
 
@@ -534,6 +546,11 @@ internal sealed class ColorPopover : PopoverWindow
         {
             _updating = false;
         }
+        if (!OffersGradients(snapshot))
+        {
+            _showingGradients = false;
+        }
+        Show(_segments, OffersGradients(snapshot));
         bool matchShown = _fill ? selected is not null : snapshot.EditingShapeLabel;
         _matchOutline.IsEnabled = _fill || !snapshot.EditingLabelFollowsStroke;
         Show(_matchOutline, matchShown);
@@ -549,7 +566,7 @@ internal sealed class ColorPopover : PopoverWindow
         Show(_validation, _validationMessage is not null);
         ShowWheel(selected ?? style.Color);
         string structure = string.Create(CultureInfo.InvariantCulture,
-            $"{matchShown}{_showingGradients}{_wheelExpanded}{selected is not null}{_shadesDisclosure.IsExpanded}{style.Opacity < 1}{_validationMessage}");
+            $"{matchShown}{_showingGradients}{_wheelExpanded}{selected is not null}{_shadesDisclosure.IsExpanded}{style.Opacity < 1}{_validationMessage}{OffersGradients(snapshot)}");
         if (structure != _structure)
         {
             _structure = structure;

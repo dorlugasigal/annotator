@@ -20,7 +20,7 @@ enum BoardsExport {
     private static func allTools() -> [Element] {
         var elements: [Element] = []
         var number = 100
-        let tools = Tool.allCases.filter { $0 != .select && $0 != .eraser }
+        let tools = Tool.allCases.filter { $0 != .select && $0 != .eraser && $0 != .laser }
         for (index, tool) in tools.enumerated() {
             number += 1
             let column = Double(index % 8), row = Double(index / 8)

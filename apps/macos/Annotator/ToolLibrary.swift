@@ -6,7 +6,7 @@ enum ToolLibrarySection: String, CaseIterable {
 
     var tools: [Tool] {
         switch self {
-        case .draw: [.select, .pen, .highlighter, .text, .arrow, .line, .eraser]
+        case .draw: [.select, .pen, .highlighter, .laser, .text, .arrow, .line, .eraser]
         case .shapes: [.rectangle, .ellipse, .diamond, .triangle, .hexagon, .star, .person]
             + Tool.systemDesignShapes + [.database, .queue, .grid, .axes]
         case .focus: [.cover]
@@ -358,6 +358,7 @@ extension Tool {
         case .pen: "pencil"
         case .text: "textformat"
         case .highlighter: "highlighter"
+        case .laser: "laser.burst"
         case .eraser: "eraser"
         case .cover: "camera.filters"
         case .blur: "aqi.medium"

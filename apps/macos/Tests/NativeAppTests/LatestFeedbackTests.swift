@@ -53,7 +53,7 @@ final class LatestFeedbackTests: XCTestCase {
         defer { editor.close(); defaults.removePersistentDomain(forName: suite) }
         let session = editor.session
         let image = try PNGExporter.data(elements: [], size: CGSize(width: 16, height: 16), background: .blue)
-        for tool in Tool.allCases where tool != .select && tool != .eraser && !tool.isConnector {
+        for tool in Tool.allCases where tool != .select && tool != .eraser && tool != .laser && !tool.isConnector {
             var item = Element(tool: tool, frame: Rect(x: 200, y: 200, width: 120, height: 60),
                                text: tool == .counter ? "1" : "Text")
             if tool.isFreehand {

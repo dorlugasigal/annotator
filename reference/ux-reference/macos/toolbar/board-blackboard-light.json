@@ -112,7 +112,19 @@
   {
    "enabled": true,
    "frame": [
-    453,
+    444,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut L",
+   "label": "Laser pointer",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    499,
     12,
     44,
     48
@@ -124,7 +136,7 @@
   {
    "enabled": true,
    "frame": [
-    508,
+    554,
     12,
     44,
     48
@@ -136,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    558,
+    604,
     12,
     44,
     48
@@ -148,7 +160,7 @@
   {
    "enabled": true,
    "frame": [
-    621,
+    667,
     12,
     44,
     48
@@ -161,7 +173,7 @@
   {
    "enabled": true,
    "frame": [
-    671,
+    717,
     12,
     60,
     48
@@ -174,7 +186,7 @@
   {
    "enabled": false,
    "frame": [
-    743,
+    789,
     30,
     12,
     12
@@ -187,7 +199,7 @@
   {
    "enabled": false,
    "frame": [
-    773,
+    819,
     30,
     12,
     12
@@ -200,7 +212,7 @@
   {
    "enabled": false,
    "frame": [
-    803,
+    849,
     29,
     12.5,
     14.5
@@ -213,7 +225,7 @@
   {
    "enabled": true,
    "frame": [
-    827,
+    873,
     23,
     24,
     26
@@ -227,7 +239,7 @@
   {
    "enabled": true,
    "frame": [
-    862,
+    908,
     29,
     14,
     14
@@ -240,7 +252,7 @@
   {
    "enabled": true,
    "frame": [
-    894,
+    940,
     31,
     10.5,
     10.5
@@ -306,9 +318,9 @@
     {
      "enabled": true,
      "frame": [
-      93,
+      91.5,
       129,
-      51,
+      32,
       14
      ],
      "role": "AXStaticText",
@@ -341,9 +353,9 @@
     {
      "enabled": true,
      "frame": [
-      243,
+      241.5,
       129,
-      60.5,
+      39.5,
       14
      ],
      "role": "AXStaticText",
@@ -365,9 +377,9 @@
     {
      "enabled": true,
      "frame": [
-      318.5,
+      295,
       129,
-      80,
+      59.5,
       14
      ],
      "role": "AXStaticText",
@@ -376,7 +388,7 @@
     {
      "enabled": true,
      "frame": [
-      317.5,
+      295,
       149,
       36,
       36
@@ -389,9 +401,9 @@
     {
      "enabled": true,
      "frame": [
-      413.5,
+      368.5,
       129,
-      64,
+      47.5,
       14
      ],
      "role": "AXStaticText",
@@ -400,7 +412,7 @@
     {
      "enabled": true,
      "frame": [
-      412.5,
+      368.5,
       149,
       36,
       36
@@ -413,9 +425,9 @@
     {
      "enabled": true,
      "frame": [
-      492.5,
+      430,
       129,
-      83.5,
+      63,
       14
      ],
      "role": "AXStaticText",
@@ -424,7 +436,7 @@
     {
      "enabled": true,
      "frame": [
-      491.5,
+      430,
       149,
       36,
       36
@@ -440,7 +452,7 @@
    "frame": [
     12,
     129,
-    899,
+    945,
     56
    ],
    "identifier": "contextual-inspector-viewport",
@@ -454,12 +466,12 @@
  "kind": "view",
  "notes": "Board button after choosing Blackboard.",
  "pixels": [
-  1846,
+  1938,
   394
  ],
  "scale": 2,
  "size": [
-  923,
+  969,
   197
  ],
  "spec": [

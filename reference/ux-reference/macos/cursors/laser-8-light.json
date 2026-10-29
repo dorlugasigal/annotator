@@ -1,0 +1,25 @@
+{
+ "appearance": "light",
+ "hotSpot": [
+  10,
+  10
+ ],
+ "image": "cursors/laser-8-light.png",
+ "kind": "image",
+ "notes": "Cursor image with its hot spot in points.",
+ "pixels": [
+  40,
+  40
+ ],
+ "scale": 2,
+ "size": [
+  20,
+  20
+ ],
+ "spec": [
+  "009 drawing cursors",
+  "WIN-OVR-11"
+ ],
+ "state": "laser-8",
+ "surface": "cursors"
+}

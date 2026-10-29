@@ -8,7 +8,7 @@ public class ManifestTests
 {
     /// <summary>The sections this project compares; motion, render and effects have their own tests.</summary>
     internal static readonly string[] Sections =
-        ["platform", "boards", "profiles", "shortcuts", "library", "editing", "geometry", "recognition", "hittest"];
+        ["platform", "boards", "profiles", "shortcuts", "library", "editing", "geometry", "laser", "recognition", "hittest"];
 
     public static TheoryData<string> Files
     {

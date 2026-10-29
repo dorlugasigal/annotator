@@ -124,7 +124,7 @@ final class UXReferenceCaptureTests: XCTestCase {
             try await recorder.view(ToolbarView(model: model), state: "draw-tools-only", dark: dark,
                                     notes: "Properties hidden: only the tools and buttons.", spec: spec)
             model.setPropertiesShown(true)
-            for tool in [Tool.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
+            for tool in [Tool.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter, .laser,
                          .eraser, .blur, .pixelate, .distort, .ruler, .counter, .image, .databaseStack] {
                 use(model, tool: tool)
                 try await recorder.view(ToolbarView(model: model), state: "full-properties-\(tool.rawValue)", dark: dark,
@@ -278,7 +278,7 @@ final class UXReferenceCaptureTests: XCTestCase {
         let spec = ["002 design.md", "001 color and gradient paint", "WIN-UI-02"]
         for dark in [false, true] {
             let (model, _) = try liveModel("properties")
-            for tool in [Tool.rectangle, .ellipse, .diamond, .arrow, .line, .pen, .highlighter, .text,
+            for tool in [Tool.rectangle, .ellipse, .diamond, .arrow, .line, .pen, .highlighter, .laser, .text,
                          .blur, .pixelate, .distort, .eraser, .counter, .ruler] {
                 use(model, tool: tool)
                 try await recorder.view(ContextualInspector(model: model).padding(16), state: tool.rawValue, dark: dark,
@@ -313,6 +313,10 @@ final class UXReferenceCaptureTests: XCTestCase {
             model.applyStyle { $0.setGradient(GradientPreset.spectrum.gradient, fill: false) }
             try await pickers.view(InspectorColorPalette(model: model, fill: false, done: {}), state: "color-gradient", dark: dark,
                                    background: .popover, notes: "Stroke with the spectrum gradient preset.", spec: spec)
+            use(model, tool: .laser)
+            try await pickers.view(InspectorColorPalette(model: model, fill: false, done: {}), state: "color-laser", dark: dark,
+                                   background: .popover, notes: "Laser pointer color: solid colors only, without the Gradient and Solid choice.",
+                                   spec: spec)
             use(model, tool: .arrow)
             for start in [true, false] {
                 try await pickers.view(ArrowHeadPalette(model: model, start: start, dismiss: {}),
@@ -755,6 +759,17 @@ final class UXReferenceCaptureTests: XCTestCase {
                         spec: spec)
                 }
             }
+            let laserTimes = (0...84).map { Double($0) / 60 }
+            let laserFrames = try laserTimes.map { time in
+                try UXReferenceRecorder.draw(width: 360, height: 220) { context in
+                    context.setFillColor(gray: shades, alpha: 1)
+                    context.fill(CGRect(x: 0, y: 0, width: 360, height: 220))
+                    LaserTrailRenderer.draw(Self.laserSwoosh(until: time), at: time, in: context)
+                }
+            }
+            try pointer.sequence(laserFrames, name: "laser-trail", dark: dark, times: laserTimes,
+                notes: "Laser pointer: a 0.5-second swoosh with the button down, then let go. Each point fades \(LaserTrail.lifetime) s after the pointer passed it; at 60 frames per second.",
+                spec: spec + ["003 laser pointer"])
             for effect in [CursorHighlightSettings.ClickEffect.pulse, .ripple, .turn] {
                 let count = Int((CursorHighlightSettings.clickDuration * 60).rounded()) + 1
                 let times = (0..<count).map { Double($0) / 60 }
@@ -788,13 +803,25 @@ final class UXReferenceCaptureTests: XCTestCase {
                               extra: ["hotSpot": [cursor.hotSpot.x, cursor.hotSpot.y]])
             entries.append(["name": name, "size": [size.width, size.height], "hotSpot": [cursor.hotSpot.x, cursor.hotSpot.y]])
         }
-        for tool in [Tool.pen, .highlighter, .eraser, .line, .arrow, .rectangle, .ellipse, .diamond, .text, .blur] {
+        for tool in [Tool.pen, .highlighter, .laser, .eraser, .line, .arrow, .rectangle, .ellipse, .diamond, .text, .blur] {
             for width in [2.0, 8.0, 24.0] {
                 try record(ToolCursorFactory.cursor(tool: tool, width: width), name: "\(tool.rawValue)-\(Int(width))")
             }
         }
         try record(ToolCursorFactory.rotationCursor, name: "rotate")
         try UXReferenceRecorder.writeJSON(entries, to: UXReferenceRecorder.root.appendingPathComponent("cursors/cursors.json"))
+    }
+
+    /// A swoosh across the picture with the button down for half a second, as far as it got at `time`.
+    static func laserSwoosh(until time: Double) -> LaserTrail {
+        var trail = LaserTrail()
+        trail.press(at: Point(40, 150), time: 0, color: LaserTrail.defaultColor, width: LaserTrail.defaultWidth)
+        for step in 1...30 where Double(step) / 60 <= time {
+            let share = Double(step) / 30
+            trail.move(to: Point(40 + 280 * share, 150 - 90 * sin(share * .pi)), time: Double(step) / 60)
+        }
+        if time >= 0.5 { trail.release(at: nil, time: 0.5) }
+        return trail
     }
 
     // MARK: Break timer

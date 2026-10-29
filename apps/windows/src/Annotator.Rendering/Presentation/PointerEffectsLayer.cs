@@ -35,8 +35,11 @@ public sealed class PointerEffectsStatistics
 /// </item>
 /// <item>A click (Pulse, Ripple, Turn or the static emphasis) is drawn frame by frame into a display-sized virtual surface,
 /// only where it changes, and the surface's memory is given back when the click ends.</item>
+/// <item>In region sharing's output, the laser pointer's trail (<see cref="ShowLaser"/>) goes between the spotlight and the
+/// halo, as Mac SharedRegionPointerView draws it, into its own display-sized virtual surface, again only where it
+/// changes. An overlay draws its trail on its canvas instead.</item>
 /// </list>
-/// Without devices the halo does not show; the spotlight needs none.
+/// Without devices the halo and the trail do not show; the spotlight needs none.
 /// </summary>
 public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
 {
@@ -52,6 +55,8 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
     private readonly CompositionColorGradientStop inner;
     private readonly SpriteVisual halo;
     private readonly ContainerVisual clicks;
+    private readonly ContainerVisual laser;
+    private readonly LaserContent laserContent;
     private readonly ISystemColorResolver? colors;
     private readonly int pixelWidth;
     private readonly int pixelHeight;
@@ -69,6 +74,10 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
     private CursorHighlightFrame? clickFrame;
     private PixelRect clickDrawn;
     private bool clickShown;
+    private DrawingSurfaceLayer? laserLayer;
+    private DisplayList? laserList;
+    private PixelRect laserDrawn;
+    private bool laserShown;
     private Vector2 shownCenter = new(float.NaN);
     private float shownOuter = float.NaN;
     private float shownOpacity = float.NaN;
@@ -107,9 +116,14 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
         clicks = compositor.CreateContainerVisual();
         clicks.Size = new Vector2(pixelWidth, pixelHeight);
         clicks.IsVisible = false;
+        laser = compositor.CreateContainerVisual();
+        laser.Size = new Vector2(pixelWidth, pixelHeight);
+        laser.IsVisible = false;
+        laserContent = new LaserContent(this);
         halo = compositor.CreateSpriteVisual();
         halo.IsVisible = false;
         container.Children.InsertAtTop(spotlight);
+        container.Children.InsertAtTop(laser);
         container.Children.InsertAtTop(clicks);
         container.Children.InsertAtTop(halo);
         root.Children.InsertAtTop(container);
@@ -125,6 +139,9 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
 
     /// <summary>Whether the spotlight shows now.</summary>
     public bool SpotlightShown => spotlightShown;
+
+    /// <summary>Whether the laser pointer's trail shows now.</summary>
+    public bool LaserShown => laserShown;
 
     /// <summary>
     /// Shows the spotlight around (<paramref name="x"/>, <paramref name="y"/>) in overlay pixels with a radius of
@@ -238,14 +255,83 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
 
     /// <summary>
     /// Gives back the halo's surfaces and renderer while no pointer effect shows (the host calls it when the effects turn off);
-    /// the next halo draws them again.
+    /// the next halo draws them again. A laser trail that shows keeps them.
     /// </summary>
     public void ReleaseIdleResources()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         SetHaloVisible(false);
         clicks.IsVisible = false;
+        if (laserShown)
+        {
+            EndClick();
+            return;
+        }
         ReleaseDeviceResources();
+    }
+
+    /// <summary>
+    /// Shows the laser pointer's trail, <paramref name="trail"/> in the display's points as LaserTrailRenderer draws it
+    /// (Mac SharedRegionPointerView), or hides it for null. Only where the old and the new trail paint is drawn again; a
+    /// list already shown changes nothing.
+    /// </summary>
+    public void ShowLaser(DisplayList? trail)
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        if (ReferenceEquals(trail, laserList) && (trail is null || laserShown))
+        {
+            return;
+        }
+        if (devices is null)
+        {
+            laserList = null;
+            laserShown = false;
+            laser.IsVisible = false;
+            return;
+        }
+        DisplayList? previous = laserList;
+        try
+        {
+            EnsureRenderer();
+            if (laserLayer is null)
+            {
+                graphics ??= Annotator.Platform.Interop.CompositionInterop.CreateGraphicsDevice(compositor, devices.D2DDevice);
+                laserLayer = new DrawingSurfaceLayer(compositor, graphics, pixelWidth, pixelHeight, isVirtual: true);
+                laser.Children.InsertAtTop(laserLayer.Visual);
+            }
+            damage.Clear();
+            if (laserShown)
+            {
+                damage.Add(laserDrawn, pixelWidth, pixelHeight);
+            }
+            PixelRect drawn = default;
+            if (trail is not null && renderer!.Enter(trail) is { } bounds)
+            {
+                drawn = DisplayListRenderer.PixelBounds(bounds, new DrawArea(scale, 0, 0, new PixelRect(0, 0, pixelWidth, pixelHeight)));
+                damage.Add(drawn, pixelWidth, pixelHeight);
+            }
+            laserList = trail;
+            int result = laserLayer.Draw(damage, scale, live: false, laserContent);
+            if (previous is not null)
+            {
+                renderer!.Leave(previous);
+            }
+            Check(result, "Draw the laser pointer's trail");
+            laserDrawn = drawn;
+            laserShown = trail is not null;
+            laser.IsVisible = laserShown;
+            if (!laserShown)
+            {
+                laserLayer.TrimAll();
+            }
+            Failure = null;
+        }
+        catch (Exception error) when (error is NativeCallException or InvalidOperationException or OutOfMemoryException)
+        {
+            // A lost device or a failed draw hides the trail until new devices or the next frame draw it.
+            Failure = error;
+            ReleaseDeviceResources();
+        }
     }
 
     public void Dispose()
@@ -262,6 +348,7 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
         spotlight.Dispose();
         halo.Dispose();
         clicks.Dispose();
+        laser.Dispose();
         container.Dispose();
     }
 
@@ -438,12 +525,30 @@ public sealed unsafe class PointerEffectsLayer : IDisposable, ILayerContent
         clickLayer?.Dispose();
         clickLayer = null;
         clickShown = false;
+        laser.Children.RemoveAll();
+        laserLayer?.Dispose();
+        laserLayer = null;
+        laserList = null;
+        laserShown = false;
+        laser.IsVisible = false;
         graphics?.Dispose();
         graphics = null;
         effects?.Dispose();
         effects = null;
         renderer?.Dispose();
         renderer = null;
+    }
+
+    /// <summary>Draws the trail that <see cref="ShowLaser"/> shows, in each damaged rectangle of its surface.</summary>
+    private sealed class LaserContent(PointerEffectsLayer owner) : ILayerContent
+    {
+        public void Render(nint deviceContext, in DrawArea area)
+        {
+            if (owner.laserList is { } list)
+            {
+                owner.renderer!.Draw(deviceContext, list, area);
+            }
+        }
     }
 
     private void Check(int result, string operation)

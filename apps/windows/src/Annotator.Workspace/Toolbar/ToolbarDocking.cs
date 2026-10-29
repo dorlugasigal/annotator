@@ -57,6 +57,8 @@ public sealed class ToolbarDocking
     private Point? _dragOrigin;
     private Rect _dragFrame;
     private Rect _dragCurrent;
+    /// <summary>Mac dockAtDragStart: the frame and dock when the drag started, so a drag that never moves the toolbar keeps it docked.</summary>
+    private (Rect Frame, Rect? Docked, DisplayId? Display, bool Edge)? _dockAtStart;
 
     /// <summary>Mac dockedFrame: where the toolbar was docked, while it has not been dragged away.</summary>
     public Rect? DockedFrame { get; private set; }
@@ -125,22 +127,20 @@ public sealed class ToolbarDocking
     {
         ArgumentNullException.ThrowIfNull(displays);
         ArgumentNullException.ThrowIfNull(dockingSize);
-        if (_dragOrigin is null)
+        Point origin;
+        if (_dragOrigin is { } dragging)
+        {
+            origin = dragging;
+        }
+        else
         {
             if (_press is not { } press || press.Distance(pointer) < DragThreshold * _pressScale)
             {
                 return null;
             }
-            // Mac beginToolbarDrag and onUserDragStarted: the drag starts at the press, and the toolbar is no longer docked.
-            _dragOrigin = press;
-            _dragFrame = _pressFrame;
-            _dragCurrent = _pressFrame;
-            _press = null;
-            DockedFrame = null;
-            DockDisplay = null;
-            EdgeDocked = false;
+            Begin(press, _pressFrame);
+            origin = press;
         }
-        Point origin = _dragOrigin.Value;
         var proposed = new Rect(_dragFrame.X + pointer.X - origin.X, _dragFrame.Y + pointer.Y - origin.Y, size.Width, size.Height);
         if ((DisplayContaining(pointer, displays) ?? DisplayOf(_dragCurrent, displays)) is { } destination)
         {
@@ -148,6 +148,43 @@ public sealed class ToolbarDocking
         }
         _dragCurrent = proposed;
         return new ToolbarDragStep(proposed, UpdatePreview(pointer, displays, presented, dockingSize));
+    }
+
+    /// <summary>
+    /// Mac finishHold and beginToolbarDrag: a press held still on the toolbar (<see cref="ToolbarHold"/>) picks it up, and it
+    /// follows the pointer from <paramref name="pointer"/>, where the press started, at once. A press on the background that
+    /// waits to become a drag becomes one from its own point. <paramref name="frame"/> is the toolbar's frame now. Nothing
+    /// changes while a drag runs.
+    /// </summary>
+    public void Hold(Point pointer, Rect frame, double scale)
+    {
+        if (IsDragging)
+        {
+            return;
+        }
+        if (_press is { } press)
+        {
+            pointer = press;
+            frame = _pressFrame;
+        }
+        _pressScale = double.IsFinite(scale) && scale > 0 ? scale : 1;
+        Begin(pointer, frame);
+    }
+
+    /// <summary>
+    /// Mac beginToolbarDrag and onUserDragStarted: the drag starts at <paramref name="origin"/>, and the toolbar is no
+    /// longer docked. The dock is remembered until the drag ends, so a drag that never moves the toolbar keeps it.
+    /// </summary>
+    private void Begin(Point origin, Rect frame)
+    {
+        _dockAtStart = (frame, DockedFrame, DockDisplay, EdgeDocked);
+        _dragOrigin = origin;
+        _dragFrame = frame;
+        _dragCurrent = frame;
+        _press = null;
+        DockedFrame = null;
+        DockDisplay = null;
+        EdgeDocked = false;
     }
 
     /// <summary>
@@ -198,8 +235,10 @@ public sealed class ToolbarDocking
         if (step.Frame == original)
         {
             Preview = null;
+            KeepDock(step.Frame);
             return new ToolbarDrop(ToolbarDropKind.Unmoved, step.Frame);
         }
+        _dockAtStart = null;
         ToolbarDockPreview? target = Preview;
         Preview = null;
         DisplayDescriptor? display = target?.Display ?? DisplayContaining(pointer, displays) ?? DisplayOf(step.Frame, displays);
@@ -221,12 +260,36 @@ public sealed class ToolbarDocking
         return new ToolbarDrop(ToolbarDropKind.Free, step.Frame, null, display);
     }
 
-    /// <summary>Mac cancelToolbarDrag: the drag ends where the toolbar is now, and the ghost goes.</summary>
+    /// <summary>
+    /// Mac cancelToolbarDrag: the drag ends where the toolbar is now, and the ghost goes. A toolbar that never moved keeps
+    /// the dock it had when the drag started (Mac onUserDragCancelled).
+    /// </summary>
     public void Cancel()
     {
+        bool dragging = _dragOrigin is not null;
         _press = null;
         _dragOrigin = null;
         Preview = null;
+        if (dragging)
+        {
+            KeepDock(_dragCurrent);
+        }
+        _dockAtStart = null;
+    }
+
+    /// <summary>
+    /// Mac onUserDragCancelled: a drag that left the toolbar at <paramref name="frame"/>, where it started (a press and hold
+    /// let go without moving), puts back the dock it had, so it stays docked and keeps its edge when its size changes.
+    /// </summary>
+    private void KeepDock(Rect frame)
+    {
+        if (_dockAtStart is { } saved && saved.Frame == frame)
+        {
+            DockedFrame = saved.Docked;
+            DockDisplay = saved.Display;
+            EdgeDocked = saved.Edge;
+        }
+        _dockAtStart = null;
     }
 
     /// <summary>

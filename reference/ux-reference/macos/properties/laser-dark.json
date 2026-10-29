@@ -1,0 +1,95 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    112.5,
+    16,
+    65.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    192,
+    16,
+    32,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Width"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    112.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#FA2933FF"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      202,
+      47,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    192,
+    47,
+    96,
+    14
+   ],
+   "label": "Width",
+   "role": "AXSlider",
+   "value": 6
+  },
+  {
+   "enabled": true,
+   "frame": [
+    342,
+    47.5,
+    194,
+    13
+   ],
+   "role": "AXStaticText",
+   "value": "Drag to point. The trail fades on its own."
+  }
+ ],
+ "appearance": "dark",
+ "background": "window",
+ "image": "properties/laser-dark.png",
+ "kind": "view",
+ "notes": "Full properties for Laser pointer, 648 points wide.",
+ "pixels": [
+  1296,
+  176
+ ],
+ "scale": 2,
+ "size": [
+  648,
+  88
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "laser",
+ "surface": "properties"
+}

@@ -3,9 +3,9 @@
   {
    "enabled": true,
    "frame": [
-    257.5,
+    256,
     16,
-    78,
+    59,
     14
    ],
    "role": "AXStaticText",

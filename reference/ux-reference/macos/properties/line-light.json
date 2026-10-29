@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    131,
+    153,
     16,
     65.5,
     14
@@ -14,9 +14,9 @@
   {
    "enabled": true,
    "frame": [
-    212,
+    232.5,
     16,
-    51,
+    32,
     14
    ],
    "role": "AXStaticText",
@@ -25,9 +25,9 @@
   {
    "enabled": true,
    "frame": [
-    362,
+    382.5,
     16,
-    60.5,
+    39.5,
     14
    ],
    "role": "AXStaticText",
@@ -36,9 +36,9 @@
   {
    "enabled": true,
    "frame": [
-    437.5,
+    436,
     16,
-    80,
+    59.5,
     14
    ],
    "role": "AXStaticText",
@@ -47,7 +47,7 @@
   {
    "enabled": true,
    "frame": [
-    131,
+    153,
     36,
     36,
     36
@@ -62,7 +62,7 @@
     {
      "enabled": true,
      "frame": [
-      214.5,
+      236.5,
       47,
       18,
       14
@@ -72,7 +72,7 @@
    ],
    "enabled": true,
    "frame": [
-    210.5,
+    232.5,
     47,
     96,
     14
@@ -84,7 +84,7 @@
   {
    "enabled": true,
    "frame": [
-    360.5,
+    382.5,
     36,
     36,
     36
@@ -97,7 +97,7 @@
   {
    "enabled": true,
    "frame": [
-    436.5,
+    436,
     36,
     36,
     36

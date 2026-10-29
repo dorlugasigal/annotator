@@ -103,6 +103,7 @@ internal static class Glyphs
         Tool.Pen => "pencil",
         Tool.Text => "textformat",
         Tool.Highlighter => "highlighter",
+        Tool.Laser => "laser.burst",
         Tool.Eraser => "eraser",
         Tool.Cover => "camera.filters",
         Tool.Blur => "aqi.medium",

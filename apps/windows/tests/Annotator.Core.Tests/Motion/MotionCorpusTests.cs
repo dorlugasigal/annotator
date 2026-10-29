@@ -62,6 +62,9 @@ public sealed class MotionCorpusTests
             ["toolbarExpandDuration"] = MotionTiming.ToolbarExpandDuration,
             ["toolbarMorphOutgoingEnd"] = ToolbarMorph.OutgoingEnd,
             ["toolbarMorphIncomingStart"] = ToolbarMorph.IncomingStart,
+            ["toolbarHoldDelay"] = ToolbarHold.Delay,
+            ["toolbarHoldSlop"] = ToolbarHold.Slop,
+            ["laserTrailLifetime"] = LaserTrail.Lifetime,
         };
         foreach (JsonProperty property in root.EnumerateObject())
         {
