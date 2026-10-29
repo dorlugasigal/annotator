@@ -11,6 +11,10 @@ public static class Program
 {
     private static Mutex? s_instance;
 
+    /// <summary>What a start without a signed-in desktop writes to standard error before it quits (WIN-SYS-08).</summary>
+    internal const string NoDesktopMessage =
+        "Annotator can't start here because there's no signed-in Windows desktop to draw on. Sign in to Windows, then open Annotator.";
+
     /// <summary>The UX reference state to show instead of the app (development builds only), or null.</summary>
     internal static ReferenceRequest? Reference { get; private set; }
 
@@ -34,6 +38,15 @@ public static class Program
     {
         StartupLog.Mark("main");
         AppDomain.CurrentDomain.UnhandledException += (_, e) => StartupLog.Note("crash", (e.ExceptionObject.ToString() ?? "unknown").ReplaceLineEndings(" | "));
+        if (!Environment.UserInteractive)
+        {
+            // WIN-SYS-08: a service or a scheduled task that runs while nobody is signed in has no desktop to draw on,
+            // and WinUI's input setup would stop the process with a fail fast (0xC0000602). Quitting here is expected
+            // there, not a failure, so the exit code is 0.
+            StartupLog.Note("no-desktop", "quit");
+            Console.Error.WriteLine(NoDesktopMessage);
+            return 0;
+        }
         if (Array.IndexOf(args, ReferenceRequest.Switch) >= 0)
         {
             return RunReference(args);
