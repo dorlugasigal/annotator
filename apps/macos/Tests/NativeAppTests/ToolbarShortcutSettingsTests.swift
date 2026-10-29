@@ -156,7 +156,7 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
     }
 
     func testSettingsTabsStayVisibleAtTheDefaultAndMinimumWidths() async throws {
-        for width in [720.0, 840] {
+        for width in [SettingsSurfaceView.minimumContentSize.width, SettingsSurfaceView.defaultContentSize.width] {
             let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
             let window = NSWindow(contentRect: NSRect(x: 120, y: 80, width: width, height: 700),
                                   styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
@@ -374,13 +374,12 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
             host.view.layoutSubtreeIfNeeded()
             return host.view.fittingSize
         }
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let expanded = size(false), expandedVertical = size(true)
         model.setToolbarSize(.minimal)
         XCTAssertEqual(model.preferences.toolbarSize, .minimal)
         let minimal = size(false), minimalVertical = size(true)
-        XCTAssertEqual(minimal.width, ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools, available: 1200,
-                                                                        propertiesVisible: false, size: .minimal), accuracy: 1)
+        XCTAssertEqual(minimal.width, ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools, available: 1200, size: .minimal), accuracy: 1)
         XCTAssertLessThan(minimal.width, expanded.width - 150)
         XCTAssertLessThanOrEqual(minimal.height, 56)
         XCTAssertLessThan(minimal.height, expanded.height)
@@ -471,10 +470,9 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
                        size: CGSize(width: 800, height: 1720), name: "toolbar-shortcuts-full", dark: dark)
             model.setToolbarSize(.minimal)
             model.setToolbarOrientation(.horizontal)
-            model.setInspectorPinned(false)
-            model.setQuickPreferencesExpanded(true)
-            try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal-quick", dark: dark)
-            model.setQuickPreferencesExpanded(false)
+            model.setPropertiesShown(true)
+            try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal-properties", dark: dark)
+            model.setPropertiesShown(false)
             try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal", dark: dark)
             model.setToolbarOrientation(.vertical)
             try render(ToolbarView(model: model, availableSize: CGSize(width: 900, height: 900)), size: nil,
@@ -489,7 +487,10 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
 
     private func withSettings(_ body: (NSPanel, NSView) async throws -> Void) async throws {
         let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
-        let panel = NSPanel(contentRect: NSRect(x: 120, y: 80, width: 840, height: 760),
+        // Tall enough to show the tray's shapes below a toolbar preview that wraps onto two lines.
+        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        let height = min(880, screen.height - 40)
+        let panel = NSPanel(contentRect: NSRect(x: screen.minX + 120, y: screen.maxY - height - 20, width: 840, height: height),
                             styleMask: [.titled, .resizable, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isReleasedWhenClosed = false
         panel.contentView = host

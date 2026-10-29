@@ -87,7 +87,8 @@ internal static class Codecs
         "spotlightRadius", "hideShortcut", "zoomShortcut", "resumeShortcut", "toolbarOrientation", "toolbarDockEdge",
         "lastCoverMode", "toolbarTools", "showMenuBarIcon", "cursorStyle", "quickPreferencesExpanded", "inspectorPinned",
         "animateVisibility", "visibilityAnimationStyle", "theme", "showShortcutHints", "cursorHighlight",
-        "commandShortcuts", "toolbarSize", "shareToolStyles", "toolbarItems", "breakTimer", "breakShortcut");
+        "commandShortcuts", "toolbarSize", "shareToolStyles", "toolbarItems", "breakTimer", "breakShortcut",
+        "hiddenToolbarControls", "toolbarCollapseDelay", "expandedPropertyChoices");
     private static readonly JsonKeys BreakTimerKeys = new(
         "minutes", "title", "background", "palette", "showEndTime", "chime", "countOver", "allDisplays", "lockWhenTouched");
 
@@ -739,7 +740,7 @@ internal static class Codecs
     {
         Json.ExpectObject(ref reader);
         var state = new KeyedState();
-        const int count = 29;
+        const int count = 31;
         // Swift decodes a missing optional as nil, even when the property has a default value.
         var preferences = new WorkspacePreferences { ShortcutVersion = null };
         while (Json.NextProperty(ref reader, PreferenceKeys, out var key))
@@ -780,6 +781,9 @@ internal static class Codecs
                 case 26: preferences.ToolbarItems = isNull ? null : state.Read(ref reader, key, count, ReadStringArray); break;
                 case 27: preferences.BreakTimer = isNull ? null : state.Read(ref reader, key, count, ReadBreakTimer); break;
                 case 28: preferences.BreakShortcut = isNull ? null : state.Read(ref reader, key, count, ReadShortcut); break;
+                case 29: preferences.HiddenToolbarControls = isNull ? null : state.Read(ref reader, key, count, ReadStringArray); break;
+                case 30: preferences.ToolbarCollapseDelay = isNull ? null : state.Read(ref reader, key, count, Json.ReadDouble); break;
+                case 31: preferences.ExpandedPropertyChoices = isNull ? null : state.Read(ref reader, key, count, ReadStringArray); break;
             }
         }
         state.Finish(PreferenceKeys, 0b111_0111);
@@ -812,6 +816,8 @@ internal static class Codecs
         {
             writer.WriteString("cursorStyle"u8, cursorStyle.RawValue);
         }
+        WriteOptional(writer, "expandedPropertyChoices"u8, value.ExpandedPropertyChoices);
+        WriteOptional(writer, "hiddenToolbarControls"u8, value.HiddenToolbarControls);
         WriteOptional(writer, "hideShortcut"u8, value.HideShortcut);
         WriteOptional(writer, "inspectorPinned"u8, value.InspectorPinned);
         if (value.LastCoverMode is { } lastCoverMode)
@@ -844,6 +850,10 @@ internal static class Codecs
             WriteStyle(writer, style);
         }
         writer.WriteEndObject();
+        if (value.ToolbarCollapseDelay is { } collapseDelay)
+        {
+            Json.WriteDouble(writer, "toolbarCollapseDelay"u8, collapseDelay);
+        }
         if (value.ToolbarDockEdge is { } dockEdge)
         {
             writer.WriteString("toolbarDockEdge"u8, dockEdge.RawValue);

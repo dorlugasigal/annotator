@@ -38,11 +38,14 @@ public struct LocalShortcut: Hashable, Sendable {
 
 /// Toolbar buttons that are not drawing tools but can have a single-key shortcut.
 public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
-    case properties, board, spotlight, cursorHalo, pointerLens, smartDraw, shareRegion, clearAll
+    case properties, board, spotlight, cursorHalo, pointerLens, smartDraw, shareRegion, clearAll, focusMenu, zoomMenu
 
-    /// Buttons people can add to the toolbar. Properties, Board and Clear all are always there.
-    public static let toolbarChoices: [ShortcutAction] = [.spotlight, .cursorHalo, .pointerLens, .smartDraw, .shareRegion]
+    /// Buttons people can add to the toolbar. Properties, Board and Clear all have fixed places (`ToolbarControl`).
+    public static let toolbarChoices: [ShortcutAction] =
+        [.spotlight, .cursorHalo, .pointerLens, .smartDraw, .shareRegion, .focusMenu, .zoomMenu]
     public var canBeInToolbar: Bool { Self.toolbarChoices.contains(self) }
+    /// The Spotlight and Zoom menus open with a click; they have no key.
+    public var isMenu: Bool { self == .focusMenu || self == .zoomMenu }
 
     public var label: String {
         switch self {
@@ -54,12 +57,14 @@ public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
         case .smartDraw: "Smart draw"
         case .shareRegion: "Share region"
         case .clearAll: "Clear all"
+        case .focusMenu: "Spotlight menu"
+        case .zoomMenu: "Zoom menu"
         }
     }
 
     public var detail: String {
         switch self {
-        case .properties: "Switch between quick controls, full properties and tools only."
+        case .properties: "Show or hide the properties below the tools."
         case .board: "Switch between desktop, whiteboard and blackboard."
         case .spotlight: "Turn the spotlight on or off."
         case .cursorHalo: "Turn the ring around your pointer on or off."
@@ -67,6 +72,8 @@ public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
         case .smartDraw: "Turn shape recognition for the pen on or off."
         case .shareRegion: "Choose part of a display and open a window to share in your call."
         case .clearAll: "Remove all drawings from every display. You can undo it."
+        case .focusMenu: "Spotlight, cursor halo and cleanup, in one menu."
+        case .zoomMenu: "Pointer lens, screen zoom and zoom levels, in one menu."
         }
     }
 
@@ -80,6 +87,8 @@ public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
         case .smartDraw: "wand.and.stars"
         case .shareRegion: "rectangle.on.rectangle"
         case .clearAll: "trash"
+        case .focusMenu: "light.beacon.max"
+        case .zoomMenu: "arrow.up.left.and.down.right.magnifyingglass"
         }
     }
 }
@@ -145,6 +154,9 @@ extension WorkspacePreferences {
         var updated = self
         updated.removeBinding(for: command)
         var displaced: ShortcutCommand?
+        if let shortcut, case .action(let action) = command, action.isMenu {
+            throw CanvasError.invalidDocument("\(action.label) opens with a click, so it has no key. \(shortcut.label) stays free.")
+        }
         if let shortcut {
             guard !shortcut.isInkColor else {
                 throw CanvasError.invalidDocument("\(shortcut.key.uppercased()) changes the ink color. Choose another key.")
@@ -201,6 +213,9 @@ extension WorkspacePreferences {
             }
             if case .tool = command, !shortcut.shift {
                 throw CanvasError.invalidDocument("Plain tool keys belong with the other tool keys.")
+            }
+            if case .action(let action) = command, action.isMenu {
+                throw CanvasError.invalidDocument("\(action.label) opens with a click, so it has no key.")
             }
             guard shortcut.shift || toolShortcuts[shortcut.key] == nil, commands.insert(command.id).inserted else {
                 throw CanvasError.invalidDocument("Each key and each tool or button can have only one shortcut.")

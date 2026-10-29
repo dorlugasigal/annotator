@@ -2,8 +2,9 @@
   "actions" : [
     {
       "canBeInToolbar" : false,
-      "detail" : "Switch between quick controls, full properties and tools only.",
+      "detail" : "Show or hide the properties below the tools.",
       "id" : "action.properties",
+      "isMenu" : false,
       "label" : "Properties",
       "symbol" : "slider.horizontal.3"
     },
@@ -11,6 +12,7 @@
       "canBeInToolbar" : false,
       "detail" : "Switch between desktop, whiteboard and blackboard.",
       "id" : "action.board",
+      "isMenu" : false,
       "label" : "Board",
       "symbol" : "rectangle.inset.filled"
     },
@@ -18,6 +20,7 @@
       "canBeInToolbar" : true,
       "detail" : "Turn the spotlight on or off.",
       "id" : "action.spotlight",
+      "isMenu" : false,
       "label" : "Spotlight",
       "symbol" : "flashlight.on.fill"
     },
@@ -25,6 +28,7 @@
       "canBeInToolbar" : true,
       "detail" : "Turn the ring around your pointer on or off.",
       "id" : "action.cursorHalo",
+      "isMenu" : false,
       "label" : "Cursor halo",
       "symbol" : "circle.dotted"
     },
@@ -32,6 +36,7 @@
       "canBeInToolbar" : true,
       "detail" : "Turn the zoom lens under your pointer on or off.",
       "id" : "action.pointerLens",
+      "isMenu" : false,
       "label" : "Pointer lens",
       "symbol" : "plus.magnifyingglass"
     },
@@ -39,6 +44,7 @@
       "canBeInToolbar" : true,
       "detail" : "Turn shape recognition for the pen on or off.",
       "id" : "action.smartDraw",
+      "isMenu" : false,
       "label" : "Smart draw",
       "symbol" : "wand.and.stars"
     },
@@ -46,6 +52,7 @@
       "canBeInToolbar" : true,
       "detail" : "Choose part of a display and open a window to share in your call.",
       "id" : "action.shareRegion",
+      "isMenu" : false,
       "label" : "Share region",
       "symbol" : "rectangle.on.rectangle"
     },
@@ -53,8 +60,25 @@
       "canBeInToolbar" : false,
       "detail" : "Remove all drawings from every display. You can undo it.",
       "id" : "action.clearAll",
+      "isMenu" : false,
       "label" : "Clear all",
       "symbol" : "trash"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Spotlight, cursor halo and cleanup, in one menu.",
+      "id" : "action.focusMenu",
+      "isMenu" : true,
+      "label" : "Spotlight menu",
+      "symbol" : "light.beacon.max"
+    },
+    {
+      "canBeInToolbar" : true,
+      "detail" : "Pointer lens, screen zoom and zoom levels, in one menu.",
+      "id" : "action.zoomMenu",
+      "isMenu" : true,
+      "label" : "Zoom menu",
+      "symbol" : "arrow.up.left.and.down.right.magnifyingglass"
     }
   ],
   "parsing" : [
@@ -131,7 +155,9 @@
     "cursorHalo",
     "pointerLens",
     "smartDraw",
-    "shareRegion"
+    "shareRegion",
+    "focusMenu",
+    "zoomMenu"
   ],
   "tools" : [
     {

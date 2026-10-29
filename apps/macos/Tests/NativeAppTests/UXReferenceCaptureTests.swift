@@ -29,13 +29,11 @@ final class UXReferenceCaptureTests: XCTestCase {
 
     // MARK: Models
 
-    /// A model with no drawing session: the toolbar and menu show the Off state. Properties start as quick controls, so
-    /// the states keep their meaning now that full properties are the default; only the full-properties states pin them.
+    /// A model with no drawing session: the toolbar and menu show the Off state, with the properties shown as by default.
     private func plainModel(_ name: String) throws -> WorkspaceModel {
         let suite = "ux-reference-\(name)-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
-        model.setInspectorPinned(false)
         cleanups.append { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
         return model
     }
@@ -122,19 +120,20 @@ final class UXReferenceCaptureTests: XCTestCase {
 
             let (model, session) = try liveModel("toolbar")
             use(model, tool: .pen)
-            model.setQuickPreferencesExpanded(false)
+            model.setPropertiesShown(false)
             try await recorder.view(ToolbarView(model: model), state: "draw-tools-only", dark: dark,
-                                    notes: "Tools only: quick properties collapsed.", spec: spec)
-            model.setQuickPreferencesExpanded(true)
+                                    notes: "Properties hidden: only the tools and buttons.", spec: spec)
+            model.setPropertiesShown(true)
             for tool in [Tool.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
                          .eraser, .blur, .pixelate, .distort, .ruler, .counter, .image, .databaseStack] {
                 use(model, tool: tool)
-                try await recorder.view(ToolbarView(model: model), state: "draw-quick-\(tool.rawValue)", dark: dark,
-                                        notes: "Expanded toolbar with quick properties for \(tool.label).", spec: spec)
+                try await recorder.view(ToolbarView(model: model), state: "full-properties-\(tool.rawValue)", dark: dark,
+                                        notes: "Properties for \(tool.label) on one row below the tools. The toolbar is as wide as its tools or the row.",
+                                        spec: spec)
             }
             use(model, tool: .rectangle)
             model.applyStyle { $0.setFillEnabled(true) }
-            try await recorder.view(ToolbarView(model: model), state: "draw-quick-rectangle-filled", dark: dark,
+            try await recorder.view(ToolbarView(model: model), state: "full-properties-rectangle-filled", dark: dark,
                                     notes: "Rectangle with Fill on: the fill pattern control appears.", spec: spec)
 
             use(model, tool: .pen)
@@ -149,25 +148,18 @@ final class UXReferenceCaptureTests: XCTestCase {
                 for orientation in [ToolbarOrientation.horizontal, .vertical] {
                     model.setToolbarOrientation(orientation)
                     for expanded in [false, true] {
-                        model.setQuickPreferencesExpanded(expanded)
+                        model.setPropertiesShown(expanded)
                         let available = orientation == .vertical ? CGSize(width: 880, height: 620) : CGSize(width: 1000, height: 900)
                         try await recorder.view(ToolbarView(model: model, availableSize: available),
-                            state: "\(size.rawValue)-\(orientation.rawValue)-\(expanded ? "quick" : "tools-only")", dark: dark,
-                            notes: "\(size.rawValue.capitalized) toolbar, \(orientation.rawValue), \(expanded ? "quick properties" : "tools only"). Pen selected.",
+                            state: "\(size.rawValue)-\(orientation.rawValue)-\(expanded ? "properties" : "tools-only")", dark: dark,
+                            notes: "\(size.rawValue.capitalized) toolbar, \(orientation.rawValue), \(expanded ? "properties shown" : "properties hidden"). Pen selected.",
                             spec: spec)
                     }
                 }
             }
             model.setToolbarSize(.expanded)
             model.setToolbarOrientation(.horizontal)
-            model.setQuickPreferencesExpanded(true)
-
-            model.setInspectorPinned(true)
-            for tool in [Tool.pen, .rectangle, .arrow, .text, .blur] {
-                use(model, tool: tool)
-                try await recorder.view(ToolbarView(model: model), state: "full-properties-\(tool.rawValue)", dark: dark,
-                                        notes: "Full properties open inside the toolbar panel, below the rail.", spec: spec)
-            }
+            model.setPropertiesShown(true)
             model.setToolbarOrientation(.vertical)
             use(model, tool: .arrow)
             try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 880, height: 620)),
@@ -179,7 +171,49 @@ final class UXReferenceCaptureTests: XCTestCase {
                                     notes: "Minimal toolbar: full properties keep the expanded layout, drawn at the minimal button size, on one row.",
                                     spec: spec)
             model.setToolbarSize(.expanded)
-            model.setInspectorPinned(false)
+            for (tool, choices) in [(Tool.rectangle, [PropertyChoice.pattern, .roughness, .fillStyle, .edges]),
+                                    (.arrow, [.pattern, .roughness, .arrowType]), (.text, [.font, .alignment]), (.pen, [.pressure])] {
+                use(model, tool: tool)
+                if tool == .rectangle { model.applyStyle { $0.setFillEnabled(true) } }
+                for choice in choices { model.setShowsAllChoices(choice, true) }
+                try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 1600, height: 900)),
+                                        state: "full-properties-all-choices-\(tool.rawValue)", dark: dark,
+                                        notes: "Full properties with every choice side by side (Settings > Your properties). The toolbar grows sideways to keep one row.",
+                                        spec: spec)
+                model.resetPropertyChoices()
+            }
+
+            use(model, tool: .pen)
+            for control in [ToolbarControl.undo, .redo, .settings, .hide] { model.setToolbarControl(control, shown: false) }
+            try await recorder.view(ToolbarView(model: model), state: "hidden-buttons", dark: dark,
+                                    notes: "Undo, Redo, Settings and Hide turned off in Settings; their room goes back to the tools.",
+                                    spec: spec + ["005 Toolbar & Shortcuts"])
+            for control in ToolbarControl.allCases { model.setToolbarControl(control, shown: false) }
+            try await recorder.view(ToolbarView(model: model), state: "hidden-buttons-all", dark: dark,
+                                    notes: "Every toolbar button turned off: only the tools and their properties stay.",
+                                    spec: spec + ["005 Toolbar & Shortcuts"])
+            model.showAllToolbarControls()
+
+            model.setToolbarCollapseDelay(5)
+            model.setToolbarCollapsed(true)
+            for size in [ToolbarSize.expanded, .minimal] {
+                model.setToolbarSize(size)
+                for orientation in [ToolbarOrientation.horizontal, .vertical] {
+                    model.setToolbarOrientation(orientation)
+                    for drawing in [true, false] {
+                        if drawing { model.adoptReferenceSession(session) } else { model.interact() }
+                        try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 1000, height: 900)),
+                            state: "collapsed-\(size.rawValue)-\(orientation.rawValue)-\(drawing ? "draw" : "apps")", dark: dark,
+                            notes: "The toolbar shrunk to one button after the Shrink delay: the Annotator mark and \(drawing ? "Draw" : "Apps").",
+                            spec: spec)
+                    }
+                }
+            }
+            model.adoptReferenceSession(session)
+            model.setToolbarCollapsed(false)
+            model.setToolbarCollapseDelay(nil)
+            model.setToolbarSize(.expanded)
+            model.setToolbarOrientation(.horizontal)
 
             use(model, tool: .arrow)
             for (name, available) in [("narrow", CGSize(width: 400, height: 600)), ("short", CGSize(width: 648, height: 230))] {
@@ -193,7 +227,7 @@ final class UXReferenceCaptureTests: XCTestCase {
             use(model, tool: .pen)
             try await recorder.view(ToolbarView(model: model, availableSize: CGSize(width: 1600, height: 900)),
                                     state: "added-buttons", dark: dark,
-                                    notes: "Spotlight, Cursor halo, Pointer lens, Smart draw, Share region, Blur and Pixelate added.",
+                                    notes: "Spotlight, Cursor halo, Pointer lens, Smart draw, Share region, the Spotlight and Zoom menus, Blur and Pixelate added.",
                                     spec: spec + ["005 Toolbar & Shortcuts"])
             model.configureToolbar(items: defaultItems)
 
@@ -207,7 +241,7 @@ final class UXReferenceCaptureTests: XCTestCase {
             model.setShareToolStyles(true)
             use(model, tool: .rectangle)
             try await recorder.view(ToolbarView(model: model), state: "shared-style", dark: dark,
-                                    notes: "Share style between tools is on: quick properties show the link mark.", spec: spec)
+                                    notes: "Share style between tools is on: the link mark ends the properties row.", spec: spec)
             model.setShareToolStyles(false)
 
             use(model, tool: .blur)
@@ -373,9 +407,11 @@ final class UXReferenceCaptureTests: XCTestCase {
                                         state: "tab-\(tab.rawValue)", dark: dark, background: .window,
                                         notes: "Settings, \(tab.rawValue) tab, at its default size. Content below the fold scrolls.",
                                         spec: spec, settle: settle)
+                // Toolbar & Shortcuts is the longest tab.
+                let full: CGFloat = tab == .toolbar ? 2400 : 1500
                 try await recorder.view(CustomizationView(model: model, showDone: false, initialTab: tab),
-                                        state: "tab-\(tab.rawValue)-full", dark: dark, background: .window, height: 1500,
-                                        notes: "Settings, \(tab.rawValue) tab, stretched to 1500 points so the whole scrolling content shows.",
+                                        state: "tab-\(tab.rawValue)-full", dark: dark, background: .window, height: full,
+                                        notes: "Settings, \(tab.rawValue) tab, stretched to \(Int(full)) points so the whole scrolling content shows.",
                                         spec: spec, settle: settle)
             }
             let states: [(String, SMAppService.Status)] = [("off", .notRegistered), ("enabled", .enabled),

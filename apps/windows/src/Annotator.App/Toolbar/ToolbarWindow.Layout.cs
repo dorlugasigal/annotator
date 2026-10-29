@@ -24,21 +24,55 @@ internal sealed partial class ToolbarWindow
     {
         _updates.Clear();
         _root.Children.Clear();
-        _root.Children.Add(look.Vertical ? Vertical(look, snapshot, revealedFrom) : Horizontal(look, snapshot, revealedFrom));
+        _root.Children.Add(look.Collapsed ? Collapsed(look)
+            : look.Vertical ? Vertical(look, snapshot, revealedFrom) : Horizontal(look, snapshot, revealedFrom));
     }
 
-    /// <summary>ToolbarView's horizontal body: the main row, the compact second row, the active board and the quick properties.</summary>
+    /// <summary>
+    /// ToolbarView's horizontal body: the main row, the narrow toolbar's second row, the active board and the properties
+    /// row. The toolbar's own buttons that are off in Settings are left out. The properties are one row; the toolbar grows
+    /// sideways to fit it (Mac ToolbarWidthLayout), and the room goes between the tools and the buttons.
+    /// </summary>
     private FrameworkElement Horizontal(ToolbarLook look, WorkspaceSnapshot snapshot, ToolbarPropertiesMode? revealedFrom)
     {
         ToolbarMetrics metrics = look.Metrics;
-        double inner = look.Width - metrics.Padding * 2;
+        double width = look.Width;
+        FrameworkElement? properties = null;
+        FrameworkElement? link = null;
+        if (look.Expanded)
+        {
+            properties = PropertiesPanel.Row(this, snapshot, _updates, metrics.PropertiesScale);
+            properties.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+            if (look.SharedStyle)
+            {
+                link = LinkMark();
+                link.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+            }
+            double ideal = properties.DesiredSize.Width + FullRowGaps + MenusWidth(look, link) + metrics.Padding * 2;
+            width = ToolbarToolLayout.GrownWidth(look.Width, look.WidthLimit, ideal);
+        }
+        double inner = width - metrics.Padding * 2;
         var content = new MacStack { Spacing = 8, Width = inner };
-        var main = new MacStack { Orientation = Orientation.Horizontal, Spacing = metrics.Spacing, HorizontalAlignment = HorizontalAlignment.Left };
+        var main = new MacStack { Orientation = Orientation.Horizontal, Spacing = metrics.Spacing, Width = inner, HorizontalAlignment = HorizontalAlignment.Left };
         main.Children.Add(Rail(look, snapshot));
-        main.Children.Add(Library(look, snapshot));
-        main.Children.Add(ToolbarParts.Divider(width: 1, height: metrics.Minimal ? 22 : 28));
-        main.Children.Add(BoardButton(look));
-        main.Children.Add(ModeButton(look));
+        if (look.Shows(ToolbarControl.Library))
+        {
+            main.Children.Add(Library(look, snapshot));
+        }
+        // When full properties make the toolbar wider, the room goes between the tools and the buttons.
+        main.Children.Add(new MacSpacer());
+        if (look.Shows(ToolbarControl.Board) || look.Shows(ToolbarControl.Mode))
+        {
+            main.Children.Add(ToolbarParts.Divider(width: 1, height: metrics.Minimal ? 22 : 28));
+        }
+        if (look.Shows(ToolbarControl.Board))
+        {
+            main.Children.Add(BoardButton(look));
+        }
+        if (look.Shows(ToolbarControl.Mode))
+        {
+            main.Children.Add(ModeButton(look));
+        }
         if (!look.CompactRail)
         {
             foreach (FrameworkElement action in Actions(look, snapshot, history: true, rest: true))
@@ -47,22 +81,12 @@ internal sealed partial class ToolbarWindow
             }
         }
         content.Children.Add(main);
-        if (look.CompactRail)
+        if (look.CompactRail && look.HasTrailingControls)
         {
-            if (look.Expanded && !look.Pinned)
-            {
-                content.Children.Add(ToolbarParts.Divider(height: 1));
-            }
             var row = new Grid { ColumnSpacing = metrics.Spacing };
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            if (look.Expanded && !look.Pinned)
-            {
-                FrameworkElement quick = CompactQuick(look, snapshot);
-                quick.VerticalAlignment = VerticalAlignment.Center;
-                row.Children.Add(quick);
-            }
             var actions = new MacStack { Orientation = Orientation.Horizontal, Spacing = metrics.Spacing, VerticalAlignment = VerticalAlignment.Center };
             foreach (FrameworkElement action in Actions(look, snapshot, history: true, rest: true))
             {
@@ -76,55 +100,95 @@ internal sealed partial class ToolbarWindow
         {
             content.Children.Add(ModeStrip(look));
         }
-        if (look.Expanded && !look.Pinned && !look.CompactRail)
+        if (properties is not null)
         {
             content.Children.Add(ToolbarParts.Divider(height: 1));
-            var quickRow = new MacStack { Orientation = Orientation.Horizontal, Spacing = 10, HorizontalAlignment = HorizontalAlignment.Center };
-            quickRow.Children.Add(Quick(look, snapshot, compact: false));
-            if (look.HasSelection)
-            {
-                quickRow.Children.Add(SelectionMenu());
-            }
-            quickRow.Children.Add(FocusMenu());
-            quickRow.Children.Add(ZoomMenu(snapshot));
-            content.Children.Add(quickRow);
+            FrameworkElement full = FullPropertiesRow(look, properties, link, inner);
+            content.Children.Add(full);
             if (revealedFrom is not null)
             {
-                PropertiesReveal.Start(quickRow);
-            }
-        }
-        if (look.Pinned)
-        {
-            // Full properties replace the quick properties below the rail (Mac pinned CompactInspectorViewport, 24 points
-            // narrower than the toolbar in both sizes).
-            content.Children.Add(ToolbarParts.Divider(height: 1));
-            ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, look.InspectorCompact, look.Width - 24, look.InspectorLimit, _updates,
-                                                             look.InspectorCompact ? 1 : look.Metrics.PropertiesScale);
-            // Centered like the Mac's VStack: the minimal toolbar's 8-point padding leaves 4 points on each side.
-            viewport.HorizontalAlignment = HorizontalAlignment.Center;
-            content.Children.Add(viewport);
-            if (revealedFrom is not null)
-            {
-                PropertiesReveal.Start(viewport);
-            }
-            if (!look.CompactRail)
-            {
-                // Full properties are the default, so they keep the quick row's menus within reach (Mac fullPropertiesMenus).
-                var menus = new MacStack { Orientation = Orientation.Horizontal, Spacing = 10, HorizontalAlignment = HorizontalAlignment.Right, Height = ToolbarLook.FullMenusHeight };
-                if (look.HasSelection)
-                {
-                    menus.Children.Add(SelectionMenu());
-                }
-                menus.Children.Add(FocusMenu());
-                menus.Children.Add(ZoomMenu(snapshot));
-                content.Children.Add(menus);
+                PropertiesReveal.Start(full);
             }
         }
         if (look.CaptureWarning is { } warning)
         {
             content.Children.Add(CaptureWarning(warning));
         }
-        return Surface(content, metrics.Padding, metrics.CornerRadius, look.Width, marker: true);
+        return Surface(content, metrics.Padding, metrics.CornerRadius, width, marker: true);
+    }
+
+    /// <summary>The gaps around the spacer between the properties and the selection's menu (Mac HStack(spacing: 12)).</summary>
+    private const double FullRowGaps = 24;
+
+    /// <summary>The selection's menu button at the end of the full properties row.</summary>
+    private const double SelectionMenuWidth = 37;
+
+    /// <summary>The end of the properties row: the shared-style link mark, then the selection's menu, 10 points apart.</summary>
+    private static double MenusWidth(ToolbarLook look, FrameworkElement? link)
+    {
+        double width = look.HasSelection ? SelectionMenuWidth : 0;
+        if (link is not null)
+        {
+            width += link.DesiredSize.Width + (look.HasSelection ? 10 : 0);
+        }
+        return width;
+    }
+
+    /// <summary>
+    /// Mac fullPropertiesRow, "Tool properties": the properties on one row with the shared-style link mark and the
+    /// selection's menu at its end, 5 points above the row's bottom. On a screen too narrow for the row, it scrolls
+    /// sideways without a scroll bar instead of wrapping.
+    /// </summary>
+    private FrameworkElement FullPropertiesRow(ToolbarLook look, FrameworkElement properties, FrameworkElement? link, double inner)
+    {
+        properties.VerticalAlignment = VerticalAlignment.Bottom;
+        var menus = new MacStack
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Height = 26,
+            Margin = new Thickness(0, 0, 0, 5),
+            VerticalAlignment = VerticalAlignment.Bottom,
+        };
+        if (link is not null)
+        {
+            menus.Children.Add(link);
+        }
+        if (look.HasSelection)
+        {
+            menus.Children.Add(SelectionMenu());
+        }
+        double natural = properties.DesiredSize.Width + FullRowGaps + MenusWidth(look, link);
+        bool fits = natural <= inner + 0.5;
+        var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 12, Width = fits ? inner : natural };
+        row.Children.Add(properties);
+        row.Children.Add(new MacSpacer());
+        row.Children.Add(menus);
+        if (fits)
+        {
+            var group = new AccessibleGroup("Tool properties", "contextual-inspector-viewport");
+            group.Children.Add(row);
+            return group;
+        }
+        // The Mac's ScrollView is the viewport itself: UI Automation reads one scroll area named Tool properties, by rows.
+        if ((properties as PropertiesRoot ?? (properties as ScaledContent)?.Child as PropertiesRoot)?.Row is { } readsByRows)
+        {
+            readsByRows.ReadsByRows = true;
+        }
+        var scroll = new ScrollViewer
+        {
+            Width = inner,
+            Content = row,
+            HorizontalScrollMode = ScrollMode.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
+            VerticalScrollMode = ScrollMode.Disabled,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            ZoomMode = ZoomMode.Disabled,
+            IsTabStop = false,
+        };
+        AutomationProperties.SetName(scroll, "Tool properties");
+        AutomationProperties.SetAutomationId(scroll, "contextual-inspector-viewport");
+        return scroll;
     }
 
     /// <summary>
@@ -200,9 +264,14 @@ internal sealed partial class ToolbarWindow
         {
             rail.Children.Add(element);
         }
-        rail.Children.Add(BoardButton(look));
-        rail.Children.Add(ModeButton(look));
-        rail.Children.Add(ZoomMenu(snapshot));
+        if (look.Shows(ToolbarControl.Board))
+        {
+            rail.Children.Add(BoardButton(look));
+        }
+        if (look.Shows(ToolbarControl.Mode))
+        {
+            rail.Children.Add(ModeButton(look));
+        }
         var history = new MacStack
         {
             Orientation = metrics.Minimal ? Orientation.Vertical : Orientation.Horizontal,
@@ -213,7 +282,11 @@ internal sealed partial class ToolbarWindow
         {
             history.Children.Add(element);
         }
-        if (metrics.Minimal)
+        if (history.Children.Count == 0)
+        {
+            // Undo and Redo are both off.
+        }
+        else if (metrics.Minimal || history.Children.Count == 1)
         {
             rail.Children.Add(history);
         }
@@ -226,7 +299,10 @@ internal sealed partial class ToolbarWindow
             overhang.Children.Add(history);
             rail.Children.Add(overhang);
         }
-        rail.Children.Add(Library(look, snapshot));
+        if (look.Shows(ToolbarControl.Library))
+        {
+            rail.Children.Add(Library(look, snapshot));
+        }
         if (look.CaptureWarning is not null)
         {
             rail.Children.Add(RailCaptureWarning(snapshot));
@@ -255,24 +331,14 @@ internal sealed partial class ToolbarWindow
         {
             double width = look.VerticalPropertyWidth;
             var panel = new MacStack { Spacing = 8, Width = width - 24 };
-            panel.Children.Add(ToolTitle(look, minimumWidth: false, exactHeight: true));
-            if (look.Pinned)
-            {
-                ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, compact: true, width - 24, look.InspectorLimit, _updates);
-                panel.Children.Add(viewport);
-            }
-            else
-            {
-                FrameworkElement quick = Quick(look, snapshot, compact: true);
-                quick.Width = width - 24;
-                panel.Children.Add(quick);
-            }
+            panel.Children.Add(ToolTitle(look));
+            ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, width - 24, look.InspectorLimit, _updates);
+            panel.Children.Add(viewport);
             var group = new AccessibleGroup("Attached tool properties", "attached-tool-properties") { FlowDirection = FlowDirection.LeftToRight };
             group.Children.Add(Surface(panel, 12, 15, width));
             group.VerticalAlignment = VerticalAlignment.Top;
             row.Children.Add(group);
-            // The attached surface stays between quick controls and full properties, so only showing it again reveals it.
-            if (revealedFrom == ToolbarPropertiesMode.ToolsOnly)
+            if (revealedFrom == ToolbarPropertiesMode.Hidden)
             {
                 PropertiesReveal.Start(group);
             }
@@ -345,7 +411,9 @@ internal sealed partial class ToolbarWindow
     }
 
     private FrameworkElement Item(ToolbarLook look, WorkspaceSnapshot snapshot, ShortcutCommand item) =>
-        item.Tool is { } tool ? ToolButton(look, snapshot, tool) : ActionButton(look, snapshot, item.Action!.Value);
+        item.Tool is { } tool ? ToolButton(look, snapshot, tool)
+        : item.Action is { IsMenu: true } menu ? MenuButton(look, snapshot, menu)
+        : ActionButton(look, snapshot, item.Action!.Value);
 
     /// <summary>Mac toolButton: the glyph, the key and the selection marker; Effects stands for every effect without its own button.</summary>
     private FrameworkElement ToolButton(ToolbarLook look, WorkspaceSnapshot snapshot, Tool tool)
@@ -648,8 +716,9 @@ internal sealed partial class ToolbarWindow
     }
 
     /// <summary>
-    /// The small actions in the Mac's order: Undo, Redo and Clear (historyActions), then Properties, Settings and Hide.
-    /// Settings opens on General (Mac openPreferences()); without a <see cref="Settings"/> action it is unavailable.
+    /// The small actions in the Mac's order: Undo, Redo and Clear (historyActions), then Properties, Settings and Hide,
+    /// without the ones turned off in Settings (Mac trailingActions). Settings opens on General (Mac openPreferences());
+    /// without a <see cref="Settings"/> action it is unavailable.
     /// </summary>
     private IEnumerable<FrameworkElement> Actions(ToolbarLook look, WorkspaceSnapshot snapshot, bool history, bool rest,
                                                   bool properties = false, bool clear = true)
@@ -657,25 +726,37 @@ internal sealed partial class ToolbarWindow
         ToolbarMetrics metrics = look.Metrics;
         if (history)
         {
-            yield return Small(metrics, "Undo", "arrow.uturn.backward", () => _model.Undo(), state => state.CanUndo);
-            yield return Small(metrics, "Redo", "arrow.uturn.forward", () => _model.Redo(), state => state.CanRedo);
-            if (clear)
+            if (look.Shows(ToolbarControl.Undo))
+            {
+                yield return Small(metrics, "Undo", "arrow.uturn.backward", () => _model.Undo(), state => state.CanUndo);
+            }
+            if (look.Shows(ToolbarControl.Redo))
+            {
+                yield return Small(metrics, "Redo", "arrow.uturn.forward", () => _model.Redo(), state => state.CanRedo);
+            }
+            if (clear && look.Shows(ToolbarControl.ClearAll))
             {
                 yield return Clear(metrics);
             }
         }
-        else if (rest && clear)
+        else if (rest && clear && look.Shows(ToolbarControl.ClearAll))
         {
             yield return Clear(metrics);
         }
-        if (properties || (rest && !look.Vertical))
+        if ((properties || (rest && !look.Vertical)) && look.Shows(ToolbarControl.Properties))
         {
             yield return PropertiesButton(look);
         }
         if (rest)
         {
-            yield return Small(metrics, "Settings and shortcuts", "gearshape", () => Settings?.Invoke(), static _ => true, available: Settings is not null);
-            yield return Small(metrics, "Hide drawings and tools", "xmark", () => _model.HideTools(), static _ => true);
+            if (look.Shows(ToolbarControl.Settings))
+            {
+                yield return Small(metrics, "Settings and shortcuts", "gearshape", () => Settings?.Invoke(), static _ => true, available: Settings is not null);
+            }
+            if (look.Shows(ToolbarControl.Hide))
+            {
+                yield return Small(metrics, "Hide drawings and tools", "xmark", () => _model.HideTools(), static _ => true);
+            }
         }
     }
 
@@ -720,9 +801,7 @@ internal sealed partial class ToolbarWindow
         return button;
     }
 
-    /// <summary>
-    /// Mac propertiesButton: shows the current properties mode and cycles quick controls, full properties and tools only.
-    /// </summary>
+    /// <summary>Mac propertiesButton: shows or hides the properties below or beside the tools.</summary>
     private ParityButton PropertiesButton(ToolbarLook look)
     {
         (double width, double height) = look.Metrics.ActionSize;
@@ -738,8 +817,8 @@ internal sealed partial class ToolbarWindow
         {
             string key = state.Preferences.ShortcutFor(ShortcutCommand.ForAction(ShortcutAction.Properties)) is { } shortcut
                 ? $" Key: {Annotator.Workspace.Shortcuts.WindowsShortcuts.Label(shortcut)}." : string.Empty;
-            ToolbarParts.Help(button, $"Show {next.RawValue.ToLowerInvariant()}",
-                $"{mode.RawValue}. Show {next.RawValue.ToLowerInvariant()}. Cycles quick controls, full properties and tools only.{key}");
+            ToolbarParts.Help(button, look.Expanded ? "Hide the properties" : "Show the properties",
+                (look.Expanded ? "Hide the properties below the tools." : "Show the properties below the tools.") + key);
         });
         button.Click += (_, _) =>
         {
@@ -875,10 +954,64 @@ internal sealed partial class ToolbarWindow
     }
 
     /// <summary>
-    /// Mac backgroundMenu, "Focus and cleanup": Toggle("Spotlight") and Toggle("Cursor halo"), then Clear drawings (keep
-    /// effects) and Remove all censors. Its frame is the symbol's, 26 by 15 points.
+    /// Mac menuButton: the Spotlight or Zoom menu as a toolbar item the size of a tool, with a chevron where a tool shows
+    /// its key. It lights up while something in it is on (Spotlight or Cursor halo; the pointer lens or screen zoom).
     /// </summary>
-    private DropDownButton FocusMenu()
+    private FrameworkElement MenuButton(ToolbarLook look, WorkspaceSnapshot snapshot, ShortcutAction action)
+    {
+        ToolbarMetrics metrics = look.Metrics;
+        double radius = metrics.Minimal ? 8 : 10;
+        var marker = new Border { CornerRadius = new CornerRadius(radius), Background = AppResources.Brush("AnnotatorSelectionFillBrush") };
+        var grid = new Grid { Width = metrics.ButtonWidth, Height = metrics.ButtonHeight };
+        grid.Children.Add(marker);
+        double size = metrics.Minimal ? 15 : 17;
+        FrameworkElement plain = Glyphs.ForSymbol(action.Symbol, size);
+        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, "AnnotatorGlyphAccent");
+        var glyph = new Grid { IsHitTestVisible = false, HorizontalAlignment = HorizontalAlignment.Center };
+        glyph.Children.Add(plain);
+        glyph.Children.Add(accent);
+        var host = new Grid { Height = metrics.Minimal ? 22 : 24 };
+        host.Children.Add(glyph);
+        var stack = new MacStack { Spacing = 2, VerticalAlignment = VerticalAlignment.Center, IsHitTestVisible = false };
+        stack.Children.Add(host);
+        if (metrics.ShowsKeyLabels)
+        {
+            FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 9, 12, 9, "AnnotatorGlyphSecondary");
+            chevron.HorizontalAlignment = HorizontalAlignment.Center;
+            stack.Children.Add(chevron);
+        }
+        grid.Children.Add(stack);
+        ParityButton button = ToolbarParts.Button(metrics.ButtonWidth, metrics.ButtonHeight, grid, action.Label, radius);
+        AutomationProperties.SetAutomationId(button, $"toolbar-action-{action.RawValue}");
+        ToolbarParts.Help(button, action.Detail, $"{action.Label}. {action.Detail}");
+        button.Flyout = action == ShortcutAction.FocusMenu ? FocusMenuItems() : ZoomMenuItems();
+        button.Click += (_, _) => _interacted();
+        Tween fill = Tween.Opacity(marker, 0);
+        Tween plainShown = Tween.Opacity(plain, 1);
+        Tween accentShown = Tween.Opacity(accent, 0);
+        bool? shown = null;
+        _updates.Add(state =>
+        {
+            bool on = state.IsOn(action);
+            button.AccessibleValue = on ? "On" : "Off";
+            if (shown == on)
+            {
+                return;
+            }
+            MotionSamples? motion = shown is null ? null : _controlMotion;
+            shown = on;
+            fill.To(on ? 1 : 0, motion);
+            plainShown.To(on ? 0 : 1, motion);
+            accentShown.To(on ? 1 : 0, motion);
+        });
+        return button;
+    }
+
+    /// <summary>
+    /// Mac focusMenuItems: Toggle("Spotlight") and Toggle("Cursor halo"), then Clear drawings (keep effects) and Remove all
+    /// censors.
+    /// </summary>
+    private MenuFlyout FocusMenuItems()
     {
         var menu = new MenuFlyout();
         void Toggle(string text, Func<WorkspaceSnapshot, bool> isOn, Action<bool> set)
@@ -895,250 +1028,198 @@ internal sealed partial class ToolbarWindow
         Toggle("Spotlight", state => state.Spotlight, _model.SetSpotlight);
         Toggle("Cursor halo", state => state.CursorHalo, _model.SetCursorHalo);
         menu.Items.Add(new MenuFlyoutSeparator());
-        void Add(string text, Action perform)
-        {
-            var item = new MenuFlyoutItem { Text = text };
-            item.Click += (_, _) =>
-            {
-                _interacted();
-                perform();
-            };
-            menu.Items.Add(item);
-        }
-        Add("Clear drawings (keep effects)", () => _model.ClearDrawingsKeepingProtection());
-        Add("Remove all censors", () => _model.ClearProtection());
-        var button = new DropDownButton
-        {
-            Style = AppResources.Style("AnnotatorMenuButton"),
-            Content = ToolbarParts.GlyphBox("light.beacon.max", 26, 15, 15),
-            Flyout = menu,
-            Width = 26,
-            Height = 15,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        AutomationProperties.SetName(button, "Focus and cleanup");
-        return button;
+        AddItem(menu, "Clear drawings (keep effects)", () => _model.ClearDrawingsKeepingProtection());
+        AddItem(menu, "Remove all censors", () => _model.ClearProtection());
+        return menu;
     }
 
     /// <summary>
-    /// Mac zoomMenu, "Zoom tools": the pointer lens, full-screen zoom, the 2×, 3× and 4× levels and, while zoom or the lens
-    /// is on, Stop zoom. Its symbol turns to the accent while either is on; its frame is the symbol's, 21 by 15 points.
+    /// Mac zoomMenuItems: the pointer lens, full-screen zoom, the 2×, 3× and 4× levels and, while zoom or the lens is on,
+    /// Stop zoom. The items follow the current state each time the menu opens.
     /// </summary>
-    private DropDownButton ZoomMenu(WorkspaceSnapshot snapshot)
+    private MenuFlyout ZoomMenuItems()
     {
-        bool on = snapshot.MagnifierEnabled || snapshot.ScreenZoomEnabled;
         var menu = new MenuFlyout();
-        void Add(string text, Action perform)
+        menu.Opening += (_, _) =>
         {
-            var item = new MenuFlyoutItem { Text = text };
-            item.Click += (_, _) =>
+            WorkspaceSnapshot state = _model.Snapshot;
+            menu.Items.Clear();
+            AddItem(menu, state.MagnifierEnabled ? "Stop lens" : "Pointer lens", () => _model.ToggleMagnifier());
+            AddItem(menu, state.ScreenZoomEnabled ? "Stop screen zoom" : "Full-screen zoom", () => _model.ToggleScreenZoom());
+            foreach (int level in new[] { 2, 3, 4 })
             {
-                _interacted();
-                perform();
-            };
-            menu.Items.Add(item);
-        }
-        Add(snapshot.MagnifierEnabled ? "Stop lens" : "Pointer lens", () => _model.ToggleMagnifier());
-        Add(snapshot.ScreenZoomEnabled ? "Stop screen zoom" : "Full-screen zoom", () => _model.ToggleScreenZoom());
-        foreach (int level in new[] { 2, 3, 4 })
-        {
-            Add($"{level}×", () => _model.SetMagnification(level));
-        }
-        if (on)
-        {
-            menu.Items.Add(new MenuFlyoutSeparator());
-            Add("Stop zoom", () => _model.StopZoom());
-        }
-        var button = new DropDownButton
-        {
-            Style = AppResources.Style("AnnotatorMenuButton"),
-            Content = ToolbarParts.GlyphBox("plus.magnifyingglass", 21, 15, 15, on ? "AnnotatorGlyphAccent" : "AnnotatorGlyph"),
-            Flyout = menu,
-            Width = 21,
-            Height = 15,
-            VerticalAlignment = VerticalAlignment.Center,
+                AddItem(menu, $"{level}×", () => _model.SetMagnification(level));
+            }
+            if (state.MagnifierEnabled || state.ScreenZoomEnabled)
+            {
+                menu.Items.Add(new MenuFlyoutSeparator());
+                AddItem(menu, "Stop zoom", () => _model.StopZoom());
+            }
         };
-        AutomationProperties.SetName(button, "Zoom tools");
-        ToolbarParts.Help(button, "Lens and full-screen zoom");
-        return button;
+        return menu;
     }
 
+    private void AddItem(MenuFlyout menu, string text, Action perform)
+    {
+        var item = new MenuFlyoutItem { Text = text };
+        item.Click += (_, _) =>
+        {
+            _interacted();
+            perform();
+        };
+        menu.Items.Add(item);
+    }
 
     /// <summary>
-    /// Mac quickPreferences: the current tool's title and its most used properties, 34 points high, unavailable while
-    /// the selection is locked. <paramref name="compact"/> is the vertical rail's attached panel.
+    /// Mac CollapsedToolbarButton, "Annotator toolbar": the toolbar shrunk to one capsule with the Annotator mark and Draw
+    /// or Apps, in the Draw button's colors. A click or a rest of the pointer opens the toolbar again; its context menu
+    /// shows the toolbar or switches between drawing and apps.
     /// </summary>
-    private FrameworkElement Quick(ToolbarLook look, WorkspaceSnapshot snapshot, bool compact)
+    private FrameworkElement Collapsed(ToolbarLook look)
     {
-        Tool tool = look.EffectiveTool;
-        FrameworkElement content;
-        if (look.Quick is QuickKind.Effect or QuickKind.Cover)
+        ToolbarMetrics metrics = look.Metrics;
+        bool vertical = look.Vertical;
+        (double width, double height) = vertical ? (metrics.Minimal ? 50.0 : 68.0, metrics.Minimal ? 74.0 : 88.0)
+            : (metrics.Minimal ? 98.0 : 112.0, metrics.Minimal ? 38.0 : 44.0);
+        double markSize = metrics.Minimal ? 18 : 22;
+        PathGeometry geometry = Glyphs.Geometry(Annotator.Workspace.Artwork.MarkGlyph.PathData);
+        geometry.FillRule = FillRule.EvenOdd;
+        (double scale, Annotator.Core.Point offset) = Annotator.Workspace.Artwork.MarkGlyph.Fit(markSize);
+        var mark = new Canvas { Width = markSize, Height = markSize, IsHitTestVisible = false };
+        mark.Children.Add(new Microsoft.UI.Xaml.Shapes.Path
         {
-            // Mac quickPreferences: CoverPropertiesView for every effect and cover, without the tool's title.
-            content = EffectControls.CoverProperties(_model, tool, look.HasSelection, compact, showsSlider: true,
-                (width, showLabel) => Value(StyleParameter.Effect, tool, width, showLabel, small: true), _updates, _interacted);
-        }
-        else if (look.Quick == QuickKind.Counter)
+            Data = geometry,
+            Style = AppResources.Style("AnnotatorGlyphFilled"),
+            RenderTransform = new MatrixTransform { Matrix = new Matrix(scale, 0, 0, scale, offset.X, offset.Y) },
+        });
+        AutomationProperties.SetAccessibilityView(mark, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
+        var drawDot = new Ellipse { Width = 6, Height = 6, Style = AppResources.Style("AnnotatorDotDraw") };
+        var appsDot = new Ellipse { Width = 6, Height = 6, Style = AppResources.Style("AnnotatorDotApps") };
+        var dot = new Grid { Width = 6, Height = 6, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center };
+        dot.Children.Add(appsDot);
+        dot.Children.Add(drawDot);
+        TextBlock word = ToolbarParts.Label(string.Empty, metrics.Minimal ? 10 : 11, "AnnotatorPrimaryText", FontWeights.SemiBold);
+        word.VerticalAlignment = VerticalAlignment.Center;
+        word.HorizontalAlignment = HorizontalAlignment.Center;
+        var status = new MacStack
         {
-            var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8 };
-            row.Children.Add(Well(fill: false, showLabel: true));
-            row.Children.Add(Value(StyleParameter.Opacity, tool, compact ? 0 : 90, showLabel: true));
-            content = row;
-        }
-        else if (compact)
+            Orientation = vertical ? Orientation.Vertical : Orientation.Horizontal,
+            Spacing = vertical ? 3 : 5,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        status.Children.Add(dot);
+        status.Children.Add(word);
+        var drawSurface = new Border { Style = AppResources.Style("AnnotatorModeDraw"), CornerRadius = new CornerRadius(vertical ? 7 : 14) };
+        var appsSurface = new Border { Style = AppResources.Style("AnnotatorModeApps"), CornerRadius = new CornerRadius(vertical ? 7 : 14) };
+        var badge = new Grid
         {
-            var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 12 };
-            row.Children.Add(ToolTitle(look, minimumWidth: false));
-            row.Children.Add(new MacSpacer());
-            if (look.Quick == QuickKind.SelectHint)
+            Width = vertical ? (metrics.Minimal ? 36 : 46) : (metrics.Minimal ? 52 : 58),
+            Height = vertical ? (metrics.Minimal ? 30 : 36) : (metrics.Minimal ? 24 : 28),
+        };
+        badge.Children.Add(appsSurface);
+        badge.Children.Add(drawSurface);
+        badge.Children.Add(status);
+        var face = new MacStack
+        {
+            Orientation = vertical ? Orientation.Vertical : Orientation.Horizontal,
+            Spacing = vertical ? (metrics.Minimal ? 5 : 7) : (metrics.Minimal ? 6 : 8),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false,
+        };
+        mark.VerticalAlignment = VerticalAlignment.Center;
+        mark.HorizontalAlignment = HorizontalAlignment.Center;
+        face.Children.Add(mark);
+        face.Children.Add(badge);
+        var capsule = new Grid { Width = width, Height = height };
+        double corner = Math.Min(width, height) / 2;
+        capsule.Children.Add(new Border { Background = AppResources.Brush("AnnotatorWindowBackgroundBrush"), CornerRadius = new CornerRadius(corner) });
+        capsule.Children.Add(face);
+        capsule.Children.Add(new Border
+        {
+            BorderBrush = AppResources.Brush("AnnotatorSurfaceStrokeBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(corner),
+            IsHitTestVisible = false,
+        });
+        ParityButton button = ToolbarParts.Button(width, height, capsule, "Annotator toolbar", corner);
+        AutomationProperties.SetAutomationId(button, "collapsed-toolbar");
+        button.Click += (_, _) =>
+        {
+            _interacted();
+            ExpandToolbar();
+        };
+        var menu = new MenuFlyout();
+        AddItem(menu, "Show Toolbar", ExpandToolbar);
+        var modeItem = new MenuFlyoutItem();
+        modeItem.Click += (_, _) =>
+        {
+            _interacted();
+            if (_model.Snapshot.Mode == WorkspaceMode.Draw)
             {
-                row.Children.Add(ToolbarParts.Text("Select to edit", 10, "AnnotatorSecondaryText"));
+                _model.UseApps();
             }
             else
             {
-                if (look.SupportsFill)
-                {
-                    row.Children.Add(Well(fill: true, showLabel: true));
-                }
-                row.Children.Add(Value(Parameter(look.Quick), tool, 0, showLabel: true));
+                _model.ResumeDrawing();
             }
-            content = row;
-        }
-        else
-        {
-            var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16 };
-            row.Children.Add(ToolTitle(look, minimumWidth: true));
-            switch (look.Quick)
-            {
-                case QuickKind.Image:
-                    row.Children.Add(Value(StyleParameter.Opacity, tool, 90, showLabel: true));
-                    break;
-                case QuickKind.SelectHint:
-                    row.Children.Add(ToolbarParts.Text("Select any object to move, edit or delete it.", 10, "AnnotatorSecondaryText"));
-                    break;
-                default:
-                    if (look.Quick != QuickKind.Eraser)
-                    {
-                        var pickers = new MacStack { Orientation = Orientation.Horizontal, Spacing = 10, VerticalAlignment = VerticalAlignment.Center };
-                        pickers.Children.Add(Well(fill: false, showLabel: true));
-                        if (look.SupportsFill)
-                        {
-                            pickers.Children.Add(Well(fill: true, showLabel: true));
-                        }
-                        var frame = new Grid { Width = 138, VerticalAlignment = VerticalAlignment.Center };
-                        frame.Children.Add(pickers);
-                        row.Children.Add(frame);
-                    }
-                    row.Children.Add(Value(look.Quick == QuickKind.Text ? StyleParameter.TextSize : StyleParameter.Width, tool, 90, showLabel: true));
-                    if (look.Quick == QuickKind.Pen)
-                    {
-                        var smart = new SmartDrawToggle(_model);
-                        _updates.Add(smart.Update);
-                        row.Children.Add(smart.Root);
-                    }
-                    break;
-            }
-            content = row;
-        }
-        // The row fills the 34-point height and centers each control in it, in exact points.
-        var host = new ContentControl
-        {
-            Content = content,
-            Height = 34,
-            IsTabStop = false,
-            HorizontalAlignment = compact ? HorizontalAlignment.Stretch : HorizontalAlignment.Left,
-            HorizontalContentAlignment = HorizontalAlignment.Stretch,
-            VerticalContentAlignment = VerticalAlignment.Stretch,
         };
-        // A locked selection disables the controls, as SwiftUI's disabled(_:) does: the words keep their colors.
-        _updates.Add(state => host.IsEnabled = !state.SelectionIsLocked);
-        return host;
-    }
-
-    /// <summary>Mac compactQuickPreferences: the fill and the precise value only, beside the actions of a narrow toolbar.</summary>
-    private FrameworkElement CompactQuick(ToolbarLook look, WorkspaceSnapshot snapshot)
-    {
-        if (look.Quick == QuickKind.SelectHint)
+        menu.Items.Add(modeItem);
+        menu.Opening += (_, _) => modeItem.Text = _model.Snapshot.Mode == WorkspaceMode.Draw ? "Use Apps" : "Draw";
+        button.ContextFlyout = menu;
+        Tween drawShown = Tween.Opacity(drawSurface, 0);
+        Tween appsShown = Tween.Opacity(appsSurface, 1);
+        Tween drawDotShown = Tween.Opacity(drawDot, 0);
+        Tween appsDotShown = Tween.Opacity(appsDot, 1);
+        WorkspaceMode? shown = null;
+        _updates.Add(state =>
         {
-            return ToolbarParts.Text("Select to edit", 10, "AnnotatorSecondaryText");
-        }
-        FrameworkElement content;
-        if (look.Quick is QuickKind.Effect or QuickKind.Cover)
-        {
-            Tool tool = look.EffectiveTool;
-            content = EffectControls.CoverProperties(_model, tool, look.HasSelection, compact: true, showsSlider: look.Width >= 500,
-                (width, showLabel) => Value(StyleParameter.Effect, tool, width, showLabel, small: true), _updates, _interacted);
-        }
-        else
-        {
-            var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 6 };
-            if (look.Quick == QuickKind.Counter)
+            bool drawing = state.Mode == WorkspaceMode.Draw;
+            button.AccessibleValue = drawing ? "Drawing is active" : "Apps receive input";
+            ToolbarParts.Help(button, "Shows all tools",
+                drawing ? "Drawing is on. Click to show your tools." : "Your apps get the clicks. Click to show your tools.");
+            if (shown == state.Mode)
             {
-                row.Children.Add(Well(fill: false, showLabel: false));
+                return;
             }
-            if (look.SupportsFill)
-            {
-                row.Children.Add(Well(fill: true, showLabel: false));
-            }
-            row.Children.Add(Value(Parameter(look.Quick), look.EffectiveTool, 0, showLabel: false));
-            content = row;
-        }
-        var host = new ContentControl { Content = content, IsTabStop = false };
-        _updates.Add(state => host.IsEnabled = !state.SelectionIsLocked);
-        return host;
+            MotionSamples? motion = shown is null ? null : _controlMotion;
+            shown = state.Mode;
+            word.Text = drawing ? "Draw" : "Apps";
+            drawShown.To(drawing ? 1 : 0, motion);
+            appsShown.To(drawing ? 0 : 1, motion);
+            drawDotShown.To(drawing ? 1 : 0, motion);
+            appsDotShown.To(drawing ? 0 : 1, motion);
+        });
+        return button;
     }
-
-    /// <summary>Mac quickParameter.</summary>
-    private static StyleParameter Parameter(QuickKind kind) => kind switch
-    {
-        QuickKind.Effect => StyleParameter.Effect,
-        QuickKind.Image or QuickKind.Counter => StyleParameter.Opacity,
-        QuickKind.Text => StyleParameter.TextSize,
-        _ => StyleParameter.Width,
-    };
 
     /// <summary>Mac toolTitle: the tool's name, with the link mark while every drawing tool shares the style.</summary>
-    private FrameworkElement ToolTitle(ToolbarLook look, bool minimumWidth, bool exactHeight = false)
+    private static FrameworkElement ToolTitle(ToolbarLook look)
     {
         var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
         TextBlock title = ToolbarParts.Text(look.EffectiveTool.Label, 11, "AnnotatorPrimaryText", FontWeights.SemiBold);
-        if (exactHeight)
-        {
-            // What follows starts where the Mac's 14-point line ends, not where its height rounded to pixels ends.
-            title.MinHeight = ToolbarParts.LineHeight(11);
-        }
+        // What follows starts where the Mac's 14-point line ends, not where its height rounded to pixels ends.
+        title.MinHeight = ToolbarParts.LineHeight(11);
         row.Children.Add(title);
         if (look.SharedStyle)
         {
-            var link = new AccessibleImage("Style shared by all drawing tools", "link",
-                "All drawing tools share this style. You can turn this off in Settings > General.")
-            {
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-            link.Children.Add(ToolbarParts.SymbolGlyph("link", style: "AnnotatorGlyphSecondary"));
-            ToolbarParts.SetToolTip(link, "All drawing tools share this style. You can turn this off in Settings > General.");
-            row.Children.Add(link);
+            row.Children.Add(LinkMark());
         }
-        if (!minimumWidth)
+        return row;
+    }
+
+    /// <summary>Mac sharedStyleMark: the link mark while every drawing tool shares the style.</summary>
+    private static FrameworkElement LinkMark()
+    {
+        var link = new AccessibleImage("Style shared by all drawing tools", "link",
+            "All drawing tools share this style. You can turn this off in Settings > General.")
         {
-            return row;
-        }
-        var frame = new Grid { MinWidth = 54, VerticalAlignment = VerticalAlignment.Center };
-        frame.Children.Add(row);
-        return frame;
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        link.Children.Add(ToolbarParts.SymbolGlyph("link", style: "AnnotatorGlyphSecondary"));
+        ToolbarParts.SetToolTip(link, "All drawing tools share this style. You can turn this off in Settings > General.");
+        return link;
     }
 
-    private FrameworkElement Well(bool fill, bool showLabel)
-    {
-        var well = new ColorWell(fill, showLabel, OpenColorPicker);
-        _updates.Add(well.Update);
-        return well.Root;
-    }
-
-    private FrameworkElement Value(StyleParameter parameter, Tool tool, double sliderWidth, bool showLabel, bool small = false)
-    {
-        var control = new ValueControl(_model, parameter, tool, sliderWidth, showLabel, BeginTyping, ReturnTypingFocus, small);
-        _updates.Add(control.Update);
-        return control.Root;
-    }
 }

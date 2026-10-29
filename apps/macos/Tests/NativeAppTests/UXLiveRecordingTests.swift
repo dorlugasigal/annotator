@@ -100,7 +100,6 @@ final class UXLiveStage {
     init() async throws {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
-        model.setInspectorPinned(false)
         model.setToolbarDockEdge(.bottom)
         let app = AppDelegate(model: model)
         let screen = try XCTUnwrap(NSScreen.main ?? NSScreen.screens.first)

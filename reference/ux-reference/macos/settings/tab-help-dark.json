@@ -164,7 +164,7 @@
      "frame": [
       23,
       47,
-      794,
+      1374,
       592
      ],
      "role": "AXScrollArea"
@@ -174,7 +174,7 @@
    "frame": [
     20,
     20,
-    800,
+    1380,
     622
    ],
    "role": "AXTabGroup"
@@ -197,12 +197,12 @@
  "kind": "view",
  "notes": "Settings, help tab, at its default size. Content below the fold scrolls.",
  "pixels": [
-  1680,
+  2840,
   1400
  ],
  "scale": 2,
  "size": [
-  840,
+  1420,
   700
  ],
  "spec": [

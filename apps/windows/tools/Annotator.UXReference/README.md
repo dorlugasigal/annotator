@@ -106,7 +106,7 @@ dotnet build apps/windows/src/Annotator.App/Annotator.App.csproj -c Debug -p:Pla
 dotnet run --project apps/windows/tools/Annotator.UXReference -- run --out <folder>
 ```
 
-Options: `--states toolbar/draw-quick-*,menu/drawing` (patterns with `*`;
+Options: `--states toolbar/full-properties-*,menu/drawing` (patterns with `*`;
 default `toolbar/*,menu/*,canvas/*,properties/*,pickers/*,tools-window/*,settings/*,tutorial/*,dialogs/*,region-sharing/*,break-timer/*`),
 `--themes light`
 (default both), `--app <path>`
@@ -134,7 +134,7 @@ repository.
 
 For a short on-screen check, start one toolbar state where the app would
 place it and let it follow its own buttons:
-`Annotator.exe --ux-reference toolbar/draw-quick-pen --placement docked --out <folder> --timeout 6`.
+`Annotator.exe --ux-reference toolbar/full-properties-pen --placement docked --out <folder> --timeout 6`.
 It shows the toolbar without activating it and quits after the timeout. Its
 Stroke and Fill buttons open the real color popover, Pick from screen included.
 Toolbar states follow their own buttons off screen too, so UI Automation can
@@ -195,14 +195,15 @@ the color popover's swatches, which the tool reads as that role.
 The error window state (`dialogs/error-window`) shows the error window's content
 on its own, 460 by 160 points on the window background, with the message the
 Mac capture shows (`Drawing format 9 is not supported by this version.`),
-reported the way the app reports errors. `toolbar/draw-quick-image` pastes a
+reported the way the app reports errors. `toolbar/full-properties-image` pastes a
 24 by 16-pixel image from an in-memory clipboard with Paste image, as the
-person would, so the quick row shows the pasted image's properties; the Mac
+person would, so the properties row shows the pasted image's properties; the Mac
 capture sets the tool directly.
 
 The tray icon state has no accessibility tree in the reference; compare its
-sheet. The Mac captures toolbar states in a desktop-style session, so the quick
-row shows the Focus and cleanup and Zoom tools menus, as Windows does.
+sheet. The Mac captures toolbar states in a desktop-style session. The Spotlight
+and Zoom menus are toolbar items there only in the `added-buttons` state, as on
+Windows.
 
 The Mac reports frames for the content below the fold. Settings' own pages report
 them too (`SettingsFrames`); for the Toolbar & Shortcuts and Pointer tabs the tool

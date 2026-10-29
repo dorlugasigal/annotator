@@ -147,7 +147,7 @@ internal sealed partial class GeneralPage
             SettingsForm.Single(privacyDetails),
         ], top: 10));
 
-        ScrollViewer scroll = SettingsForm.Scroll(form, new Thickness(SettingsForm.Inset, 20, SettingsForm.Inset, 20));
+        ScrollViewer scroll = SettingsForm.Scroll(new FormColumn(form), new Thickness(SettingsForm.Inset, 20, SettingsForm.Inset, 20));
         scroll.Background = SettingsLook.Window;
         Root = new Page(scroll, new Pad(CoffeeView(actions), new Thickness(16)) { HorizontalAlignment = HorizontalAlignment.Stretch });
         _usage.Changed += ShowUsage;

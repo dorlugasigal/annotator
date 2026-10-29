@@ -197,7 +197,7 @@ internal sealed partial class BreakTimerPage : UserControl
             _cannotLockRow,
         ]));
 
-        ScrollViewer scroll = SettingsForm.Scroll(form, new Thickness(SettingsForm.Inset, 20, SettingsForm.Inset, 20));
+        ScrollViewer scroll = SettingsForm.Scroll(new FormColumn(form), new Thickness(SettingsForm.Inset, 20, SettingsForm.Inset, 20));
         scroll.Background = SettingsLook.Window;
         return scroll;
     }

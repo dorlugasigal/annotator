@@ -21,10 +21,6 @@ final class NativeCanvasFixture: NSObject, NSWindowDelegate {
          pasteboard: NSPasteboard = .general) {
         model = WorkspaceModel(defaults: settingsOwner?.preferenceDefaults ?? defaults, imagePasteboard: pasteboard)
         model.connectSettingsOwner(settingsOwner)
-        // Fixture tests were written for quick controls, the default before full properties; keep their meaning.
-        if model.preferences.inspectorPinned == nil, model.preferenceDefaults !== UserDefaults.standard {
-            model.setInspectorPinned(false)
-        }
         let visible = NSScreen.main?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1200, height: 900)
         let frame = CGRect(x: visible.midX - min(1100, visible.width - 80)/2,
                            y: visible.midY - min(820, visible.height - 80)/2,
@@ -50,7 +46,7 @@ final class NativeCanvasFixture: NSObject, NSWindowDelegate {
         for child in [scroll, view] { child.translatesAutoresizingMaskIntoConstraints = false; container.addSubview(child) }
         measuredHeight = ceil(view.fittingSize.height)
         let width = view.widthAnchor.constraint(equalToConstant: ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools,
-            available: frame.width - 24, propertiesVisible: ToolbarPropertiesMode(model: model) != .toolsOnly))
+            available: frame.width - 24))
         let height = view.heightAnchor.constraint(equalToConstant: measuredHeight)
         toolbarWidth = width
         toolbarHeight = height
@@ -89,7 +85,7 @@ final class NativeCanvasFixture: NSObject, NSWindowDelegate {
         let size = CGSize(width: container.bounds.width - 24, height: container.bounds.height)
         guard toolbar.rootView.availableSize != size else { return }
         toolbarWidth?.constant = ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools,
-            available: size.width, propertiesVisible: ToolbarPropertiesMode(model: model) != .toolsOnly)
+            available: size.width)
         toolbar.rootView = ToolbarView(model: model, availableSize: size, showInspector: false)
         updateToolbarSize(toolbar.fittingSize)
     }
@@ -98,8 +94,7 @@ final class NativeCanvasFixture: NSObject, NSWindowDelegate {
         measuredHeight = ceil(size.height)
         let height = toolsVisible ? measuredHeight : 0
         let width = ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools,
-            available: toolbar?.rootView.availableSize.width ?? size.width,
-            propertiesVisible: ToolbarPropertiesMode(model: model) != .toolsOnly)
+            available: toolbar?.rootView.availableSize.width ?? size.width)
         guard toolbarHeight?.constant != height || toolbarWidth?.constant != width else { return }
         toolbarHeight?.constant = height
         toolbarWidth?.constant = width

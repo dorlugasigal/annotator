@@ -141,7 +141,14 @@ import Testing
         preferences.toolbarItems = invalid
         #expect(throws: CanvasError.self) { try preferences.validate() }
     }
-    #expect(ShortcutAction.toolbarChoices == [.spotlight, .cursorHalo, .pointerLens, .smartDraw, .shareRegion])
+    #expect(ShortcutAction.toolbarChoices == [.spotlight, .cursorHalo, .pointerLens, .smartDraw, .shareRegion, .focusMenu, .zoomMenu])
+    preferences.toolbarItems = ["tool.select", "action.focusMenu", "tool.pen", "action.zoomMenu"]
+    preferences.toolbarTools = ["select", "pen"]
+    #expect(try WorkspacePreferences.read(preferences.data()) == preferences, "The Spotlight and Zoom menus can join the tools.")
+    #expect(throws: CanvasError.self) { try preferences.bind(LocalShortcut(key: "j"), to: .action(.zoomMenu)) }
+    preferences.commandShortcuts = ["j": "action.focusMenu"]
+    #expect(throws: CanvasError.self) { try preferences.validate() }
+    preferences.commandShortcuts = nil
     preferences.toolbarItems = ["tool.select", "action.shareRegion"]
     preferences.toolbarTools = ["select"]
     try preferences.bind(LocalShortcut(key: "j"), to: .action(.shareRegion))

@@ -4,6 +4,23 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- You can take any button off the toolbar, including Properties, Undo, Redo, Settings, Board, Draw and More tools. In Settings > Toolbar & Shortcuts, drag it down to More tools or click its minus button. Its key still works.
+- The toolbar can shrink to one small button with the Annotator mark and Draw or Apps. Pick when in Settings > Toolbar & Shortcuts > Shrink, where a short demo shows how it works. Point at the button and your tools come right back.
+- The Spotlight and Zoom menus are now toolbar buttons the size of a tool. They're off at first: add them from More tools > Presenting in Settings.
+- Settings > Toolbar & Shortcuts > Your properties lets you show a property, such as Pattern or Roughness, as one button or with all its choices side by side.
+
+### Changed
+
+- The properties always stay on one row. When they need more room, the toolbar gets wider (with a short animation on a Mac), and there's no scroll bar next to them anymore.
+- Properties are now just shown or hidden. Quick controls are gone, so if you used them, you now see all the properties.
+- The toolbar is exactly as wide as its tools and buttons, so taking some off leaves no gap. Buttons move to a second row only on a narrow screen.
+- When the toolbar changes width, its tools and buttons stay put instead of jumping around.
+- Pattern, Roughness, Fill style, Font and Alignment are one button each: click it for the next choice. Rounded corners, Curved arrow and Ink pressure are on and off buttons, and Width and text size are just a slider.
+- The small Spotlight and Zoom menus at the end of the properties row are gone. Add them as toolbar buttons instead.
+- Settings opens wider, so your toolbar stays on one line in Toolbar & Shortcuts, even with 15 tools.
+
 ## 0.1.0-beta.16 (build 34) - 2026-10-25
 
 ### Changed

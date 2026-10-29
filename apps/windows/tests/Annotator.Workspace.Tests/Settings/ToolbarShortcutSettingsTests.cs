@@ -471,8 +471,8 @@ public sealed class ShortcutPreferenceTests
         model.SetToolbarSize(ToolbarSize.Minimal);
         Assert.Equal(ToolbarSize.Minimal, model.Snapshot.Preferences.ToolbarSize);
         ShortcutCommand[] items = [.. model.Snapshot.ToolbarItems];
-        double minimal = ToolbarToolLayout.HorizontalWidth(items, 1200, propertiesVisible: false, ToolbarSize.Minimal);
-        double expanded = ToolbarToolLayout.HorizontalWidth(items, 1200, propertiesVisible: false, ToolbarSize.Expanded);
+        double minimal = ToolbarToolLayout.HorizontalWidth(items, 1200, ToolbarSize.Minimal);
+        double expanded = ToolbarToolLayout.HorizontalWidth(items, 1200, ToolbarSize.Expanded);
         Assert.True(minimal < expanded - 150, $"{minimal} against {expanded}");
         Assert.Equal(50, new ToolbarMetrics(ToolbarSize.Minimal).VerticalRailWidth);
         model.SetToolbarSize(ToolbarSize.Expanded);
@@ -629,9 +629,10 @@ public sealed class ShortcutPreferenceTests
     {
         IReadOnlyList<ShortcutCommand> candidates = WorkspaceModel.ToolbarCandidates;
         Assert.Equal(ShortcutCommand.ForTool(Tool.Select), candidates[0]);
-        Assert.DoesNotContain(ShortcutCommand.ForTool(Tool.Blur), candidates.Take(candidates.Count - 8));
-        Assert.Equal([Tool.Blur, Tool.Pixelate, Tool.Distort], candidates.Skip(candidates.Count - 8).Take(3).Select(item => item.Tool!.Value));
-        Assert.Equal(ShortcutAction.ToolbarChoices, candidates.TakeLast(5).Select(item => item.Action!.Value));
+        int added = 3 + ShortcutAction.ToolbarChoices.Count;
+        Assert.DoesNotContain(ShortcutCommand.ForTool(Tool.Blur), candidates.Take(candidates.Count - added));
+        Assert.Equal([Tool.Blur, Tool.Pixelate, Tool.Distort], candidates.Skip(candidates.Count - added).Take(3).Select(item => item.Tool!.Value));
+        Assert.Equal(ShortcutAction.ToolbarChoices, candidates.TakeLast(ShortcutAction.ToolbarChoices.Count).Select(item => item.Action!.Value));
         Assert.Equal(candidates.Count, candidates.Distinct().Count());
     }
 }

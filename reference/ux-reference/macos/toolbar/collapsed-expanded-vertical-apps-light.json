@@ -1,0 +1,40 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    0,
+    0,
+    68,
+    88
+   ],
+   "help": "Shows all tools",
+   "identifier": "collapsed-toolbar",
+   "label": "Annotator toolbar",
+   "role": "AXButton",
+   "value": "Apps receive input"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "toolbar/collapsed-expanded-vertical-apps-light.png",
+ "kind": "view",
+ "notes": "The toolbar shrunk to one button after the Shrink delay: the Annotator mark and Apps.",
+ "pixels": [
+  136,
+  176
+ ],
+ "scale": 2,
+ "size": [
+  68,
+  88
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "collapsed-expanded-vertical-apps",
+ "surface": "toolbar"
+}

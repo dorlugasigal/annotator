@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    17.5,
+    257.5,
     16,
     78,
     14
@@ -12,48 +12,12 @@
    "value": "Eraser size"
   },
   {
-   "enabled": true,
-   "frame": [
-    16,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 8",
-   "label": "Width 8",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    57,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 16",
-   "label": "Width 16",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    98,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 28",
-   "label": "Width 28",
-   "role": "AXButton"
-  },
-  {
    "children": [
     {
      "enabled": true,
      "frame": [
-      19,
-      81.5,
+      260,
+      47,
       18,
       14
      ],
@@ -62,39 +26,14 @@
    ],
    "enabled": true,
    "frame": [
-    16,
-    81.5,
-    80,
+    256,
+    47,
+    96,
     14
    ],
    "label": "Size",
    "role": "AXSlider",
    "value": 3
-  },
-  {
-   "enabled": true,
-   "frame": [
-    102,
-    78,
-    48,
-    21
-   ],
-   "help": "Size: 1–40 pt",
-   "label": "Precise size",
-   "placeholder": "Size",
-   "role": "AXTextField",
-   "value": "3"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    156,
-    82,
-    10,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "pt"
   }
  ],
  "appearance": "light",
@@ -104,12 +43,12 @@
  "notes": "Full properties for Eraser, 648 points wide.",
  "pixels": [
   1296,
-  230
+  176
  ],
  "scale": 2,
  "size": [
   648,
-  115
+  88
  ],
  "spec": [
   "002 design.md",

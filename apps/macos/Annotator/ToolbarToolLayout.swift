@@ -19,39 +19,106 @@ struct ToolbarMetrics: Equatable {
     var actionSize: CGSize { minimal ? CGSize(width: 22, height: 24) : CGSize(width: 24, height: 26) }
     var boardWidth: CGFloat { minimal ? 34 : 44 }
     var modeWidth: CGFloat { minimal ? 46 : 60 }
-    /// Room for the one-row action strip, gaps and padding next to the tools.
-    var regularReserve: CGFloat { minimal ? 316 : 392 }
-    var compactReserve: CGFloat { minimal ? 316 : 332 }
-    var railReserve: CGFloat { regularReserve - 16 }
-    var compactRailReserve: CGFloat { minimal ? 150 : 214 }
-    var propertiesWidth: CGFloat { minimal ? 640 : 700 }
+    /// Room for the one-row action strip, gaps and padding next to the tools: the padding, the gap after the tools, and
+    /// each button with its gap (`horizontalRoom`).
+    var regularReserve: CGFloat { minimal ? 307 : 383 }
+    /// The same room on a narrow screen, where only More tools, Board and Draw stay beside the tools.
+    var compactReserve: CGFloat { minimal ? 151 : 203 }
+    /// Below this screen width a toolbar that doesn't fit on one row moves its other buttons to a second row; on a wider
+    /// screen it keeps one row and shows fewer tools.
+    var compactThreshold: CGFloat { minimal ? 420 : 700 }
     /// Full properties below a minimal rail keep the expanded toolbar's layout, drawn smaller by as much as the tool buttons,
     /// so a tool's properties stay on one row.
     var propertiesScale: CGFloat { minimal ? 34.0 / 44.0 : 1 }
-    var minimumWidth: CGFloat { minimal ? 300 : 400 }
-    var compactThreshold: CGFloat { minimal ? 420 : 700 }
     var verticalRailWidth: CGFloat { buttonWidth + padding * 2 }
     var verticalToolPitch: CGFloat { minimal ? 39 : 51 }
-    var verticalReserve: CGFloat { minimal ? 364 : 374 }
+    /// Room for the rail's own buttons below the tools, with gaps and padding.
+    var verticalReserve: CGFloat { minimal ? 346 : 354 }
+
+    /// The width one of the toolbar's own controls takes in the horizontal row, with its gap.
+    func horizontalRoom(_ control: ToolbarControl) -> CGFloat {
+        switch control {
+        case .library: buttonWidth + spacing
+        case .board: boardWidth + spacing
+        case .mode: modeWidth + spacing
+        case .undo, .redo, .clearAll, .properties, .settings, .hide: actionSize.width + spacing
+        }
+    }
+
+    /// The divider before Board and Draw, which goes when both of them do.
+    func dividerRoom(hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        hidden.isSuperset(of: [.board, .mode]) ? 1 + spacing : 0
+    }
+
+    func regularReserve(hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        regularReserve - hidden.reduce(0) { $0 + horizontalRoom($1) } - dividerRoom(hiding: hidden)
+    }
+
+    /// A narrow toolbar keeps More tools, Board and Draw beside the tools and moves the other buttons below them.
+    func compactReserve(hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        compactReserve - firstRowRoom(hiding: hidden)
+    }
+
+    /// The second row of a narrow toolbar: Undo, Redo and the other buttons, each with its gap, and the padding.
+    func secondRowWidth(hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        let shown = ToolbarToolLayout.secondRowControls.subtracting(hidden)
+        return padding * 2 + shown.reduce(0) { $0 + horizontalRoom($1) }
+    }
+
+    private func firstRowRoom(hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        hidden.intersection([.library, .board, .mode]).reduce(0) { $0 + horizontalRoom($1) } + dividerRoom(hiding: hidden)
+    }
+
+    /// The height one of the toolbar's own controls takes in the vertical rail, with its gap.
+    func verticalRoom(_ control: ToolbarControl, hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        let gap: CGFloat = minimal ? 3 : 5
+        switch control {
+        case .library: return buttonHeight + gap
+        case .board: return (minimal ? 30 : 36) + gap
+        case .mode: return 36 + gap
+        case .properties, .clearAll, .settings, .hide: return actionSize.height + gap
+        // Undo and Redo share a row in the expanded rail and stack in the minimal one.
+        case .undo, .redo:
+            if minimal { return actionSize.height + 3 }
+            return control == .redo && hidden.isSuperset(of: [.undo, .redo]) ? actionSize.height + gap : 0
+        }
+    }
+
+    func verticalReserve(hiding hidden: Set<ToolbarControl>) -> CGFloat {
+        verticalReserve - hidden.reduce(0) { $0 + verticalRoom($1, hiding: hidden) }
+    }
 }
 
 enum ToolbarToolLayout {
     static let buttonWidth: CGFloat = 44
-    static func horizontalWidth(tools: [Tool], available: CGFloat, propertiesVisible: Bool,
-                                size: ToolbarSize = .expanded) -> CGFloat {
-        horizontalWidth(items: tools.map(ShortcutCommand.tool), available: available,
-                        propertiesVisible: propertiesVisible, size: size)
+    /// The buttons a narrow toolbar moves below its tools.
+    static let secondRowControls: Set<ToolbarControl> = [.undo, .redo, .clearAll, .properties, .settings, .hide]
+    static func horizontalWidth(tools: [Tool], available: CGFloat,
+                                size: ToolbarSize = .expanded, hiding hidden: Set<ToolbarControl> = []) -> CGFloat {
+        horizontalWidth(items: tools.map(ShortcutCommand.tool), available: available, size: size, hiding: hidden)
     }
 
-    static func horizontalWidth(items: [ShortcutCommand], available: CGFloat, propertiesVisible: Bool,
-                                size: ToolbarSize = .expanded) -> CGFloat {
+    /// The toolbar's width: exactly its tools and buttons on one row, so taking a button off leaves no gap. On a screen
+    /// too narrow for that, the screen's width, with fewer tools showing. One row of full properties can make it wider
+    /// (`ToolbarWidthLayout`).
+    static func horizontalWidth(items: [ShortcutCommand], available: CGFloat,
+                                size: ToolbarSize = .expanded, hiding hidden: Set<ToolbarControl> = []) -> CGFloat {
         let metrics = ToolbarMetrics(size)
         let toolWidth = width(of: items, size: size)
-        // Reserve the measured full or compact action strip, including gaps and padding.
-        let regular = toolWidth + metrics.regularReserve
-        let desired = regular >= metrics.compactThreshold ? regular : toolWidth + metrics.compactReserve
-        // The default tools fit in 1000 points; a toolbar with added items may grow up to the screen width.
-        return min(max(320, available), max(propertiesVisible ? metrics.propertiesWidth : metrics.minimumWidth, desired))
+        let limit = max(320, available)
+        guard usesTwoRows(items: items, available: available, size: size, hiding: hidden) else {
+            return min(limit, toolWidth + metrics.regularReserve(hiding: hidden))
+        }
+        return min(limit, max(toolWidth + metrics.compactReserve(hiding: hidden), metrics.secondRowWidth(hiding: hidden)))
+    }
+
+    /// Only a narrow screen, too narrow for one row, moves Undo, Redo and the other buttons below the tools.
+    static func usesTwoRows(items: [ShortcutCommand], available: CGFloat,
+                            size: ToolbarSize = .expanded, hiding hidden: Set<ToolbarControl> = []) -> Bool {
+        let metrics = ToolbarMetrics(size)
+        let limit = max(320, available)
+        guard !hidden.isSuperset(of: secondRowControls), limit < metrics.compactThreshold else { return false }
+        return width(of: items, size: size) + metrics.regularReserve(hiding: hidden) > limit
     }
 
     /// The toolbar button that stands for the current tool. Effects share one button unless they have their own.

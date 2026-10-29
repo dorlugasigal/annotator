@@ -1,7 +1,6 @@
 using System.Numerics;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Hosting;
 
 namespace Annotator.App.Toolbar;
 
@@ -22,7 +21,8 @@ internal static class PropertiesReveal
         var element = (FrameworkElement)sender;
         element.Loaded -= OnLoaded;
         bool reduced = ToolbarMotion.ReducesMotion();
-        Compositor compositor = ElementCompositionPreview.GetElementVisual(element).Compositor;
+        // Not GetElementVisual: WinUI refuses Translation on an element whose visual was handed out.
+        Compositor compositor = Microsoft.UI.Xaml.Media.CompositionTarget.GetCompositorForCurrentThread();
         // SwiftUI's easeOut curve.
         CubicBezierEasingFunction easeOut = compositor.CreateCubicBezierEasingFunction(new Vector2(0, 0), new Vector2(0.58f, 1));
         TimeSpan duration = TimeSpan.FromSeconds(reduced ? 0.12 : 0.16);
@@ -48,5 +48,23 @@ internal static class PropertiesReveal
         rise.DelayTime = delay;
         rise.DelayBehavior = AnimationDelayBehavior.SetInitialValueBeforeDelay;
         element.StartAnimation(rise);
+    }
+}
+
+/// <summary>
+/// Mac CycleOptions' face change: the new choice comes in from the trailing edge of the 36-point button while it fades in,
+/// on the snappy spring (Motion.snappy); with reduced motion it only fades (Motion.reduced).
+/// </summary>
+internal static class CycleSlide
+{
+    public static void Start(UIElement element)
+    {
+        bool reduced = ToolbarMotion.ReducesMotion();
+        Annotator.Workspace.Motion.MotionSamples progress = Annotator.Workspace.Motion.ToolbarControlMotion.Selection(reduced);
+        ToolbarMotion.Scalar(element, "Opacity", progress, value => (float)Math.Clamp(value, 0, 1));
+        if (!reduced)
+        {
+            ToolbarMotion.Vector(element, "Translation", progress, value => new Vector3((float)(36 * (1 - value)), 0, 0));
+        }
     }
 }

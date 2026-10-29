@@ -1,12 +1,12 @@
 {
   "environment" : {
-    "build" : "26A434",
+    "build" : "26B123",
     "cpu" : "Apple M4 Max",
     "gpu" : "Apple M4 Max",
-    "macOS" : "27.0.1",
+    "macOS" : "27.2.0",
     "machine" : "arm64"
   },
-  "fileCount" : 252,
+  "fileCount" : 261,
   "files" : [
     {
       "bytes" : 1364,
@@ -764,9 +764,9 @@
       "sha256" : "133586b779d52c9e6115177f71fbb35e32c4d9a1ab14c15856e763bf200993ac"
     },
     {
-      "bytes" : 3020,
+      "bytes" : 3599,
       "path" : "motion/durations.json",
-      "sha256" : "caca6541e8fee0bf600a51a7fb146a30318af338728b2e2db8103607c88612a8"
+      "sha256" : "494e3ad5bf1ed7a80fa23f875c79673cbe61ba7051156e9ed532a956f646fb63"
     },
     {
       "bytes" : 93195,
@@ -774,9 +774,9 @@
       "sha256" : "481edbd2f011e002b6ba0cd0e99894ad4db76d87514bb4e82e4a1dcf94c14bf9"
     },
     {
-      "bytes" : 73398,
+      "bytes" : 106138,
       "path" : "motion/timelines.jsonl",
-      "sha256" : "ddaa42bc0e6954c1a8da7a5093123364b097662318f1da5d60090795e9e3846e"
+      "sha256" : "e930330e088d59c1ada8f6d2a45ffd0e71d18a401519a49e6287057d2674978c"
     },
     {
       "bytes" : 24563,
@@ -827,6 +827,26 @@
       "bytes" : 19043,
       "path" : "platform/strings.jsonl",
       "sha256" : "ca11a089e28386763cdbef56db5fd21357aad2c2aaa82818d5d41c7d65c3c9c3"
+    },
+    {
+      "bytes" : 536,
+      "path" : "profiles/collapse-delay-0.5.json",
+      "sha256" : "2ac66f9bfdd006d97734036a3f8fa68783215a6680e60466bc7804021fd2a5de"
+    },
+    {
+      "bytes" : 534,
+      "path" : "profiles/collapse-delay-1.json",
+      "sha256" : "6102348590b5a4d6045e116f4cb7349f60a3aa07139387b8101f5456d26d3d68"
+    },
+    {
+      "bytes" : 536,
+      "path" : "profiles/collapse-delay-600.json",
+      "sha256" : "5475345aa6c3d28286f4b9af136e293fb14ba5bafa145ff901820d16591bf53a"
+    },
+    {
+      "bytes" : 536,
+      "path" : "profiles/collapse-delay-601.json",
+      "sha256" : "4cdc51c90e188467d9aaac49a80607d33963df2652fd505c095713e8b587e73e"
     },
     {
       "bytes" : 553,
@@ -884,9 +904,9 @@
       "sha256" : "e9b40ac6fb670050487a430bd55f11a713da8f1e3d411d1c3d8d3e60e84b37f2"
     },
     {
-      "bytes" : 2208,
+      "bytes" : 2347,
       "path" : "profiles/full.json",
-      "sha256" : "24b0838bcb525fb07108dedfcd319424797529b0f7e9a8654cc78491bc2950e1"
+      "sha256" : "f50b5981f70df445cf461c9c1b22cbe4b0ccea5e943f547ee4a01e426c8df3d0"
     },
     {
       "bytes" : 615,
@@ -924,9 +944,24 @@
       "sha256" : "f005bcead897cee3f4c2e4ad593af243f96e11d2567817a4d2a71af5452a95f6"
     },
     {
-      "bytes" : 34281,
+      "bytes" : 616,
+      "path" : "profiles/hidden-controls-all.json",
+      "sha256" : "09842e747d0a0019f3ae21f42ff2c2fa7c2a94cb3d2097c1b7be9f2bacf5cdf0"
+    },
+    {
+      "bytes" : 575,
+      "path" : "profiles/hidden-controls-future.json",
+      "sha256" : "7643f3f551467ab6b34c6b6609d744c68224ebb2ab020333fe915d66af2d7970"
+    },
+    {
+      "bytes" : 543,
+      "path" : "profiles/hidden-controls-only-future.json",
+      "sha256" : "31d5e86a12eeb406dfba581393cd13dd9b104f062d70e7163bc1eb8f9a3490d6"
+    },
+    {
+      "bytes" : 45719,
       "path" : "profiles/index.jsonl",
-      "sha256" : "d4a5d9161e7835b5985a4492bae0ca8d9f5c2c54a5b3ccd47eb4a09468551102"
+      "sha256" : "66ee837863f4ef4c24cc2fdc2b4aa7adc1ddb425de4c982fb287446bbca902f4"
     },
     {
       "bytes" : 359,
@@ -942,6 +977,16 @@
       "bytes" : 368,
       "path" : "profiles/legacy-ink-key.json",
       "sha256" : "fd15165a752381e5e40481e2f64caccced6d12bf06d1ec47d2f910e61946e044"
+    },
+    {
+      "bytes" : 552,
+      "path" : "profiles/menu-key.json",
+      "sha256" : "c040ae7bf6f4a06b7bd09e42e73409bb2d69a6980293348041cb321fed84cc11"
+    },
+    {
+      "bytes" : 583,
+      "path" : "profiles/property-choices-future.json",
+      "sha256" : "6502e68c1530e5edc6ce87172c30ab2e61848a7911fc87f3195e274147c714ed"
     },
     {
       "bytes" : 508,
@@ -1044,9 +1089,9 @@
       "sha256" : "1e260eb2975eefdf25debce1064fbbffdd459947437ba7ba728dce68983aef40"
     },
     {
-      "bytes" : 1392,
+      "bytes" : 4222,
       "path" : "profiles/visibility-styles.json",
-      "sha256" : "9292dcf78c51c884c2267513d9dd124246630ee0f4561739d6110b034a1dfc1e"
+      "sha256" : "9e8f1ee7a1875009ddfbaacd283b4e4a93b32a55467b3206a0ce7b04b86213a7"
     },
     {
       "bytes" : 614,
@@ -1234,19 +1279,19 @@
       "sha256" : "aa82b26e7e9ff5cc51c469e55ac00aa1ae3b49bf5a34b4f0f5738b2df30b279d"
     },
     {
-      "bytes" : 16512,
+      "bytes" : 16888,
       "path" : "shortcuts/assign-script.jsonl",
-      "sha256" : "28eb06ac4643219395bea0a9ab1a29844560cdf6f911167d7b2f4b6bf5d4bd36"
+      "sha256" : "d8def0aa9bf919ba27664c3d2487c4c32fedace9f6e9cd7fa3edb91e4371542c"
     },
     {
-      "bytes" : 28571,
+      "bytes" : 31392,
       "path" : "shortcuts/bind-script.jsonl",
-      "sha256" : "07f2c608a45741e72949f0688da5413437dfdac69b7083d83cf574a34c0d620a"
+      "sha256" : "5552884510daa36d98dfeebefdb1db65c1828080c65a285ac63e92afaec03112"
     },
     {
-      "bytes" : 12847,
+      "bytes" : 13561,
       "path" : "shortcuts/commands.json",
-      "sha256" : "97f0d28b6bce846c47eddd65a2572053b85be3d4afaccdf312955df8ae59ffda"
+      "sha256" : "e4849bc92327d8ba69a7cd0c348b9bc08c70295111b4c3b1a4b575ee41604a2c"
     },
     {
       "bytes" : 4645,
@@ -1286,9 +1331,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "f1b4b99d412cbd6c1afd8c23d376ddd7141c6f6e",
-    "date" : "2026-10-25",
-    "fingerprint" : "372b6628daf74564dc6de92f38decdd29da24820c6a90da2d24b42241d34ad7e",
+    "commit" : "bdffbeff05887f128759600a856899ab98c3a4a7",
+    "date" : "2026-10-29",
+    "fingerprint" : "cc70c00369db5fb8d454e463999b1c18d1b36ad6df7aebec5ac7d0eddd6b110e",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

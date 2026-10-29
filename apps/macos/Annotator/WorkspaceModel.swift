@@ -238,6 +238,10 @@ final class WorkspaceModel: ObservableObject {
     var onRegionSharingToolbar: (() -> NSWindow?)?
     var onThemeChanged: ((AppTheme) -> Void)?
     var onToolbarLayoutChanged: (() -> Void)?
+    /// The toolbar shows as one button: the Annotator mark and whether you draw or use apps.
+    @Published private(set) var toolbarCollapsed = false
+    var onExpandToolbarRequested: (() -> Void)?
+    var onToolbarCollapseSettingChanged: (() -> Void)?
     var onDisplaysChanged: (() -> Void)?
     var onOpenPreferences: (() -> Void)?
     var onInspectorVisibilityChanged: (() -> Void)?
@@ -767,9 +771,12 @@ final class WorkspaceModel: ObservableObject {
         updatePointerEffects()
     }
 
-    func setQuickPreferencesExpanded(_ expanded: Bool) {
-        if let owner = globalSettingsOwner { owner.setQuickPreferencesExpanded(expanded); return }
-        preferences.quickPreferencesExpanded = expanded
+    /// Shows or hides the tool's properties below the tools.
+    func setPropertiesShown(_ shown: Bool) {
+        if let owner = globalSettingsOwner { owner.setPropertiesShown(shown); return }
+        preferences.quickPreferencesExpanded = shown
+        // Quick controls are gone, so shown properties are always the full ones.
+        if shown { preferences.inspectorPinned = true }
         persistPreferences()
         onInspectorVisibilityChanged?()
     }
@@ -782,16 +789,7 @@ final class WorkspaceModel: ObservableObject {
 
     func toggleProperties() {
         if let owner = globalSettingsOwner { owner.toggleProperties(); return }
-        let expanded = preferences.inspectorPinned != false && preferences.quickPreferencesExpanded != false
-        setInspectorPinned(!expanded)
-    }
-
-    func setInspectorPinned(_ pinned: Bool) {
-        if let owner = globalSettingsOwner { owner.setInspectorPinned(pinned); return }
-        preferences.inspectorPinned = pinned
-        if pinned { preferences.quickPreferencesExpanded = true }
-        persistPreferences()
-        onInspectorVisibilityChanged?()
+        setPropertiesShown(preferences.quickPreferencesExpanded == false)
     }
 
     func setVisibilityAnimation(_ enabled: Bool) {
@@ -1166,10 +1164,88 @@ final class WorkspaceModel: ObservableObject {
             openRegionSharing()
         case .clearAll:
             clearCanvas()
+        case .focusMenu, .zoomMenu:
+            // Menus open with a click and have no key.
+            break
         }
     }
 
     var toolbarSize: ToolbarSize { preferences.toolbarSize ?? .expanded }
+
+    /// The toolbar's own buttons and menus that are turned off in Settings.
+    var hiddenToolbarControls: Set<ToolbarControl> {
+        Set((preferences.hiddenToolbarControls ?? []).compactMap(ToolbarControl.init(rawValue:)))
+    }
+
+    func showsToolbarControl(_ control: ToolbarControl) -> Bool { preferences.showsToolbarControl(control) }
+
+    func setToolbarControl(_ control: ToolbarControl, shown: Bool) {
+        if let owner = globalSettingsOwner { owner.setToolbarControl(control, shown: shown); return }
+        do {
+            var updated = preferences
+            updated.setToolbarControl(control, shown: shown)
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+            onToolbarLayoutChanged?()
+        } catch { report(error) }
+    }
+
+    /// Whether a property shows all its choices side by side instead of one button.
+    func showsAllChoices(_ choice: PropertyChoice) -> Bool { preferences.showsAllChoices(choice) }
+
+    func setShowsAllChoices(_ choice: PropertyChoice, _ shown: Bool) {
+        if let owner = globalSettingsOwner { owner.setShowsAllChoices(choice, shown); return }
+        do {
+            var updated = preferences
+            updated.setShowsAllChoices(choice, shown)
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+        } catch { report(error) }
+    }
+
+    func resetPropertyChoices() {
+        if let owner = globalSettingsOwner { owner.resetPropertyChoices(); return }
+        guard preferences.expandedPropertyChoices != nil else { return }
+        preferences.expandedPropertyChoices = nil
+        persistPreferences()
+    }
+
+    func showAllToolbarControls() {
+        if let owner = globalSettingsOwner { owner.showAllToolbarControls(); return }
+        guard preferences.hiddenToolbarControls != nil else { return }
+        preferences.hiddenToolbarControls = nil
+        persistPreferences()
+        onToolbarLayoutChanged?()
+    }
+
+    /// Seconds the pointer can stay off the toolbar before it shrinks to one button. `nil` keeps it open.
+    var toolbarCollapseDelay: Double? { preferences.toolbarCollapseDelay }
+
+    func setToolbarCollapseDelay(_ delay: Double?) {
+        if let owner = globalSettingsOwner { owner.setToolbarCollapseDelay(delay); return }
+        do {
+            var updated = preferences
+            updated.toolbarCollapseDelay = delay
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+            if delay == nil && toolbarCollapsed { requestToolbarExpansion() }
+            onToolbarCollapseSettingChanged?()
+        } catch { report(error) }
+    }
+
+    /// Asks the toolbar to open from its one-button form. The app animates the change; without it, it happens at once.
+    func requestToolbarExpansion() {
+        guard toolbarCollapsed else { return }
+        if let onExpandToolbarRequested { onExpandToolbarRequested() } else { setToolbarCollapsed(false) }
+    }
+
+    func setToolbarCollapsed(_ collapsed: Bool) {
+        guard toolbarCollapsed != collapsed else { return }
+        toolbarCollapsed = collapsed
+    }
 
     func setToolbarSize(_ size: ToolbarSize) {
         if let owner = globalSettingsOwner {
@@ -1596,6 +1672,8 @@ final class WorkspaceModel: ObservableObject {
         case .pointerLens: magnifierEnabled
         case .smartDraw: smartDraw
         case .shareRegion: regionSharingState.isCapturing
+        case .focusMenu: spotlight || cursorHalo
+        case .zoomMenu: magnifierEnabled || screenZoomEnabled
         case .properties, .board, .clearAll: false
         }
     }

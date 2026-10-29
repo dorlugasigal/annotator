@@ -360,7 +360,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
     @objc private func redoFromMenu() { model?.redo() }
     @objc private func libraryFromMenu() { model?.openToolLibrary() }
     @objc private func saveShapeFromMenu() { model?.openToolLibrary(.myShapes) }
-    @objc private func propertiesFromMenu() { model?.setInspectorPinned(true); model?.setQuickPreferencesExpanded(true); model?.onShowToolbar?() }
+    @objc private func propertiesFromMenu() { model?.setPropertiesShown(true); model?.onShowToolbar?() }
     @objc private func finishPathFromMenu() { finishLinearPath() }
     @objc private func cancelEditFromMenu() { cancelGesture(); model?.synchronize() }
 

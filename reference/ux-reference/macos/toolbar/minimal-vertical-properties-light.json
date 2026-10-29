@@ -1,0 +1,436 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      8,
+      34,
+      36
+     ],
+     "help": "Shortcut 1",
+     "label": "Select",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      47,
+      34,
+      36
+     ],
+     "help": "Shortcut 2",
+     "label": "Rectangle",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      86,
+      34,
+      36
+     ],
+     "help": "Shortcut 3",
+     "label": "Diamond",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      125,
+      34,
+      36
+     ],
+     "help": "Shortcut 4",
+     "label": "Ellipse",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      164,
+      34,
+      36
+     ],
+     "help": "Shortcut 5",
+     "label": "Arrow",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      203,
+      34,
+      36
+     ],
+     "help": "Shortcut 6",
+     "label": "Line",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      242,
+      34,
+      36
+     ],
+     "help": "Shortcut 7",
+     "label": "Pen",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      14,
+      285,
+      22,
+      24
+     ],
+     "help": "Hide the properties",
+     "identifier": "toolbar-properties",
+     "label": "Properties",
+     "role": "AXButton",
+     "value": "Shown"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      16.5,
+      319.5,
+      17.5,
+      15
+     ],
+     "help": "Cycle Desktop, Whiteboard and Blackboard on this drawing display. Control-W: whiteboard. Control-B: blackboard.",
+     "identifier": "desktopcomputer",
+     "label": "Board background",
+     "role": "AXButton",
+     "value": "Desktop"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      345,
+      34,
+      36
+     ],
+     "help": "Drawing is active. Click Use apps to pass clicks through. Escape finishes text or cancels an unfinished drawing first. ⌃⇧2 returns to drawing.",
+     "label": "Use apps",
+     "role": "AXButton",
+     "value": "Drawing is active"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      19,
+      390,
+      12,
+      12
+     ],
+     "help": "Undo",
+     "identifier": "arrow.uturn.backward",
+     "label": "Undo",
+     "role": "AXButton"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      19,
+      417,
+      12,
+      12
+     ],
+     "help": "Redo",
+     "identifier": "arrow.uturn.forward",
+     "label": "Redo",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      438,
+      34,
+      36
+     ],
+     "help": "More shapes and tools (⌘L)",
+     "identifier": "square.grid.2x2",
+     "label": "Tool library",
+     "role": "AXButton"
+    },
+    {
+     "enabled": false,
+     "frame": [
+      19,
+      482,
+      12.5,
+      14.5
+     ],
+     "help": "Clear all drawings — undoable",
+     "identifier": "trash",
+     "label": "Clear all drawings — undoable",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      18,
+      509,
+      14,
+      14
+     ],
+     "help": "Settings and shortcuts",
+     "identifier": "gearshape",
+     "label": "Settings and shortcuts",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      20,
+      538,
+      10.5,
+      10.5
+     ],
+     "help": "Hide drawings and tools",
+     "identifier": "xmark",
+     "label": "Hide drawings and tools",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    0,
+    0,
+    50,
+    563
+   ],
+   "label": "Drawing tool rail",
+   "role": "AXGroup"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      70,
+      12,
+      20.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pen"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        70,
+        34,
+        65.5,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Stroke color"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        70,
+        54,
+        36,
+        36
+       ],
+       "help": "Stroke color",
+       "label": "Stroke color",
+       "role": "AXButton",
+       "value": "#F04538FF"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        71.5,
+        104,
+        51,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Width"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          74,
+          135,
+          18,
+          14
+         ],
+         "role": "AXValueIndicator"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        70,
+        135,
+        96,
+        14
+       ],
+       "label": "Width",
+       "role": "AXSlider",
+       "value": 3
+      },
+      {
+       "enabled": true,
+       "frame": [
+        71.5,
+        174,
+        60.5,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Pattern"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        70,
+        194,
+        36,
+        36
+       ],
+       "help": "Changes to dashed",
+       "label": "Pattern",
+       "role": "AXButton",
+       "value": "Solid"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        71,
+        244,
+        80,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Roughness"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        70,
+        264,
+        36,
+        36
+       ],
+       "help": "Changes to sketchy",
+       "label": "Roughness",
+       "role": "AXButton",
+       "value": "Clean"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        71,
+        314,
+        64,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Pressure"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        70,
+        334,
+        36,
+        36
+       ],
+       "help": "One width all along. Click for ink pressure.",
+       "label": "Ink pressure",
+       "role": "AXButton",
+       "value": "Off"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        71,
+        384,
+        83.5,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Smart Draw"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        70,
+        404,
+        36,
+        36
+       ],
+       "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
+       "identifier": "wand.and.stars",
+       "label": "Smart Draw",
+       "role": "AXButton",
+       "value": "Off"
+      }
+     ],
+     "enabled": false,
+     "frame": [
+      70,
+      34,
+      276,
+      406
+     ],
+     "role": "AXScrollArea"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    58,
+    0,
+    300,
+    452
+   ],
+   "identifier": "attached-tool-properties",
+   "label": "Attached tool properties",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "none",
+ "image": "toolbar/minimal-vertical-properties-light.png",
+ "kind": "view",
+ "notes": "Minimal toolbar, vertical, properties shown. Pen selected.",
+ "pixels": [
+  716,
+  1126
+ ],
+ "scale": 2,
+ "size": [
+  358,
+  563
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "minimal-vertical-properties",
+ "surface": "toolbar"
+}

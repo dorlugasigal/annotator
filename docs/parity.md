@@ -383,16 +383,25 @@ platform that departs from the specifications, unless an ADR changes them.
   icons in the hidden overflow and apps cannot pin themselves; the tutorial's
   finish card shows how to keep the icon visible (DV-4).
 - **WIN-UI-02**: The toolbar and properties match 002 and ADR 0012 in points:
-  up to 1000 wide with default tools, 72 tools-only, 126 with quick
-  controls, 44 by 48 tool targets, 34 for Minimal, a 15-point corner
-  radius, and the same controls, states and separators. The background is the
+  exactly as wide as its tools and buttons on one row (923 with the default
+  tools), 72 with the properties hidden, about 146 with them shown, 44 by 48
+  tool targets, 34 for Minimal, a 15-point corner radius, and the same
+  controls, states and separators. Only a screen narrower than 700 points
+  (420 for Minimal) moves the buttons to a second row. The background is the
   theme's window background color rather than Acrylic, so live and snapshot
-  appearances are identical. Focus rings appear only during keyboard
-  navigation. Pick from screen replaces the Mac's system color sampler with a
-  magnifier loupe that follows the pointer; a click reads only that pixel of
-  the composed screen and Escape cancels. It needs no permission.
+  appearances are identical. Every one of the toolbar's own buttons can be
+  turned off in Settings without leaving a gap. Properties are shown or
+  hidden, and stay on one row: the toolbar grows sideways to fit them. After
+  the delay chosen in Settings, the toolbar shrinks to one capsule with the
+  mark and Draw or Apps (Core `ToolbarMorph` timings for the faces; the
+  window resizes at once, DV-12); pointing at it opens it
+  at once, and Settings plays a short demo of it. Focus rings appear only
+  during keyboard navigation. Pick from screen replaces the Mac's system color
+  sampler with a magnifier loupe that follows the pointer; a click reads only
+  that pixel of the composed screen and Escape cancels. It needs no
+  permission.
 - **WIN-UI-03**: Settings is a resizable, nonmodal window opened by Ctrl+, or
-  the gear, about 840 by 700 by default and bounded by the work area. It has the
+  the gear, about 1420 by 700 by default and bounded by the work area. It has the
   same six tabs in the same order: General, Toolbar & Shortcuts, Pointer,
   Permissions, Help and About. It may use Windows' Mica backdrop because it
   never appears in drawing snapshots.
@@ -732,6 +741,20 @@ These need owner approval before Windows release.
   Mac says the update is ready to install, and the automatic check's question
   offers Open Downloads page..., Copy winget command and Not now instead of
   Sparkle's install window. A Store copy keeps the Store's install.
+- **DV-12 Toolbar frame motion** (owner decision, 2026-10-29): when the
+  toolbar shrinks to one button or opens again, the Mac animates the window's
+  frame between the two sizes (Core `ToolbarMorph`, 0.3 s and 0.34 s) and
+  cross-fades the faces; when the properties row needs more room, it widens
+  the window over 0.22 s (`MotionTiming.ToolbarResizeDuration`). A WinUI
+  window lays its content out a frame after each resize, so a frame-by-frame
+  resize flickers and cuts the buttons off. Windows resizes the toolbar window
+  at once and fades the new face or properties in (Motion.fadeIn, or
+  Motion.reduced with Animation effects off).
+- **DV-13 Off-screen frames** (owner decision, 2026-10-29): while the
+  properties row scrolls sideways on a narrow screen, UI Automation gives no
+  frame to the properties scrolled out of view (they report IsOffscreen),
+  where the Mac's accessibility tree keeps their frames. Their names, values
+  and order match.
 
 ## Owner decisions
 
@@ -884,3 +907,11 @@ The recommended defaults were adopted on 2026-10-18 (see the records below).
     msstore` (WIN-DST-02). The owner also sets the GitHub repository variable
     `WINDOWS_STORE_ID` to `9NMZ345ZJ6JK` before any hosted Windows Store run;
     agents do not set it.
+- **2026-10-29, toolbar deviations (DV-12, DV-13).** The Windows agent's
+  handoff on pull request #77 asked the owner to accept or reject DV-12 and
+  DV-13 before a Windows release. The owner then wrote: "i think the windows
+  agent is done, they handoff back so go ahead finalize whats needed, merge
+  and go for a new release". Applied: both deviations ship with the next
+  release; DV-12 stands until WinUI can resize a window without the frame's
+  delay, and DV-13 until UI Automation reports frames for content scrolled
+  out of view.

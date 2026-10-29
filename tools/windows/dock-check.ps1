@@ -31,7 +31,7 @@
 param(
     [Parameter(Mandatory)] [string] $Out,
     [string] $App = (Join-Path $PSScriptRoot '..\..\apps\windows\src\Annotator.App\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\Annotator.exe'),
-    [string] $State = 'toolbar/draw-quick-pen',
+    [string] $State = 'toolbar/full-properties-pen',
     [ValidateSet('light', 'dark')] [string] $Theme = 'dark',
     [string] $Shot = '',
     [int] $TimeoutSeconds = 90

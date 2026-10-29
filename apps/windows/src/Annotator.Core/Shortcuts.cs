@@ -71,7 +71,7 @@ public readonly record struct LocalShortcut
 }
 
 /// <summary>Toolbar buttons that are not drawing tools but can have a single-key shortcut.</summary>
-public enum ShortcutAction { Properties, Board, Spotlight, CursorHalo, PointerLens, SmartDraw, ShareRegion, ClearAll }
+public enum ShortcutAction { Properties, Board, Spotlight, CursorHalo, PointerLens, SmartDraw, ShareRegion, ClearAll, FocusMenu, ZoomMenu }
 
 public static class ToolbarSizeExtensions
 {
@@ -93,16 +93,20 @@ public static class ToolbarSizeExtensions
 public static class ShortcutActionExtensions
 {
     internal static readonly RawValueMap<ShortcutAction> RawValues = new(
-        "properties", "board", "spotlight", "cursorHalo", "pointerLens", "smartDraw", "shareRegion", "clearAll");
+        "properties", "board", "spotlight", "cursorHalo", "pointerLens", "smartDraw", "shareRegion", "clearAll", "focusMenu",
+        "zoomMenu");
 
     private static readonly ValueList<ShortcutAction> Choices =
-        [ShortcutAction.Spotlight, ShortcutAction.CursorHalo, ShortcutAction.PointerLens, ShortcutAction.SmartDraw, ShortcutAction.ShareRegion];
+    [
+        ShortcutAction.Spotlight, ShortcutAction.CursorHalo, ShortcutAction.PointerLens, ShortcutAction.SmartDraw,
+        ShortcutAction.ShareRegion, ShortcutAction.FocusMenu, ShortcutAction.ZoomMenu,
+    ];
 
     extension(ShortcutAction)
     {
         public static ValueList<ShortcutAction> AllCases => RawValues.AllCases;
 
-        /// <summary>Buttons people can add to the toolbar. Properties, Board and Clear all are always there.</summary>
+        /// <summary>Buttons people can add to the toolbar. Properties, Board and Clear all have fixed places (<see cref="ToolbarControl"/>).</summary>
         public static ValueList<ShortcutAction> ToolbarChoices => Choices;
 
         public static ShortcutAction? FromRawValue(string rawValue) => RawValues.Parse(rawValue);
@@ -114,6 +118,9 @@ public static class ShortcutActionExtensions
 
         public bool CanBeInToolbar => Choices.Contains(action);
 
+        /// <summary>The Spotlight and Zoom menus open with a click; they have no key.</summary>
+        public bool IsMenu => action is ShortcutAction.FocusMenu or ShortcutAction.ZoomMenu;
+
         public string Label => action switch
         {
             ShortcutAction.Properties => "Properties",
@@ -124,12 +131,14 @@ public static class ShortcutActionExtensions
             ShortcutAction.SmartDraw => "Smart draw",
             ShortcutAction.ShareRegion => "Share region",
             ShortcutAction.ClearAll => "Clear all",
+            ShortcutAction.FocusMenu => "Spotlight menu",
+            ShortcutAction.ZoomMenu => "Zoom menu",
             _ => throw new ArgumentOutOfRangeException(nameof(action)),
         };
 
         public string Detail => action switch
         {
-            ShortcutAction.Properties => "Switch between quick controls, full properties and tools only.",
+            ShortcutAction.Properties => "Show or hide the properties below the tools.",
             ShortcutAction.Board => "Switch between desktop, whiteboard and blackboard.",
             ShortcutAction.Spotlight => "Turn the spotlight on or off.",
             ShortcutAction.CursorHalo => "Turn the ring around your pointer on or off.",
@@ -137,6 +146,8 @@ public static class ShortcutActionExtensions
             ShortcutAction.SmartDraw => "Turn shape recognition for the pen on or off.",
             ShortcutAction.ShareRegion => "Choose part of a display and open a window to share in your call.",
             ShortcutAction.ClearAll => "Remove all drawings from every display. You can undo it.",
+            ShortcutAction.FocusMenu => "Spotlight, cursor halo and cleanup, in one menu.",
+            ShortcutAction.ZoomMenu => "Pointer lens, screen zoom and zoom levels, in one menu.",
             _ => throw new ArgumentOutOfRangeException(nameof(action)),
         };
 
@@ -151,6 +162,8 @@ public static class ShortcutActionExtensions
             ShortcutAction.SmartDraw => "wand.and.stars",
             ShortcutAction.ShareRegion => "rectangle.on.rectangle",
             ShortcutAction.ClearAll => "trash",
+            ShortcutAction.FocusMenu => "light.beacon.max",
+            ShortcutAction.ZoomMenu => "arrow.up.left.and.down.right.magnifyingglass",
             _ => throw new ArgumentOutOfRangeException(nameof(action)),
         };
     }
@@ -275,6 +288,10 @@ public partial struct WorkspacePreferences
         var updated = this;
         updated.RemoveBinding(command);
         ShortcutCommand? displaced = null;
+        if (shortcut is { } menuKey && command.Action is { IsMenu: true } menu)
+        {
+            throw CanvasError.InvalidDocument($"{menu.Label} opens with a click, so it has no key. {menuKey.Label} stays free.");
+        }
         if (shortcut is { } key)
         {
             if (key.IsInkColor)
@@ -368,6 +385,10 @@ public partial struct WorkspacePreferences
             if (command.Tool is not null && !shortcut.Shift)
             {
                 throw CanvasError.InvalidDocument("Plain tool keys belong with the other tool keys.");
+            }
+            if (command.Action is { IsMenu: true } menu)
+            {
+                throw CanvasError.InvalidDocument($"{menu.Label} opens with a click, so it has no key.");
             }
             if (!(shortcut.Shift || !ToolShortcuts.ContainsKey(shortcut.Key)) || !commands.Add(command.Id))
             {

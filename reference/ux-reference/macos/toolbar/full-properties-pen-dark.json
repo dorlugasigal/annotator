@@ -148,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    626,
+    632,
     20.5,
     22.5,
     32.5
@@ -161,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    665,
+    671,
     12,
     60,
     48
@@ -174,7 +174,7 @@
   {
    "enabled": false,
    "frame": [
-    737,
+    743,
     30,
     12,
     12
@@ -187,7 +187,7 @@
   {
    "enabled": false,
    "frame": [
-    767,
+    773,
     30,
     12,
     12
@@ -200,7 +200,7 @@
   {
    "enabled": false,
    "frame": [
-    797,
+    803,
     29,
     12.5,
     14.5
@@ -213,21 +213,21 @@
   {
    "enabled": true,
    "frame": [
-    821,
+    827,
     23,
     24,
     26
    ],
-   "help": "Show tools only",
+   "help": "Hide the properties",
    "identifier": "toolbar-properties",
    "label": "Properties",
    "role": "AXButton",
-   "value": "Full properties"
+   "value": "Shown"
   },
   {
    "enabled": true,
    "frame": [
-    856,
+    862,
     29,
     14,
     14
@@ -240,7 +240,7 @@
   {
    "enabled": true,
    "frame": [
-    888,
+    894,
     31,
     10.5,
     10.5
@@ -266,61 +266,6 @@
     {
      "enabled": true,
      "frame": [
-      93,
-      77,
-      51,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Width"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      257,
-      77,
-      60.5,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Pattern"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      388.5,
-      77,
-      80,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Roughness"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      520.5,
-      77,
-      64,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Pressure"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      630.5,
-      77,
-      83.5,
-      14
-     ],
-     "role": "AXStaticText",
-     "value": "Smart Draw"
-    },
-    {
-     "enabled": true,
-     "frame": [
       12,
       97,
       36,
@@ -334,159 +279,21 @@
     {
      "enabled": true,
      "frame": [
-      91.5,
-      97,
-      36,
-      36
+      93,
+      77,
+      51,
+      14
      ],
-     "help": "Width 2",
-     "label": "Width 2",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      132.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Width 4",
-     "label": "Width 4",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      173.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Width 7",
-     "label": "Width 7",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      255.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Solid",
-     "label": "Solid",
-     "role": "AXButton",
-     "selected": true
-    },
-    {
-     "enabled": true,
-     "frame": [
-      296.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Dashed",
-     "label": "Dashed",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      337.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Dotted",
-     "label": "Dotted",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      387.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Clean",
-     "label": "Clean",
-     "role": "AXButton",
-     "selected": true
-    },
-    {
-     "enabled": true,
-     "frame": [
-      428.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Sketchy",
-     "label": "Sketchy",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      469.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Wild",
-     "label": "Wild",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      523.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Constant pressure",
-     "label": "Constant pressure",
-     "role": "AXButton",
-     "selected": true
-    },
-    {
-     "enabled": true,
-     "frame": [
-      579.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Ink pressure",
-     "label": "Ink pressure",
-     "role": "AXButton"
-    },
-    {
-     "enabled": true,
-     "frame": [
-      629.5,
-      97,
-      36,
-      36
-     ],
-     "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
-     "identifier": "wand.and.stars",
-     "label": "Smart Draw",
-     "role": "AXButton",
-     "value": "Off"
+     "role": "AXStaticText",
+     "value": "Width"
     },
     {
      "children": [
       {
        "enabled": true,
        "frame": [
-        94.5,
-        142.5,
+        95.5,
+        108,
         18,
         14
        ],
@@ -496,8 +303,8 @@
      "enabled": true,
      "frame": [
       91.5,
-      142.5,
-      80,
+      108,
+      96,
       14
      ],
      "label": "Width",
@@ -507,108 +314,126 @@
     {
      "enabled": true,
      "frame": [
-      177.5,
-      139,
-      48,
-      21
+      243,
+      77,
+      60.5,
+      14
      ],
-     "help": "Width: 1–40 pt",
-     "label": "Precise width",
-     "placeholder": "Width",
-     "role": "AXTextField",
-     "value": "3"
+     "role": "AXStaticText",
+     "value": "Pattern"
     },
     {
      "enabled": true,
      "frame": [
-      231.5,
-      143,
-      10,
-      13
+      241.5,
+      97,
+      36,
+      36
      ],
-     "role": "AXStaticText",
-     "value": "pt"
+     "help": "Changes to dashed",
+     "label": "Pattern",
+     "role": "AXButton",
+     "value": "Solid"
     },
     {
      "enabled": true,
      "frame": [
-      519.5,
-      137,
-      44,
-      13
+      318.5,
+      77,
+      80,
+      14
      ],
      "role": "AXStaticText",
-     "value": "Constant"
+     "value": "Roughness"
     },
     {
      "enabled": true,
      "frame": [
-      590.5,
-      137,
-      14.5,
-      13
+      317.5,
+      97,
+      36,
+      36
      ],
-     "role": "AXStaticText",
-     "value": "Ink"
+     "help": "Changes to sketchy",
+     "label": "Roughness",
+     "role": "AXButton",
+     "value": "Clean"
     },
     {
-     "enabled": false,
+     "enabled": true,
      "frame": [
-      906,
-      76,
-      15,
-      85
+      413.5,
+      77,
+      64,
+      14
      ],
-     "role": "AXScrollBar",
-     "value": 0
+     "role": "AXStaticText",
+     "value": "Pressure"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      412.5,
+      97,
+      36,
+      36
+     ],
+     "help": "One width all along. Click for ink pressure.",
+     "label": "Ink pressure",
+     "role": "AXButton",
+     "value": "Off"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      492.5,
+      77,
+      83.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Smart Draw"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      491.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
+     "identifier": "wand.and.stars",
+     "label": "Smart Draw",
+     "role": "AXButton",
+     "value": "Off"
     }
    ],
-   "enabled": false,
+   "enabled": true,
    "frame": [
     12,
     77,
-    908,
-    83
-   ],
-   "role": "AXScrollArea"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    863,
-    168.5,
-    26,
-    15
-   ],
-   "label": "Focus and cleanup",
-   "role": "AXMenuButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
     899,
-    168.5,
-    21,
-    15
+    56
    ],
-   "help": "Lens and full-screen zoom",
-   "label": "Zoom tools",
-   "role": "AXMenuButton"
+   "identifier": "contextual-inspector-viewport",
+   "label": "Tool properties",
+   "role": "AXGroup"
   }
  ],
  "appearance": "dark",
  "background": "none",
  "image": "toolbar/full-properties-pen-dark.png",
  "kind": "view",
- "notes": "Full properties open inside the toolbar panel, below the rail.",
+ "notes": "Properties for Pen on one row below the tools. The toolbar is as wide as its tools or the row.",
  "pixels": [
-  1864,
-  392
+  1846,
+  290
  ],
  "scale": 2,
  "size": [
-  932,
-  196
+  923,
+  145
  ],
  "spec": [
   "002 design.md",

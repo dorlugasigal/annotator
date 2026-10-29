@@ -254,7 +254,7 @@ internal sealed partial class ToolbarWindow
         FrameworkElement? layout = null;
         try
         {
-            layout = look.Vertical ? Vertical(look, snapshot, null) : Horizontal(look, snapshot, null);
+            layout = look.Collapsed ? Collapsed(look) : look.Vertical ? Vertical(look, snapshot, null) : Horizontal(look, snapshot, null);
             foreach (Action<WorkspaceSnapshot> update in _updates)
             {
                 update(snapshot);

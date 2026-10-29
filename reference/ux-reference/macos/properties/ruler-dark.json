@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    16,
+    22.5,
     16,
     65.5,
     14
@@ -14,7 +14,7 @@
   {
    "enabled": true,
    "frame": [
-    97,
+    103.5,
     16,
     51,
     14
@@ -25,8 +25,45 @@
   {
    "enabled": true,
    "frame": [
-    259.5,
-    20,
+    22.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Stroke color",
+   "label": "Stroke color",
+   "role": "AXButton",
+   "value": "#F04538FF"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      106,
+      47,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    102,
+    47,
+    96,
+    14
+   ],
+   "label": "Width",
+   "role": "AXSlider",
+   "value": 3
+  },
+  {
+   "enabled": true,
+   "frame": [
+    252,
+    47.5,
     37.5,
     13
    ],
@@ -38,8 +75,8 @@
     {
      "enabled": true,
      "frame": [
-      375,
-      19.5,
+      367.5,
+      47,
       18,
       14
      ],
@@ -48,8 +85,8 @@
    ],
    "enabled": true,
    "frame": [
-    303,
-    19.5,
+    295.5,
+    47,
     90,
     14
    ],
@@ -60,8 +97,8 @@
   {
    "enabled": true,
    "frame": [
-    399,
-    16,
+    391.5,
+    43.5,
     48,
     21
    ],
@@ -74,8 +111,8 @@
   {
    "enabled": true,
    "frame": [
-    453,
-    20,
+    445.5,
+    47.5,
     9.5,
     13
    ],
@@ -85,108 +122,10 @@
   {
    "enabled": true,
    "frame": [
-    16,
-    36,
-    36,
-    36
-   ],
-   "help": "Stroke color",
-   "label": "Stroke color",
-   "role": "AXButton",
-   "value": "#F04538FF"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    95.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 2",
-   "label": "Width 2",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    136.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 4",
-   "label": "Width 4",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    177.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 7",
-   "label": "Width 7",
-   "role": "AXButton"
-  },
-  {
-   "children": [
-    {
-     "enabled": true,
-     "frame": [
-      98.5,
-      81.5,
-      18,
-      14
-     ],
-     "role": "AXValueIndicator"
-    }
-   ],
-   "enabled": true,
-   "frame": [
-    95.5,
-    81.5,
-    80,
-    14
-   ],
-   "label": "Width",
-   "role": "AXSlider",
-   "value": 3
-  },
-  {
-   "enabled": true,
-   "frame": [
-    181.5,
-    78,
-    48,
-    21
-   ],
-   "help": "Width: 1–40 pt",
-   "label": "Precise width",
-   "placeholder": "Width",
-   "role": "AXTextField",
-   "value": "3"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    235.5,
-    82,
-    10,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "pt"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    113,
-    223.5,
-    13
+    469,
+    41,
+    157,
+    26
    ],
    "role": "AXStaticText",
    "value": "Drag to measure the distance in source pixels."
@@ -199,12 +138,12 @@
  "notes": "Full properties for Pixel ruler, 648 points wide.",
  "pixels": [
   1296,
-  284
+  176
  ],
  "scale": 2,
  "size": [
   648,
-  142
+  88
  ],
  "spec": [
   "002 design.md",

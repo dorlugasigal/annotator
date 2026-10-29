@@ -1,0 +1,588 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    12,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 1",
+   "label": "Select",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    67,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 2",
+   "label": "Rectangle",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    113,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 3",
+   "label": "Diamond",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    159,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 4",
+   "label": "Ellipse",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    205,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 5",
+   "label": "Arrow",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    251,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 6",
+   "label": "Line",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    306,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 7",
+   "label": "Pen",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    352,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 8",
+   "label": "Text",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    398,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 9",
+   "label": "Highlighter",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    453,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut 0",
+   "label": "Eraser",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    508,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut S",
+   "label": "Effects",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    558,
+    12,
+    44,
+    48
+   ],
+   "help": "More shapes and tools (⌘L)",
+   "label": "Tool library",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    635,
+    20.5,
+    22.5,
+    32.5
+   ],
+   "help": "Cycle Desktop, Whiteboard and Blackboard on this drawing display. Control-W: whiteboard. Control-B: blackboard.",
+   "label": "Board background",
+   "role": "AXButton",
+   "value": "Desktop"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    674,
+    12,
+    60,
+    48
+   ],
+   "help": "Drawing is active. Click Use apps to pass clicks through. Escape finishes text or cancels an unfinished drawing first. ⌃⇧2 returns to drawing.",
+   "label": "Use apps",
+   "role": "AXButton",
+   "value": "Drawing is active"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    746,
+    30,
+    12,
+    12
+   ],
+   "help": "Undo",
+   "identifier": "arrow.uturn.backward",
+   "label": "Undo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    776,
+    30,
+    12,
+    12
+   ],
+   "help": "Redo",
+   "identifier": "arrow.uturn.forward",
+   "label": "Redo",
+   "role": "AXButton"
+  },
+  {
+   "enabled": false,
+   "frame": [
+    806,
+    29,
+    12.5,
+    14.5
+   ],
+   "help": "Clear all drawings — undoable",
+   "identifier": "trash",
+   "label": "Clear all drawings — undoable",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    830,
+    23,
+    24,
+    26
+   ],
+   "help": "Hide the properties",
+   "identifier": "toolbar-properties",
+   "label": "Properties",
+   "role": "AXButton",
+   "value": "Shown"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    865,
+    29,
+    14,
+    14
+   ],
+   "help": "Settings and shortcuts",
+   "identifier": "gearshape",
+   "label": "Settings and shortcuts",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    897,
+    31,
+    10.5,
+    10.5
+   ],
+   "help": "Hide drawings and tools",
+   "identifier": "xmark",
+   "label": "Hide drawings and tools",
+   "role": "AXButton"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      77,
+      65.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Stroke color"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      12,
+      97,
+      36,
+      36
+     ],
+     "help": "Stroke color",
+     "label": "Stroke color",
+     "role": "AXButton",
+     "value": "#F04538FF"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      93,
+      77,
+      51,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Width"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        95.5,
+        108,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      91.5,
+      108,
+      96,
+      14
+     ],
+     "label": "Width",
+     "role": "AXSlider",
+     "value": 3
+    },
+    {
+     "enabled": true,
+     "frame": [
+      243,
+      77,
+      60.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pattern"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      241.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Solid",
+     "label": "Solid",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      282.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Dashed",
+     "label": "Dashed",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      323.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Dotted",
+     "label": "Dotted",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      374.5,
+      77,
+      80,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Roughness"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      373.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Clean",
+     "label": "Clean",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      414.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Sketchy",
+     "label": "Sketchy",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      455.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Wild",
+     "label": "Wild",
+     "role": "AXButton"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        507,
+        77,
+        47,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Start"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        505.5,
+        97,
+        68,
+        36
+       ],
+       "help": "Start arrowhead",
+       "label": "Start arrowhead",
+       "role": "AXButton",
+       "value": "None"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        589,
+        77,
+        40.5,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "End"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        587.5,
+        97,
+        68,
+        36
+       ],
+       "help": "End arrowhead",
+       "label": "End arrowhead",
+       "role": "AXButton",
+       "value": "Arrow"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        671,
+        77,
+        79,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Arrow type"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        669.5,
+        97,
+        36,
+        36
+       ],
+       "help": "Straight arrow",
+       "label": "Straight arrow",
+       "role": "AXButton",
+       "selected": true
+      },
+      {
+       "enabled": true,
+       "frame": [
+        710.5,
+        97,
+        36,
+        36
+       ],
+       "help": "Curved arrow",
+       "label": "Curved arrow",
+       "role": "AXButton"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        765.5,
+        77,
+        73,
+        14
+       ],
+       "role": "AXStaticText",
+       "value": "Head size"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          775.5,
+          108,
+          18,
+          14
+         ],
+         "role": "AXValueIndicator"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        764,
+        108,
+        86,
+        14
+       ],
+       "label": "Arrowhead size",
+       "role": "AXSlider",
+       "value": 0.75
+      },
+      {
+       "enabled": true,
+       "frame": [
+        856,
+        108.5,
+        22.5,
+        13
+       ],
+       "role": "AXStaticText",
+       "value": "75%"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      505.5,
+      77,
+      373,
+      56
+     ],
+     "label": "Arrow properties",
+     "role": "AXGroup"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    12,
+    77,
+    902,
+    56
+   ],
+   "identifier": "contextual-inspector-viewport",
+   "label": "Tool properties",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "none",
+ "image": "toolbar/full-properties-all-choices-arrow-dark.png",
+ "kind": "view",
+ "notes": "Full properties with every choice side by side (Settings > Your properties). The toolbar grows sideways to keep one row.",
+ "pixels": [
+  1852,
+  290
+ ],
+ "scale": 2,
+ "size": [
+  926,
+  145
+ ],
+ "spec": [
+  "002 design.md",
+  "009",
+  "ADR 0012",
+  "WIN-UI-02"
+ ],
+ "state": "full-properties-all-choices-arrow",
+ "surface": "toolbar"
+}

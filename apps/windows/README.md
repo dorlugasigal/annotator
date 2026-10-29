@@ -74,9 +74,10 @@ Select tool; the keyboard (Shift+F10 on the canvas, Focus drawing tools, Tab in
 the toolbar, Escape back to the canvas and Escape releasing input); the Tools window (Ctrl+L, the keyboard on its sections, the Tool
 library button, saving the selection to My shapes, inserting, renaming and
 deleting it, a tile and Escape, each giving the keyboard back to the canvas; My
-shapes is in memory there); Focus and cleanup (its items, and Remove all
-censors closing it); Spotlight and Cursor halo (the yellow ring at the pointer,
-the dimming, the Stop buttons); live zoom (the Zoom tools menu, the lens
+shapes is in memory there); the Spotlight menu (its items, and Remove all
+censors closing it; the live check adds it and the Zoom menu to its toolbar);
+Spotlight and Cursor halo (the yellow ring at the pointer,
+the dimming, the Stop buttons); live zoom (the Zoom menu, the lens
 window, full-screen zoom's level, both effects on during zoom with the ring at
 the pointer, and the Stop buttons; no hook is installed unless `-ZoomMeasure`
 asks for the zoom measurements, and `-Shot` with the render harness's path
@@ -137,7 +138,7 @@ dotnet build apps/windows/src/Annotator.App/Annotator.App.csproj -c Debug -p:Pla
 pwsh -NoProfile -File tools/windows/dock-check.ps1 -Out <folder outside the repository>
 ```
 
-It shows the docked toolbar reference state (`--ux-reference toolbar/draw-quick-pen
+It shows the docked toolbar reference state (`--ux-reference toolbar/full-properties-pen
 --placement docked`, the app's own toolbar window and placement with an in-memory
 profile) and drags its background with SendInput on the display it is on: a free
 drop, a drop 3 points inside an edge, and drops at the outermost pixel of the

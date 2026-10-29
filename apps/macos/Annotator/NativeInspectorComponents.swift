@@ -3,6 +3,14 @@ import SwiftUI
 import AnnotationCore
 import PresentationRendering
 
+extension VerticalAlignment {
+    private enum PropertyControl: AlignmentID {
+        static func defaultValue(in context: ViewDimensions) -> CGFloat { context[VerticalAlignment.center] }
+    }
+    /// The middle of a property's control, below its name, so controls with and without a name line up on one row.
+    static let propertyControl = VerticalAlignment(PropertyControl.self)
+}
+
 struct PropertyBlock<Content: View>: View {
     let name: String
     let symbol: String
@@ -11,7 +19,8 @@ struct PropertyBlock<Content: View>: View {
         VStack(alignment: .leading, spacing: 6) {
             Label(name, systemImage: symbol)
                 .font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-            content
+            VStack(alignment: .leading, spacing: 6) { content }
+                .alignmentGuide(.propertyControl) { $0[VerticalAlignment.center] }
         }.frame(maxWidth: .infinity, alignment: .topLeading)
     }
 }
@@ -190,6 +199,7 @@ struct InspectorControlButton<Content: View>: View {
     var selected = false
     var width: CGFloat = 36
     var height: CGFloat = 36
+    var help: String?
     let action: () -> Void
     @ViewBuilder var content: Content
     @State private var hover = false
@@ -204,9 +214,112 @@ struct InspectorControlButton<Content: View>: View {
                 }
                 .contentShape(RoundedRectangle(cornerRadius: 9))
         }
-        .buttonStyle(.plain).help(name).accessibilityLabel(name)
+        .buttonStyle(.plain).help(help ?? name).accessibilityLabel(name)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .onHover { hover = $0 }
+    }
+}
+
+/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice and moves to the next
+/// one on each click. The dots show where you are; the context menu and VoiceOver's adjust actions reach every choice.
+struct CycleOptions<Value: Equatable>: View {
+    let name: String
+    let values: [(value: Value, label: String, sample: CycleSample)]
+    let selection: Value
+    let update: (Value) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    enum CycleSample {
+        case sample(InspectorSample)
+        case symbol(String)
+        case text(String, Font.Design)
+    }
+
+    init(name: String, values: [(Value, String, InspectorSample)], selection: Value, update: @escaping (Value) -> Void) {
+        self.init(name: name, choices: values.map { ($0.0, $0.1, CycleSample.sample($0.2)) },
+                  selection: selection, update: update)
+    }
+
+    init(name: String, choices: [(Value, String, CycleSample)], selection: Value, update: @escaping (Value) -> Void) {
+        self.name = name
+        self.values = choices.map { (value: $0.0, label: $0.1, sample: $0.2) }
+        self.selection = selection
+        self.update = update
+    }
+
+    private var index: Int { values.firstIndex { $0.value == selection } ?? 0 }
+    private var next: Int { (index + 1) % values.count }
+
+    var body: some View {
+        let current = values[index]
+        InspectorControlButton(name: name, help: "\(name): \(current.label). Click for \(values[next].label.lowercased()).",
+                               action: { choose(next) }) {
+            ZStack {
+                face(current.sample)
+                    .id(index)
+                    .transition(reduceMotion ? .opacity : .asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)))
+                HStack(spacing: 2.5) {
+                    ForEach(values.indices, id: \.self) { position in
+                        Circle().fill(position == index ? Color.accentColor : Color.primary.opacity(0.22))
+                            .frame(width: 3.5, height: 3.5)
+                    }
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 3)
+                .accessibilityHidden(true)
+            }
+            .clipped()
+        }
+        .animation(Motion.resolve(Motion.snappy, reduceMotion: reduceMotion), value: index)
+        .accessibilityValue(current.label)
+        .accessibilityHint("Changes to \(values[next].label.lowercased())")
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: choose(next)
+            case .decrement: choose((index + values.count - 1) % values.count)
+            @unknown default: break
+            }
+        }
+        .contextMenu {
+            ForEach(values.indices, id: \.self) { position in
+                Button { choose(position) } label: {
+                    if position == index { Label(values[position].label, systemImage: "checkmark") }
+                    else { Text(values[position].label) }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func face(_ sample: CycleSample) -> some View {
+        switch sample {
+        case .sample(let sample): InspectorSampleView(sample: sample).allowsHitTesting(false)
+        case .symbol(let name): Image(systemName: name).font(.system(size: 15))
+        case .text(let text, let design): Text(text).font(.system(size: 16, design: design))
+        }
+    }
+
+    private func choose(_ position: Int) {
+        guard values.indices.contains(position), position != index else { return }
+        update(values[position].value)
+    }
+}
+
+/// An on and off button for one feature, such as a curved arrow. The accent outline shows it's on.
+struct InspectorToggle: View {
+    let name: String
+    let sample: InspectorSample
+    let isOn: Bool
+    let onHelp: String
+    let offHelp: String
+    let toggle: () -> Void
+
+    var body: some View {
+        InspectorControlButton(name: name, selected: isOn, help: isOn ? onHelp : offHelp, action: toggle) {
+            InspectorSampleView(sample: sample).allowsHitTesting(false)
+        }
+        .accessibilityValue(isOn ? "On" : "Off")
     }
 }
 

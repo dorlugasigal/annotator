@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    16,
+    72,
     16,
     65.5,
     14
@@ -14,7 +14,7 @@
   {
    "enabled": true,
    "frame": [
-    91.5,
+    147.5,
     16,
     15.5,
     14
@@ -25,7 +25,7 @@
   {
    "enabled": true,
    "frame": [
-    143,
+    199,
     16,
     51,
     14
@@ -36,7 +36,7 @@
   {
    "enabled": true,
    "frame": [
-    307,
+    349,
     16,
     60.5,
     14
@@ -47,7 +47,7 @@
   {
    "enabled": true,
    "frame": [
-    438.5,
+    424.5,
     16,
     80,
     14
@@ -58,7 +58,18 @@
   {
    "enabled": true,
    "frame": [
+    520,
     16,
+    56,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Edges"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    72,
     36,
     36,
     36
@@ -71,7 +82,7 @@
   {
    "enabled": true,
    "frame": [
-    91.5,
+    147.5,
     36,
     36,
     36
@@ -82,122 +93,12 @@
    "value": "Transparent"
   },
   {
-   "enabled": true,
-   "frame": [
-    141.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 2",
-   "label": "Width 2",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    182.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 4",
-   "label": "Width 4",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    223.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Width 7",
-   "label": "Width 7",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    305.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Solid",
-   "label": "Solid",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    346.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Dashed",
-   "label": "Dashed",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    387.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Dotted",
-   "label": "Dotted",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    437.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Clean",
-   "label": "Clean",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    478.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Sketchy",
-   "label": "Sketchy",
-   "role": "AXButton"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    519.5,
-    36,
-    36,
-    36
-   ],
-   "help": "Wild",
-   "label": "Wild",
-   "role": "AXButton"
-  },
-  {
    "children": [
     {
      "enabled": true,
      "frame": [
-      144.5,
-      81.5,
+      201.5,
+      47,
       18,
       14
      ],
@@ -206,9 +107,9 @@
    ],
    "enabled": true,
    "frame": [
-    141.5,
-    81.5,
-    80,
+    197.5,
+    47,
+    96,
     14
    ],
    "label": "Width",
@@ -218,63 +119,41 @@
   {
    "enabled": true,
    "frame": [
-    227.5,
-    78,
-    48,
-    21
-   ],
-   "help": "Width: 1–40 pt",
-   "label": "Precise width",
-   "placeholder": "Width",
-   "role": "AXTextField",
-   "value": "3"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    281.5,
-    82,
-    10,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "pt"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    17.5,
-    113,
-    56,
-    14
-   ],
-   "role": "AXStaticText",
-   "value": "Edges"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    133,
+    347.5,
+    36,
     36,
     36
    ],
-   "help": "Sharp corners",
-   "label": "Sharp corners",
+   "help": "Changes to dashed",
+   "label": "Pattern",
    "role": "AXButton",
-   "selected": true
+   "value": "Solid"
   },
   {
    "enabled": true,
    "frame": [
-    57,
-    133,
+    423.5,
+    36,
     36,
     36
    ],
-   "help": "Rounded corners",
+   "help": "Changes to sketchy",
+   "label": "Roughness",
+   "role": "AXButton",
+   "value": "Clean"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    518.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Sharp corners. Click to round them.",
    "label": "Rounded corners",
-   "role": "AXButton"
+   "role": "AXButton",
+   "value": "Off"
   }
  ],
  "appearance": "light",
@@ -284,12 +163,12 @@
  "notes": "Full properties for Diamond, 648 points wide.",
  "pixels": [
   1296,
-  370
+  176
  ],
  "scale": 2,
  "size": [
   648,
-  185
+  88
  ],
  "spec": [
   "002 design.md",

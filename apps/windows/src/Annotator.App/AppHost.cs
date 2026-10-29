@@ -138,6 +138,12 @@ internal sealed partial class AppHost
             DisplayedZoom = _zoomBoard,
             ScreenAccess = _screenAccess,
         });
+        if (check is not null)
+        {
+            // The live check opens the Spotlight and Zoom menus, which a new profile keeps in More tools.
+            _model.ConfigureToolbar([.. _model.Snapshot.ToolbarItems, ShortcutCommand.ForAction(ShortcutAction.FocusMenu),
+                ShortcutCommand.ForAction(ShortcutAction.ZoomMenu)]);
+        }
         // Devices and overlays live on their own thread (S-12). They are created after the toolbar's first frame:
         // setting up both threads' composition at the same moment sometimes left the toolbar black until it redrew.
         Action<OverlayEvent> report = overlayEvent => _queue.TryEnqueue(() => OnOverlayEvent(overlayEvent));
@@ -207,6 +213,7 @@ internal sealed partial class AppHost
             ArrowHeads = OpenArrowHeads,
             ToolLibrary = () => OpenToolLibrary(null),
             Settings = () => OpenSettings(SettingsTab.General),
+            HoldsOpen = () => _tutorial is { IsVisible: true } || _canvases.ConstructingArrow || ToolsUnderPointer(),
         };
         canvases.ToolbarWindow = (nint)_toolbar.Hwnd;
         // Open board, Save board, Export PNG and Insert image (WIN-SYS-04): dialogs over the toolbar, file work off the app thread.
@@ -725,6 +732,18 @@ internal sealed partial class AppHost
         _tools ??= new ToolsWindow(_registry, _model, _library, _thumbnails,
             () => _model.Snapshot.ToolbarVisible ? _toolbar.Frame : null, TrayFocusTarget, OpenSettings, _files);
         _tools.Show(section);
+    }
+
+    /// <summary>Mac toolbarMustStayOpen: the Tools window is open and the pointer is on it.</summary>
+    private bool ToolsUnderPointer()
+    {
+        if (_tools is not { IsShown: true } tools || WindowChrome.TryCursor() is not { } pointer)
+        {
+            return false;
+        }
+        PointInt32 origin = tools.AppWindow.Position;
+        SizeInt32 size = tools.AppWindow.Size;
+        return pointer.X >= origin.X && pointer.X < origin.X + size.Width && pointer.Y >= origin.Y && pointer.Y < origin.Y + size.Height;
     }
 
     /// <summary>

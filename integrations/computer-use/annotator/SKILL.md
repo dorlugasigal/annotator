@@ -73,17 +73,21 @@ For a screenshot, clip or walkthrough the user asked for, follow
 | Label a shape | With Select, double-click inside the shape—even an unfilled one—or click inside it with Text. Type and press Command-Return. The centered label belongs to the shape and follows move, resize and rotation |
 | Highlight words | Locate the actual word bounds, choose **Highlighter**, and drag through their vertical center, slightly beyond the first and last letters. Check the stroke before adding another |
 | Move or resize a mark | Choose **Select**, select the mark, then drag it or its handle. Hold Shift for equal proportions when supported |
-| Change its look | Select the mark and use **Properties**, **Stroke color**, **Fill color**, or the visible width controls |
+| Change its look | Select the mark and use **Properties**, **Stroke color**, **Fill color**, or the **Width** slider |
 | Show more shapes | Open **Tool library** (Command-L while Annotator has keyboard input), then **Shapes**. The Tools window is resizable: widen it for more columns, increase its height for more rows, or scroll the grid |
 | Change an arrowhead | Select the arrow, open **Start arrowhead** or **End arrowhead**, and choose the named option. Each end has its own setting |
-| Bend an arrow | Select the arrow and choose **Curved** / **Curved arrow** in Arrow type. Check the bend and attachment points afterward |
-| Add a fill or rough edge | Select the shape, choose **Fill color**, then a fill pattern if offered. Use **Clean**, **Sketchy** or **Wild** for roughness |
+| Bend an arrow | Select the arrow and click **Curved arrow** under Curved; it's an on and off button. If Arrow type shows both choices, choose **Curved arrow**. Check the bend and attachment points afterward |
+| Add a fill or rough edge | Select the shape, choose **Fill color**, then click **Fill style** to go through the fill patterns. Click **Roughness** to go through **Clean**, **Sketchy** and **Wild**; its value names the current one. If the user set a property to show all its choices, click the named choice instead |
 | Pick a screen color | Open the color palette and use **Pick from screen**. Escape cancels |
 | Copy an object | Select it, press Command-C, move the pointer to an empty spot and press Command-V. The copy is selected. With the pointer still on the original, it lands a little down and right |
 | Reuse a saved shape | Open **Tool library > My shapes** and choose its name. The editable copy appears in the center of the current view; move it if needed |
 | Save a reusable shape | When asked, select the drawings, open **Tool library > My shapes**, enter a name and choose **Save selection**. Images and covers are not supported |
 | Fix your last change | Use **Undo**, then check what changed |
 | Let the user use other apps | Use **Use apps** or **Return to Interact**, or Escape when there is no edit or zoom to cancel |
+| Open a shrunk toolbar | If the toolbar is one small **Annotator toolbar** button with Draw or Apps, click it to show the tools. Don't change the user's Shrink setting |
+
+The user can take buttons such as Undo, Properties or Settings off the toolbar.
+If one is missing, use its key or ask; don't turn it back on unless asked.
 
 After choosing a color, start the next annotation on the desktop; that click
 dismisses the color picker. Do not add a Done click to a demo unless you need

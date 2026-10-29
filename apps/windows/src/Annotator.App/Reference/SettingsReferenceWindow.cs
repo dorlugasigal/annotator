@@ -11,8 +11,8 @@ namespace Annotator.App.Reference;
 
 /// <summary>
 /// Development only (UX reference capture): Settings and its dialogs on their own, as the Mac capture renders them
-/// (UXReferenceCaptureTests.test05Settings and test06WindowsAndDialogs): CustomizationView at 840 points wide and 700 or
-/// 1500 high with the Toolbar &amp; Shortcuts, Pointer and Break timer pages the app sets, LoginItemSettings().padding(16) 620 wide for a
+/// (UXReferenceCaptureTests.test05Settings and test06WindowsAndDialogs): CustomizationView at 840 points wide and 700,
+/// 1500 or 2400 high with the Toolbar &amp; Shortcuts, Pointer and Break timer pages the app sets, LoginItemSettings().padding(16) 620 wide for a
 /// startup task state, FeedbackView at 460 by 680 and ReleaseNotesView().padding(20) at 560 by 640. Launch at sign-in reads a
 /// fixed state; nothing opens a link, a dialog, the clipboard or Windows Settings.
 /// </summary>
@@ -53,7 +53,7 @@ internal sealed class SettingsReferenceWindow : PopoverWindow
                 _view = new SettingsView(actions, scenario.Tab, pages);
                 _view.Root.Width = SettingsWindow.DefaultWidth;
                 _view.Root.Height = scenario.Height;
-                // The full states are 1500 points high, taller than most screens.
+                // The full states are 1500 or 2400 points high, taller than most screens.
                 WindowChrome.AllowAnySize(Hwnd);
                 Surface = _view.Root;
                 model.Published += Apply;

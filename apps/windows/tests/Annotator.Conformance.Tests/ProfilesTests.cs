@@ -43,8 +43,23 @@ public class ProfilesTests
             ["defaultToolShortcuts"] = Strings(WorkspacePreferences.DefaultToolShortcuts),
             ["defaultToolbar"] = new JsonArray(WorkspacePreferences.DefaultToolbar.Select(tool => (JsonNode)tool.RawValue).ToArray()),
             ["legacyToolShortcuts"] = Strings(WorkspacePreferences.LegacyToolShortcuts),
+            ["propertyChoices"] = new JsonArray(PropertyChoice.AllCases.Select(choice => (JsonNode)new JsonObject
+            {
+                ["choices"] = new JsonArray(choice.Choices.Select(name => (JsonNode)name).ToArray()),
+                ["id"] = choice.RawValue,
+                ["label"] = choice.Label,
+            }).ToArray()),
             ["resolved"] = new JsonObject(VisibilityAnimationStyle.AllCases.Select(style =>
                 KeyValuePair.Create(style.RawValue, (JsonNode?)style.Resolved.RawValue))),
+            ["toolbarCollapseDelays"] = new JsonArray(WorkspacePreferences.ToolbarCollapseDelays.Select(delay => (JsonNode)delay).ToArray()),
+            ["toolbarControls"] = new JsonArray(ToolbarControl.AllCases.Select(control => (JsonNode)new JsonObject
+            {
+                ["action"] = control.Action is { } action ? action.RawValue : null,
+                ["detail"] = control.Detail,
+                ["id"] = control.RawValue,
+                ["label"] = control.Label,
+                ["symbol"] = control.Symbol,
+            }).ToArray()),
         };
         JsonDiff.Equal(expected, actual, NumberRule.Exact);
     }

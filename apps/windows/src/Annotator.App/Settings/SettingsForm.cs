@@ -146,6 +146,48 @@ internal sealed partial class Pad : Panel, IExactSize
     }
 }
 
+/// <summary>
+/// A grouped Form's readable width: SwiftUI keeps the cards at most <see cref="SettingsForm.CardWidth"/> points wide and
+/// centers them when the window is wider, as the 1420-point Settings window is.
+/// </summary>
+internal sealed partial class FormColumn : Panel, IExactSize
+{
+    private Size? _exact;
+
+    public FormColumn(FrameworkElement child)
+    {
+        Child = child;
+        Children.Add(child);
+    }
+
+    public FrameworkElement Child { get; }
+
+    public Size? ExactSize => _exact;
+
+    private static double ColumnWidth(double available) =>
+        double.IsInfinity(available) ? SettingsForm.CardWidth : Math.Min(available, SettingsForm.CardWidth);
+
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        double column = ColumnWidth(availableSize.Width);
+        Child.Measure(new Size(column, availableSize.Height));
+        double height = MacStack.Extent(Child, horizontal: false).Along;
+        var size = new Size(double.IsInfinity(availableSize.Width) ? column : availableSize.Width, height);
+        _exact = size;
+        return size;
+    }
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        double scale = XamlRoot?.RasterizationScale ?? 1;
+        Point residual = MacStack.InheritedResidual(this);
+        double column = ColumnWidth(finalSize.Width);
+        double height = MacStack.Extent(Child, horizontal: false).Along;
+        MacStack.ArrangeExact(Child, residual.X + (finalSize.Width - column) / 2, residual.Y, column, height, Child.Margin, scale);
+        return finalSize;
+    }
+}
+
 /// <summary>Builds the grouped Form of Settings > General: section headers, rounded cards, rows and separators.</summary>
 internal static class SettingsForm
 {
@@ -153,6 +195,9 @@ internal static class SettingsForm
     public const double Inset = 45;
 
     public const double CardRadius = 10;
+
+    /// <summary>The widest a card gets; a wider window centers it (<see cref="FormColumn"/>).</summary>
+    public const double CardWidth = 704;
 
     /// <summary>The width text gets in a row of the default 704-point card: the card less 10 points on each side.</summary>
     public const double RowWidth = 684;

@@ -51,6 +51,7 @@ internal sealed partial class ArrangerTile : UserControl
     private readonly Grid _placeholder = new() { Visibility = Visibility.Collapsed, IsHitTestVisible = false };
     private readonly Canvas _badgeLayer = new() { HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top, Width = 0, Height = 0 };
     private FrameworkElement? _badge;
+    private readonly AccessibleElement? _menuName;
     private bool _hovering;
     private bool _placeholderShown;
 
@@ -95,7 +96,31 @@ internal sealed partial class ArrangerTile : UserControl
             _content.Children.Add(titleArea);
         }
         Chip = new KeyChip(RecordingTarget.Local(item), item.Label, compact: true, host.Toggle);
-        _content.Children.Add(Chip.Button);
+        if (item.Action is { IsMenu: true })
+        {
+            // The Spotlight and Zoom menus open with a click and have no key; in the toolbar a chevron stands where a
+            // tool shows its key (Mac ArrangerTile).
+            if (inToolbar && metrics.ShowsKeyLabels)
+            {
+                FrameworkElement chevron = Glyphs.ForSymbol("chevron.down", 9, "AnnotatorGlyphSecondary");
+                chevron.HorizontalAlignment = HorizontalAlignment.Center;
+                _content.Children.Add(chevron);
+            }
+            if (!inToolbar)
+            {
+                // With no key below it, SwiftUI reports the tile's name over the whole tile.
+                foreach (TextBlock words in _content.Children.OfType<Grid>().SelectMany(area => area.Children.OfType<TextBlock>()))
+                {
+                    AutomationProperties.SetAccessibilityView(words, AccessibilityView.Raw);
+                }
+                _menuName = new AccessibleElement(AutomationControlType.Text) { InSettings = true, IsHitTestVisible = false };
+                AutomationProperties.SetName(_menuName, item.Label);
+            }
+        }
+        else
+        {
+            _content.Children.Add(Chip.Button);
+        }
         _focus.BorderBrush = SettingsColors.AccentBrush();
         _placeholder.Children.Add(new Border { CornerRadius = new CornerRadius(10), Background = SettingsColors.AccentBrush(0.08) });
         _placeholder.Children.Add(new Rectangle
@@ -114,6 +139,10 @@ internal sealed partial class ArrangerTile : UserControl
         centered.Children.Add(_content);
         centered.Children.Add(new MacSpacer());
         _root.Children.Add(centered);
+        if (_menuName is not null)
+        {
+            _root.Children.Add(_menuName);
+        }
         _root.Children.Add(_focus);
         _root.Children.Add(_placeholder);
         _root.Children.Add(_badgeLayer);
@@ -365,7 +394,10 @@ internal sealed partial class ArrangerTile : UserControl
             menu.Items.Add(left);
             menu.Items.Add(right);
             menu.Items.Add(new MenuFlyoutSeparator());
-            menu.Items.Add(Library.LibraryParts.Item("Change key…", () => _host.Toggle(RecordingTarget.Local(Item))));
+            if (Item.Action is not { IsMenu: true })
+            {
+                menu.Items.Add(Library.LibraryParts.Item("Change key…", () => _host.Toggle(RecordingTarget.Local(Item))));
+            }
             if (Item != ToolbarArranger.Select)
             {
                 menu.Items.Add(Library.LibraryParts.Item("Remove from toolbar", () => _host.Remove(Item)));
@@ -380,7 +412,10 @@ internal sealed partial class ArrangerTile : UserControl
         else
         {
             menu.Items.Add(Library.LibraryParts.Item("Add to toolbar", () => _host.Add(Item)));
-            menu.Items.Add(Library.LibraryParts.Item("Change key…", () => _host.Toggle(RecordingTarget.Local(Item))));
+            if (Item.Action is not { IsMenu: true })
+            {
+                menu.Items.Add(Library.LibraryParts.Item("Change key…", () => _host.Toggle(RecordingTarget.Local(Item))));
+            }
         }
         return menu;
     }

@@ -53,7 +53,7 @@ enum ShortcutsExport {
         }
         let actions: [J] = ShortcutAction.allCases.map { action in
             ["id": .string(ShortcutCommand.action(action).id), "label": .string(action.label), "detail": .string(action.detail),
-             "symbol": .string(action.symbol), "canBeInToolbar": .bool(action.canBeInToolbar)]
+             "symbol": .string(action.symbol), "canBeInToolbar": .bool(action.canBeInToolbar), "isMenu": .bool(action.isMenu)]
         }
         try corpus.json("shortcuts/commands.json", ["parsing": .array(records), "tools": .array(tools), "actions": .array(actions),
             "toolbarChoices": .array(ShortcutAction.toolbarChoices.map { .string($0.rawValue) })])
@@ -117,6 +117,7 @@ enum ShortcutsExport {
             let result = outcome { .string(try preferences.bind(shortcut, to: command)?.id ?? "") }
             records.append(.object(["step": .string("bind \(label) to \(id)"), "result": result].merging(state(preferences)) { $1 }))
         }
+        bind("k", "action.zoomMenu")
         bind("j", "action.spotlight")
         bind("a", shift: true, "tool.arrow")
         bind("a", "action.board")

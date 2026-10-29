@@ -50,16 +50,16 @@
          "frame": [
           61,
           103,
-          492,
+          664,
           15
          ],
          "role": "AXStaticText",
-         "value": "Drag tools and buttons to arrange them. Click the key under one, then press a new key."
+         "value": "Drag tools to arrange them. Drag any tool or button down to take it off. Click the key under one, then press a new key."
         },
         {
          "enabled": true,
          "frame": [
-          708,
+          1288,
           83,
           54,
           16
@@ -367,18 +367,135 @@
            "identifier": "toolbar-tool-cover",
            "label": "Effects",
            "role": "AXGroup"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            670,
+            150,
+            44,
+            48
+           ],
+           "help": "More tools: Every shape and tool in one place. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-library",
+           "label": "More tools",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            726,
+            150,
+            44,
+            48
+           ],
+           "help": "Board: Desktop, whiteboard or blackboard. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-board",
+           "label": "Board",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            776,
+            150,
+            60,
+            48
+           ],
+           "help": "Draw and Use apps: Switch between drawing and clicking your apps. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-mode",
+           "label": "Draw and Use apps",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            842,
+            161,
+            24,
+            26
+           ],
+           "help": "Undo: Take back your last change. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-undo",
+           "label": "Undo",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            872,
+            161,
+            24,
+            26
+           ],
+           "help": "Redo: Bring back what Undo took. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-redo",
+           "label": "Redo",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            902,
+            161,
+            24,
+            26
+           ],
+           "help": "Clear all: Remove all drawings. You can undo it. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-clearAll",
+           "label": "Clear all",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            932,
+            161,
+            24,
+            26
+           ],
+           "help": "Properties: Show or hide the properties below the tools. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-properties",
+           "label": "Properties",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            962,
+            161,
+            24,
+            26
+           ],
+           "help": "Settings: Open Settings. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-settings",
+           "label": "Settings",
+           "role": "AXUnknown"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            992,
+            161,
+            24,
+            26
+           ],
+           "help": "Hide: Hide drawings and tools. Drag it down to take it off your toolbar.",
+           "identifier": "toolbar-control-hide",
+           "label": "Hide",
+           "role": "AXUnknown"
           }
          ],
-         "enabled": true,
+         "enabled": false,
          "frame": [
-          61,
-          132,
-          701,
-          84
+          59,
+          122,
+          1285,
+          104
          ],
          "identifier": "toolbar-arrangement",
          "label": "Your toolbar",
-         "role": "AXGroup"
+         "role": "AXScrollArea"
         },
         {
          "enabled": true,
@@ -856,6 +973,56 @@
            "role": "AXGroup"
           },
           {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              489,
+              513,
+              78,
+              84
+             ],
+             "role": "AXStaticText",
+             "value": "Spotlight menu"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            489,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-focusMenu",
+           "label": "Spotlight menu",
+           "role": "AXGroup"
+          },
+          {
+           "children": [
+            {
+             "enabled": true,
+             "frame": [
+              573,
+              513,
+              78,
+              84
+             ],
+             "role": "AXStaticText",
+             "value": "Zoom menu"
+            }
+           ],
+           "enabled": true,
+           "frame": [
+            573,
+            513,
+            78,
+            84
+           ],
+           "identifier": "more-action-zoomMenu",
+           "label": "Zoom menu",
+           "role": "AXGroup"
+          },
+          {
            "enabled": true,
            "frame": [
             69,
@@ -1175,8 +1342,8 @@
             {
              "enabled": true,
              "frame": [
-              84.5,
-              755,
+              756.5,
+              665,
               47,
               13
              ],
@@ -1186,8 +1353,8 @@
             {
              "enabled": true,
              "frame": [
-              95.5,
-              778.5,
+              767.5,
+              688.5,
               25,
               17
              ],
@@ -1199,8 +1366,8 @@
            ],
            "enabled": true,
            "frame": [
-            69,
-            716,
+            741,
+            626,
             78,
             84
            ],
@@ -1213,8 +1380,8 @@
             {
              "enabled": true,
              "frame": [
-              176,
-              755,
+              848,
+              665,
               32.5,
               13
              ],
@@ -1224,8 +1391,8 @@
             {
              "enabled": true,
              "frame": [
-              179.5,
-              778.5,
+              851.5,
+              688.5,
               25,
               17
              ],
@@ -1237,8 +1404,8 @@
            ],
            "enabled": true,
            "frame": [
-            153,
-            716,
+            825,
+            626,
             78,
             84
            ],
@@ -1251,8 +1418,8 @@
             {
              "enabled": true,
              "frame": [
-              249.5,
-              755,
+              921.5,
+              665,
               53.5,
               13
              ],
@@ -1262,8 +1429,8 @@
             {
              "enabled": true,
              "frame": [
-              263.5,
-              778.5,
+              935.5,
+              688.5,
               25,
               17
              ],
@@ -1275,8 +1442,8 @@
            ],
            "enabled": true,
            "frame": [
-            237,
-            716,
+            909,
+            626,
             78,
             84
            ],
@@ -1289,8 +1456,8 @@
             {
              "enabled": true,
              "frame": [
-              349,
-              755,
+              1021,
+              665,
               22,
               13
              ],
@@ -1300,8 +1467,8 @@
             {
              "enabled": true,
              "frame": [
-              347.5,
-              778.5,
+              1019.5,
+              688.5,
               25,
               17
              ],
@@ -1313,8 +1480,8 @@
            ],
            "enabled": true,
            "frame": [
-            321,
-            716,
+            993,
+            626,
             78,
             84
            ],
@@ -1327,8 +1494,8 @@
             {
              "enabled": true,
              "frame": [
-              410.5,
-              755,
+              1082.5,
+              665,
               67,
               13
              ],
@@ -1338,8 +1505,8 @@
             {
              "enabled": true,
              "frame": [
-              431.5,
-              778.5,
+              1103.5,
+              688.5,
               25,
               17
              ],
@@ -1351,8 +1518,8 @@
            ],
            "enabled": true,
            "frame": [
-            405,
-            716,
+            1077,
+            626,
             78,
             84
            ],
@@ -1365,8 +1532,8 @@
             {
              "enabled": true,
              "frame": [
-              507.5,
-              755,
+              1179.5,
+              665,
               41,
               13
              ],
@@ -1376,8 +1543,8 @@
             {
              "enabled": true,
              "frame": [
-              515.5,
-              778.5,
+              1187.5,
+              688.5,
               25,
               17
              ],
@@ -1389,8 +1556,8 @@
            ],
            "enabled": true,
            "frame": [
-            489,
-            716,
+            1161,
+            626,
             78,
             84
            ],
@@ -1403,8 +1570,8 @@
             {
              "enabled": true,
              "frame": [
-              595,
-              755,
+              1267,
+              665,
               34.5,
               13
              ],
@@ -1414,8 +1581,8 @@
             {
              "enabled": true,
              "frame": [
-              599.5,
-              778.5,
+              1271.5,
+              688.5,
               25,
               17
              ],
@@ -1427,8 +1594,8 @@
            ],
            "enabled": true,
            "frame": [
-            573,
-            716,
+            1245,
+            626,
             78,
             84
            ],
@@ -1441,7 +1608,7 @@
             {
              "enabled": true,
              "frame": [
-              670.5,
+              82.5,
               755,
               51,
               13
@@ -1452,7 +1619,7 @@
             {
              "enabled": true,
              "frame": [
-              683.5,
+              95.5,
               778.5,
               25,
               17
@@ -1465,7 +1632,7 @@
            ],
            "enabled": true,
            "frame": [
-            657,
+            69,
             716,
             78,
             84
@@ -1479,8 +1646,8 @@
             {
              "enabled": true,
              "frame": [
-              74.5,
-              845,
+              158.5,
+              755,
               67.5,
               13
              ],
@@ -1490,8 +1657,8 @@
             {
              "enabled": true,
              "frame": [
-              95.5,
-              868.5,
+              179.5,
+              778.5,
               25,
               17
              ],
@@ -1503,8 +1670,8 @@
            ],
            "enabled": true,
            "frame": [
-            69,
-            806,
+            153,
+            716,
             78,
             84
            ],
@@ -1517,8 +1684,8 @@
             {
              "enabled": true,
              "frame": [
-              157,
-              845,
+              241,
+              755,
               70,
               13
              ],
@@ -1528,8 +1695,8 @@
             {
              "enabled": true,
              "frame": [
-              179.5,
-              868.5,
+              263.5,
+              778.5,
               25,
               17
              ],
@@ -1541,8 +1708,8 @@
            ],
            "enabled": true,
            "frame": [
-            153,
-            806,
+            237,
+            716,
             78,
             84
            ],
@@ -1555,8 +1722,8 @@
             {
              "enabled": true,
              "frame": [
-              245.5,
-              845,
+              329.5,
+              755,
               61,
               13
              ],
@@ -1566,8 +1733,8 @@
             {
              "enabled": true,
              "frame": [
-              263.5,
-              868.5,
+              347.5,
+              778.5,
               25,
               17
              ],
@@ -1579,8 +1746,8 @@
            ],
            "enabled": true,
            "frame": [
-            237,
-            806,
+            321,
+            716,
             78,
             84
            ],
@@ -1593,8 +1760,8 @@
             {
              "enabled": true,
              "frame": [
-              337.5,
-              845,
+              421.5,
+              755,
               45,
               13
              ],
@@ -1604,8 +1771,8 @@
             {
              "enabled": true,
              "frame": [
-              347.5,
-              868.5,
+              431.5,
+              778.5,
               25,
               17
              ],
@@ -1617,8 +1784,8 @@
            ],
            "enabled": true,
            "frame": [
-            321,
-            806,
+            405,
+            716,
             78,
             84
            ],
@@ -1631,8 +1798,8 @@
             {
              "enabled": true,
              "frame": [
-              433.5,
-              845,
+              517.5,
+              755,
               21.5,
               13
              ],
@@ -1642,8 +1809,8 @@
             {
              "enabled": true,
              "frame": [
-              431.5,
-              868.5,
+              515.5,
+              778.5,
               25,
               17
              ],
@@ -1655,8 +1822,8 @@
            ],
            "enabled": true,
            "frame": [
-            405,
-            806,
+            489,
+            716,
             78,
             84
            ],
@@ -1669,8 +1836,8 @@
             {
              "enabled": true,
              "frame": [
-              519,
-              845,
+              603,
+              755,
               18.5,
               13
              ],
@@ -1680,8 +1847,8 @@
             {
              "enabled": true,
              "frame": [
-              515.5,
-              868.5,
+              599.5,
+              778.5,
               25,
               17
              ],
@@ -1693,8 +1860,8 @@
            ],
            "enabled": true,
            "frame": [
-            489,
-            806,
+            573,
+            716,
             78,
             84
            ],
@@ -1707,8 +1874,8 @@
          "frame": [
           61,
           260,
-          701,
-          638
+          1281,
+          548
          ],
          "label": "More tools",
          "role": "AXGroup"
@@ -1718,17 +1885,488 @@
        "frame": [
         45,
         65,
-        733,
-        849
+        1313,
+        759
        ],
        "identifier": "tool-shortcuts-list",
+       "role": "AXGroup"
+      },
+      {
+       "children": [
+        {
+         "enabled": true,
+         "frame": [
+          61,
+          868,
+          111,
+          19
+         ],
+         "role": "AXStaticText",
+         "value": "Your properties"
+        },
+        {
+         "enabled": true,
+         "frame": [
+          61,
+          890,
+          673.5,
+          15
+         ],
+         "role": "AXStaticText",
+         "value": "One button saves room: click it to go to the next choice. All choices puts them side by side, so each one is a click away."
+        },
+        {
+         "enabled": false,
+         "frame": [
+          1175,
+          870,
+          167,
+          16
+         ],
+         "identifier": "reset-property-choices",
+         "label": "Use one button everywhere",
+         "role": "AXLink"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            72.5,
+            929,
+            66,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Pattern"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            71,
+            952,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Solid, Dashed and Dotted.",
+           "identifier": "property-choice-pattern-one",
+           "label": "Pattern: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            151.5,
+            952,
+            134,
+            75
+           ],
+           "help": "Solid, Dashed and Dotted, side by side.",
+           "identifier": "property-choice-pattern-all",
+           "label": "Pattern: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          61,
+          919,
+          234.5,
+          118
+         ],
+         "identifier": "property-choice-pattern",
+         "label": "Pattern",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            316.5,
+            929,
+            87,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Roughness"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            315.5,
+            952,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Clean, Sketchy and Wild.",
+           "identifier": "property-choice-roughness-one",
+           "label": "Roughness: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            396,
+            952,
+            134,
+            75
+           ],
+           "help": "Clean, Sketchy and Wild, side by side.",
+           "identifier": "property-choice-roughness-all",
+           "label": "Roughness: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          305.5,
+          919,
+          234.5,
+          118
+         ],
+         "identifier": "property-choice-roughness",
+         "label": "Roughness",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            561.5,
+            929,
+            70,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Fill style"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            560,
+            952,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Solid, Hatch and Crosshatch.",
+           "identifier": "property-choice-fillStyle-one",
+           "label": "Fill style: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            640.5,
+            952,
+            134,
+            75
+           ],
+           "help": "Solid, Hatch and Crosshatch, side by side.",
+           "identifier": "property-choice-fillStyle-all",
+           "label": "Fill style: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          550,
+          919,
+          234.5,
+          118
+         ],
+         "identifier": "property-choice-fillStyle",
+         "label": "Fill style",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            806,
+            929,
+            60,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Edges"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            804.5,
+            952,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Sharp corners and Rounded corners.",
+           "identifier": "property-choice-edges-one",
+           "label": "Edges: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            885,
+            952,
+            93,
+            75
+           ],
+           "help": "Sharp corners and Rounded corners, side by side.",
+           "identifier": "property-choice-edges-all",
+           "label": "Edges: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          794.5,
+          919,
+          193.5,
+          118
+         ],
+         "identifier": "property-choice-edges",
+         "label": "Edges",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            1009.5,
+            929,
+            86,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Arrow type"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            1008,
+            952,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Straight arrow and Curved arrow.",
+           "identifier": "property-choice-arrowType-one",
+           "label": "Arrow type: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            1088.5,
+            952,
+            93,
+            75
+           ],
+           "help": "Straight arrow and Curved arrow, side by side.",
+           "identifier": "property-choice-arrowType-all",
+           "label": "Arrow type: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          998,
+          919,
+          193.5,
+          118
+         ],
+         "identifier": "property-choice-arrowType",
+         "label": "Arrow type",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            72,
+            1057,
+            69.5,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Pressure"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            71,
+            1080,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Constant pressure and Ink pressure.",
+           "identifier": "property-choice-pressure-one",
+           "label": "Pressure: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            151.5,
+            1080,
+            93,
+            75
+           ],
+           "help": "Constant pressure and Ink pressure, side by side.",
+           "identifier": "property-choice-pressure-all",
+           "label": "Pressure: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          61,
+          1047,
+          193.5,
+          118
+         ],
+         "identifier": "property-choice-pressure",
+         "label": "Pressure",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            276,
+            1057,
+            50.5,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Font"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            274.5,
+            1080,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: System and Mono.",
+           "identifier": "property-choice-font-one",
+           "label": "Font: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            355,
+            1080,
+            93,
+            75
+           ],
+           "help": "System and Mono, side by side.",
+           "identifier": "property-choice-font-all",
+           "label": "Font: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          264.5,
+          1047,
+          193.5,
+          118
+         ],
+         "identifier": "property-choice-font",
+         "label": "Font",
+         "role": "AXGroup"
+        },
+        {
+         "children": [
+          {
+           "enabled": true,
+           "frame": [
+            479.5,
+            1057,
+            82.5,
+            15
+           ],
+           "role": "AXStaticText",
+           "value": "Alignment"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            478,
+            1080,
+            72.5,
+            75
+           ],
+           "help": "One button. Click it to go to the next choice: Left, Center and Right.",
+           "identifier": "property-choice-alignment-one",
+           "label": "Alignment: one button",
+           "role": "AXButton",
+           "selected": true,
+           "value": "Selected"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            558.5,
+            1080,
+            134,
+            75
+           ],
+           "help": "Left, Center and Right, side by side.",
+           "identifier": "property-choice-alignment-all",
+           "label": "Alignment: all choices",
+           "role": "AXButton"
+          }
+         ],
+         "enabled": true,
+         "frame": [
+          468,
+          1047,
+          234.5,
+          118
+         ],
+         "identifier": "property-choice-alignment",
+         "label": "Alignment",
+         "role": "AXGroup"
+        }
+       ],
+       "enabled": true,
+       "frame": [
+        45,
+        852,
+        1313,
+        329
+       ],
+       "identifier": "property-choices",
        "role": "AXGroup"
       },
       {
        "enabled": true,
        "frame": [
         45,
-        942,
+        1209,
         122,
         19
        ],
@@ -1739,7 +2377,7 @@
        "enabled": true,
        "frame": [
         45,
-        964,
+        1231,
         281,
         15
        ],
@@ -1752,7 +2390,7 @@
          "enabled": true,
          "frame": [
           45,
-          993,
+          1260,
           250,
           128
          ],
@@ -1765,7 +2403,7 @@
          "enabled": true,
          "frame": [
           307,
-          993,
+          1260,
           250,
           128
          ],
@@ -1777,7 +2415,7 @@
        "enabled": true,
        "frame": [
         45,
-        993,
+        1260,
         512,
         128
        ],
@@ -1788,7 +2426,7 @@
        "enabled": true,
        "frame": [
         53,
-        1139,
+        1406,
         55,
         16
        ],
@@ -1801,7 +2439,7 @@
          "enabled": true,
          "frame": [
           168,
-          1135,
+          1402,
           86,
           24
          ],
@@ -1815,7 +2453,7 @@
          "enabled": true,
          "frame": [
           254,
-          1135,
+          1402,
           86,
           24
          ],
@@ -1829,7 +2467,7 @@
        "enabled": true,
        "frame": [
         168,
-        1135,
+        1402,
         172,
         24
        ],
@@ -1840,7 +2478,7 @@
        "enabled": true,
        "frame": [
         63,
-        1175,
+        1442,
         45,
         16
        ],
@@ -1851,7 +2489,7 @@
        "enabled": true,
        "frame": [
         124,
-        1171,
+        1438,
         126,
         24
        ],
@@ -1863,7 +2501,7 @@
        "enabled": true,
        "frame": [
         45,
-        1211,
+        1478,
         63,
         16
        ],
@@ -1874,19 +2512,43 @@
        "enabled": true,
        "frame": [
         124,
-        1207,
-        135.5,
+        1474,
+        91,
         24
        ],
        "label": "Properties",
        "role": "AXPopUpButton",
-       "value": "Quick controls"
+       "value": "Shown"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        69.5,
+        1514,
+        38.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Shrink"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        124,
+        1510,
+        152,
+        24
+       ],
+       "identifier": "toolbar-collapse-delay",
+       "label": "Shrink",
+       "role": "AXPopUpButton",
+       "value": "Never"
       },
       {
        "enabled": true,
        "frame": [
         46,
-        1245,
+        1548,
         577.5,
         13
        ],
@@ -1896,24 +2558,59 @@
       {
        "enabled": true,
        "frame": [
-        45,
-        1286.5,
-        209.5,
-        19
+        57,
+        1587.5,
+        300,
+        92
+       ],
+       "help": "The toolbar turns into one button after the pointer leaves it, and opens as soon as the pointer is back.",
+       "identifier": "toolbar-shrink-demo",
+       "label": "Shrink preview",
+       "role": "AXImage"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        373,
+        1604,
+        42,
+        16
        ],
        "role": "AXStaticText",
-       "value": "Buttons that are always there"
+       "value": "Shrink"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        373,
+        1624,
+        280,
+        39
+       ],
+       "role": "AXStaticText",
+       "value": "Pick a time in Shrink and the toolbar tucks into one button when you leave it. Point at the button and your tools are back."
       },
       {
        "enabled": true,
        "frame": [
         45,
-        1308.5,
-        521,
+        1719.5,
+        172.5,
+        19
+       ],
+       "role": "AXStaticText",
+       "value": "Keys for toolbar buttons"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        45,
+        1741.5,
+        455,
         15
        ],
        "role": "AXStaticText",
-       "value": "These buttons are always in the toolbar. Their keys work while you draw, like the keys above."
+       "value": "These keys work while you draw, even when you take the button off your toolbar."
       },
       {
        "children": [
@@ -1921,7 +2618,7 @@
          "enabled": true,
          "frame": [
           91,
-          1344.5,
+          1782,
           64.5,
           16
          ],
@@ -1932,18 +2629,18 @@
          "enabled": true,
          "frame": [
           91,
-          1362.5,
-          245,
-          26
+          1800,
+          213.5,
+          13
          ],
          "role": "AXStaticText",
-         "value": "Switch between quick controls, full properties and tools only."
+         "value": "Show or hide the properties below the tools."
         },
         {
          "enabled": true,
          "frame": [
-          363.5,
-          1355.5,
+          653.5,
+          1786.5,
           31,
           22
          ],
@@ -1955,8 +2652,8 @@
         {
          "enabled": true,
          "frame": [
-          462.5,
-          1344.5,
+          752.5,
+          1782,
           37,
           16
          ],
@@ -1966,10 +2663,10 @@
         {
          "enabled": true,
          "frame": [
-          462.5,
-          1362.5,
-          202,
-          26
+          752.5,
+          1800,
+          259,
+          13
          ],
          "role": "AXStaticText",
          "value": "Switch between desktop, whiteboard and blackboard."
@@ -1977,8 +2674,8 @@
         {
          "enabled": true,
          "frame": [
-          735,
-          1355.5,
+          1315,
+          1786.5,
           31,
           22
          ],
@@ -1991,7 +2688,7 @@
          "enabled": true,
          "frame": [
           91,
-          1416.5,
+          1850,
           50.5,
           16
          ],
@@ -2002,9 +2699,9 @@
          "enabled": true,
          "frame": [
           91,
-          1434.5,
-          236.5,
-          26
+          1868,
+          273,
+          13
          ],
          "role": "AXStaticText",
          "value": "Remove all drawings from every display. You can undo it."
@@ -2012,8 +2709,8 @@
         {
          "enabled": true,
          "frame": [
-          363.5,
-          1427.5,
+          653.5,
+          1854.5,
           31,
           22
          ],
@@ -2026,9 +2723,9 @@
        "enabled": true,
        "frame": [
         45,
-        1335.5,
-        733,
-        134
+        1768.5,
+        1313,
+        126
        ],
        "identifier": "toolbar-button-keys",
        "role": "AXGroup"
@@ -2037,7 +2734,7 @@
        "enabled": true,
        "frame": [
         45,
-        1497.5,
+        1922.5,
         182.5,
         19
        ],
@@ -2048,7 +2745,7 @@
        "enabled": true,
        "frame": [
         45,
-        1519.5,
+        1944.5,
         359,
         15
        ],
@@ -2059,7 +2756,7 @@
        "enabled": true,
        "frame": [
         93,
-        1555.5,
+        1980.5,
         32,
         16
        ],
@@ -2070,7 +2767,7 @@
        "enabled": true,
        "frame": [
         93,
-        1573.5,
+        1998.5,
         255,
         13
        ],
@@ -2080,8 +2777,8 @@
       {
        "enabled": true,
        "frame": [
-        646,
-        1557,
+        1226,
+        1982,
         120,
         28
        ],
@@ -2095,7 +2792,7 @@
        "enabled": true,
        "frame": [
         93,
-        1612.5,
+        2037.5,
         72,
         16
        ],
@@ -2106,7 +2803,7 @@
        "enabled": true,
        "frame": [
         93,
-        1630.5,
+        2055.5,
         212.5,
         13
        ],
@@ -2116,8 +2813,8 @@
       {
        "enabled": true,
        "frame": [
-        646,
-        1614,
+        1226,
+        2039,
         120,
         28
        ],
@@ -2131,7 +2828,7 @@
        "enabled": true,
        "frame": [
         93,
-        1669.5,
+        2094.5,
         58.5,
         16
        ],
@@ -2142,7 +2839,7 @@
        "enabled": true,
        "frame": [
         93,
-        1687.5,
+        2112.5,
         229.5,
         13
        ],
@@ -2152,8 +2849,8 @@
       {
        "enabled": true,
        "frame": [
-        646,
-        1671,
+        1226,
+        2096,
         120,
         28
        ],
@@ -2167,7 +2864,7 @@
        "enabled": true,
        "frame": [
         93,
-        1726.5,
+        2151.5,
         63,
         16
        ],
@@ -2178,7 +2875,7 @@
        "enabled": true,
        "frame": [
         93,
-        1744.5,
+        2169.5,
         148.5,
         13
        ],
@@ -2188,8 +2885,8 @@
       {
        "enabled": true,
        "frame": [
-        646,
-        1728,
+        1226,
+        2153,
         120,
         28
        ],
@@ -2203,7 +2900,7 @@
        "enabled": true,
        "frame": [
         93,
-        1783.5,
+        2208.5,
         71.5,
         16
        ],
@@ -2214,7 +2911,7 @@
        "enabled": true,
        "frame": [
         93,
-        1801.5,
+        2226.5,
         155.5,
         13
        ],
@@ -2224,8 +2921,8 @@
       {
        "enabled": true,
        "frame": [
-        646,
-        1785,
+        1226,
+        2210,
         120,
         28
        ],
@@ -2239,7 +2936,7 @@
        "enabled": true,
        "frame": [
         45,
-        1851.5,
+        2276.5,
         154,
         16
        ],
@@ -2252,7 +2949,7 @@
          "enabled": true,
          "frame": [
           45,
-          1877.5,
+          2302.5,
           161.5,
           20
          ],
@@ -2263,7 +2960,7 @@
          "enabled": true,
          "frame": [
           214.5,
-          1877.5,
+          2302.5,
           93.5,
           20
          ],
@@ -2274,7 +2971,7 @@
          "enabled": true,
          "frame": [
           316,
-          1877.5,
+          2302.5,
           90,
           20
          ],
@@ -2285,7 +2982,7 @@
          "enabled": true,
          "frame": [
           414,
-          1877.5,
+          2302.5,
           52,
           20
          ],
@@ -2296,7 +2993,7 @@
          "enabled": true,
          "frame": [
           483,
-          1877.5,
+          2302.5,
           70,
           20
          ],
@@ -2307,7 +3004,7 @@
          "enabled": true,
          "frame": [
           561,
-          1877.5,
+          2302.5,
           87,
           20
          ],
@@ -2318,7 +3015,7 @@
          "enabled": true,
          "frame": [
           656,
-          1877.5,
+          2302.5,
           98.5,
           20
          ],
@@ -2328,8 +3025,8 @@
         {
          "enabled": true,
          "frame": [
-          45,
-          1905.5,
+          762.5,
+          2302.5,
           81,
           20
          ],
@@ -2339,8 +3036,8 @@
         {
          "enabled": true,
          "frame": [
-          134,
-          1905.5,
+          851.5,
+          2302.5,
           107,
           20
          ],
@@ -2350,8 +3047,8 @@
         {
          "enabled": true,
          "frame": [
-          249,
-          1905.5,
+          966.5,
+          2302.5,
           179.5,
           20
          ],
@@ -2362,9 +3059,9 @@
        "enabled": true,
        "frame": [
         45,
-        1877.5,
-        709.5,
-        48
+        2302.5,
+        1101,
+        20
        ],
        "label": "Keys that stay the same",
        "role": "AXGroup"
@@ -2374,10 +3071,10 @@
         {
          "enabled": false,
          "frame": [
-          803,
+          1383,
           50,
           11,
-          178.5
+          148
          ],
          "role": "AXValueIndicator",
          "value": 0
@@ -2395,10 +3092,10 @@
         {
          "enabled": false,
          "frame": [
-          803,
-          229,
+          1383,
+          198.5,
           11,
-          407
+          437.5
          ],
          "role": "AXButton",
          "subrole": "AXIncrementPage"
@@ -2411,7 +3108,7 @@
        ],
        "enabled": true,
        "frame": [
-        799,
+        1379,
         46,
         19,
         594
@@ -2424,7 +3121,7 @@
      "frame": [
       23,
       47,
-      794,
+      1374,
       592
      ],
      "role": "AXScrollArea"
@@ -2434,7 +3131,7 @@
    "frame": [
     20,
     20,
-    800,
+    1380,
     622
    ],
    "role": "AXTabGroup"
@@ -2457,12 +3154,12 @@
  "kind": "view",
  "notes": "Settings, toolbar tab, at its default size. Content below the fold scrolls.",
  "pixels": [
-  1680,
+  2840,
   1400
  ],
  "scale": 2,
  "size": [
-  840,
+  1420,
   700
  ],
  "spec": [

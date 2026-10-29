@@ -57,6 +57,11 @@ public sealed class MotionCorpusTests
             ["hintTextCrossfadeDuration"] = MotionTiming.HintTextCrossfadeDuration,
             ["hintDwellDuration"] = MotionTiming.HintDwellDuration,
             ["pointerClickDuration"] = CursorHighlightSettings.ClickDuration,
+            ["toolbarResizeDuration"] = MotionTiming.ToolbarResizeDuration,
+            ["toolbarCollapseDuration"] = MotionTiming.ToolbarCollapseDuration,
+            ["toolbarExpandDuration"] = MotionTiming.ToolbarExpandDuration,
+            ["toolbarMorphOutgoingEnd"] = ToolbarMorph.OutgoingEnd,
+            ["toolbarMorphIncomingStart"] = ToolbarMorph.IncomingStart,
         };
         foreach (JsonProperty property in root.EnumerateObject())
         {
@@ -170,6 +175,13 @@ public sealed class MotionCorpusTests
             ["eraser fade alpha factor"] = (MotionTiming.EraseFadeDuration, static time => 0.22 * (1 - MotionCurves.Fade.Progress(time))),
             ["eraser fade scale"] = (MotionTiming.EraseFadeDuration, static time => 1 - 0.03 * MotionCurves.Exit.Progress(time)),
             ["pointer click pulse scale"] = (CursorHighlightSettings.ClickDuration, CursorHighlightGeometry.PulseScale),
+            ["toolbar resize"] = (MotionTiming.ToolbarResizeDuration, ToolbarMorph.Shape),
+            ["toolbar collapse shape"] = (MotionTiming.ToolbarCollapseDuration, ToolbarMorph.Shape),
+            ["toolbar collapse outgoing face"] = (MotionTiming.ToolbarCollapseDuration, ToolbarMorph.OutgoingOpacity),
+            ["toolbar collapse incoming face"] = (MotionTiming.ToolbarCollapseDuration, ToolbarMorph.IncomingOpacity),
+            ["toolbar expand shape"] = (MotionTiming.ToolbarExpandDuration, ToolbarMorph.Shape),
+            ["toolbar expand outgoing face"] = (MotionTiming.ToolbarExpandDuration, ToolbarMorph.OutgoingOpacity),
+            ["toolbar expand incoming face"] = (MotionTiming.ToolbarExpandDuration, ToolbarMorph.IncomingOpacity),
         };
 
     [Fact]

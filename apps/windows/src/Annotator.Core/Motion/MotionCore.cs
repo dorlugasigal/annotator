@@ -224,6 +224,17 @@ public static class MotionTiming
     /// <summary>How long the on-screen tip stays after it wakes, before it fades out.</summary>
     public const double HintDwellDuration = 5.0;
 
+    /// <summary>The toolbar grows or shrinks sideways to fit a tool's properties, with <see cref="MotionCurves.Standard"/>.</summary>
+    public const double ToolbarResizeDuration = 0.22;
+
+    /// <summary>
+    /// The toolbar shrinks into one button, and grows back, with <see cref="MotionCurves.Standard"/>. The outgoing face
+    /// fades out and the incoming face fades in as <see cref="ToolbarMorph"/> describes.
+    /// </summary>
+    public const double ToolbarCollapseDuration = 0.3;
+
+    public const double ToolbarExpandDuration = 0.34;
+
     /// <summary>Selection, toggles and small state changes.</summary>
     public static SpringMotion Snappy { get; } = new(0.28, 0.86);
 
@@ -260,4 +271,28 @@ public static class MotionTiming
         VisibilityAnimationStyle.Focus => appearing ? 0.36 : 0.28,
         _ => appearing ? ToolbarShowDuration : ToolbarHideDuration,
     };
+}
+
+/// <summary>
+/// Swift <c>ToolbarMorph</c>: the toolbar's change between its full face and its one-button face. The background's frame
+/// and corner radius follow <see cref="MotionCurves.Standard"/>, while the faces cross-fade so the old one is gone before
+/// the new one settles.
+/// </summary>
+public static class ToolbarMorph
+{
+    /// <summary>The share of the morph after which the outgoing face is gone.</summary>
+    public const double OutgoingEnd = 0.5;
+
+    /// <summary>The share of the morph after which the incoming face starts to appear.</summary>
+    public const double IncomingStart = 0.35;
+
+    /// <summary>Progress of the background's frame and corner radius at linear time <paramref name="time"/> in 0...1.</summary>
+    public static double Shape(double time) => MotionCurves.Standard.Progress(time);
+
+    /// <summary>Opacity of the face that is leaving at linear time <paramref name="time"/> in 0...1.</summary>
+    public static double OutgoingOpacity(double time) => 1 - MotionCurves.Fade.Progress(time / OutgoingEnd);
+
+    /// <summary>Opacity of the face that is arriving at linear time <paramref name="time"/> in 0...1.</summary>
+    public static double IncomingOpacity(double time) =>
+        MotionCurves.Fade.Progress((time - IncomingStart) / (1 - IncomingStart));
 }

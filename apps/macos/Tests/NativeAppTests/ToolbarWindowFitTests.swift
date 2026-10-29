@@ -9,7 +9,6 @@ final class ToolbarWindowFitTests: XCTestCase {
         let suite = "toolbar-display-recovery-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
-        model.setInspectorPinned(false)
         model.setVisibilityAnimation(false)
         let app = AppDelegate(model: model)
         defer {
@@ -44,7 +43,6 @@ final class ToolbarWindowFitTests: XCTestCase {
         let suite = "toolbar-small-display-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
-        model.setInspectorPinned(false)
         model.setVisibilityAnimation(false)
         let app = AppDelegate(model: model)
         defer {
@@ -70,7 +68,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let app = AppDelegate(model: model)
         defer {
             app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
@@ -120,7 +118,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         try click("Resume drawing")
         XCTAssertEqual(model.mode, .draw)
         try click("Properties")
-        XCTAssertNotEqual(ToolbarPropertiesMode(model: model), .toolsOnly)
+        XCTAssertNotEqual(ToolbarPropertiesMode(model: model), .hidden)
         XCTAssertEqual(backgroundDrags, 0, "Button presses must not invoke background dragging.")
     }
 
@@ -129,7 +127,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let app = AppDelegate(model: model)
         defer {
             app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
@@ -186,7 +184,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         let app = AppDelegate(model: model)
         defer {
             app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
@@ -203,13 +201,26 @@ final class ToolbarWindowFitTests: XCTestCase {
         var moves = 0
         let callback = panel.onUserDragMoved
         panel.onUserDragMoved = { point in moves += 1; callback?(point) }
+        NativeAccessibilityNode.enable()
         for orientation in [ToolbarOrientation.horizontal, .vertical] {
             model.setToolbarOrientation(orientation)
-            try await Task.sleep(for: .milliseconds(150))
+            try await Task.sleep(for: .milliseconds(300))
             panel.contentView?.layoutSubtreeIfNeeded()
-            let scroll = try XCTUnwrap(scrollView(in: try XCTUnwrap(panel.contentView)))
-            let document = try XCTUnwrap(scroll.documentView)
-            let start = document.convert(CGPoint(x: document.bounds.maxX - 2, y: 8), to: nil)
+            let content = try XCTUnwrap(panel.contentView)
+            // Horizontal properties are one row: its top-right corner, above the menus, is empty. Vertical properties
+            // scroll in a column without a scroll bar.
+            let scroll = scrollView(in: content)
+            let start: CGPoint
+            if orientation == .horizontal {
+                XCTAssertNil(scroll, "One row of properties needs no scroll view")
+                let row = try XCTUnwrap(NativeAccessibilityNode.nodes(in: content).first {
+                    $0.accessibilityIdentifier() == "contextual-inspector-viewport"
+                }).accessibilityFrame()
+                start = panel.convertPoint(fromScreen: CGPoint(x: row.maxX - 2, y: row.maxY - 4))
+            } else {
+                let document = try XCTUnwrap(try XCTUnwrap(scroll).documentView)
+                start = document.convert(CGPoint(x: document.bounds.maxX - 2, y: 8), to: nil)
+            }
             func event(_ type: NSEvent.EventType, _ offset: CGFloat) throws -> NSEvent {
                 try XCTUnwrap(NSEvent.mouseEvent(with: type,
                     location: CGPoint(x: start.x + offset, y: start.y), modifierFlags: [],
@@ -217,7 +228,7 @@ final class ToolbarWindowFitTests: XCTestCase {
                     context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
             }
             let before = moves
-            let scrollOffset = scroll.contentView.bounds.origin
+            let scrollOffset = scroll?.contentView.bounds.origin
             for offset in [5.0, 10.0, 15.0] {
                 NSApp.postEvent(try event(.leftMouseDragged, offset), atStart: false)
             }
@@ -230,7 +241,7 @@ final class ToolbarWindowFitTests: XCTestCase {
             try await Task.sleep(for: .milliseconds(30))
             XCTAssertGreaterThan(moves, before, "\(orientation)")
             XCTAssertFalse(panel.isTrackingToolbarDrag)
-            XCTAssertEqual(scroll.contentView.bounds.origin, scrollOffset)
+            XCTAssertEqual(scroll?.contentView.bounds.origin, scrollOffset)
         }
     }
 
@@ -240,7 +251,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let app = AppDelegate(model: model)
         defer {
             app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
@@ -252,7 +263,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let content = try XCTUnwrap(panel.contentView as? ToolbarContentView)
         let nodes = NativeAccessibilityNode.nodes(in: content.host)
         XCTAssertFalse(nodes.contains { $0.accessibilityIdentifier() == "workspace-control-panel" })
-        XCTAssertEqual(ToolbarPropertiesMode(model: model), .toolsOnly)
+        XCTAssertEqual(ToolbarPropertiesMode(model: model), .hidden)
         for label in ["Board background", "Use apps", "Undo", "Redo", "Clear all drawings — undoable",
                       "Properties", "Settings and shortcuts", "Hide drawings and tools"] {
             let matches = nodes.filter { $0.accessibilityRole() == .button && $0.accessibilityLabel() == label }
@@ -268,7 +279,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let app = AppDelegate(model: model)
         defer {
             app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
@@ -330,7 +341,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(150))
         XCTAssertEqual(window.frame, preview)
         XCTAssertEqual(window.frame.midX, screen.visibleFrame.midX, accuracy: 1)
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         for edge in [ToolbarDockEdge.right, .left] {
             let point = CGPoint(x: edge == .right ? screen.frame.maxX - 1 : screen.frame.minX + 1, y: screen.frame.midY)
             app.updateDockPreview(at: point)
@@ -392,7 +403,6 @@ final class ToolbarWindowFitTests: XCTestCase {
         let suite = "owned-toolbar-drag-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
-        model.setInspectorPinned(false)
         model.setVisibilityAnimation(false)
         let app = AppDelegate(model: model)
         defer {
@@ -476,7 +486,7 @@ final class ToolbarWindowFitTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         model.setToolbarOrientation(.vertical)
         model.setToolbarDockEdge(.left)
         let app = AppDelegate(model: model)
@@ -506,27 +516,29 @@ final class ToolbarWindowFitTests: XCTestCase {
         XCTAssertTrue(safe.insetBy(dx: -1, dy: -1).contains(horizontal))
         XCTAssertEqual(horizontal.midX, safe.midX, accuracy: 1)
 
-        model.setInspectorPinned(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         try await Task.sleep(for: .milliseconds(150))
         let collapsed = try XCTUnwrap(app.toolbarFrame)
         XCTAssertEqual(collapsed.midX, safe.midX, accuracy: 1)
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         try await Task.sleep(for: .milliseconds(150))
         let expanded = try XCTUnwrap(app.toolbarFrame)
         XCTAssertTrue(safe.insetBy(dx: -1, dy: -1).contains(expanded))
         XCTAssertEqual(expanded.midX, safe.midX, accuracy: 1)
 
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         try await Task.sleep(for: .milliseconds(100))
         let originalWidth = try XCTUnwrap(app.toolbarFrame).width
         model.configureToolbar([.select, .pen])
+        // The toolbar grows and shrinks sideways in a short animation.
         try await Task.sleep(for: .milliseconds(150))
+        for _ in 0..<20 where app.toolbarIsAnimating { try await Task.sleep(for: .milliseconds(25)) }
         let fewerTools = try XCTUnwrap(app.toolbarFrame)
         XCTAssertLessThan(fewerTools.width, originalWidth)
         XCTAssertEqual(fewerTools.midX, safe.midX, accuracy: 1)
         model.configureToolbar(WorkspacePreferences.defaultToolbar)
         try await Task.sleep(for: .milliseconds(150))
+        for _ in 0..<20 where app.toolbarIsAnimating { try await Task.sleep(for: .milliseconds(25)) }
         XCTAssertEqual(try XCTUnwrap(app.toolbarFrame).width, originalWidth, accuracy: 1)
     }
 }

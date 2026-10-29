@@ -67,6 +67,7 @@ public class ShortcutsTests
                 ["canBeInToolbar"] = action.CanBeInToolbar,
                 ["detail"] = action.Detail,
                 ["id"] = ShortcutCommand.ForAction(action).Id,
+                ["isMenu"] = action.IsMenu,
                 ["label"] = action.Label,
                 ["symbol"] = action.Symbol,
             }).ToArray()),
@@ -138,6 +139,7 @@ public class ShortcutsTests
             state["result"] = result;
             actual.Add(state);
         }
+        Bind("k", "action.zoomMenu");
         Bind("j", "action.spotlight");
         Bind("a", "tool.arrow", shift: true);
         Bind("a", "action.board");

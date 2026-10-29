@@ -224,6 +224,16 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
     public BreakTimerSettings? BreakTimer;
     public ActivationShortcut? BreakShortcut;
 
+    /// <summary>The toolbar's own buttons and menus that are turned off (<see cref="ToolbarControl"/> raw values).</summary>
+    public ValueList<string>? HiddenToolbarControls;
+
+    /// <summary>Seconds the pointer can stay off the toolbar before it shrinks to one button. <c>null</c> keeps it open.</summary>
+    public double? ToolbarCollapseDelay;
+
+    /// <summary>Properties that show all their choices side by side (<see cref="PropertyChoice"/> raw values). <c>null</c>
+    /// means every property is one button.</summary>
+    public ValueList<string>? ExpandedPropertyChoices;
+
     private const int MaximumBytes = 256 * 1_024;
 
     public WorkspacePreferences()
@@ -335,6 +345,7 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         }
         ValidateCommandShortcuts();
         ValidateToolbarItems();
+        ValidateToolbarControls();
     }
 
     public void AssignShortcut(string key, Tool tool)
@@ -382,6 +393,7 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         {
             preferences.VisibilityAnimationStyle = AnimationStyle.Slide;
         }
+        preferences.NormalizeToolbarControls();
         if (preferences.ShortcutVersion is null or 1)
         {
             var custom = new List<KeyValuePair<string, string>>();
@@ -464,7 +476,9 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         && Theme == other.Theme && ShowShortcutHints == other.ShowShortcutHints && CursorHighlight == other.CursorHighlight
         && OptionalDictionaryEquals(CommandShortcuts, other.CommandShortcuts) && ToolbarSize == other.ToolbarSize
         && ShareToolStyles == other.ShareToolStyles && ToolbarItems == other.ToolbarItems
-        && BreakTimer == other.BreakTimer && BreakShortcut == other.BreakShortcut;
+        && BreakTimer == other.BreakTimer && BreakShortcut == other.BreakShortcut
+        && HiddenToolbarControls == other.HiddenToolbarControls && ToolbarCollapseDelay == other.ToolbarCollapseDelay
+        && ExpandedPropertyChoices == other.ExpandedPropertyChoices;
 
     public override readonly bool Equals(object? obj) => obj is WorkspacePreferences other && Equals(other);
 

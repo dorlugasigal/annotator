@@ -105,7 +105,6 @@ final class ParityRegressionTests: XCTestCase {
         XCTAssertTrue(pen === ToolCursorFactory.cursor(tool: .pen, width: 7, style: .toolPreview))
         let (model, suite) = try makeModel()
         defer { model.closeAll(); UserDefaults.standard.removePersistentDomain(forName: suite) }
-        model.setInspectorPinned(false)
         model.configureToolbar([.select, .blur, .pen])
         model.setToolbarOrientation(.vertical)
         let controller = NSHostingController(rootView: ToolbarView(model: model))

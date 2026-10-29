@@ -149,7 +149,7 @@
   {
    "enabled": true,
    "frame": [
-    485.5,
+    489.5,
     18.5,
     17.5,
     15
@@ -163,7 +163,7 @@
   {
    "enabled": true,
    "frame": [
-    515,
+    519,
     8,
     46,
     36
@@ -176,7 +176,7 @@
   {
    "enabled": false,
    "frame": [
-    570,
+    574,
     20,
     12,
     12
@@ -189,7 +189,7 @@
   {
    "enabled": false,
    "frame": [
-    596,
+    600,
     20,
     12,
     12
@@ -202,7 +202,7 @@
   {
    "enabled": false,
    "frame": [
-    622,
+    626,
     19,
     12.5,
     14.5
@@ -215,21 +215,21 @@
   {
    "enabled": true,
    "frame": [
-    643,
+    647,
     14,
     22,
     24
    ],
-   "help": "Show quick controls",
+   "help": "Show the properties",
    "identifier": "toolbar-properties",
    "label": "Properties",
    "role": "AXButton",
-   "value": "Tools only"
+   "value": "Hidden"
   },
   {
    "enabled": true,
    "frame": [
-    673,
+    677,
     19,
     14,
     14
@@ -242,7 +242,7 @@
   {
    "enabled": true,
    "frame": [
-    701,
+    705,
     21,
     10.5,
     10.5
@@ -257,14 +257,14 @@
  "background": "none",
  "image": "toolbar/minimal-horizontal-tools-only-light.png",
  "kind": "view",
- "notes": "Minimal toolbar, horizontal, tools only. Pen selected.",
+ "notes": "Minimal toolbar, horizontal, properties hidden. Pen selected.",
  "pixels": [
-  1476,
+  1458,
   104
  ],
  "scale": 2,
  "size": [
-  738,
+  729,
   52
  ],
  "spec": [

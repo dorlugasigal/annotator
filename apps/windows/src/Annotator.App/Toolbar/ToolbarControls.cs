@@ -171,7 +171,7 @@ internal static class ToolbarParts
     /// <summary>
     /// A tooltip that opens beside the toolbar, never over its controls: below a horizontal toolbar (above when there is no
     /// room) and beside a vertical one. WinUI shows a tooltip in a window of its own, and over the toolbar that window took
-    /// the clicks meant for the controls under it, often the quick row's Stroke and Fill wells below a tool.
+    /// the clicks meant for the controls under it, often the properties' Stroke and Fill wells below a tool.
     /// </summary>
     public static void SetToolTip(FrameworkElement element, string? text)
     {
@@ -262,8 +262,8 @@ internal static class ToolbarParts
 
 /// <summary>
 /// Port of InspectorColorPicker: a swatch over the transparency grid, with the chevron, that opens the color popover.
-/// Compact (quick properties): an optional 8-point "Stroke" or "Fill" label beside a 28-point swatch. Full properties: an
-/// 11-point "Stroke color" or "Fill" label above a 36-point swatch. Accessibility value: "#RRGGBBAA" or "Transparent".
+/// Compact: an optional 8-point "Stroke" or "Fill" label beside a 28-point swatch. Full properties: an 11-point
+/// "Stroke color" or "Fill" label above a 36-point swatch. Accessibility value: "#RRGGBBAA" or "Transparent".
 /// </summary>
 internal sealed class ColorWell
 {
@@ -376,7 +376,8 @@ internal sealed class ColorWell
 /// <summary>
 /// Port of StyleValueControl: an optional caption, an optional slider, a 48-point "Precise" field and the unit. A
 /// slider drag and a field edit are one Undo step each (Mac beginStyleEdit and finishStyleEdit). The full properties
-/// panel uses the small slider (<c>controlSize(.small)</c>): a 14-point band with an 18 by 14 knob.
+/// panel uses the small slider (<c>controlSize(.small)</c>): a 14-point band with an 18 by 14 knob. Without the field
+/// (Mac <c>showsField: false</c>), the slider shows its value beside it, such as "3 pt".
 /// </summary>
 internal sealed class ValueControl
 {
@@ -385,6 +386,8 @@ internal sealed class ValueControl
     private readonly ParitySlider? _slider;
     private readonly TextBox _field;
     private readonly ContentControl _warning = new() { IsTabStop = false, VerticalAlignment = VerticalAlignment.Center, Visibility = Visibility.Collapsed };
+    /// <summary>The value beside a slider without a field, or null with the field.</summary>
+    private readonly TextBlock? _readout;
     private readonly Action<TextBox> _beginTyping;
     private readonly Action _endTyping;
     private string _original = string.Empty;
@@ -396,7 +399,7 @@ internal sealed class ValueControl
     private bool _settingText;
 
     public ValueControl(WorkspaceModel model, StyleParameter parameter, Tool tool, double sliderWidth, bool showLabel,
-                        Action<TextBox> beginTyping, Action endTyping, bool small = false)
+                        Action<TextBox> beginTyping, Action endTyping, bool small = false, bool showsField = true)
     {
         _model = model;
         _parameter = parameter;
@@ -467,6 +470,17 @@ internal sealed class ValueControl
                 Finish(commit: false);
             }
         };
+        if (!showsField)
+        {
+            // Mac: the caption font's monospaced digits (Segoe UI's are tabular already) in the secondary color, at least
+            // 34 points wide, hidden from UI Automation (the slider reads its value).
+            _readout = ToolbarParts.Text(string.Empty, 10, "AnnotatorSecondaryText");
+            _readout.MinWidth = 34;
+            _readout.VerticalAlignment = VerticalAlignment.Center;
+            AutomationProperties.SetAccessibilityView(_readout, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
+            Root.Children.Add(_readout);
+            return;
+        }
         Root.Children.Add(_field);
         if (parameter.Unit is { Length: > 0 } unit)
         {
@@ -540,6 +554,15 @@ internal sealed class ValueControl
         }
         // Mac onChange(of: current): a new value replaces the draft, unless the person is typing; an unchanged value
         // leaves a refused draft in place for correction.
+        if (_readout is { } readout)
+        {
+            string formatted = StyleParameter.Format(current);
+            string text = _parameter.Unit is { Length: > 0 } unit ? $"{formatted} {unit}" : formatted;
+            if (readout.Text != text)
+            {
+                readout.Text = text;
+            }
+        }
         if (!_editing && current != _shown)
         {
             _shown = current;
@@ -654,7 +677,7 @@ internal sealed class ValueControl
     }
 }
 
-/// <summary>Port of SmartDrawButton: a toggle with the wand, On or Off; 32 points in quick properties, 36 in full properties.</summary>
+/// <summary>Port of SmartDrawButton: a toggle with the wand, On or Off; 36 points in the properties.</summary>
 internal sealed class SmartDrawToggle
 {
     private readonly ToggleButton _button;

@@ -115,6 +115,7 @@ public sealed partial class WorkspaceModel
     private WorkspaceMode _mode;
     private bool _hidden;
     private bool _toolbarVisible;
+    private bool _toolbarCollapsed;
     private bool _resumeAfterShowing;
     private VisibilityTransition? _transition;
     private ulong _transitionSerial;

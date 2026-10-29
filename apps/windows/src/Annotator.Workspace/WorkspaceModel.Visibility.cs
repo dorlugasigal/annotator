@@ -80,6 +80,7 @@ public sealed partial class WorkspaceModel
         }
         _transition = null;
         _toolbarVisible = false;
+        _toolbarCollapsed = false;
     }
 
     /// <summary>
@@ -135,6 +136,7 @@ public sealed partial class WorkspaceModel
         else
         {
             _toolbarVisible = false;
+        _toolbarCollapsed = false;
         }
     }
 
@@ -155,6 +157,7 @@ public sealed partial class WorkspaceModel
         if (_hidden)
         {
             _toolbarVisible = false;
+        _toolbarCollapsed = false;
         }
     }
 

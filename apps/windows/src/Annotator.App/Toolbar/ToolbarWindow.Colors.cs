@@ -9,7 +9,7 @@ internal sealed partial class ToolbarWindow
     /// <summary>
     /// The one way to open the color popover (WIN-UI-02): for the stroke or the fill of the current tool and selection,
     /// on the page <paramref name="request"/> names, placed below <paramref name="anchor"/> (or above it when there is no
-    /// room). The quick row's Stroke and Fill buttons and the full properties panel call it with their own button.
+    /// room). The properties' Stroke and Fill buttons call it with their own button.
     /// </summary>
     public void OpenColorPicker(ColorPickerRequest request, FrameworkElement anchor)
     {

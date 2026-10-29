@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    82.5,
+    -23.5,
     16.5,
     120,
     20
@@ -15,7 +15,7 @@
   {
    "enabled": true,
    "frame": [
-    210.5,
+    104.5,
     20,
     45,
     13
@@ -28,7 +28,7 @@
     {
      "enabled": true,
      "frame": [
-      294,
+      188,
       19.5,
       18,
       14
@@ -38,7 +38,7 @@
    ],
    "enabled": true,
    "frame": [
-    261.5,
+    155.5,
     19.5,
     90,
     14
@@ -50,7 +50,7 @@
   {
    "enabled": true,
    "frame": [
-    357.5,
+    251.5,
     16,
     48,
     21
@@ -64,13 +64,13 @@
   {
    "enabled": true,
    "frame": [
-    82.5,
-    47,
-    483,
+    313.5,
+    20,
+    358.5,
     13
    ],
    "role": "AXStaticText",
-   "value": "Blur, pixelation and distortion can leave details readable. Remove private information before sharing."
+   "value": "Blurred details can still be readable. Remove private info before you share."
   }
  ],
  "appearance": "light",
@@ -80,12 +80,12 @@
  "notes": "Full properties for Pixelate region, 648 points wide.",
  "pixels": [
   1296,
-  152
+  106
  ],
  "scale": 2,
  "size": [
   648,
-  76
+  53
  ],
  "spec": [
   "002 design.md",

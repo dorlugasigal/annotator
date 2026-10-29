@@ -71,7 +71,7 @@ final class ColorWorkflowTests: XCTestCase {
         let shape = Element(tool: .rectangle, frame: Rect(x: 50, y: 50, width: 180, height: 90))
         session.document = try CanvasDocument(elements: [shape])
         session.document.select([shape.id])
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         model.synchronize()
         let host = NSHostingView(rootView: ToolbarView(model: model, availableSize: CGSize(width: 900, height: 900)))
         let toolbar = NSPanel(contentRect: CGRect(x: 100, y: 300, width: 900, height: 400),

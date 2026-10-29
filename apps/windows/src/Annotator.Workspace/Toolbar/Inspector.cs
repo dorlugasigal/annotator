@@ -6,7 +6,10 @@ namespace Annotator.Workspace.Toolbar;
 /// <summary>The main part of the full properties panel (the branches of ContextualInspector.swift).</summary>
 public enum InspectorBody
 {
-    /// <summary>The adaptive property layout with <see cref="InspectorPlan.Items"/>.</summary>
+    /// <summary>
+    /// <see cref="InspectorPlan.Items"/> on one row (<see cref="PropertyLayout.Row"/>), or in a column beside a vertical
+    /// toolbar. The row never wraps: the toolbar grows sideways to fit it.
+    /// </summary>
     Layout,
 
     /// <summary>Select with nothing selected: "Select an object to edit its properties."</summary>
@@ -19,7 +22,7 @@ public enum InspectorBody
     Cover,
 }
 
-/// <summary>One top-level item of the adaptive property layout, in the Mac's order.</summary>
+/// <summary>One top-level item of the properties row, in the Mac's order.</summary>
 public enum InspectorItem
 {
     /// <summary>The stroke picker, and the fill picker for fill-capable tools, side by side (10 points apart).</summary>
@@ -29,28 +32,35 @@ public enum InspectorItem
 
     FillColor,
 
-    /// <summary>"Width" (or "Eraser size"): three sample widths, the slider and the precise field.</summary>
+    /// <summary>"Width" (or "Eraser size"): just the slider, with its value beside it ("3 pt").</summary>
     Width,
 
     /// <summary>The opacity slider and field with its caption.</summary>
     Opacity,
 
+    /// <summary>One button that steps through Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>), or the
+    /// three side by side (<see cref="InspectorPlan.ShowsAllChoices"/>).</summary>
     Pattern,
 
+    /// <summary>One button that steps through Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>), or the
+    /// three side by side.</summary>
     Roughness,
 
-    /// <summary>"Fill style": only while a visible fill is set.</summary>
+    /// <summary>"Fill style": one button that steps through the fill patterns, or all of them side by side; only while a
+    /// visible fill is set.</summary>
     FillStyle,
 
-    /// <summary>Sharp or rounded corners of rectangles and diamonds.</summary>
+    /// <summary>"Edges": the Rounded corners switch of rectangles and diamonds, or Sharp corners and Rounded corners side
+    /// by side.</summary>
     Edges,
 
     /// <summary>The grid's rows and columns fields.</summary>
     GridSize,
 
-    /// <summary>The axes' centered switch, tick count and its explanation.</summary>
+    /// <summary>The axes' centered switch and tick count; the explanation is the tick count's help.</summary>
     Axes,
 
+    /// <summary>"Pressure": the Ink pressure switch, or Constant pressure and Ink pressure side by side.</summary>
     Pressure,
 
     SmartDraw,
@@ -58,12 +68,16 @@ public enum InspectorItem
     /// <summary>The counter's or ruler's hint (<see cref="InspectorPlan.Caption"/>).</summary>
     Caption,
 
+    /// <summary>One button that switches between System and Mono (<see cref="InspectorPlan.FontChoices"/>), or the two
+    /// side by side.</summary>
     Font,
 
+    /// <summary>"Size": just the slider, with its value beside it ("28 pt").</summary>
     TextSize,
 
     Weight,
 
+    /// <summary>One button that steps through Left, Center and Right, or the three side by side.</summary>
     Alignment,
 }
 
@@ -72,20 +86,40 @@ public enum InspectorItem
 /// The app turns the plan into controls; the plan changes only when the set of controls changes.
 /// </summary>
 /// <param name="Context">"Editing …" while objects are selected (Mac selected-object-context), or null.</param>
-/// <param name="Arrow">The arrow controls (Start, End, Arrow type and Head size) end the body's layout as one
-/// group, or follow it when compact.</param>
+/// <param name="Arrow">The arrow controls (Start, End, the Curved arrow switch or both arrow types, and the Head size
+/// slider) end the row as one group, or follow the column when compact.</param>
 /// <param name="Caption">The counter's or ruler's hint for <see cref="InspectorItem.Caption"/>.</param>
 public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Body, ImmutableArray<InspectorItem> Items, bool Arrow,
                                    string? Caption)
 {
     public const string SelectHintText = "Select an object to edit its properties.";
-    public const string CoverCaption = "Blur, pixelation and distortion can leave details readable. Remove private information before sharing.";
+    public const string CoverCaption = "Blurred details can still be readable. Remove private info before you share.";
     public const string ImageHint = "Drag handles to resize or rotate. Delete removes the selected image.";
     public const string CounterCaption = "Click to add sequential numbered markers.";
     public const string RulerCaption = "Drag to measure the distance in source pixels.";
 
+    /// <summary>Properties that show all their choices side by side instead of one button (Mac showsAllChoices).</summary>
+    public ImmutableArray<PropertyChoice> AllChoices { get; init; } = [];
+
     /// <summary>A key that changes exactly when the controls change, for rebuilding them.</summary>
-    public string Key => $"{Tool}|{Context is not null}|{Body}|{string.Join(',', Items)}|{Arrow}";
+    public string Key => $"{Tool}|{Context is not null}|{Body}|{string.Join(',', Items)}|{Arrow}|{string.Join(',', AllChoices)}";
+
+    /// <summary>Whether <paramref name="choice"/> shows all its choices side by side.</summary>
+    public bool ShowsAllChoices(PropertyChoice choice) => AllChoices.Contains(choice);
+
+    /// <summary>The arrow type block's title: "Curved" for the switch, "Arrow type" for both choices.</summary>
+    public string ArrowTypeTitle => ShowsAllChoices(PropertyChoice.ArrowType) ? "Arrow type" : "Curved";
+
+    /// <summary>
+    /// The names of a property's buttons when it shows all its choices (Mac SampleOptions and the font and alignment
+    /// buttons): "Solid", "Sharp corners", "System font", "Align left".
+    /// </summary>
+    public static ImmutableArray<string> ChoiceNames(PropertyChoice choice) => choice switch
+    {
+        PropertyChoice.Font => [.. choice.Choices.Select(name => $"{name} font")],
+        PropertyChoice.Alignment => [.. choice.Choices.Select(name => $"Align {name.ToLowerInvariant()}")],
+        _ => [.. choice.Choices],
+    };
 
     public static InspectorPlan For(WorkspaceSnapshot snapshot)
     {
@@ -168,7 +202,10 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
                 items.Add(InspectorItem.SmartDraw);
             }
         }
-        return new InspectorPlan(tool, context, body, items.ToImmutable(), tool == Tool.Arrow, caption);
+        return new InspectorPlan(tool, context, body, items.ToImmutable(), tool == Tool.Arrow, caption)
+        {
+            AllChoices = [.. PropertyChoice.AllCases.Where(snapshot.ShowsAllChoices)],
+        };
     }
 
     /// <summary>The "Editing …" line for a selection (Mac selected-object-context), or null without one.</summary>
@@ -182,28 +219,50 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
             : $"Editing {count} selected objects";
     }
 
-    /// <summary>The Width block's sample widths (Mac widthControls): larger ones for the eraser.</summary>
-    public static ImmutableArray<double> WidthChoices(Tool tool) => tool == Tool.Eraser ? [8, 16, 28] : [2, 4, 7];
-
     /// <summary>The Width block's title.</summary>
     public static string WidthTitle(Tool tool) => tool == Tool.Eraser ? "Eraser size" : "Width";
 
     /// <summary>The roughness choices: Clean, Sketchy and Wild.</summary>
     public static ImmutableArray<(double Value, string Name)> RoughnessChoices { get; } = [(0, "Clean"), (2, "Sketchy"), (6, "Wild")];
 
-    /// <summary>The head size choices, as fractions of the full head.</summary>
-    public static ImmutableArray<double> HeadSizeChoices { get; } = [0.5, 0.75, 1];
+    /// <summary>The pattern choices, as the Mac's capitalized raw values: Solid, Dashed and Dotted.</summary>
+    public static ImmutableArray<(StrokePattern Value, string Name)> PatternChoices { get; } =
+        [.. StrokePattern.AllCases.Select(pattern => (pattern, Capitalized(pattern.RawValue)))];
 
-    /// <summary>The text sizes of the Size block.</summary>
-    public static ImmutableArray<double> FontSizeChoices { get; } = [18, 28, 44];
+    /// <summary>The fill style choices: Solid, Hatch and Crosshatch.</summary>
+    public static ImmutableArray<(FillPattern Value, string Name)> FillStyleChoices { get; } =
+        [.. FillPattern.AllCases.Select(pattern => (pattern, Capitalized(pattern.RawValue)))];
 
-    /// <summary>The corner radius the Edges block's rounded choice sets.</summary>
+    /// <summary>The font choices: System and Mono, by their saved font names.</summary>
+    public static ImmutableArray<(string Value, string Name)> FontChoices { get; } = [("system", "System"), ("monospace", "Mono")];
+
+    /// <summary>The alignment choices: Left, Center and Right.</summary>
+    public static ImmutableArray<(TextAlignment Value, string Name)> AlignmentChoices { get; } =
+        [.. TextAlignment.AllCases.Select(alignment => (alignment, Capitalized(alignment.RawValue)))];
+
+    /// <summary>
+    /// Mac CycleOptions: the choice after <paramref name="current"/>, wrapping to the first. A value that isn't one of the
+    /// choices counts as the first, as the button shows it.
+    /// </summary>
+    public static int NextChoice<T>(ImmutableArray<(T Value, string Name)> choices, T current)
+    {
+        int index = Math.Max(0, choices.IndexOf(choices.FirstOrDefault(choice => EqualityComparer<T>.Default.Equals(choice.Value, current))));
+        return (index + 1) % choices.Length;
+    }
+
+    /// <summary>Mac CycleOptions' help: "Pattern: Solid. Click for dashed."</summary>
+    public static string CycleHelp(string name, string current, string next) => $"{name}: {current}. Click for {next.ToLowerInvariant()}.";
+
+    /// <summary>Mac CycleOptions' accessibilityHint, which screen readers read instead of the tooltip: "Changes to dashed".</summary>
+    public static string CycleHint(string next) => $"Changes to {next.ToLowerInvariant()}";
+
+    /// <summary>The corner radius the Rounded corners switch sets.</summary>
     public const double RoundedCornerRadius = 14;
 
     /// <summary>"75%": the head size as the Mac shows it next to its slider.</summary>
     public static string HeadSizeText(double? headScale) => $"{(int)((headScale ?? 1) * 100)}%";
 
-    /// <summary>The axes' explanation under the tick count (Mac ContextualInspector).</summary>
+    /// <summary>The axes' explanation, the tick count's help (Mac ContextualInspector).</summary>
     public static string AxesCaption(long? tickCount) => tickCount is null
         ? "Legacy tick spacing. Set a count for equal intervals from the origin; 0 hides ticks."
         : "Evenly spaced in each direction. More ticks reduce spacing; 0 hides ticks.";
@@ -214,31 +273,31 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
 }
 
 /// <summary>
-/// Port of AdaptivePropertyLayout.frames: items flow left to right with <paramref name="spacing"/> between them and wrap
-/// to a new row, <paramref name="spacing"/> below the tallest item of the row, when the next one would pass
-/// <paramref name="width"/>. An item wider than the width takes the whole width.
+/// The properties row (Mac ContextualInspector with <c>HStackLayout(alignment: .propertyControl)</c>): items sit left to
+/// right, <paramref name="spacing"/> apart, never wrapping, with the middles of their controls on one line. A named block's
+/// control sits below its name; an item without a name is its own control, so its middle is its centre.
 /// </summary>
 public static class PropertyLayout
 {
     public const double Spacing = 14;
 
-    public static Rect[] Frames(ReadOnlySpan<(double Width, double Height)> sizes, double width, double spacing = Spacing)
+    /// <summary>The frames of the items, and the row's size. <c>Middle</c> is the item's control middle from its top.</summary>
+    public static (Rect[] Frames, double Width, double Height) Row(ReadOnlySpan<(double Width, double Height, double Middle)> items,
+                                                                 double spacing = Spacing)
     {
-        var frames = new Rect[sizes.Length];
-        double x = 0, y = 0, rowHeight = 0;
-        for (int index = 0; index < sizes.Length; index++)
+        double above = 0, below = 0;
+        foreach (var item in items)
         {
-            double itemWidth = Math.Min(width, sizes[index].Width);
-            if (x > 0 && x + itemWidth > width)
-            {
-                x = 0;
-                y += rowHeight + spacing;
-                rowHeight = 0;
-            }
-            frames[index] = new Rect(x, y, itemWidth, sizes[index].Height);
-            x += itemWidth + spacing;
-            rowHeight = Math.Max(rowHeight, sizes[index].Height);
+            above = Math.Max(above, item.Middle);
+            below = Math.Max(below, item.Height - item.Middle);
         }
-        return frames;
+        var frames = new Rect[items.Length];
+        double x = 0;
+        for (int index = 0; index < items.Length; index++)
+        {
+            frames[index] = new Rect(x, above - items[index].Middle, items[index].Width, items[index].Height);
+            x += items[index].Width + (index + 1 < items.Length ? spacing : 0);
+        }
+        return (frames, x, above + below);
     }
 }

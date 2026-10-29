@@ -11,7 +11,7 @@
     canvas, after a stroke, after the color popover closed with Done after a choice and with Escape, while a tooltip
     shows, in Use apps and after Resume drawing (the owner's "sometimes i cant press the fill, or any button on the tool
     bar"); as on the Mac, the popover stays open after a choice;
-  - toolbar buttons and the quick row's Fill color take clicks in those states, after hovering a button, and after a
+  - toolbar buttons and the properties row's Fill color take clicks in those states, after hovering a button, and after a
     press on a button that was released elsewhere; a tooltip opens outside the toolbar;
   - the shape drawn is selected and the tool becomes Select, as on the Mac (canvas.png shows its selection chrome);
   - the keyboard (WIN-A11Y-02, WIN-A11Y-04): Shift+F10 on the canvas opens its context menu, and Up and Enter choose its
@@ -25,12 +25,13 @@
     window; the toolbar's Tool library button opens it again; Edit, Rename... and Delete... rename and delete the saved
     shape (an in-memory library, never the person's shapes); a tile chooses its tool, and Escape hides the window,
     each giving the keyboard back to the canvas;
-  - Focus and cleanup: the toolbar's menu opens with Spotlight, Cursor halo, Clear drawings (keep effects) and Remove all
-    censors available; Remove all censors, with no effect on the canvas, closes the menu and changes nothing;
+  - Spotlight menu: the toolbar's menu, added to the live check's toolbar, opens with Spotlight, Cursor halo, Clear
+    drawings (keep effects) and Remove all censors available; Remove all censors, with no effect on the canvas, closes the
+    menu and changes nothing;
   - Pointer effects: Cursor halo and Spotlight turn on from that menu and show Stop buttons in the toolbar; over the
     canvas the screen shows the yellow ring at the pointer and Spotlight dims the canvas away from it; the Stop buttons
     turn them off; the result shows the raw input watcher's activity and clicks, and both effects off at the end;
-  - live zoom: Zoom tools turns on the pointer lens (its window shows) and full-screen zoom (the strip's level shows,
+  - live zoom: the Zoom menu turns on the pointer lens (its window shows) and full-screen zoom (the strip's level shows,
     and Increase changes 2.0x to 2.5x); during zoom Cursor halo and Spotlight turn on, the pointer watcher starts again
     and the ring shows at the pointer, then their Stop buttons turn them off; the strip's Stop buttons end zoom and
     the lens. No hook is installed unless -ZoomMeasure asks for the zoom measurements;
@@ -48,7 +49,8 @@
   - Shift: a line and an arrow snap to 45 degrees, a rectangle becomes a square and a highlighter stroke is straight;
   - Toolbar & Shortcuts (spec 005, ADR 0012), on its tab in the Settings window: J becomes Pen's key, 1 moves from Select
     to Pen and Undo gives it back, and Delete removes a key; dragging Highlighter to More tools takes it out of the
-    toolbar, and Reset brings the default tools and keys back; Show / hide records
+    toolbar, and Reset brings the default tools and keys back; Enter on their More tools tiles puts the Spotlight and
+    Zoom menus back; Show / hide records
     Ctrl+Alt+Shift+9 (held by the check's own registrar until it quits) and recording Draw then refuses it through the
     recording gate; the canvas uses the new key. The check never presses a default global shortcut;
   - on-screen tip (spec 009): right after Resume drawing wakes it, the canvas reads the tip as static text
@@ -725,8 +727,9 @@ try {
     }
     HitTest 'after Tools closed'
 
-    # Focus and cleanup (Mac backgroundMenu): Spotlight, Cursor halo and the effect cleanup are available. Remove all censors
-    # finds no effect on this canvas, so it changes nothing (the result's checks below would see a change).
+    # Spotlight menu (Mac focusMenuItems): Spotlight, Cursor halo and the effect cleanup are available. Remove all censors
+    # finds no effect on this canvas, so it changes nothing (the result's checks below would see a change). The live check's
+    # toolbar has the Spotlight and Zoom menus; a new profile keeps them in More tools.
     function MenuItem([string]$name) {
         $condition = [Windows.Automation.AndCondition]::new(
             [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, $name),
@@ -737,7 +740,7 @@ try {
         }
         return $null
     }
-    Note "click Focus and cleanup: $(ClickButton 'Focus and cleanup')"
+    Note "click Spotlight menu: $(ClickButton 'Spotlight menu')"
     if (WaitFor { $null -ne (MenuItem 'Remove all censors') }) {
         $states = @('Spotlight', 'Cursor halo', 'Clear drawings (keep effects)', 'Remove all censors' | ForEach-Object {
             $item = MenuItem $_
@@ -751,15 +754,15 @@ try {
         Check 'focus-menu-closes' (WaitFor { $null -eq (MenuItem 'Remove all censors') }) "menu still open: $($null -ne (MenuItem 'Remove all censors'))"
     }
     else {
-        Check 'focus-menu-items' $false 'the Focus and cleanup menu did not open'
+        Check 'focus-menu-items' $false 'the Spotlight menu did not open'
     }
-    HitTest 'after Focus and cleanup'
+    HitTest 'after the Spotlight menu'
 
-    # Pointer effects: Cursor halo and Spotlight turn on from Focus and cleanup and show Stop buttons in the toolbar's mode
+    # Pointer effects: Cursor halo and Spotlight turn on from the Spotlight menu and show Stop buttons in the toolbar's mode
     # strip; over the canvas the screen shows the yellow ring at the pointer and Spotlight dims the canvas away from it. The
     # Stop buttons turn them off again. Clicks anywhere (here the Stop buttons) count for the click effect.
     function MenuChoose([string]$item) {
-        Note "click Focus and cleanup: $(ClickButton 'Focus and cleanup')"
+        Note "click Spotlight menu: $(ClickButton 'Spotlight menu')"
         if (-not (WaitFor { $null -ne (MenuItem $item) })) { Note "no menu item $item"; return }
         $c = Center (MenuItem $item)
         $target = [LiveInput]::TopLevelAt($c[0], $c[1])
@@ -804,19 +807,19 @@ try {
     Check 'pointer-spotlight-fades-out' ([Math]::Abs($farOff - $farBefore) -le 12) ("canvas far from the pointer: luma {0:F0} before, {1:F0} after Stop" -f $farBefore, $farOff)
     HitTest 'after the pointer effects'
 
-    # Live zoom (WIN-CAP-05, WIN-CAP-06): Zoom tools turns on the pointer lens, whose own window shows beside the pointer,
+    # Live zoom (WIN-CAP-05, WIN-CAP-06): the Zoom menu turns on the pointer lens, whose own window shows beside the pointer,
     # and full-screen zoom, whose level the strip changes; Stop buttons end both. The live check installs no hooks, so
     # Alt+scroll over other apps and the Escape hook stay with the owner's checks.
     function LensWindow() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::ClassName($_) -eq 'Annotator.Platform.PointerLens' } | Select-Object -First 1 }
     function ChooseZoom([string]$item) {
-        Note "click Zoom tools: $(ClickButton 'Zoom tools')"
+        Note "click Zoom menu: $(ClickButton 'Zoom menu')"
         if (WaitFor { $null -ne (MenuItem $item) }) {
             $c = Center (MenuItem $item)
             $target = [LiveInput]::TopLevelAt($c[0], $c[1])
             if ([LiveInput]::OwnerOf($target) -eq $appPid) { Note "click ${item}: $([LiveInput]::Click($c[0], $c[1], $target))" }
             else { Note "refused: $item is under $([LiveInput]::Describe($target))" }
         }
-        else { Note "the Zoom tools menu did not show $item" }
+        else { Note "the Zoom menu did not show $item" }
     }
     # The lens shows only while the pointer is on its display: the pointer rests on the canvas first.
     $rest = Canvas 300 220
@@ -1227,7 +1230,7 @@ try {
         Check 'settings-permissions-screen-access' ($null -ne (Find 'Open screen recording settings' $settings) -and $null -eq (Find 'Allow screen access' $settings) -and
             $captureStatus.Count -eq 1 -and $captureStatus[0] -ne 'Not allowed') "status: '$($captureStatus -join "', '")'; Allow screen access shown: $($null -ne (Find 'Allow screen access' $settings))"
         # The Pointer tab shows the Pointer page the app sets (SettingsWindow.SetPage): Show halo turns the cursor halo on and
-        # off, as the toolbar's Focus and cleanup menu does.
+        # off, as the toolbar's Spotlight menu does.
         Note "click Pointer: $(ClickTyped 'Pointer' ([Windows.Automation.ControlType]::TabItem) $settings)"
         Check 'settings-pointer-tab' (WaitFor { (Chosen $settings 'Pointer') -and $null -ne (Find 'Show halo' $settings) }) "Pointer chosen: $(Chosen $settings 'Pointer'); Show halo: $($null -ne (Find 'Show halo' $settings))"
         # The page is made when its tab first shows: the switch takes clicks once it is laid out.
@@ -1349,7 +1352,12 @@ try {
         # Dragging Highlighter down to More tools takes it out of the toolbar; Reset puts the default tools and keys back.
         ScrollPage 0
         $tile = ById $page 'toolbar-tool-highlighter'
-        $tray = Find 'More tools' $page
+        # The tray group, not the More tools button in the strip (toolbar-control-library) nor the tray's heading.
+        $tray = ([Windows.Automation.AutomationElement]::FromHandle($page)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+            [Windows.Automation.AndCondition]::new(
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, 'More tools'),
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::Group),
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::AutomationIdProperty, '')))
         if ($null -ne $tile -and $null -ne $tray) {
             $from = Center $tile
             $r = $tray.Current.BoundingRectangle
@@ -1363,6 +1371,64 @@ try {
         Check 'reset-default-tools' (WaitFor { $null -ne (ById $page 'toolbar-tool-highlighter') -and $null -ne (Find 'Highlighter') }) "in the strip: $($null -ne (ById $page 'toolbar-tool-highlighter')); toolbar button: $($null -ne (Find 'Highlighter'))"
         ChooseReset 'Default keys for tools and buttons'
         Check 'reset-default-keys' (WaitFor { (KeyValue 'Pen key') -eq '7' }) "Pen key '$(KeyValue 'Pen key')'"
+        # The default tools leave the Spotlight and Zoom menus in More tools; Enter on their tiles puts them back for the
+        # steps below that use them.
+        foreach ($menu in 'more-action-focusMenu', 'more-action-zoomMenu') {
+            $menuTile = ById $page $menu
+            if ($null -ne $menuTile) {
+                $menuTile.SetFocus()
+                Note "Enter on ${menu}: $([LiveInput]::Tap(0x0D, $appPid))"
+            }
+        }
+        Check 'menus-added-back' (WaitFor { $null -ne (Find 'Spotlight menu') -and $null -ne (Find 'Zoom menu') }) "Spotlight menu $($null -ne (Find 'Spotlight menu')); Zoom menu $($null -ne (Find 'Zoom menu'))"
+
+        # Shrink (Mac toolbarCollapseDelay): with After 3 seconds, the toolbar becomes one button once the pointer has been
+        # off it that long, and pointing at the button opens it at once. Never turns it off again.
+        function ChooseShrink([string]$item) {
+            $popUp = $null
+            $scroller = ([Windows.Automation.AutomationElement]::FromHandle($page)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+                ([Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::IsScrollPatternAvailableProperty, $true)))
+            foreach ($percent in (0..20 | ForEach-Object { $_ * 5 })) {
+                ScrollPage $percent
+                $popUp = Typed 'Shrink' ([Windows.Automation.ControlType]::ComboBox) $page
+                if ((Placed $popUp) -and $null -ne $scroller) {
+                    $c = Center $popUp
+                    $view = $scroller.Current.BoundingRectangle
+                    if ($c[1] -gt $view.Top + 20 -and $c[1] -lt $view.Bottom - 20 -and [LiveInput]::TopLevelAt($c[0], $c[1]) -eq $page) { break }
+                }
+                $popUp = $null
+            }
+            if ($null -eq $popUp) { Note "the Shrink pop-up is not on screen"; return }
+            Note "click Shrink: $(ClickTyped 'Shrink' ([Windows.Automation.ControlType]::ComboBox) $page)"
+            if (WaitFor { Placed (MenuItem $item) }) {
+                $c = Center (MenuItem $item)
+                $target = [LiveInput]::TopLevelAt($c[0], $c[1])
+                if ([LiveInput]::OwnerOf($target) -eq $appPid) { Note "click ${item}: $([LiveInput]::Click($c[0], $c[1], $target))" }
+                else { Note "refused: $item is under $([LiveInput]::Describe($target))" }
+            }
+            else { Note "the Shrink menu did not show $item" }
+            Start-Sleep -Milliseconds 300
+        }
+        ChooseShrink 'After 3 seconds'
+        Check 'shrink-chosen' (WaitFor { (PopUpValue 'Shrink' $page) -eq 'After 3 seconds' }) "Shrink '$(PopUpValue 'Shrink' $page)'"
+        $bar = ([Windows.Automation.AutomationElement]::FromHandle($toolbar)).Current.BoundingRectangle
+        $pageRect = ([Windows.Automation.AutomationElement]::FromHandle($page)).Current.BoundingRectangle
+        $rest = @([int]($pageRect.X + 40), [int]($pageRect.Bottom - 40))
+        if ($rest[0] -ge $bar.Left -and $rest[0] -le $bar.Right -and $rest[1] -ge $bar.Top -and $rest[1] -le $bar.Bottom) { $rest[1] = [int]($bar.Bottom + 40) }
+        Note "pointer on Settings, off the toolbar: $([LiveInput]::Hover($rest[0], $rest[1], $page))"
+        Check 'shrink-collapses' (WaitFor { $null -ne (ById $toolbar 'collapsed-toolbar') } 6000) "one button: $($null -ne (ById $toolbar 'collapsed-toolbar'))"
+        $capsule = ById $toolbar 'collapsed-toolbar'
+        if ($null -ne $capsule) {
+            $c = Center $capsule
+            $opening = [Diagnostics.Stopwatch]::StartNew()
+            Note "point at the button: $([LiveInput]::Hover($c[0], $c[1], $toolbar))"
+            Check 'shrink-opens-on-pointing' (WaitFor { $null -eq (ById $toolbar 'collapsed-toolbar') -and $null -ne (Find 'Pen') } 1000) "one button: $($null -ne (ById $toolbar 'collapsed-toolbar')), Pen shown: $($null -ne (Find 'Pen')) after $($opening.ElapsedMilliseconds) ms"
+            # The pointer stays on the toolbar, which keeps it open.
+            Start-Sleep -Milliseconds 3500
+            Check 'shrink-stays-open-under-pointer' ($null -eq (ById $toolbar 'collapsed-toolbar')) "one button: $($null -ne (ById $toolbar 'collapsed-toolbar'))"
+        }
+        ChooseShrink 'Never'
+        Check 'shrink-never' (WaitFor { (PopUpValue 'Shrink' $page) -eq 'Never' -and $null -eq (ById $toolbar 'collapsed-toolbar') }) "Shrink '$(PopUpValue 'Shrink' $page)'"
         ScrollPage 0
         Record 'Pen key' 0x4A
         [void](WaitFor { (KeyValue 'Pen key') -eq 'J' })

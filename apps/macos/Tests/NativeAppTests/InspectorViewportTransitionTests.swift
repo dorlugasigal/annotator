@@ -7,6 +7,8 @@ import PresentationRendering
 
 @MainActor
 final class InspectorViewportTransitionTests: XCTestCase {
+    /// Beside a vertical toolbar, full properties are a column that scrolls, without a scroll bar, on a short screen.
+    /// A horizontal toolbar keeps them on one row instead (ToolbarCustomizationTests).
     func testSwitchingScrolledFullPropertiesRevealsTheFirstHeadingAndControl() throws {
         NativeAccessibilityNode.enable()
         let suite = "inspector-viewport-transitions-\(UUID())"
@@ -21,8 +23,8 @@ final class InspectorViewportTransitionTests: XCTestCase {
         editor.model.choose(.select)
         editor.session.document.select([items[0].id])
         editor.model.synchronize()
-        editor.model.setToolbarOrientation(.horizontal)
-        ToolbarPropertiesMode.full.apply(to: editor.model)
+        editor.model.setToolbarOrientation(.vertical)
+        ToolbarPropertiesMode.shown.apply(to: editor.model)
         let host = NSHostingController(rootView: ToolbarView(model: editor.model,
             availableSize: CGSize(width: 640, height: 280)))
         let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 640, height: 280),
@@ -41,6 +43,8 @@ final class InspectorViewportTransitionTests: XCTestCase {
         settle()
         let scroll = try XCTUnwrap(scrollViews(in: host.view).first)
         XCTAssertTrue(try XCTUnwrap(scroll.documentView).isFlipped)
+        XCTAssertFalse(scroll.hasVerticalScroller, "The properties have no scroll bar")
+        XCTAssertFalse(scroll.hasHorizontalScroller)
         let sequence = [items[1], items[2], items[3], items[4], items[0], items[5]]
         for item in sequence {
             let oldDocument = try XCTUnwrap(scroll.documentView)

@@ -7,20 +7,6 @@ using Windows.Foundation;
 
 namespace Annotator.App.Toolbar;
 
-/// <summary>What the quick properties show for the current tool (the branches of ToolbarView.quickPreferences).</summary>
-internal enum QuickKind
-{
-    Effect,
-    Counter,
-    Image,
-    Cover,
-    SelectHint,
-    Eraser,
-    Text,
-    Pen,
-    Stroke,
-}
-
 /// <summary>
 /// The toolbar's computed layout, a port of ToolbarView's computed properties: metrics, orientation, properties mode,
 /// width, the compact rail and the visible tool items. <see cref="Structure"/> changes only when the controls change,
@@ -40,12 +26,25 @@ internal sealed record ToolbarLook
 
     public required ToolbarPropertiesMode Properties { get; init; }
 
-    public bool Expanded => Properties != ToolbarPropertiesMode.ToolsOnly;
+    /// <summary>The toolbar's own buttons turned off in Settings (Mac hiddenToolbarControls).</summary>
+    public IReadOnlySet<ToolbarControl> Hidden { get; init; } = new HashSet<ToolbarControl>();
 
-    /// <summary>Full properties: the panel replaces the quick properties (Mac pinned).</summary>
-    public bool Pinned => Properties == ToolbarPropertiesMode.Full;
+    /// <summary>Mac shows(_:): whether one of the toolbar's own buttons is on.</summary>
+    public bool Shows(ToolbarControl control) => !Hidden.Contains(control);
 
-    /// <summary>What the full properties panel shows, while it is pinned.</summary>
+    /// <summary>
+    /// Mac trailingControls: Undo, Redo, Clear all, Properties, Settings and Hide that are on. A narrow toolbar moves them
+    /// to a second row; with none of them it keeps one row.
+    /// </summary>
+    public bool HasTrailingControls => !Hidden.IsSupersetOf(ToolbarToolLayout.SecondRowControls);
+
+    /// <summary>The toolbar shows as one button: the Annotator mark and Draw or Apps (Mac toolbarCollapsed).</summary>
+    public bool Collapsed { get; init; }
+
+    /// <summary>The properties show below or beside the tools.</summary>
+    public bool Expanded => Properties == ToolbarPropertiesMode.Shown;
+
+    /// <summary>What the properties show, while they are shown.</summary>
     public InspectorPlan? Plan { get; init; }
 
     public required Size Available { get; init; }
@@ -78,8 +77,6 @@ internal sealed record ToolbarLook
 
     public required Tool EffectiveTool { get; init; }
 
-    public required QuickKind Quick { get; init; }
-
     public required bool SupportsFill { get; init; }
 
     public required bool HasSelection { get; init; }
@@ -92,18 +89,18 @@ internal sealed record ToolbarLook
     public double VerticalPropertyWidth => Math.Min(300, Math.Max(240, Available.Width - 76 - (ShowsModeStrip ? 76 : 0)));
 
     /// <summary>
-    /// Mac CompactInspectorViewport's height limit: below the horizontal rail, the available height less the rail, the
-    /// compact actions row or the menus row below full properties, and the board strip; beside the vertical rail, the
-    /// available height less the tool title.
+    /// Mac CompactInspectorViewport's height limit beside the vertical rail: the available height less the tool title.
     /// </summary>
-    public double InspectorLimit => Vertical ? Math.Max(64, Available.Height - 50)
-        : Math.Max(64, Available.Height - 100 - (CompactRail ? 48 : FullMenusHeight + 8) - (ShowsModeStrip ? 52 : 0));
+    public double InspectorLimit => Math.Max(64, Available.Height - 50);
 
-    /// <summary>The menus row below horizontal full properties (Mac fullPropertiesMenus): the 16-point menu buttons.</summary>
-    public const double FullMenusHeight = 16;
+    /// <summary>
+    /// Full properties are one column only beside a vertical toolbar; below a horizontal one they are one row, and the
+    /// toolbar grows sideways to fit it.
+    /// </summary>
+    public bool InspectorCompact => Vertical;
 
-    /// <summary>A horizontal toolbar narrower than 620 points shows full properties in one column, as a vertical one does.</summary>
-    public bool InspectorCompact => Vertical || Width < 620;
+    /// <summary>The widest a horizontal toolbar can grow for its properties row (Mac ToolbarWidth's limit).</summary>
+    public double WidthLimit => Math.Max(320, Available.Width);
 
     public required string Structure { get; init; }
 
@@ -121,36 +118,38 @@ internal sealed record ToolbarLook
         bool vertical = (orientation ?? preferences.ToolbarOrientation) == ToolbarOrientation.Vertical;
         bool rightDocked = vertical && (dockEdge ?? preferences.ToolbarDockEdge) == ToolbarDockEdge.Right;
         ToolbarPropertiesMode properties = ToolbarPropertiesMode.From(preferences);
-        bool expanded = properties != ToolbarPropertiesMode.ToolsOnly;
+        bool expanded = properties == ToolbarPropertiesMode.Shown;
         ShortcutCommand[] items = [.. snapshot.ToolbarItems];
+        IReadOnlySet<ToolbarControl> hidden = snapshot.HiddenToolbarControls;
         IReadOnlyList<ActiveToolbarMode> modes = ActiveToolbarModes.Active(snapshot);
         PendingZoomPresentation? pending = PendingZoomPresentation.For(snapshot.ZoomStart);
         bool zoomControls = ActiveToolbarModes.ShowsZoomControls(snapshot);
         bool strip = pending is not null || modes.Count > 0;
         double width = vertical
             ? metrics.VerticalRailWidth + (strip ? 76 : 0) + (expanded ? Math.Min(300, Math.Max(240, available.Width - 76 - (strip ? 76 : 0))) + 8 : 0)
-            : ToolbarToolLayout.HorizontalWidth(items, available.Width, expanded, size);
-        bool compact = vertical || width < metrics.CompactThreshold;
+            : ToolbarToolLayout.HorizontalWidth(items, available.Width, size, hidden);
+        bool compact = vertical || ToolbarToolLayout.UsesTwoRows(items, available.Width, size, hidden);
         Tool current = snapshot.Tool;
         Tool identity = ToolbarToolLayout.Identity(current, items);
         string? warning = snapshot.CaptureWarning;
+        // The tools' room: all of them, or on a screen too narrow for that, all the room left, with as many as fit.
+        double budget = Math.Max(metrics.ButtonWidth, width - (compact ? metrics.CompactReserveHiding(hidden) : metrics.RegularReserveHiding(hidden)));
         ShortcutCommand[] visible = vertical
-            ? VerticalItems(items, identity, available.Height - (warning is null ? 0 : 64), metrics)
-            : ToolbarToolLayout.Visible(items, ShortcutCommand.ForTool(identity),
-                Math.Max(metrics.ButtonWidth, width - (compact ? metrics.CompactRailReserve : metrics.RailReserve)), size);
+            ? VerticalItems(items, identity, available.Height - (warning is null ? 0 : 64), metrics, hidden)
+            : ToolbarToolLayout.Visible(items, ShortcutCommand.ForTool(identity), budget, size);
         bool diagram = current.IsShape && current is not (Tool.Rectangle or Tool.Ellipse or Tool.Diamond);
         Tool? rectangleShows = diagram && !Array.Exists(items, item => item.Tool == current) ? current : null;
         Tool effective = snapshot.EffectiveTool;
         bool shared = preferences.ShareToolStyles == true && effective.SharesStyle;
-        QuickKind quick = Kind(effective, snapshot.SelectionCount);
-        InspectorPlan? plan = properties == ToolbarPropertiesMode.Full ? InspectorPlan.For(snapshot) : null;
+        InspectorPlan? plan = expanded ? InspectorPlan.For(snapshot) : null;
         var structure = new StringBuilder();
         structure.Append(size).Append('|').Append(vertical).Append('|').Append(rightDocked).Append('|').Append(properties).Append('|').Append(width)
             .Append('|').Append(compact).Append('|').Append(available.Height).Append('|').Append(rectangleShows).Append('|')
             .Append(string.Join(',', modes)).Append('|').Append(pending?.Phase).Append('|').Append(zoomControls).Append('|')
-            .Append(effective).Append('|').Append(quick).Append('|')
+            .Append(effective).Append('|')
             .Append(snapshot.SelectionSupportsFill).Append('|').Append(snapshot.SelectionCount > 0).Append('|').Append(shared)
-            .Append('|').Append(plan?.Key).Append('|').Append(warning);
+            .Append('|').Append(plan?.Key).Append('|').Append(warning).Append('|').Append(snapshot.ToolbarCollapsed)
+            .Append('|').Append(string.Join(',', ToolbarControl.AllCases.Where(hidden.Contains)));
         foreach (ShortcutCommand item in visible)
         {
             structure.Append('|').Append(item.Id).Append('=').Append(Key(preferences, item, rectangleShows));
@@ -162,12 +161,14 @@ internal sealed record ToolbarLook
             Vertical = vertical,
             RightDocked = rightDocked,
             Properties = properties,
+            Hidden = hidden,
+            Collapsed = snapshot.ToolbarCollapsed,
             Available = available,
             Width = width,
             CompactRail = compact,
             Items = items,
             Visible = visible,
-            RailWidth = ToolbarToolLayout.Width(visible, size),
+            RailWidth = visible.Length == items.Length ? ToolbarToolLayout.Width(visible, size) : budget,
             RectangleShows = rectangleShows,
             ShowsModeStrip = strip,
             Board = snapshot.Board,
@@ -175,7 +176,6 @@ internal sealed record ToolbarLook
             PendingZoom = pending,
             ShowsZoomControls = zoomControls,
             EffectiveTool = effective,
-            Quick = quick,
             SupportsFill = snapshot.SelectionSupportsFill,
             HasSelection = snapshot.SelectionCount > 0,
             SharedStyle = shared,
@@ -207,23 +207,15 @@ internal sealed record ToolbarLook
         return "Ctrl+L";
     }
 
-    private static QuickKind Kind(Tool effective, int selectionCount) => effective switch
+    /// <summary>
+    /// Mac verticalItems: as many tools as fit the height beside the rail's buttons that are on, scrolled so the current
+    /// one shows.
+    /// </summary>
+    private static ShortcutCommand[] VerticalItems(ShortcutCommand[] items, Tool identity, double availableHeight, ToolbarMetrics metrics,
+                                                   IReadOnlySet<ToolbarControl> hidden)
     {
-        _ when effective.IsPixelEffect => QuickKind.Effect,
-        Tool.Cover => QuickKind.Cover,
-        Tool.Counter => QuickKind.Counter,
-        Tool.Image => QuickKind.Image,
-        Tool.Select when selectionCount == 0 => QuickKind.SelectHint,
-        Tool.Eraser => QuickKind.Eraser,
-        Tool.Text => QuickKind.Text,
-        Tool.Pen => QuickKind.Pen,
-        _ => QuickKind.Stroke,
-    };
-
-    /// <summary>Mac verticalItems: as many tools as fit the height, scrolled so the current one shows.</summary>
-    private static ShortcutCommand[] VerticalItems(ShortcutCommand[] items, Tool identity, double availableHeight, ToolbarMetrics metrics)
-    {
-        int count = Math.Max(1, Math.Min(items.Length, (int)(Math.Max(48, availableHeight - metrics.VerticalReserve) / metrics.VerticalToolPitch)));
+        int count = Math.Max(1, Math.Min(items.Length,
+            (int)(Math.Max(48, availableHeight - metrics.VerticalReserveHiding(hidden)) / metrics.VerticalToolPitch)));
         int active = Math.Max(0, Array.IndexOf(items, ShortcutCommand.ForTool(identity)));
         int start = Math.Max(0, Math.Min(active - count + 1, items.Length - count));
         return items[start..(start + count)];

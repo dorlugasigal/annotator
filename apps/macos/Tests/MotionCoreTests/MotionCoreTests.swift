@@ -95,3 +95,18 @@ private func reference(_ curve: CubicBezier, _ x: Double) -> Double {
     #expect(peak > 1.16 && peak < 1.17, "The entrance overshoots by about 17% once, at 27% of the time.")
     #expect(abs(samples[999] - 1) < 0.01, "It has settled before the last frame.")
 }
+
+@Test func toolbarMorphHandsOverBetweenFaces() {
+    #expect(ToolbarMorph.shape(0) == 0)
+    #expect(ToolbarMorph.shape(1) == 1)
+    #expect(ToolbarMorph.outgoingOpacity(0) == 1)
+    #expect(ToolbarMorph.outgoingOpacity(ToolbarMorph.outgoingEnd) == 0)
+    #expect(ToolbarMorph.incomingOpacity(ToolbarMorph.incomingStart) == 0)
+    #expect(ToolbarMorph.incomingOpacity(1) == 1)
+    // Both faces show a little in the middle, so the change reads as one movement.
+    let middle = (ToolbarMorph.incomingStart + ToolbarMorph.outgoingEnd) / 2
+    #expect(ToolbarMorph.outgoingOpacity(middle) > 0)
+    #expect(ToolbarMorph.incomingOpacity(middle) > 0)
+    #expect(MotionTiming.toolbarResizeDuration < MotionTiming.toolbarCollapseDuration)
+    #expect(MotionTiming.toolbarCollapseDuration < MotionTiming.toolbarExpandDuration)
+}
