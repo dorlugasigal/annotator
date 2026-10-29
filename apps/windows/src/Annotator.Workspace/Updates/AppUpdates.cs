@@ -185,7 +185,8 @@ public static class UpdateText
 
 /// <summary>
 /// What a portable copy needs to check for updates itself (WIN-SYS-03): the website's feed, its own build, the saved
-/// settings and the clock.
+/// settings and the clock. Builds are derived from versions (0.2.0 is 200) and grow with every release, so a copy of an
+/// earlier version, with build 35 or lower, finds any later release newer.
 /// </summary>
 public sealed record PortableUpdateSource(IReleaseFeed Feed, int Build, Annotator.Workspace.FirstUse.AppDefaults Defaults,
                                           Func<DateTimeOffset>? Now = null);

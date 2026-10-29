@@ -120,7 +120,10 @@ final class SupportInfoTests: XCTestCase {
         model.copySupportInfo(to: pasteboard)
         let copied = try XCTUnwrap(pasteboard.string(forType: .string))
         XCTAssertTrue(copied.contains("Running build:"))
-        XCTAssertTrue(copied.contains("Version: \(model.versionLabel)"))
+        let version = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+        XCTAssertEqual(model.versionLabel, version)
+        XCTAssertTrue(copied.components(separatedBy: .newlines).contains("Version: \(version)"),
+                      "Support info names the plain version, without the build number.")
         XCTAssertTrue(copied.contains("Scroll shortcut: Option only"))
         XCTAssertTrue(copied.contains("Global scroll monitor active:"))
         XCTAssertFalse(copied.contains("private-drawing-content-684"))

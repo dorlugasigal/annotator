@@ -12,9 +12,11 @@ Keep verified user-visible changes in `releases/notes.json` under
 `python3 tools/release/release.py changelog --write`. Don't call Unreleased
 changes shipped.
 
-Both platforms share the version in `apps/macos/project.yml`; the Windows
-package version is `(Major + 1).Minor.Build.0`. Ask a maintainer before
-changing the version. A version change is not approval to publish, deploy,
+Both platforms share one plain semantic version, `X.Y.Z`, in
+`apps/macos/project.yml`: no alpha, beta or rc labels, and no counted build
+numbers. The build is derived (`major * 10000 + minor * 100 + patch`) and the
+Windows package version is `(Major + 1).Minor.Patch.0`; `release.py prepare
+--version X.Y.Z` writes them. Ask a maintainer before changing the version. A version change is not approval to publish, deploy,
 notarize, submit to the Microsoft Store, open a winget pull request, change
 update feeds or turn off `partOfReleases` in `releases/windows.json`. Those run
 through the Release workflow or the maintainer tools in `docs/maintainers/`.

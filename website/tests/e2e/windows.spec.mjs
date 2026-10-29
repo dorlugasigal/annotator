@@ -100,8 +100,8 @@ if (!storeId) {
       await expect(page.locator(".download-action")).toHaveCount(1);
       const link = install.getByRole("link", {name: "Get it for Windows", exact: true});
       await expect(link).toHaveAttribute("href", listingURL);
-      // The counting service accepts only Mac release tracks, and the Store link uses no badge artwork.
-      await expect(link).not.toHaveAttribute("data-download-track");
+      // The counting service counts only Mac downloads, and the Store link uses no badge artwork.
+      await expect(link).not.toHaveAttribute("data-download");
       await expect(install.locator('[data-platform-part="windows"] img')).toHaveCount(0);
       await expect(install.locator(".windows-availability p")).toHaveText("Microsoft Store · Windows 11, version 22H2 or later · x64 and ARM64");
       await expect(install.locator(".store-command [data-copy-command]")).toHaveText(winget);

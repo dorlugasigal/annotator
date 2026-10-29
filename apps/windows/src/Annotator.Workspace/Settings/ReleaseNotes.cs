@@ -72,8 +72,9 @@ public static class ReleaseNotesCatalog
     }
 
     /// <summary>
-    /// Mac load(bundle:): the catalog file next to the app, for the running version (with its prerelease suffix) and build.
-    /// A missing file is a missing version, as on the Mac; anything unreadable is invalid.
+    /// Mac load(bundle:): the catalog file next to the app, for the running version (a plain X.Y.Z) and its derived build.
+    /// Entries of earlier versions keep the versions and builds they were released with. A missing file is a missing
+    /// version, as on the Mac; anything unreadable is invalid.
     /// </summary>
     public static ReleaseNotesEntry Load(string path, string version, int? build)
     {

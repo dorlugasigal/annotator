@@ -18,43 +18,47 @@ final class ReleaseNotesTests: XCTestCase {
         host.layoutSubtreeIfNeeded()
         RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         let entry = try ReleaseNotesCatalog.load()
-        let versionLabel = "\(entry.version) (\(entry.build))"
         let before = NativeAccessibilityNode.nodes(in: host)
-        XCTAssertFalse(before.contains { $0.accessibilityValue() as? String == versionLabel })
+        XCTAssertFalse(before.contains { $0.accessibilityValue() as? String == entry.version })
         let disclosure = try XCTUnwrap(before.first {
             $0.accessibilityRole() == .disclosureTriangle || $0.accessibilityRole() == .button
         })
         XCTAssertTrue(disclosure.accessibilityPerformPress())
         RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         host.layoutSubtreeIfNeeded()
-        let text = NativeAccessibilityNode.nodes(in: host).flatMap {
+        let strings = NativeAccessibilityNode.nodes(in: host).flatMap {
             [$0.accessibilityLabel(), $0.accessibilityValue() as? String].compactMap { $0 }
-        }.joined(separator: "\n")
-        XCTAssertTrue(text.contains(versionLabel))
-        if !entry.knownIssues.isEmpty { XCTAssertTrue(text.contains("Known limits")) }
+        }
+        XCTAssertTrue(strings.contains(entry.version), "The notes start with the plain version.")
+        XCTAssertFalse(strings.contains { $0.contains("(\(entry.build))") }, "The build number is not shown.")
+        if !entry.knownIssues.isEmpty { XCTAssertTrue(strings.joined(separator: "\n").contains("Known limits")) }
     }
 
     func testBundledNotesMatchRunningVersionAndExcludeUnreleased() throws {
         let entry = try ReleaseNotesCatalog.load()
         let version = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
-        let suffix = Bundle.main.object(forInfoDictionaryKey: "AnnotatorPrerelease") as? String ?? ""
         let build = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String)
-        XCTAssertEqual(entry.version, version + (suffix.isEmpty ? "" : "-\(suffix)"))
+        XCTAssertEqual(entry.version, version)
         XCTAssertEqual(entry.build, Int(build))
     }
 
     func testMissingOrInvalidNotesAreExplicitErrors() throws {
         let data = Data(#"""
         {"schemaVersion":1,"unreleased":{"Added":["Do not show this"]},"releases":[
-          {"version":"0.1.0-alpha.1","build":9,"date":"2026-09-23","changes":{"Fixed":["A verified fix."]},"knownIssues":[]}
+          {"version":"0.2.1","build":201,"date":"2026-11-02","changes":{"Fixed":["A verified fix."]},"knownIssues":[]},
+          {"version":"0.1.0-beta.17","build":35,"date":"2026-10-29","changes":{"Added":["An older change."]},"knownIssues":[]}
         ]}
         """#.utf8)
-        let entry = try ReleaseNotesCatalog.current(data: data, version: "0.1.0-alpha.1", build: 9)
+        let entry = try ReleaseNotesCatalog.current(data: data, version: "0.2.1", build: 201)
         XCTAssertEqual(entry.changes, ["Fixed": ["A verified fix."]])
-        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: data, version: "0.1.0-alpha.2", build: 10))
-        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: data, version: "0.1.0-alpha.1", build: 10))
-        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: Data("broken".utf8), version: "0.1.0", build: 9))
+        let legacy = try ReleaseNotesCatalog.current(data: data, version: "0.1.0-beta.17", build: 35)
+        XCTAssertEqual(legacy.changes, ["Added": ["An older change."]], "Notes from before plain versions stay readable.")
+        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: data, version: "0.2.2", build: 202))
+        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: data, version: "0.2.1", build: 202))
+        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: data, version: "0.1.0", build: 35),
+                             "A plain version never matches an older pre-release entry.")
+        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: Data("broken".utf8), version: "0.2.1", build: 201))
         let unsupported = Data(String(decoding: data, as: UTF8.self).replacingOccurrences(of: "\"schemaVersion\":1", with: "\"schemaVersion\":2").utf8)
-        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: unsupported, version: "0.1.0-alpha.1", build: 9))
+        XCTAssertThrowsError(try ReleaseNotesCatalog.current(data: unsupported, version: "0.2.1", build: 201))
     }
 }

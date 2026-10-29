@@ -144,6 +144,6 @@ public static class SettingsCopy
     public const string NotesCameWithApp = "These notes came with this app. Opening them does not check for updates.";
     public const string KnownLimits = "Known limits";
 
-    /// <summary>The Mac's version line: "Version" and the label (formatVersion).</summary>
-    public static string VersionLine(string versionLabel) => $"Version {versionLabel}";
+    /// <summary>The Mac's version line: "Version" and the plain version, such as "Version 0.2.0".</summary>
+    public static string VersionLine(string version) => $"Version {version}";
 }

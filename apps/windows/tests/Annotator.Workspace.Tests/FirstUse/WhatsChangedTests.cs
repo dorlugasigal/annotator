@@ -74,8 +74,8 @@ public sealed class WhatsChangedTests
     [Fact]
     public void TheWordsMatchTheMac()
     {
-        var entry = new ReleaseNotesEntry("0.1.0-beta.13", 31, "2026-10-24", [("Added", ["x"])], []);
-        Assert.Equal("You now have version 0.1.0-beta.13 (31).", WhatsChangedText.Version(entry));
+        var entry = new ReleaseNotesEntry("0.2.0", 200, "2026-10-29", [("Added", ["x"])], []);
+        Assert.Equal("You now have version 0.2.0.", WhatsChangedText.Version(entry));
         Assert.Equal("What's changed", WhatsChangedText.Title);
         Assert.Equal("Annotator is updated", WhatsChangedText.Heading);
     }

@@ -1,12 +1,10 @@
 ---
 import Page from "../layouts/Page.astro";
-import { distribution, githubURL, hasDownloads, releasePageURL, runsOnIntel } from "../lib/distribution";
+import { githubURL, hasDownloads, release, releasePageURL, runsOnIntel } from "../lib/distribution";
 import { windowsListing as windows } from "../lib/windows";
 import { sitePath } from "../lib/paths";
 import PlatformSwitch from "../components/PlatformSwitch.astro";
-const entries = [distribution.stable, distribution.preview].filter(value => value !== null);
-// Claim Intel only when every release listed here runs on it.
-const intel = entries.length > 0 && entries.every(runsOnIntel);
+const intel = runsOnIntel(release);
 ---
 <Page title="Downloads">
   <article class="prose wrap" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
@@ -20,27 +18,24 @@ const intel = entries.length > 0 && entries.every(runsOnIntel);
     {intel
       ? <p>{windows ? "The Mac app requires" : "Requires"} macOS 14 or later, on a Mac with Apple Silicon or an Intel processor. Check Apple menu &gt; About This Mac for your macOS version.</p>
       : <p>{windows ? "The Mac app requires" : "Requires"} macOS 14 or later and Apple Silicon (an Apple M-series chip). Check Apple menu &gt; About This Mac for your chip and macOS version.</p>}
-    {hasDownloads ? (
+    {release ? (
       <>
         <p>Save your boards before updating. If you are screen sharing, stop before quitting Annotator: quitting removes covers.</p>
-        {entries.map(entry => (
-          <section>
-            <h2>{entry.track === "stable" ? "Stable" : "Testing preview"}: {entry.releaseVersion}</h2>
-            {entry.track === "preview" && <p>This is a prerelease for testing, with known limitations. Keep a backup of your boards.</p>}
-            {entry.diskImage ? (
-              <>
-                <p><a href={entry.diskImage.url} data-download-track={entry.track}>Download {entry.releaseVersion} (disk image)</a></p>
-                <p>Or get the <a href={entry.downloadURL}>ZIP archive</a> instead.</p>
-              </>
-            ) : <p><a href={entry.downloadURL} data-download-track={entry.track}>Download {entry.releaseVersion} from GitHub</a></p>}
-            <p><a href={releasePageURL(entry)}>Read release notes and known limits for {entry.releaseVersion}</a></p>
-            <p>Build {entry.build}. Developer ID signed and notarized. Your Mac or organization may still apply additional restrictions.</p>
-            <details><summary>SHA-256 {entry.diskImage ? "checksums" : "checksum"}</summary>
-              {entry.diskImage && <p>Disk image: <code style="overflow-wrap:anywhere">{entry.diskImage.sha256}</code></p>}
-              <p>{entry.diskImage && "ZIP archive: "}<code style="overflow-wrap:anywhere">{entry.sha256}</code></p>
-            </details>
-          </section>
-        ))}
+        <section>
+          <h2>Version {release.releaseVersion}</h2>
+          {release.diskImage ? (
+            <>
+              <p><a href={release.diskImage.url} data-download>Download {release.releaseVersion} (disk image)</a></p>
+              <p>Or get the <a href={release.downloadURL}>ZIP archive</a> instead.</p>
+            </>
+          ) : <p><a href={release.downloadURL} data-download>Download {release.releaseVersion} from GitHub</a></p>}
+          <p><a href={releasePageURL(release)}>Read release notes and known limits for {release.releaseVersion}</a></p>
+          <p>Developer ID signed and notarized. Your Mac or organization may still apply additional restrictions.</p>
+          <details><summary>SHA-256 {release.diskImage ? "checksums" : "checksum"}</summary>
+            {release.diskImage && <p>Disk image: <code style="overflow-wrap:anywhere">{release.diskImage.sha256}</code></p>}
+            <p>{release.diskImage && "ZIP archive: "}<code style="overflow-wrap:anywhere">{release.sha256}</code></p>
+          </details>
+        </section>
         <p>Open the disk image and drag Annotator into Applications, or unzip the ZIP and move Annotator to Applications. Then open it from Applications. Annotator can update itself only from there. If macOS blocks it, report the exact message rather than bypassing security checks.</p>
       </>
     ) : <p>This page has no verified download details. Check the <a href="https://github.com/dorlugasigal/annotator/releases">public releases</a> for current downloads.</p>}

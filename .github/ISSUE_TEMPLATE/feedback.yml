@@ -11,7 +11,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: App version and build
+      label: App version
       description: Settings > About shows it.
   - type: textarea
     id: experience

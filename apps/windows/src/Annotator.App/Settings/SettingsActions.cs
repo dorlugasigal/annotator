@@ -55,13 +55,12 @@ internal sealed class WindowsStartupTask : IStartupTask
 /// </summary>
 internal sealed record SettingsEnvironment
 {
-    public required string VersionLabel { get; init; }
+    /// <summary>This app's version, a plain X.Y.Z: shown in About and feedback, and the version of its release notes.</summary>
+    public required string Version { get; init; }
 
     public required string BuildLabel { get; init; }
 
-    /// <summary>The release-notes version (with its prerelease suffix) and build of this app.</summary>
-    public required string NotesVersion { get; init; }
-
+    /// <summary>The build derived from <see cref="Version"/>, which release notes are matched to with it.</summary>
     public int? BuildNumber { get; init; }
 
     /// <summary>The Local build badge of development builds (the Mac's .dev bundle).</summary>
@@ -90,9 +89,8 @@ internal sealed record SettingsEnvironment
     /// <summary>The running app's environment.</summary>
     public static SettingsEnvironment ForApp(Func<SupportFacts> facts, Func<WorkspacePreferences, string?>? registerShortcuts, bool hasTrayIcon) => new()
     {
-        VersionLabel = BuildInfo.VersionLabel,
+        Version = BuildInfo.Version,
         BuildLabel = BuildInfo.BuildLabel,
-        NotesVersion = BuildInfo.NotesVersion,
         BuildNumber = BuildInfo.BuildNumber,
         LocalBuild = BuildInfo.IsDevelopment,
         IssuesUrl = BuildInfo.IssuesUrl,
@@ -145,7 +143,7 @@ internal sealed class SettingsActions(WorkspaceModel model, LaunchAtSignIn launc
     public Annotator.Workspace.Metrics.UsageMetrics UsageMetrics { get; set; } = Annotator.Workspace.Metrics.UsageMetrics.Unavailable();
 
     /// <summary>The Mac's issueReportURL: the issue form when this build names a valid one.</summary>
-    public Uri? IssueUrl => IssueReporting.IssueUrl(environment.IssuesUrl, environment.VersionLabel);
+    public Uri? IssueUrl => IssueReporting.IssueUrl(environment.IssuesUrl, environment.Version);
 
     /// <summary>An outcome for the workspace's status (Mac status).</summary>
     public void Say(string status) => model.ShowStatus(status);
@@ -197,7 +195,7 @@ internal sealed class SettingsActions(WorkspaceModel model, LaunchAtSignIn launc
     /// <summary>Mac reportIssue(feedback:): the issue form with only the version (Open GitHub form).</summary>
     public void ReportIssue(bool feedback)
     {
-        if (IssueReporting.IssueUrl(environment.IssuesUrl, environment.VersionLabel, feedback) is not { } link)
+        if (IssueReporting.IssueUrl(environment.IssuesUrl, environment.Version, feedback) is not { } link)
         {
             Fail(IssueReporting.NotConfiguredMessage);
         }

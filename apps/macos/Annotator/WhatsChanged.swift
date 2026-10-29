@@ -134,7 +134,7 @@ struct WhatsChangedView: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Annotator is updated").font(.title2.bold())
-                            Text("You now have version \(entry.version) (\(entry.build)).")
+                            Text("You now have version \(entry.version).")
                                 .foregroundStyle(.secondary)
                         }
                     }

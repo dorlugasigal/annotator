@@ -352,7 +352,7 @@ final class UXReferenceCaptureTests: XCTestCase {
                                     notes: "Update checks unavailable: the reason shows under the button.", spec: spec)
             off.canCheckForUpdates = true
             off.updateStatus = AppUpdateController.status(automatic: true)
-            off.updateReminderVersion = "0.1.0-beta.13"
+            off.updateReminderVersion = "0.2.0"
             try await recorder.view(MenuBarPopoverView(model: off, developerPreview: false, perform: { _ in }, maximumHeight: menuHeight, toolsVisible: { false }),
                                     state: "update-available", dark: dark, background: .popover,
                                     notes: "An automatic check found an update while the person was busy: Update available and the waiting version.",

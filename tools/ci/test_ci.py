@@ -200,7 +200,9 @@ class WindowsReleaseTests(unittest.TestCase):
         # Every release goes to the public listing (owner decision, 2026-10-25); preflight refuses it without publish.
         self.assertIn("default: public", dispatch)
         self.assertIn("RELEASE_PUBLISHES: ${{ inputs.publish }}", job(RELEASE, "preflight"))
-        self.assertIn("options: [none, testers, public]", dispatch)
+        # Plain versions only (owner decision, 2026-10-29): no tester builds or package flights.
+        self.assertIn("options: [none, public]", dispatch)
+        self.assertNotIn("FLIGHT", RELEASE)
 
     def test_signing_keeps_the_archive_sent_to_apple_on_failure(self):
         sign = job(RELEASE, "sign")
@@ -370,7 +372,8 @@ class WorkflowStructureTests(unittest.TestCase):
     def test_resume_store_submission_is_owner_only_and_never_builds(self):
         data = dict(self.workflows())["store-submission.yml"]
         self.assertEqual(set(data["on"]), {"workflow_dispatch"})
-        self.assertEqual(data["on"]["workflow_dispatch"]["inputs"]["windows_store"]["options"], ["testers", "public"])
+        # It sends to the public listing only: there are no tester builds or package flights.
+        self.assertEqual(set(data["on"]["workflow_dispatch"]["inputs"]), {"release_run_id"})
         self.assertEqual(data["concurrency"], {"group": "annotator-release", "cancel-in-progress": False})
         job = data["jobs"]["submit"]
         for clause in ("github.ref == 'refs/heads/main'", "github.event_name == 'workflow_dispatch'",
@@ -388,7 +391,7 @@ class WorkflowStructureTests(unittest.TestCase):
     def test_release_runs_one_at_a_time_without_cancelling(self):
         data = dict(self.workflows())["release.yml"]
         self.assertEqual(data["concurrency"], {"group": "annotator-release", "cancel-in-progress": False})
-        self.assertEqual(data["on"]["workflow_dispatch"]["inputs"]["windows_store"]["options"], ["none", "testers", "public"])
+        self.assertEqual(data["on"]["workflow_dispatch"]["inputs"]["windows_store"]["options"], ["none", "public"])
 
 
 if __name__ == "__main__":

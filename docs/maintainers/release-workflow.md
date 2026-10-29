@@ -8,12 +8,12 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
 
 | Input | Meaning |
 | --- | --- |
-| `version` | The approved label, such as `0.1.0-beta.12` |
+| `version` | The approved plain version, such as `0.2.0` |
 | `candidate_sha` | Full SHA of the head of `main`: the merged release pull request |
 | `notarize` | Send the Mac build to Apple |
 | `publish` | Publish the verified files to the GitHub release, Homebrew and feeds |
 | `windows_packages` | Build Windows packages even when `releases/windows.json` leaves Windows out |
-| `windows_store` | `public` (the default: every release goes to the Store), `testers` (the flight) or `none` (a run that publishes nothing) |
+| `windows_store` | `public` (the default: every release goes to the Store) or `none` (a run that publishes nothing) |
 
 ## Jobs
 
@@ -29,8 +29,8 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
    `xcrun notarytool info <ID>` before you send anything again.
 4. **Windows packages** (Windows) installs the pinned .NET SDK from
    `tools/windows/toolchain.json`, builds the x64 and ARM64 Native AOT
-   packages, the MSIX bundle and the portable ZIPs, and checks the version
-   `(Major + 1).Minor.Build.0`, label and checksums.
+   packages, the MSIX bundle and the portable ZIPs, and checks the package
+   version `(Major + 1).Minor.Patch.0`, the app's version and the checksums.
 5. **Windows signing** (Windows, `windows-signing`) runs only when the run
    publishes and `SIGNPATH_ENABLED` is `true`. It sends the portable ZIPs to
    SignPath, waits up to 30 minutes for the owner to approve the request,
@@ -40,7 +40,7 @@ never releases. Prepare the candidate first ([releasing.md](../releasing.md)).
    job does this last part with the unsigned ZIPs.
 6. **Publish** (Linux, `release-publishing`) uses the workflow's own token to
    upload the Mac files, the disk image and the Windows ZIPs to the GitHub
-   release. With `TAP_FROM_ACTIONS` on, it also updates the Homebrew tap with
+   release `vX.Y.Z`, a normal release marked latest. With `TAP_FROM_ACTIONS` on, it also updates the Homebrew tap with
    `TAP_TOKEN`. GitHub's release list can lag a few seconds behind a new
    release, so the tap step waits until this run's version is listed, and
    fails rather than write an older cask; re-run the publish job then.
@@ -58,7 +58,7 @@ release ([website.md](website.md)).
 Nothing goes to the Store unless all of these hold:
 
 - A maintainer ran Release by hand with `windows_store` set to `public` (the
-  default, with `publish` on) or `testers`.
+  default, with `publish` on).
 - The run was started by the repository owner.
 - `STORE_SUBMISSION_ENABLED` is `true`.
 - The bundle carries the real Partner Center identity
@@ -72,9 +72,8 @@ Certification can take up to three business days.
 
 When a Release run left the Store out (`windows_store` was `none`) or its Store
 job failed, run **Actions > Resume Store submission** on `main` instead of a
-new release. Give it the Release run's ID (the number at the end of its URL)
-and `testers` or `public`. It sends the `windows-bundle` artifact that run
-built, after checking that the run succeeded on `main` and that the published
+new release. Give it the Release run's ID (the number at the end of its URL).
+It sends the `windows-bundle` artifact that run built to the public listing, after checking that the run succeeded on `main` and that the published
 `v<version>` tag points at the same commit. It builds nothing and has the same
 gate as above. The artifact is kept for 14 days.
 

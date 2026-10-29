@@ -156,7 +156,7 @@ def prepare(args):
         metrics = d.website_url(metrics)
         if metrics != site or urlsplit(metrics).path not in ("", "/") or urlsplit(metrics).hostname.endswith(".github.io"):
             raise Error("Metrics must use the approved combined HTTPS website origin.")
-    track = "preview" if "-" in args.version else "stable"
+    track = "stable"
     output.mkdir(mode=0o700, parents=True)
     with locked(output), tempfile.TemporaryDirectory(prefix="annotator-local-build-") as tmp:
         derived = Path(tmp).resolve() / "DerivedData"
@@ -172,7 +172,7 @@ def prepare(args):
                   f"ANNOTATOR_WEBSITE_URL={site}", f"ANNOTATOR_METRICS_URL={metrics}",
                   f"ANNOTATOR_SUPPORT_URL={support}", "build")
         built = derived / "Build/Products/Release/Annotator.app"
-        metadata = d.packager.inspect_app(built, "release")
+        metadata = d.packager.inspect_app(built)
         if (metadata["releaseVersion"], int(metadata["build"])) != (args.version, build):
             raise Error("The built app does not match the candidate's version/build.")
         d.sign_distribution_bundle(built, args.identity, args.team)
@@ -221,7 +221,7 @@ def load(folder):
     if "websiteURL" in receipt and (receipt["websiteURL"] != receipt["homepage"] or
                                     receipt["metricsURL"] not in ("", receipt["homepage"])):
         raise Error("Invalid receipt website or metrics destination.")
-    if receipt["track"] != ("preview" if "-" in receipt["version"] else "stable") or len(d.decode_secret(receipt["publicKey"])) != 32:
+    if receipt["track"] != "stable" or len(d.decode_secret(receipt["publicKey"])) != 32:
         raise Error("Invalid receipt update settings.")
     if not receipt["identity"].startswith("Developer ID Application:") or not re.fullmatch(r"[A-Z0-9]{10}", receipt["team"]):
         raise Error("Invalid receipt signing identity or team.")
@@ -232,7 +232,7 @@ def load(folder):
             raise Error("A saved release artifact changed. Restore the original bytes.")
     if tree_hash(folder / "Annotator.app") != receipt["appHash"]:
         raise Error("The saved signed app changed. Restore the original bytes.")
-    metadata = d.packager.inspect_app(folder / "Annotator.app", "release")
+    metadata = d.packager.inspect_app(folder / "Annotator.app")
     if metadata != receipt["metadata"] or (metadata["releaseVersion"], int(metadata["build"])) != (receipt["version"], receipt["build"]):
         raise Error("The saved app metadata differs from the receipt.")
     bundle_settings(folder / "Annotator.app", receipt)
@@ -352,7 +352,7 @@ def finalize(folder, receipt, auth, key):
         tag = f"v{receipt['version']}"
         url = f"https://github.com/{receipt['repository']}/releases/download/{tag}/{name}"
         output = work / "final"
-        report = d.packager.package(app, output, "release", url, receipt["homepage"])
+        report = d.packager.package(app, output, url, receipt["homepage"])
         signer = folder / "sign_update"
         signature = d.command(signer, "--ed-key-file", key, "-p", output / name).strip()
         if len(d.decode_secret(signature)) != 64:

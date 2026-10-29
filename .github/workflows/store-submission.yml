@@ -1,7 +1,7 @@
 name: Resume Store submission
 
-# Sends the Windows bundle of an earlier, successful Release run to the Microsoft Store: for a run that left the
-# Store out, or whose Store job failed. It never builds anything; the bundle is the one that run built and published.
+# Sends the Windows bundle of an earlier, successful Release run to the Microsoft Store's public listing: for a run that
+# left the Store out, or whose Store job failed. It never builds anything; the bundle is the one that run built and published.
 on:
   workflow_dispatch:
     inputs:
@@ -9,12 +9,6 @@ on:
         description: ID of the successful Release run whose windows-bundle artifact to send (its URL ends with it)
         required: true
         type: string
-      windows_store:
-        description: Where to send it (testers = the package flight or the private audience; public only after the launch decision)
-        required: true
-        default: testers
-        type: choice
-        options: [testers, public]
 
 permissions:
   contents: read
@@ -72,7 +66,7 @@ jobs:
           SOURCE_RUN_SHA: ${{ steps.source.outputs.sha }}
         run: |
           $receipt = Get-Content "$env:RUNNER_TEMP/windows-bundle/windows-release.json" -Raw | ConvertFrom-Json
-          if ($receipt.releaseVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$') { throw "The receipt names no release version." }
+          if ($receipt.releaseVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+$') { throw "The receipt names no plain X.Y.Z release version." }
           $env:TAG_SHA = gh api "repos/$env:REPOSITORY/commits/v$($receipt.releaseVersion)" --jq .sha
           python tools/windows/hosted_release.py resume --folder "$env:RUNNER_TEMP/windows-bundle"
       - name: Check the bundle's SHA-256
@@ -86,13 +80,12 @@ jobs:
         run: python tools/windows/hosted_release.py cli --folder "$env:RUNNER_TEMP/msstore"
       - name: Send the bundle to the Store
         env:
-          STORE_TARGET: ${{ inputs.windows_store }}
+          STORE_TARGET: public
           CANDIDATE_SHA: ${{ steps.bundle.outputs.candidate }}
           MSIX: ${{ steps.bundle.outputs.msix }}
           BUNDLE_SHA256: ${{ steps.bundle.outputs.sha256 }}
           BUNDLE_RUN_ID: ${{ inputs.release_run_id }}
           WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
-          WINDOWS_STORE_FLIGHT_ID: ${{ vars.WINDOWS_STORE_FLIGHT_ID }}
           PARTNER_CENTER_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
           PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
           PARTNER_CENTER_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}

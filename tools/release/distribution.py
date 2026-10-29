@@ -79,13 +79,18 @@ def preflight(expected, candidate):
         raise DistributionError("Signing requires a main-branch push or explicit main-branch dispatch.")
     if os.environ.get("GITHUB_SHA") != candidate:
         raise DistributionError("Candidate must match the exact commit that triggered this workflow.")
+    try:
+        release.parse_version(expected)
+    except release.ReleaseError as error:
+        raise DistributionError(f"Approve a plain X.Y.Z version: {error}") from error
     version, build = metadata()
     if expected != version:
         raise DistributionError("Approved version does not match project.yml.")
     release.verify_candidate()
     repo, site = configuration()
+    # Every release goes to the one stable update feed; the old preview feeds only mirror it for installed betas.
     return dict(version=version, build=build, source=candidate, repository=repo,
-                homepage=site, tag=f"v{version}", track="preview" if "-" in version else "stable")
+                homepage=site, tag=f"v{version}", track="stable")
 
 
 def private_file(path, data):
@@ -225,14 +230,14 @@ def sign_and_package(expected, candidate, output, recovery=None):
                     "-scheme", "Annotator", "-configuration", "Release", "-derivedDataPath", derived,
                     "CODE_SIGN_STYLE=Manual", f"CODE_SIGN_IDENTITY={identity}", f"DEVELOPMENT_TEAM={team}",
                     "CODE_SIGNING_REQUIRED=YES", "OTHER_CODE_SIGN_FLAGS=--timestamp",
-                    f"ANNOTATOR_UPDATE_FEED_URL={info['homepage']}/updates/{info['track']}.xml",
+                    f"ANNOTATOR_UPDATE_FEED_URL={info['homepage']}/updates/stable.xml",
                     f"ANNOTATOR_UPDATE_PUBLIC_KEY={public_key}", f"ANNOTATOR_BUILD_STAMP=Release {candidate}",
                     f"ANNOTATOR_ISSUES_URL=https://github.com/{info['repository']}/issues/new",
                     f"ANNOTATOR_WEBSITE_URL={info['homepage']}", f"ANNOTATOR_METRICS_URL={metrics_url}",
                     f"ANNOTATOR_SUPPORT_URL={support_url}", "COMPILER_INDEX_STORE_ENABLE=NO",
                     "build")
             app = derived / "Build/Products/Release/Annotator.app"
-            actual = packager.inspect_app(app, "release")
+            actual = packager.inspect_app(app)
             if (actual["releaseVersion"], int(actual["build"])) != (expected, info["build"]):
                 raise DistributionError("The built version does not match the approved candidate.")
             sign_distribution_bundle(app, identity, team)
@@ -257,7 +262,7 @@ def sign_and_package(expected, candidate, output, recovery=None):
             command("spctl", "--assess", "--type", "execute", app)
             name = packager.archive_name("annotator", expected, str(info["build"]), packager.architectures(app, actual), "zip")
             url = f"https://github.com/{info['repository']}/releases/download/{info['tag']}/{name}"
-            report = packager.package(app, output, "release", url, info["homepage"])
+            report = packager.package(app, output, url, info["homepage"])
             signer = derived / "SourcePackages/artifacts/sparkledistribution/Sparkle/bin/sign_update"
             key_file = temp / "sparkle-private"
             private_file(key_file, sparkle_key.encode())
@@ -324,11 +329,20 @@ def notarized_disk_image(output, manifest, identity, auth, temp):
 
 def validate_manifest(data, repo=None):
     version = data.get("releaseVersion", "")
-    _, stage, _ = release.parse_version(version)
     build = str(data.get("build", ""))
-    if not re.fullmatch(r"[1-9][0-9]*", build):
-        raise DistributionError("Invalid manifest build.")
-    expected_track = "stable" if stage == "stable" else "preview"
+    if release.is_legacy(version):
+        # Releases up to 0.1.0-beta.17 had pre-release labels, counted builds and the preview update track.
+        if not re.fullmatch(r"[1-9][0-9]*", build):
+            raise DistributionError("Invalid manifest build.")
+        expected_track = "preview"
+    else:
+        try:
+            derived = release.derived_build(version)
+        except release.ReleaseError as error:
+            raise DistributionError(f"Invalid manifest version: {error}") from error
+        if build != str(derived):
+            raise DistributionError("The manifest's build is not the one derived from its version.")
+        expected_track = "stable"
     destination = repository(data.get("repository", ""))
     # Releases up to alpha.6 are Apple Silicon only; later ones may be universal (Apple Silicon and Intel).
     architecture = data.get("architecture")
@@ -402,7 +416,7 @@ def appcast(data, notes=None):
     validate_manifest(data)
     rss = ET.Element("rss", version="2.0")
     channel = ET.SubElement(rss, "channel")
-    ET.SubElement(channel, "title").text = f"Annotator {data['track']} updates"
+    ET.SubElement(channel, "title").text = "Annotator updates"
     item = ET.SubElement(channel, "item")
     ET.SubElement(item, "title").text = data["releaseVersion"]
     # Sparkle shows the item's description as the release notes in its update window.
@@ -475,7 +489,7 @@ def validate_windows_description(windows, data, assets):
 
 def windows_feed(data):
     """What a portable Windows copy reads to learn about a newer release; it downloads nothing from it."""
-    return {"schemaVersion": 1, "track": data["track"], "releaseVersion": data["releaseVersion"], "build": int(data["build"]),
+    return {"schemaVersion": 1, "releaseVersion": data["releaseVersion"], "build": int(data["build"]),
             "downloadPage": f"{data['homepage']}/downloads/",
             "releaseURL": f"https://github.com/{data['repository']}/releases/tag/{data['tag']}"}
 
@@ -485,6 +499,8 @@ def publish(folder, disk_image_folder=None, windows_folder=None):
         raise DistributionError("Publication is disabled.")
     repo, site = configuration()
     data = validate_manifest(json.loads((folder / "annotator-manifest.json").read_text()), repo)
+    if release.is_legacy(data["releaseVersion"]):
+        raise DistributionError("Only plain X.Y.Z releases are published now.")
     if data["homepage"] != site:
         raise DistributionError("Artifact and website destinations differ.")
     if data["source"] != os.environ.get("CANDIDATE_SHA"):
@@ -526,7 +542,7 @@ def publish(folder, disk_image_folder=None, windows_folder=None):
         marker += f"Windows {row['architecture']} ZIP SHA-256: `{row['sha256']}`\n"
     body = (folder / "release-notes.md").read_text().rstrip() + marker
     if found:
-        if found["body"] != body or found["prerelease"] != (data["track"] == "preview"):
+        if found["body"] != body or found["prerelease"]:
             raise DistributionError("Existing release belongs to a different immutable candidate.")
         present = {asset["name"] for asset in found["assets"]}
         if present - {path.name for path in files}:
@@ -553,8 +569,7 @@ def publish(folder, disk_image_folder=None, windows_folder=None):
         raise DistributionError("Release build must exceed every published build.")
     if not found:
         command("gh", "release", "create", data["tag"], "--repo", repo, "--draft", "--target", data["source"],
-                "--title", f"Annotator {data['releaseVersion']}", "--notes-file", "-",
-                "--latest=false", *(["--prerelease"] if data["track"] == "preview" else []), input=body)
+                "--title", f"Annotator {data['releaseVersion']}", "--notes-file", "-", "--latest=false", input=body)
     # Only explicit deliverables can leave the private repository. Never upload logs or source.
     missing = [path for path in files if path.name not in present]
     if missing:
@@ -567,8 +582,7 @@ def publish(folder, disk_image_folder=None, windows_folder=None):
             command("gh", "release", "download", data["tag"], "--repo", repo, "--pattern", disk_data["archive"], "--dir", tmp)
             if hashlib.sha256((Path(tmp) / disk_data["archive"]).read_bytes()).hexdigest() != disk_data["sha256"]:
                 raise DistributionError("Uploaded disk image verification failed; release remains a draft.")
-    command("gh", "release", "edit", data["tag"], "--repo", repo, "--draft=false",
-            "--latest=false" if data["track"] == "preview" else "--latest")
+    command("gh", "release", "edit", data["tag"], "--repo", repo, "--draft=false", "--latest")
 
 
 def update_tap():
@@ -581,17 +595,14 @@ def update_tap():
     if gh_json("api", f"repos/{tap}").get("private") is not False:
         raise DistributionError("The configured tap must be public.")
     published = published_release(repo, os.environ.get("EXPECTED_VERSION"))
-    stable = [row for row in published if row["track"] == "stable"]
-    # Use the alpha under the canonical name until a stable release exists.
-    entries = stable or [row for row in published if row["track"] == "preview"]
-    if not entries:
+    if not published:
         raise DistributionError("No verified published release is available for the Annotator cask.")
-    data = max(entries, key=lambda row: int(row["build"]))
+    data = newest(published)
     token = "annotator"
     content = packager.cask({**data, "token": token, "name": "Annotator.app"},
-                           data["downloadURL"], data["sha256"], data["homepage"], "release")
+                           data["downloadURL"], data["sha256"], data["homepage"])
     path = f"Casks/{token}.rb"
-    message = f"Update {token} to {data['releaseVersion']} ({data['build']})"
+    message = f"Update {token} to {data['releaseVersion']}"
     write_cask(tap, path, content, message)
     # Macs that tapped the release repository by URL, before the dedicated tap existed, still read
     # its copy. Keep that copy current, but never start one there. A workflow running in the release
@@ -650,35 +661,37 @@ def write_cask(repo, path, content, message, create=True):
     return True
 
 
+def newest(entries):
+    """The newest release: builds grow with every release, legacy ones included."""
+    return max(entries, key=lambda row: int(row["build"]))
+
+
 def website_metadata():
     repo, _ = configuration()
     entries = published_manifests(repo)
-    output = {"stable": None, "preview": None}
     directory = ROOT / "website/public/updates"
     directory.mkdir(parents=True, exist_ok=True)
-    for track in output:
-        candidates = [row for row in entries if row["track"] == track]
-        if not candidates:
-            stale = directory / f"{track}.xml"
-            if stale.exists():
-                stale.unlink()
-            continue
-        data = max(candidates, key=lambda row: int(row["build"]))
-        output[track] = {key: data[key] for key in ("releaseVersion", "build", "downloadURL", "sha256", "track", "architecture")}
+    # Every copy reads stable.xml and windows-stable.json. Copies from 0.1.0-beta.17 and earlier read the preview feeds,
+    # so those carry the same newest release.
+    feeds = {"stable.xml": None, "preview.xml": None, "windows-stable.json": None, "windows-preview.json": None}
+    output = {"release": None}
+    if entries:
+        data = newest(entries)
+        output["release"] = {key: data[key] for key in ("releaseVersion", "downloadURL", "sha256", "architecture")}
         if data.get("diskImage"):
-            output[track].update(diskImageURL=data["diskImage"]["downloadURL"],
-                                 diskImageSHA256=data["diskImage"]["sha256"],
-                                 diskImageSize=data["diskImage"]["size"])
-        (directory / f"{track}.xml").write_text(appcast(data))
-    # Portable Windows copies check this feed (WIN-SYS-03); it names the newest release with Windows files.
-    for track in output:
-        feed = directory / f"windows-{track}.json"
-        candidates = [row for row in entries if row["track"] == track and row.get("windows")]
-        if not candidates:
-            if feed.exists():
-                feed.unlink()
-            continue
-        feed.write_text(json.dumps(windows_feed(max(candidates, key=lambda row: int(row["build"]))), indent=2) + "\n")
+            output["release"].update(diskImageURL=data["diskImage"]["downloadURL"],
+                                     diskImageSHA256=data["diskImage"]["sha256"],
+                                     diskImageSize=data["diskImage"]["size"])
+        feeds["stable.xml"] = feeds["preview.xml"] = appcast(data)
+    windows = [row for row in entries if row.get("windows")]
+    if windows:
+        # Portable Windows copies check this feed (WIN-SYS-03); it names the newest release with Windows files.
+        feeds["windows-stable.json"] = feeds["windows-preview.json"] = json.dumps(windows_feed(newest(windows)), indent=2) + "\n"
+    for name, content in feeds.items():
+        if content is not None:
+            (directory / name).write_text(content)
+        elif (directory / name).exists():
+            (directory / name).unlink()
     (ROOT / "website/src/data/distribution.json").write_text(json.dumps(output, indent=2) + "\n")
 
 

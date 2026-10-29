@@ -16,13 +16,13 @@ test("metrics accept only an HTTPS origin and coarse route/referrer categories",
 test("per-tab counts stay same-origin, honor browser privacy signals and exclude private strings", async () => {
   const keys = ["document", "navigator", "location", "sessionStorage", "fetch", "console"];
   const saved = new Map(keys.map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
-  const storage = new Map(), requests = [], listeners = [], notices = [];
+  const storage = new Map(), requests = [], listeners = [], notices = [], selectors = [];
   let optedOut = false, dnt = "0", configured = "", failedStorage = false;
   const mock = {
     document: {
       body: {get dataset() {return {metricsEndpoint:configured, siteBase:"/"};}},
       referrer:"https://www.google.com/search?q=private-screen",
-      querySelectorAll: () => [{dataset:{downloadTrack:"preview"}, addEventListener: (_, callback) => listeners.push(callback)}],
+      querySelectorAll: selector => {selectors.push(selector); return [{addEventListener: (_, callback) => listeners.push(callback)}];},
     },
     navigator: {get globalPrivacyControl() {return optedOut;}, get doNotTrack() {return dnt;}},
     location: {origin:"https://example.test", hostname:"example.test", pathname:"/downloads/", search:"?email=private"},
@@ -54,6 +54,9 @@ test("per-tab counts stay same-origin, honor browser privacy signals and exclude
     const bodies = requests.map(request=>JSON.parse(request.body));
     assert.equal(bodies[0].event,"session");
     assert.equal(bodies[1].event,"download");
+    // There is one release channel; the counting service still groups download clicks by track.
+    assert.deepEqual([...new Set(selectors)],["a[data-download]"]);
+    assert.equal(bodies[1].track,"stable");
     assert.equal(bodies[0].session,bodies[1].session);
     assert.equal(bodies[0].route,"downloads");
     assert.equal(bodies[0].referrer,"search");

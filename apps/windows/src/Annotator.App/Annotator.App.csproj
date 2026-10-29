@@ -2,7 +2,7 @@
   <!-- Annotator.App: the WinUI 3 app host (tray icon, toolbar, overlays on their own thread, modes, global shortcuts).
        Self-contained Windows App SDK and Native AOT, x64 today with ARM64-ready settings. Development builds are unpackaged
        (WindowsPackageType None); -p:AnnotatorPackage=true builds the single-project MSIX (tools/windows/validate.ps1 package). -->
-  <!-- Version, prerelease suffix and build from apps/macos/project.yml (WIN-DST-04). -->
+  <!-- The shared version from apps/macos/project.yml and its derived build (WIN-DST-04). -->
   <Import Project="SharedVersion.props" />
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -59,7 +59,8 @@
     <AssemblyMetadata Include="AnnotatorBuildStamp" Value="$(AnnotatorBuildStamp)" />
     <!-- The portable release ZIP sets AnnotatorDistribution=portable (tools/windows/package.ps1 -Portable). -->
     <AssemblyMetadata Include="AnnotatorDistribution" Value="$(AnnotatorDistribution)" />
-    <!-- The portable release's update feed on the website (package.ps1 -UpdateSite); only a portable copy reads it (WIN-SYS-03). -->
+    <!-- The portable release's update feed on the website, <site>/updates/windows-stable.json (package.ps1 -UpdateSite); only
+         a portable copy reads it (WIN-SYS-03). -->
     <AssemblyMetadata Include="AnnotatorUpdateFeedURL" Value="$(AnnotatorUpdateFeedUrl)" />
     <!-- The usage-count service's origin (ANNOTATOR_METRICS_URL on the Mac). Source builds have none and send nothing; the
          owner's release build sets it once UsageMetrics.ServiceAcceptsWindows is on (specification 011, WIN-PRV-01). -->
@@ -98,7 +99,7 @@
       </ResolvedFileToPublish>
     </ItemGroup>
   </Target>
-  <!-- The package version is (Major + 1).Minor.Build.0 of the shared version (WIN-DST-04); the checked-in manifest keeps
+  <!-- The package version is (Major + 1).Minor.Patch.0 of the shared version (WIN-DST-04); the checked-in manifest keeps
        0.0.0.0 and the owner's Store identity. -->
   <Target Name="AnnotatorPackageManifest" BeforeTargets="PrepareForBuild" Condition="'$(AnnotatorPackage)' == 'true'">
     <Error Condition="'$(AnnotatorMsixVersion)' == ''" Text="The package version could not be made from the shared version in $(AnnotatorProjectYml)." />

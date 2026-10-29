@@ -34,18 +34,18 @@ class LocalReleaseTests(unittest.TestCase):
         self.folder.mkdir()
         self.key = self.root / "private-key"
         self.key.write_text("SECRET-KEY-MATERIAL")
-        self.notes = {"releases": [dict(version="0.1.0-alpha.2", build=10,
+        self.notes = {"releases": [dict(version="0.2.0", build=200,
                                       date="2026-09-23", changes={"Fixed": ["A fix."]},
                                       knownIssues=[])]}
         self.app(self.folder / "Annotator.app")
         (self.folder / "notarization.zip").write_bytes(b"original submission bytes")
         (self.folder / "sign_update").write_bytes(b"fixture signer")
-        (self.folder / "release-notes.md").write_text(local.release.changelog(self.notes, "0.1.0-alpha.2"))
-        self.receipt = dict(schema=1, version="0.1.0-alpha.2", build=10, source=SOURCE,
+        (self.folder / "release-notes.md").write_text(local.release.changelog(self.notes, "0.2.0"))
+        self.receipt = dict(schema=1, version="0.2.0", build=200, source=SOURCE,
                             repository="example/binaries", homepage="https://example.com",
-                            track="preview", publicKey=PUBLIC,
+                            track="stable", publicKey=PUBLIC,
                             identity="Developer ID Application: Example", team="AAAAAAAAAA",
-                            metadata=d.packager.inspect_app(self.folder / "Annotator.app", "release"),
+                            metadata=d.packager.inspect_app(self.folder / "Annotator.app"),
                             appHash=local.tree_hash(self.folder / "Annotator.app"),
                             archiveHash=local.digest(self.folder / "notarization.zip"),
                             signerHash=local.digest(self.folder / "sign_update"),
@@ -63,9 +63,9 @@ class LocalReleaseTests(unittest.TestCase):
         (path / "Contents/MacOS/Annotator").write_bytes(b"fixture")
         (path / "Contents/Info.plist").write_bytes(plistlib.dumps({
             "CFBundleIdentifier": "com.dorlugasigal.annotator",
-            "LSMinimumSystemVersion": "14.0", "CFBundleShortVersionString": "0.1.0",
-            "CFBundleVersion": "10", "AnnotatorPrerelease": "alpha.2",
-            "SUPublicEDKey": PUBLIC, "SUFeedURL": "https://example.com/updates/preview.xml",
+            "LSMinimumSystemVersion": "14.0", "CFBundleShortVersionString": "0.2.0",
+            "CFBundleVersion": "200",
+            "SUPublicEDKey": PUBLIC, "SUFeedURL": "https://example.com/updates/stable.xml",
             "AnnotatorBuildStamp": f"Release {SOURCE}",
             "AnnotatorWebsiteURL": "https://example.com", "AnnotatorMetricsURL": "",
         }))
@@ -144,11 +144,11 @@ class LocalReleaseTests(unittest.TestCase):
         self.assertEqual(len(local.tree_hash(app)), 64)
 
     def test_metadata_and_public_settings_checked_even_with_updated_hashes(self):
-        self.receipt["version"] = "0.1.0-alpha.3"
+        self.receipt["version"] = "0.2.1"
         self.save_receipt()
         with self.assertRaisesRegex(local.Error, "metadata"):
             local.load(self.folder)
-        self.receipt["version"] = "0.1.0-alpha.2"
+        self.receipt["version"] = "0.2.0"
         self.receipt["publicKey"] = base64.b64encode(b"z" * 32).decode()
         self.save_receipt()
         with self.assertRaisesRegex(local.Error, "update settings"):
@@ -223,7 +223,7 @@ class LocalReleaseTests(unittest.TestCase):
 
     def test_pending_invalid_and_wrong_hash_cannot_finalize(self):
         self.attach()
-        with patch.object(local, "candidate", return_value=(10, self.notes)):
+        with patch.object(local, "candidate", return_value=(200, self.notes)):
             for state, checksum in (("In Progress", self.log_hash), ("Invalid", self.log_hash),
                                     ("Accepted", "f" * 64)):
                 self.state, self.log_hash = state, checksum
@@ -232,28 +232,28 @@ class LocalReleaseTests(unittest.TestCase):
                 self.assertFalse((self.folder / "final").exists())
         self.assertFalse(any("staple" in call.args for call in self.run.call_args_list))
 
-    def package(self, app, output, channel, url, homepage):
+    def package(self, app, output, url, homepage):
         output.mkdir()
         name = url.rsplit("/", 1)[-1]
         (output / name).write_bytes(b"stapled final archive")
-        return dict(self.receipt["metadata"], channel=channel, downloadURL=url, homepage=homepage,
+        return dict(self.receipt["metadata"], channel="release", downloadURL=url, homepage=homepage,
                     archive=name, sha256=local.digest(output / name), architecture=self.architecture,
                     notarizationVerified=True)
 
     def test_universal_app_finalizes_under_universal_names(self):
         self.attach()
         self.architecture = "arm64 x86_64"
-        with patch.object(local, "candidate", return_value=(10, self.notes)), \
+        with patch.object(local, "candidate", return_value=(200, self.notes)), \
              patch.object(d.packager, "package", side_effect=self.package):
             local.finalize(self.folder, self.receipt, (), self.key)
         report = d.validate_manifest(json.loads((self.folder / "final" / "annotator-manifest.json").read_text()))
-        self.assertEqual(report["archive"], "annotator-0.1.0-alpha.2-10-universal.zip")
-        self.assertTrue(report["downloadURL"].endswith("/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-universal.zip"))
+        self.assertEqual(report["archive"], "annotator-0.2.0-universal.zip")
+        self.assertTrue(report["downloadURL"].endswith("/v0.2.0/annotator-0.2.0-universal.zip"))
         self.assertEqual(report["architecture"], "arm64 x86_64")
 
     def test_accepted_finalizes_copy_and_preserves_original(self):
         self.attach()
-        with patch.object(local, "candidate", return_value=(10, self.notes)), \
+        with patch.object(local, "candidate", return_value=(200, self.notes)), \
              patch.object(d.packager, "package", side_effect=self.package):
             local.finalize(self.folder, self.receipt, (), self.key)
             with self.assertRaisesRegex(local.Error, "already exists"):
@@ -270,7 +270,7 @@ class LocalReleaseTests(unittest.TestCase):
 
     def test_finalize_failure_can_retry_without_overwriting(self):
         self.attach()
-        with patch.object(local, "candidate", return_value=(10, self.notes)), \
+        with patch.object(local, "candidate", return_value=(200, self.notes)), \
              patch.object(d.packager, "package", side_effect=self.package):
             original = self.command
             def fail(*args, **kwargs):
@@ -288,19 +288,19 @@ class LocalReleaseTests(unittest.TestCase):
     def final_zip(self):
         final = self.folder / "final"
         final.mkdir(exist_ok=True)
-        archive = final / "annotator-0.1.0-alpha.2-10-arm64.zip"
+        archive = final / "annotator-0.2.0-arm64.zip"
         archive.write_bytes(b"stapled zip")
-        data = dict(self.receipt["metadata"], channel="release", downloadURL="https://github.com/example/binaries/releases/download/v0.1.0-alpha.2/annotator-0.1.0-alpha.2-10-arm64.zip",
+        data = dict(self.receipt["metadata"], channel="release", downloadURL="https://github.com/example/binaries/releases/download/v0.2.0/annotator-0.2.0-arm64.zip",
                     homepage="https://example.com", archive=archive.name, sha256=local.digest(archive),
                     architecture="arm64", notarizationVerified=True, repository="example/binaries",
-                    tag="v0.1.0-alpha.2", track="preview", source=SOURCE, size=archive.stat().st_size,
+                    tag="v0.2.0", track="stable", source=SOURCE, size=archive.stat().st_size,
                     edSignature=SIGNATURE)
         (final / "annotator-manifest.json").write_text(json.dumps(data))
         return data
 
     def test_disk_image_build_receipt_and_submit_resume(self):
         manifest = self.final_zip()
-        name = "annotator-0.1.0-alpha.2-10-arm64.dmg"
+        name = "annotator-0.2.0-arm64.dmg"
         def make_dmg(app, out, identity, requested):
             self.assertEqual(requested, name)
             path = out / requested
@@ -332,14 +332,14 @@ class LocalReleaseTests(unittest.TestCase):
         self.final_zip()
         target = self.folder / "disk-image"
         target.mkdir()
-        name = "annotator-0.1.0-alpha.2-10-arm64.dmg"
+        name = "annotator-0.2.0-arm64.dmg"
         (target / name).write_bytes(b"dmg")
-        dmg_receipt = dict(schema=1, releaseVersion="0.1.0-alpha.2", build="10", source=SOURCE,
-                           repository="example/binaries", tag="v0.1.0-alpha.2", archive=name,
+        dmg_receipt = dict(schema=1, releaseVersion="0.2.0", build="200", source=SOURCE,
+                           repository="example/binaries", tag="v0.2.0", archive=name,
                            sha256=local.digest(target / name), size=(target / name).stat().st_size,
                            volumeName="Annotator", sourceAppHash="tree-hash",
-                           appArchive="annotator-0.1.0-alpha.2-10-arm64.zip",
-                           appSHA256=local.digest(self.folder / "final" / "annotator-0.1.0-alpha.2-10-arm64.zip"))
+                           appArchive="annotator-0.2.0-arm64.zip",
+                           appSHA256=local.digest(self.folder / "final" / "annotator-0.2.0-arm64.zip"))
         local.write_once(target / "disk-image-receipt.json", dmg_receipt)
         local.write_once(target / "submit-attempt.json", {
             "receiptHash": local.digest(target / "disk-image-receipt.json"),
@@ -356,14 +356,14 @@ class LocalReleaseTests(unittest.TestCase):
         self.final_zip()
         target = self.folder / "disk-image"
         target.mkdir()
-        name = "annotator-0.1.0-alpha.2-10-arm64.dmg"
+        name = "annotator-0.2.0-arm64.dmg"
         (target / name).write_bytes(b"dmg")
-        dmg_receipt = dict(schema=1, releaseVersion="0.1.0-alpha.2", build="10", source=SOURCE,
-                           repository="example/binaries", tag="v0.1.0-alpha.2", archive=name,
+        dmg_receipt = dict(schema=1, releaseVersion="0.2.0", build="200", source=SOURCE,
+                           repository="example/binaries", tag="v0.2.0", archive=name,
                            sha256=local.digest(target / name), size=(target / name).stat().st_size,
                            volumeName="Annotator", sourceAppHash="tree-hash",
-                           appArchive="annotator-0.1.0-alpha.2-10-arm64.zip",
-                           appSHA256=local.digest(self.folder / "final" / "annotator-0.1.0-alpha.2-10-arm64.zip"))
+                           appArchive="annotator-0.2.0-arm64.zip",
+                           appSHA256=local.digest(self.folder / "final" / "annotator-0.2.0-arm64.zip"))
         local.write_once(target / "disk-image-receipt.json", dmg_receipt)
         self.notary_name = name
         self.log_hash = dmg_receipt["sha256"]
@@ -391,22 +391,22 @@ class LocalReleaseTests(unittest.TestCase):
 
     def test_candidate_requires_the_exact_clean_commit(self):
         with patch.object(d, "command", return_value=SOURCE), \
-             patch.object(local.release, "configured_version", return_value=("0.1.0-alpha.2", 10)), \
+             patch.object(local.release, "configured_version", return_value=("0.2.0", 200)), \
              patch.object(local.release, "load_notes", return_value=self.notes), \
              patch.object(local.release, "verify_candidate") as clean:
-            self.assertEqual(local.candidate("0.1.0-alpha.2", SOURCE), (10, self.notes))
+            self.assertEqual(local.candidate("0.2.0", SOURCE), (200, self.notes))
             clean.assert_called_once_with(local.ROOT)
             with self.assertRaisesRegex(local.Error, "exact original"):
-                local.candidate("0.1.0-alpha.2", "b" * 40)
+                local.candidate("0.2.0", "b" * 40)
             with self.assertRaisesRegex(local.Error, "version"):
-                local.candidate("0.1.0-alpha.3", SOURCE)
+                local.candidate("0.2.1", SOURCE)
             clean.side_effect = local.release.ReleaseError("Packaging requires a clean worktree.")
             with self.assertRaisesRegex(local.release.ReleaseError, "clean worktree"):
-                local.candidate("0.1.0-alpha.2", SOURCE)
+                local.candidate("0.2.0", SOURCE)
 
     def test_prepare_rejects_stale_source_before_build_or_directory_creation(self):
         folder = self.root / "new-release"
-        args = argparse.Namespace(folder=folder, version="0.1.0-alpha.2", candidate=SOURCE)
+        args = argparse.Namespace(folder=folder, version="0.2.0", candidate=SOURCE)
         with patch.object(local, "candidate", side_effect=local.release.ReleaseError("stale source")):
             with self.assertRaisesRegex(local.release.ReleaseError, "stale source"):
                 local.prepare(args)
@@ -415,7 +415,7 @@ class LocalReleaseTests(unittest.TestCase):
 
     def test_prepare_builds_and_persists_before_any_submit(self):
         folder = self.root / "new-release"
-        args = argparse.Namespace(folder=folder, version="0.1.0-alpha.2", candidate=SOURCE,
+        args = argparse.Namespace(folder=folder, version="0.2.0", candidate=SOURCE,
                                   repository="example/binaries", homepage="https://example.com",
                                   identity=self.receipt["identity"], team=self.receipt["team"],
                                   public_key=PUBLIC, support_url="")
@@ -435,7 +435,7 @@ class LocalReleaseTests(unittest.TestCase):
                 return ""
             return self.command(*cmd, **kwargs)
         self.run.side_effect = build
-        with patch.object(local, "candidate", return_value=(10, self.notes)), \
+        with patch.object(local, "candidate", return_value=(200, self.notes)), \
              patch.object(d, "sign_distribution_bundle") as sign:
             local.prepare(args)
         sign.assert_called_once()

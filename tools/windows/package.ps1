@@ -24,13 +24,13 @@
 
   -Portable also builds the portable release for people without the Microsoft Store (WIN-DST-09): the Native AOT app
   of each architecture, published with -p:AnnotatorDistribution=portable, zipped as
-  Annotator-<label>-windows-<architecture>.zip with Annotator.exe at the root, the file winget installs as a portable
+  Annotator-<version>-windows-<architecture>.zip with Annotator.exe at the root, the file winget installs as a portable
   app (tools/windows/winget.py). Each ZIP's SHA-256 is in package-report.json.
 
   -UpdateSite gives the portable app the website that publishes its update feed (WIN-SYS-03), as the Mac's
   ANNOTATOR_UPDATE_FEED_URL: an HTTPS root such as https://getannotator.app. The portable app then reads
-  <site>/updates/windows-<track>.json, where the track is preview for a prerelease and stable otherwise, and only says where
-  to get a newer release. Without it the portable app can't check and says how to update with winget.
+  <site>/updates/windows-stable.json and only says where to get a newer release. Without it the portable app can't check
+  and says how to update with winget.
 .EXAMPLE
   pwsh tools/windows/package.ps1
   pwsh tools/windows/package.ps1 -Portable
@@ -54,41 +54,46 @@ if (-not $Output) {
     $Output = Join-Path $windows 'out\package'
 }
 
-# The shared version, read like tools/release/release.py (a second, independent reading of SharedVersion.props).
+# The shared version, read like tools/release/release.py (a second, independent reading of SharedVersion.props): a plain
+# X.Y.Z, its build derived as major * 10000 + minor * 100 + patch, and the package version (major + 1).minor.patch.0.
 function Get-SharedVersion {
     $text = Get-Content (Join-Path $root 'apps\macos\project.yml') -Raw
+    if ($text -match '(?m)^ *ANNOTATOR_PRERELEASE:') {
+        throw 'Remove ANNOTATOR_PRERELEASE from apps/macos/project.yml: releases have no pre-release labels.'
+    }
     $values = @{}
-    foreach ($name in 'MARKETING_VERSION', 'ANNOTATOR_PRERELEASE', 'CURRENT_PROJECT_VERSION') {
+    foreach ($name in 'MARKETING_VERSION', 'CURRENT_PROJECT_VERSION') {
         $found = [regex]::Matches($text, "(?m)^    ${name}: *(.*?) *\r?$")
         if ($found.Count -ne 1) {
             throw "Expected one base $name setting in apps/macos/project.yml."
         }
         $values[$name] = $found[0].Groups[1].Value.Trim('"', "'")
     }
-    $version = [regex]::Match($values.MARKETING_VERSION, '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')
-    if (-not $version.Success -or $values.CURRENT_PROJECT_VERSION -notmatch '^[1-9][0-9]*$') {
-        throw 'The shared version or build in apps/macos/project.yml is not valid.'
+    $version = [regex]::Match($values.MARKETING_VERSION, '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)$')
+    if (-not $version.Success) {
+        throw "The shared version $($values.MARKETING_VERSION) in apps/macos/project.yml is not a plain X.Y.Z with minor and patch at 99 or lower."
     }
-    $label = $values.MARKETING_VERSION + $(if ($values.ANNOTATOR_PRERELEASE) { "-$($values.ANNOTATOR_PRERELEASE)" } else { '' }) +
-        " ($($values.CURRENT_PROJECT_VERSION))"
+    $major, $minor, $patch = [int]$version.Groups[1].Value, [int]$version.Groups[2].Value, [int]$version.Groups[3].Value
+    $build = $major * 10000 + $minor * 100 + $patch
+    if ($values.CURRENT_PROJECT_VERSION -ne "$build") {
+        throw "CURRENT_PROJECT_VERSION in apps/macos/project.yml must be $build, derived from $($values.MARKETING_VERSION)."
+    }
     [pscustomobject]@{
-        Label = $label
-        Msix = '{0}.{1}.{2}.0' -f ([int]$version.Groups[1].Value + 1), $version.Groups[2].Value, $values.CURRENT_PROJECT_VERSION
-        # The release track, as tools/release/distribution.py names it: a prerelease is preview.
-        Track = if ($values.ANNOTATOR_PRERELEASE) { 'preview' } else { 'stable' }
+        Label = $values.MARKETING_VERSION
+        Msix = '{0}.{1}.{2}.0' -f ($major + 1), $minor, $patch
     }
 }
 
-# The portable app's update feed for -UpdateSite: <site>/updates/windows-<track>.json, an HTTPS root without credentials,
+# The portable app's update feed for -UpdateSite: <site>/updates/windows-stable.json, an HTTPS root without credentials,
 # port, query or fragment (the app's own rule, ReleaseFeed.Address, checks it again).
-function Get-UpdateFeed([string]$site, [string]$track) {
+function Get-UpdateFeed([string]$site) {
     $trimmed = $site.TrimEnd('/')
     $uri = $null
     if (-not [Uri]::TryCreate($trimmed, [UriKind]::Absolute, [ref]$uri) -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or
         -not $uri.IsDefaultPort -or $uri.Query -or $uri.Fragment) {
         throw "-UpdateSite must be an HTTPS website root such as https://getannotator.app, not '$site'."
     }
-    "$trimmed/updates/windows-$track.json"
+    "$trimmed/updates/windows-stable.json"
 }
 
 function Get-MakeAppx {
@@ -298,7 +303,7 @@ if ($MetricsUrl -and $MetricsUrl -cnotmatch '^https://[A-Za-z0-9.-]+/?$') {
 
 $shared = Get-SharedVersion
 $version = $shared.Msix
-$feed = if ($UpdateSite) { Get-UpdateFeed $UpdateSite $shared.Track } else { '' }
+$feed = if ($UpdateSite) { Get-UpdateFeed $UpdateSite } else { '' }
 if ($feed -and -not $Portable) {
     Write-Host '-UpdateSite only changes the portable app (-Portable); the Store packages get their updates from the Store.' -ForegroundColor Yellow
 }
@@ -355,7 +360,7 @@ try {
         throw "MakeAppx could not unpack the x64 package (exit code $LASTEXITCODE)."
     }
     if ($Portable) {
-        $report.portable = @(foreach ($architecture in $architectures) { Invoke-PortableBuild $architecture $folder $shared.Label.Split(' ')[0] $feed })
+        $report.portable = @(foreach ($architecture in $architectures) { Invoke-PortableBuild $architecture $folder $shared.Label $feed })
     }
     $report.problems = @($problems)
     $report | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $folder 'package-report.json') -Encoding utf8NoBOM

@@ -19,7 +19,7 @@ internal sealed partial class AppHost
         _defaults,
         UsageMetrics.ServiceAcceptsWindows,
         live ? UsageMetrics.ValidatedEndpoint(BuildInfo.MetricsUrl) : null,
-        UsageMetricsBuild.ForWindows(BuildInfo.NotesVersion, BuildInfo.BuildNumber, Environment.OSVersion.Version, RuntimeInformation.ProcessArchitecture),
+        UsageMetricsBuild.ForWindows(BuildInfo.Version, BuildInfo.BuildNumber, Environment.OSVersion.Version, RuntimeInformation.ProcessArchitecture),
         SendUsageCountsAsync,
         schedule: live ? action => _queue.TryEnqueue(() => action()) : null);
 

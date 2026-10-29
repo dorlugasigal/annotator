@@ -13,7 +13,7 @@ Native apps for macOS and Windows.
 [Help](https://getannotator.app/docs/) &nbsp;·&nbsp;
 [Release notes](https://github.com/dorlugasigal/annotator/releases)
 
-[![Latest release](https://img.shields.io/github/v/release/dorlugasigal/annotator?include_prereleases&label=release&color=ffb58c&labelColor=111928)](https://github.com/dorlugasigal/annotator/releases)
+[![Latest release](https://img.shields.io/github/v/release/dorlugasigal/annotator?label=release&color=ffb58c&labelColor=111928)](https://github.com/dorlugasigal/annotator/releases/latest)
 [![macOS 14 or later](https://img.shields.io/badge/macOS-14%2B-e8eef9?labelColor=111928)](#install)
 [![Windows 11](https://img.shields.io/badge/Windows-11-e8eef9?labelColor=111928)](#install)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-e8eef9?labelColor=111928)](LICENSE)<br>
@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/b87f25bf-7f11-4e36-8000-47584de43221
 Music: “Product Launch Advertising Commercial Music” by lNPLUSMUSIC, from Pixabay.</sub></p>
 
 > [!NOTE]
-> Annotator is in public beta. Expect rough edges, and please
+> Annotator hasn't reached 1.0 yet. Expect rough edges, and please
 > [report them](https://github.com/dorlugasigal/annotator/issues/new/choose).
 
 ## What you can do

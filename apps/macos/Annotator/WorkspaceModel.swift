@@ -268,16 +268,10 @@ final class WorkspaceModel: ObservableObject {
     let usageMetrics: UsageMetrics
     let canvasInteraction = PassthroughSubject<Void, Never>()
     let buildLabel: String
+    /// The version the app shows: a plain X.Y.Z, such as 0.2.0. The build number (CFBundleVersion) is derived from it
+    /// for Sparkle and What's changed, and is never shown.
     var versionLabel: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Version unavailable"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
-        let prerelease = Bundle.main.object(forInfoDictionaryKey: "AnnotatorPrerelease") as? String
-        return Self.formatVersion(version: version, build: build, prerelease: prerelease)
-    }
-
-    static func formatVersion(version: String, build: String, prerelease: String?) -> String {
-        let suffix = prerelease.flatMap { $0.isEmpty ? nil : "-\($0)" } ?? ""
-        return "\(version)\(suffix) (\(build))"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Version unavailable"
     }
     private let imagePasteboard: NSPasteboard
     static let annotationPasteboardType = NSPasteboard.PasteboardType("app.annotator.annotations")

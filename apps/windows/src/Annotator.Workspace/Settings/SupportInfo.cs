@@ -9,7 +9,7 @@ namespace Annotator.Workspace.Settings;
 /// </summary>
 public sealed record SupportFacts
 {
-    /// <summary>The version label, such as "0.1.0-beta.8 (26)" (WIN-DST-04).</summary>
+    /// <summary>The version, a plain X.Y.Z such as "0.2.0" (WIN-DST-04).</summary>
     public required string Version { get; init; }
 
     /// <summary>The build stamp, or the Mac's "Unstamped development build".</summary>

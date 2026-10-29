@@ -38,9 +38,7 @@ struct ReleaseNotesCatalog: Decodable {
               let url = bundle.url(forResource: "notes", withExtension: "json") else {
             throw ReleaseNotesFailure.missingVersion
         }
-        let suffix = bundle.object(forInfoDictionaryKey: "AnnotatorPrerelease") as? String ?? ""
-        return try current(data: Data(contentsOf: url),
-                           version: version + (suffix.isEmpty ? "" : "-\(suffix)"), build: build)
+        return try current(data: Data(contentsOf: url), version: version, build: build)
     }
 }
 
@@ -65,7 +63,7 @@ struct ReleaseNotesView: View {
                 Text("These notes came with this app. Opening them does not check for updates.")
                     .font(.caption).foregroundStyle(.secondary)
                 if let entry {
-                    Text("\(entry.version) (\(entry.build))").font(.headline)
+                    Text(entry.version).font(.headline)
                     Text(entry.date).font(.caption).foregroundStyle(.secondary)
                     ForEach(ReleaseNotesCatalog.categories, id: \.self) { category in
                         if let changes = entry.changes[category] {

@@ -8,8 +8,6 @@
 	<string>$(ANNOTATOR_ISSUES_URL)</string>
 	<key>AnnotatorMetricsURL</key>
 	<string>$(ANNOTATOR_METRICS_URL)</string>
-	<key>AnnotatorPrerelease</key>
-	<string>$(ANNOTATOR_PRERELEASE)</string>
 	<key>AnnotatorSupportURL</key>
 	<string>$(ANNOTATOR_SUPPORT_URL)</string>
 	<key>AnnotatorWebsiteURL</key>

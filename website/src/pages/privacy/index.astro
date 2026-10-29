@@ -1,11 +1,9 @@
 ---
 import Page from "../../layouts/Page.astro";
 import { sitePath } from "../../lib/paths";
-import { distribution, supportsRegionSharing } from "../../lib/distribution";
 import { windowsListing as windows } from "../../lib/windows";
 const countsEnabled = Boolean(import.meta.env.PUBLIC_METRICS_URL);
 const netlifySite = process.env.ANNOTATOR_SITE_PROVIDER === "netlify";
-const regionSharing = supportsRegionSharing(distribution.stable ?? distribution.preview);
 const computer = windows ? "computer" : "Mac";
 ---
 <Page title="Privacy">
@@ -15,8 +13,8 @@ const computer = windows ? "computer" : "Mac";
     <p>The AI app may send screenshots and text to its model provider. That app has its own permissions and privacy settings. Check them before using private information. <a href={sitePath("/ai/")}>Read the AI setup guide.</a></p>
     <h2>Files you save</h2>
     <p>A board keeps your drawings editable, including original pasted images under covers. Do not share a board containing private details. PNG export saves an image on your {computer}. Open the exported file and check it before sharing; blur can still leave details readable.</p>
-    <p>Drawing needs no screen access. {regionSharing ? "Zoom, live pixel effects and region sharing" : "Screen zoom and live pixel effects"} need Screen Recording permission, but Annotator does not record or save a video.{windows && " On Windows, the matching setting is Screenshots and screen recording."}</p>
-    {regionSharing && <p>Region sharing composes a chosen desktop area into a local window. Your meeting app sends it only when you choose to share that window. Anything inside the area can appear, including notifications. Pausing replaces the output with an opaque view; the region is not restored automatically on your next launch.</p>}
+    <p>Drawing needs no screen access. Zoom, live pixel effects and region sharing need Screen Recording permission, but Annotator does not record or save a video.{windows && " On Windows, the matching setting is Screenshots and screen recording."}</p>
+    <p>Region sharing composes a chosen desktop area into a local window. Your meeting app sends it only when you choose to share that window. Anything inside the area can appear, including notifications. Pausing replaces the output with an opaque view; the region is not restored automatically on your next launch.</p>
     <h2>Feedback you choose to share</h2>
     <p>You can write a report in Annotator without sending it. Open GitHub draft sends your title, details and app version to GitHub in a browser link. Submitting it there makes the issue public. Remove private details before opening GitHub. No drawings, screenshots or logs are attached automatically.</p>
     <p>Copy support info includes app and {windows ? "macOS or Windows" : "macOS"} versions, number of screens, permissions, update and login settings, and current app state. It does not include drawings, screenshots or document names. Copying or saving this information does not upload it; review the text before sharing it.</p>

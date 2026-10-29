@@ -1,6 +1,6 @@
 ---
 name: annotator-release
-description: Prepare and guide Annotator releases for macOS and the Windows edition. Use for local release readiness, version bumps, signing/notarization handoff on a maintainer's Mac, the Windows package build, WACK and Microsoft Store handoff on a maintainer's Windows PC, progress monitoring, release recovery, Homebrew and website publication, or release notes. Prefer local checks and preserve exact artifacts. Ask before advancing versions/stages; do not infer production or Store authorization.
+description: Prepare and guide Annotator releases for macOS and the Windows edition. Use for local release readiness, version bumps, signing/notarization handoff on a maintainer's Mac, the Windows package build, WACK and Microsoft Store handoff on a maintainer's Windows PC, progress monitoring, release recovery, Homebrew and website publication, or release notes. Prefer local checks and preserve exact artifacts. Ask before changing the version; do not infer production or Store authorization.
 ---
 
 # Annotator release checkpoint
@@ -46,40 +46,45 @@ section covers a maintainer's Windows PC and the Microsoft Store. On Windows, wr
 
 ## Recommend and ask
 
-Use `python3 tools/release/release.py plan --change fix` (or `feature`, `breaking`,
-`docs`) to calculate numbering. This is read-only and does not judge readiness.
-For a stage proposal add `--stage beta`, `rc` or `stable`; do not skip stages.
-Consult the stage definitions and checklist in `docs/releasing.md`.
+Every release has a plain semantic version, `X.Y.Z`: no alpha, beta or rc
+labels and no counted builds (owner decision, 2026-10-29). Use
+`python3 tools/release/release.py plan --change fix` (or `feature`, `breaking`,
+`docs`) to calculate the next version, its derived build and its Windows
+package version. This is read-only and does not judge readiness. Consult the
+version rules and checklist in `docs/releasing.md`.
 
 Present one short decision:
 
-- Current version/build and verified baseline.
+- Current version and verified baseline.
 - Meaningful changes and the strongest remaining blocker.
-- Recommendation: keep accumulating work, make the next candidate in the same
-  stage, or promote one stage; include the exact proposed label/build.
-- Timing: ready for another test build now, wait for specified feedback, or
-  blocked by a named validation/installation requirement.
+- Recommendation: keep accumulating work, or release the next version; include
+  the exact proposed `X.Y.Z` (patch for fixes, minor for features, major for
+  breaking changes; before 1.0.0 a breaking change moves the minor version).
+- Timing: ready now, wait for specified feedback, or blocked by a named
+  validation/installation requirement.
 
 Ask with `ask_user`, offering **Keep current version**, **Prepare recommended
-candidate**, and **Choose another target**. An explicit user request naming the
-target already supplies version approval; do not ask for it again.
+version**, and **Choose another version**. An explicit user request naming the
+version already supplies version approval; do not ask for it again.
 If approval is unavailable, leave a recommendation and Unreleased notes only.
-Autopilot is not authorization to promote a stage. Do not repeat this prompt
-after every small edit or after a maintainer already chose to wait.
+Autopilot is not authorization to release. Do not repeat this prompt after every
+small edit or after a maintainer already chose to wait.
 
 ## Prepare only after version approval
 
-1. Verify the approved target against the read-only plan. Bump the three
-   settings in `apps/macos/project.yml`; never edit generated files directly.
-   Build numbers must exceed every existing release entry. Never reuse a label.
-   These settings are the shared version. The Windows build reads the same
-   file (`apps/windows/src/Annotator.App/SharedVersion.props`), so never set a
+1. Verify the approved version against the read-only plan, then run
+   `python3 tools/release/release.py prepare --version X.Y.Z`. It writes
+   `MARKETING_VERSION` and the derived `CURRENT_PROJECT_VERSION` in
+   `apps/macos/project.yml`, moves Unreleased into a dated entry that starts
+   with the previous known limits, and renders `CHANGELOG.md`. Review and update
+   the known limits. Never edit generated files directly and never reuse a
+   version. The Windows build reads the same file
+   (`apps/windows/src/Annotator.App/SharedVersion.props`), so never set a
    Windows version anywhere else.
-2. Move the applicable Unreleased items into a new notes entry with version,
-   build, date, changes and known issues. Do the bump and the notes in one
-   release pull request that changes only `apps/macos/project.yml`, the Xcode
-   project's version lines, `releases/notes.json` and `CHANGELOG.md`; it needs
-   no issue (the Linked issue check exempts it), so don't open one.
+2. Do the bump and the notes in one release pull request that changes only
+   `apps/macos/project.yml`, the Xcode project's version lines,
+   `releases/notes.json` and `CHANGELOG.md`; it needs no issue (the Linked issue
+   check exempts it), so don't open one.
 3. Regenerate with `make generate`; render the changelog and run the complete
    validation matrix in the pipeline guide. Fix errors, record skip reasons,
    and record actual results in the release pull request. `make generate` and the
@@ -91,9 +96,9 @@ after every small edit or after a maintainer already chose to wait.
    --candidate` from a clean checkout of it before packaging, and start the
    Release run on that exact commit (the head of `main`). Its tag and manifest
    record it.
-5. Build the appropriate identity and signing channel. Verify the extracted
-   signature, embedded version/stage/build, absence of test fixtures, source
-   stamp and checksum. Use a fresh output directory. Never rename an old ZIP.
+5. Build the release identity and signing channel. Verify the extracted
+   signature, embedded version and derived build, absence of test fixtures,
+   source stamp and checksum. Use a fresh output directory. Never rename an old ZIP.
 6. Run local validation first; the candidate's pull request then runs CI.
    Local and hosted results are distinct; do not claim an earlier run covers
    new source.
@@ -167,11 +172,11 @@ it publishes.
 
 ### Version and the Windows switch
 
-- The label and build are the shared ones, such as `0.1.0-beta.7 (25)`. The MSIX
-  package version is `(Major + 1).Minor.Build.0` (WIN-DST-04): 0.1.0 build 26
-  becomes `1.1.26.0`. `package.ps1`, the publisher and the hosted job all
-  check it. Every Store package needs a higher version, so the shared build
-  must keep rising.
+- The version is the shared plain one, such as `0.2.0`. The MSIX package
+  version is `(Major + 1).Minor.Patch.0` (WIN-DST-04): 0.2.0 becomes
+  `1.2.0.0`, above `1.1.35.0`, the last package of the pre-release labels.
+  `package.ps1`, the publisher and the hosted job all check it. Every Store
+  package needs a higher version, and every new version gives one.
 - `releases/windows.json` `partOfReleases` is `true`: every Release run that
   signs the Mac app also builds the Windows packages from the same commit.
   Turning it off needs a maintainer's decision.
@@ -186,8 +191,8 @@ plans by default; a maintainer adds `--execute`. Keep the release folder outside
 the checkout:
 
 ```powershell
-python tools/windows/publish_windows.py --folder C:\Releases\annotator-windows-1.1.26.0
-python tools/windows/publish_windows.py --folder C:\Releases\annotator-windows-1.1.26.0 --status
+python tools/windows/publish_windows.py --folder C:\Releases\annotator-windows-1.2.0.0
+python tools/windows/publish_windows.py --folder C:\Releases\annotator-windows-1.2.0.0 --status
 python tools/windows/publish_windows.py --check-store --store-id <Store ID>
 ```
 
@@ -218,7 +223,7 @@ run with **windows_packages**. That job runs no test suite; WACK and
 
 ### Portable ZIPs and winget
 
-Since beta.11 every release also carries the portable Windows ZIPs (WIN-DST-09). The Release workflow builds them
+Every release also carries the portable Windows ZIPs, `Annotator-X.Y.Z-windows-<arch>.zip` (WIN-DST-09). The Release workflow builds them
 with the bundle (`windows-portable` artifact); `tools/release/publish_release.py` fetches them in **Get Windows files** and
 uploads them with the Mac files. `tools/windows/winget.py manifests` writes the winget-pkgs manifests for
 `DorLugasiGal.Annotator`; only a maintainer opens that pull request. See `docs/maintainers/winget.md`.
@@ -234,11 +239,11 @@ uploads them with the Mac files. `tools/windows/winget.py manifests` writes the 
   Agents may run the check; they never invent these values.
 - Install Visual Studio's ARM64 build tools and the Microsoft Store Developer
   CLI, then run `msstore reconfigure` once.
-- Make the first submission by hand in Partner Center, to a private
-  audience; the Store CLI can't make it. Create the tester group and package
-  flights (WIN-DST-03), which exist only after a published submission.
+- Make the first submission by hand in Partner Center (done on 2026-10-21; the
+  listing is public). There are no tester builds or package flights: every
+  release goes to the public listing (WIN-DST-03).
 - Set up the `windows-store` GitHub environment with the four
-  `PARTNER_CENTER_*` secrets and `WINDOWS_STORE_FLIGHT_ID`, and the repository
+  `PARTNER_CENTER_*` secrets, and the repository
   variables `WINDOWS_STORE_ID` and `STORE_SUBMISSION_ENABLED` (`true` only
   after the first submission is published). Secrets go only into GitHub's
   secret fields, never into chat, files or command arguments.
@@ -254,9 +259,9 @@ Every release goes to the public Store listing (owner decision, 2026-10-25):
 a Release run that the owner approved to publish keeps **windows_store** at
 its default, `public`, and the Store job runs with it. Version approval alone
 still authorizes no Release run, and nothing authorizes a Store submission
-outside a release (a Partner Center upload or `msstore publish`), a package
-flight for testers, `STORE_SUBMISSION_ENABLED`, the website's `storeId` or
-turning off `partOfReleases`.
+outside a release (a Partner Center upload or `msstore publish`),
+`STORE_SUBMISSION_ENABLED`, the website's `storeId` or turning off
+`partOfReleases`.
 Never override a Gatekeeper rejection, alter quarantine or change MDM policy.
 Ask for the specific external action when it becomes necessary. Do not merge
 or push main, create a public release, or contact testers merely because a local

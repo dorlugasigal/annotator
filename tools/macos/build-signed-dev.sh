@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 action="${1:-build}"
-if [[ "$action" != "build" && "$action" != "test" && "$action" != "alpha" ]]; then
-    printf '%s\n' 'Supported actions: build, test, alpha.' >&2
+if [[ "$action" != "build" && "$action" != "test" ]]; then
+    printf '%s\n' 'Supported actions: build, test.' >&2
     exit 1
 fi
 if [[ $# -gt 0 ]]; then shift; fi
@@ -24,15 +24,6 @@ fi
 if [[ "$arch" == "x86_64" ]]; then derived_data=build/DerivedData-x86_64; fi
 overrides=(CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Development")
 stamp="$(date '+%Y-%m-%d %H:%M %z')"
-if [[ "$action" == "alpha" ]]; then
-    action=build
-    configuration=Release
-    derived_data=build/AlphaDerivedData
-    overrides+=(PRODUCT_NAME="Annotator Dev" PRODUCT_BUNDLE_IDENTIFIER=com.dorlugasigal.annotator.dev)
-    revision="$(git rev-parse --short HEAD)"
-    if [[ -n "$(git status --porcelain)" ]]; then revision="$revision-dirty"; fi
-    stamp="Private alpha $revision - $stamp"
-fi
 
 team="${DEVELOPMENT_TEAM:-}"
 if [[ -z "$team" ]]; then

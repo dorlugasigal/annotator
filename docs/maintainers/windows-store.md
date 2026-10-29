@@ -58,9 +58,8 @@ different, look for the same words nearby.
 | 5 | Approve the candidate version, then run the publisher ([5.2](#52-the-first-submission-step-by-step)) | 5 minutes to start; it runs alone, and WACK needs an administrator terminal |
 | 6 | Create the tester group ([5.2](#52-the-first-submission-step-by-step)) | 5 minutes |
 | 7 | Fill in the submission with the text on this page, then submit ([3](#3-submission-fields-ready-to-paste)) | 20 to 30 minutes; certification can take up to three business days |
-| 8 | After the private release: add a package flight for each new tester build ([5.3](#53-tester-builds-after-the-first-release)) | 5 minutes each |
-| 9 | Later, when you decide to launch: make the listing public and set the website's Store ID ([5.4](#54-the-launch-decision)) | 15 minutes |
-| 10 | Optional, after the first release: let GitHub Actions send tester builds ([6](#6-send-builds-from-github-actions)) | 20 minutes once, then one manual run per build |
+| 8 | Later, when you decide to launch: make the listing public and set the website's Store ID ([5.4](#54-the-launch-decision)) | 15 minutes |
+| 9 | After the first release: let GitHub Actions send each release ([6](#6-send-builds-from-github-actions)) | 20 minutes once, then part of every Release run |
 
 ## 1. In Partner Center
 
@@ -276,8 +275,9 @@ result is higher, check the answers before you appeal.
    Clear Xbox, Holographic and Team if Partner Center selected them. Leave the
    box that lets Microsoft offer the app to future device families cleared.
 3. Every upload needs a higher version than the one before. The publisher
-   takes it from the shared version and build: `(Major + 1).Minor.Build.0`,
-   for example `1.1.26.0` for build 26 (WIN-DST-04).
+   takes it from the shared version: `(Major + 1).Minor.Patch.0`, for example
+   `1.2.0.0` for 0.2.0 (WIN-DST-04). Packages up to 0.1.0-beta.17 used the
+   build number instead of the patch, up to `1.1.35.0`.
 
 ### Store listings
 
@@ -469,7 +469,13 @@ notifications off) and uploaded with these captions. They are in
 `~/VMs/annotator-win/shots/`. Partner Center processes each picture for
 about ten seconds; add a caption only after the count next to Desktop goes up.
 
-## 5. Testers, flights and the first submission
+## 5. The first submission
+
+The first submission was made on 2026-10-21, and the listing has been public
+since then. Every release now goes to the public listing from the Release
+workflow ([6](#6-send-builds-from-github-actions)); there are no tester builds
+or package flights any more. This section records how the first submission was
+made.
 
 ### 5.1 Why the first submission is private
 
@@ -522,44 +528,30 @@ testers (WIN-DST-03). The listing stays private until your launch decision.
    Microsoft Store with the invited account and installs Annotator. They need
    Windows 11 version 22H2 or later. The Store updates them automatically.
 
-### 5.3 Tester builds after the first release
+### 5.3 Uploading a release by hand
 
-1. Approve the next candidate (a higher build) and run the publisher in a new
-   release folder.
-2. On Annotator's overview page, find **Package flights** and select
-   **New package flight**. Name it, for example "Windows beta", and choose the
-   tester group, or make a new one there with **Create a flight group**. You
-   create the flight once and reuse it.
-3. Upload the new bundle to the flight's submission and submit it. Testers in
-   the group get the highest-ranked flight that includes them. The non-flight
-   submission always ranks lowest.
-
-You can also upload from the command line, but only after the first
-submission is published. Install the Microsoft Store Developer CLI
-(`winget install "Microsoft Store Developer CLI"`) and run `msstore reconfigure`
-once. It needs a Microsoft Entra application from **Account settings** >
-**User management** > **Microsoft Entra applications**.
-`msstore flights list <Store ID>` shows each flight's ID. Then use the command
-that the publisher prints:
+The Release workflow sends every release ([6](#6-send-builds-from-github-actions)).
+To upload a bundle yourself instead, for example when the hosted Store job
+can't run, use Partner Center's Packages page, or the Microsoft Store Developer
+CLI (`winget install "Microsoft Store Developer CLI"`, then `msstore reconfigure`
+once). The CLI signs in as a Microsoft Entra application from **Account
+settings** > **User management** > **Microsoft Entra applications**. The
+publisher prints the command:
 
 ```powershell
-python tools/windows/publish_windows.py --folder <release folder> --execute --store-id <Store ID> --flight-id <flight ID>
-msstore publish "<bundle>" -id <Store ID> --noCommit -f <flight ID>
+msstore publish "<bundle>" -id <Store ID> --noCommit
 ```
 
 `--noCommit` uploads the bundle and leaves a draft; it is not a dry run.
 `msstore publish` replaces a draft that is waiting, so run it before you edit
 the draft in Partner Center. Check the draft there, then submit.
 
-GitHub Actions can do the upload for you instead, from the same commit:
-see [6](#6-send-builds-from-github-actions).
-
 ### 5.4 The launch decision
 
 When you decide to launch:
 
 1. Make a new submission with **Public audience** and **Make this product
-   available and discoverable in the Store**. Flights keep working for testers.
+   available and discoverable in the Store**.
 2. When the listing opens signed out, set `storeId` in
    `website/src/data/windows-listing.json` to `9NMZ345ZJ6JK`, run
    `python tools/windows/publish_windows.py --check-store --store-id 9NMZ345ZJ6JK`
@@ -627,10 +619,6 @@ In the source repository (`dorlugasigal/annotator`), open
    The workflow's own gate also applies: only a run that you start by hand
    can submit.
 3. **Environment secrets**: add the four secrets from 6.1.
-4. **Environment variables**: add `WINDOWS_STORE_FLIGHT_ID`, the ID of your
-   tester flight. `msstore flights list <Store ID>` shows it
-   ([5.3](#53-tester-builds-after-the-first-release)). Without it, tester
-   builds go to the private audience instead.
 
 Then, under **Settings** > **Secrets and variables** > **Actions** >
 **Variables**, add two repository variables:
@@ -652,19 +640,14 @@ showing it.
    first, for its local validation and WACK.
 2. On GitHub, open **Actions** > **Release** > **Run workflow** and choose
    branch `main`.
-3. Fill in **version** (the approved label, such as `0.1.0-beta.8`) and
+3. Fill in **version** (the approved plain version, such as `0.2.0`) and
    **candidate_sha** (the full SHA of the newest commit on `main`).
 4. **windows_store**:
    - `public` (the default): every release goes to the public listing
      (owner decision, 2026-10-25). It needs **notarize** and **publish** on,
      so the Store gets the same build as the GitHub release.
-   - `testers`: the package flight in `WINDOWS_STORE_FLIGHT_ID`, for a test
-     build that publishes nothing. Without a flight, the main submission, but
-     only while its audience is private. Otherwise the job stops and leaves a
-     draft for you to check.
    - `none`: a run that builds without sending anything to the Store.
-5. For a release, turn on **notarize** and **publish**. For a testers build
-   alone, leave them off.
+5. Turn on **notarize** and **publish**.
 6. Select **Run workflow**. The run checks the candidate on Linux, builds and
    checks the bundle on Windows, then sends it. The run's summary shows the
    bundle's SHA-256 and where it went.

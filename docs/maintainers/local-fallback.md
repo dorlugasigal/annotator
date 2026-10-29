@@ -26,9 +26,9 @@ the website.
 ## Run
 
 ```sh
-python3 tools/release/publish_release.py --config build/local-publish-config.json --folder build/release-<label>            # plan
-python3 tools/release/publish_release.py --config build/local-publish-config.json --folder build/release-<label> --execute
-python3 tools/release/publish_release.py --folder build/release-<label> --watch                                              # read-only progress
+python3 tools/release/publish_release.py --config build/local-publish-config.json --folder build/release-<version>            # plan
+python3 tools/release/publish_release.py --config build/local-publish-config.json --folder build/release-<version> --execute
+python3 tools/release/publish_release.py --folder build/release-<version> --watch                                              # read-only progress
 ```
 
 Without `--execute` it only prints the plan. Rerun the same command to resume;

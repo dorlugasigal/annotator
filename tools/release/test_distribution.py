@@ -21,6 +21,19 @@ SUBMISSION = "11111111-2222-3333-4444-555555555555"
 
 def manifest():
     archive = b"test archive"
+    return dict(releaseVersion="0.2.0", version="0.2.0", build="200",
+                repository="example/annotator-releases", tag="v0.2.0", track="stable",
+                archive="annotator-0.2.0-arm64.zip",
+                downloadURL="https://github.com/example/annotator-releases/releases/download/v0.2.0/annotator-0.2.0-arm64.zip",
+                channel="release", identifier="com.dorlugasigal.annotator", architecture="arm64",
+                notarizationVerified=True, homepage="https://annotator.example",
+                source="a"*40, sha256=hashlib.sha256(archive).hexdigest(), size=len(archive),
+                edSignature=base64.b64encode(b"x"*64).decode())
+
+
+def legacy_manifest():
+    """A release from 0.1.0-beta.17 or earlier: a pre-release label, a counted build and the preview track."""
+    archive = b"test archive"
     return dict(releaseVersion="0.1.0-alpha.1", version="0.1.0", build="9", prerelease="alpha.1",
                 repository="example/annotator-releases", tag="v0.1.0-alpha.1", track="preview",
                 archive="annotator-0.1.0-alpha.1-9-arm64.zip",
@@ -34,8 +47,7 @@ def manifest():
 def disk_manifest(app=None):
     app = app or manifest()
     archive = b"test dmg"
-    suffix = "universal" if app.get("architecture") == "arm64 x86_64" else "arm64"
-    name = f"annotator-{app['releaseVersion']}-{app['build']}-{suffix}.dmg"
+    name = d.packager.archive_name("annotator", app["releaseVersion"], str(app["build"]), app.get("architecture", "arm64"), "dmg")
     return dict(schema=1, releaseVersion=app["releaseVersion"], build=str(app["build"]),
                 source=app["source"], repository=app["repository"], tag=app["tag"],
                 archive=name, downloadURL=f"https://github.com/{app['repository']}/releases/download/{app['tag']}/{name}",
@@ -136,13 +148,13 @@ class DistributionTests(unittest.TestCase):
         for event in ("push", "workflow_dispatch"):
             with self.subTest(event=event), patch.dict(os.environ, {**env, "GITHUB_EVENT_NAME": event}, clear=True), \
                  patch.object(d, "command", return_value=sha), \
-                 patch.object(d, "metadata", return_value=("0.1.0-alpha.2", 10)), \
+                 patch.object(d, "metadata", return_value=("0.2.0", 200)), \
                  patch.object(d.release, "verify_candidate") as candidate:
-                info = d.preflight("0.1.0-alpha.2", sha)
-                self.assertEqual((info["source"], info["version"], info["build"]), (sha, "0.1.0-alpha.2", 10))
+                info = d.preflight("0.2.0", sha)
+                self.assertEqual((info["source"], info["version"], info["build"]), (sha, "0.2.0", 200))
                 candidate.assert_called_once_with()
                 with self.assertRaisesRegex(d.DistributionError, "Approved version"):
-                    d.preflight("0.1.0-alpha.1", sha)
+                    d.preflight("0.2.1", sha)
         for overrides in [
             {"GITHUB_EVENT_NAME": "pull_request"},
             {"GITHUB_EVENT_NAME": "workflow_run"},
@@ -154,7 +166,7 @@ class DistributionTests(unittest.TestCase):
             with self.subTest(overrides=overrides), patch.dict(os.environ, {**env, **overrides}, clear=True), \
                  patch.object(d, "command", return_value=sha), patch.object(d, "metadata") as metadata:
                 with self.assertRaises(d.DistributionError):
-                    d.preflight("0.1.0-alpha.2", sha)
+                    d.preflight("0.2.0", sha)
                 metadata.assert_not_called()
 
     def test_configuration_requires_separate_explicit_destinations(self):
@@ -209,10 +221,11 @@ class DistributionTests(unittest.TestCase):
         data = manifest()
         self.assertEqual(d.validate_manifest(data), data)
         xml = d.appcast(data)
-        self.assertIn("<sparkle:version>9</sparkle:version>", xml)
-        self.assertIn("<sparkle:shortVersionString>0.1.0-alpha.1</sparkle:shortVersionString>", xml)
+        self.assertIn("<sparkle:version>200</sparkle:version>", xml)
+        self.assertIn("<sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>", xml)
         for key, value in [("notarizationVerified", False), ("channel", "preview"),
-                           ("identifier", "com.dorlugasigal.annotator.dev"), ("track", "stable"),
+                           ("identifier", "com.dorlugasigal.annotator.dev"), ("track", "preview"), ("build", "35"),
+                           ("releaseVersion", "0.2.0-beta.1"),
                            ("archive", "../secret"), ("downloadURL", "https://evil.example/app.zip"),
                            ("source", "main"), ("sha256", "bad"), ("edSignature", ""), ("size", 0)]:
             changed = {**data, key: value}
@@ -222,12 +235,12 @@ class DistributionTests(unittest.TestCase):
     def test_universal_manifests_use_universal_names_and_arm64_ones_stay_valid(self):
         data = manifest()
         self.assertEqual(d.validate_manifest(data)["architecture"], "arm64")
-        name = "annotator-0.1.0-alpha.1-9-universal.zip"
+        name = "annotator-0.2.0-universal.zip"
         universal = {**data, "architecture": "arm64 x86_64", "archive": name,
                      "downloadURL": data["downloadURL"].rsplit("/", 1)[0] + "/" + name}
         self.assertEqual(d.validate_manifest(universal), universal)
         self.assertEqual(d.validate_disk_image_manifest(disk_manifest(universal), universal)["archive"],
-                         "annotator-0.1.0-alpha.1-9-universal.dmg")
+                         "annotator-0.2.0-universal.dmg")
         # A universal build under an Apple Silicon name, or an Intel-only build, is not a verified artifact.
         for changed in ({**data, "architecture": "arm64 x86_64"}, {**data, "architecture": "x86_64"},
                         {**universal, "archive": data["archive"], "downloadURL": data["downloadURL"]}):
@@ -241,7 +254,7 @@ class DistributionTests(unittest.TestCase):
         app = manifest()
         data = disk_manifest(app)
         self.assertEqual(d.validate_disk_image_manifest(data, app), data)
-        for key, value in [("releaseVersion", "0.1.0-alpha.2"), ("build", "10"),
+        for key, value in [("releaseVersion", "0.2.1"), ("build", "201"),
                            ("source", "b" * 40), ("repository", "other/repo"),
                            ("archive", "../bad.dmg"), ("downloadURL", "https://evil.example/app.dmg"),
                            ("sha256", "bad"), ("size", 0), ("volumeName", "Bad"),
@@ -254,7 +267,7 @@ class DistributionTests(unittest.TestCase):
     def test_notarization_is_never_run_without_explicit_enabled_hosted_gate(self):
         with patch.dict(os.environ, {"RELEASE_AUTOMATION_ENABLED": "false"}, clear=True), patch.object(d, "command") as run:
             with self.assertRaises(d.DistributionError):
-                d.sign_and_package("0.1.0-alpha.1", "a"*40, Path("/tmp/unused"))
+                d.sign_and_package("0.2.0", "a"*40, Path("/tmp/unused"))
             run.assert_not_called()
 
     def test_signing_failure_restores_and_removes_ephemeral_keychain(self):
@@ -276,11 +289,11 @@ class DistributionTests(unittest.TestCase):
                 if args[0] == "xcodebuild":
                     raise d.DistributionError("Synthetic build failure")
                 return ""
-            info = dict(homepage="https://annotator.example", track="preview", build=9,
-                        repository="example/annotator-releases", tag="v0.1.0-alpha.1")
+            info = dict(homepage="https://annotator.example", track="stable", build=200,
+                        repository="example/annotator-releases", tag="v0.2.0")
             with patch.dict(os.environ, env, clear=True), patch.object(d, "preflight", return_value=info), patch.object(d, "command", side_effect=command):
                 with self.assertRaisesRegex(d.DistributionError, "Synthetic"):
-                    d.sign_and_package("0.1.0-alpha.1", "a"*40, Path(tmp)/"output")
+                    d.sign_and_package("0.2.0", "a"*40, Path(tmp)/"output")
             self.assertTrue(any(call[:2] == ("security", "delete-keychain") for call in calls))
             self.assertFalse(any("notarytool" in call for call in calls))
             self.assertEqual(list(Path(tmp).iterdir()), [])
@@ -318,15 +331,15 @@ class DistributionTests(unittest.TestCase):
                 if args[:3] == ("xcrun", "notarytool", "submit"): return f'{{"id":"{SUBMISSION}","message":"Successfully uploaded file"}}'
                 if args[:3] == ("xcrun", "notarytool", "info"): return f'{{"id":"{SUBMISSION}","status":"Invalid","name":"notarization.zip"}}'
                 return ""
-            info = dict(homepage="https://annotator.example", track="preview", build=9,
-                        repository="example/annotator-releases", tag="v0.1.0-alpha.1")
+            info = dict(homepage="https://annotator.example", track="stable", build=200,
+                        repository="example/annotator-releases", tag="v0.2.0")
             with patch.dict(os.environ, env, clear=True), patch.object(d, "preflight", return_value=info), \
                  patch.object(d, "command", side_effect=command), \
                  patch.object(d, "sign_distribution_bundle") as sign_bundle, \
-                 patch.object(d.packager, "inspect_app", return_value={"releaseVersion": "0.1.0-alpha.1", "build": "9"}), \
+                 patch.object(d.packager, "inspect_app", return_value={"releaseVersion": "0.2.0", "build": "200"}), \
                  patch.object(d.packager, "package") as package:
                 with self.assertRaisesRegex(d.DistributionError, "not accepted"):
-                    d.sign_and_package("0.1.0-alpha.1", "a"*40, Path(tmp)/"output")
+                    d.sign_and_package("0.2.0", "a"*40, Path(tmp)/"output")
                 package.assert_not_called()
                 sign_bundle.assert_called_once()
             self.assertFalse(any("stapler" in call for call in calls))
@@ -356,14 +369,14 @@ class DistributionTests(unittest.TestCase):
             if args[:3] == ("xcrun", "notarytool", "wait"):
                 raise d.DistributionError("notarytool failed with exit code 1. No later distribution step was run.")
             return ""
-        info = dict(homepage="https://annotator.example", track="preview", build=9,
-                    repository="example/annotator-releases", tag="v0.1.0-alpha.1")
+        info = dict(homepage="https://annotator.example", track="stable", build=200,
+                    repository="example/annotator-releases", tag="v0.2.0")
         with patch.dict(os.environ, env, clear=True), patch.object(d, "preflight", return_value=info), \
              patch.object(d, "command", side_effect=command), patch.object(d, "sign_distribution_bundle"), \
-             patch.object(d.packager, "inspect_app", return_value={"releaseVersion": "0.1.0-alpha.1", "build": "9"}), \
+             patch.object(d.packager, "inspect_app", return_value={"releaseVersion": "0.2.0", "build": "200"}), \
              patch.object(d.packager, "package") as package:
             with self.assertRaises(d.DistributionError) as error:
-                d.sign_and_package("0.1.0-alpha.1", "a"*40, Path(tmp)/"output", recovery)
+                d.sign_and_package("0.2.0", "a"*40, Path(tmp)/"output", recovery)
             package.assert_not_called()
         self.assertTrue(any(call[:2] == ("security", "delete-keychain") for call in calls))
         return calls, str(error.exception)
@@ -376,7 +389,7 @@ class DistributionTests(unittest.TestCase):
             self.assertEqual(sorted(path.name for path in recovery.iterdir()), ["notarization.zip", "recovery.json"])
             self.assertEqual((recovery/"notarization.zip").read_bytes(), b"submitted archive")
             record = json.loads((recovery/"recovery.json").read_text())
-            self.assertEqual(record, {"schema": 1, "releaseVersion": "0.1.0-alpha.1", "build": 9, "source": "a"*40,
+            self.assertEqual(record, {"schema": 1, "releaseVersion": "0.2.0", "build": 200, "source": "a"*40,
                                       "archive": "notarization.zip", "size": len(b"submitted archive"),
                                       "archiveSha256": hashlib.sha256(b"submitted archive").hexdigest(),
                                       "submissionId": SUBMISSION})
@@ -412,11 +425,11 @@ class DistributionTests(unittest.TestCase):
                 with open(args[3], "ab") as stream: stream.write(b" stapled")
             if str(args[0]).endswith("sign_update") and "-p" in args: return signature
             return ""
-        def package(app, folder, channel, url, homepage):
+        def package(app, folder, url, homepage):
             data = manifest()
             folder.mkdir(parents=True)
             (folder/data["archive"]).write_bytes(b"test archive")
-            return {key: data[key] for key in ("releaseVersion", "version", "build", "prerelease", "archive",
+            return {key: data[key] for key in ("releaseVersion", "version", "build", "archive",
                                                "downloadURL", "channel", "identifier", "architecture",
                                                "notarizationVerified", "homepage", "sha256")}
         def build(app, target, identity, name):
@@ -424,15 +437,15 @@ class DistributionTests(unittest.TestCase):
             target.mkdir(parents=True)
             (target/name).write_bytes(b"test dmg")
             return {"archive": name, "sha256": hashlib.sha256(b"test dmg").hexdigest(), "size": 8, "volumeName": "Annotator"}
-        info = dict(homepage="https://annotator.example", track="preview", build=9,
-                    repository="example/annotator-releases", tag="v0.1.0-alpha.1")
+        info = dict(homepage="https://annotator.example", track="stable", build=200,
+                    repository="example/annotator-releases", tag="v0.2.0")
         with patch.dict(os.environ, env, clear=True), patch.object(d, "preflight", return_value=info), \
              patch.object(d, "command", side_effect=command), patch.object(d, "sign_distribution_bundle"), \
-             patch.object(d.packager, "inspect_app", return_value={"releaseVersion": "0.1.0-alpha.1", "build": "9"}), \
+             patch.object(d.packager, "inspect_app", return_value={"releaseVersion": "0.2.0", "build": "200"}), \
              patch.object(d.packager, "architectures", return_value="arm64"), \
              patch.object(d.packager, "package", side_effect=package), \
              patch.object(d.disk_image, "build", side_effect=build):
-            d.sign_and_package("0.1.0-alpha.1", "a"*40, output)
+            d.sign_and_package("0.2.0", "a"*40, output)
         return calls, output
 
     def test_hosted_signing_notarizes_and_staples_a_disk_image_of_the_final_zip(self):
@@ -446,8 +459,8 @@ class DistributionTests(unittest.TestCase):
             # The image holds the app from the shipped ZIP, which already carries its own ticket.
             self.assertLess(app_staple, unzip)
             self.assertLess(unzip, build)
-            self.assertTrue(calls[unzip][3].endswith("annotator-0.1.0-alpha.1-9-arm64.zip"))
-            self.assertEqual(calls[build][2:], ("Developer ID Application: Example", "annotator-0.1.0-alpha.1-9-arm64.dmg"))
+            self.assertTrue(calls[unzip][3].endswith("annotator-0.2.0-arm64.zip"))
+            self.assertEqual(calls[build][2:], ("Developer ID Application: Example", "annotator-0.2.0-arm64.dmg"))
             dmg_calls = [call[:3] for call in calls[build:] if call[-1].endswith(".dmg") or "-v" in call]
             self.assertIn(("xcrun", "stapler", "staple"), dmg_calls)
             self.assertIn(("spctl", "--assess", "--type"), dmg_calls)
@@ -476,7 +489,7 @@ class DistributionTests(unittest.TestCase):
             with patch.dict(os.environ, self.signing_environment(tmp), clear=True), \
                  patch.object(d, "preflight", return_value={}), patch.object(d, "command") as run:
                 with self.assertRaisesRegex(d.DistributionError, "fresh output"):
-                    d.sign_and_package("0.1.0-alpha.1", "a"*40, Path(tmp)/"output", Path(tmp)/"recovery")
+                    d.sign_and_package("0.2.0", "a"*40, Path(tmp)/"output", Path(tmp)/"recovery")
                 run.assert_not_called()
 
     def test_publication_uses_draft_then_verification_and_no_source_upload(self):
@@ -511,6 +524,36 @@ class DistributionTests(unittest.TestCase):
             self.assertEqual({Path(path).name for path in upload[6:]},
                              {data["archive"], "annotator-manifest.json", "release-notes.md", "SHA256SUMS", "appcast.xml"})
             self.assertTrue(all("--clobber" not in call for call in calls))
+            # Every release is a normal release, never a pre-release, and becomes the latest once verified.
+            self.assertNotIn("--prerelease", create)
+            edit = next(call for call in calls if call[:3] == ("gh", "release", "edit"))
+            self.assertIn("--latest", edit)
+            self.assertNotIn("--latest=false", edit)
+
+    def test_a_legacy_pre_release_is_never_published(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data = legacy_manifest()
+            (root/"annotator-manifest.json").write_text(json.dumps(data))
+            (root/data["archive"]).write_bytes(b"test archive")
+            env = dict(PUBLICATION_ENABLED="true", CANDIDATE_SHA=data["source"],
+                       DISTRIBUTION_REPOSITORY=data["repository"], WEBSITE_URL=data["homepage"])
+            with patch.dict(os.environ, env), patch.object(d, "gh_json") as api, patch.object(d, "command") as run:
+                with self.assertRaisesRegex(d.DistributionError, "plain"):
+                    d.publish(root)
+            api.assert_not_called()
+            run.assert_not_called()
+
+    def test_preflight_refuses_a_labelled_version(self):
+        sha = "a" * 40
+        env = dict(GITHUB_REF="refs/heads/main", GITHUB_SHA=sha, GITHUB_EVENT_NAME="workflow_dispatch",
+                   DISTRIBUTION_REPOSITORY="owner/annotator", WEBSITE_URL="https://owner.github.io/annotator")
+        with patch.dict(os.environ, env, clear=True), patch.object(d, "command", return_value=sha), \
+             patch.object(d, "metadata", return_value=("0.2.0", 200)), patch.object(d.release, "verify_candidate"):
+            for version in ("0.2.0-beta.1", "0.2", "v0.2.0"):
+                with self.subTest(version=version), self.assertRaisesRegex(d.DistributionError, "plain"):
+                    d.preflight(version, sha)
+            self.assertEqual(d.preflight("0.2.0", sha)["track"], "stable")
 
     def test_publication_uploads_disk_image_when_supplied(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -554,7 +597,7 @@ class DistributionTests(unittest.TestCase):
     def test_published_manifests_accepts_optional_disk_image(self):
         data = manifest()
         disk = disk_manifest(data)
-        row = {"draft": False, "tag_name": data["tag"], "prerelease": True,
+        row = {"draft": False, "tag_name": data["tag"], "prerelease": False,
                "assets": [
                    {"name": "annotator-manifest.json", "id": 1},
                    {"name": data["archive"], "size": data["size"], "browser_download_url": data["downloadURL"]},
@@ -567,6 +610,16 @@ class DistributionTests(unittest.TestCase):
         row_no_dmg = {**row, "assets": row["assets"][:2]}
         with patch.object(d, "gh_json", side_effect=[[[row_no_dmg]], data]):
             self.assertNotIn("diskImage", d.published_manifests(data["repository"])[0])
+        # A plain release marked as a pre-release disagrees with its manifest; legacy releases were pre-releases.
+        with patch.object(d, "gh_json", side_effect=[[[{**row_no_dmg, "prerelease": True}]], data]), \
+             self.assertRaises(d.DistributionError):
+            d.published_manifests(data["repository"])
+        legacy = legacy_manifest()
+        legacy_row = {"draft": False, "tag_name": legacy["tag"], "prerelease": True, "assets": [
+            {"name": "annotator-manifest.json", "id": 1},
+            {"name": legacy["archive"], "size": legacy["size"], "browser_download_url": legacy["downloadURL"]}]}
+        with patch.object(d, "gh_json", side_effect=[[[legacy_row]], legacy]):
+            self.assertEqual(d.published_manifests(legacy["repository"])[0]["releaseVersion"], "0.1.0-alpha.1")
 
     def test_existing_draft_or_release_cannot_be_replaced_with_different_candidate(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -578,23 +631,21 @@ class DistributionTests(unittest.TestCase):
                 (root/name).write_text(text)
             env = dict(PUBLICATION_ENABLED="true", CANDIDATE_SHA=data["source"],
                        DISTRIBUTION_REPOSITORY=data["repository"], WEBSITE_URL=data["homepage"])
-            row = {"tag_name": data["tag"], "draft": True, "prerelease": True, "body": "Different source", "assets": []}
+            row = {"tag_name": data["tag"], "draft": True, "prerelease": False, "body": "Different source", "assets": []}
             with patch.dict(os.environ, env), patch.object(d, "gh_json", side_effect=[{"private": False}, [[row]]]), \
                  patch.object(d, "command") as run:
                 with self.assertRaisesRegex(d.DistributionError, "different immutable"):
                     d.publish(root)
                 run.assert_not_called()
 
-    def test_canonical_tap_uses_alpha_until_stable_exists(self):
-        preview = manifest()
-        stable = {**preview, "build": "10", "track": "stable", "releaseVersion": "0.1.0"}
-        newer_preview = {**preview, "build": "11"}
-        env = dict(PUBLICATION_ENABLED="true", DISTRIBUTION_REPOSITORY=preview["repository"],
-                   HOMEBREW_TAP_REPOSITORY=preview["repository"],
-                   GITHUB_REPOSITORY="example/private-code", WEBSITE_URL=preview["homepage"])
-        for entries, expected in [([preview], preview), ([preview, newer_preview], newer_preview),
-                                  ([stable, newer_preview], stable)]:
-            with self.subTest(entries=entries), patch.dict(os.environ, env, clear=True), \
+    def test_canonical_tap_uses_the_newest_release(self):
+        legacy, plain = legacy_manifest(), manifest()
+        env = dict(PUBLICATION_ENABLED="true", DISTRIBUTION_REPOSITORY=plain["repository"],
+                   HOMEBREW_TAP_REPOSITORY=plain["repository"],
+                   GITHUB_REPOSITORY="example/private-code", WEBSITE_URL=plain["homepage"])
+        for entries, expected, version in [([legacy], legacy, "0.1.0-alpha.1,9"), ([legacy, plain], plain, "0.2.0"),
+                                           ([plain, legacy], plain, "0.2.0")]:
+            with self.subTest(entries=[row["releaseVersion"] for row in entries]), patch.dict(os.environ, env, clear=True), \
                  patch.object(d, "published_manifests", return_value=entries), \
                  patch.object(d, "gh_json", side_effect=[{"private": False}, {"tree": []}]), \
                  patch.object(d, "command") as run:
@@ -602,8 +653,10 @@ class DistributionTests(unittest.TestCase):
                 request = json.loads(run.call_args.kwargs["input"])
                 content = base64.b64decode(request["content"]).decode()
                 self.assertIn('cask "annotator"', content)
-                self.assertIn(f'version "{expected["releaseVersion"]},{expected["build"]}"', content)
-                self.assertIn('conflicts_with cask: "annotator-preview"', content)
+                self.assertIn(f'version "{version}"\n', content)
+                self.assertIn(expected["downloadURL"], content)
+                self.assertNotIn("conflicts_with", content)
+                self.assertEqual(request["message"], f"Update annotator to {expected['releaseVersion']}")
                 self.assertIn("Casks/annotator.rb", run.call_args.args[4])
                 run.assert_called_once()
 
@@ -619,7 +672,7 @@ class DistributionTests(unittest.TestCase):
                 d.update_tap()
             run.assert_not_called()
         content = d.packager.cask({**data, "token": "annotator", "name": "Annotator.app"},
-                                 data["downloadURL"], data["sha256"], data["homepage"], "release")
+                                 data["downloadURL"], data["sha256"], data["homepage"])
         with patch.dict(os.environ, env, clear=True), \
              patch.object(d, "published_manifests", return_value=[data]), \
              patch.object(d, "gh_json", side_effect=[{"private": False},
@@ -684,48 +737,54 @@ class DistributionTests(unittest.TestCase):
         self.assertEqual(d.tap_name("example/homebrew-annotator"), "example/annotator")
         self.assertEqual(d.tap_name("example/annotator"), "example/annotator")
 
-    def test_website_metadata_uses_highest_build_in_each_track(self):
-        preview = manifest()
-        older = {**preview, "build": "8"}
-        stable = {**preview, "build": "11", "track": "stable", "releaseVersion": "0.1.0"}
+    def test_website_metadata_names_the_newest_release_and_mirrors_the_old_feeds(self):
+        legacy, plain = legacy_manifest(), manifest()
+        older = {**legacy, "build": "8"}
+        site = ("example/releases", "https://example.com")
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root/"website/src/data").mkdir(parents=True)
-            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
-                 patch.object(d, "published_manifests", return_value=[older, stable, preview]), \
-                 patch.object(d, "appcast", side_effect=lambda entry: f"build:{entry['build']}"):
-                d.website_metadata()
-            payload = json.loads((root/"website/src/data/distribution.json").read_text())
-            self.assertEqual(payload["preview"]["build"], "9")
-            self.assertEqual(payload["stable"]["build"], "11")
-            # The website states which Macs a release runs on from its verified architectures.
-            self.assertEqual(payload["preview"]["architecture"], "arm64")
-            self.assertEqual((root/"website/public/updates/preview.xml").read_text(), "build:9")
-            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
+            updates = root/"website/public/updates"
+            for published, expected in (([older, plain, legacy], plain), ([older, legacy], legacy)):
+                with self.subTest(newest=expected["releaseVersion"]), patch.object(d, "ROOT", root), \
+                     patch.object(d, "configuration", return_value=site), \
+                     patch.object(d, "published_manifests", return_value=published), \
+                     patch.object(d, "appcast", side_effect=lambda entry: f"build:{entry['build']}"):
+                    d.website_metadata()
+                    payload = json.loads((root/"website/src/data/distribution.json").read_text())
+                    # The website states which Macs a release runs on from its verified architectures; it shows no build.
+                    self.assertEqual(payload, {"release": {key: expected[key] for key in ("releaseVersion", "downloadURL", "sha256", "architecture")}})
+                    # Copies from 0.1.0-beta.17 and earlier read the preview feed, so it carries the same newest release.
+                    for name in ("stable.xml", "preview.xml"):
+                        self.assertEqual((updates/name).read_text(), f"build:{expected['build']}")
+            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=site), \
                  patch.object(d, "published_manifests", return_value=[]):
                 d.website_metadata()
-            self.assertFalse((root/"website/public/updates/preview.xml").exists())
-            self.assertEqual(json.loads((root/"website/src/data/distribution.json").read_text()), {"stable": None, "preview": None})
+            self.assertFalse((updates/"stable.xml").exists())
+            self.assertFalse((updates/"preview.xml").exists())
+            self.assertEqual(json.loads((root/"website/src/data/distribution.json").read_text()), {"release": None})
 
     def test_website_metadata_emits_disk_image_keys_only_when_present(self):
-        preview = {**manifest(), "diskImage": disk_manifest()}
-        stable = {**manifest(), "track": "stable", "releaseVersion": "0.1.0", "build": "11"}
+        with_dmg = {**manifest(), "diskImage": disk_manifest()}
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root/"website/src/data").mkdir(parents=True)
-            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
-                 patch.object(d, "published_manifests", return_value=[preview, stable]), \
-                 patch.object(d, "appcast", return_value="xml"):
-                d.website_metadata()
-            payload = json.loads((root/"website/src/data/distribution.json").read_text())
-            self.assertEqual(payload["preview"]["diskImageURL"], preview["diskImage"]["downloadURL"])
-            self.assertEqual(payload["preview"]["diskImageSHA256"], preview["diskImage"]["sha256"])
-            self.assertEqual(payload["preview"]["diskImageSize"], preview["diskImage"]["size"])
-            self.assertNotIn("diskImageURL", payload["stable"])
+            for published in ([with_dmg], [manifest()]):
+                with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
+                     patch.object(d, "published_manifests", return_value=published), \
+                     patch.object(d, "appcast", return_value="xml"):
+                    d.website_metadata()
+                payload = json.loads((root/"website/src/data/distribution.json").read_text())["release"]
+                if "diskImage" in published[0]:
+                    self.assertEqual(payload["diskImageURL"], with_dmg["diskImage"]["downloadURL"])
+                    self.assertEqual(payload["diskImageSHA256"], with_dmg["diskImage"]["sha256"])
+                    self.assertEqual(payload["diskImageSize"], with_dmg["diskImage"]["size"])
+                else:
+                    self.assertNotIn("diskImageURL", payload)
 
     def test_appcast_shows_the_releases_mac_notes_and_fails_without_them(self):
         data = manifest()
-        notes = {"releases": [{"version": "0.1.0-alpha.1", "build": 9, "changes": {"Fixed": ["Pen <strokes> & arrows"], "Added": ["Zoom"]},
+        notes = {"releases": [{"version": "0.2.0", "build": 200, "changes": {"Fixed": ["Pen <strokes> & arrows"], "Added": ["Zoom"]},
                                "knownIssues": ["Effects are not secure redaction."],
                                "platforms": {"windows": {"changes": {"Added": ["Windows only"]}, "knownIssues": []}}}]}
         root = ET.fromstring(d.appcast(data, notes))
@@ -736,7 +795,7 @@ class DistributionTests(unittest.TestCase):
         self.assertNotIn("Windows only", description)
         without_limits = {"releases": [{**notes["releases"][0], "knownIssues": []}]}
         self.assertNotIn("Known limits", d.update_notes(data, without_limits))
-        for missing in ({"releases": []}, {"releases": [{**notes["releases"][0], "build": 8}]},
+        for missing in ({"releases": []}, {"releases": [{**notes["releases"][0], "build": 199}]},
                         {"releases": [{**notes["releases"][0], "changes": {"Other": ["x"]}}]}):
             with self.subTest(missing=missing), self.assertRaises(d.DistributionError):
                 d.appcast(data, missing)
@@ -762,30 +821,33 @@ class DistributionTests(unittest.TestCase):
             with self.subTest(changed=changed, published=published), self.assertRaises(d.DistributionError):
                 d.validate_windows_description(changed, data, published)
 
-    def test_website_metadata_writes_a_windows_feed_only_for_releases_with_windows_files(self):
-        preview = manifest()
-        newer_mac_only = {**preview, "build": "10", "releaseVersion": "0.1.0-alpha.2", "tag": "v0.1.0-alpha.2"}
-        with_windows = {**preview, "windows": self.windows_description(preview)[0]}
-        stable = {**preview, "track": "stable", "releaseVersion": "0.1.0", "build": "11"}
+    def test_website_metadata_writes_windows_feeds_only_for_releases_with_windows_files(self):
+        plain = manifest()
+        newer_mac_only = {**plain, "build": "201", "releaseVersion": "0.2.1", "version": "0.2.1", "tag": "v0.2.1"}
+        with_windows = {**plain, "windows": self.windows_description(plain)[0]}
+        legacy = {**legacy_manifest(), "windows": self.windows_description(legacy_manifest())[0]}
+        site = ("example/releases", "https://example.com")
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root/"website/src/data").mkdir(parents=True)
-            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
-                 patch.object(d, "published_manifests", return_value=[newer_mac_only, with_windows, stable]), \
+            updates = root/"website/public/updates"
+            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=site), \
+                 patch.object(d, "published_manifests", return_value=[newer_mac_only, with_windows, legacy]), \
                  patch.object(d, "appcast", return_value="xml"):
                 d.website_metadata()
-            feed = json.loads((root/"website/public/updates/windows-preview.json").read_text())
-            # The Mac feed moves on to build 10, but Windows copies only hear about a release that has Windows files.
-            self.assertEqual(feed, {"schemaVersion": 1, "track": "preview", "releaseVersion": "0.1.0-alpha.1", "build": 9,
-                                    "downloadPage": "https://annotator.example/downloads/",
-                                    "releaseURL": "https://github.com/example/annotator-releases/releases/tag/v0.1.0-alpha.1"})
-            self.assertFalse((root/"website/public/updates/windows-stable.json").exists())
-            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=("example/releases", "https://example.com")), \
+            # The Mac feed moves on to 0.2.1, but Windows copies only hear about a release that has Windows files. The
+            # preview feed, read by copies from 0.1.0-beta.17 and earlier, says the same, and no feed names a track.
+            expected = {"schemaVersion": 1, "releaseVersion": "0.2.0", "build": 200,
+                        "downloadPage": "https://annotator.example/downloads/",
+                        "releaseURL": "https://github.com/example/annotator-releases/releases/tag/v0.2.0"}
+            for name in ("windows-stable.json", "windows-preview.json"):
+                self.assertEqual(json.loads((updates/name).read_text()), expected)
+            with patch.object(d, "ROOT", root), patch.object(d, "configuration", return_value=site), \
                  patch.object(d, "published_manifests", return_value=[newer_mac_only]), patch.object(d, "appcast", return_value="xml"):
                 d.website_metadata()
-            self.assertFalse((root/"website/public/updates/windows-preview.json").exists())
+            self.assertFalse((updates/"windows-stable.json").exists())
+            self.assertFalse((updates/"windows-preview.json").exists())
 
-    @unittest.skipUnless(sys.platform == "darwin", "CryptoKit CLI verification requires macOS.")
     def test_update_verifier_accepts_public_rfc8032_vector_and_rejects_changed_data(self):
         public = bytes.fromhex("d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a")
         signature = bytes.fromhex(
