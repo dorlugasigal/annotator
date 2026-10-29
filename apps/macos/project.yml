@@ -18,10 +18,10 @@ settings:
     ENABLE_HARDENED_RUNTIME: YES
     CODE_SIGN_STYLE: Automatic
     # The shared release version, a plain X.Y.Z. Change it with: python3 tools/release/release.py prepare --version X.Y.Z
-    MARKETING_VERSION: 0.2.0
+    MARKETING_VERSION: 0.2.1
     # Derived from MARKETING_VERSION, never counted: major * 10000 + minor * 100 + patch. macOS and Sparkle need a
     # growing number; release.py prepare writes it and release.py check verifies it.
-    CURRENT_PROJECT_VERSION: 200
+    CURRENT_PROJECT_VERSION: 201
     ANNOTATOR_SUPPORT_URL: https://buymeacoffee.com/dorlugasigal
     ANNOTATOR_ISSUES_URL: https://github.com/dorlugasigal/annotator/issues/new
     ANNOTATOR_WEBSITE_URL: https://dorlugasigal.github.io/annotator

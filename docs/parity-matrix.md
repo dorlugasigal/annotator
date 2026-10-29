@@ -135,7 +135,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Undo cancels unfinished work first; coordinated clear | Core | I | Corpus |
 | Background cycle button; Ctrl+W and Ctrl+B | Toolbar and keys | I | UI tests |
 | Edge docking with ghost preview and orientation change | App-owned drag | I | S-4 |
-| Press and hold anywhere on the toolbar (0.4 s within 3 points) to move it; the held control gets no click; sliders and fields keep their press; closed hand on the Mac, move cursor on Windows | App-owned drag | E | Unit tests, dock check |
+| Drag the toolbar from anywhere on it (a move past 3 points, or a 0.4 s hold within 3 points, picks it up); the pressed control gets no click; sliders and fields keep their press; closed hand on the Mac, move cursor on Windows | App-owned drag | E | Unit tests, dock check |
 | Property names as plain text, without icons | Properties | I | UX reference |
 | One Effects tool with three modes | Core and toolbar | I | Corpus |
 | 44 by 48 tool targets; Shift-resize; highlighter Shift straightening | XAML and core | I | Corpus |

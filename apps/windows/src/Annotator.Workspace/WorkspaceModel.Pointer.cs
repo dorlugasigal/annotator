@@ -43,6 +43,30 @@ public sealed partial class WorkspaceModel
         PersistPreferences();
     }
 
+    /// <summary>Mac <c>laserFade</c>: seconds the laser pointer's trail stays before it fades.</summary>
+    public double LaserFade => _preferences.LaserFade ?? LaserTrail.DefaultLifetime;
+
+    /// <summary>
+    /// Mac setLaserFade: saves the laser pointer's Fade, to a tenth of a second, from <see cref="LaserTrail.MinimumLifetime"/>
+    /// to <see cref="LaserTrail.MaximumLifetime"/>. The next stroke uses it; the default saves nothing.
+    /// </summary>
+    public void SetLaserFade(double seconds)
+    {
+        if (!double.IsFinite(seconds))
+        {
+            return;
+        }
+        double rounded = Math.Round(Math.Clamp(seconds, LaserTrail.MinimumLifetime, LaserTrail.MaximumLifetime) * 10,
+            MidpointRounding.AwayFromZero) / 10;
+        if (rounded == LaserFade)
+        {
+            return;
+        }
+        using ChangeScope scope = Change();
+        _preferences.LaserFade = rounded == LaserTrail.DefaultLifetime ? null : rounded;
+        PersistPreferences();
+    }
+
     /// <summary>
     /// Mac setCursorHighlight: saves the cursor halo's shape, outline, color, size, border, opacity, glow, click effect and
     /// visibility. Values outside the Mac's limits are refused with its message and nothing changes.

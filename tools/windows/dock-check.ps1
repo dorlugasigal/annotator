@@ -13,11 +13,11 @@
     the pointer moves inward; the drop docks the toolbar at exactly the ghost's frame, flush against the work area and
     centered along the edge, vertical at the left and right edges and horizontal at the top and bottom;
   - a drop three quarters along an edge still docks at its center;
-  - press and hold (ToolbarHold: 0.4 seconds within 3 points): a tool button held still and let go leaves the docked
-    toolbar where it was and never clicks; a short press on a button still clicks it; a button held for 0.6 seconds
-    picks the toolbar up, it follows the pointer from where the press started with Windows' move cursor (the Mac's
-    closed hand), and the button never clicks; the Width slider gets its press at once, so holding and sliding it changes
-    the width and never moves the toolbar;
+  - press and drag or press and hold (ToolbarHold: a move past 3 points, or 0.4 seconds within 3 points): a tool button
+    held still and let go leaves the docked toolbar where it was and never clicks; a short press on a button still clicks
+    it; a button held for 0.6 seconds, or dragged at once, picks the toolbar up, it follows the pointer from where the
+    press started with Windows' move cursor (the Mac's closed hand), and the button never clicks; the Width slider gets
+    its press at once, so holding and sliding it changes the width and never moves the toolbar;
   - the toolbar never enters a window manager move, so no Snap layout appears (the drag is the app's own).
 
   Safety: every press first checks with WindowFromPoint that the point is the toolbar's own background (UI Automation
@@ -483,6 +483,14 @@ try {
         "held Rectangle for 0.6 s and moved to $($target -join ','): toolbar $after, expected $($hold.Before.Left + $dx),$($hold.Before.Top + $dy)"
     Check 'hold-move-cursor' ([bool]$hold.During) "Windows' move cursor showed while the toolbar moved: $($hold.During)"
     Check 'hold-never-clicks' (-not (Chosen 'Rectangle') -and (Chosen 'Pen')) "Rectangle chosen $(Chosen 'Rectangle'), Pen chosen $(Chosen 'Pen')"
+
+    # 5e. Dragged at once, without a hold: the toolbar follows from the press too, and Rectangle never clicks.
+    $target = @([int]($midX - 100 * $scale), [int]($midY + 120 * $scale))
+    $hold = Hold (ControlAt 'Rectangle' $buttonType) 30 @(, $target) { [DockInput]::MoveCursorShows() }
+    $after = [DockInput]::Rect($toolbar)
+    $dx = $target[0] - $hold.Start[0]; $dy = $target[1] - $hold.Start[1]
+    Check 'drag-from-button-moves-toolbar' ($hold.Followed -and (Near $after.Left ($hold.Before.Left + $dx)) -and (Near $after.Top ($hold.Before.Top + $dy)) -and -not (Chosen 'Rectangle') -and (Chosen 'Pen')) `
+        "dragged Rectangle at once to $($target -join ','): toolbar $after, expected $($hold.Before.Left + $dx),$($hold.Before.Top + $dy); Rectangle chosen $(Chosen 'Rectangle')"
 
     # 5d. The Width slider gets its press at once: held for 0.6 s and slid 30 points, it changes and the toolbar stays.
     $slider = ControlAt 'Width' ([Windows.Automation.ControlType]::Slider)

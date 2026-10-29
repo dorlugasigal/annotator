@@ -54,7 +54,7 @@ public sealed class ToolbarHoldTests
     }
 
     [Fact]
-    public void QuickAndSlowClicksAndMovesStayTheControls()
+    public void QuickAndSlowClicksStayTheControlsAndAMoveEndsTheWait()
     {
         var hold = new ToolbarHoldGesture();
         // testQuickAndSlowClicksStillPressTheButton: letting go before the delay keeps the click.
@@ -66,7 +66,8 @@ public sealed class ToolbarHoldTests
         Assert.True(hold.Press(1, new Point(10, 10), allowed: true, OnAButton));
         Assert.Null(hold.Elapse(buttonDown: false, allowed: true));
         Assert.False(hold.IsWaiting);
-        // testMovingBeforeTheHoldEndsGivesThePressBack: moving further than the slop gives the press back.
+        // testMovingBeforeTheHoldEndsMovesTheToolbar: moving further than the slop ends the wait, and the window picks the
+        // toolbar up from the press.
         Assert.True(hold.Press(1, new Point(10, 10), allowed: true, OnAButton));
         Assert.Equal(ToolbarHoldMove.Still, hold.Move(1, new Point(11, 10)));
         Assert.Equal(ToolbarHoldMove.Moved, hold.Move(1, new Point(11, 16)));

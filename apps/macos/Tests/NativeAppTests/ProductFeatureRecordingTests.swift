@@ -356,7 +356,7 @@ final class ProductFeatureRecordingTests: XCTestCase {
             let floating = try XCTUnwrap(toolbar as? InspectorPanel)
             let start = CGPoint(x: toolbar.frame.midX, y: toolbar.frame.midY)
             let destination = CGPoint(x: stage.midX, y: stage.minY + 420 - toolbar.frame.height / 2)
-            floating.beginToolbarDrag(at: start, gestureOwned: true)
+            floating.beginToolbarDrag(at: start)
             floating.updateToolbarDrag(to: destination)
             floating.endToolbarDrag(at: destination)
             try await Task.sleep(for: .milliseconds(150))

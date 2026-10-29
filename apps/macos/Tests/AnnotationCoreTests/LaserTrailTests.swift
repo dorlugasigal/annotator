@@ -113,3 +113,16 @@ private func trail(_ points: [(Double, Double, Double)], release: Double? = nil,
     let bounds = try #require(fresh.bounds(at: 0.02))
     #expect(bounds.x <= 0 && bounds.contains(Point(0, 0)), "The band from the tail's point is drawn, so it is redrawn too")
 }
+
+@Test func laserTrailKeepsItsPointsForTheChosenFade() {
+    var slow = trail((0...40).map { (Double($0) * 5, 0, Double($0) * 0.01) }, release: 0.4)
+    slow.lifetime = 2.5
+    // 1.9 seconds after the pointer passed the start, it still shows; with the default Fade it was gone after 0.8.
+    #expect(slow.shapes(at: 1.9).first?.dots.first?.center == Point(0, 0))
+    #expect(trail((0...40).map { (Double($0) * 5, 0, Double($0) * 0.01) }, release: 0.4).shapes(at: 1.9).isEmpty)
+    // Released at 0.4, it fades out over the next 2.5 seconds.
+    #expect(slow.shapes(at: 1.65).first.map { abs($0.opacity - 0.5) < 1e-9 } == true)
+    slow.prune(at: 2.95)
+    #expect(slow.isEmpty)
+    #expect(LaserTrail.lifetimeRange.contains(LaserTrail.defaultLifetime))
+}

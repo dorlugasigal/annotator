@@ -121,6 +121,17 @@ public sealed class PointerEffectsTests
         Assert.Equal(50, fresh.Snapshot.Preferences.SpotlightRadius);
         fresh.SetSpotlightRadius(double.NaN);
         Assert.Equal(50, fresh.Snapshot.Preferences.SpotlightRadius);
+
+        // The laser pointer's Fade: tenths of a second from 0.5 to 5; the default saves nothing.
+        Assert.Equal(LaserTrail.DefaultLifetime, fresh.LaserFade);
+        fresh.SetLaserFade(2.46);
+        Assert.Equal(2.5, fresh.Snapshot.Preferences.LaserFade);
+        fresh.SetLaserFade(30);
+        Assert.Equal(LaserTrail.MaximumLifetime, fresh.LaserFade);
+        fresh.SetLaserFade(0.81);
+        Assert.Null(fresh.Snapshot.Preferences.LaserFade);
+        fresh.SetLaserFade(double.NaN);
+        Assert.Equal(LaserTrail.DefaultLifetime, fresh.LaserFade);
     }
 
     [Fact]

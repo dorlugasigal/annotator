@@ -165,9 +165,6 @@ struct CollapsedToolbarButton: View {
         .contentShape(Capsule())
         .onHover { hovering = $0 }
         .onTapGesture { model.requestToolbarExpansion() }
-        .gesture(DragGesture(minimumDistance: 3, coordinateSpace: .global)
-            .onChanged { value in model.onToolbarBackgroundDrag?(value.translation, false) }
-            .onEnded { value in model.onToolbarBackgroundDrag?(value.translation, true) })
         .contextMenu {
             Button("Show Toolbar") { model.requestToolbarExpansion() }
             Button(drawing ? "Use Apps" : "Draw") { toggleMode() }

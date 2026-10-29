@@ -23,7 +23,7 @@ private struct ToolbarPressArea: NSViewRepresentable {
 }
 
 extension View {
-    /// Holding this control is how people use it, so its press doesn't wait for a press and hold.
+    /// Dragging and holding this control is how people use it, so it gets its press at once instead of moving the toolbar.
     func keepsToolbarPress() -> some View { background(ToolbarPressArea()) }
 }
 

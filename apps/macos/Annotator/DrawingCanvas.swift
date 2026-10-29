@@ -512,6 +512,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
             return
         }
         if model.tool == .laser {
+            laserTrail.lifetime = model.laserFade
             laserTrail.press(at: point, time: CACurrentMediaTime(), color: model.style.color, width: model.style.width)
             runLaser()
             return

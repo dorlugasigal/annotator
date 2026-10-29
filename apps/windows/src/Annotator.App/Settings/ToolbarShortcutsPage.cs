@@ -218,7 +218,7 @@ internal sealed partial class ShortcutsPageBody : Grid
         }
         section.Children.Add(form);
         section.Children.Add(Caption("hand.draw",
-            "Press and hold anywhere on the toolbar, then drag it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical."));
+            "Drag the toolbar from anywhere on it, even from a button, to put it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical."));
         section.Children.Add(ShrinkCard());
         return section;
     }

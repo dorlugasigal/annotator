@@ -196,7 +196,6 @@ final class WorkspaceModel: ObservableObject {
     var onDismissToolbar: (() -> Void)?
     var onSuspendPresentation: (() -> Void)?
     var onToolbarSizeChanged: ((CGSize) -> Void)?
-    var onToolbarBackgroundDrag: ((CGSize, Bool) -> Void)?
     var onActivationShortcutChanged: ((ActivationShortcut) throws -> Void)?
     var onActivationRequested: (() -> Void)?
     var onResumeDrawingRequested: (() -> Void)?
@@ -1216,6 +1215,25 @@ final class WorkspaceModel: ObservableObject {
 
     /// Seconds the pointer can stay off the toolbar before it shrinks to one button. `nil` keeps it open.
     var toolbarCollapseDelay: Double? { preferences.toolbarCollapseDelay }
+
+    /// Seconds the laser pointer's trail stays before it fades.
+    var laserFade: Double { preferences.laserFade ?? LaserTrail.defaultLifetime }
+
+    /// Saves the laser pointer's Fade, to a tenth of a second, within `LaserTrail.lifetimeRange`. The next stroke uses it.
+    func setLaserFade(_ seconds: Double) {
+        if let owner = globalSettingsOwner { owner.setLaserFade(seconds); return }
+        guard seconds.isFinite else { return }
+        let range = LaserTrail.lifetimeRange
+        let rounded = (min(range.upperBound, max(range.lowerBound, seconds)) * 10).rounded() / 10
+        guard rounded != laserFade else { return }
+        do {
+            var updated = preferences
+            updated.laserFade = rounded == LaserTrail.defaultLifetime ? nil : rounded
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+        } catch { report(error) }
+    }
 
     func setToolbarCollapseDelay(_ delay: Double?) {
         if let owner = globalSettingsOwner { owner.setToolbarCollapseDelay(delay); return }

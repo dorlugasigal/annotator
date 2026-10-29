@@ -134,3 +134,20 @@ func legacyDrawingCursorPreferencesStillRoundTrip(_ style: ToolCursorStyle) thro
     preferences.expandedPropertyChoices = ["sparkle"]
     #expect(throws: CanvasError.self) { try preferences.data() }
 }
+
+@Test func laserFadeIsSavedWithinItsRange() throws {
+    var preferences = WorkspacePreferences()
+    #expect(preferences.laserFade == nil, "A new profile uses the default Fade.")
+    preferences.laserFade = 2.5
+    #expect(try WorkspacePreferences.read(preferences.data()) == preferences)
+    for fade in [0.4, 5.1, .infinity, .nan] {
+        preferences.laserFade = fade
+        #expect(throws: CanvasError.self) { try preferences.data() }
+    }
+    // A Fade from a version with a wider choice keeps the nearest one this version offers.
+    var object = try #require(JSONSerialization.jsonObject(with: WorkspacePreferences().data()) as? [String: Any])
+    object["laserFade"] = 12
+    #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).laserFade == 5)
+    object["laserFade"] = 0.1
+    #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).laserFade == 0.5)
+}

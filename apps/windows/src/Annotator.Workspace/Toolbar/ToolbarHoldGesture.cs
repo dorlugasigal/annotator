@@ -30,15 +30,18 @@ public enum ToolbarHoldMove
     /// <summary>The pointer stayed within <see cref="ToolbarHold.Slop"/> points: the press keeps waiting.</summary>
     Still,
 
-    /// <summary>The pointer moved further: the press is the control's, as usual (the background's own drag may start).</summary>
+    /// <summary>
+    /// The pointer moved further: the press no longer waits, and the host picks the toolbar up from the press, as a hold
+    /// does (the background's own drag starts by itself).
+    /// </summary>
     Moved,
 }
 
 /// <summary>
-/// The decisions of Mac InspectorPanel's press and hold (<see cref="ToolbarHold"/>), without a window. A left press anywhere
-/// on the toolbar waits up to <see cref="ToolbarHold.Delay"/> seconds: letting go or moving further than
-/// <see cref="ToolbarHold.Slop"/> points first leaves the press to the control under the pointer, and staying still that long
-/// picks the toolbar up from where the press started, so the control never gets it. Sliders and editable fields get their
+/// The decisions of Mac InspectorPanel's press and drag or press and hold (<see cref="ToolbarHold"/>), without a window. A
+/// left press anywhere on the toolbar waits up to <see cref="ToolbarHold.Delay"/> seconds: letting go first leaves the
+/// press to the control under the pointer, and moving further than <see cref="ToolbarHold.Slop"/> points or staying still
+/// that long picks the toolbar up from where the press started, so the control never gets it. Sliders and editable fields get their
 /// press at once, because holding them is how people use them. Positions are in points of the toolbar window; the host runs
 /// the timer and moves the toolbar (<see cref="ToolbarDocking.Hold"/>). Use it on one thread.
 /// </summary>
@@ -86,7 +89,7 @@ public sealed class ToolbarHoldGesture
         return true;
     }
 
-    /// <summary>Mac holdPress for leftMouseDragged: a small wobble is still a hold; a larger move gives the press back.</summary>
+    /// <summary>Mac holdPress for leftMouseDragged: a small wobble still waits; a larger move picks the toolbar up.</summary>
     public ToolbarHoldMove Move(uint pointer, Point point)
     {
         if (_press is not { } press || pointer != _pointer)

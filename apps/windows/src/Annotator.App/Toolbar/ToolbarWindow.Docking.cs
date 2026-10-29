@@ -18,8 +18,8 @@ using CoreSize = Annotator.Core.Geometry.Size;
 namespace Annotator.App.Toolbar;
 
 /// <summary>
-/// The toolbar's drag and docking (WIN-OVR-10, spec 009). A drag on the empty background, or a press and hold anywhere on
-/// the toolbar (ToolbarWindow.Hold.cs), moves the toolbar inside the work area of the display under the pointer, with
+/// The toolbar's drag and docking (WIN-OVR-10, spec 009). A drag from anywhere on the toolbar, or a press and hold
+/// (ToolbarWindow.Hold.cs), moves the toolbar inside the work area of the display under the pointer, with
 /// Windows' move cursor (the Mac's closed hand). With the pointer at the outermost point of a display edge a mouse-transparent
 /// ghost shows exactly where it will dock; releasing there docks it flush against that edge of the work area, centered,
 /// vertical at the left and right edges and horizontal at the top and bottom, and saves the edge. The drag is the app's
