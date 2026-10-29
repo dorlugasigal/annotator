@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On Windows, Annotator no longer crashes when it's started without a signed-in desktop, for example by a scheduled task that runs while nobody is signed in. It now quits and says why.
+
 ## 0.1.0-beta.17 (build 35) - 2026-10-29
 
 ### Added
