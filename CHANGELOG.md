@@ -4,6 +4,8 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+## 0.1.0-beta.17 (build 35) - 2026-10-29
+
 ### Added
 
 - You can take any button off the toolbar, including Properties, Undo, Redo, Settings, Board, Draw and More tools. In Settings > Toolbar & Shortcuts, drag it down to More tools or click its minus button. Its key still works.
@@ -24,6 +26,33 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 ### Fixed
 
 - Sharing half your screen, or any other region, now looks sharp on the call. The Annotator - Shared Region window used to open small, so Teams, Meet and Zoom sent a shrunken, blurry picture. It now opens at the region's full size, or as large as fits on that display, next to the region when there's room. If you make the window smaller, the picture shrinks smoothly instead of losing detail.
+
+### Known limits
+
+- The new toolbar options (removable buttons, one-row properties, Your properties and Shrink) passed automated checks on both platforms and scripted live checks on Windows. The owner tried them on a Mac development build; a person still needs to try them on Windows.
+- On Windows, the toolbar changes size at once when it shrinks to one button, opens again or grows for its properties. On a Mac, it animates.
+- The sharper Shared Region window was checked on one display on each platform. A region on a second display with different scaling, and how the picture looks in a real Teams, Meet or Zoom call, still need a hands-on check.
+- The Update available… reminder passed automated checks on both platforms. A real update from beta.16 to this version, including Remind me later and Skip This Version, still needs a hands-on check on the Mac.
+- The toolbar no longer shows a message while an effect waits for capture. This passed automated checks and still needs a hands-on look on both platforms.
+- Ink pressure was tuned with a mouse and a trackpad. Drawing with a pressure-sensitive pen still needs a hands-on check.
+- The on-screen tips, Ink pressure and the new gradients were checked on Windows with automated and live checks. On the Mac they passed automated checks; VoiceOver for the tip's ✕ still needs a hands-on check.
+- The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.
+- The animations added in beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.
+- The names of the Selection actions, Spotlight and Zoom menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.
+- The screen zoom ramp was checked with automated state tests only. The live-capture zoom tests did not run on the validation Mac because the test build had no Screen Recording permission.
+- In the Shared Region window, the spotlight still turns on and off at once instead of fading.
+- Shared animations passed controlled local capture checks. Their appearance in a Teams, Meet or Zoom receiver still needs a hands-on check.
+- The controlled toolbar-sharing check has been inconsistent on this Mac. Check that the toolbar appears in your meeting's shared window before relying on it.
+- The owner confirmed the region highlight works on the current monitor setup. Full-screen browser transitions, Stage Manager and unplugging or reconnecting monitors still need separate checks.
+- Choosing a different area in the configuration window or changing the display setup turns region sharing off. Check the outline before starting it again.
+- Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
+- The Intel app and tests compiled, but runtime tests could not run because Rosetta is missing on the validation Mac. No Intel Mac has run this version yet.
+- Installing on another Mac and updating from an earlier version still need a hands-on check.
+- VoiceOver and Full Keyboard Access checks remain incomplete.
+- With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.
+- Cross-monitor dragging still needs a hands-on check.
+- Effects do not follow moving windows or scrolling content and are not secure redaction.
+- Heavy gradient scenes and long-session resource use still need native performance checks.
 
 ## 0.1.0-beta.16 (build 34) - 2026-10-25
 
