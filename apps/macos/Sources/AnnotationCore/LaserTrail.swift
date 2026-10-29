@@ -15,8 +15,9 @@ public struct LaserTrail: Equatable, Sendable {
     /// The tail narrows to nothing over this many line widths.
     public static let tailTaper = 4.0
 
-    /// One layer of the trail's look. Layers are drawn in order: two soft glows in the trail's color, the line itself and
-    /// a thin white core. Each layer is one filled outline, so where the trail crosses itself it is no darker.
+    /// One layer of the trail's look. Layers are drawn in order: four glows in the trail's color that get stronger towards
+    /// the line, so the glow fades out softly, then the line itself and a thin white core. Each layer is one filled
+    /// outline, so where the trail crosses itself it is no darker.
     public struct Pass: Equatable, Sendable {
         /// The layer's radius at each dot: the dot's radius times `scale`, plus `extra` points.
         public let scale: Double
@@ -33,8 +34,10 @@ public struct LaserTrail: Equatable, Sendable {
     }
 
     public static let passes: [Pass] = [
-        Pass(scale: 2.4, extra: 2, alpha: 0.14, white: false),
-        Pass(scale: 1.6, extra: 1, alpha: 0.24, white: false),
+        Pass(scale: 2.8, extra: 3, alpha: 0.05, white: false),
+        Pass(scale: 2.2, extra: 2, alpha: 0.08, white: false),
+        Pass(scale: 1.7, extra: 1.5, alpha: 0.12, white: false),
+        Pass(scale: 1.35, extra: 1, alpha: 0.18, white: false),
         Pass(scale: 1, extra: 0, alpha: 1, white: false),
         Pass(scale: 0.4, extra: 0, alpha: 0.85, white: true)
     ]

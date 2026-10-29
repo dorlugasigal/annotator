@@ -74,12 +74,12 @@ private func trail(_ points: [(Double, Double, Double)], release: Double? = nil,
 @Test func laserTrailBoundsIncludeTheGlow() throws {
     let held = trail([(100, 100, 0)])
     let bounds = try #require(held.bounds(at: 0))
-    let reach = 3 * 2.4 + 2
+    let reach = 3 * 2.8 + 3
     #expect(bounds == Rect(x: 100 - reach, y: 100 - reach, width: reach * 2, height: reach * 2))
 }
 
 @Test func laserBandsWindLikeTheirCircles() throws {
-    let pass = LaserTrail.passes[2]
+    let pass = LaserTrail.passes[4]
     for (start, end) in [(Point(0, 0), Point(10, 0)), (Point(10, 0), Point(0, 0)), (Point(0, 0), Point(0, -10))] {
         let band = try #require(LaserTrail.band(from: LaserTrail.Dot(center: start, radius: 2),
                                                 to: LaserTrail.Dot(center: end, radius: 3), pass: pass))
