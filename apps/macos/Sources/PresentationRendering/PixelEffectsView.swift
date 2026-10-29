@@ -31,6 +31,8 @@ public final class PixelEffectsView: MTKView, MTKViewDelegate {
     public var onFailure: ((Error) -> Void)?
     public var onPresented: ((UInt64) -> Void)?
     public var onFrameMetrics: ((PixelFrameMetrics) -> Void)?
+    /// Scales the picture down smoothly when the view is smaller than its source (ViewportProjection.imageForMetal).
+    public var smoothDownscaling = false
     public override var isOpaque: Bool { false }
 
     public init(renderingFrame frame: CGRect) throws {
@@ -97,8 +99,8 @@ public final class PixelEffectsView: MTKView, MTKViewDelegate {
         let target = CGRect(origin: .zero, size: textureSize)
         var transformed: CIImage
         do {
-            transformed = try ViewportProjection.imageForMetal(image, sourceSize: sourceSize,
-                                                               viewport: viewport, targetSize: textureSize)
+            transformed = try ViewportProjection.imageForMetal(image, sourceSize: sourceSize, viewport: viewport,
+                                                               targetSize: textureSize, smoothDownscaling: smoothDownscaling)
             if let screenOverlay {
                 transformed = try ViewportProjection.overlayForMetal(screenOverlay, targetSize: textureSize)
                     .composited(over: transformed).cropped(to: target)

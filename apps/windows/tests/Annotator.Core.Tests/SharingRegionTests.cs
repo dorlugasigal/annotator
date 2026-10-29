@@ -58,4 +58,54 @@ public class SharingRegionTests
         Assert.Equal(region.Bounds, region.SourceBounds(null));
         AssertCanvasError(CanvasError.InvalidGeometry, () => region.AspectFit(Rect.Zero));
     }
+
+    [Fact]
+    public void SharingOutputShowsHalfAnUltrawideDisplayBesideTheRegion()
+    {
+        var display = new Rect(0, 0, 5120, 1440);
+        var region = new SharingRegion(ShareRegionPreset.LeftHalf, display);
+        var content = region.OutputContentFrame(new Rect(0, 25, 5120, 1415), new FrameInsets(28));
+        Assert.Equal(1415 - 2 * 24 - 28, content.Height);
+        Assert.True(Math.Abs(content.Width / content.Height - 2560.0 / 1440) < 0.000001);
+        Assert.Equal(5120 - 24, content.MaxX);
+        Assert.Equal(25 + 24 + 28, content.Y);
+        Assert.True(content.X > region.Bounds.MaxX, "The window stays out of the shared half.");
+    }
+
+    [Fact]
+    public void SharingOutputKeepsTheRegionsOwnSizeWhenItFits()
+    {
+        var display = new Rect(0, 0, 1920, 1080);
+        var region = new SharingRegion(new Rect(100, 100, 800, 600), display);
+        Assert.Equal(new Rect(1096, 77, 800, 600), region.OutputContentFrame(new Rect(0, 25, 1920, 1055), new FrameInsets(28)));
+    }
+
+    [Fact]
+    public void SharingOutputTakesTheCornerThatCoversTheLeastOfTheRegion()
+    {
+        var laptop = new Rect(0, 0, 1512, 982);
+        var right = new SharingRegion(ShareRegionPreset.RightHalf, laptop);
+        var besideRight = right.OutputContentFrame(new Rect(0, 38, 1512, 944), new FrameInsets(28));
+        Assert.Equal((24.0, 38.0 + 24 + 28), (besideRight.X, besideRight.Y));
+        Assert.Equal(944 - 2 * 24 - 28, besideRight.Height);
+        Assert.True(besideRight.MaxX < right.Bounds.X);
+
+        var wide = new Rect(0, 0, 1920, 1080);
+        var top = new SharingRegion(ShareRegionPreset.TopHalf, wide);
+        Assert.Equal(new Rect(24, 529.5, 1872, 526.5), top.OutputContentFrame(new Rect(0, 25, 1920, 1055), new FrameInsets(28)));
+
+        var tie = new SharingRegion(wide, wide).OutputContentFrame(new Rect(0, 25, 1920, 1055), new FrameInsets(28));
+        Assert.Equal((1920.0 - 24, 25.0 + 24 + 28), (tie.MaxX, tie.Y));
+    }
+
+    [Fact]
+    public void SharingOutputHasAMinimumSizeAndChecksItsInputs()
+    {
+        var display = new Rect(-1440, 0, 1440, 900);
+        var small = new SharingRegion(new Rect(-1440, 0, 40, 40), display);
+        Assert.Equal(new Rect(-24 - 1 - 320, 24 + 28, 320, 200), small.OutputContentFrame(display, new FrameInsets(28, 1, 1, 1)));
+        AssertCanvasError(CanvasError.InvalidGeometry, () => small.OutputContentFrame(Rect.Zero, new FrameInsets(28)));
+        AssertCanvasError(CanvasError.InvalidGeometry, () => small.OutputContentFrame(display, new FrameInsets(-1)));
+        AssertCanvasError(CanvasError.InvalidGeometry, () => small.OutputContentFrame(display, new FrameInsets(double.NaN)));
+    }
 }

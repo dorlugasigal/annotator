@@ -13,8 +13,11 @@ public struct PixelScreenOverlay {
 }
 
 public enum ViewportProjection {
+    /// The viewport's source fills `targetSize`, sampled nearest-neighbor. With `smoothDownscaling`, a target smaller
+    /// than the source is scaled down smoothly instead: nearest-neighbor would drop whole rows and columns of pixels
+    /// and break up text.
     public static func imageForMetal(_ image: CIImage, sourceSize: CGSize, viewport: Viewport,
-                                     targetSize: CGSize) throws -> CIImage {
+                                     targetSize: CGSize, smoothDownscaling: Bool = false) throws -> CIImage {
         guard sourceSize.width > 0, sourceSize.height > 0, sourceSize.width.isFinite, sourceSize.height.isFinite,
               targetSize.width > 0, targetSize.height > 0, targetSize.width.isFinite, targetSize.height.isFinite else {
             throw RenderFailure.invalidSize
@@ -24,9 +27,17 @@ public enum ViewportProjection {
         let crop = CGRect(x: extent.minX + viewport.source.x * sx,
                           y: extent.maxY - viewport.source.maxY * sy,
                           width: viewport.source.width * sx, height: viewport.source.height * sy)
+        let scale = CGAffineTransform(scaleX: targetSize.width / crop.width, y: targetSize.height / crop.height)
+        if smoothDownscaling && (targetSize.width < crop.width || targetSize.height < crop.height) {
+            // Clamping after the crop repeats the crop's edge pixels, so nothing outside it is sampled.
+            return image.cropped(to: crop).clampedToExtent()
+                .transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
+                .transformed(by: scale, highQualityDownsample: true)
+                .cropped(to: CGRect(origin: .zero, size: targetSize))
+        }
         return image.samplingNearest().cropped(to: crop)
             .transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
-            .transformed(by: CGAffineTransform(scaleX: targetSize.width / crop.width, y: targetSize.height / crop.height))
+            .transformed(by: scale)
     }
 
     public static func overlayForMetal(_ overlay: PixelScreenOverlay, targetSize: CGSize) throws -> CIImage {

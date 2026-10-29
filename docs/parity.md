@@ -362,8 +362,16 @@ platform that departs from the specifications, unless an ADR changes them.
 - **WIN-CAP-08**: Region sharing matches 012. The output is an ordinary
   top-level window titled **Annotator - Shared Region**. It opens behind other
   apps without taking focus and keeps updating while covered. Meeting apps
-  cannot capture a minimized window, so help says not to minimize it. Resizing
-  keeps the region's aspect ratio with letterboxing. Source pixels are cropped
+  send a window at its own size, so it opens at the region's size, or as
+  large as fits in the display's work area 24 points from its edges, in the
+  corner that covers the least of the region (top right first), as
+  `SharingRegion.OutputContentFrame` computes (corpus `sharingOutput`). It
+  keeps the size people give it until sharing starts with another region.
+  Meeting apps cannot capture a minimized window, so help says not to
+  minimize it. Resizing keeps the region's aspect ratio with letterboxing. A
+  window smaller than the region scales the picture down smoothly, never by
+  dropping rows of pixels; at the region's size and larger it is sampled
+  nearest-neighbor. Source pixels are cropped
   before filters run. The visible toolbar appears through a borderless capture
   of Annotator's own toolbar window, or a XAML render if S-11 shows that is
   identical. The tray icon shows a red dot while sharing is live. Every state,

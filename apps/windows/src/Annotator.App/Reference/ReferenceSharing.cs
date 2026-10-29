@@ -93,7 +93,13 @@ internal sealed partial class ReferenceHost
         Windows.Graphics.PointInt32 origin = OffscreenOrigin();
         MonitorArea monitor = WindowChrome.MonitorAt(origin.X, origin.Y);
         var area = PixelRect.FromSize(origin.X, origin.Y, (int)Math.Round(1600 * monitor.Scale), (int)Math.Round(1000 * monitor.Scale));
-        window.Place(new DisplayInfo(0, "reference-sharing", area, area, (uint)Math.Round(96 * monitor.Scale), IsPrimary: false));
+        uint dpi = (uint)Math.Round(96 * monitor.Scale);
+        // The Mac's reference output is 720 by 440 points, with the window 24 points from the top-right corner of its area.
+        (int frameTop, _, _, int frameRight) = SharedRegionWindow.VisibleFrame(dpi);
+        int clientWidth = (int)Math.Round(720 * monitor.Scale), clientHeight = (int)Math.Round(440 * monitor.Scale);
+        int margin = (int)Math.Round(24 * monitor.Scale);
+        window.Place(new DisplayInfo(0, "reference-sharing", area, area, dpi, IsPrimary: false),
+                     PixelRect.FromSize(area.Right - margin - frameRight - clientWidth, area.Top + margin + frameTop, clientWidth, clientHeight));
         window.ShowBehind();
         (int width, int height) = window.ClientSize;
         string cover = RegionSharingText.StartingCover;

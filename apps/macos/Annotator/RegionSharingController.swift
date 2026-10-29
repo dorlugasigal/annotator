@@ -344,6 +344,7 @@ final class RegionSharingController: NSObject, ObservableObject, NSWindowDelegat
             guard let presentation = source.presentation else { throw RegionSharingFailure.unavailable }
             model.interact()
             let output = try self.output ?? SharedRegionWindow(region: region, displayFrame: display.frame)
+            try output.fit(region: region, displayFrame: display.frame)
             self.output = output
             output.onClosed = { [weak self] in self?.stop(closeOutput: true) }
             output.content.onFailure = { [weak self] in self?.fail($0) }

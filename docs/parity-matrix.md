@@ -171,6 +171,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Start/Stop, quick halves, red accents and red tray dot | Controls, flyout and tray | E | UI tests |
 | Show/hide animations mirrored in the output | Motion module: the overlays' plan copied into the output (`SharedMotion` through `IVisibilityMirror`) | I | Native tests |
 | Opens behind other apps, updates while covered, aspect ratio kept | Window service | E | S-11 |
+| Opens at the region's size, or as large as fits, beside the region; a smaller window scales down smoothly | `SharingRegion.OutputContentFrame` placing the window; linear composition sampling when smaller | I | Viewports corpus, Platform tests |
 | Stops opaque on failure, lock, sleep or display change | Capture service states and the output's cover | I | S-1 |
 
 ## 014 Break timer

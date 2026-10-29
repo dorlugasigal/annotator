@@ -581,6 +581,42 @@ final class RegionSharingTests: XCTestCase {
         XCTAssertEqual(output.content.drawingRenderCount, 1, "Live source frames and window sizes reuse the drawing layer.")
     }
 
+    func testOutputOpensAtTheRegionsOwnSizeBesideItAndRefitsForANewRegion() throws {
+        let screen = try XCTUnwrap(NSScreen.main)
+        let display = Rect(x: 0, y: 0, width: screen.frame.width, height: screen.frame.height)
+        let visible = screen.visibleFrame
+        let width = min(600, (visible.width / 3).rounded(.down)), height = min(400, (visible.height / 3).rounded(.down))
+        let corner = try SharingRegion(bounds: Rect(x: 0, y: display.height - height, width: width, height: height),
+                                       displayBounds: display)
+        let output = try SharedRegionWindow(region: corner, displayFrame: screen.frame)
+        defer { output.close() }
+        output.show(inBackground: true)
+        XCTAssertTrue(output.content.smoothDownscaling, "A window smaller than the region must not drop pixel rows.")
+        var content = output.window.contentRect(forFrameRect: output.window.frame)
+        XCTAssertEqual(content.size, CGSize(width: width, height: height), "Meeting apps get the region at its own size.")
+        XCTAssertFalse(output.window.frame.intersects(RegionSharingGuide.screenFrame(for: corner.bounds, on: screen.frame)))
+        XCTAssertTrue(visible.contains(output.window.frame))
+
+        output.window.setContentSize(CGSize(width: 500, height: 320))
+        let resized = output.window.frame
+        try output.fit(region: corner, displayFrame: screen.frame)
+        XCTAssertEqual(output.window.frame, resized, "The same region keeps the size people chose.")
+
+        let half = try SharingRegion(preset: .leftHalf, displayBounds: display)
+        try output.fit(region: half, displayFrame: screen.frame)
+        content = output.window.contentRect(forFrameRect: output.window.frame)
+        let available = Rect(x: visible.minX - screen.frame.minX, y: screen.frame.maxY - visible.maxY,
+                             width: visible.width, height: visible.height)
+        let expected = RegionSharingGuide.screenFrame(for: try half.outputContentFrame(available: available,
+            frame: FrameInsets(top: output.window.frame.height - content.height)), on: screen.frame)
+        for (actual, wanted) in [(content.minX, expected.minX), (content.maxY, expected.maxY),
+                                 (content.width, expected.width), (content.height, expected.height)] {
+            XCTAssertEqual(actual, wanted, accuracy: 1)
+        }
+        XCTAssertEqual(content.width / content.height, half.bounds.width / half.bounds.height, accuracy: 0.01)
+        XCTAssertTrue(visible.contains(output.window.frame))
+    }
+
     func testSharedTextIncludesTheNativeEditorBeforeCommit() throws {
         let suite = "shared-text-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

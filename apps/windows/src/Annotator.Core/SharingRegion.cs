@@ -107,8 +107,65 @@ public readonly record struct SharingRegion
         return new Rect(output.X + (output.Width - width) / 2, output.Y + (output.Height - height) / 2, width, height);
     }
 
+    /// <summary>The output window's distance from the edges of the display's usable area.</summary>
+    public const double OutputMargin = 24;
+
+    public const double OutputMinimumWidth = 320;
+
+    public const double OutputMinimumHeight = 200;
+
+    /// <summary>
+    /// Where the output window's content goes when sharing starts, in the coordinates of <see cref="Bounds"/>. Meeting apps
+    /// send the window at its own size, so the content shows the region at its own size, or as large as fits in
+    /// <paramref name="available"/> (the display's usable area) with <see cref="OutputMargin"/> around the window's frame.
+    /// The window takes the corner of <paramref name="available"/> that covers the least of the region, top right first, so
+    /// it stays out of the shared area when it can. Throws <see cref="CanvasError.InvalidGeometry"/> for an invalid area or
+    /// frame.
+    /// </summary>
+    public Rect OutputContentFrame(Rect available, FrameInsets frame)
+    {
+        if (!available.IsValid || !(available.Width > 0) || !(available.Height > 0) || !frame.IsValid)
+        {
+            throw CanvasError.InvalidGeometry;
+        }
+        const double margin = OutputMargin;
+        double chromeWidth = frame.Left + frame.Right, chromeHeight = frame.Top + frame.Bottom;
+        double scale = SwiftMath.Min(SwiftMath.Min(1, (available.Width - 2 * margin - chromeWidth) / Bounds.Width),
+                                     (available.Height - 2 * margin - chromeHeight) / Bounds.Height);
+        double width = SwiftMath.Max(1, SwiftMath.Min(SwiftMath.Max(Bounds.Width * scale, OutputMinimumWidth), available.Width - chromeWidth));
+        double height = SwiftMath.Max(1, SwiftMath.Min(SwiftMath.Max(Bounds.Height * scale, OutputMinimumHeight), available.Height - chromeHeight));
+        double frameWidth = width + chromeWidth, frameHeight = height + chromeHeight;
+        double right = SwiftMath.Max(available.X, available.MaxX - frameWidth - margin);
+        double left = SwiftMath.Max(available.X, SwiftMath.Min(available.MaxX - frameWidth, available.X + margin));
+        double top = SwiftMath.Max(available.Y, SwiftMath.Min(available.MaxY - frameHeight, available.Y + margin));
+        double bottom = SwiftMath.Max(available.Y, available.MaxY - frameHeight - margin);
+        Rect best = default;
+        double covered = double.PositiveInfinity;
+        ReadOnlySpan<(double X, double Y)> corners = [(right, top), (left, top), (right, bottom), (left, bottom)];
+        foreach ((double x, double y) in corners)
+        {
+            var candidate = new Rect(x, y, frameWidth, frameHeight);
+            double overlap = SwiftMath.Max(0, SwiftMath.Min(candidate.MaxX, Bounds.MaxX) - SwiftMath.Max(candidate.X, Bounds.X)) *
+                SwiftMath.Max(0, SwiftMath.Min(candidate.MaxY, Bounds.MaxY) - SwiftMath.Max(candidate.Y, Bounds.Y));
+            if (overlap < covered)
+            {
+                best = candidate;
+                covered = overlap;
+            }
+        }
+        return new Rect(best.X + frame.Left, best.Y + frame.Top, width, height);
+    }
+
     private static Rect Scale(Rect unit, Rect display) => new(
         display.X + unit.X * display.Width,
         display.Y + unit.Y * display.Height,
         unit.Width * display.Width, unit.Height * display.Height);
+}
+
+/// <summary>The space a window's frame adds around its content, in points.</summary>
+public readonly record struct FrameInsets(double Top, double Left = 0, double Bottom = 0, double Right = 0)
+{
+    public bool IsValid => Valid(Top) && Valid(Left) && Valid(Bottom) && Valid(Right);
+
+    private static bool Valid(double value) => double.IsFinite(value) && value >= 0 && value <= 10_000;
 }

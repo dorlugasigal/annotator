@@ -65,7 +65,8 @@ public sealed record SharedRegionPresenterOptions
 /// black outside the region, covers black, pixel effects filtered from that scene and covers on top again. Only the
 /// region's pixels and a one-pixel margin are read and filtered, which gives exactly the pixels of filtering the whole
 /// display. The result goes to a composition swap chain the size of the region in pixels, which the output's visual
-/// scales to its letterboxed frame with nearest-neighbor sampling, as the Mac's Metal view samples it. Frames are drawn
+/// scales to its letterboxed frame as the Mac's Metal view samples it: nearest-neighbor, or smoothly when the frame is
+/// smaller than the region (<see cref="SmoothDownscaling"/>). Frames are drawn
 /// by the capture worker that delivers them; the presenter's thread only attaches the swap chain and hears what was shown.
 /// Nothing is drawn without a lease, and unfiltered pixels are never shown where an effect or cover is (WIN-CAP-03).
 /// </summary>
@@ -87,6 +88,7 @@ public sealed unsafe class SharedRegionPresenter : IDisposable
     private ICaptureLease? lease;
     private ICompositionSurface? surface;
     private CompositionSurfaceBrush? brush;
+    private bool smoothDownscaling;
     private long attachedGeneration = -1;
     private bool disposed;
     private readonly List<SpriteVisual> views = [];
@@ -161,6 +163,28 @@ public sealed unsafe class SharedRegionPresenter : IDisposable
 
     /// <summary>The region image. The owner sets its offset and size to the letterboxed frame, in the window's pixels.</summary>
     public SpriteVisual Visual => visual;
+
+    /// <summary>
+    /// Set by the owner when <see cref="Visual"/> is smaller than the region's pixels: the picture is then scaled down
+    /// smoothly, since nearest-neighbor sampling would drop whole rows and columns of pixels and break up text (Mac
+    /// ViewportProjection.imageForMetal with smoothDownscaling). Otherwise it is sampled nearest-neighbor.
+    /// </summary>
+    public bool SmoothDownscaling
+    {
+        get => smoothDownscaling;
+        set
+        {
+            VerifyAccess();
+            smoothDownscaling = value;
+            if (brush is not null)
+            {
+                brush.BitmapInterpolationMode = Interpolation;
+            }
+        }
+    }
+
+    private CompositionBitmapInterpolationMode Interpolation =>
+        smoothDownscaling ? CompositionBitmapInterpolationMode.Linear : CompositionBitmapInterpolationMode.NearestNeighbor;
 
     /// <summary>
     /// Another view of the region image (the same swap chain) for a layer above it: the output draws the covers and pixel
@@ -784,8 +808,7 @@ public sealed unsafe class SharedRegionPresenter : IDisposable
             var created = Annotator.Platform.Interop.CompositionInterop.CreateCompositionSurfaceForSwapChain(compositor, chain);
             var createdBrush = compositor.CreateSurfaceBrush(created);
             createdBrush.Stretch = CompositionStretch.Fill;
-            // The Mac's ViewportProjection samples the region image nearest-neighbor into its view.
-            createdBrush.BitmapInterpolationMode = CompositionBitmapInterpolationMode.NearestNeighbor;
+            createdBrush.BitmapInterpolationMode = Interpolation;
             DetachSurface();
             surface = created;
             brush = createdBrush;

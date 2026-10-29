@@ -255,6 +255,18 @@ public class GeometryTests
             case "sharingRegion":
                 result = Outcome.Of(() => Shapes.Json(new SharingRegion(Shapes.Rect(record["bounds"]), display).Bounds));
                 break;
+            case "sharingOutput":
+                var available = Shapes.Rect(record["available"]);
+                var insets = record["frame"]!;
+                var frame = new FrameInsets(NumberOf(insets["top"]), NumberOf(insets["left"]), NumberOf(insets["bottom"]), NumberOf(insets["right"]));
+                result = Outcome.Of(() =>
+                {
+                    var region = record["preset"] is { } outputPreset
+                        ? new SharingRegion(ShareRegionPreset.FromRawValue(outputPreset.GetValue<string>()) ?? throw new InvalidDataException("Unknown preset."), display)
+                        : new SharingRegion(Shapes.Rect(record["bounds"]), display);
+                    return Shapes.Json(region.OutputContentFrame(available, frame));
+                });
+                break;
             default:
                 throw new InvalidDataException($"Unknown call {record["call"]}.");
         }

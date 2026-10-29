@@ -15,6 +15,9 @@
       "Pattern, Roughness, Fill style, Font and Alignment are one button each: click it for the next choice. Rounded corners, Curved arrow and Ink pressure are on and off buttons, and Width and text size are just a slider.",
       "The small Spotlight and Zoom menus at the end of the properties row are gone. Add them as toolbar buttons instead.",
       "Settings opens wider, so your toolbar stays on one line in Toolbar & Shortcuts, even with 15 tools."
+    ],
+    "Fixed": [
+      "Sharing half your screen, or any other region, now looks sharp on the call. The Annotator - Shared Region window used to open small, so Teams, Meet and Zoom sent a shrunken, blurry picture. It now opens at the region's full size, or as large as fits on that display, next to the region when there's room. If you make the window smaller, the picture shrinks smoothly instead of losing detail."
     ]
   },
   "releases": [

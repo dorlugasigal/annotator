@@ -128,13 +128,14 @@ public sealed class RegionSharingWindowTests
                 Assert.Equal(0u, (uint)Win32.ExStyle(handle) & (uint)WINDOW_EX_STYLE.WS_EX_TOPMOST);
 
                 DisplayInfo primary = TestDisplays.Primary();
-                window.Place(primary);
-                (int width, int height) = window.ClientSize;
-                int expected = Math.Min((int)Math.Round(SharedRegionWindow.DefaultWidth * primary.Scale), primary.WorkArea.Width);
-                Assert.InRange(width, expected - 2, expected + 2);
-                Assert.InRange(height, 1, (int)Math.Round(SharedRegionWindow.DefaultHeight * primary.Scale) + 2);
-                PixelRect client = window.ClientScreenRect();
-                Assert.True(client.Right <= primary.WorkArea.Right && client.Top >= primary.WorkArea.Top, $"client {client} in {primary.WorkArea}");
+                (int frameTop, int frameLeft, int frameBottom, int frameRight) = SharedRegionWindow.VisibleFrame(primary.Dpi);
+                Assert.True(frameTop > 0 && frameLeft >= 0 && frameBottom >= 0 && frameRight >= 0, $"frame {frameTop} {frameLeft} {frameBottom} {frameRight}");
+                PixelRect work = primary.WorkArea;
+                int clientWidth = Math.Min(640, work.Width / 2), clientHeight = Math.Min(360, work.Height / 2);
+                var client = PixelRect.FromSize(work.Right - frameRight - 24 - clientWidth, work.Top + frameTop + 24, clientWidth, clientHeight);
+                window.Place(primary, client);
+                Assert.Equal((clientWidth, clientHeight), window.ClientSize);
+                Assert.Equal(client, window.ClientScreenRect());
 
                 HWND foreground = PInvoke.GetForegroundWindow();
                 window.ShowBehind();
