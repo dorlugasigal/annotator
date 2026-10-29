@@ -8,9 +8,9 @@
   {
    "enabled": true,
    "frame": [
-    8,
+    39,
     156,
-    51,
+    32,
     14
    ],
    "role": "AXStaticText",
@@ -19,9 +19,9 @@
   {
    "enabled": true,
    "frame": [
-    158,
+    189,
     156,
-    60.5,
+    39.5,
     14
    ],
    "role": "AXStaticText",
@@ -30,9 +30,9 @@
   {
    "enabled": true,
    "frame": [
-    233.5,
+    242.5,
     156,
-    80,
+    59.5,
     14
    ],
    "role": "AXStaticText",
@@ -41,7 +41,7 @@
   {
    "enabled": true,
    "frame": [
-    -43.5,
+    -11,
     176,
     36,
     36
@@ -56,7 +56,7 @@
     {
      "enabled": true,
      "frame": [
-      10.5,
+      43,
       187,
       18,
       14
@@ -66,7 +66,7 @@
    ],
    "enabled": true,
    "frame": [
-    6.5,
+    39,
     187,
     96,
     14
@@ -78,7 +78,7 @@
   {
    "enabled": true,
    "frame": [
-    156.5,
+    189,
     176,
     36,
     36
@@ -91,7 +91,7 @@
   {
    "enabled": true,
    "frame": [
-    232.5,
+    242.5,
     176,
     36,
     36
@@ -106,9 +106,9 @@
     {
      "enabled": true,
      "frame": [
-      329,
+      316,
       156,
-      47,
+      27,
       14
      ],
      "role": "AXStaticText",
@@ -117,7 +117,7 @@
     {
      "enabled": true,
      "frame": [
-      327.5,
+      316,
       176,
       68,
       36
@@ -130,9 +130,9 @@
     {
      "enabled": true,
      "frame": [
-      411,
+      398,
       156,
-      40.5,
+      20.5,
       14
      ],
      "role": "AXStaticText",
@@ -141,7 +141,7 @@
     {
      "enabled": true,
      "frame": [
-      409.5,
+      398,
       176,
       68,
       36
@@ -154,9 +154,9 @@
     {
      "enabled": true,
      "frame": [
-      493,
+      480,
       156,
-      59,
+      39,
       14
      ],
      "role": "AXStaticText",
@@ -165,7 +165,7 @@
     {
      "enabled": true,
      "frame": [
-      491.5,
+      480,
       176,
       36,
       36
@@ -178,9 +178,9 @@
     {
      "enabled": true,
      "frame": [
-      567.5,
+      533,
       156,
-      73,
+      53,
       14
      ],
      "role": "AXStaticText",
@@ -191,7 +191,7 @@
       {
        "enabled": true,
        "frame": [
-        577.5,
+        544.5,
         187,
         18,
         14
@@ -201,7 +201,7 @@
      ],
      "enabled": true,
      "frame": [
-      566,
+      533,
       187,
       86,
       14
@@ -213,7 +213,7 @@
     {
      "enabled": true,
      "frame": [
-      658,
+      625,
       187.5,
       22.5,
       13
@@ -224,9 +224,9 @@
    ],
    "enabled": true,
    "frame": [
-    327.5,
+    316,
     156,
-    353,
+    331.5,
     56
    ],
    "label": "Arrow properties",

@@ -1,0 +1,25 @@
+{
+ "appearance": "light",
+ "hotSpot": [
+  8,
+  8
+ ],
+ "image": "cursors/laser-2-light.png",
+ "kind": "image",
+ "notes": "Cursor image with its hot spot in points.",
+ "pixels": [
+  32,
+  32
+ ],
+ "scale": 2,
+ "size": [
+  16,
+  16
+ ],
+ "spec": [
+  "009 drawing cursors",
+  "WIN-OVR-11"
+ ],
+ "state": "laser-2",
+ "surface": "cursors"
+}

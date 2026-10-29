@@ -14,9 +14,9 @@
   {
    "enabled": true,
    "frame": [
-    297.5,
+    296,
     16,
-    51,
+    32,
     14
    ],
    "role": "AXStaticText",

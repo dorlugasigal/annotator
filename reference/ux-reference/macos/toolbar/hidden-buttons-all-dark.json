@@ -112,7 +112,19 @@
   {
    "enabled": true,
    "frame": [
-    453,
+    444,
+    12,
+    44,
+    48
+   ],
+   "help": "Shortcut L",
+   "label": "Laser pointer",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    499,
     12,
     44,
     48
@@ -124,7 +136,7 @@
   {
    "enabled": true,
    "frame": [
-    508,
+    554,
     12,
     44,
     48
@@ -162,9 +174,9 @@
     {
      "enabled": true,
      "frame": [
-      93,
+      91.5,
       77,
-      51,
+      32,
       14
      ],
      "role": "AXStaticText",
@@ -197,9 +209,9 @@
     {
      "enabled": true,
      "frame": [
-      243,
+      241.5,
       77,
-      60.5,
+      39.5,
       14
      ],
      "role": "AXStaticText",
@@ -221,9 +233,9 @@
     {
      "enabled": true,
      "frame": [
-      318.5,
+      295,
       77,
-      80,
+      59.5,
       14
      ],
      "role": "AXStaticText",
@@ -232,7 +244,7 @@
     {
      "enabled": true,
      "frame": [
-      317.5,
+      295,
       97,
       36,
       36
@@ -245,9 +257,9 @@
     {
      "enabled": true,
      "frame": [
-      413.5,
+      368.5,
       77,
-      64,
+      47.5,
       14
      ],
      "role": "AXStaticText",
@@ -256,7 +268,7 @@
     {
      "enabled": true,
      "frame": [
-      412.5,
+      368.5,
       97,
       36,
       36
@@ -269,9 +281,9 @@
     {
      "enabled": true,
      "frame": [
-      492.5,
+      430,
       77,
-      83.5,
+      63,
       14
      ],
      "role": "AXStaticText",
@@ -280,7 +292,7 @@
     {
      "enabled": true,
      "frame": [
-      491.5,
+      430,
       97,
       36,
       36
@@ -296,7 +308,7 @@
    "frame": [
     12,
     77,
-    588,
+    592,
     56
    ],
    "identifier": "contextual-inspector-viewport",
@@ -310,12 +322,12 @@
  "kind": "view",
  "notes": "Every toolbar button turned off: only the tools and their properties stay.",
  "pixels": [
-  1224,
+  1232,
   290
  ],
  "scale": 2,
  "size": [
-  612,
+  616,
   145
  ],
  "spec": [

@@ -112,7 +112,19 @@
   {
    "enabled": true,
    "frame": [
-    353,
+    346,
+    8,
+    34,
+    36
+   ],
+   "help": "Shortcut L",
+   "label": "Laser pointer",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    389,
     8,
     34,
     36
@@ -124,7 +136,7 @@
   {
    "enabled": true,
    "frame": [
-    396,
+    432,
     8,
     34,
     36
@@ -136,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    434,
+    470,
     8,
     34,
     36
@@ -149,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    489.5,
+    525.5,
     18.5,
     17.5,
     15
@@ -163,7 +175,7 @@
   {
    "enabled": true,
    "frame": [
-    519,
+    555,
     8,
     46,
     36
@@ -176,7 +188,7 @@
   {
    "enabled": false,
    "frame": [
-    574,
+    610,
     20,
     12,
     12
@@ -189,7 +201,7 @@
   {
    "enabled": false,
    "frame": [
-    600,
+    636,
     20,
     12,
     12
@@ -202,7 +214,7 @@
   {
    "enabled": false,
    "frame": [
-    626,
+    662,
     19,
     12.5,
     14.5
@@ -215,7 +227,7 @@
   {
    "enabled": true,
    "frame": [
-    647,
+    683,
     14,
     22,
     24
@@ -229,7 +241,7 @@
   {
    "enabled": true,
    "frame": [
-    677,
+    713,
     19,
     14,
     14
@@ -242,7 +254,7 @@
   {
    "enabled": true,
    "frame": [
-    705,
+    741,
     21,
     10.5,
     10.5
@@ -259,12 +271,12 @@
  "kind": "view",
  "notes": "Minimal toolbar, horizontal, properties hidden. Pen selected.",
  "pixels": [
-  1458,
+  1530,
   104
  ],
  "scale": 2,
  "size": [
-  729,
+  765,
   52
  ],
  "spec": [
