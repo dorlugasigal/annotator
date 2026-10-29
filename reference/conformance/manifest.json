@@ -659,9 +659,9 @@
       "sha256" : "d1e333b42759fd62d82e624a61486a55ae49218da90481023c2d327a0fa71e86"
     },
     {
-      "bytes" : 327853,
+      "bytes" : 327738,
       "path" : "laser/trails.jsonl",
-      "sha256" : "494038291f231e48a8be7ad26807053e8722e8bbedfa4c0afd58659d129dc0e1"
+      "sha256" : "31a7cef85cf473fb3c6a37ddec61331ac4a2983fc0a1c79f8992527dfed6afaf"
     },
     {
       "bytes" : 7969,
@@ -1367,9 +1367,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "c59872d9880cdc907f3c3d36fcb46859fefacaf8",
+    "commit" : "5daac76171dd06f626a98778de49848eb2f485d4",
     "date" : "2026-10-29",
-    "fingerprint" : "8ce95ff731a4c7ee7f817ded21b4407d69173225d60ab38ffed4d283d84fd4bd",
+    "fingerprint" : "5c69df27f860919e21b3f6d4c417d8e5142d4ec1359649bf528f798973a6d1b1",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
