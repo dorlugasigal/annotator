@@ -20,7 +20,7 @@ namespace Annotator.App.Toolbar;
 /// <summary>
 /// The drawing toolbar (WIN-UI-02, ADR 0012), a port of the Mac ToolbarView: the tool rail from the profile's
 /// toolbar items, Tool library, Board background, Draw or Use apps, Undo, Redo, Clear, Properties, Settings and Hide,
-/// the quick properties of the current tool, and the active board. It is a borderless window that never activates
+/// the properties of the current tool, and the active board. It is a borderless window that never activates
 /// (WS_EX_NOACTIVATE), so clicking it leaves the person's app active (WIN-OVR-03); a value field activates it only
 /// while the person types. Drag the background to move it inside the work area, or to a display edge to dock it there
 /// (WIN-OVR-10, ToolbarWindow.Docking.cs).

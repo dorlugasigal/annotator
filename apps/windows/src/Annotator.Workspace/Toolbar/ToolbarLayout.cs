@@ -2,12 +2,14 @@ using Annotator.Core;
 
 namespace Annotator.Workspace.Toolbar;
 
-/// <summary>Port of ToolbarPropertiesMode in ToolbarView.swift: what the toolbar shows below or beside the tools.</summary>
+/// <summary>
+/// Port of ToolbarPropertiesMode in ToolbarView.swift: whether a tool's properties show below or beside the tools.
+/// Profiles from before, with quick controls, show them.
+/// </summary>
 public enum ToolbarPropertiesMode
 {
-    ToolsOnly,
-    Quick,
-    Full,
+    Shown,
+    Hidden,
 }
 
 public static class ToolbarPropertiesModeExtensions
@@ -17,31 +19,21 @@ public static class ToolbarPropertiesModeExtensions
         /// <summary>The Mac's raw value, also the Properties button's accessibility value.</summary>
         public string RawValue => mode switch
         {
-            ToolbarPropertiesMode.ToolsOnly => "Tools only",
-            ToolbarPropertiesMode.Quick => "Quick controls",
-            ToolbarPropertiesMode.Full => "Full properties",
+            ToolbarPropertiesMode.Shown => "Shown",
+            ToolbarPropertiesMode.Hidden => "Hidden",
             _ => throw new ArgumentOutOfRangeException(nameof(mode)),
         };
 
-        /// <summary>The Properties button's cycle: tools only, quick controls, full properties.</summary>
-        public ToolbarPropertiesMode Next => mode switch
-        {
-            ToolbarPropertiesMode.ToolsOnly => ToolbarPropertiesMode.Quick,
-            ToolbarPropertiesMode.Quick => ToolbarPropertiesMode.Full,
-            _ => ToolbarPropertiesMode.ToolsOnly,
-        };
+        /// <summary>The Properties button and key switch between the two.</summary>
+        public ToolbarPropertiesMode Next =>
+            mode == ToolbarPropertiesMode.Shown ? ToolbarPropertiesMode.Hidden : ToolbarPropertiesMode.Shown;
     }
 
     extension(ToolbarPropertiesMode)
     {
-        /// <summary>
-        /// Mac ToolbarPropertiesMode(model:): tools only when quick preferences are collapsed, quick controls when the person chose
-        /// them (the inspector unpinned), else full properties, which is the default.
-        /// </summary>
+        /// <summary>Mac ToolbarPropertiesMode(model:): hidden when quick preferences are collapsed, else shown, the default.</summary>
         public static ToolbarPropertiesMode From(in WorkspacePreferences preferences) =>
-            preferences.QuickPreferencesExpanded == false ? ToolbarPropertiesMode.ToolsOnly
-            : preferences.InspectorPinned == false ? ToolbarPropertiesMode.Quick
-            : ToolbarPropertiesMode.Full;
+            preferences.QuickPreferencesExpanded == false ? ToolbarPropertiesMode.Hidden : ToolbarPropertiesMode.Shown;
     }
 }
 
@@ -74,15 +66,14 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
 
     public double ModeWidth => Minimal ? 46 : 60;
 
-    public double RegularReserve => Minimal ? 316 : 392;
+    /// <summary>
+    /// Room for the one-row action strip, gaps and padding next to the tools: the padding, the gap after the tools, and
+    /// each button with its gap (<see cref="HorizontalRoom"/>).
+    /// </summary>
+    public double RegularReserve => Minimal ? 307 : 383;
 
-    public double CompactReserve => Minimal ? 316 : 332;
-
-    public double RailReserve => RegularReserve - 16;
-
-    public double CompactRailReserve => Minimal ? 150 : 214;
-
-    public double PropertiesWidth => Minimal ? 640 : 700;
+    /// <summary>The same room on a narrow screen, where only More tools, Board and Draw stay beside the tools.</summary>
+    public double CompactReserve => Minimal ? 151 : 203;
 
     /// <summary>
     /// Full properties below a minimal rail keep the expanded toolbar's layout, drawn smaller by as much as the tool buttons,
@@ -90,8 +81,10 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
     /// </summary>
     public double PropertiesScale => Minimal ? 34.0 / 44.0 : 1;
 
-    public double MinimumWidth => Minimal ? 300 : 400;
-
+    /// <summary>
+    /// Below this screen width a toolbar that doesn't fit on one row moves its other buttons to a second row; on a wider
+    /// screen it keeps one row and shows fewer tools.
+    /// </summary>
     public double CompactThreshold => Minimal ? 420 : 700;
 
     public double VerticalRailWidth => ButtonWidth + Padding * 2;
@@ -127,9 +120,19 @@ public readonly record struct ToolbarMetrics(ToolbarSize Size)
     /// <summary>A narrow toolbar keeps More tools, Board and Draw beside the tools and moves the other buttons below them.</summary>
     public double CompactReserveHiding(IReadOnlySet<ToolbarControl> hidden) => CompactReserve - FirstRowRoom(hidden);
 
-    public double RailReserveHiding(IReadOnlySet<ToolbarControl> hidden) => RegularReserveHiding(hidden) - 16;
-
-    public double CompactRailReserveHiding(IReadOnlySet<ToolbarControl> hidden) => CompactRailReserve - FirstRowRoom(hidden);
+    /// <summary>The second row of a narrow toolbar: Undo, Redo and the other buttons, each with its gap, and the padding.</summary>
+    public double SecondRowWidth(IReadOnlySet<ToolbarControl> hidden)
+    {
+        double width = Padding * 2;
+        foreach (var control in ToolbarToolLayout.SecondRowControls)
+        {
+            if (!hidden.Contains(control))
+            {
+                width += HorizontalRoom(control);
+            }
+        }
+        return width;
+    }
 
     private double FirstRowRoom(IReadOnlySet<ToolbarControl> hidden)
     {
@@ -188,18 +191,37 @@ public static class ToolbarToolLayout
 
     private static readonly IReadOnlySet<ToolbarControl> NoneHidden = new HashSet<ToolbarControl>();
 
-    /// <summary>The toolbar's width for its tools and buttons. Full properties can make it wider (Mac ToolbarWidthLayout).</summary>
-    public static double HorizontalWidth(ReadOnlySpan<ShortcutCommand> items, double available, bool propertiesVisible,
+    /// <summary>
+    /// The toolbar's width: exactly its tools and buttons on one row, so taking a button off leaves no gap. On a screen too
+    /// narrow for that, the screen's width, with fewer tools showing. One row of full properties can make it wider
+    /// (<see cref="GrownWidth"/>, Mac ToolbarWidthLayout).
+    /// </summary>
+    public static double HorizontalWidth(ReadOnlySpan<ShortcutCommand> items, double available,
                                          ToolbarSize size = ToolbarSize.Expanded, IReadOnlySet<ToolbarControl>? hidden = null)
     {
         hidden ??= NoneHidden;
         var metrics = new ToolbarMetrics(size);
         double toolWidth = Width(items, size);
-        double regular = toolWidth + metrics.RegularReserveHiding(hidden);
-        // A narrow toolbar moves Undo, Redo and the other buttons to a second row; without them it keeps one row.
-        double desired = regular >= metrics.CompactThreshold || hidden.IsSupersetOf(SecondRowControls) ? regular
-            : toolWidth + metrics.CompactReserveHiding(hidden);
-        return Math.Min(Math.Max(320, available), Math.Max(propertiesVisible ? metrics.PropertiesWidth : metrics.MinimumWidth, desired));
+        double limit = Math.Max(320, available);
+        if (!UsesTwoRows(items, available, size, hidden))
+        {
+            return Math.Min(limit, toolWidth + metrics.RegularReserveHiding(hidden));
+        }
+        return Math.Min(limit, Math.Max(toolWidth + metrics.CompactReserveHiding(hidden), metrics.SecondRowWidth(hidden)));
+    }
+
+    /// <summary>Only a narrow screen, too narrow for one row, moves Undo, Redo and the other buttons below the tools.</summary>
+    public static bool UsesTwoRows(ReadOnlySpan<ShortcutCommand> items, double available, ToolbarSize size = ToolbarSize.Expanded,
+                                   IReadOnlySet<ToolbarControl>? hidden = null)
+    {
+        hidden ??= NoneHidden;
+        var metrics = new ToolbarMetrics(size);
+        double limit = Math.Max(320, available);
+        if (hidden.IsSupersetOf(SecondRowControls) || limit >= metrics.CompactThreshold)
+        {
+            return false;
+        }
+        return Width(items, size) + metrics.RegularReserveHiding(hidden) > limit;
     }
 
     /// <summary>Mac ToolbarWidthLayout: a horizontal toolbar is as wide as its tools and buttons need, or wider when its

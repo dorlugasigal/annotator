@@ -235,9 +235,6 @@ public static class MotionTiming
 
     public const double ToolbarExpandDuration = 0.34;
 
-    /// <summary>Resting the pointer on the one-button toolbar this long opens it.</summary>
-    public const double ToolbarExpandHoverDelay = 0.25;
-
     /// <summary>Selection, toggles and small state changes.</summary>
     public static SpringMotion Snappy { get; } = new(0.28, 0.86);
 

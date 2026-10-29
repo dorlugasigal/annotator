@@ -45,7 +45,7 @@ public static class ToolbarControlExtensions
             ToolbarControl.Undo => "Take back your last change.",
             ToolbarControl.Redo => "Bring back what Undo took.",
             ToolbarControl.ClearAll => "Remove all drawings. You can undo it.",
-            ToolbarControl.Properties => "Quick controls, full properties or tools only.",
+            ToolbarControl.Properties => "Show or hide the properties below the tools.",
             ToolbarControl.Settings => "Open Settings.",
             ToolbarControl.Hide => "Hide drawings and tools.",
             _ => throw new ArgumentOutOfRangeException(nameof(control)),

@@ -5,50 +5,25 @@ namespace Annotator.Workspace;
 
 public sealed partial class WorkspaceModel
 {
-    /// <summary>Mac setQuickPreferencesExpanded: shows or collapses the toolbar's properties.</summary>
-    public void SetQuickPreferencesExpanded(bool expanded)
+    /// <summary>Mac setPropertiesShown: shows or hides the tool's properties below or beside the tools.</summary>
+    public void SetPropertiesShown(bool shown)
     {
         using ChangeScope scope = Change();
-        _preferences.QuickPreferencesExpanded = expanded;
-        PersistPreferences();
-    }
-
-    /// <summary>Mac setInspectorPinned: full properties; pinning also expands the properties.</summary>
-    public void SetInspectorPinned(bool pinned)
-    {
-        using ChangeScope scope = Change();
-        _preferences.InspectorPinned = pinned;
-        if (pinned)
+        _preferences.QuickPreferencesExpanded = shown;
+        // Quick controls are gone, so shown properties are always the full ones.
+        if (shown)
         {
-            _preferences.QuickPreferencesExpanded = true;
+            _preferences.InspectorPinned = true;
         }
         PersistPreferences();
     }
 
-    /// <summary>Mac ToolbarPropertiesMode.apply(to:): what the Properties button and its key choose.</summary>
-    public void ApplyPropertiesMode(ToolbarPropertiesMode mode)
-    {
-        using ChangeScope scope = Change();
-        switch (mode)
-        {
-            case ToolbarPropertiesMode.ToolsOnly:
-                SetQuickPreferencesExpanded(false);
-                break;
-            case ToolbarPropertiesMode.Quick:
-                SetInspectorPinned(false);
-                SetQuickPreferencesExpanded(true);
-                break;
-            case ToolbarPropertiesMode.Full:
-                SetInspectorPinned(true);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(mode));
-        }
-    }
+    /// <summary>Mac ToolbarPropertiesMode.apply(to:): what the Properties button, its key and Settings choose.</summary>
+    public void ApplyPropertiesMode(ToolbarPropertiesMode mode) => SetPropertiesShown(mode == ToolbarPropertiesMode.Shown);
 
     /// <summary>
-    /// The Properties key (Mac performShortcutAction(.properties)): the next of quick controls, full properties and
-    /// tools only, with a status line naming it.
+    /// The Properties key (Mac performShortcutAction(.properties)): shows or hides the properties, with a status line
+    /// naming the result.
     /// </summary>
     public void CyclePropertiesMode()
     {
@@ -58,12 +33,11 @@ public sealed partial class WorkspaceModel
         _status = $"Properties: {next.RawValue.ToLowerInvariant()}.";
     }
 
-    /// <summary>The canvas menu's Properties (Mac propertiesFromMenu): full properties in the shown toolbar.</summary>
+    /// <summary>The canvas menu's Properties (Mac propertiesFromMenu): the properties in the shown toolbar.</summary>
     public void ShowFullProperties()
     {
         using ChangeScope scope = Change();
-        SetInspectorPinned(true);
-        SetQuickPreferencesExpanded(true);
+        SetPropertiesShown(true);
         ShowToolbar();
     }
 

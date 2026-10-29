@@ -1,20 +1,16 @@
-using Annotator.Core.Motion;
-
 namespace Annotator.Workspace.Toolbar;
 
 /// <summary>
 /// Port of ToolbarCollapseController (CollapsedToolbar.swift): decides when the toolbar shrinks to one button and when it
 /// opens again. It shrinks once the pointer has been off it for the chosen delay, unless something holds it open
-/// (<see cref="IsHeldOpen"/>: a menu or flyout, a drag, typing, the tutorial or the pointer on the toolbar), and opens when
-/// the pointer rests on it for <see cref="MotionTiming.ToolbarExpandHoverDelay"/>. Use it on the app thread; its waits
-/// resume there.
+/// (<see cref="IsHeldOpen"/>: a menu or flyout, a drag, typing, the tutorial or the pointer on the toolbar), and opens as
+/// soon as the pointer is on it. Use it on the app thread; its waits resume there.
 /// </summary>
 public sealed class ToolbarCollapseTimer
 {
     private readonly Func<double?> _delay;
     private readonly Func<bool> _collapsed;
     private CancellationTokenSource? _collapseWait;
-    private CancellationTokenSource? _hoverWait;
 
     /// <param name="delay">The saved delay in seconds (<c>WorkspacePreferences.ToolbarCollapseDelay</c>); null never shrinks.</param>
     /// <param name="collapsed">Whether the toolbar shows as one button now (<see cref="WorkspaceSnapshot.ToolbarCollapsed"/>).</param>
@@ -51,12 +47,11 @@ public sealed class ToolbarCollapseTimer
             CancelCollapse();
             if (_collapsed())
             {
-                ScheduleHoverExpansion();
+                Expand();
             }
         }
         else
         {
-            CancelHover();
             Restart();
         }
     }
@@ -74,11 +69,7 @@ public sealed class ToolbarCollapseTimer
         _ = WaitToCollapse(delay, wait);
     }
 
-    public void Cancel()
-    {
-        CancelCollapse();
-        CancelHover();
-    }
+    public void Cancel() => CancelCollapse();
 
     private async Task WaitToCollapse(double delay, CancellationTokenSource wait)
     {
@@ -104,47 +95,10 @@ public sealed class ToolbarCollapseTimer
         Collapse();
     }
 
-    private void ScheduleHoverExpansion()
-    {
-        CancelHover();
-        var wait = new CancellationTokenSource();
-        _hoverWait = wait;
-        _ = WaitToExpand(wait);
-    }
-
-    private async Task WaitToExpand(CancellationTokenSource wait)
-    {
-        try
-        {
-            await Wait(MotionTiming.ToolbarExpandHoverDelay, wait.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
-        if (wait.IsCancellationRequested || !ReferenceEquals(_hoverWait, wait))
-        {
-            return;
-        }
-        _hoverWait = null;
-        wait.Dispose();
-        if (PointerInside && _collapsed())
-        {
-            Expand();
-        }
-    }
-
     private void CancelCollapse()
     {
         _collapseWait?.Cancel();
         _collapseWait?.Dispose();
         _collapseWait = null;
-    }
-
-    private void CancelHover()
-    {
-        _hoverWait?.Cancel();
-        _hoverWait?.Dispose();
-        _hoverWait = null;
     }
 }

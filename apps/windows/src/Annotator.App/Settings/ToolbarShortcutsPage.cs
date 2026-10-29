@@ -77,9 +77,11 @@ internal sealed partial class ShortcutsPageBody : Grid
     private readonly ToolbarSizePicker _sizes;
     private readonly DirectionPicker _direction;
     private readonly ChoicePopUp _startAt = new("Start at", 126);
-    private readonly ChoicePopUp _properties = new("Properties", 135.5);
+    private readonly ChoicePopUp _properties = new("Properties", 91);
     /// <summary>Mac Picker("Shrink"): Never, or after 3, 5, 10 or 30 seconds with the pointer off the toolbar.</summary>
-    private readonly ChoicePopUp _shrink = new("Shrink", 170);
+    private readonly ChoicePopUp _shrink = new("Shrink", 152);
+    private readonly ShrinkDemo _shrinkDemo = new();
+    private readonly TextBlock _shrinkCaption = SettingsText.Label(ShrinkDemoText.Caption(null), 10, "AnnotatorSecondaryText");
     private readonly PropertyChoicesEditor _choices;
     private readonly List<KeyChip> _rowChips = [];
     private readonly List<GlobalKeyButton> _globals = [];
@@ -217,9 +219,30 @@ internal sealed partial class ShortcutsPageBody : Grid
         section.Children.Add(form);
         section.Children.Add(Caption("hand.draw",
             "Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical."));
-        section.Children.Add(Caption("capsule",
-            "A shrunk toolbar is one button that shows Draw or Apps. Point at it or click it to get your tools back."));
+        section.Children.Add(ShrinkCard());
         return section;
+    }
+
+    /// <summary>Mac's Shrink card: the demo, then "Shrink" and what it does for the chosen delay, on a soft card.</summary>
+    private FrameworkElement ShrinkCard()
+    {
+        var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16 };
+        row.Children.Add(_shrinkDemo.Root);
+        var words = new MacStack { Orientation = Orientation.Vertical, Spacing = 4, MaxWidth = 280, VerticalAlignment = VerticalAlignment.Center };
+        words.Children.Add(SettingsText.Label("Shrink", 13, "AnnotatorPrimaryText", FontWeights.SemiBold));
+        _shrinkCaption.TextWrapping = TextWrapping.Wrap;
+        words.Children.Add(_shrinkCaption);
+        row.Children.Add(words);
+        return new Border
+        {
+            Child = row,
+            Padding = new Thickness(12),
+            CornerRadius = new CornerRadius(12),
+            Background = SettingsColors.Primary(0.03),
+            BorderBrush = SettingsColors.Primary(0.07),
+            BorderThickness = new Thickness(1),
+            HorizontalAlignment = HorizontalAlignment.Left,
+        };
     }
 
     /// <summary>Mac Label(_:systemImage:) in the caption font and the secondary color.</summary>
@@ -400,9 +423,10 @@ internal sealed partial class ShortcutsPageBody : Grid
             : [ToolbarDockEdge.Automatic, ToolbarDockEdge.Top, ToolbarDockEdge.Bottom];
         _startAt.Show(EdgeTitle(edge), [.. edges.Select(choice => (EdgeTitle(choice), (Action)(() => _model.SetToolbarDockEdge(choice))))]);
         ToolbarPropertiesMode mode = ToolbarPropertiesMode.From(preferences);
-        _properties.Show(mode.RawValue, [.. new[] { ToolbarPropertiesMode.ToolsOnly, ToolbarPropertiesMode.Quick, ToolbarPropertiesMode.Full }
+        _properties.Show(mode.RawValue, [.. Enum.GetValues<ToolbarPropertiesMode>()
             .Select(choice => (choice.RawValue, (Action)(() => _model.ApplyPropertiesMode(choice))))]);
         double? collapse = preferences.ToolbarCollapseDelay;
+        _shrinkCaption.Text = ShrinkDemoText.Caption(collapse);
         _shrink.Show(DelayTitle(collapse), [(DelayTitle(null), (Action)(() => _model.SetToolbarCollapseDelay(null))),
             .. CollapseDelays(collapse).Select(delay => (DelayTitle(delay), (Action)(() => _model.SetToolbarCollapseDelay(delay))))]);
         _choices.Apply(snapshot);

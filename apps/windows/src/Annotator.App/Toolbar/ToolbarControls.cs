@@ -171,7 +171,7 @@ internal static class ToolbarParts
     /// <summary>
     /// A tooltip that opens beside the toolbar, never over its controls: below a horizontal toolbar (above when there is no
     /// room) and beside a vertical one. WinUI shows a tooltip in a window of its own, and over the toolbar that window took
-    /// the clicks meant for the controls under it, often the quick row's Stroke and Fill wells below a tool.
+    /// the clicks meant for the controls under it, often the properties' Stroke and Fill wells below a tool.
     /// </summary>
     public static void SetToolTip(FrameworkElement element, string? text)
     {
@@ -262,8 +262,8 @@ internal static class ToolbarParts
 
 /// <summary>
 /// Port of InspectorColorPicker: a swatch over the transparency grid, with the chevron, that opens the color popover.
-/// Compact (quick properties): an optional 8-point "Stroke" or "Fill" label beside a 28-point swatch. Full properties: an
-/// 11-point "Stroke color" or "Fill" label above a 36-point swatch. Accessibility value: "#RRGGBBAA" or "Transparent".
+/// Compact: an optional 8-point "Stroke" or "Fill" label beside a 28-point swatch. Full properties: an 11-point
+/// "Stroke color" or "Fill" label above a 36-point swatch. Accessibility value: "#RRGGBBAA" or "Transparent".
 /// </summary>
 internal sealed class ColorWell
 {
@@ -677,7 +677,7 @@ internal sealed class ValueControl
     }
 }
 
-/// <summary>Port of SmartDrawButton: a toggle with the wand, On or Off; 32 points in quick properties, 36 in full properties.</summary>
+/// <summary>Port of SmartDrawButton: a toggle with the wand, On or Off; 36 points in the properties.</summary>
 internal sealed class SmartDrawToggle
 {
     private readonly ToggleButton _button;

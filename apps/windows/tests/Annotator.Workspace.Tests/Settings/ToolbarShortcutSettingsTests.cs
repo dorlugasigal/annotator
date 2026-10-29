@@ -471,8 +471,8 @@ public sealed class ShortcutPreferenceTests
         model.SetToolbarSize(ToolbarSize.Minimal);
         Assert.Equal(ToolbarSize.Minimal, model.Snapshot.Preferences.ToolbarSize);
         ShortcutCommand[] items = [.. model.Snapshot.ToolbarItems];
-        double minimal = ToolbarToolLayout.HorizontalWidth(items, 1200, propertiesVisible: false, ToolbarSize.Minimal);
-        double expanded = ToolbarToolLayout.HorizontalWidth(items, 1200, propertiesVisible: false, ToolbarSize.Expanded);
+        double minimal = ToolbarToolLayout.HorizontalWidth(items, 1200, ToolbarSize.Minimal);
+        double expanded = ToolbarToolLayout.HorizontalWidth(items, 1200, ToolbarSize.Expanded);
         Assert.True(minimal < expanded - 150, $"{minimal} against {expanded}");
         Assert.Equal(50, new ToolbarMetrics(ToolbarSize.Minimal).VerticalRailWidth);
         model.SetToolbarSize(ToolbarSize.Expanded);

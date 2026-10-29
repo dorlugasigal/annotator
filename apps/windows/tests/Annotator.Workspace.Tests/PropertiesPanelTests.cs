@@ -186,32 +186,32 @@ public sealed class PropertiesPanelTests
     }
 
     [Fact]
-    public void ThePropertiesKeyCyclesLikeTheButtonAndSaysWhatItShows()
+    public void ThePropertiesKeyTogglesLikeTheButtonAndSaysWhatItShows()
     {
         WorkspaceModel model = Drawing();
-        model.ApplyPropertiesMode(ToolbarPropertiesMode.Quick);
+        model.ApplyPropertiesMode(ToolbarPropertiesMode.Shown);
         Assert.True(model.PerformShortcutAction(ShortcutAction.Properties));
-        Assert.Equal(ToolbarPropertiesMode.Full, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
-        Assert.Equal("Properties: full properties.", model.Snapshot.Status);
+        Assert.Equal(ToolbarPropertiesMode.Hidden, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        Assert.Equal("Properties: hidden.", model.Snapshot.Status);
         Assert.Equal(CanvasCommandResult.Done,
             model.Perform(new CanvasCommand(CanvasCommandKind.ShortcutAction, Primary) { Action = ShortcutAction.Properties }));
-        Assert.Equal(ToolbarPropertiesMode.ToolsOnly, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
-        Assert.Equal("Properties: tools only.", model.Snapshot.Status);
+        Assert.Equal(ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        Assert.Equal("Properties: shown.", model.Snapshot.Status);
         model.CyclePropertiesMode();
-        Assert.Equal(ToolbarPropertiesMode.Quick, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
-        Assert.Equal("Properties: quick controls.", model.Snapshot.Status);
+        Assert.Equal(ToolbarPropertiesMode.Hidden, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        Assert.Equal("Properties: hidden.", model.Snapshot.Status);
     }
 
     [Fact]
     public void TheCanvasMenuOpensFullPropertiesInTheShownToolbar()
     {
         WorkspaceModel model = Drawing();
-        model.ApplyPropertiesMode(ToolbarPropertiesMode.ToolsOnly);
+        model.ApplyPropertiesMode(ToolbarPropertiesMode.Hidden);
         model.HideTools();
         Assert.False(model.Snapshot.ToolsPresented);
         model.ShowFullProperties();
         Assert.True(model.Snapshot.ToolsPresented);
-        Assert.Equal(ToolbarPropertiesMode.Full, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        Assert.Equal(ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
     }
 
     [Fact]

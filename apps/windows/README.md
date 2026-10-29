@@ -138,7 +138,7 @@ dotnet build apps/windows/src/Annotator.App/Annotator.App.csproj -c Debug -p:Pla
 pwsh -NoProfile -File tools/windows/dock-check.ps1 -Out <folder outside the repository>
 ```
 
-It shows the docked toolbar reference state (`--ux-reference toolbar/draw-quick-pen
+It shows the docked toolbar reference state (`--ux-reference toolbar/full-properties-pen
 --placement docked`, the app's own toolbar window and placement with an in-memory
 profile) and drags its background with SendInput on the display it is on: a free
 drop, a drop 3 points inside an edge, and drops at the outermost pixel of the

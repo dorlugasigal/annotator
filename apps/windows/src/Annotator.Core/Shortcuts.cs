@@ -138,7 +138,7 @@ public static class ShortcutActionExtensions
 
         public string Detail => action switch
         {
-            ShortcutAction.Properties => "Switch between quick controls, full properties and tools only.",
+            ShortcutAction.Properties => "Show or hide the properties below the tools.",
             ShortcutAction.Board => "Switch between desktop, whiteboard and blackboard.",
             ShortcutAction.Spotlight => "Turn the spotlight on or off.",
             ShortcutAction.CursorHalo => "Turn the ring around your pointer on or off.",

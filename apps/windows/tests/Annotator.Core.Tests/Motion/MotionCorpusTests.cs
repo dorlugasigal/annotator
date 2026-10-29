@@ -60,7 +60,6 @@ public sealed class MotionCorpusTests
             ["toolbarResizeDuration"] = MotionTiming.ToolbarResizeDuration,
             ["toolbarCollapseDuration"] = MotionTiming.ToolbarCollapseDuration,
             ["toolbarExpandDuration"] = MotionTiming.ToolbarExpandDuration,
-            ["toolbarExpandHoverDelay"] = MotionTiming.ToolbarExpandHoverDelay,
             ["toolbarMorphOutgoingEnd"] = ToolbarMorph.OutgoingEnd,
             ["toolbarMorphIncomingStart"] = ToolbarMorph.IncomingStart,
         };

@@ -235,30 +235,33 @@ public sealed class ToolbarLayoutTests
 {
     private static readonly ShortcutCommand[] Defaults = [.. WorkspacePreferences.DefaultToolbar.Select(ShortcutCommand.ForTool)];
 
-    // Mac InspectorInteractionRegressionTests.testPropertiesCycleIsSharedAndQuickControlsExistInImageWorkspace: the
-    // Properties button cycles quick controls, full properties and tools only, and the choice is saved.
+    // Mac InspectorInteractionRegressionTests.testPropertiesToggleIsSharedAndShowsTheWidthInImageWorkspace and
+    // PropertiesToggleTests: the Properties button shows or hides the properties, and the choice is saved.
     [Fact]
-    public void PropertiesModesCycleAndPersistLikeTheMac()
+    public void PropertiesShowOrHideAndPersistLikeTheMac()
     {
         var store = new MemoryPreferencesStore();
         WorkspaceModel model = Create(store: store);
-        model.ApplyPropertiesMode(ToolbarPropertiesMode.ToolsOnly);
+        Assert.Equal(ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        Assert.Equal(new[] { ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.Hidden }, Enum.GetValues<ToolbarPropertiesMode>());
+        model.ApplyPropertiesMode(ToolbarPropertiesMode.Hidden);
         ToolbarPropertiesMode mode = ToolbarPropertiesMode.From(model.Snapshot.Preferences);
-        Assert.Equal(ToolbarPropertiesMode.ToolsOnly, mode);
-        foreach (ToolbarPropertiesMode expected in new[] { ToolbarPropertiesMode.Quick, ToolbarPropertiesMode.Full, ToolbarPropertiesMode.ToolsOnly, ToolbarPropertiesMode.Quick })
+        Assert.Equal(ToolbarPropertiesMode.Hidden, mode);
+        foreach (ToolbarPropertiesMode expected in new[] { ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.Hidden, ToolbarPropertiesMode.Shown })
         {
             model.ApplyPropertiesMode(mode.Next);
             mode = ToolbarPropertiesMode.From(model.Snapshot.Preferences);
             Assert.Equal(expected, mode);
         }
-        Assert.Equal("Quick controls", mode.RawValue);
-        Assert.Equal("Full properties", mode.Next.RawValue);
-        Assert.Equal("Tools only", mode.Next.Next.RawValue);
-        Assert.Equal(ToolbarPropertiesMode.Quick, ToolbarPropertiesMode.From(WorkspacePreferences.Read(store.Data!)));
-        model.SetInspectorPinned(true);
-        Assert.True(model.Snapshot.Preferences.QuickPreferencesExpanded);
-        model.SetQuickPreferencesExpanded(false);
-        Assert.Equal(ToolbarPropertiesMode.ToolsOnly, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        Assert.Equal("Shown", mode.RawValue);
+        Assert.Equal("Hidden", mode.Next.RawValue);
+        Assert.Equal(ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.From(WorkspacePreferences.Read(store.Data!)));
+        Assert.True(model.Snapshot.Preferences.InspectorPinned);
+        model.SetPropertiesShown(false);
+        Assert.Equal(ToolbarPropertiesMode.Hidden, ToolbarPropertiesMode.From(model.Snapshot.Preferences));
+        // A profile from before, with quick controls, shows the properties.
+        var quick = new WorkspacePreferences { QuickPreferencesExpanded = true, InspectorPinned = false };
+        Assert.Equal(ToolbarPropertiesMode.Shown, ToolbarPropertiesMode.From(quick));
     }
 
     [Fact]
@@ -266,8 +269,8 @@ public sealed class ToolbarLayoutTests
     {
         // 11 tools of 44 points: select | 5 shapes and connectors | 3 ink tools | eraser | effects.
         Assert.Equal(11 * 44 + 6 * 2 + 4 * 11, ToolbarToolLayout.Width(Defaults));
-        Assert.Equal(932, ToolbarToolLayout.HorizontalWidth(Defaults, 1000, propertiesVisible: true));
-        Assert.Equal(400, ToolbarToolLayout.HorizontalWidth([ShortcutCommand.ForTool(Tool.Select)], 1000, propertiesVisible: false));
+        Assert.Equal(923, ToolbarToolLayout.HorizontalWidth(Defaults, 1000));
+        Assert.Equal(44 + 383, ToolbarToolLayout.HorizontalWidth([ShortcutCommand.ForTool(Tool.Select)], 1000));
         Assert.Equal(15, new ToolbarMetrics(ToolbarSize.Expanded).CornerRadius);
         Assert.Equal(44, new ToolbarMetrics(ToolbarSize.Expanded).ButtonWidth);
         Assert.Equal(48, new ToolbarMetrics(ToolbarSize.Expanded).ButtonHeight);

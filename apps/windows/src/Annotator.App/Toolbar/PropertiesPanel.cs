@@ -34,7 +34,7 @@ internal interface IPropertiesHost
 
     /// <summary>
     /// Opens the color popover for the stroke or the fill next to <paramref name="anchor"/>, the color well that asked:
-    /// the same entry point as the quick properties' color wells (<see cref="ToolbarWindow.OpenColorPicker"/>).
+    /// the toolbar's one entry point for color (<see cref="ToolbarWindow.OpenColorPicker"/>).
     /// </summary>
     void OpenColorPicker(ColorPickerRequest request, FrameworkElement anchor);
 

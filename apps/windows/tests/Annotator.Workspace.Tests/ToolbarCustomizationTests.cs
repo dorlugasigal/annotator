@@ -1,4 +1,5 @@
 using Annotator.Core;
+using Annotator.Workspace.Settings;
 using Annotator.Workspace.Toolbar;
 using static Annotator.Workspace.Tests.TestWorkspace;
 
@@ -33,12 +34,14 @@ public sealed class ToolbarCustomizationTests
     public void TurningButtonsOffGivesTheirRoomBack()
     {
         ValueList<ShortcutCommand> items = WorkspacePreferences.DefaultToolbar.Map(ShortcutCommand.ForTool);
-        double full = ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, propertiesVisible: false);
-        Assert.Equal(932, full);
-        Assert.Equal(full, ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, propertiesVisible: false, hidden: None));
+        double full = ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400);
+        Assert.Equal(923, full);
+        Assert.Equal(full, ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, hidden: None));
         var all = new HashSet<ToolbarControl>(ToolbarControl.AllCases);
-        double bare = ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, propertiesVisible: false, hidden: all);
+        double bare = ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, hidden: all);
         Assert.True(bare < full - 300, $"{bare}");
+        // Only the padding and the gap after the tools stay.
+        Assert.Equal(ToolbarToolLayout.Width(items.AsSpan()) + 24 + 6, bare);
         var metrics = new ToolbarMetrics(ToolbarSize.Expanded);
         Assert.Equal(metrics.RegularReserve - 30, metrics.RegularReserveHiding(new HashSet<ToolbarControl> { ToolbarControl.Undo }));
         // Undo shares its row with Redo in the expanded rail.
@@ -51,7 +54,7 @@ public sealed class ToolbarCustomizationTests
     public void PropertiesCanShowAllTheirChoices()
     {
         WorkspaceModel model = Drawing();
-        model.SetInspectorPinned(true);
+        model.SetPropertiesShown(true);
         model.Choose(Tool.Arrow);
         InspectorPlan one = InspectorPlan.For(model.Snapshot);
         Assert.Empty(one.AllChoices);
@@ -103,6 +106,47 @@ public sealed class ToolbarCustomizationTests
         Assert.Equal(order, model.Snapshot.ToolbarItems.ToArray());
     }
 
+    /// <summary>Mac testFewToolsKeepOneRowWithoutGaps: few tools hug one row; only a narrow screen takes two rows.</summary>
+    [Fact]
+    public void FewToolsKeepOneRowWithoutGaps()
+    {
+        ShortcutCommand[] few = [ShortcutCommand.ForTool(Tool.Select), ShortcutCommand.ForTool(Tool.Pen), ShortcutCommand.ForTool(Tool.Eraser)];
+        Assert.False(ToolbarToolLayout.UsesTwoRows(few, 1400));
+        Assert.Equal(ToolbarToolLayout.Width(few) + 383, ToolbarToolLayout.HorizontalWidth(few, 1400));
+        Assert.Equal(ToolbarToolLayout.Width(few, ToolbarSize.Minimal) + 307, ToolbarToolLayout.HorizontalWidth(few, 1400, ToolbarSize.Minimal));
+        ValueList<ShortcutCommand> items = WorkspacePreferences.DefaultToolbar.Map(ShortcutCommand.ForTool);
+        // A screen a little too narrow keeps one row and shows fewer tools.
+        Assert.False(ToolbarToolLayout.UsesTwoRows(items.AsSpan(), 880));
+        Assert.Equal(880, ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 880));
+        // A narrow screen moves Undo, Redo and the other buttons to a second row.
+        Assert.True(ToolbarToolLayout.UsesTwoRows(items.AsSpan(), 400));
+        Assert.Equal(400, ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 400));
+        Assert.False(ToolbarToolLayout.UsesTwoRows(items.AsSpan(), 400, hidden: new HashSet<ToolbarControl>(ToolbarToolLayout.SecondRowControls)));
+        var metrics = new ToolbarMetrics(ToolbarSize.Expanded);
+        Assert.Equal(24 + 6 * 30, metrics.SecondRowWidth(None));
+    }
+
+    /// <summary>Mac testShrinkDemoTimeline: still first, shrinks after the pointer leaves, opens with no wait, loops.</summary>
+    [Fact]
+    public void ShrinkDemoTimeline()
+    {
+        Assert.Equal(ShrinkDemoPose.At(0), ShrinkDemoPose.At(ShrinkDemoPose.Leave - 0.01));
+        Assert.Equal(0, ShrinkDemoPose.At(0).Shrink);
+        Assert.Equal(ShrinkDemoPose.OnToolbarX, ShrinkDemoPose.At(0).PointerX);
+        Assert.Equal(ShrinkDemoPose.Open, ShrinkDemoPose.At(ShrinkDemoPose.Collapse - 0.01));
+        ShrinkDemoPose shrinking = ShrinkDemoPose.At((ShrinkDemoPose.Collapse + ShrinkDemoPose.Rest) / 2);
+        Assert.InRange(shrinking.Shrink, 0.01, 0.99);
+        Assert.Equal(ShrinkDemoPose.Shrunk, ShrinkDemoPose.At(ShrinkDemoPose.Back - 0.01));
+        Assert.Equal(ShrinkDemoPose.OnToolbarX, ShrinkDemoPose.At(ShrinkDemoPose.Expand).PointerX);
+        Assert.True(ShrinkDemoPose.At(ShrinkDemoPose.Expand + 0.05).Shrink < 1, "It opens with no wait");
+        Assert.Equal(0, ShrinkDemoPose.At(ShrinkDemoPose.Opened + 0.01).Shrink);
+        Assert.Equal(ShrinkDemoPose.At(0.3), ShrinkDemoPose.At(ShrinkDemoPose.Period + 0.3));
+        Assert.Equal("Pick a time in Shrink and the toolbar tucks into one button when you leave it. Point at the button and your tools are back.",
+            ShrinkDemoText.Caption(null));
+        Assert.Equal("Leave the toolbar alone for 5 seconds and it shrinks to one button that shows Draw or Apps. Point at it and your tools are back.",
+            ShrinkDemoText.Caption(5));
+    }
+
     [Fact]
     public void PropertiesMakeTheToolbarWiderUpToTheScreen()
     {
@@ -147,7 +191,7 @@ public sealed class ToolbarCustomizationTests
     }
 
     [Fact]
-    public async Task CollapseWaitsForTheDelayAndHoverOpens()
+    public async Task CollapseWaitsForTheDelayAndPointingOpens()
     {
         double? delay = null;
         bool collapsed = false;
@@ -176,7 +220,8 @@ public sealed class ToolbarCustomizationTests
         Assert.True(collapsed);
 
         timer.PointerChanged(inside: true);
-        await WaitFor(() => expansions == 1);
+        // Pointing at the button opens the toolbar at once, with no wait.
+        Assert.Equal(1, expansions);
         Assert.False(collapsed);
         await Task.Delay(100, TestContext.Current.CancellationToken);
         Assert.Equal(1, collapses);

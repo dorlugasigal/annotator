@@ -7,8 +7,8 @@ namespace Annotator.App.Toolbar;
 
 /// <summary>
 /// The toolbar that shrinks to one button (Mac ToolbarCollapseController and the app delegate's collapse wiring): once
-/// the pointer has been off the toolbar for the delay chosen in Settings, it becomes the Annotator capsule; resting the
-/// pointer on the capsule or clicking it opens the toolbar again. Open menus and flyouts, a drag and typing keep it open.
+/// the pointer has been off the toolbar for the delay chosen in Settings, it becomes the Annotator capsule; pointing at
+/// the capsule or clicking it opens the toolbar again at once. Open menus and flyouts, a drag and typing keep it open.
 /// The change fades the new face in; the Mac's frame morph (Core ToolbarMorph) is not ported yet.
 /// </summary>
 internal sealed partial class ToolbarWindow
@@ -81,7 +81,7 @@ internal sealed partial class ToolbarWindow
         _model.SetToolbarCollapsed(true);
     }
 
-    /// <summary>Opens the shrunk toolbar: a click on the capsule, its context menu or a rest of the pointer on it.</summary>
+    /// <summary>Opens the shrunk toolbar: a click on the capsule, its context menu or the pointer reaching it.</summary>
     private void ExpandToolbar()
     {
         if ((_view ?? _model.Snapshot).ToolbarCollapsed)

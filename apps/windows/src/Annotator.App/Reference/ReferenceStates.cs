@@ -30,7 +30,7 @@ internal enum ReferenceSurface
     /// <summary>The Tools window's content (Mac ToolLibraryPanel) at a width and maximum height, on the window background.</summary>
     ToolsWindow,
 
-    /// <summary>The Settings window's content (Mac CustomizationView) on a tab, 840 points wide and 700 or 1500 high.</summary>
+    /// <summary>The Settings window's content (Mac CustomizationView) on a tab, 840 points wide and 700, 1500 or 2400 high.</summary>
     Settings,
 
     /// <summary>Launch at sign-in on its own (Mac LoginItemSettings().padding(16)), 620 points wide, for a startup task state.</summary>
@@ -158,7 +158,10 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     /// <summary>The tab Settings shows, for <see cref="ReferenceSurface.Settings"/>.</summary>
     public SettingsTab Tab { get; init; }
 
-    /// <summary>The surface's height in points, for <see cref="ReferenceSurface.Settings"/>: 700, or 1500 for the full states.</summary>
+    /// <summary>
+    /// The surface's height in points, for <see cref="ReferenceSurface.Settings"/>: 700, or 1500 for the full states (2400 for
+    /// Toolbar &amp; Shortcuts).
+    /// </summary>
     public double Height { get; init; } = 700;
 
     /// <summary>The startup task's state that launch at sign-in reads; the Mac capture's tabs show it off.</summary>
@@ -217,13 +220,10 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     public TimeSpan Settle { get; init; }
 }
 
-/// <summary>
-/// The profile fields the reference states change. The captures start in quick controls, as the Mac capture's
-/// setInspectorPinned(false); full properties states choose them.
-/// </summary>
+/// <summary>The profile fields the reference states change. The captures start with the properties shown, the default.</summary>
 internal sealed class ReferenceProfile
 {
-    public WorkspacePreferences Preferences = new() { InspectorPinned = false };
+    public WorkspacePreferences Preferences = new();
 }
 
 /// <summary>The named states of the toolbar and the tray flyout and icon (reference/ux-reference/macos/INDEX.md).</summary>
@@ -249,11 +249,15 @@ internal static partial class ReferenceStates
     };
 
     /// <summary>
-    /// UXReferenceCaptureTests.test05Settings: every tab at the default 840 by 700 points and stretched to 1500 high, on the
+    /// UXReferenceCaptureTests.test05Settings: every tab at the default 840 by 700 points and stretched to 1500 high (2400
+    /// for Toolbar &amp; Shortcuts, the longest tab), on the
     /// default profile with launch at sign-in off, and launch at sign-in alone for four startup states. The Mac's
     /// requires-approval is Windows' DisabledByUser and not-found an unpackaged build (WIN-SYS-01). The Toolbar &amp;
     /// Shortcuts and Pointer tabs show the pages the app sets through SettingsWindow.SetPage.
     /// </summary>
+    /// <summary>The height of a tab's full state: the whole scrolling content shows.</summary>
+    private static double FullHeight(SettingsTab tab) => tab == SettingsTab.Toolbar ? 2400 : 1500;
+
     private static ReferenceScenario? Settings(string state)
     {
         const string Launch = "launch-at-login-";
@@ -285,7 +289,7 @@ internal static partial class ReferenceStates
         {
             return null;
         }
-        return new ReferenceScenario(ReferenceSurface.Settings) { Tab = tab, Height = full ? 1500 : 700 };
+        return new ReferenceScenario(ReferenceSurface.Settings) { Tab = tab, Height = full ? FullHeight(tab) : 700 };
     }
 
     /// <summary>
@@ -508,42 +512,37 @@ internal static partial class ReferenceStates
 
     private static ReferenceScenario? Toolbar(string state)
     {
-        if (state.StartsWith("draw-quick-", StringComparison.Ordinal))
+        if (state == "full-properties-rectangle-filled")
         {
-            string name = state["draw-quick-".Length..];
-            if (name == "rectangle-filled")
+            return Drawing(Tool.Rectangle) with
             {
-                return Drawing(Tool.Rectangle) with
+                Setup = model =>
                 {
-                    Setup = model =>
-                    {
-                        model.ShowToolbar();
-                        model.Choose(Tool.Rectangle);
-                        model.ApplyStyle((ref Style style) => style.SetFillEnabled(true));
-                    },
-                };
-            }
-            if (Tool.FromRawValue(name) is not { } tool)
-            {
-                return null;
-            }
+                    model.ShowToolbar();
+                    model.Choose(Tool.Rectangle);
+                    model.ApplyStyle((ref Style style) => style.SetFillEnabled(true));
+                },
+            };
+        }
+        if (state == "full-properties-image")
+        {
             // Paste image is an action, as on the Mac: the Mac capture sets the tool directly, which no call does, so Windows
-            // pastes an image from the clipboard, and its quick properties show for the selected image.
-            return Drawing(tool) with { ClipboardHasImage = tool == Tool.Image };
+            // pastes an image from the clipboard, and its properties show for the selected image.
+            return Drawing(Tool.Image) with { ClipboardHasImage = true };
         }
         return state switch
         {
-            "expanded-horizontal-quick" => Drawing(Tool.Pen),
+            "expanded-horizontal-properties" => Drawing(Tool.Pen),
             "expanded-horizontal-tools-only" or "draw-tools-only" => Drawing(Tool.Pen) with { Profile = ToolsOnly },
-            "expanded-vertical-quick" => Drawing(Tool.Pen) with { Profile = Vertical, Available = VerticalAvailable },
+            "expanded-vertical-properties" => Drawing(Tool.Pen) with { Profile = Vertical, Available = VerticalAvailable },
             "expanded-vertical-tools-only" => Drawing(Tool.Pen) with
             {
                 Profile = profile => { Vertical(profile); ToolsOnly(profile); },
                 Available = VerticalAvailable,
             },
-            "minimal-horizontal-quick" => Drawing(Tool.Pen) with { Profile = Minimal },
+            "minimal-horizontal-properties" => Drawing(Tool.Pen) with { Profile = Minimal },
             "minimal-horizontal-tools-only" => Drawing(Tool.Pen) with { Profile = profile => { Minimal(profile); ToolsOnly(profile); } },
-            "minimal-vertical-quick" => Drawing(Tool.Pen) with
+            "minimal-vertical-properties" => Drawing(Tool.Pen) with
             {
                 Profile = profile => { Minimal(profile); Vertical(profile); },
                 Available = VerticalAvailable,
@@ -593,10 +592,10 @@ internal static partial class ReferenceStates
             },
             "full-properties-vertical-arrow" => Drawing(Tool.Arrow) with
             {
-                Profile = profile => { Vertical(profile); Pinned(profile); },
+                Profile = profile => { Vertical(profile); PropertiesShown(profile); },
                 Available = VerticalAvailable,
             },
-            "minimal-full-properties-arrow" => Drawing(Tool.Arrow) with { Profile = profile => { Minimal(profile); Pinned(profile); } },
+            "minimal-full-properties-arrow" => Drawing(Tool.Arrow) with { Profile = profile => { Minimal(profile); PropertiesShown(profile); } },
             // UXReferenceCaptureTests: full properties with every choice side by side (Settings > Your properties).
             "full-properties-all-choices-rectangle" => AllChoices(Tool.Rectangle, fill: true, "pattern", "roughness", "fillStyle", "edges"),
             "full-properties-all-choices-arrow" => AllChoices(Tool.Arrow, fill: false, "pattern", "roughness", "arrowType"),
@@ -613,7 +612,7 @@ internal static partial class ReferenceStates
             },
             _ when state.StartsWith("collapsed-", StringComparison.Ordinal) => Collapsed(state["collapsed-".Length..]),
             _ when state.StartsWith("full-properties-", StringComparison.Ordinal) &&
-                   Tool.FromRawValue(state["full-properties-".Length..]) is { } tool => Drawing(tool) with { Profile = Pinned },
+                   Tool.FromRawValue(state["full-properties-".Length..]) is { } tool => Drawing(tool) with { Profile = PropertiesShown },
             _ => null,
         };
     }
@@ -674,13 +673,13 @@ internal static partial class ReferenceStates
 
     private static ReferenceScenario Unavailable(string reason) => new(ReferenceSurface.Toolbar) { Unavailable = reason };
 
-    /// <summary>UXReferenceCaptureTests' full-properties-all-choices states: pinned, 1600 points available, the choices shown side by side.</summary>
+    /// <summary>UXReferenceCaptureTests' full-properties-all-choices states: 1600 points available, the choices shown side by side.</summary>
     private static ReferenceScenario AllChoices(Tool tool, bool fill, params string[] choices) => Drawing(tool) with
     {
         Available = new Size(1600, 900),
         Profile = profile =>
         {
-            Pinned(profile);
+            PropertiesShown(profile);
             profile.Preferences.ExpandedPropertyChoices = [.. choices];
         },
         Setup = model =>
@@ -746,8 +745,8 @@ internal static partial class ReferenceStates
 
     private static void ToolsOnly(ReferenceProfile profile) => profile.Preferences.QuickPreferencesExpanded = false;
 
-    /// <summary>Full properties (Mac setInspectorPinned(true)).</summary>
-    private static void Pinned(ReferenceProfile profile)
+    /// <summary>The properties shown (Mac setPropertiesShown(true)).</summary>
+    private static void PropertiesShown(ReferenceProfile profile)
     {
         profile.Preferences.InspectorPinned = true;
         profile.Preferences.QuickPreferencesExpanded = true;
