@@ -126,7 +126,7 @@ final class ToolbarFrameAnimator {
 }
 
 /// The toolbar shrunk to one button: the Annotator mark and whether you draw or use your apps, in the Draw button's
-/// colors. Clicking it, or resting the pointer on it, brings every tool back; dragging it moves the toolbar.
+/// colors. Pointing at it or clicking it brings every tool back; dragging it moves the toolbar.
 struct CollapsedToolbarButton: View {
     @ObservedObject var model: WorkspaceModel
     let vertical: Bool
@@ -208,12 +208,11 @@ struct CollapsedToolbarButton: View {
 }
 
 /// Decides when the toolbar shrinks to one button and when it opens again. It shrinks once the pointer has been off it
-/// for the chosen delay, unless something holds it open (`isHeldOpen`), and opens when the pointer rests on it.
+/// for the chosen delay, unless something holds it open (`isHeldOpen`), and opens as soon as the pointer is on it.
 @MainActor
 final class ToolbarCollapseController {
     private let model: WorkspaceModel
     private var collapseTimer: Task<Void, Never>?
-    private var hoverTimer: Task<Void, Never>?
     private(set) var pointerInside = false
     /// Things that keep the toolbar open, such as an open menu, a drag, the tutorial or the pointer on the toolbar.
     var isHeldOpen: @MainActor () -> Bool = { false }
@@ -230,10 +229,8 @@ final class ToolbarCollapseController {
         if inside {
             collapseTimer?.cancel()
             collapseTimer = nil
-            if model.toolbarCollapsed { scheduleHoverExpansion() }
+            if model.toolbarCollapsed { expand() }
         } else {
-            hoverTimer?.cancel()
-            hoverTimer = nil
             restart()
         }
     }
@@ -255,18 +252,5 @@ final class ToolbarCollapseController {
     func cancel() {
         collapseTimer?.cancel()
         collapseTimer = nil
-        hoverTimer?.cancel()
-        hoverTimer = nil
-    }
-
-    private func scheduleHoverExpansion() {
-        hoverTimer?.cancel()
-        hoverTimer = Task { @MainActor [weak self] in
-            try? await self?.wait(MotionTiming.toolbarExpandHoverDelay)
-            guard !Task.isCancelled, let self else { return }
-            self.hoverTimer = nil
-            guard self.pointerInside, self.model.toolbarCollapsed else { return }
-            self.expand()
-        }
     }
 }

@@ -64,7 +64,7 @@ public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
 
     public var detail: String {
         switch self {
-        case .properties: "Switch between quick controls, full properties and tools only."
+        case .properties: "Show or hide the properties below the tools."
         case .board: "Switch between desktop, whiteboard and blackboard."
         case .spotlight: "Turn the spotlight on or off."
         case .cursorHalo: "Turn the ring around your pointer on or off."

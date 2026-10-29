@@ -374,13 +374,12 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
             host.view.layoutSubtreeIfNeeded()
             return host.view.fittingSize
         }
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let expanded = size(false), expandedVertical = size(true)
         model.setToolbarSize(.minimal)
         XCTAssertEqual(model.preferences.toolbarSize, .minimal)
         let minimal = size(false), minimalVertical = size(true)
-        XCTAssertEqual(minimal.width, ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools, available: 1200,
-                                                                        propertiesVisible: false, size: .minimal), accuracy: 1)
+        XCTAssertEqual(minimal.width, ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools, available: 1200, size: .minimal), accuracy: 1)
         XCTAssertLessThan(minimal.width, expanded.width - 150)
         XCTAssertLessThanOrEqual(minimal.height, 56)
         XCTAssertLessThan(minimal.height, expanded.height)
@@ -471,10 +470,9 @@ final class ToolbarShortcutSettingsTests: XCTestCase {
                        size: CGSize(width: 800, height: 1720), name: "toolbar-shortcuts-full", dark: dark)
             model.setToolbarSize(.minimal)
             model.setToolbarOrientation(.horizontal)
-            model.setInspectorPinned(false)
-            model.setQuickPreferencesExpanded(true)
-            try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal-quick", dark: dark)
-            model.setQuickPreferencesExpanded(false)
+            model.setPropertiesShown(true)
+            try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal-properties", dark: dark)
+            model.setPropertiesShown(false)
             try render(ToolbarView(model: model), size: nil, name: "toolbar-minimal", dark: dark)
             model.setToolbarOrientation(.vertical)
             try render(ToolbarView(model: model, availableSize: CGSize(width: 900, height: 900)), size: nil,

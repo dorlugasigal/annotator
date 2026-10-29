@@ -80,7 +80,9 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var toolbarTools: [String]?
     public var showMenuBarIcon: Bool?
     public var cursorStyle: ToolCursorStyle?
+    /// `false` hides the tool's properties below the tools.
     public var quickPreferencesExpanded: Bool?
+    /// Kept for older profiles. Quick controls are gone, so shown properties are always the full ones.
     public var inspectorPinned: Bool?
     public var animateVisibility: Bool?
     public var visibilityAnimationStyle: VisibilityAnimationStyle?

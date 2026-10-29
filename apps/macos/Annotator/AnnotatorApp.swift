@@ -810,10 +810,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let animated = !Motion.systemReducesMotion && toolbar.isVisible && !model.workspaceHidden && !model.toolbarCollapsed &&
             model.preferences.toolbarOrientation != .vertical && abs(frame.height - old.height) < 1 && abs(frame.width - old.width) >= 1
         if animated {
-            frameAnimator.animate(toolbar, to: frame, duration: MotionTiming.toolbarResizeDuration,
-                                  completion: { [weak content] in content?.contentSize = nil })
-            content?.pin = .topLeading
-            content?.contentSize = size
+            // The toolbar fills the window on every frame, so its buttons stay at the window's edges.
+            content?.contentSize = nil
+            frameAnimator.animate(toolbar, to: frame, duration: MotionTiming.toolbarResizeDuration)
         } else {
             frameAnimator.finishNow(nil)
             content?.contentSize = nil
@@ -1097,16 +1096,17 @@ final class MovableToolbarHost: NSHostingView<ToolbarView> {
 
 // Window geometry belongs to the controller, not the hosting view's sizing constraints.
 /// The toolbar window's content: the SwiftUI toolbar over a background AppKit draws, so the window can grow, shrink or
-/// morph smoothly while the toolbar keeps its final layout, pinned where the old and new frames meet.
+/// morph smoothly. A resize lays the toolbar out at the window's size on every frame; a morph keeps the new face at its
+/// final size, pinned where the old and new frames meet.
 final class ToolbarContentView: NSView {
     let host: MovableToolbarHost
     let chrome = ToolbarChromeView()
-    /// The toolbar's measured size while the window animates toward it; `nil` fills the window.
+    /// The new face's size while a morph animates the window toward it; `nil` fills the window.
     var contentSize: CGSize? { didSet { if contentSize != oldValue { placeSubviews() } } }
     var pin = ToolbarPin.topLeading { didSet { if pin != oldValue { placeSubviews() } } }
     var onPointerInside: ((Bool) -> Void)?
     private var pointerTracking: NSTrackingArea?
-    private var outgoing: CALayer?
+    private var outgoing: MorphFaceView?
     private var outgoingSize = CGSize.zero
     private var morphRadii: (from: CGFloat, to: CGFloat)?
     /// A vertical toolbar has no background of its own, so the morph fades one in or out between `start` and `end`.
@@ -1129,7 +1129,7 @@ final class ToolbarContentView: NSView {
     }
 
     static func toolbar(model: WorkspaceModel, availableSize: CGSize) -> ToolbarView {
-        ToolbarView(model: model, availableSize: availableSize, drawsChrome: false)
+        ToolbarView(model: model, availableSize: availableSize, drawsChrome: false, fillsWindow: true)
     }
 
     required init?(coder: NSCoder) { nil }
@@ -1149,10 +1149,7 @@ final class ToolbarContentView: NSView {
         chrome.frame = bounds
         let frame = pin.rect(size: contentSize ?? bounds.size, in: bounds)
         if host.frame != frame { host.frame = frame }
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
         outgoing?.frame = pin.rect(size: outgoingSize, in: bounds)
-        CATransaction.commit()
     }
 
     /// A vertical toolbar draws its own surfaces; the horizontal toolbar and the one button use this background.
@@ -1193,13 +1190,10 @@ final class ToolbarContentView: NSView {
         morphRadii = radii
         self.chromeFade = chromeFade
         if let image {
-            let layer = CALayer()
-            layer.contents = image
-            layer.contentsGravity = .resize
-            layer.contentsScale = window?.backingScaleFactor ?? 2
-            layer.actions = ["position": NSNull(), "bounds": NSNull(), "frame": NSNull(), "opacity": NSNull()]
-            self.layer?.addSublayer(layer)
-            outgoing = layer
+            // A view, not a sublayer, so AppKit keeps it above the new face and the background.
+            let face = MorphFaceView(image: image)
+            addSubview(face, positioned: .above, relativeTo: host)
+            outgoing = face
         }
         chrome.isHidden = false
         updateMorph(0)
@@ -1207,10 +1201,7 @@ final class ToolbarContentView: NSView {
     }
 
     func updateMorph(_ time: Double) {
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        outgoing?.opacity = Float(ToolbarMorph.outgoingOpacity(time))
-        CATransaction.commit()
+        outgoing?.alphaValue = ToolbarMorph.outgoingOpacity(time)
         host.alphaValue = ToolbarMorph.incomingOpacity(time)
         if let morphRadii {
             chrome.cornerRadius = morphRadii.from + (morphRadii.to - morphRadii.from) * ToolbarMorph.shape(time)
@@ -1222,13 +1213,33 @@ final class ToolbarContentView: NSView {
     }
 
     func endMorph() {
-        outgoing?.removeFromSuperlayer()
+        outgoing?.removeFromSuperview()
         outgoing = nil
         morphRadii = nil
         chromeFade = nil
         host.alphaValue = 1
         refreshChrome()
     }
+}
+
+/// The face that leaves during a morph: a picture of the toolbar's controls that fades out while the window changes.
+private final class MorphFaceView: NSView {
+    private let image: CGImage
+
+    init(image: CGImage) {
+        self.image = image
+        super.init(frame: .zero)
+        wantsLayer = true
+    }
+
+    required init?(coder: NSCoder) { nil }
+    override var wantsUpdateLayer: Bool { true }
+    override func updateLayer() {
+        layer?.contents = image
+        layer?.contentsGravity = .resize
+    }
+    // Clicks go to the toolbar under it.
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 struct SettingsWindowSurface: NSViewRepresentable {

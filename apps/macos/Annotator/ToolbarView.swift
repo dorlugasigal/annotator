@@ -10,32 +10,17 @@ private struct ToolbarMeasuredSize: PreferenceKey {
     }
 }
 
+/// Whether a tool's properties show below the tools. Profiles from before, with quick controls, show them.
 enum ToolbarPropertiesMode: String, CaseIterable {
-    case toolsOnly = "Tools only", quick = "Quick controls", full = "Full properties"
+    case shown = "Shown", hidden = "Hidden"
 
-    /// Full properties are the default, so Curved and the other choices show without a click.
     @MainActor init(model: WorkspaceModel) {
-        self = model.preferences.quickPreferencesExpanded == false ? .toolsOnly :
-            model.preferences.inspectorPinned == false ? .quick : .full
+        self = model.preferences.quickPreferencesExpanded == false ? .hidden : .shown
     }
 
-    var next: Self {
-        switch self {
-        case .toolsOnly: .quick
-        case .quick: .full
-        case .full: .toolsOnly
-        }
-    }
+    var next: Self { self == .shown ? .hidden : .shown }
 
-    @MainActor func apply(to model: WorkspaceModel) {
-        switch self {
-        case .toolsOnly: model.setQuickPreferencesExpanded(false)
-        case .quick:
-            model.setInspectorPinned(false)
-            model.setQuickPreferencesExpanded(true)
-        case .full: model.setInspectorPinned(true)
-        }
-    }
+    @MainActor func apply(to model: WorkspaceModel) { model.setPropertiesShown(self == .shown) }
 }
 
 enum ActiveToolbarMode: String, CaseIterable {
@@ -156,6 +141,9 @@ struct ToolbarView: View {
     var dockEdgeOverride: ToolbarDockEdge?
     /// The real toolbar window draws the background in AppKit, so it can follow the window while it resizes.
     var drawsChrome = true
+    /// In the toolbar window, the toolbar fills the window from its top-leading corner, so its buttons follow the
+    /// window's edges while the window animates to a new size (`ToolbarWindowLayout`).
+    var fillsWindow = false
     private var tools: [Tool] { model.toolbarTools }
     private var items: [ShortcutCommand] { model.toolbarItems }
     @State private var libraryOpen = false
@@ -182,22 +170,25 @@ struct ToolbarView: View {
     /// The width the tools and buttons need. Full properties can make a horizontal toolbar wider (`ToolbarWidthLayout`).
     private var width: CGFloat {
         vertical ? metrics.verticalRailWidth + activeColumnWidth + (expanded ? verticalPropertyWidth + 8 : 0) :
-            ToolbarToolLayout.horizontalWidth(items: items, available: availableSize.width, propertiesVisible: expanded,
-                                              size: model.toolbarSize, hiding: hidden)
+            ToolbarToolLayout.horizontalWidth(items: items, available: availableSize.width, size: model.toolbarSize,
+                                              hiding: hidden)
     }
-    private var compactRail: Bool { vertical || (width < metrics.compactThreshold && !trailingControls.isEmpty) }
+    private var compactRail: Bool {
+        vertical || ToolbarToolLayout.usesTwoRows(items: items, available: availableSize.width, size: model.toolbarSize,
+                                                  hiding: hidden)
+    }
+    /// The tools' room: all of them, or on a screen too narrow for that, all the room left, with as many as fit.
     private var toolRailWidth: CGFloat {
-        let reserve = compactRail ? metrics.compactRailReserve(hiding: hidden) : metrics.railReserve(hiding: hidden)
+        let reserve = compactRail ? metrics.compactReserve(hiding: hidden) : metrics.regularReserve(hiding: hidden)
         let budget = max(metrics.buttonWidth, width - reserve)
         let visible = ToolbarToolLayout.visible(items, selected: .tool(activeRailTool), width: budget, size: model.toolbarSize)
-        return ToolbarToolLayout.width(of: visible, size: model.toolbarSize)
+        return visible.count == items.count ? ToolbarToolLayout.width(of: visible, size: model.toolbarSize) : budget
     }
     private var trailingControls: [ToolbarControl] {
         [ToolbarControl.undo, .redo, .clearAll, .properties, .settings, .hide].filter(shows)
     }
     private var propertiesMode: ToolbarPropertiesMode { ToolbarPropertiesMode(model: model) }
-    private var expanded: Bool { propertiesMode != .toolsOnly }
-    private var pinned: Bool { propertiesMode == .full }
+    private var expanded: Bool { propertiesMode == .shown }
     private var revealingProperties: Bool {
         !model.workspaceHidden && !model.visibilityAnimating && (settledPropertiesMode.map { $0 != propertiesMode } ?? false)
     }
@@ -211,7 +202,7 @@ struct ToolbarView: View {
     private var needsCaptureRecovery: Bool { model.captureFailureMessage != nil || zoomFailure != nil }
 
     var body: some View {
-        Group {
+        reportingSize(Group {
             if model.toolbarCollapsed {
                 CollapsedToolbarButton(model: model, vertical: vertical, drawsChrome: drawsChrome)
             } else {
@@ -219,10 +210,7 @@ struct ToolbarView: View {
             }
         }
         .allowsHitTesting(!model.visibilityAnimating)
-        .accessibilityHidden(model.visibilityAnimating)
-        .background {
-            GeometryReader { proxy in Color.clear.preference(key: ToolbarMeasuredSize.self, value: proxy.size) }
-        }
+        .accessibilityHidden(model.visibilityAnimating))
         .onPreferenceChange(ToolbarMeasuredSize.self) { size in
             let orientation = vertical
             Task { @MainActor in
@@ -246,6 +234,20 @@ struct ToolbarView: View {
         }
     }
 
+    /// Reports the toolbar's own size. In the toolbar window the toolbar fills the window, so a clear probe at the
+    /// toolbar's size reports it instead.
+    @ViewBuilder private func reportingSize(_ toolbar: some View) -> some View {
+        let probe = GeometryReader { proxy in Color.clear.preference(key: ToolbarMeasuredSize.self, value: proxy.size) }
+        if fillsWindow {
+            ToolbarWindowLayout {
+                toolbar
+                probe.allowsHitTesting(false).accessibilityHidden(true)
+            }
+        } else {
+            toolbar.background { probe }
+        }
+    }
+
     private var expandedToolbar: some View {
         VStack(spacing: 8) {
             if vertical {
@@ -262,12 +264,8 @@ struct ToolbarView: View {
                     if expanded {
                         VStack(alignment: .leading, spacing: 8) {
                             toolTitle
-                            if pinned {
-                                CompactInspectorViewport(model: model, width: verticalPropertyWidth - 24,
-                                                         limit: max(64, availableSize.height - 50), compact: true)
-                            } else {
-                                quickPreferences.frame(width: verticalPropertyWidth - 24)
-                            }
+                            CompactInspectorViewport(model: model, width: verticalPropertyWidth - 24,
+                                                     limit: max(64, availableSize.height - 50), compact: true)
                         }
                         .padding(12)
                         .frame(width: verticalPropertyWidth)
@@ -307,24 +305,14 @@ struct ToolbarView: View {
                 if !compactRail { trailingActions }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if compactRail && ((expanded && !pinned) || !trailingControls.isEmpty) {
-                if expanded && !pinned { Divider() }
+            if compactRail && !trailingControls.isEmpty {
                 HStack(spacing: metrics.spacing) {
-                    if expanded && !pinned { compactQuickPreferences }
                     Spacer(minLength: 0)
                     trailingActions
                 }
             }
             if showsModeStrip { activeModeStrip }
-            if expanded && !pinned && !compactRail {
-                Divider()
-                HStack(spacing: 10) {
-                    quickPreferences
-                    propertiesMenus
-                }
-                .modifier(PropertiesReveal(animated: revealingProperties))
-            }
-            if pinned {
+            if expanded {
                 Divider()
                 fullPropertiesRow
                     .modifier(PropertiesReveal(animated: revealingProperties))
@@ -348,7 +336,8 @@ struct ToolbarView: View {
         }
         .id(vertical)
         .padding(vertical ? 0 : metrics.padding)
-        .modifier(ToolbarWidth(vertical: vertical, width: width, limit: max(320, availableSize.width)))
+        .modifier(ToolbarWidth(vertical: vertical, width: width, limit: max(320, availableSize.width),
+                               followsProposal: fillsWindow))
         .fixedSize(horizontal: false, vertical: true)
         .background {
             ToolbarDragBackground(model: model)
@@ -422,14 +411,21 @@ struct ToolbarView: View {
         let row = HStack(alignment: .bottom, spacing: 12) {
             scaledProperties
             Spacer(minLength: 0)
-            HStack(spacing: 10) { propertiesMenus }
+            HStack(spacing: 10) {
+                sharedStyleMark
+                propertiesMenus
+            }
                 .frame(height: 26)
                 .padding(.bottom, 5)
         }
-        return ViewThatFits(in: .horizontal) {
-            row
-            ScrollView(.horizontal, showsIndicators: false) { row.fixedSize() }
+        return PropertiesRowLayout(limit: max(320, availableSize.width) - metrics.padding * 2) {
+            ViewThatFits(in: .horizontal) {
+                row
+                ScrollView(.horizontal, showsIndicators: false) { row.fixedSize() }
+            }
         }
+        // While the toolbar grows toward a wider row, its padding edge cuts the row off sideways.
+        .mask { Rectangle().padding(.vertical, -40) }
         .background { ToolbarDragBackground(model: model) }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tool properties")
@@ -459,107 +455,31 @@ struct ToolbarView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("\(propertiesMode.rawValue). Show \(propertiesMode.next.rawValue.lowercased()). Cycles quick controls, full properties and tools only." +
+        .help((expanded ? "Hide the properties below the tools." : "Show the properties below the tools.") +
               (model.shortcut(for: .action(.properties)).map { " Key: \($0.label)." } ?? ""))
         .accessibilityLabel("Properties")
         .accessibilityValue(propertiesMode.rawValue)
-        .accessibilityHint("Show \(propertiesMode.next.rawValue.lowercased())")
+        .accessibilityHint(expanded ? "Hide the properties" : "Show the properties")
         .accessibilityIdentifier("toolbar-properties")
-    }
-
-    private var quickPreferences: some View {
-        Group {
-            if model.effectiveTool.isProtection {
-                CoverPropertiesView(model: model, compact: compactRail)
-            } else if model.effectiveTool == .counter {
-                HStack(spacing: 8) {
-                    InspectorColorPicker(model: model, compact: true)
-                    StyleValueControl(model: model, parameter: .opacity, sliderWidth: compactRail ? 0 : 90)
-                }
-            } else if compactRail {
-                HStack(spacing: 12) {
-                    toolTitle
-                    Spacer(minLength: 0)
-                    if model.effectiveTool == .cover {
-                        Text("100% opaque").font(.caption).foregroundStyle(.secondary)
-                    } else if model.effectiveTool == .select && model.selectionCount == 0 {
-                        Text("Select to edit").font(.caption).foregroundStyle(.secondary)
-                    } else {
-                        if model.selectionSupportsFill {
-                            InspectorColorPicker(model: model, fill: true, compact: true)
-                        }
-                        StyleValueControl(model: model, parameter: quickParameter, sliderWidth: 0)
-                    }
-                }
-            } else {
-            HStack(spacing: 16) {
-                toolTitle.frame(minWidth: 54, alignment: .leading)
-                if model.effectiveTool.isPixelEffect {
-                    StyleValueControl(model: model, parameter: .effect)
-                } else if model.effectiveTool == .image {
-                    StyleValueControl(model: model, parameter: .opacity)
-                } else if model.effectiveTool == .cover {
-                    Text("100% opaque").font(.caption).foregroundStyle(.secondary)
-                        .help("Select this region to move, resize or delete it.")
-                } else if model.effectiveTool == .select && model.selectionCount == 0 {
-                    Text("Select any object to move, edit or delete it.").font(.caption).foregroundStyle(.secondary)
-                } else {
-                    if model.effectiveTool != .eraser {
-                        HStack(spacing: 10) {
-                            InspectorColorPicker(model: model, compact: true)
-                            if model.selectionSupportsFill { InspectorColorPicker(model: model, fill: true, compact: true) }
-                        }.frame(width: 138, alignment: .leading)
-                    }
-                    if model.effectiveTool == .text {
-                        StyleValueControl(model: model, parameter: .textSize)
-                    } else {
-                        StyleValueControl(model: model, parameter: .width)
-                    }
-                    if model.effectiveTool == .pen {
-                        SmartDrawButton(model: model, compact: true)
-                    }
-                }
-            }
-            }
-        }.frame(height: 34).disabled(model.selectionStyleIsLocked)
     }
 
     private var toolTitle: some View {
         HStack(spacing: 4) {
             Text(model.effectiveTool.label).font(.system(size: 11, weight: .semibold)).lineLimit(1)
-            if model.sharesToolStyles && model.effectiveTool.sharesStyle {
-                Image(systemName: "link").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
-                    .help("All drawing tools share this style. You can turn this off in Settings > General.")
-                    .accessibilityLabel("Style shared by all drawing tools")
-            }
+            sharedStyleMark
+        }
+    }
+
+    @ViewBuilder private var sharedStyleMark: some View {
+        if model.sharesToolStyles && model.effectiveTool.sharesStyle {
+            Image(systemName: "link").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                .help("All drawing tools share this style. You can turn this off in Settings > General.")
+                .accessibilityLabel("Style shared by all drawing tools")
         }
     }
 
     private var clearHelp: String {
         "Clear all drawings — undoable" + (model.shortcut(for: .action(.clearAll)).map { " (\($0.label))" } ?? "")
-    }
-
-    private var compactQuickPreferences: some View {
-        Group {
-            if model.effectiveTool.isProtection {
-                CoverPropertiesView(model: model, compact: true, showsSlider: width >= 500)
-            } else if model.effectiveTool == .select && model.selectionCount == 0 {
-                Text("Select to edit").font(.caption).foregroundStyle(.secondary)
-            } else {
-                HStack(spacing: 6) {
-                    if model.effectiveTool == .counter { InspectorColorPicker(model: model, compact: true, showLabel: false) }
-                    if model.selectionSupportsFill { InspectorColorPicker(model: model, fill: true, compact: true, showLabel: false) }
-                    StyleValueControl(model: model, parameter: quickParameter, sliderWidth: 0, showLabel: false)
-                }
-            }
-        }.disabled(model.selectionStyleIsLocked)
-    }
-
-    private var quickParameter: StyleParameter {
-        if model.effectiveTool.isPixelEffect { return .effect }
-        if model.effectiveTool == .image || model.effectiveTool == .counter { return .opacity }
-        if model.effectiveTool == .text { return .textSize }
-        return .width
     }
 
     private var verticalRail: some View {
@@ -885,34 +805,37 @@ private struct SupportReminderPresentation: ViewModifier {
     }
 }
 
-/// A vertical toolbar has a fixed width; a horizontal one is as wide as its tools and buttons need (`width`), or wider
-/// when its content, such as one row of full properties, needs more room, up to `limit`.
+/// A vertical toolbar has a fixed width; a horizontal one is as wide as its content, such as its tools and buttons on one
+/// row (`width`) or one row of full properties, up to `limit`. In the toolbar window it follows the window's width
+/// instead (`followsProposal`), so its buttons stay at the window's edges while the window animates to that width.
 private struct ToolbarWidth: ViewModifier {
     let vertical: Bool
     let width: CGFloat
     let limit: CGFloat
+    var followsProposal = false
 
     func body(content: Content) -> some View {
         if vertical {
             content.frame(width: width)
         } else {
-            ToolbarWidthLayout(base: width, limit: limit) { content }
+            ToolbarWidthLayout(limit: limit, followsProposal: followsProposal) { content }
         }
     }
 }
 
 struct ToolbarWidthLayout: Layout {
-    let base: CGFloat
     let limit: CGFloat
+    var followsProposal = false
 
-    static func width(base: CGFloat, limit: CGFloat, ideal: CGFloat) -> CGFloat {
-        guard ideal.isFinite else { return base }
-        return min(max(base, ceil(ideal)), max(base, limit))
+    static func width(limit: CGFloat, ideal: CGFloat) -> CGFloat {
+        guard ideal.isFinite else { return limit }
+        return min(ceil(ideal), limit)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         guard let content = subviews.first else { return .zero }
-        let width = Self.width(base: base, limit: limit, ideal: content.sizeThatFits(.unspecified).width)
+        let width = followsProposal ? proposal.width ?? Self.width(limit: limit, ideal: content.sizeThatFits(.unspecified).width) :
+            Self.width(limit: limit, ideal: content.sizeThatFits(.unspecified).width)
         let height = content.sizeThatFits(ProposedViewSize(width: width, height: proposal.height)).height
         return CGSize(width: width, height: height)
     }
@@ -920,6 +843,46 @@ struct ToolbarWidthLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         subviews.first?.place(at: bounds.origin, anchor: .topLeading,
                               proposal: ProposedViewSize(width: bounds.width, height: bounds.height))
+    }
+}
+
+/// The toolbar window's root. The toolbar, first, fills the window from its top-leading corner, so nothing shifts while
+/// the window animates to the toolbar's new size; a clear probe, last, takes the toolbar's own size and reports it.
+private struct ToolbarWindowLayout: Layout {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let toolbar = subviews.first else { return .zero }
+        let own = toolbar.sizeThatFits(.unspecified)
+        return CGSize(width: proposal.width ?? own.width, height: proposal.height ?? own.height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let toolbar = subviews.first, let probe = subviews.last, subviews.count > 1 else { return }
+        toolbar.place(at: bounds.origin, anchor: .topLeading, proposal: ProposedViewSize(width: bounds.width, height: nil))
+        probe.place(at: bounds.origin, anchor: .topLeading, proposal: ProposedViewSize(toolbar.sizeThatFits(.unspecified)))
+    }
+}
+
+/// Gives the properties row at least the width it needs, so it keeps its layout while the toolbar window grows toward
+/// that width, and no more than `limit`, where it scrolls.
+private struct PropertiesRowLayout: Layout {
+    let limit: CGFloat
+
+    private func rowWidth(_ proposed: CGFloat?, _ row: LayoutSubview) -> CGFloat {
+        let needed = min(row.sizeThatFits(.unspecified).width, limit)
+        return max(proposed ?? needed, needed)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let row = subviews.first else { return .zero }
+        let width = rowWidth(proposal.width, row)
+        let height = row.sizeThatFits(ProposedViewSize(width: width, height: proposal.height)).height
+        return CGSize(width: proposal.width ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let row = subviews.first else { return }
+        row.place(at: bounds.origin, anchor: .topLeading,
+                  proposal: ProposedViewSize(width: rowWidth(bounds.width, row), height: bounds.height))
     }
 }
 

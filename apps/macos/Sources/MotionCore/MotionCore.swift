@@ -171,8 +171,6 @@ public enum MotionTiming {
     /// out and the incoming face fades in as `ToolbarMorph` describes.
     public static let toolbarCollapseDuration = 0.3
     public static let toolbarExpandDuration = 0.34
-    /// Resting the pointer on the one-button toolbar this long opens it.
-    public static let toolbarExpandHoverDelay = 0.25
 
     /// Seconds for one shape's or the toolbar's show (`appearing`) or hide in each workspace style.
     public static func visibilityDuration(_ style: VisibilityAnimationStyle, appearing: Bool) -> Double {

@@ -24,7 +24,7 @@ final class InspectorViewportTransitionTests: XCTestCase {
         editor.session.document.select([items[0].id])
         editor.model.synchronize()
         editor.model.setToolbarOrientation(.vertical)
-        ToolbarPropertiesMode.full.apply(to: editor.model)
+        ToolbarPropertiesMode.shown.apply(to: editor.model)
         let host = NSHostingController(rootView: ToolbarView(model: editor.model,
             availableSize: CGSize(width: 640, height: 280)))
         let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 640, height: 280),

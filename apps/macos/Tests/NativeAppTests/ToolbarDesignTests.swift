@@ -41,12 +41,11 @@ final class ToolbarDesignTests: XCTestCase {
         return size
     }
 
-    func testCompactContextualLayoutsInBothAppearances() throws {
+    func testEveryToolsPropertiesStayOnOneRowInBothAppearances() throws {
         let suite = "native-design-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
-        model.setInspectorPinned(false)
         model.beginDrawing()
         for dark in [false, true] {
             for tool in [Tool.select, .rectangle, .ellipse, .arrow, .line, .pen, .highlighter, .text, .eraser,
@@ -55,8 +54,8 @@ final class ToolbarDesignTests: XCTestCase {
                 model.applyStyle { $0 = .defaults(for: tool) }
                 let size = try render(ToolbarView(model: model), name: tool.rawValue, dark: dark)
                 XCTAssertEqual(size.width, ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools,
-                    available: 1000, propertiesVisible: true), accuracy: 1)
-                XCTAssertLessThanOrEqual(size.height, 126, "\(tool.rawValue) is not compact")
+                    available: 1000), accuracy: 1)
+                XCTAssertLessThanOrEqual(size.height, 150, "\(tool.rawValue) properties take more than one row")
                 XCTAssertGreaterThan(size.height, 80)
             }
         }
@@ -67,28 +66,25 @@ final class ToolbarDesignTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
-        let cases: [(String, CGSize, Bool, Bool, Bool)] = [
-            ("collapsed", CGSize(width: 880, height: 900), false, false, false),
-            ("narrow", CGSize(width: 400, height: 600), true, false, false),
-            ("vertical", CGSize(width: 880, height: 620), true, false, true),
-            ("pinned", CGSize(width: 880, height: 600), true, true, false),
-            ("use-apps", CGSize(width: 880, height: 600), true, false, false)
+        let cases: [(String, CGSize, Bool, Bool)] = [
+            ("collapsed", CGSize(width: 880, height: 900), false, false),
+            ("narrow", CGSize(width: 400, height: 600), true, false),
+            ("vertical", CGSize(width: 880, height: 620), true, true),
+            ("pinned", CGSize(width: 880, height: 600), true, false),
+            ("use-apps", CGSize(width: 880, height: 600), true, false)
         ]
         for dark in [false, true] {
-            for (name, available, expanded, pinned, vertical) in cases {
+            for (name, available, expanded, vertical) in cases {
                 model.setToolbarOrientation(vertical ? .vertical : .horizontal)
-                model.setInspectorPinned(pinned)
-                model.setQuickPreferencesExpanded(expanded)
+                model.setPropertiesShown(expanded)
                 model.tool = .pen
                 model.beginDrawing()
                 if name == "use-apps" { model.interact() }
                 let size = try render(ToolbarView(model: model, availableSize: available), name: name, dark: dark)
                 XCTAssertEqual(size.width, vertical ? (expanded ? 376 : 68) :
-                    ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools, available: available.width,
-                                                      propertiesVisible: expanded), accuracy: 1)
+                    ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools, available: available.width), accuracy: 1)
                 XCTAssertLessThanOrEqual(size.height, available.height)
                 if !expanded { XCTAssertLessThanOrEqual(size.height, 72) }
-                if !pinned && !vertical && expanded { XCTAssertLessThanOrEqual(size.height, 126) }
             }
         }
     }
@@ -98,7 +94,6 @@ final class ToolbarDesignTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
-        model.setInspectorPinned(false)
         model.tool = .arrow
         let size = try render(ToolbarView(model: model, availableSize: CGSize(width: 648, height: 230)),
                               name: "short", dark: false)

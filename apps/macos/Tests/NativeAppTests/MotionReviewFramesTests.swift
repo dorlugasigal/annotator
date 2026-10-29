@@ -17,7 +17,7 @@ final class MotionReviewFramesTests: XCTestCase {
         let suite = "motion-review-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let host = NSHostingView(rootView: ToolbarView(model: model).environment(\.colorScheme, .dark))
         let panel = NSPanel(contentRect: CGRect(x: 80, y: 80, width: 924, height: 72),
                             styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)

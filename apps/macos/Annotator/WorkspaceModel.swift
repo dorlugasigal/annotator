@@ -771,9 +771,12 @@ final class WorkspaceModel: ObservableObject {
         updatePointerEffects()
     }
 
-    func setQuickPreferencesExpanded(_ expanded: Bool) {
-        if let owner = globalSettingsOwner { owner.setQuickPreferencesExpanded(expanded); return }
-        preferences.quickPreferencesExpanded = expanded
+    /// Shows or hides the tool's properties below the tools.
+    func setPropertiesShown(_ shown: Bool) {
+        if let owner = globalSettingsOwner { owner.setPropertiesShown(shown); return }
+        preferences.quickPreferencesExpanded = shown
+        // Quick controls are gone, so shown properties are always the full ones.
+        if shown { preferences.inspectorPinned = true }
         persistPreferences()
         onInspectorVisibilityChanged?()
     }
@@ -786,16 +789,7 @@ final class WorkspaceModel: ObservableObject {
 
     func toggleProperties() {
         if let owner = globalSettingsOwner { owner.toggleProperties(); return }
-        let expanded = preferences.inspectorPinned != false && preferences.quickPreferencesExpanded != false
-        setInspectorPinned(!expanded)
-    }
-
-    func setInspectorPinned(_ pinned: Bool) {
-        if let owner = globalSettingsOwner { owner.setInspectorPinned(pinned); return }
-        preferences.inspectorPinned = pinned
-        if pinned { preferences.quickPreferencesExpanded = true }
-        persistPreferences()
-        onInspectorVisibilityChanged?()
+        setPropertiesShown(preferences.quickPreferencesExpanded == false)
     }
 
     func setVisibilityAnimation(_ enabled: Bool) {

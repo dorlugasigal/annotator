@@ -27,7 +27,7 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
         case .undo: "Take back your last change."
         case .redo: "Bring back what Undo took."
         case .clearAll: "Remove all drawings. You can undo it."
-        case .properties: "Quick controls, full properties or tools only."
+        case .properties: "Show or hide the properties below the tools."
         case .settings: "Open Settings."
         case .hide: "Hide drawings and tools."
         }

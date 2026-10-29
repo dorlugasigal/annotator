@@ -143,7 +143,6 @@ enum MotionExport {
             "toolbarResizeDuration": .double(MotionTiming.toolbarResizeDuration),
             "toolbarCollapseDuration": .double(MotionTiming.toolbarCollapseDuration),
             "toolbarExpandDuration": .double(MotionTiming.toolbarExpandDuration),
-            "toolbarExpandHoverDelay": .double(MotionTiming.toolbarExpandHoverDelay),
             "toolbarMorphOutgoingEnd": .double(ToolbarMorph.outgoingEnd),
             "toolbarMorphIncomingStart": .double(ToolbarMorph.incomingStart),
             "notes": .array([

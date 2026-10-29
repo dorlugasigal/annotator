@@ -80,8 +80,7 @@ final class SelectedContentEditingTests: XCTestCase {
         editor.session.document = try CanvasDocument(elements: shapes)
         editor.session.document.select(Set(shapes.map(\.id)))
         editor.model.choose(.select)
-        editor.model.setQuickPreferencesExpanded(true)
-        editor.model.setInspectorPinned(false)
+        editor.model.setPropertiesShown(true)
         editor.model.setToolbarOrientation(.vertical)
         for full in [false, true] {
             let content = full ? AnyView(ContextualInspector(model: editor.model)) :
@@ -98,7 +97,7 @@ final class SelectedContentEditingTests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.05))
             let fill = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
                 $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Fill color"
-            }, full ? "Full mixed-selection properties" : "Compact quick properties")
+            }, full ? "Full mixed-selection properties" : "Properties attached to the vertical toolbar")
             if !full {
                 XCTAssertTrue(fill.accessibilityPerformPress())
                 RunLoop.current.run(until: Date().addingTimeInterval(0.05))

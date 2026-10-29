@@ -53,8 +53,8 @@ final class ProductFeatureRecordingTests: XCTestCase {
         let model = WorkspaceModel(defaults: defaults)
         model.setVisibilityAnimation(false)
         model.setToolbarDockEdge(.bottom)
-        model.setInspectorPinned(true)
-        model.setQuickPreferencesExpanded(true)
+        model.setPropertiesShown(true)
+        model.setPropertiesShown(true)
         let previousAppearance = NSApp.appearance
         NSApp.appearance = NSAppearance(named: .darkAqua)
         defer { NSApp.appearance = previousAppearance }
@@ -352,7 +352,7 @@ final class ProductFeatureRecordingTests: XCTestCase {
                     try await prepareControl("Done")
                 }
             }
-            XCTAssertEqual(ToolbarPropertiesMode(model: model), .full)
+            XCTAssertEqual(ToolbarPropertiesMode(model: model), .shown)
             let floating = try XCTUnwrap(toolbar as? InspectorPanel)
             let start = CGPoint(x: toolbar.frame.midX, y: toolbar.frame.midY)
             let destination = CGPoint(x: stage.midX, y: stage.minY + 420 - toolbar.frame.height / 2)

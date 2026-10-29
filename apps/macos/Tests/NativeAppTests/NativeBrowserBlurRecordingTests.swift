@@ -55,8 +55,8 @@ final class NativeBrowserBlurRecordingTests: XCTestCase {
         let model = WorkspaceModel(defaults:defaults)
         model.setVisibilityAnimation(false)
         model.setToolbarDockEdge(.bottom)
-        model.setInspectorPinned(true)
-        model.setQuickPreferencesExpanded(true)
+        model.setPropertiesShown(true)
+        model.setPropertiesShown(true)
         let app = AppDelegate(model:model)
         app.resumeDrawing()
         defer {

@@ -194,10 +194,26 @@ struct ToolbarShortcutSettings: View {
             Label("Drag the toolbar to a screen edge to dock it there. Top and bottom make it horizontal; left and right make it vertical.",
                   systemImage: "hand.draw")
                 .font(.caption).foregroundStyle(.secondary)
-            Label("A shrunk toolbar is one button that shows Draw or Apps. Point at it or click it to get your tools back.",
-                  systemImage: "capsule")
-                .font(.caption).foregroundStyle(.secondary)
+            HStack(alignment: .center, spacing: 16) {
+                ToolbarShrinkDemo()
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Shrink").font(.headline)
+                    Text(shrinkCaption).font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: 280, alignment: .leading)
+            }
+            .padding(12)
+            .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.03)))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.primary.opacity(0.07)))
         }
+    }
+
+    private var shrinkCaption: String {
+        guard let delay = model.toolbarCollapseDelay else {
+            return "Pick a time in Shrink and the toolbar tucks into one button when you leave it. Point at the button and your tools are back."
+        }
+        return "Leave the toolbar alone for \(delay.formatted()) seconds and it shrinks to one button that shows Draw or Apps. Point at it and your tools are back."
     }
 
     /// The delay choices, plus a delay from an imported profile that isn't one of them.

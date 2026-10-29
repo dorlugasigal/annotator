@@ -466,7 +466,7 @@ final class MultiDisplayEditingTests: XCTestCase {
     func testToolbarAlwaysExposesBoardsAndCompactModeWithoutLibraryHistoryButtons() throws {
         let (model, defaults, suite) = try workspace()
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         for orientation in [ToolbarOrientation.horizontal, .vertical] {
             model.setToolbarOrientation(orientation)
             let host = NSHostingView(rootView: ToolbarView(model: model, availableSize: CGSize(width: 640, height: 800)))

@@ -60,9 +60,14 @@ final class ToolbarCustomizationTests: XCTestCase {
     }
 
     private func press(_ label: String, in host: NSView, file: StaticString = #filePath, line: UInt = #line) async throws {
-        let node = try XCTUnwrap(nodes(host).first { $0.accessibilityRole() == .button && $0.accessibilityLabel() == label },
-                                 "No \(label) button", file: file, line: line)
-        XCTAssertTrue(node.accessibilityPerformPress(), file: file, line: line)
+        // The accessibility tree can trail a new layout by a frame or two, so wait for the button.
+        var node = nodes(host).first { $0.accessibilityRole() == .button && $0.accessibilityLabel() == label }
+        for _ in 0..<25 where node == nil {
+            try await Task.sleep(for: .milliseconds(20))
+            node = nodes(host).first { $0.accessibilityRole() == .button && $0.accessibilityLabel() == label }
+        }
+        let button = try XCTUnwrap(node, "No \(label) button", file: file, line: line)
+        XCTAssertTrue(button.accessibilityPerformPress(), file: file, line: line)
         try await Task.sleep(for: .milliseconds(40))
     }
 
@@ -79,7 +84,7 @@ final class ToolbarCustomizationTests: XCTestCase {
     func testFullPropertiesStayOnOneRowForEveryTool() async throws {
         let (model, cleanup) = try makeModel("one-row")
         defer { cleanup() }
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         model.beginDrawing()
         let cases: [(String, Tool, (inout Style) -> Void)] = [
             ("select", .select, { _ in }), ("rectangle", .rectangle, { _ in }),
@@ -98,7 +103,7 @@ final class ToolbarCustomizationTests: XCTestCase {
                 defer { close(panel) }
                 try save(host, name: "full-\(name)", dark: dark)
                 let size = host.fittingSize
-                let base = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400, propertiesVisible: true)
+                let base = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400)
                 XCTAssertGreaterThanOrEqual(size.width, base - 1, name)
                 XCTAssertLessThanOrEqual(size.height, 152, "\(name) properties took more than one row (\(size.height) points)")
                 let row = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "contextual-inspector-viewport" }, name)
@@ -120,13 +125,13 @@ final class ToolbarCustomizationTests: XCTestCase {
     func testToolbarGrowsSidewaysWhenPropertiesNeedMoreRoom() async throws {
         let (model, cleanup) = try makeModel("grow")
         defer { cleanup() }
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         model.setToolbarSize(.minimal)
         model.configureToolbar([.select, .arrow, .pen])
         // Every choice side by side takes more room than the tools.
         for choice in [PropertyChoice.pattern, .roughness, .arrowType] { model.setShowsAllChoices(choice, true) }
         model.beginDrawing()
-        let base = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400, propertiesVisible: true,
+        let base = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400,
                                                      size: .minimal)
         model.tool = .arrow
         model.applyStyle { $0 = .defaults(for: .arrow) }
@@ -150,7 +155,7 @@ final class ToolbarCustomizationTests: XCTestCase {
     func testChoicesAreSingleButtonsThatCycle() async throws {
         let (model, cleanup) = try makeModel("toggles")
         defer { cleanup() }
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         model.beginDrawing()
         model.tool = .rectangle
         model.applyStyle { $0 = .defaults(for: .rectangle) }
@@ -203,7 +208,7 @@ final class ToolbarCustomizationTests: XCTestCase {
     func testPropertiesCanShowAllTheirChoices() async throws {
         let (model, cleanup) = try makeModel("all-choices")
         defer { cleanup() }
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         model.beginDrawing()
         typealias Case = (PropertyChoice, Tool, (inout Style) -> Void, String, [String], String, (Style) -> Bool)
         let cases: [Case] = [
@@ -300,19 +305,18 @@ final class ToolbarCustomizationTests: XCTestCase {
         model.tool = .pen
         for orientation in [ToolbarOrientation.horizontal, .vertical] {
             model.setToolbarOrientation(orientation)
-            for pinned in [false, true] {
-                model.setInspectorPinned(pinned)
-                if !pinned { model.setQuickPreferencesExpanded(true) }
+            for shown in [false, true] {
+                model.setPropertiesShown(shown)
                 for control in ToolbarControl.allCases {
                     let labels = try XCTUnwrap(Self.controlLabels[control])
                     let (shownPanel, shownHost) = try await show(model)
                     XCTAssertTrue(nodes(shownHost).contains { labels.contains($0.accessibilityLabel() ?? "") },
-                                  "\(control) is missing before it is turned off (\(orientation), pinned \(pinned))")
+                                  "\(control) is missing before it is turned off (\(orientation), properties \(shown))")
                     close(shownPanel)
                     model.setToolbarControl(control, shown: false)
                     let (panel, host) = try await show(model)
                     XCTAssertFalse(nodes(host).contains { labels.contains($0.accessibilityLabel() ?? "") },
-                                   "\(control) stays after it is turned off (\(orientation), pinned \(pinned))")
+                                   "\(control) stays after it is turned off (\(orientation), properties \(shown))")
                     close(panel)
                     model.setToolbarControl(control, shown: true)
                 }
@@ -326,7 +330,7 @@ final class ToolbarCustomizationTests: XCTestCase {
         defer { cleanup() }
         model.beginDrawing()
         model.tool = .pen
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         let menuIDs = ["toolbar-action-focusMenu", "toolbar-action-zoomMenu"]
         let (plainPanel, plainHost) = try await show(model)
         XCTAssertFalse(nodes(plainHost).contains { menuIDs.contains($0.accessibilityIdentifier() ?? "") },
@@ -375,17 +379,16 @@ final class ToolbarCustomizationTests: XCTestCase {
     func testTurningButtonsOffGivesTheirRoomBack() async throws {
         let (model, cleanup) = try makeModel("room")
         defer { cleanup() }
-        model.setInspectorPinned(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         model.beginDrawing()
-        let full = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400, propertiesVisible: false)
+        let full = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400)
         let (panel, host) = try await show(model)
         XCTAssertEqual(host.fittingSize.width, full, accuracy: 1)
         close(panel)
         for control in ToolbarControl.allCases { model.setToolbarControl(control, shown: false) }
         let hidden = model.hiddenToolbarControls
         XCTAssertEqual(hidden, Set(ToolbarControl.allCases))
-        let bare = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400, propertiesVisible: false,
+        let bare = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400,
                                                      hiding: hidden)
         XCTAssertLessThan(bare, full - 300)
         let (barePanel, bareHost) = try await show(model)
@@ -395,7 +398,73 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertTrue(nodes(bareHost).contains { $0.accessibilityLabel() == "Select" }, "The tools stay")
         // Keys still work without their buttons.
         model.performShortcutAction(.properties)
-        XCTAssertEqual(ToolbarPropertiesMode(model: model), .quick)
+        XCTAssertEqual(ToolbarPropertiesMode(model: model), .shown)
+    }
+
+    /// A toolbar with few tools hugs them on one row, with or without properties, so nothing leaves a gap.
+    func testFewToolsKeepOneRowWithoutGaps() async throws {
+        let (model, cleanup) = try makeModel("few")
+        defer { cleanup() }
+        model.beginDrawing()
+        model.configureToolbar([.select, .pen, .eraser])
+        model.choose(.pen)
+        model.setPropertiesShown(false)
+        let width = ToolbarToolLayout.horizontalWidth(items: model.toolbarItems, available: 1400)
+        XCTAssertFalse(ToolbarToolLayout.usesTwoRows(items: model.toolbarItems, available: 1400))
+        let (panel, host) = try await show(model)
+        try save(host, name: "few-tools", dark: false)
+        XCTAssertEqual(host.fittingSize.width, width, accuracy: 1, "The toolbar is exactly its tools and buttons")
+        XCTAssertLessThanOrEqual(host.fittingSize.height, 72, "One row, never two")
+        close(panel)
+        model.setPropertiesShown(true)
+        let (shownPanel, shownHost) = try await show(model)
+        defer { close(shownPanel) }
+        try save(shownHost, name: "few-tools-properties", dark: false)
+        XCTAssertGreaterThanOrEqual(shownHost.fittingSize.width, width - 1)
+        XCTAssertLessThanOrEqual(shownHost.fittingSize.height, 150, "The tools and the properties each take one row")
+    }
+
+    /// While the real toolbar grows or shrinks for a tool's properties, its tools stay at the left edge and its buttons
+    /// at the right edge on every frame.
+    func testToolsAndButtonsStayAtTheEdgesWhileTheToolbarResizes() async throws {
+        let (model, cleanup) = try makeModel("resize")
+        model.setVisibilityAnimation(false)
+        model.configureToolbar([.select, .rectangle, .arrow, .pen, .text])
+        model.setPropertiesShown(true)
+        let app = AppDelegate(model: model)
+        app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }
+        defer {
+            app.hideTools()
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            cleanup()
+        }
+        app.activateTools()
+        model.choose(.pen)
+        try await Task.sleep(for: .milliseconds(400))
+        let panel = try XCTUnwrap(app.toolbarWindow)
+        let content = try XCTUnwrap(panel.contentView)
+        func edges() throws -> (left: CGFloat, right: CGFloat, width: CGFloat) {
+            let all = nodes(content)
+            let select = try XCTUnwrap(all.first { $0.accessibilityLabel() == "Select" }).accessibilityFrame()
+            let hide = try XCTUnwrap(all.first { $0.accessibilityLabel() == "Hide drawings and tools" }).accessibilityFrame()
+            return (select.minX - panel.frame.minX, panel.frame.maxX - hide.maxX, panel.frame.width)
+        }
+        let rest = try edges()
+        // The Arrow's properties need more room than the Pen's.
+        for tool in [Tool.arrow, .pen] {
+            let start = panel.frame.width
+            model.choose(tool)
+            var moving = false
+            for _ in 0..<30 {
+                try await Task.sleep(for: .milliseconds(12))
+                let sample = try edges()
+                if app.toolbarIsAnimating && abs(sample.width - start) >= 1 { moving = true }
+                XCTAssertEqual(sample.left, rest.left, accuracy: 1, "The tools leave the left edge at width \(sample.width)")
+                XCTAssertEqual(sample.right, rest.right, accuracy: 1, "The buttons leave the right edge at width \(sample.width)")
+            }
+            XCTAssertNotEqual(panel.frame.width, start, accuracy: 1, "\(tool.label) changes the toolbar's width")
+            if !Motion.systemReducesMotion { XCTAssertTrue(moving, "The toolbar animates to its new width") }
+        }
     }
 
     // MARK: One-button toolbar
@@ -437,7 +506,7 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertFalse(model.toolbarCollapsed, "Without the app's animation the toolbar opens at once")
     }
 
-    func testCollapseWaitsForTheDelayAndHoverOpens() async throws {
+    func testCollapseWaitsForTheDelayAndPointingOpens() async throws {
         let (model, cleanup) = try makeModel("controller")
         defer { cleanup() }
         let controller = ToolbarCollapseController(model: model)
@@ -464,8 +533,7 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertTrue(model.toolbarCollapsed)
 
         controller.pointerChanged(inside: true)
-        try await Task.sleep(for: .milliseconds(80))
-        XCTAssertEqual(expansions, 1, "Resting the pointer on the button opens the toolbar")
+        XCTAssertEqual(expansions, 1, "Pointing at the button opens the toolbar at once, with no wait")
         XCTAssertFalse(model.toolbarCollapsed)
         try await Task.sleep(for: .milliseconds(80))
         XCTAssertEqual(collapses, 1, "It stays open while the pointer is on it")
@@ -478,13 +546,90 @@ final class ToolbarCustomizationTests: XCTestCase {
         controller.cancel()
     }
 
+    /// The Shrink demo starts still, shrinks the toolbar once the pointer leaves, opens it the moment the pointer is
+    /// back, and loops.
+    func testShrinkDemoTimeline() {
+        XCTAssertEqual(ShrinkDemoPose(at: 0), ShrinkDemoPose(at: ShrinkDemoPose.leave - 0.01), "The first second is still")
+        XCTAssertEqual(ShrinkDemoPose(at: 0).shrink, 0)
+        XCTAssertEqual(ShrinkDemoPose(at: 0).pointer, ShrinkDemoPose.onToolbar)
+        XCTAssertEqual(ShrinkDemoPose(at: ShrinkDemoPose.collapse - 0.01), .open, "The pointer is away before it shrinks")
+        let shrinking = ShrinkDemoPose(at: (ShrinkDemoPose.collapse + ShrinkDemoPose.rest) / 2)
+        XCTAssertGreaterThan(shrinking.shrink, 0)
+        XCTAssertLessThan(shrinking.shrink, 1)
+        XCTAssertEqual(ShrinkDemoPose.rest - ShrinkDemoPose.collapse, MotionTiming.toolbarCollapseDuration, accuracy: 0.001)
+        XCTAssertEqual(ShrinkDemoPose(at: ShrinkDemoPose.back - 0.01), .shrunk)
+        let arrived = ShrinkDemoPose(at: ShrinkDemoPose.expand)
+        XCTAssertEqual(arrived.pointer, ShrinkDemoPose.onToolbar)
+        XCTAssertLessThan(ShrinkDemoPose(at: ShrinkDemoPose.expand + 0.05).shrink, 1, "It opens with no wait")
+        XCTAssertEqual(ShrinkDemoPose.opened - ShrinkDemoPose.expand, MotionTiming.toolbarExpandDuration, accuracy: 0.001)
+        XCTAssertEqual(ShrinkDemoPose(at: ShrinkDemoPose.opened + 0.01).shrink, 0)
+        XCTAssertEqual(ShrinkDemoPose(at: ShrinkDemoPose.period + 0.3), ShrinkDemoPose(at: 0.3), "It loops")
+    }
+
+    func testSettingsShowTheShrinkDemo() async throws {
+        let (model, cleanup) = try makeModel("shrink-demo")
+        defer { cleanup() }
+        let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))
+        let window = NSWindow(contentRect: NSRect(origin: CGPoint(x: 40, y: 40), size: SettingsSurfaceView.defaultContentSize),
+                              styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = host
+        window.orderFrontRegardless()
+        defer { window.orderOut(nil); window.contentView = nil; window.close() }
+        var found: NativeAccessibilityNode?
+        for _ in 0..<30 where found == nil {
+            try await Task.sleep(for: .milliseconds(100))
+            found = nodes(host).first { $0.accessibilityIdentifier() == "toolbar-shrink-demo" }
+        }
+        let demo = try XCTUnwrap(found, "Settings shows what Shrink does")
+        XCTAssertEqual(demo.accessibilityLabel(), "Shrink preview")
+        XCTAssertEqual(demo.accessibilityRole(), .image)
+        XCTAssertFalse((demo.accessibilityHelp() ?? "").isEmpty, "It says what it shows")
+        XCTAssertGreaterThan(demo.accessibilityFrame().width, 200)
+    }
+
+    /// The morph covers the toolbar with a picture of its face while the window shrinks, so the tools fade out instead of
+    /// blinking away.
+    func testMorphStartsFromAPictureOfTheTools() async throws {
+        let (model, cleanup) = try makeModel("picture")
+        model.setVisibilityAnimation(false)
+        model.setPropertiesShown(false)
+        let app = AppDelegate(model: model)
+        app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }
+        defer {
+            app.hideTools()
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            cleanup()
+        }
+        app.activateTools()
+        try await Task.sleep(for: .milliseconds(300))
+        let content = try XCTUnwrap(app.toolbarWindow?.contentView as? ToolbarContentView)
+        let picture = try XCTUnwrap(content.snapshotHost(), "The morph has a picture of the tools")
+        let bitmap = NSBitmapImageRep(cgImage: picture)
+        var ink = 0
+        for x in stride(from: 0, to: bitmap.pixelsWide, by: 2) {
+            for y in stride(from: 0, to: bitmap.pixelsHigh, by: 2) where (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 {
+                ink += 1
+            }
+        }
+        XCTAssertGreaterThan(ink, 200, "The picture shows the tools, not an empty toolbar")
+        XCTAssertEqual(content.subviews.count, 2)
+        model.setToolbarCollapseDelay(3)
+        app.collapse.collapse()
+        XCTAssertTrue(app.toolbarIsAnimating, "The morph starts")
+        XCTAssertEqual(content.subviews.count, 3, "The picture of the tools covers the toolbar while it morphs")
+        XCTAssertFalse(content.subviews.last === content.host, "The picture stays above the new face and the background")
+        for _ in 0..<40 where app.toolbarIsAnimating { try await Task.sleep(for: .milliseconds(25)) }
+        XCTAssertTrue(model.toolbarCollapsed)
+        XCTAssertEqual(content.subviews.count, 2, "The picture goes when the morph ends")
+    }
+
     func testRealToolbarMorphsIntoOneButtonAndBack() async throws {
         let screen = try XCTUnwrap(NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main)
         let safe = screen.visibleFrame.insetBy(dx: 12, dy: 12)
         let (model, cleanup) = try makeModel("morph")
         model.setVisibilityAnimation(false)
-        model.setInspectorPinned(false)
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         model.setToolbarCollapseDelay(3)
         let app = AppDelegate(model: model)
         app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }

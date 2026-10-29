@@ -20,8 +20,8 @@ final class VerticalAttachedPropertiesTests: XCTestCase {
             .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("UIReview/VerticalAttached")
         try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
         for dark in [false, true] {
-            for mode in [ToolbarPropertiesMode.quick, .full] {
-                mode.apply(to: model)
+            do {
+                model.setPropertiesShown(true)
                 for tool in Tool.allCases {
                     model.tool = tool
                     model.style = .defaults(for: tool)
@@ -63,15 +63,11 @@ final class VerticalAttachedPropertiesTests: XCTestCase {
                         XCTAssertLessThanOrEqual(frame.maxX, surfaceFrame.maxX + 1,
                                                  "A real \(tool.rawValue) control overflows the attached surface.")
                     }
-                    if mode == .quick {
-                        XCTAssertLessThanOrEqual(surfaceFrame.height, 90, tool.rawValue)
-                    } else {
-                        let scroll = try XCTUnwrap(scrollViews(in: host.view).first)
-                        let content = try XCTUnwrap(scroll.documentView)
-                        XCTAssertLessThanOrEqual(surfaceFrame.height, min(850, content.frame.height) + 60,
-                                                 "The surface must hug its controls, not the rail: \(tool.rawValue)")
-                        XCTAssertLessThanOrEqual(content.frame.width, 276)
-                    }
+                    let scroll = try XCTUnwrap(scrollViews(in: host.view).first)
+                    let content = try XCTUnwrap(scroll.documentView)
+                    XCTAssertLessThanOrEqual(surfaceFrame.height, min(850, content.frame.height) + 60,
+                                             "The surface must hug its controls, not the rail: \(tool.rawValue)")
+                    XCTAssertLessThanOrEqual(content.frame.width, 276)
                     let bitmap = try XCTUnwrap(host.view.bitmapImageRepForCachingDisplay(in: host.view.bounds))
                     host.view.cacheDisplay(in: host.view.bounds, to: bitmap)
                     if surfaceFrame.minY > railFrame.minY + 24 {
@@ -91,7 +87,7 @@ final class VerticalAttachedPropertiesTests: XCTestCase {
                                               "The void below \(tool.rawValue) properties must stay transparent.")
                         }
                     }
-                    let name = "\(tool.rawValue)-\(mode == .quick ? "quick" : "full")-\(dark ? "dark" : "light").png"
+                    let name = "\(tool.rawValue)-full-\(dark ? "dark" : "light").png"
                     try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
                         .write(to: output.appendingPathComponent(name))
                 }

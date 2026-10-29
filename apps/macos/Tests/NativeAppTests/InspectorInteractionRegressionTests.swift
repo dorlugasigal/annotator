@@ -245,13 +245,13 @@ final class InspectorInteractionRegressionTests: XCTestCase {
         }
     }
 
-    func testPropertiesCycleIsSharedAndQuickControlsExistInImageWorkspace() throws {
+    func testPropertiesToggleIsSharedAndShowsTheWidthInImageWorkspace() throws {
         try withWorkspace { editor in
-            ToolbarPropertiesMode.toolsOnly.apply(to: editor.model)
+            ToolbarPropertiesMode.hidden.apply(to: editor.model)
             editor.model.choose(.pen)
             try withPanel(ToolbarView(model: editor.model,
                                       availableSize: CGSize(width: 600, height: 500), showInspector: false)) { _, host in
-                for expected in [ToolbarPropertiesMode.quick, .full, .toolsOnly, .quick] {
+                for expected in [ToolbarPropertiesMode.shown, .hidden, .shown] {
                     let controls = accessibilityNodes(in: host).filter {
                         $0.accessibilityLabel() == "Properties" && $0.accessibilityRole() == .button
                     }
@@ -260,19 +260,20 @@ final class InspectorInteractionRegressionTests: XCTestCase {
                     settle()
                     XCTAssertEqual(ToolbarPropertiesMode(model: editor.model), expected)
                 }
-                XCTAssertEqual(fields(in: host).count, 1, "Image workspace must retain quick width control.")
+                XCTAssertTrue(accessibilityNodes(in: host).contains { $0.accessibilityLabel() == "Width" },
+                              "The image workspace keeps the width control.")
             }
         }
     }
 
-    func testCounterQuickControlsEditOpacityAndNeverOfferIneffectiveWidth() throws {
+    func testCounterPropertiesEditOpacityAndNeverOfferIneffectiveWidth() throws {
         try withWorkspace { editor in
             var counter = Element(tool: .counter, frame: Rect(x: 50, y: 50, width: 40, height: 40), text: "1")
             counter.style.width = 7
             counter.style.opacity = 0.75
             editor.session.document = try CanvasDocument(elements: [counter])
             select(counter, in: editor)
-            ToolbarPropertiesMode.quick.apply(to: editor.model)
+            ToolbarPropertiesMode.shown.apply(to: editor.model)
             for (orientation, width) in [(ToolbarOrientation.horizontal, 320.0), (.horizontal, 1000.0), (.vertical, 1000.0)] {
                 editor.model.setToolbarOrientation(orientation)
                 try withPanel(ToolbarView(model: editor.model,
@@ -330,7 +331,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
         try withWorkspace { editor in
             editor.model.choose(.arrow)
             editor.model.setToolbarOrientation(.horizontal)
-            ToolbarPropertiesMode.full.apply(to: editor.model)
+            ToolbarPropertiesMode.shown.apply(to: editor.model)
             try withPanel(ToolbarView(model: editor.model,
                                       availableSize: CGSize(width: 400, height: 900))) { panel, host in
                 panel.setContentSize(host.fittingSize)
@@ -362,10 +363,10 @@ final class InspectorInteractionRegressionTests: XCTestCase {
     func testActiveModesStayVisibleAndStopInEveryToolbarLayout() throws {
         try withWorkspace { editor in
             let configurations: [(ToolbarOrientation, ToolbarPropertiesMode, CGSize)] = [
-                (.horizontal, .toolsOnly, CGSize(width: 320, height: 620)),
-                (.horizontal, .quick, CGSize(width: 700, height: 620)),
-                (.vertical, .toolsOnly, CGSize(width: 740, height: 620)),
-                (.vertical, .full, CGSize(width: 740, height: 620))
+                (.horizontal, .hidden, CGSize(width: 320, height: 620)),
+                (.horizontal, .shown, CGSize(width: 700, height: 620)),
+                (.vertical, .hidden, CGSize(width: 740, height: 620)),
+                (.vertical, .shown, CGSize(width: 740, height: 620))
             ]
             for (orientation, properties, available) in configurations {
                 editor.model.setToolbarOrientation(orientation)
@@ -410,7 +411,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
 
     func testLensAndBlackboardHaveIndependentOneClickStops() throws {
         try withWorkspace { editor in
-            ToolbarPropertiesMode.toolsOnly.apply(to: editor.model)
+            ToolbarPropertiesMode.hidden.apply(to: editor.model)
             editor.model.board = .dark
             try editor.session.document.setPresentation(PresentationSettings(mode: .lens, zoom: 3))
             editor.model.synchronize()
@@ -555,8 +556,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
             let generation = editor.session.document.generation
             for full in [true, false] {
                 editor.model.smartDraw = false
-                editor.model.setInspectorPinned(full)
-                editor.model.setQuickPreferencesExpanded(true)
+                editor.model.setPropertiesShown(true)
                 let content = full
                     ? AnyView(ContextualInspector(model: editor.model).frame(width: 800))
                     : AnyView(ToolbarView(model: editor.model).frame(width: 1000))
@@ -721,6 +721,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
         func accessibilityLabel() -> String? { value("accessibilityLabel") as? String }
         func accessibilityTitle() -> String? { value("accessibilityTitle") as? String }
         func accessibilityIdentifier() -> String? { value("accessibilityIdentifier") as? String }
+        func accessibilityHelp() -> String? { value("accessibilityHelp") as? String }
         func accessibilityValue() -> Any? { value("accessibilityValue") }
         func accessibilityRole() -> NSAccessibility.Role? {
             (value("accessibilityRole") as? String).map(NSAccessibility.Role.init(rawValue:))

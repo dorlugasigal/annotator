@@ -114,6 +114,7 @@
 		9386B2A9CB94503E08035EF1 /* DemoHandMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7350D22B28A13BBC2666F1 /* DemoHandMotion.swift */; };
 		93A86D4D5362073F63956C55 /* PresentationRendering in Frameworks */ = {isa = PBXBuildFile; productRef = 3858F9AE3C1CA2A988E74C66 /* PresentationRendering */; };
 		972081E6F29D7FBCE30567B7 /* NativePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = 1FD1DA9C05B33DCAC1374ED6 /* NativePlatform */; };
+		97ED41B7B2EDFFFFAEAB1CA5 /* ToolbarShrinkDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B53A525EABD2C45C0DA8C6 /* ToolbarShrinkDemo.swift */; };
 		98504EECA225EB17E21749E6 /* WorkspaceHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E344D975E831FD04E069E0B /* WorkspaceHint.swift */; };
 		992D8CC7AA9BD44E9B58FDC0 /* UsageMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE3F83668F4BAD9008111D /* UsageMetricsTests.swift */; };
 		99C7634613654B6C1AFD5A3D /* InspectorInteractionRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8A472A207B6DE0EDB07F675 /* InspectorInteractionRegressionTests.swift */; };
@@ -213,6 +214,7 @@
 		12C5A7483E1B0D6B51D6AD4A /* SharedWorkspaceTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedWorkspaceTransition.swift; sourceTree = "<group>"; };
 		12FF3096B66D001FD0278434 /* MenuBarIconTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconTests.swift; sourceTree = "<group>"; };
 		156636AC58FFE7942E6393A2 /* ImageClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageClipboard.swift; sourceTree = "<group>"; };
+		15B53A525EABD2C45C0DA8C6 /* ToolbarShrinkDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarShrinkDemo.swift; sourceTree = "<group>"; };
 		16FAA133DFEABA4A39FC11C1 /* RegionSharingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionSharingController.swift; sourceTree = "<group>"; };
 		18DDF5598A5F3DC12023F335 /* ReleaseNotesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseNotesTests.swift; sourceTree = "<group>"; };
 		194453AA5A37C9FADB5450D3 /* UXReferenceRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UXReferenceRecorder.swift; sourceTree = "<group>"; };
@@ -542,6 +544,7 @@
 				EA1B0031048064C700A6D213 /* SupportReminder.swift */,
 				2AFE3923183D96B9450FBA86 /* ToolbarPlacement.swift */,
 				0B650F965A383E08BA69043E /* ToolbarShortcutSettings.swift */,
+				15B53A525EABD2C45C0DA8C6 /* ToolbarShrinkDemo.swift */,
 				9C9375D281C59389BD1C0A55 /* ToolbarSlideMotion.swift */,
 				28629AD3EE078E861AB0F2ED /* ToolbarToolLayout.swift */,
 				B33699E0A9CB222D19C1424A /* ToolbarView.swift */,
@@ -821,6 +824,7 @@
 				729DD31C0969F0F57F790747 /* ToolLibraryWindowController.swift in Sources */,
 				1142F0D61AE9893F48A46180 /* ToolbarPlacement.swift in Sources */,
 				225C69F6455449E4BF5C6366 /* ToolbarShortcutSettings.swift in Sources */,
+				97ED41B7B2EDFFFFAEAB1CA5 /* ToolbarShrinkDemo.swift in Sources */,
 				F02C469C11DD8C40B584086C /* ToolbarSlideMotion.swift in Sources */,
 				D17D4B200915CFE86E07FBC9 /* ToolbarToolLayout.swift in Sources */,
 				6B4E443BB4C5F3E19EE6E7AC /* ToolbarView.swift in Sources */,

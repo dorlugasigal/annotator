@@ -19,14 +19,14 @@ final class ToolbarOverflowTests: XCTestCase {
         }
     }
 
-    func testNarrowPrecisionFieldIsNotClipped() throws {
+    /// A narrow toolbar keeps the properties on one row that scrolls; the number field at its start isn't cut off.
+    func testNarrowPropertiesFieldIsNotClipped() throws {
         let suite = "narrow-precision-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
-        model.setInspectorPinned(false)
         model.beginDrawing()
-        for tool in [Tool.pen, .rectangle, .text, .blur] {
+        for tool in [Tool.blur, .pixelate] {
             model.tool = tool
             let host = NSHostingController(rootView: ToolbarView(model: model, availableSize: CGSize(width: 400, height: 500)))
             let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 400, height: 130),

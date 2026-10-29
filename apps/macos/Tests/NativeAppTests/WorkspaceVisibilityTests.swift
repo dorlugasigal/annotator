@@ -395,14 +395,14 @@ final class WorkspaceVisibilityTests: XCTestCase {
         let (model, defaults, suite) = try model()
         defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
         model.tool = .pen
-        model.setInspectorPinned(true)
+        model.setPropertiesShown(true)
         let pinned = NSHostingController(rootView: ToolbarView(model: model))
         let fullHeight = pinned.sizeThatFits(in: CGSize(width: 880, height: 900)).height
-        model.setQuickPreferencesExpanded(false)
+        model.setPropertiesShown(false)
         let collapsed = NSHostingController(rootView: ToolbarView(model: model))
         let size = collapsed.sizeThatFits(in: CGSize(width: 880, height: 900))
         XCTAssertEqual(size.width, ToolbarToolLayout.horizontalWidth(tools: model.toolbarTools,
-            available: 1000, propertiesVisible: false), accuracy: 1)
+            available: 1000), accuracy: 1)
         XCTAssertLessThanOrEqual(size.height, 72)
         XCTAssertGreaterThan(fullHeight, size.height + 60)
         let saved = try WorkspacePreferences.read(try XCTUnwrap(defaults.data(forKey: "workspace-preferences-v1")))
