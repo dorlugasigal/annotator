@@ -86,6 +86,7 @@ internal sealed partial class ToolbarWindow
             }
             ShowGhost(step.Preview);
             _root.ShowMoveCursor(true);
+            TakeEscape();
             args.Handled = true;
         }
     }
@@ -178,6 +179,7 @@ internal sealed partial class ToolbarWindow
 
     private void EndDrag()
     {
+        ReleaseEscape();
         _root.ShowMoveCursor(false);
         _dragSurface = null;
         _dragAvailable = null;

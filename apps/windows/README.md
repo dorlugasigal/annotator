@@ -149,8 +149,8 @@ orientation, and that the toolbar's thread never enters a system move loop
 (where Snap layouts appear). Then it presses and holds: Rectangle held still and
 let go leaves the docked toolbar where it was, a short press still clicks, a
 0.6-second hold then a move picks the toolbar up with the move cursor and never
-clicks the button, and the Width slider gets its press at once and never moves
-the toolbar. Every press is on the toolbar's background or on the named toolbar
+clicks the button, the Width slider gets its press at once and never moves
+the toolbar, and Escape during a move stops the toolbar where it is. Every press is on the toolbar's background or on the named toolbar
 control (WindowFromPoint and UI Automation first), and the release happens only
 while the toolbar follows the pointer or over the toolbar. It moves the pointer
 for about 20 seconds and takes no keyboard focus.

@@ -256,7 +256,9 @@ platform that departs from the specifications, unless an ADR changes them.
   clamping inside the work area. The drag is app-owned, so Windows Snap
   layouts never compete with it. A press held still anywhere on the toolbar
   for `ToolbarHold.delay` picks it up, as on the Mac; while it moves, Windows
-  shows the move cursor where the Mac shows the closed hand.
+  shows the move cursor where the Mac shows the closed hand. Escape stops a
+  move where the toolbar is: the toolbar takes Escape only while it moves, so
+  the app in front never gets it.
 - **WIN-OVR-11**: Drawing cursors show the tool footprint scaled by stroke
   width and zoom, generated for each monitor scale as real system cursors.
   Spike S-5 measures the largest cursor Windows draws without a software

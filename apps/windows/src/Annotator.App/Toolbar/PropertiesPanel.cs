@@ -554,7 +554,15 @@ internal sealed class PropertiesPanel
     {
         var block = new MacStack { Spacing = 6 };
         PropertyRow.SetTitled(block, true);
-        block.Children.Add(Left(PropertyMetrics.Text(name, 11, Secondary, FontWeights.Medium)));
+        TextBlock title = PropertyMetrics.Text(name, 11, Secondary, FontWeights.Medium);
+        if (!TextScaling.Scaled)
+        {
+            // The Mac's 14-point line, so a column of blocks doesn't drift by a rounded pixel each.
+            title.LineHeight = 14;
+            title.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
+            title.Height = 14;
+        }
+        block.Children.Add(Left(title));
         foreach (FrameworkElement part in content)
         {
             block.Children.Add(Left(part));

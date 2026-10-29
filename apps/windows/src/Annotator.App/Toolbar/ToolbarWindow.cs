@@ -116,6 +116,15 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         {
             AppResources.SystemLookChanged -= OnSystemLookChanged;
             _registration.Dispose();
+            _escape = null;
+            try
+            {
+                _escapeService?.Dispose();
+            }
+            catch (AggregateException)
+            {
+                // Windows drops a window's hotkeys with the window.
+            }
         };
     }
 

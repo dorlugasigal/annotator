@@ -17,7 +17,8 @@ namespace Annotator.App.Toolbar;
 /// pointer loses the pointer to the toolbar, so it never clicks. Letting go or moving further sooner leaves the press to
 /// the control as usual, and the background's own drag still starts as soon as it moves. Sliders and fields get their
 /// press at once. Windows hands the press to the control right away, where the Mac holds it back, so a held button looks
-/// pressed until the toolbar is picked up.
+/// pressed until the toolbar is picked up. At the 0.4-second mark the button's own state decides, so a release that hasn't
+/// reached the toolbar yet still clicks. Escape ends a move where the toolbar is, as on the Mac.
 /// </summary>
 internal sealed partial class ToolbarWindow
 {
@@ -27,6 +28,10 @@ internal sealed partial class ToolbarWindow
     private Pointer? _holdPointer;
     /// <summary>Where that press started, in desktop pixels.</summary>
     private CorePoint _holdPress;
+    /// <summary>The element the press landed on.</summary>
+    private DependencyObject? _holdSource;
+    private Annotator.Platform.Hotkeys.HotkeyService? _escapeService;
+    private Annotator.Platform.Hotkeys.HotkeyId? _escape;
 
     /// <summary>Watches every press on the toolbar, including those its controls handle.</summary>
     private void WatchHold()
@@ -55,6 +60,7 @@ internal sealed partial class ToolbarWindow
             return;
         }
         _holdPointer = args.Pointer;
+        _holdSource = args.OriginalSource as DependencyObject;
         _holdPress = EventPoint(args);
         _holdTimer ??= CreateHoldTimer();
         _holdTimer.Start();
@@ -130,12 +136,18 @@ internal sealed partial class ToolbarWindow
         StopHoldTimer();
         Pointer? pointer = _holdPointer;
         _holdPointer = null;
-        if (_hold.Elapse(buttonDown: pointer is not null, HoldAllowed()) is null || pointer is null)
+        // A release that arrives at the same instant as the timer has not reached the toolbar yet: the button's own state
+        // decides, so a click that lasted just 0.4 seconds still clicks.
+        bool down = pointer is not null && PrimaryButtonDown();
+        if (_hold.Elapse(buttonDown: down, HoldAllowed()) is null || !down)
         {
             return;
         }
         if (!_docking.IsTracking)
         {
+            // The control under the press took the pointer when it was pressed, and WinUI gives a captured pointer to no
+            // one else: it lets go first, which ends its press without a click.
+            ReleaseControlCapture(pointer!);
             if (!_root.CapturePointer(pointer))
             {
                 // The press is no longer down here: it stays the control's.
@@ -150,6 +162,87 @@ internal sealed partial class ToolbarWindow
         _interacted();
         _docking.Hold(_holdPress, ToCore(Frame), Scale());
         _root.ShowMoveCursor(true);
+        TakeEscape();
+    }
+
+    /// <summary>The element between the press and the toolbar that holds <paramref name="pointer"/> lets go of it.</summary>
+    private void ReleaseControlCapture(Pointer pointer)
+    {
+        DependencyObject? element = _holdSource;
+        _holdSource = null;
+        for (; element is not null && !ReferenceEquals(element, _root); element = VisualTreeHelper.GetParent(element))
+        {
+            if (element is UIElement control && Captures(control, pointer.PointerId))
+            {
+                control.ReleasePointerCapture(pointer);
+                return;
+            }
+        }
+    }
+
+    /// <summary>Whether the left button (the primary one, even when the buttons are swapped) is down now.</summary>
+    private static bool PrimaryButtonDown()
+    {
+        const int SwapButton = 23;
+        Windows.Win32.UI.Input.KeyboardAndMouse.VIRTUAL_KEY key = Windows.Win32.PInvoke.GetSystemMetrics((Windows.Win32.UI.WindowsAndMessaging.SYSTEM_METRICS_INDEX)SwapButton) != 0
+            ? Windows.Win32.UI.Input.KeyboardAndMouse.VIRTUAL_KEY.VK_RBUTTON
+            : Windows.Win32.UI.Input.KeyboardAndMouse.VIRTUAL_KEY.VK_LBUTTON;
+        return (Windows.Win32.PInvoke.GetAsyncKeyState((int)key) & 0x8000) != 0;
+    }
+
+    /// <summary>
+    /// Mac cancelToolbarDrag on Escape: the toolbar never takes the keyboard, so while it moves Escape is taken for the
+    /// toolbar alone and ends the move where the toolbar is. It goes back to the other apps as soon as the move ends, and
+    /// the app in front never gets that Escape (a slide show keeps running).
+    /// </summary>
+    private void TakeEscape()
+    {
+        if (_escape is not null)
+        {
+            return;
+        }
+        try
+        {
+            _escapeService ??= CreateEscapeService();
+            if (_escapeService.Register(new Annotator.Platform.Hotkeys.HotkeyChord(default, 0x1B)) is
+                Annotator.Platform.Hotkeys.HotkeyRegistrationResult.Registered registered)
+            {
+                _escape = registered.Id;
+            }
+        }
+        catch (Annotator.Platform.NativeCallException)
+        {
+            // Without it Escape stays the other apps'; the move still ends when the button goes up.
+        }
+    }
+
+    private void ReleaseEscape()
+    {
+        if (_escape is not { } id || _escapeService is null)
+        {
+            return;
+        }
+        _escape = null;
+        try
+        {
+            _escapeService.Unregister(id);
+        }
+        catch (Annotator.Platform.NativeCallException)
+        {
+        }
+    }
+
+    private Annotator.Platform.Hotkeys.HotkeyService CreateEscapeService()
+    {
+        var service = new Annotator.Platform.Hotkeys.HotkeyService();
+        service.Pressed += (_, _) =>
+        {
+            if (_docking.IsTracking)
+            {
+                CancelDrag();
+            }
+        };
+        return service;
     }
 
     /// <summary>Mac clearHold: nothing waits for a hold any more.</summary>

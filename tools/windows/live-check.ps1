@@ -434,6 +434,18 @@ public static class LiveInput
         return count;
     }
 
+    /// <summary>Red pixels (the laser pointer's trail) among the pixels.</summary>
+    public static int Red(int[] pixels)
+    {
+        int count = 0;
+        foreach (int pixel in pixels)
+        {
+            int red = (pixel >> 16) & 255, green = (pixel >> 8) & 255, blue = pixel & 255;
+            if (red > 200 && green < 110 && blue < 120) count++;
+        }
+        return count;
+    }
+
     /// <summary>Whether any pixel is not black (a window copy that shows something).</summary>
     public static bool Lit(int[] pixels)
     {
@@ -1777,6 +1789,24 @@ public static class BoardDialogs
     }
     HitTest 'at the end'
 
+    # Laser pointer: a drag leaves a red trail that fades on its own a moment after letting go, and nothing is added to the
+    # drawing. The trail is read from the screen's pixels in the stroke's band, against a copy taken before.
+    Note "click Laser pointer: $(ClickButton 'Laser pointer')"
+    Check 'laser-chosen' (WaitFor { IsOn 'Laser pointer' }) "Laser pointer on: $(IsOn 'Laser pointer')"
+    [void](WaitFor { (Foreground) -eq $overlay })
+    $laserFrom = Canvas 420 180; $laserTo = Canvas 760 230
+    $band = @(($laserFrom[0] - [int](30 * $scale)), ($laserFrom[1] - [int](30 * $scale)), ($laserTo[0] - $laserFrom[0] + [int](60 * $scale)), ($laserTo[1] - $laserFrom[1] + [int](60 * $scale)))
+    $objectsBefore = BoardObjects
+    $plain = [LiveInput]::Capture($band[0], $band[1], $band[2], $band[3])
+    [void](DrawOnCanvas $laserFrom $laserTo 'a laser stroke')
+    $lit = [LiveInput]::Capture($band[0], $band[1], $band[2], $band[3])
+    Start-Sleep -Milliseconds 1800
+    $faded = [LiveInput]::Capture($band[0], $band[1], $band[2], $band[3])
+    $redBefore = [LiveInput]::Red($plain); $redLit = [LiveInput]::Red($lit); $redFaded = [LiveInput]::Red($faded)
+    Check 'laser-trail-shows' ($redLit -gt $redBefore + 200) "red pixels before $redBefore, right after the stroke $redLit"
+    Check 'laser-trail-fades' ($redFaded -le $redBefore + 20) "red pixels 1.8 s after letting go: $redFaded (before $redBefore)"
+    Check 'laser-adds-nothing' ((BoardObjects) -eq $objectsBefore) "objects before $objectsBefore, after $(BoardObjects)"
+    Note "click Select: $(ClickButton 'Select')"
     # Region sharing (WIN-CAP-08, spec 012): the Tools tile opens Share a region; a custom region is drawn on the selection
     # panel; Left half starts sharing into an ordinary output window that turns live, never topmost; Stop covers it.
     function TitledWindow([string]$title) { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::Title($_) -like $title } | Select-Object -First 1 }

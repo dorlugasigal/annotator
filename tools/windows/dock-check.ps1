@@ -164,6 +164,8 @@ public static class DockInput
     public static void Press(int x, int y) { Send(Mouse(x, y, LeftDown)); }
 
     public static void Release(int x, int y) { Send(Mouse(x, y, LeftUp)); }
+    /// <summary>Presses and lets go of Escape. Only the toolbar takes it, while it moves; it never reaches another app then.</summary>
+    public static void Escape() { Send(new INPUT { type = 1, u = new UNION { ki = new KEYBDINPUT { wVk = 0x1B } } }); Send(new INPUT { type = 1, u = new UNION { ki = new KEYBDINPUT { wVk = 0x1B, dwFlags = 2 } } }); }
 
     /// <summary>True while the cursor on screen is Windows' move cursor (IDC_SIZEALL).</summary>
     public static bool MoveCursorShows()
@@ -400,7 +402,9 @@ try {
         $under = [Windows.Automation.AutomationElement]::FromPoint([System.Windows.Point]::new($x, $y))
         $walker = [Windows.Automation.TreeWalker]::ControlViewWalker
         for ($i = 0; $null -ne $under -and $i -lt 4 -and -not [Windows.Automation.Automation]::Compare($under, $element); $i++) { $under = $walker.GetParent($under) }
-        if ($null -eq $under -or -not [Windows.Automation.Automation]::Compare($under, $element)) { throw "Refused: $x,$y is not the toolbar's '$name'." }
+        # UI Automation's FromPoint stops at the toolbar's XAML root (also on main); the control's own frame decides then.
+        $inside = $x -ge $box.X -and $x -lt $box.X + $box.Width -and $y -ge $box.Y -and $y -lt $box.Y + $box.Height
+        if (($null -eq $under -or -not [Windows.Automation.Automation]::Compare($under, $element)) -and -not $inside) { throw "Refused: $x,$y is not the toolbar's '$name'." }
         [pscustomobject]@{ Element = $element; X = $x; Y = $y }
     }
     # Whether the toolbar's tool button $name shows its tool as chosen (its SelectionItem pattern).
@@ -488,6 +492,28 @@ try {
     Check 'hold-slider-keeps-press' ((Same $after $hold.Before) -and $null -ne $width -and $null -ne $hold.During -and $hold.During -ne $width) `
         "held the Width slider for 0.6 s and slid 30 points: width $width, then $($hold.During); toolbar $after (was $($hold.Before))"
 
+    # 5f. Escape during a move (Mac cancelToolbarDrag): the toolbar stays where Escape left it, letting go elsewhere doesn't
+    # move it, and the held button never clicks. Escape is taken by the toolbar only while it moves.
+    $first = @([int]($midX - 150 * $scale), [int]($midY + 30 * $scale))
+    $second = @([int]($midX + 150 * $scale), [int]($midY + 120 * $scale))
+    $control = ControlAt 'Rectangle' $buttonType
+    $before = [DockInput]::Rect($toolbar)
+    [DockInput]::MoveTo($control.X, $control.Y); Start-Sleep -Milliseconds 60
+    [DockInput]::Press($control.X, $control.Y); $script:pressed = $true
+    Start-Sleep -Milliseconds 600
+    for ($i = 1; $i -le 12; $i++) { [DockInput]::MoveTo([int]($control.X + ($first[0] - $control.X) * $i / 12), [int]($control.Y + ($first[1] - $control.Y) * $i / 12)); Start-Sleep -Milliseconds 12 }
+    Start-Sleep -Milliseconds 120
+    $moved = [DockInput]::Rect($toolbar)
+    [DockInput]::Escape()
+    Start-Sleep -Milliseconds 200
+    for ($i = 1; $i -le 12; $i++) { [DockInput]::MoveTo([int]($first[0] + ($second[0] - $first[0]) * $i / 12), [int]($first[1] + ($second[1] - $first[1]) * $i / 12)); Start-Sleep -Milliseconds 12 }
+    $last = if ([DockInput]::TopLevelAt($second[0], $second[1]) -eq $toolbar) { $second } else { @([int](($moved.Left + $moved.Right) / 2), [int]($moved.Top + 10)) }
+    [DockInput]::MoveTo($last[0], $last[1]); Start-Sleep -Milliseconds 60
+    [DockInput]::Release($last[0], $last[1]); $script:pressed = $false
+    Start-Sleep -Milliseconds 350
+    $after = [DockInput]::Rect($toolbar)
+    Check 'hold-escape-stops-move' (-not (Same $moved $before) -and (Same $after $moved) -and $null -eq (GhostRect) -and -not (Chosen 'Rectangle')) `
+        "moved from $before to $moved, Escape, then the pointer went on to $($second -join ','): toolbar $after; Rectangle chosen $(Chosen 'Rectangle')"
     # The drag never enters a window manager move or size loop, so Windows offers no Snap layout.
     Check 'no-system-move-loop' (-not $script:moveLoop) "the toolbar's thread was in a move or size loop at some step: $($script:moveLoop)"
 }

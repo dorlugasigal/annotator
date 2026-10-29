@@ -83,7 +83,17 @@ internal static class PropertyMetrics
     public static TextBlock Text(string text, double size, string style, Windows.UI.Text.FontWeight? weight = null)
     {
         TextBlock block = ToolbarParts.Text(text, size, style, weight);
-        block.MinWidth = TextWidth(text, size);
+        double width = TextWidth(text, size);
+        block.MinWidth = width;
+        if (width > 0 && !Annotator.App.Shell.TextScaling.Scaled)
+        {
+            // Exactly the Mac's width, so the controls after it don't drift by a rounded pixel each (when the words fit).
+            block.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+            if (block.DesiredSize.Width <= width + 0.5)
+            {
+                block.Width = width;
+            }
+        }
         return block;
     }
 }
