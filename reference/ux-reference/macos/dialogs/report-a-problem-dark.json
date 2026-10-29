@@ -18,11 +18,11 @@
      "frame": [
       20,
       52.5,
-      63,
+      61.5,
       13
      ],
      "role": "AXStaticText",
-     "value": "Version 0.2.0"
+     "value": "Version 0.2.1"
     },
     {
      "enabled": true,

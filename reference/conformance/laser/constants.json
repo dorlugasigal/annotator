@@ -29,6 +29,10 @@
   },
   "defaultWidth" : 6,
   "lifetime" : 0.8,
+  "lifetimeRange" : [
+    0.5,
+    5
+  ],
   "maximumSamples" : 2048,
   "minimumStep" : 1,
   "passes" : [

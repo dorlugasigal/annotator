@@ -200,4 +200,39 @@ public class LaserTrailTests
         Assert.Null(LaserTrailRenderer.List(released, 0.95));
         Assert.Null(LaserTrailRenderer.List(new LaserTrail(), 0));
     }
+
+    [Fact]
+    public void KeepsItsPointsForTheChosenFade()
+    {
+        (double, double, double)[] line = [.. Enumerable.Range(0, 41).Select(index => (index * 5.0, 0.0, index * 0.01))];
+        LaserTrail slow = Trail(line, release: 0.4);
+        slow.Lifetime = 2.5;
+        // 1.9 seconds after the pointer passed the start, it still shows; with the default Fade it was gone after 0.8.
+        Assert.Equal(new Point(0, 0), slow.Shapes(1.9)[0].Dots[0].Center);
+        Assert.True(Trail(line, release: 0.4).Shapes(1.9).IsEmpty);
+        // Released at 0.4, it fades out over the next 2.5 seconds.
+        Assert.Equal(0.5, slow.Shapes(1.65)[0].Opacity, 9);
+        slow.Prune(2.95);
+        Assert.True(slow.IsEmpty);
+        Assert.Equal(LaserTrail.DefaultLifetime, new LaserTrail().Lifetime);
+        Assert.InRange(LaserTrail.DefaultLifetime, LaserTrail.MinimumLifetime, LaserTrail.MaximumLifetime);
+    }
+
+    [Fact]
+    public void LaserFadeIsSavedWithinItsRange()
+    {
+        var preferences = new WorkspacePreferences();
+        Assert.Null(preferences.LaserFade);
+        preferences.LaserFade = 2.5;
+        Assert.Equal(preferences, WorkspacePreferences.Read(preferences.Data()));
+        foreach (double fade in new[] { 0.4, 5.1, double.PositiveInfinity, double.NaN })
+        {
+            preferences.LaserFade = fade;
+            Assert.Throws<CanvasError>(() => preferences.Data());
+        }
+        // A Fade from a version with a wider choice keeps the nearest one this version offers.
+        string json = System.Text.Encoding.UTF8.GetString(new WorkspacePreferences().Data());
+        Assert.Equal(5, WorkspacePreferences.Read(System.Text.Encoding.UTF8.GetBytes(json.Insert(1, "\"laserFade\":12,"))).LaserFade);
+        Assert.Equal(0.5, WorkspacePreferences.Read(System.Text.Encoding.UTF8.GetBytes(json.Insert(1, "\"laserFade\":0.1,"))).LaserFade);
+    }
 }

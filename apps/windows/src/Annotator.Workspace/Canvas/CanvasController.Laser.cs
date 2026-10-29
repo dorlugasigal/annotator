@@ -26,6 +26,7 @@ public sealed partial class CanvasController
     {
         double now = _options.Clock();
         Style style = DrawingStyle;
+        _laser.Lifetime = Workspace.Preferences.LaserFade ?? LaserTrail.DefaultLifetime;
         _laser.Press(e.Position, now, style.Color, style.Width);
         _laserPointer = e.PointerId;
         StepLaser(now);

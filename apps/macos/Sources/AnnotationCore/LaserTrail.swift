@@ -2,14 +2,16 @@ import Foundation
 
 /// The laser pointer's trail. While the button is down, the pointer leaves a glowing line. Each point of it lasts
 /// `lifetime` seconds after the pointer passed and thins out as it ages, so the line disappears behind the pointer; when
-/// the button goes up, what is left fades out as well. The trail is never part of a drawing: it has no Undo step and is
+/// the button goes up, what is left fades out as well. People choose the lifetime with the laser pointer's Fade. The trail is never part of a drawing: it has no Undo step and is
 /// never saved, copied or exported.
 public struct LaserTrail: Equatable, Sendable {
     /// The laser pointer's color and width in a new profile.
     public static let defaultColor = RGBA(0.98, 0.16, 0.2)
     public static let defaultWidth = 6.0
-    /// Seconds a point of the trail lasts after the pointer passed it.
-    public static let lifetime = 0.8
+    /// Seconds a point of the trail lasts after the pointer passed it, unless the person chose another Fade.
+    public static let defaultLifetime = 0.8
+    /// The Fade people can choose, in seconds.
+    public static let lifetimeRange: ClosedRange<Double> = 0.5...5
     /// A new position closer than this to the point before the newest moves the newest point instead of adding one.
     public static let minimumStep = 1.0
     /// The tail narrows to nothing over this many line widths.
@@ -80,8 +82,10 @@ public struct LaserTrail: Equatable, Sendable {
     public static let maximumSamples = 2_048
 
     public private(set) var strokes: [Stroke] = []
+    /// Seconds a point of the trail lasts after the pointer passed it. A change applies to the whole trail at once.
+    public var lifetime: Double
 
-    public init() {}
+    public init(lifetime: Double = LaserTrail.defaultLifetime) { self.lifetime = lifetime }
 
     public var isEmpty: Bool { strokes.isEmpty }
     /// The button is down and the newest stroke follows the pointer.
@@ -126,7 +130,7 @@ public struct LaserTrail: Equatable, Sendable {
 
     /// Drops what has faded by `now`, keeping the last faded point of each stroke so its tail can end between points.
     public mutating func prune(at now: Double) {
-        let horizon = now - Self.lifetime
+        let horizon = now - lifetime
         for index in strokes.indices {
             let samples = strokes[index].samples
             var faded = 0
@@ -139,7 +143,7 @@ public struct LaserTrail: Equatable, Sendable {
 
     /// Every stroke as drawn at `now`, oldest first. Strokes that have faded are left out.
     public func shapes(at now: Double) -> [Shape] {
-        strokes.compactMap { Self.shape(of: $0, at: now) }
+        strokes.compactMap { Self.shape(of: $0, at: now, lifetime: lifetime) }
     }
 
     /// The area the trail covers at `now`, glow included, or `nil` when nothing shows. Every dot counts, even one with no
@@ -156,7 +160,7 @@ public struct LaserTrail: Equatable, Sendable {
         return area
     }
 
-    static func shape(of stroke: Stroke, at now: Double) -> Shape? {
+    static func shape(of stroke: Stroke, at now: Double, lifetime: Double) -> Shape? {
         let horizon = now - lifetime
         let samples = stroke.samples
         guard let head = samples.last, stroke.live || head.time > horizon else { return nil }
@@ -180,15 +184,17 @@ public struct LaserTrail: Equatable, Sendable {
         for (index, sample) in visible.enumerated() {
             if index > 0 { travelled += visible[index - 1].point.distance(to: sample.point) }
             let isHead = index == visible.count - 1
-            let life = isHead && stroke.live ? 1 : fraction(sample.time - horizon)
+            let life = isHead && stroke.live ? 1 : fraction(sample.time - horizon, of: lifetime)
             let thickness = life * (2 - life)
             let tail = isHead ? 1 : min(1, travelled / taper)
             dots.append(Dot(center: sample.point, radius: radius * thickness * tail))
         }
-        return Shape(dots: dots, color: stroke.color, opacity: stroke.live ? 1 : fraction(head.time - horizon))
+        return Shape(dots: dots, color: stroke.color, opacity: stroke.live ? 1 : fraction(head.time - horizon, of: lifetime))
     }
 
-    private static func fraction(_ remaining: Double) -> Double { min(1, max(0, remaining / lifetime)) }
+    private static func fraction(_ remaining: Double, of lifetime: Double) -> Double {
+        lifetime > 0 ? min(1, max(0, remaining / lifetime)) : 0
+    }
 
     /// The band that joins two neighboring dots in one layer: four corners, each end as wide as its dot's circle, wound
     /// like the circles (counterclockwise with y up), or `nil` when the dots meet or both are empty.

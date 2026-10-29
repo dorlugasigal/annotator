@@ -79,6 +79,7 @@ struct ContextualInspector: View {
                 propertyLayout {
                     InspectorColorPicker(model: model)
                     widthControls
+                    LaserFadeControl(model: model)
                     Text("Drag to point. The trail fades on its own.")
                         .font(.caption).foregroundStyle(.secondary)
                         .fixedSize(horizontal: !compact, vertical: true)
@@ -305,5 +306,32 @@ struct ContextualInspector: View {
     }
     private func styleEditing(_ editing: Bool) {
         if editing { model.beginStyleEdit() } else { model.finishStyleEdit() }
+    }
+}
+
+/// The laser pointer's Fade: how long its trail stays before it fades, saved for the next time like the tool's color. It
+/// looks like Width: the name above, the slider with its value beside it.
+struct LaserFadeControl: View {
+    @ObservedObject var model: WorkspaceModel
+
+    static func label(_ seconds: Double) -> String { "\(seconds.formatted(.number.precision(.fractionLength(1)))) s" }
+
+    var body: some View {
+        let range = LaserTrail.lifetimeRange
+        PropertyBlock(name: "Fade") {
+            HStack(spacing: 6) {
+                Slider(value: Binding(get: { model.laserFade }, set: { model.setLaserFade($0) }), in: range)
+                    .frame(width: 96).keepsToolbarPress()
+                    .accessibilityLabel("Fade")
+                    .help("How long the trail stays before it fades: \(Self.label(range.lowerBound)) to \(Self.label(range.upperBound)).")
+                Text(Self.label(model.laserFade))
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    .frame(minWidth: 34, alignment: .leading)
+                    .contentTransition(.numericText())
+                    .accessibilityHidden(true)
+            }
+            .fixedSize(horizontal: true, vertical: false)
+            .frame(height: 36)
+        }.fixedSize(horizontal: true, vertical: false)
     }
 }

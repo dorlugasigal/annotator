@@ -46,6 +46,11 @@ public sealed class PropertiesPanelTests
         InspectorPlan ruler = PlanFor(Tool.Ruler);
         Assert.Equal<InspectorItem>([InspectorItem.StrokeColor, InspectorItem.Width, InspectorItem.Opacity, InspectorItem.Caption], ruler.Items);
         Assert.Equal("Drag to measure the distance in source pixels.", ruler.Caption);
+        InspectorPlan laser = PlanFor(Tool.Laser);
+        Assert.Equal<InspectorItem>([InspectorItem.StrokeColor, InspectorItem.Width, InspectorItem.LaserFade, InspectorItem.Caption], laser.Items);
+        Assert.Equal("Drag to point. The trail fades on its own.", laser.Caption);
+        Assert.Equal("0.8 s", InspectorPlan.LaserFadeLabel(LaserTrail.DefaultLifetime));
+        Assert.Equal("How long the trail stays before it fades: 0.5 s to 5.0 s.", InspectorPlan.LaserFadeHelp);
 
         InspectorPlan arrow = PlanFor(Tool.Arrow);
         Assert.Equal<InspectorItem>(stroke, arrow.Items);

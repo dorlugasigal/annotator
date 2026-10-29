@@ -103,6 +103,9 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var toolbarCollapseDelay: Double?
     /// Properties that show all their choices side by side instead of one button (`PropertyChoice` raw values).
     public var expandedPropertyChoices: [String]?
+    /// Seconds the laser pointer's trail stays before it fades, within `LaserTrail.lifetimeRange`. `nil` means
+    /// `LaserTrail.defaultLifetime`.
+    public var laserFade: Double?
     public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
                                                  .laser, .eraser, .cover]
 
@@ -156,6 +159,11 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
         try validateCommandShortcuts()
         try validateToolbarItems()
         try validateToolbarControls()
+        if let laserFade {
+            guard laserFade.isFinite, LaserTrail.lifetimeRange.contains(laserFade) else {
+                throw CanvasError.invalidDocument("The laser trail can fade after 0.5 to 5 seconds.")
+            }
+        }
     }
 
     public mutating func assignShortcut(_ key: String, to tool: Tool) throws {
@@ -187,6 +195,10 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
         }
         if preferences.visibilityAnimationStyle == .fluid { preferences.visibilityAnimationStyle = .slide }
         preferences.normalizeToolbarControls()
+        // A Fade from a version with a wider choice keeps the nearest one this version offers.
+        if let fade = preferences.laserFade {
+            preferences.laserFade = fade.isFinite ? min(LaserTrail.lifetimeRange.upperBound, max(LaserTrail.lifetimeRange.lowerBound, fade)) : nil
+        }
         if preferences.shortcutVersion == nil || preferences.shortcutVersion == 1 {
             let custom = preferences.toolShortcuts.filter { key, tool in
                 legacyToolShortcuts[key] != tool && InkShortcut.choices[key] == nil

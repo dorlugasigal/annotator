@@ -18,15 +18,17 @@ enum LaserExport {
         let note: String
         let steps: [Step]
         let times: [Double]
+        /// The trail's Fade, in seconds.
+        var lifetime = LaserTrail.defaultLifetime
     }
 
     static func run(_ corpus: Corpus) throws {
-        corpus.describe("laser", "The laser pointer's trail from LaserTrail: scripted presses, moves, releases and prunes, the strokes they leave, and every stroke's dots, opacity, bounds and per-layer bands at set times. pictures.jsonl lists pictures drawn by LaserTrailRenderer into an sRGB premultiplied RGBA bitmap (transparent background) at 1x and 2x.")
+        corpus.describe("laser", "The laser pointer's trail from LaserTrail: scripted presses, moves, releases and prunes with the trail's lifetime (the person's Fade), the strokes they leave, and every stroke's dots, opacity, bounds and per-layer bands at set times. pictures.jsonl lists pictures drawn by LaserTrailRenderer into an sRGB premultiplied RGBA bitmap (transparent background) at 1x and 2x.")
         var records: [J] = []
         for scenario in scenarios() {
-            let trail = play(scenario.steps)
+            let trail = play(scenario.steps, lifetime: scenario.lifetime)
             records.append([
-                "name": .string(scenario.name), "note": .string(scenario.note),
+                "name": .string(scenario.name), "note": .string(scenario.note), "lifetime": .double(scenario.lifetime),
                 "steps": .array(scenario.steps.map(record)),
                 "strokes": .array(trail.strokes.map { stroke in
                     ["samples": .array(stroke.samples.map { ["point": $0.point.json, "time": .double($0.time)] }),
@@ -39,7 +41,8 @@ enum LaserExport {
         try corpus.lines("laser/trails.jsonl", records)
         try corpus.json("laser/constants.json", [
             "defaultColor": .value(LaserTrail.defaultColor), "defaultWidth": .double(LaserTrail.defaultWidth),
-            "lifetime": .double(LaserTrail.lifetime), "minimumStep": .double(LaserTrail.minimumStep),
+            "lifetime": .double(LaserTrail.defaultLifetime), "minimumStep": .double(LaserTrail.minimumStep),
+            "lifetimeRange": .array([.double(LaserTrail.lifetimeRange.lowerBound), .double(LaserTrail.lifetimeRange.upperBound)]),
             "tailTaper": .double(LaserTrail.tailTaper), "restInterval": .double(LaserTrail.restInterval),
             "maximumSamples": .int(LaserTrail.maximumSamples),
             "passes": .array(LaserTrail.passes.map { pass in
@@ -50,8 +53,8 @@ enum LaserExport {
         try pictures(corpus)
     }
 
-    static func play(_ steps: [Step]) -> LaserTrail {
-        var trail = LaserTrail()
+    static func play(_ steps: [Step], lifetime: Double = LaserTrail.defaultLifetime) -> LaserTrail {
+        var trail = LaserTrail(lifetime: lifetime)
         for step in steps {
             switch step {
             case .press(let point, let time, let color, let width): trail.press(at: point, time: time, color: color, width: width)
@@ -100,6 +103,8 @@ enum LaserExport {
         line.append(.release(nil, 0.4))
         scenarios.append(Scenario(name: "line", note: "A fast straight line, released at 0.4 seconds: the tail retreats, then the rest fades.",
             steps: line, times: [0.05, 0.2, 0.4, 0.6, 0.9, 1.1, 1.25]))
+        scenarios.append(Scenario(name: "slow fade", note: "The same line with a 2.5-second Fade: the tail stays longer, then the rest fades.",
+            steps: line, times: [0.4, 1.0, 1.9, 2.6, 2.85, 2.95], lifetime: 2.5))
         var circle: [Step] = [.press(Point(220, 100), 0, RGBA(0.1, 0.6, 1), 10)]
         for index in 1...72 {
             let angle = Double(index) * .pi / 30
@@ -128,7 +133,7 @@ enum LaserExport {
         let size = CGSize(width: 320, height: 200)
         for (name, time) in [("circle", 0.6), ("line", 0.6)] {
             guard let scenario = scenarios().first(where: { $0.name == name }) else { continue }
-            let trail = play(scenario.steps)
+            let trail = play(scenario.steps, lifetime: scenario.lifetime)
             var images: [String: J] = [:]
             for scale in [1.0, 2.0] {
                 let width = Int(size.width * scale), height = Int(size.height * scale)

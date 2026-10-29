@@ -768,7 +768,7 @@ final class UXReferenceCaptureTests: XCTestCase {
                 }
             }
             try pointer.sequence(laserFrames, name: "laser-trail", dark: dark, times: laserTimes,
-                notes: "Laser pointer: a 0.5-second swoosh with the button down, then let go. Each point fades \(LaserTrail.lifetime) s after the pointer passed it; at 60 frames per second.",
+                notes: "Laser pointer: a 0.5-second swoosh with the button down, then let go. Each point fades \(LaserTrail.defaultLifetime) s after the pointer passed it; at 60 frames per second.",
                 spec: spec + ["003 laser pointer"])
             for effect in [CursorHighlightSettings.ClickEffect.pulse, .ripple, .turn] {
                 let count = Int((CursorHighlightSettings.clickDuration * 60).rounded()) + 1

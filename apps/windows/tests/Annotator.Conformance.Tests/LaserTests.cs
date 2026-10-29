@@ -20,7 +20,7 @@ public class LaserTests
     public void TrailMatchesTheMac(string caseName)
     {
         JsonObject record = CorpusCases.Record(caseName);
-        LaserTrail trail = Play(record["steps"]!.AsArray());
+        LaserTrail trail = Play(record["steps"]!.AsArray(), record["lifetime"]!.GetValue<double>());
         var actual = new JsonObject
         {
             ["strokes"] = new JsonArray([.. trail.Strokes.Select(Stroke)]),
@@ -44,7 +44,8 @@ public class LaserTests
         {
             ["defaultColor"] = Color(LaserTrail.DefaultColor),
             ["defaultWidth"] = LaserTrail.DefaultWidth,
-            ["lifetime"] = LaserTrail.Lifetime,
+            ["lifetime"] = LaserTrail.DefaultLifetime,
+            ["lifetimeRange"] = new JsonArray(LaserTrail.MinimumLifetime, LaserTrail.MaximumLifetime),
             ["minimumStep"] = LaserTrail.MinimumStep,
             ["tailTaper"] = LaserTrail.TailTaper,
             ["restInterval"] = LaserTrail.RestInterval,
@@ -69,9 +70,9 @@ public class LaserTests
         Assert.Equal(["move", "press", "prune", "release"], kinds.Order(StringComparer.Ordinal));
     }
 
-    private static LaserTrail Play(JsonArray steps)
+    private static LaserTrail Play(JsonArray steps, double lifetime)
     {
-        var trail = new LaserTrail();
+        var trail = new LaserTrail(lifetime);
         foreach (JsonNode? step in steps)
         {
             var (kind, value) = step!.AsObject().Single();

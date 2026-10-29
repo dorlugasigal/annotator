@@ -58,10 +58,11 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
     }
 }
 
-/// Press and hold anywhere on the toolbar to move it: on a button, a label or empty space. A press that stays within
-/// `slop` points for `delay` seconds picks the toolbar up, and the control under the pointer never gets the press. Letting
-/// go or moving sooner presses the control as usual. Sliders and number fields get their press at once, because holding
-/// them is how people use them.
+/// Press anywhere on the toolbar and drag, or press and hold, to move it: on a button, a label or empty space, also on the
+/// toolbar shrunk to one button. A press that moves more than `slop` points, or stays within `slop` points for `delay`
+/// seconds, picks the toolbar up from where the press started, and the control under the pointer never gets the press.
+/// Letting go sooner presses the control as usual. Sliders and number fields get their press at once, because dragging and
+/// holding them is how people use them.
 public enum ToolbarHold {
     /// Seconds a press has to stay still before it picks the toolbar up.
     public static let delay = 0.4

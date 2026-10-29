@@ -71,7 +71,7 @@ internal static class LaserPictures
     public static LaserTrail Trail(string scenario)
     {
         var record = ConformanceCorpus.Lines("laser/trails.jsonl").Single(line => line.GetProperty("name").GetString() == scenario);
-        var trail = new LaserTrail();
+        var trail = new LaserTrail(record.GetProperty("lifetime").GetDouble());
         foreach (var step in record.GetProperty("steps").EnumerateArray())
         {
             var property = step.EnumerateObject().Single();

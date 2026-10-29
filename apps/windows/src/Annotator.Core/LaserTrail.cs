@@ -4,7 +4,8 @@ namespace Annotator.Core;
 /// <summary>
 /// Swift <c>LaserTrail</c>: the laser pointer's trail. While the button is down, the pointer leaves a glowing line. Each
 /// point of it lasts <see cref="Lifetime"/> seconds after the pointer passed and thins out as it ages, so the line
-/// disappears behind the pointer; when the button goes up, what is left fades out as well. The trail is never part of a
+/// disappears behind the pointer; when the button goes up, what is left fades out as well. People choose the lifetime
+/// with the laser pointer's Fade. The trail is never part of a
 /// drawing: it has no Undo step and is never saved, copied or exported. A value, like the Swift struct (see Element.cs).
 /// </summary>
 public struct LaserTrail : IEquatable<LaserTrail>
@@ -12,8 +13,14 @@ public struct LaserTrail : IEquatable<LaserTrail>
     /// <summary>The laser pointer's width in a new profile.</summary>
     public const double DefaultWidth = 6.0;
 
-    /// <summary>Seconds a point of the trail lasts after the pointer passed it.</summary>
-    public const double Lifetime = 0.8;
+    /// <summary>Seconds a point of the trail lasts after the pointer passed it, unless the person chose another Fade.</summary>
+    public const double DefaultLifetime = 0.8;
+
+    /// <summary>The shortest Fade people can choose, in seconds (Swift <c>lifetimeRange</c>).</summary>
+    public const double MinimumLifetime = 0.5;
+
+    /// <summary>The longest Fade people can choose, in seconds (Swift <c>lifetimeRange</c>).</summary>
+    public const double MaximumLifetime = 5;
 
     /// <summary>A new position closer than this to the point before the newest moves the newest point instead of adding one.</summary>
     public const double MinimumStep = 1.0;
@@ -28,6 +35,20 @@ public struct LaserTrail : IEquatable<LaserTrail>
     public const int MaximumSamples = 2_048;
 
     private ValueList<Stroke> strokes;
+    private double lifetime;
+
+    /// <summary>A trail whose points last <paramref name="lifetime"/> seconds.</summary>
+    public LaserTrail(double lifetime) => this.lifetime = lifetime;
+
+    /// <summary>
+    /// Seconds a point of the trail lasts after the pointer passed it (Swift <c>lifetime</c>); a trail made with
+    /// <c>new LaserTrail()</c> or <c>default</c> uses <see cref="DefaultLifetime"/>. A change applies to the whole trail at once.
+    /// </summary>
+    public double Lifetime
+    {
+        readonly get => lifetime > 0 ? lifetime : DefaultLifetime;
+        set => lifetime = value;
+    }
 
     /// <summary>The laser pointer's color in a new profile.</summary>
     public static RGBA DefaultColor => new(0.98, 0.16, 0.2);
@@ -137,7 +158,7 @@ public struct LaserTrail : IEquatable<LaserTrail>
         var shapes = new List<Shape>(strokes.Count);
         foreach (ref readonly Stroke stroke in strokes)
         {
-            if (ShapeOf(stroke, now) is { } shape)
+            if (ShapeOf(stroke, now, Lifetime) is { } shape)
             {
                 shapes.Add(shape);
             }
@@ -198,9 +219,9 @@ public struct LaserTrail : IEquatable<LaserTrail>
     }
 
     /// <summary>A stroke as drawn at <paramref name="now"/>, or null once it has faded.</summary>
-    internal static Shape? ShapeOf(in Stroke stroke, double now)
+    internal static Shape? ShapeOf(in Stroke stroke, double now, double lifetime)
     {
-        double horizon = now - Lifetime;
+        double horizon = now - lifetime;
         ValueList<Sample> samples = stroke.Samples;
         if (samples.IsEmpty)
         {
@@ -245,25 +266,26 @@ public struct LaserTrail : IEquatable<LaserTrail>
                 travelled += visible[index - 1].Point.Distance(sample.Point);
             }
             bool isHead = index == visible.Count - 1;
-            double life = isHead && stroke.Live ? 1 : Fraction(sample.Time - horizon);
+            double life = isHead && stroke.Live ? 1 : Fraction(sample.Time - horizon, lifetime);
             double thickness = life * (2 - life);
             double tail = isHead ? 1 : SwiftMath.Min(1, travelled / taper);
             dots[index] = new Dot(sample.Point, radius * thickness * tail);
         }
-        return new Shape(ValueList.Create<Dot>(dots), stroke.Color, stroke.Live ? 1 : Fraction(head.Time - horizon));
+        return new Shape(ValueList.Create<Dot>(dots), stroke.Color, stroke.Live ? 1 : Fraction(head.Time - horizon, lifetime));
     }
 
-    public readonly bool Equals(LaserTrail other) => strokes == other.strokes;
+    public readonly bool Equals(LaserTrail other) => strokes == other.strokes && Lifetime == other.Lifetime;
 
     public override readonly bool Equals(object? obj) => obj is LaserTrail other && Equals(other);
 
-    public override readonly int GetHashCode() => strokes.GetHashCode();
+    public override readonly int GetHashCode() => HashCode.Combine(strokes, Lifetime);
 
     public static bool operator ==(LaserTrail left, LaserTrail right) => left.Equals(right);
 
     public static bool operator !=(LaserTrail left, LaserTrail right) => !left.Equals(right);
 
-    private static double Fraction(double remaining) => SwiftMath.Min(1, SwiftMath.Max(0, remaining / Lifetime));
+    private static double Fraction(double remaining, double lifetime) =>
+        lifetime > 0 ? SwiftMath.Min(1, SwiftMath.Max(0, remaining / lifetime)) : 0;
 
     /// <summary>The widest layer's radius at <paramref name="dot"/> (Swift <c>passes.map { $0.radius(dot) }.max()</c>).</summary>
     private static double Reach(in Dot dot)

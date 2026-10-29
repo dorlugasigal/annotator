@@ -191,7 +191,7 @@ struct ToolbarShortcutSettings: View {
                     .accessibilityIdentifier("toolbar-collapse-delay")
                 }
             }
-            Label("Press and hold anywhere on the toolbar, then drag it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical.",
+            Label("Drag the toolbar from anywhere on it, even from a button, to put it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical.",
                   systemImage: "hand.draw")
                 .font(.caption).foregroundStyle(.secondary)
             HStack(alignment: .center, spacing: 16) {

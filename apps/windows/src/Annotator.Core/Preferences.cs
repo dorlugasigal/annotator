@@ -234,6 +234,12 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
     /// means every property is one button.</summary>
     public ValueList<string>? ExpandedPropertyChoices;
 
+    /// <summary>
+    /// Seconds the laser pointer's trail stays before it fades, from <see cref="LaserTrail.MinimumLifetime"/> to
+    /// <see cref="LaserTrail.MaximumLifetime"/>. <c>null</c> means <see cref="LaserTrail.DefaultLifetime"/>.
+    /// </summary>
+    public double? LaserFade;
+
     private const int MaximumBytes = 256 * 1_024;
 
     public WorkspacePreferences()
@@ -346,6 +352,11 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         ValidateCommandShortcuts();
         ValidateToolbarItems();
         ValidateToolbarControls();
+        if (LaserFade is { } fade
+            && !(double.IsFinite(fade) && fade >= LaserTrail.MinimumLifetime && fade <= LaserTrail.MaximumLifetime))
+        {
+            throw CanvasError.InvalidDocument("The laser trail can fade after 0.5 to 5 seconds.");
+        }
     }
 
     public void AssignShortcut(string key, Tool tool)
@@ -394,6 +405,13 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
             preferences.VisibilityAnimationStyle = AnimationStyle.Slide;
         }
         preferences.NormalizeToolbarControls();
+        // A Fade from a version with a wider choice keeps the nearest one this version offers.
+        if (preferences.LaserFade is { } fade)
+        {
+            preferences.LaserFade = double.IsFinite(fade)
+                ? Math.Clamp(fade, LaserTrail.MinimumLifetime, LaserTrail.MaximumLifetime)
+                : null;
+        }
         if (preferences.ShortcutVersion is null or 1)
         {
             var custom = new List<KeyValuePair<string, string>>();

@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import XCTest
 import AnnotationCore
 import PresentationRendering
@@ -23,7 +24,7 @@ final class LaserPointerTests: XCTestCase {
     }
 
     private func waitUntilGone(_ canvas: DrawingCanvas) async throws {
-        let deadline = Date().addingTimeInterval(LaserTrail.lifetime + 2)
+        let deadline = Date().addingTimeInterval(LaserTrail.defaultLifetime + 2)
         while !canvas.laserTrail.isEmpty && Date() < deadline { try await Task.sleep(for: .milliseconds(20)) }
     }
 
@@ -63,6 +64,30 @@ final class LaserPointerTests: XCTestCase {
         XCTAssertFalse(canvas.laserTrail.isDrawing)
         try await waitUntilGone(canvas)
         XCTAssertTrue(canvas.laserTrail.isEmpty)
+    }
+
+    /// Tester request: the trail disappears too fast, so Fade in the laser pointer's properties sets how long it stays.
+    func testFadeInThePropertiesSetsHowLongTheNextTrailStays() throws {
+        let (editor, defaults, suite) = try fixture("laser-fade")
+        defer { editor.close(); defaults.removePersistentDomain(forName: suite) }
+        NativeAccessibilityNode.enable()
+        let host = NSHostingView(rootView: ContextualInspector(model: editor.model))
+        host.frame = CGRect(x: 0, y: 0, width: 700, height: 80)
+        host.layoutSubtreeIfNeeded()
+        let fade = try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first {
+            $0.accessibilityRole() == .slider && $0.accessibilityLabel() == "Fade"
+        }, "The laser pointer's properties have a Fade slider.")
+        XCTAssertEqual((fade.accessibilityValue() as? NSNumber)?.doubleValue ?? 0, LaserTrail.defaultLifetime, accuracy: 0.001)
+        editor.model.setLaserFade(2.46)
+        XCTAssertEqual(editor.model.laserFade, 2.5, "Fade keeps tenths of a second.")
+        let canvas = editor.session.canvas
+        canvas.mouseDown(with: try event(.leftMouseDown, Point(100, 100), on: editor))
+        XCTAssertEqual(canvas.laserTrail.lifetime, 2.5, "The next stroke uses the new Fade.")
+        canvas.mouseUp(with: try event(.leftMouseUp, Point(100, 100), on: editor))
+        let saved = try WorkspacePreferences.read(try XCTUnwrap(editor.model.preferenceDefaults.data(forKey: "workspace-preferences-v1")))
+        XCTAssertEqual(saved.laserFade, 2.5, "Fade is saved for the next time.")
+        editor.model.setLaserFade(LaserTrail.defaultLifetime)
+        XCTAssertNil(editor.model.preferences.laserFade, "The default saves nothing.")
     }
 
     func testEachPressKeepsItsOwnColorWhileEarlierTrailsFade() throws {

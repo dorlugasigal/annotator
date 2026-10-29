@@ -79,6 +79,12 @@ public enum InspectorItem
 
     /// <summary>One button that steps through Left, Center and Right, or the three side by side.</summary>
     Alignment,
+
+    /// <summary>
+    /// The laser pointer's "Fade" (Mac LaserFadeControl): just the slider, with its value beside it ("0.8 s"), saved with
+    /// the preferences (<see cref="WorkspacePreferences.LaserFade"/>).
+    /// </summary>
+    LaserFade,
 }
 
 /// <summary>
@@ -98,6 +104,14 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
     public const string CounterCaption = "Click to add sequential numbered markers.";
     public const string RulerCaption = "Drag to measure the distance in source pixels.";
     public const string LaserCaption = "Drag to point. The trail fades on its own.";
+
+    /// <summary>The laser pointer's Fade as its slider shows it beside it (Mac LaserFadeControl.label).</summary>
+    public static string LaserFadeLabel(double seconds) =>
+        seconds.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + " s";
+
+    /// <summary>The Fade slider's help.</summary>
+    public static string LaserFadeHelp =>
+        $"How long the trail stays before it fades: {LaserFadeLabel(LaserTrail.MinimumLifetime)} to {LaserFadeLabel(LaserTrail.MaximumLifetime)}.";
 
     /// <summary>Properties that show all their choices side by side instead of one button (Mac showsAllChoices).</summary>
     public ImmutableArray<PropertyChoice> AllChoices { get; init; } = [];
@@ -172,6 +186,7 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
         {
             items.Add(InspectorItem.StrokeColor);
             items.Add(InspectorItem.Width);
+            items.Add(InspectorItem.LaserFade);
             items.Add(InspectorItem.Caption);
             caption = LaserCaption;
         }

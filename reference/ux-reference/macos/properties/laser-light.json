@@ -3,7 +3,7 @@
   {
    "enabled": true,
    "frame": [
-    112.5,
+    37.5,
     16,
     65.5,
     14
@@ -14,7 +14,7 @@
   {
    "enabled": true,
    "frame": [
-    192,
+    117,
     16,
     32,
     14
@@ -25,7 +25,18 @@
   {
    "enabled": true,
    "frame": [
-    112.5,
+    267,
+    16,
+    26,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Fade"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    37.5,
     36,
     36,
     36
@@ -40,7 +51,7 @@
     {
      "enabled": true,
      "frame": [
-      202,
+      127,
       47,
       18,
       14
@@ -50,7 +61,7 @@
    ],
    "enabled": true,
    "frame": [
-    192,
+    117,
     47,
     96,
     14
@@ -60,9 +71,33 @@
    "value": 6
   },
   {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      272,
+      47,
+      18,
+      14
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
    "enabled": true,
    "frame": [
-    342,
+    267,
+    47,
+    96,
+    14
+   ],
+   "label": "Fade",
+   "role": "AXSlider",
+   "value": 0.8
+  },
+  {
+   "enabled": true,
+   "frame": [
+    417,
     47.5,
     194,
     13

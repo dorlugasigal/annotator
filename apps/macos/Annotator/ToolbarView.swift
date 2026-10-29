@@ -339,9 +339,7 @@ struct ToolbarView: View {
         .modifier(ToolbarWidth(vertical: vertical, width: width, limit: max(320, availableSize.width),
                                followsProposal: fillsWindow))
         .fixedSize(horizontal: false, vertical: true)
-        .background {
-            ToolbarDragBackground(model: model)
-        }
+        .background { ToolbarRowBackground() }
         .background {
             if !vertical && drawsChrome {
                 RoundedRectangle(cornerRadius: metrics.cornerRadius).fill(Color(nsColor: .windowBackgroundColor))
@@ -426,7 +424,7 @@ struct ToolbarView: View {
         }
         // While the toolbar grows toward a wider row, its padding edge cuts the row off sideways.
         .mask { Rectangle().padding(.vertical, -40) }
-        .background { ToolbarDragBackground(model: model) }
+        .background { ToolbarRowBackground() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tool properties")
         .accessibilityIdentifier("contextual-inspector-viewport")
@@ -790,15 +788,10 @@ private struct ToolbarSurface: ViewModifier {
     }
 }
 
-private struct ToolbarDragBackground: View {
-    let model: WorkspaceModel
-    var body: some View {
-        Color.clear.contentShape(Rectangle())
-            .gesture(DragGesture(minimumDistance: 3, coordinateSpace: .global)
-                .onChanged { value in model.onToolbarBackgroundDrag?(value.translation, false) }
-                .onEnded { value in model.onToolbarBackgroundDrag?(value.translation, true) })
-    }
-
+/// Clear space behind the toolbar and its properties. It has no gesture of its own: the toolbar window moves the toolbar
+/// from any press (`InspectorPanel`). It keeps each group's accessibility frame the size of the whole row, as on Windows.
+struct ToolbarRowBackground: View {
+    var body: some View { Color.clear.contentShape(Rectangle()) }
 }
 
 private struct SupportReminderPresentation: ViewModifier {
@@ -945,7 +938,7 @@ private struct CompactInspectorViewport: NSViewRepresentable {
         let inspector = ContextualInspector(model: model, compact: compact)
             .frame(width: contentWidth / scale, alignment: .topLeading)
             .fixedSize(horizontal: false, vertical: true)
-            .background { ToolbarDragBackground(model: model) }
+            .background { ToolbarRowBackground() }
         guard scale < 1 else { return AnyView(inspector) }
         return AnyView(ScaledPropertiesLayout(scale: scale) { inspector.scaleEffect(scale, anchor: .topLeading) })
     }

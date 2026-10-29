@@ -11,14 +11,14 @@ using CorePoint = Annotator.Core.Point;
 namespace Annotator.App.Toolbar;
 
 /// <summary>
-/// Press and hold anywhere on the toolbar to move it (Mac InspectorPanel's holdPress, <see cref="ToolbarHold"/>): on a
-/// button, a name or empty space, also on the toolbar shrunk to one button. A left press that stays within 3 points for 0.4
-/// seconds picks the toolbar up: the background's drag starts from where the press started, and the control under the
-/// pointer loses the pointer to the toolbar, so it never clicks. Letting go or moving further sooner leaves the press to
-/// the control as usual, and the background's own drag still starts as soon as it moves. Sliders and fields get their
-/// press at once. Windows hands the press to the control right away, where the Mac holds it back, so a held button looks
-/// pressed until the toolbar is picked up. At the 0.4-second mark the button's own state decides, so a release that hasn't
-/// reached the toolbar yet still clicks. Escape ends a move where the toolbar is, as on the Mac.
+/// Press anywhere on the toolbar and drag, or press and hold, to move it (Mac InspectorPanel's holdPress,
+/// <see cref="ToolbarHold"/>): on a button, a name or empty space, also on the toolbar shrunk to one button. A left press
+/// that moves more than 3 points, or stays within 3 points for 0.4 seconds, picks the toolbar up: the background's drag
+/// starts from where the press started, and the control under the pointer loses the pointer to the toolbar, so it never
+/// clicks. Letting go sooner leaves the press to the control as usual. Sliders and fields get their press at once. Windows
+/// hands the press to the control right away, where the Mac holds it back, so a held button looks pressed until the
+/// toolbar is picked up. At the 0.4-second mark the button's own state decides, so a release that hasn't reached the
+/// toolbar yet still clicks. Escape ends a move where the toolbar is, as on the Mac.
 /// </summary>
 internal sealed partial class ToolbarWindow
 {
@@ -55,7 +55,13 @@ internal sealed partial class ToolbarWindow
         }
         StopHoldTimer();
         _holdPointer = null;
-        if (!_hold.Press(args.Pointer.PointerId, new CorePoint(point.Position.X, point.Position.Y), HoldAllowed(), PressTargets(args.OriginalSource)))
+        if (_docking.IsDragging)
+        {
+            // Mac sendEvent: the release of that drag never came here, so the toolbar stays where it is and this press
+            // starts afresh.
+            CancelDrag();
+        }
+        if (!_hold.Press(args.Pointer.PointerId, DesktopPoints(args), HoldAllowed(), PressTargets(args.OriginalSource)))
         {
             return;
         }
@@ -68,13 +74,15 @@ internal sealed partial class ToolbarWindow
 
     private void OnHoldMoved(object sender, PointerRoutedEventArgs args)
     {
-        if (_hold.IsWaiting)
+        if (_hold.IsWaiting && _hold.Move(args.Pointer.PointerId, DesktopPoints(args)) == ToolbarHoldMove.Moved)
         {
-            Windows.Foundation.Point position = args.GetCurrentPoint(null).Position;
-            if (_hold.Move(args.Pointer.PointerId, new CorePoint(position.X, position.Y)) == ToolbarHoldMove.Moved)
+            // Mac holdPress: moving on picks the toolbar up from the press, as holding still does.
+            StopHoldTimer();
+            Pointer? pointer = _holdPointer;
+            _holdPointer = null;
+            if (pointer is not null && HoldAllowed())
             {
-                StopHoldTimer();
-                _holdPointer = null;
+                PickUp(pointer);
             }
         }
         if (ReferenceEquals(_dragSurface, _root))
@@ -127,10 +135,7 @@ internal sealed partial class ToolbarWindow
         }
     }
 
-    /// <summary>
-    /// Mac finishHold: the press stayed still for the delay. A press on the background becomes its drag at once; a press on
-    /// a control moves the pointer to the toolbar, so the control never clicks, and the toolbar follows it from the press.
-    /// </summary>
+    /// <summary>Mac finishHold: the press stayed still for the delay, so the toolbar is picked up (<see cref="PickUp"/>).</summary>
     private void OnHoldElapsed()
     {
         StopHoldTimer();
@@ -143,11 +148,20 @@ internal sealed partial class ToolbarWindow
         {
             return;
         }
+        PickUp(pointer!);
+    }
+
+    /// <summary>
+    /// Mac beginToolbarDrag from a held press: a press on the background becomes its drag at once; a press on a control
+    /// moves the pointer to the toolbar, so the control never clicks, and the toolbar follows it from the press.
+    /// </summary>
+    private void PickUp(Pointer pointer)
+    {
         if (!_docking.IsTracking)
         {
             // The control under the press took the pointer when it was pressed, and WinUI gives a captured pointer to no
             // one else: it lets go first, which ends its press without a click.
-            ReleaseControlCapture(pointer!);
+            ReleaseControlCapture(pointer);
             if (!_root.CapturePointer(pointer))
             {
                 // The press is no longer down here: it stays the control's.
@@ -163,6 +177,17 @@ internal sealed partial class ToolbarWindow
         _docking.Hold(_holdPress, ToCore(Frame), Scale());
         _root.ShowMoveCursor(true);
         TakeEscape();
+    }
+
+    /// <summary>
+    /// Where the pointer is on the desktop, in points: a press waits while the window opens or grows under it, so whether
+    /// the pointer stayed still is measured on the screen, not in the window.
+    /// </summary>
+    private CorePoint DesktopPoints(PointerRoutedEventArgs args)
+    {
+        CorePoint pixels = EventPoint(args);
+        double scale = Scale();
+        return new CorePoint(pixels.X / scale, pixels.Y / scale);
     }
 
     /// <summary>The element between the press and the toolbar that holds <paramref name="pointer"/> lets go of it.</summary>

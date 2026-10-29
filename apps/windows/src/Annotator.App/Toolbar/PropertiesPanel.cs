@@ -249,6 +249,8 @@ internal sealed class PropertiesPanel
                 return Titled(Well(fill: true));
             case InspectorItem.Width:
                 return Block(InspectorPlan.WidthTitle(tool), SliderOnly(StyleParameter.Width));
+            case InspectorItem.LaserFade:
+                return Block("Fade", LaserFade());
             case InspectorItem.Opacity:
                 return Value(StyleParameter.Opacity, _compact ? 64 : 90, showLabel: true);
             case InspectorItem.Pattern:
@@ -536,6 +538,47 @@ internal sealed class PropertiesPanel
         var frame = new Grid { Height = PropertyRow.ControlHeight };
         control.Root.VerticalAlignment = VerticalAlignment.Center;
         frame.Children.Add(control.Root);
+        return frame;
+    }
+
+    /// <summary>
+    /// Mac LaserFadeControl: how long the laser pointer's trail stays before it fades, as the slider with its value beside it
+    /// in a 36-point frame, like Width. It is saved with the preferences, and the next stroke uses it.
+    /// </summary>
+    private FrameworkElement LaserFade()
+    {
+        ParitySlider slider = ValueControl.Slider(96, LaserTrail.MinimumLifetime, LaserTrail.MaximumLifetime, small: true,
+            out FrameworkElement band);
+        AutomationProperties.SetName(slider, "Fade");
+        ToolbarParts.SetToolTip(slider, InspectorPlan.LaserFadeHelp);
+        // Mac: the caption font's monospaced digits in the secondary color, at least 34 points wide, hidden from UI
+        // Automation (the slider reads its value).
+        TextBlock readout = ToolbarParts.Text(string.Empty, 10, "AnnotatorSecondaryText");
+        readout.MinWidth = 34;
+        readout.VerticalAlignment = VerticalAlignment.Center;
+        AutomationProperties.SetAccessibilityView(readout, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
+        bool updating = false;
+        slider.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler((_, _) => _host.Interacted()), handledEventsToo: true);
+        slider.ValueChanged += (_, args) =>
+        {
+            if (!updating)
+            {
+                _model.SetLaserFade(args.NewValue);
+            }
+        };
+        _updates.Add(state =>
+        {
+            double seconds = state.Preferences.LaserFade ?? LaserTrail.DefaultLifetime;
+            updating = true;
+            slider.Value = Math.Clamp(seconds, slider.Minimum, slider.Maximum);
+            updating = false;
+            readout.Text = InspectorPlan.LaserFadeLabel(seconds);
+        });
+        var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
+        row.Children.Add(band);
+        row.Children.Add(readout);
+        var frame = new Grid { Height = PropertyRow.ControlHeight };
+        frame.Children.Add(row);
         return frame;
     }
 
