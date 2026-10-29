@@ -327,6 +327,41 @@
      "enabled": true,
      "frame": [
       241.5,
+      77,
+      26,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Fade"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        246.5,
+        108,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      241.5,
+      108,
+      96,
+      14
+     ],
+     "label": "Fade",
+     "role": "AXSlider",
+     "value": 0.8
+    },
+    {
+     "enabled": true,
+     "frame": [
+      391.5,
       108.5,
       194,
       13

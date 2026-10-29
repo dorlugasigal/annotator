@@ -639,9 +639,9 @@
       "sha256" : "188607adbd6acba5f012be5bc1f2ff3a7508efe63517b34b3df070393165a71d"
     },
     {
-      "bytes" : 1286,
+      "bytes" : 1328,
       "path" : "laser/constants.json",
-      "sha256" : "fce4de67566d8ee80e62a4f182e84ab40eaa4525c2ea689ac37f4b4214eff710"
+      "sha256" : "bd1438257dd1d084cdc75776834be7e6151a90e92177e2ba55be994610bc7eb1"
     },
     {
       "bytes" : 4123,
@@ -659,9 +659,9 @@
       "sha256" : "d1e333b42759fd62d82e624a61486a55ae49218da90481023c2d327a0fa71e86"
     },
     {
-      "bytes" : 327738,
+      "bytes" : 402238,
       "path" : "laser/trails.jsonl",
-      "sha256" : "31a7cef85cf473fb3c6a37ddec61331ac4a2983fc0a1c79f8992527dfed6afaf"
+      "sha256" : "0bd634d34dde2408e9904fa43130c89e19de17ffb538cd577edfd371f9665e0e"
     },
     {
       "bytes" : 7969,
@@ -799,9 +799,9 @@
       "sha256" : "133586b779d52c9e6115177f71fbb35e32c4d9a1ab14c15856e763bf200993ac"
     },
     {
-      "bytes" : 4131,
+      "bytes" : 4279,
       "path" : "motion/durations.json",
-      "sha256" : "ccd677d241218574f8f67a055562a55197afa0283857610e761554e5fca9d11e"
+      "sha256" : "078bafcf1fadfcb52017a9013dc9409d43b90f42c8a575b3d98a6ede0ff1a9a3"
     },
     {
       "bytes" : 93195,
@@ -1357,7 +1357,7 @@
     "effects" : "Input PNGs and CaptureCompositor.image output, rendered into sRGB RGBA8 by a Core Image context configured like the app's (Metal, default working space: extended linear sRGB in half float). See context.json.",
     "geometry" : "Path elements from SceneRenderer for every shape and stroke (rough ones from the element seed), simulated Ink pen pressure from InkPressure, arrowheads, polygons, rounded diamonds, connector curves, anchors, drag constraints, viewports, sharing regions, transforms, axis ticks and pointer shapes. text.jsonl depends on macOS fonts.",
     "hittest" : "contains.jsonl: per element, a grid of HitTesting.contains results ('#' hit, '.' miss). frontmost.jsonl: per scene, a grid of ElementStacking.frontmost results by element letter. Grid points are origin + (column, row) × step.",
-    "laser" : "The laser pointer's trail from LaserTrail: scripted presses, moves, releases and prunes, the strokes they leave, and every stroke's dots, opacity, bounds and per-layer bands at set times. pictures.jsonl lists pictures drawn by LaserTrailRenderer into an sRGB premultiplied RGBA bitmap (transparent background) at 1x and 2x.",
+    "laser" : "The laser pointer's trail from LaserTrail: scripted presses, moves, releases and prunes with the trail's lifetime (the person's Fade), the strokes they leave, and every stroke's dots, opacity, bounds and per-layer bands at set times. pictures.jsonl lists pictures drawn by LaserTrailRenderer into an sRGB premultiplied RGBA bitmap (transparent background) at 1x and 2x.",
     "library" : "Saved-shape files with their read result and the document after inserting them, creation and naming refusals, invalid files, and a scripted ShapeLibraryStore session.",
     "motion" : "MotionCore curves, springs, fades and timelines sampled every millisecond, the per-style show and hide durations, and the pointer click pulse.",
     "platform" : "Swift memory layout, Foundation JSON and string behavior, Core Graphics paths, rectangle math, hatch positions and libm samples.",
@@ -1367,9 +1367,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "5daac76171dd06f626a98778de49848eb2f485d4",
-    "date" : "2026-10-29",
-    "fingerprint" : "5c69df27f860919e21b3f6d4c417d8e5142d4ec1359649bf528f798973a6d1b1",
+    "commit" : "10f70d5586c891363d6683e1dfbe799af3fffc58",
+    "date" : "2026-10-30",
+    "fingerprint" : "806579c4343f0fd4994b31a23b7d063d2f76d6834079d5582ac7e26720f868c0",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

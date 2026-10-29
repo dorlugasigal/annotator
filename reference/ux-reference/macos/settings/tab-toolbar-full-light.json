@@ -2576,11 +2576,11 @@
        "frame": [
         46,
         1548,
-        789,
+        855,
         13
        ],
        "role": "AXStaticText",
-       "value": "Press and hold anywhere on the toolbar, then drag it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical."
+       "value": "Drag the toolbar from anywhere on it, even from a button, to put it where you like. At a screen edge it docks: top and bottom make it horizontal, left and right make it vertical."
       },
       {
        "enabled": true,
