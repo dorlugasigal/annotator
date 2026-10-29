@@ -55,6 +55,13 @@ class WingetTests(unittest.TestCase):
         installer = (out / "DorLugasiGal.Annotator.installer.yaml").read_text()
         self.assertIn("InstallerType: zip\nNestedInstallerType: portable\n", installer)
         self.assertIn("PortableCommandAlias: annotator", installer)
+        # Without it winget starts Annotator.exe through a link in another folder, where the Windows App SDK is missing.
+        self.assertIn("\nArchiveBinariesDependOnPath: true\n", installer)
+        for name in ("DorLugasiGal.Annotator.yaml", "DorLugasiGal.Annotator.installer.yaml", "DorLugasiGal.Annotator.locale.en-US.yaml"):
+            text = (out / name).read_text()
+            self.assertIn(f"\nManifestVersion: {winget.MANIFEST_VERSION}\n", text)
+            self.assertIn(f".{winget.MANIFEST_VERSION}.schema.json\n", text)
+        self.assertGreaterEqual(tuple(int(part) for part in winget.MANIFEST_VERSION.split(".")), (1, 9, 0))
         row = next(item for item in data["files"] if item["architecture"] == "x64")
         self.assertIn(f"https://github.com/dorlugasigal/annotator/releases/download/v{self.label}/{row['file']}", installer)
         self.assertIn(row["sha256"].upper(), installer)
