@@ -11,6 +11,22 @@ extension VerticalAlignment {
     static let propertyControl = VerticalAlignment(PropertyControl.self)
 }
 
+/// Sits behind a toolbar control that gets its press at once, such as a slider or a number field, instead of waiting to
+/// see whether the press is a hold that moves the toolbar (`ToolbarHold`). It takes no clicks itself.
+final class ToolbarPressMarker: NSView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+}
+
+private struct ToolbarPressArea: NSViewRepresentable {
+    func makeNSView(context: Context) -> ToolbarPressMarker { ToolbarPressMarker() }
+    func updateNSView(_ view: ToolbarPressMarker, context: Context) {}
+}
+
+extension View {
+    /// Holding this control is how people use it, so its press doesn't wait for a press and hold.
+    func keepsToolbarPress() -> some View { background(ToolbarPressArea()) }
+}
+
 /// A property's name above its control. The name is plain text, like the color pickers' names, so every name on the row
 /// starts at the same edge.
 struct PropertyBlock<Content: View>: View {

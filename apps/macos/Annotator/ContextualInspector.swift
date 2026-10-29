@@ -45,7 +45,7 @@ struct ContextualInspector: View {
                             Slider(
                                 value: Binding(get: { model.style.opacity }, set: { value in model.applyStyle { $0.opacity = value } }),
                                 in: 0...1, onEditingChanged: styleEditing
-                            ).frame(width: 180)
+                            ).frame(width: 180).keepsToolbarPress()
                             Text("\(Int(model.style.opacity * 100))%").font(.caption.monospacedDigit())
                         }
                         Text("Drag handles to resize or rotate. Delete removes the selected image.").font(.caption).foregroundStyle(
@@ -211,7 +211,8 @@ struct ContextualInspector: View {
                 PropertyBlock(name: "Head size") {
                     HStack(spacing: 6) {
                         Slider(value: Binding(get: { model.style.headScale ?? 1 }, set: { value in model.applyStyle { $0.headScale = value } }),
-                               in: 0.5...2, onEditingChanged: styleEditing).frame(width: 86).accessibilityLabel("Arrowhead size")
+                               in: 0.5...2, onEditingChanged: styleEditing).frame(width: 86).keepsToolbarPress()
+                            .accessibilityLabel("Arrowhead size")
                         Text("\(Int((model.style.headScale ?? 1) * 100))%").font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary).frame(minWidth: 34, alignment: .leading)
                     }.frame(height: 36)

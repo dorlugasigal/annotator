@@ -135,6 +135,25 @@ final class ToolbarHoldTests: XCTestCase {
         XCTAssertEqual(model.board, .light, "Released over the button, the press is a click.")
     }
 
+    func testHoldWithoutMovingKeepsTheToolbarDocked() async throws {
+        let (model, panel) = try await toolbar()
+        panel.leftButtonIsDown = { true }
+        let middle = panel.frame.midX
+        let board = try center(of: "Board background", role: .button, in: panel)
+        panel.sendEvent(try event(.leftMouseDown, at: board, in: panel))
+        try await waitForHold()
+        XCTAssertTrue(panel.isTrackingToolbarDrag)
+        panel.sendEvent(try event(.leftMouseUp, at: board, in: panel))
+        XCTAssertFalse(panel.isTrackingToolbarDrag)
+        XCTAssertEqual(model.board, .transparent)
+        // A docked toolbar that grows for its properties stays centered on its edge.
+        model.setPropertiesShown(true)
+        model.choose(.pen)
+        try await Task.sleep(for: .milliseconds(800))
+        XCTAssertGreaterThan(panel.frame.width, 0)
+        XCTAssertEqual(panel.frame.midX, middle, accuracy: 1, "Still docked after a hold that never moved")
+    }
+
     func testSlidersGetTheirPressAtOnce() async throws {
         let (model, panel) = try await toolbar(properties: true)
         model.choose(.pen)
@@ -144,6 +163,7 @@ final class ToolbarHoldTests: XCTestCase {
         // A native slider follows the pointer in its own loop until the button goes up.
         NSApp.postEvent(try event(.leftMouseUp, at: slider, in: panel), atStart: false)
         panel.sendEvent(try event(.leftMouseDown, at: slider, in: panel))
+        XCTAssertFalse(panel.isHoldingPress, "The slider took its press, and its own loop took the release.")
         if let up = NSApp.nextEvent(matching: .leftMouseUp, until: .distantPast, inMode: .default, dequeue: true) {
             panel.sendEvent(up)
         }

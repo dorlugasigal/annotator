@@ -142,13 +142,13 @@ public struct LaserTrail: Equatable, Sendable {
         strokes.compactMap { Self.shape(of: $0, at: now) }
     }
 
-    /// The area the trail covers at `now`, glow included, or `nil` when nothing shows.
+    /// The area the trail covers at `now`, glow included, or `nil` when nothing shows. Every dot counts, even one with no
+    /// width: the band from the tail's point to the next dot is drawn too.
     public func bounds(at now: Double) -> Rect? {
         var area: Rect?
         for shape in shapes(at: now) {
             for dot in shape.dots {
                 let reach = Self.passes.map { $0.radius(dot) }.max() ?? 0
-                guard reach > 0 else { continue }
                 let rect = Rect(x: dot.center.x - reach, y: dot.center.y - reach, width: reach * 2, height: reach * 2)
                 area = area.map { $0.union(rect) } ?? rect
             }

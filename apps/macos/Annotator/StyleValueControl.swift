@@ -137,7 +137,7 @@ struct StyleValueControl: View {
                         sliding = false
                         model.finishStyleEdit()
                     }
-                }).frame(width: sliderWidth).accessibilityLabel(title)
+                }).frame(width: sliderWidth).keepsToolbarPress().accessibilityLabel(title)
                     .help(parameter == .effect
                         ? "Slider: \(Int(sliderRange.lowerBound))–\(Int(sliderRange.upperBound)). Enter up to 100 in the number field for a stronger effect."
                         : "\(title): \(Int(sliderRange.lowerBound))–\(Int(sliderRange.upperBound)).")
@@ -162,7 +162,7 @@ struct StyleValueControl: View {
                 }
             })
                 .textFieldStyle(.roundedBorder).font(.caption.monospacedDigit())
-                .frame(width: 48).focused($editing)
+                .frame(width: 48).keepsToolbarPress().focused($editing)
                 .accessibilityLabel("Precise \(title.lowercased())")
                 .help("\(title): \(Int(parameter.range.lowerBound))–\(Int(parameter.range.upperBound)) \(parameter.unit)")
                 .onSubmit {

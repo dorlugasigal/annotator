@@ -31,6 +31,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var dockedFrame: CGRect?
     private var toolbarDockDisplayID: CGDirectDisplayID?
     private var edgeDocked = false
+    /// The toolbar's frame and dock when a drag started, so a drag that never moves it keeps it docked.
+    private var dockAtDragStart: (frame: CGRect, docked: CGRect?, display: CGDirectDisplayID?, edge: Bool)?
     private var dockPreview: NSPanel?
     private var previewEdge: ToolbarDockEdge?
     private var previewScreen: CGRect?
@@ -570,6 +572,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func finishToolbarDrag(at point: CGPoint) {
+        dockAtDragStart = nil
         updateDockPreview(at: point)
         let targetFrame = dockPreviewFrame
         let targetEdge = previewEdge
@@ -680,12 +683,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.title = "Annotator Drawing Tools"
         panel.onUserDragEnded = { [weak self] point in self?.finishToolbarDrag(at: point) }
         panel.onUserDragMoved = { [weak self] point in self?.updateDockPreview(at: point) }
-        panel.onUserDragCancelled = { [weak self] in self?.hideDockPreview() }
+        panel.onUserDragCancelled = { [weak self] in
+            guard let self else { return }
+            self.hideDockPreview()
+            // A press and hold let go without moving leaves the toolbar where it was, still docked.
+            if let saved = self.dockAtDragStart, self.toolbar?.frame == saved.frame {
+                self.dockedFrame = saved.docked
+                self.toolbarDockDisplayID = saved.display
+                self.edgeDocked = saved.edge
+            }
+            self.dockAtDragStart = nil
+        }
         panel.onUserDragWillStart = { [weak self] in self?.finishToolbarAnimations() }
         panel.onUserDragStarted = { [weak self] in
-            self?.dockedFrame = nil
-            self?.toolbarDockDisplayID = nil
-            self?.edgeDocked = false
+            guard let self else { return }
+            self.dockAtDragStart = (self.toolbar?.frame ?? .zero, self.dockedFrame, self.toolbarDockDisplayID, self.edgeDocked)
+            self.dockedFrame = nil
+            self.toolbarDockDisplayID = nil
+            self.edgeDocked = false
         }
         panel.allowsHoldToMove = { [weak self] in
             guard let self else { return false }
@@ -1099,9 +1114,16 @@ final class InspectorPanel: AnnotationPanel {
         }
     }
 
-    /// Sliders and number fields get a press at once: holding one is how people use it.
+    /// Sliders and number fields get a press at once: holding one is how people use it. SwiftUI marks them with a
+    /// `ToolbarPressMarker` behind them; a text field that is being edited is an AppKit view under the pointer.
     private func keepsPressAtOnce(_ event: NSEvent) -> Bool {
         guard let content = contentView, let container = content.superview else { return false }
+        func marked(_ view: NSView) -> Bool {
+            if view is ToolbarPressMarker, !view.isHiddenOrHasHiddenAncestor,
+               view.convert(view.bounds, to: nil).contains(event.locationInWindow) { return true }
+            return view.subviews.contains(where: marked)
+        }
+        if marked(content) { return true }
         var view = content.hitTest(container.convert(event.locationInWindow, from: nil))
         while let current = view, current !== content {
             if current is NSSlider || current is NSTextView || (current as? NSTextField)?.isEditable == true { return true }

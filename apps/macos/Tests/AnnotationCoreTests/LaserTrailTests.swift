@@ -105,3 +105,11 @@ private func trail(_ points: [(Double, Double, Double)], release: Double? = nil,
     #expect(preferences.shortcut(for: .tool(.laser))?.label == "L")
     try preferences.validate()
 }
+
+@Test func laserTrailBoundsCoverTheTailPointThatHasNoWidth() throws {
+    let fresh = trail([(0, 0, 0), (100, 0, 0.01)])
+    let shape = try #require(fresh.shapes(at: 0.02).first)
+    #expect(shape.dots.first?.radius == 0, "The tail narrows to a point")
+    let bounds = try #require(fresh.bounds(at: 0.02))
+    #expect(bounds.x <= 0 && bounds.contains(Point(0, 0)), "The band from the tail's point is drawn, so it is redrawn too")
+}
