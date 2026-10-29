@@ -667,11 +667,12 @@ final class ProductFeatureRecordingTests: XCTestCase {
                     try await movie.wait(0.35)
                     let key = try XCTUnwrap(NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [],
                         timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: panel.windowNumber, context: nil,
-                        characters: "l", charactersIgnoringModifiers: "l", isARepeat: false, keyCode: 37))
+                        characters: "j", charactersIgnoringModifiers: "j", isARepeat: false, keyCode: 38))
                     panel.firstResponder?.keyDown(with: key)
                     try await movie.wait(0.7)
-                    XCTAssertEqual(model.shortcut(for: .action(.spotlight)), LocalShortcut(key: "l"))
-                    actions.append(["gesture": "type-shortcut", "text": "L", "time": movie.elapsed])
+                    // L belongs to the laser pointer, so Spotlight gets a free key.
+                    XCTAssertEqual(model.shortcut(for: .action(.spotlight)), LocalShortcut(key: "j"))
+                    actions.append(["gesture": "type-shortcut", "text": "J", "time": movie.elapsed])
                     let line = try identified("toolbar-tool-line")
                     try await drag(from: line, to: CGPoint(x: line.midX + 40, y: strip.minY - 150))
                     XCTAssertFalse(model.toolbarTools.contains(.line))

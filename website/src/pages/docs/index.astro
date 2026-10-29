@@ -57,6 +57,7 @@ const refinedRegionSharing = Boolean(release && BigInt(release.build) >= 20n);
     <p>If Option-scroll works only over Annotator, check that the Accessibility entry belongs to the app copy you use. Replace only an older Annotator entry; leave other apps unchanged. Before quitting and reopening, stop screen sharing and save your board: quitting removes covers. Then try your Live zoom shortcut from Settings &gt; Toolbar &amp; Shortcuts.</p>
     {windows && <p id="windows-permissions">On Windows, drawing, global shortcuts and Alt+scroll over other apps need no permission. Zoom, live effects and region sharing need screen access. The first time, Annotator explains why, then Windows asks. Settings &gt; Permissions shows whether access works and can open Windows Settings &gt; Privacy &amp; security &gt; Screenshots and screen recording. If effect regions stay covered, check that page.</p>}
     <h2 id="focus">Help people follow along</h2>
+    <p>Choose Laser pointer on the toolbar and drag to point at something. A glowing trail follows your pointer and fades away on its own, so nothing is added to your drawing and there's nothing to undo. Pick its color and width in the properties.</p>
     <p>Open Tools &gt; Focus for Cursor halo, Spotlight, Pointer lens and Screen zoom. A halo makes your pointer easier to spot. Spotlight dims the surrounding area. The lens and screen zoom make small details easier to read.</p>
     <p>In Settings &gt; Pointer, choose the halo's shape, color, size, outline, opacity and glow. Click the preview to try Pulse, Ripple or Turn. Keep it visible while turned on, or show it only when you move or click. Custom color expands right there in Settings. Drawing and pointer highlights don't need Screen Recording{windows && " (screen access on Windows)"}; zoom and live effects do.</p>
 
@@ -104,6 +105,7 @@ const refinedRegionSharing = Boolean(release && BigInt(release.build) >= 20n);
       <dt>Control-Option-2{windows && <span class="windows-key">Windows: Ctrl+Alt+Shift+2</span>}</dt><dd>Always hide drawings and toolbar.</dd>
       <dt>Escape</dt><dd>Finish text or cancel an unfinished drawing. If no edit is active, stop zoom or return to using the app underneath. Press Control-Shift-2{windows && " (Ctrl+Shift+2 on Windows)"} or click Resume drawing to draw again.</dd>
       <dt>1 2 3 4 5 6 7 8 9 0</dt><dd>Select, rectangle, diamond, ellipse, arrow, line, pen, text, highlighter, eraser.</dd>
+      <dt>L</dt><dd>Laser pointer. Settings from an earlier version keep their keys, so give it L in Settings &gt; Toolbar &amp; Shortcuts if you like.</dd>
       <dt>R G B Y O P C W K</dt><dd>Red, green, blue, yellow, orange, pink, cyan, white, black ink.</dd>
       <dt>Control-W / Control-B{windows && <span class="windows-key">Windows: Ctrl+W / Ctrl+B</span>}</dt><dd>Toggle whiteboard / blackboard.</dd>
       <dt>Delete{windows && <span class="windows-key">Windows: Backspace or Delete</span>}</dt><dd>Delete the selection; clear drawings on all displays when nothing is selected.</dd>
@@ -113,7 +115,7 @@ const refinedRegionSharing = Boolean(release && BigInt(release.build) >= 20n);
       <dt>Command-L{windows && <span class="windows-key">Windows: Ctrl+L</span>}</dt><dd>Open the resizable Tools window while Annotator receives keyboard input.</dd>
       <dt>Command-Z / Shift-Command-Z{windows && <span class="windows-key">Windows: Ctrl+Z / Ctrl+Shift+Z or Ctrl+Y</span>}</dt><dd>Undo and redo.</dd>
     </dl>
-    <p>Properties shows or hides the tool’s properties below the tools; they show by default. Background, mode, history and window actions stay on the toolbar either way. Drag empty toolbar space to move it; buttons, fields and sliders keep their normal actions. Open the tool library for more tools and file actions. The app follows macOS Reduce Motion{windows && " and, on Windows, the animation effects setting"}.</p>
+    <p>Properties shows or hides the tool’s properties below the tools; they show by default. Background, mode, history and window actions stay on the toolbar either way. To move the toolbar, drag empty space, or press and hold anywhere on it, even on a button or a name, then drag. Sliders and number fields keep their own drag. Open the tool library for more tools and file actions. The app follows macOS Reduce Motion{windows && " and, on Windows, the animation effects setting"}.</p>
     <h2 id="displays">Drawing on more than one screen</h2>
     <p>Draw on a connected screen without moving the toolbar. Click that screen to edit its drawings. Desk/White/Black changes that screen's background; other screens keep their own backgrounds. Control-W toggles Whiteboard and Control-B toggles Blackboard{windows && " (Ctrl+W and Ctrl+B on Windows)"}.</p>
     <p>Command-A{windows && " (Ctrl+A on Windows)"} selects drawings across screens. Properties, Delete and arrow keys apply to that selection together. Click a screen to select its drawings for dragging or resizing.</p>
