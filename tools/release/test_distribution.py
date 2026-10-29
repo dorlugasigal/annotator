@@ -848,6 +848,7 @@ class DistributionTests(unittest.TestCase):
             self.assertFalse((updates/"windows-stable.json").exists())
             self.assertFalse((updates/"windows-preview.json").exists())
 
+    @unittest.skipUnless(sys.platform == "darwin", "CryptoKit CLI verification requires macOS.")
     def test_update_verifier_accepts_public_rfc8032_vector_and_rejects_changed_data(self):
         public = bytes.fromhex("d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a")
         signature = bytes.fromhex(
