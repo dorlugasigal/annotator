@@ -22,10 +22,16 @@ The Microsoft Store listing is a separate route
    winget settings --enable LocalManifestFiles   # once, as administrator
    winget validate <manifest folder>
    winget install --manifest <manifest folder>
+   annotator   # in a new terminal; Annotator starts in the system tray
    ```
 
 4. Open a pull request from your fork of microsoft/winget-pkgs. Microsoft's
    bots validate it; a moderator merges it.
+
+The installer manifest sets `ArchiveBinariesDependOnPath: true`, so winget
+adds Annotator's folder to PATH instead of putting a link to `Annotator.exe`
+in its Links folder. Started through that link, Annotator can't find the
+Windows App SDK files next to it and stops with `DllNotFoundException`.
 
 From the first open-source release on, the manifest's `License` is
 `Apache-2.0` and `LicenseUrl` is

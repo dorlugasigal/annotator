@@ -27,7 +27,8 @@ sys.path.insert(0, str(ROOT / "tools" / "release"))
 import release  # noqa: E402
 
 PACKAGE_IDENTIFIER = "DorLugasiGal.Annotator"
-MANIFEST_VERSION = "1.6.0"
+# 1.9.0 or later: ArchiveBinariesDependOnPath is new in 1.9.0.
+MANIFEST_VERSION = "1.10.0"
 ARCHITECTURES = ("x64", "arm64")
 DESCRIPTION_FILE = "annotator-windows.json"
 MINIMUM_OS = "10.0.22621.0"
@@ -111,10 +112,13 @@ def manifests(data, repository, tag, output, notes_url=None):
         f"  InstallerUrl: https://github.com/{repository}/releases/download/{tag}/{row['file']}\n"
         f"  InstallerSha256: {row['sha256'].upper()}\n"
         for row in sorted(data["files"], key=lambda item: item["architecture"]))
+    # Annotator.exe loads the Windows App SDK files next to it. Started through winget's usual link in its Links
+    # folder, it looks for them there and stops with DllNotFoundException, so winget adds the app's folder to PATH.
     (folder / f"{PACKAGE_IDENTIFIER}.installer.yaml").write_text(
         header.format("installer") + base +
         f"MinimumOSVersion: {MINIMUM_OS}\nInstallerType: zip\nNestedInstallerType: portable\n"
         "NestedInstallerFiles:\n- RelativeFilePath: Annotator.exe\n  PortableCommandAlias: annotator\n"
+        "ArchiveBinariesDependOnPath: true\n"
         "UpgradeBehavior: uninstallPrevious\n"
         f"Installers:\n{installers}ManifestType: installer\nManifestVersion: {MANIFEST_VERSION}\n")
     notes = f"ReleaseNotesUrl: {notes_url or f'https://github.com/{repository}/releases/tag/{tag}'}\n"
