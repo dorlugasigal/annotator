@@ -13,7 +13,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Changed
 
-- The properties always stay on one row. When they need more room, the toolbar gets wider with a short animation, and there's no scroll bar next to them anymore.
+- The properties always stay on one row. When they need more room, the toolbar gets wider (with a short animation on a Mac), and there's no scroll bar next to them anymore.
 - Properties are now just shown or hidden. Quick controls are gone, so if you used them, you now see all the properties.
 - The toolbar is exactly as wide as its tools and buttons, so taking some off leaves no gap. Buttons move to a second row only on a narrow screen.
 - When the toolbar changes width, its tools and buttons stay put instead of jumping around.

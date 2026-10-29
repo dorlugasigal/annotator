@@ -741,19 +741,20 @@ These need owner approval before Windows release.
   Mac says the update is ready to install, and the automatic check's question
   offers Open Downloads page..., Copy winget command and Not now instead of
   Sparkle's install window. A Store copy keeps the Store's install.
-- **DV-12 Toolbar frame motion**: when the toolbar shrinks to one button or
-  opens again, the Mac animates the window's frame between the two sizes
-  (Core `ToolbarMorph`, 0.3 s and 0.34 s) and cross-fades the faces; when the
-  properties row needs more room, it widens the window over 0.22 s
-  (`MotionTiming.ToolbarResizeDuration`). A WinUI window lays its content out
-  a frame after each resize, so a frame-by-frame resize flickers and cuts the
-  buttons off. Windows resizes the toolbar window at once and fades the new
-  face or properties in (Motion.fadeIn, or Motion.reduced with Animation
-  effects off).
-- **DV-13 Off-screen frames**: while the properties row scrolls sideways on a
-  narrow screen, UI Automation gives no frame to the properties scrolled out
-  of view (they report IsOffscreen), where the Mac's accessibility tree keeps
-  their frames. Their names, values and order match.
+- **DV-12 Toolbar frame motion** (owner decision, 2026-10-29): when the
+  toolbar shrinks to one button or opens again, the Mac animates the window's
+  frame between the two sizes (Core `ToolbarMorph`, 0.3 s and 0.34 s) and
+  cross-fades the faces; when the properties row needs more room, it widens
+  the window over 0.22 s (`MotionTiming.ToolbarResizeDuration`). A WinUI
+  window lays its content out a frame after each resize, so a frame-by-frame
+  resize flickers and cuts the buttons off. Windows resizes the toolbar window
+  at once and fades the new face or properties in (Motion.fadeIn, or
+  Motion.reduced with Animation effects off).
+- **DV-13 Off-screen frames** (owner decision, 2026-10-29): while the
+  properties row scrolls sideways on a narrow screen, UI Automation gives no
+  frame to the properties scrolled out of view (they report IsOffscreen),
+  where the Mac's accessibility tree keeps their frames. Their names, values
+  and order match.
 
 ## Owner decisions
 
@@ -906,3 +907,11 @@ The recommended defaults were adopted on 2026-10-18 (see the records below).
     msstore` (WIN-DST-02). The owner also sets the GitHub repository variable
     `WINDOWS_STORE_ID` to `9NMZ345ZJ6JK` before any hosted Windows Store run;
     agents do not set it.
+- **2026-10-29, toolbar deviations (DV-12, DV-13).** The Windows agent's
+  handoff on pull request #77 asked the owner to accept or reject DV-12 and
+  DV-13 before a Windows release. The owner then wrote: "i think the windows
+  agent is done, they handoff back so go ahead finalize whats needed, merge
+  and go for a new release". Applied: both deviations ship with the next
+  release; DV-12 stands until WinUI can resize a window without the frame's
+  delay, and DV-13 until UI Automation reports frames for content scrolled
+  out of view.
