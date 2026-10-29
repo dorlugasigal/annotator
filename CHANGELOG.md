@@ -13,6 +13,11 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - To move the toolbar, press and hold anywhere on it, even on a button or a name, then drag. A normal click works as before, and sliders keep their own drag.
 - Property names such as Width, Pattern and Roughness no longer have an icon in front, so every name on the row lines up and the row looks cleaner.
 
+### Fixed
+
+- On Windows, Annotator no longer crashes when it's started without a signed-in desktop, for example by a scheduled task that runs while nobody is signed in. It now quits and says why.
+- On Windows, pressing Esc while you move the toolbar now stops it where it is, as on a Mac. The app in front doesn't get that Esc.
+
 ## 0.1.0-beta.17 (build 35) - 2026-10-29
 
 ### Added

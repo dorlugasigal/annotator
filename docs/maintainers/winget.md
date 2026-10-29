@@ -33,6 +33,15 @@ adds Annotator's folder to PATH instead of putting a link to `Annotator.exe`
 in its Links folder. Started through that link, Annotator can't find the
 Windows App SDK files next to it and stops with `DllNotFoundException`.
 
+winget's ARM64 check appears to start `Annotator.exe` without a signed-in
+desktop. Up to 0.1.0-beta.17, Annotator then stops with 0xC0000602, and the
+pull request gets `Validation-Executable-Error`, even though x64 passes. Only
+a winget administrator can clear that label, so explain this in a comment and
+wait. Later releases quit with exit code 0 there instead (WIN-SYS-08 in
+[parity.md](../parity.md)), so the check should pass.
+`RestartAgent.exe`, a Windows App SDK helper, also fails when it's started on
+its own; x64 passes anyway.
+
 From the first open-source release on, the manifest's `License` is
 `Apache-2.0` and `LicenseUrl` is
 `https://github.com/dorlugasigal/annotator/blob/main/LICENSE`. Don't edit
