@@ -1,0 +1,74 @@
+{
+  "defaultColor" : {
+    "alpha" : 1,
+    "blue" : 0.2,
+    "green" : 0.16,
+    "red" : 0.98
+  },
+  "defaultStyle" : {
+    "alignment" : "left",
+    "bold" : false,
+    "color" : {
+      "alpha" : 1,
+      "blue" : 0.2,
+      "green" : 0.16,
+      "red" : 0.98
+    },
+    "cornerRadius" : 0,
+    "curved" : false,
+    "endHead" : "open",
+    "fillPattern" : "solid",
+    "fontName" : "system",
+    "fontSize" : 28,
+    "opacity" : 1,
+    "pattern" : "solid",
+    "pressure" : false,
+    "roughness" : 0,
+    "startHead" : "none",
+    "width" : 6
+  },
+  "defaultWidth" : 6,
+  "lifetime" : 0.8,
+  "maximumSamples" : 2048,
+  "minimumStep" : 1,
+  "passes" : [
+    {
+      "alpha" : 0.05,
+      "extra" : 3,
+      "scale" : 2.8,
+      "white" : false
+    },
+    {
+      "alpha" : 0.08,
+      "extra" : 2,
+      "scale" : 2.2,
+      "white" : false
+    },
+    {
+      "alpha" : 0.12,
+      "extra" : 1.5,
+      "scale" : 1.7,
+      "white" : false
+    },
+    {
+      "alpha" : 0.18,
+      "extra" : 1,
+      "scale" : 1.35,
+      "white" : false
+    },
+    {
+      "alpha" : 1,
+      "extra" : 0,
+      "scale" : 1,
+      "white" : false
+    },
+    {
+      "alpha" : 0.85,
+      "extra" : 0,
+      "scale" : 0.4,
+      "white" : true
+    }
+  ],
+  "restInterval" : 0.05,
+  "tailTaper" : 4
+}

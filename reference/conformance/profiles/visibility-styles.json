@@ -26,6 +26,7 @@
     "f" : "grid",
     "h" : "person",
     "i" : "image",
+    "l" : "laser",
     "m" : "ruler",
     "n" : "counter",
     "q" : "queue",
@@ -44,6 +45,7 @@
     "pen",
     "text",
     "highlighter",
+    "laser",
     "eraser",
     "cover"
   ],
