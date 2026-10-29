@@ -206,53 +206,31 @@
   {
    "enabled": true,
    "frame": [
-    805,
-    20.5,
-    20,
-    17
+    793,
+    12,
+    44,
+    48
    ],
-   "help": "Spotlight menu. Spotlight, cursor halo and cleanup, in one menu.",
+   "help": "Spotlight, cursor halo and cleanup, in one menu.",
    "identifier": "toolbar-action-focusMenu",
+   "label": "Spotlight menu",
    "role": "AXMenuButton",
+   "title": "Spotlight menu",
    "value": "Off"
   },
   {
    "enabled": true,
    "frame": [
-    853,
-    21,
-    16.5,
-    16.5
+    839,
+    12,
+    44,
+    48
    ],
-   "help": "Zoom menu. Pointer lens, screen zoom and zoom levels, in one menu.",
+   "help": "Pointer lens, screen zoom and zoom levels, in one menu.",
    "identifier": "toolbar-action-zoomMenu",
+   "label": "Zoom menu",
    "role": "AXMenuButton",
-   "value": "Off"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    812,
-    47,
-    6.5,
-    4
-   ],
-   "help": "Spotlight menu. Spotlight, cursor halo and cleanup, in one menu.",
-   "identifier": "toolbar-action-focusMenu",
-   "role": "AXMenuButton",
-   "value": "Off"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    858,
-    47,
-    6.5,
-    4
-   ],
-   "help": "Zoom menu. Pointer lens, screen zoom and zoom levels, in one menu.",
-   "identifier": "toolbar-action-zoomMenu",
-   "role": "AXMenuButton",
+   "title": "Zoom menu",
    "value": "Off"
   },
   {

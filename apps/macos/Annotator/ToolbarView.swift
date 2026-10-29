@@ -566,7 +566,7 @@ struct ToolbarView: View {
         let on = model.isOn(action)
         let radius: CGFloat = metrics.minimal ? 8 : 10
         return Menu {
-            if action == .focusMenu { focusMenuItems } else { zoomMenuItems }
+            menuItems(action)
         } label: {
             VStack(spacing: 2) {
                 Image(systemName: action.symbol)
@@ -586,9 +586,18 @@ struct ToolbarView: View {
         // The button menu style draws the whole label; the borderless one keeps only its first image.
         .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).fixedSize()
         .help("\(action.label). \(action.detail)")
-        .accessibilityLabel(action.label)
+        // The button menu style gives VoiceOver an unnamed menu button for each image. A borderless menu with the same
+        // items stands in for it: one menu button over the whole cell, named like the other toolbar buttons.
+        .accessibilityRepresentation {
+            Menu(action.label) { menuItems(action) }.menuStyle(.borderlessButton)
+        }
         .accessibilityValue(on ? "On" : "Off")
+        .accessibilityHint(action.detail)
         .accessibilityIdentifier("toolbar-action-\(action.rawValue)")
+    }
+
+    @ViewBuilder private func menuItems(_ action: ShortcutAction) -> some View {
+        if action == .focusMenu { focusMenuItems } else { zoomMenuItems }
     }
 
     /// Effects light up for any effect, unless that effect has its own button.

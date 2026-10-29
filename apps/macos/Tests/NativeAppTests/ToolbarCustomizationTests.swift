@@ -25,6 +25,8 @@ final class ToolbarCustomizationTests: XCTestCase {
     /// Shows the toolbar in a panel, lets it settle and returns the panel and its hosting view.
     private func show(_ model: WorkspaceModel, available: CGSize = CGSize(width: 1400, height: 900),
                       dark: Bool = false) async throws -> (NSPanel, NSHostingView<ToolbarView>) {
+        // SwiftUI builds its accessibility tree only once accessibility is on, so switch it on before the toolbar exists.
+        enableAccessibility()
         let host = NSHostingView(rootView: ToolbarView(model: model, availableSize: available))
         host.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
         let panel = NSPanel(contentRect: CGRect(x: 80, y: 260, width: 1400, height: 400),
@@ -54,21 +56,32 @@ final class ToolbarCustomizationTests: XCTestCase {
         panel.close()
     }
 
-    private func nodes(_ host: NSView) -> [NativeAccessibilityNode] {
+    /// Switches accessibility on once: setting it again while a toolbar shows can make SwiftUI rebuild its tree, so a
+    /// button found a moment before may no longer take a press.
+    private static var accessibilityOn = false
+
+    private func enableAccessibility() {
+        guard !Self.accessibilityOn else { return }
         NativeAccessibilityNode.enable()
+        Self.accessibilityOn = true
+    }
+
+    private func nodes(_ host: NSView) -> [NativeAccessibilityNode] {
+        enableAccessibility()
         return NativeAccessibilityNode.nodes(in: host)
     }
 
     private func press(_ label: String, in host: NSView, file: StaticString = #filePath, line: UInt = #line) async throws {
-        // The accessibility tree can trail a new layout by a frame or two, so wait for the button.
+        // The accessibility tree can trail a new layout, so wait for the button.
         var node = nodes(host).first { $0.accessibilityRole() == .button && $0.accessibilityLabel() == label }
-        for _ in 0..<25 where node == nil {
+        for _ in 0..<75 where node == nil {
             try await Task.sleep(for: .milliseconds(20))
             node = nodes(host).first { $0.accessibilityRole() == .button && $0.accessibilityLabel() == label }
         }
         let button = try XCTUnwrap(node, "No \(label) button", file: file, line: line)
         XCTAssertTrue(button.accessibilityPerformPress(), file: file, line: line)
-        try await Task.sleep(for: .milliseconds(40))
+        // A cycle button's new face slides in (Motion.snappy); let it finish before the next look at the tree.
+        try await Task.sleep(for: .milliseconds(450))
     }
 
     private func save(_ host: NSView, name: String, dark: Bool) throws {
@@ -350,8 +363,20 @@ final class ToolbarCustomizationTests: XCTestCase {
                 let name = "\(size) \(orientation)"
                 let rectangle = try XCTUnwrap(all.first { $0.accessibilityLabel() == "Rectangle" }, name).accessibilityFrame()
                 let ellipse = try XCTUnwrap(all.first { $0.accessibilityLabel() == "Ellipse" }, name).accessibilityFrame()
+                for (id, label) in zip(menuIDs, ["Spotlight menu", "Zoom menu"]) {
+                    // VoiceOver finds one menu button per menu, with its name, as on Windows.
+                    let elements = all.filter { $0.accessibilityIdentifier() == id }
+                    XCTAssertEqual(elements.count, 1, "\(name): \(label) is one element")
+                    XCTAssertEqual(elements.first?.accessibilityRole(), .menuButton, name)
+                    XCTAssertEqual(elements.first?.accessibilityLabel(), label, name)
+                    XCTAssertEqual(elements.first?.accessibilityValue() as? String, "Off", name)
+                    XCTAssertFalse((elements.first?.accessibilityHelp() ?? "").isEmpty, "\(name): \(label) says what it holds")
+                }
                 let focus = try XCTUnwrap(all.first { $0.accessibilityIdentifier() == menuIDs[0] }, name).accessibilityFrame()
                 let zoom = try XCTUnwrap(all.first { $0.accessibilityIdentifier() == menuIDs[1] }, name).accessibilityFrame()
+                // The menu covers the whole cell, like a tool button.
+                XCTAssertEqual(focus.width, ToolbarMetrics(size).buttonWidth, accuracy: 1, name)
+                XCTAssertEqual(focus.height, ToolbarMetrics(size).buttonHeight, accuracy: 1, name)
                 // Neighbouring menus sit one tool apart, like neighbouring tools, so each one takes a tool's room.
                 if orientation == .horizontal {
                     XCTAssertEqual(zoom.midX - focus.midX, ellipse.midX - rectangle.midX, accuracy: 1, name)
