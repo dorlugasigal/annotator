@@ -1,3 +1,4 @@
+using Annotator.App.Shell;
 using Annotator.Workspace;
 using Annotator.Workspace.Toolbar;
 using Microsoft.UI.Xaml;
@@ -8,8 +9,9 @@ namespace Annotator.App.Toolbar;
 /// <summary>
 /// The toolbar that shrinks to one button (Mac ToolbarCollapseController and the app delegate's collapse wiring): once
 /// the pointer has been off the toolbar for the delay chosen in Settings, it becomes the Annotator capsule; pointing at
-/// the capsule or clicking it opens the toolbar again at once. Open menus and flyouts, a drag and typing keep it open.
-/// The change fades the new face in; the Mac's frame morph (Core ToolbarMorph) is not ported yet.
+/// the capsule or clicking it opens the toolbar again at once. Open menus and flyouts, a drag, typing, the tutorial card,
+/// the Tools window under the pointer, an arrow being built and a pending zoom keep it open. The change fades the new
+/// face in; the Mac also animates the window's frame (Core ToolbarMorph), which WinUI can't do smoothly (DV-12).
 /// </summary>
 internal sealed partial class ToolbarWindow
 {
@@ -90,15 +92,31 @@ internal sealed partial class ToolbarWindow
         }
     }
 
-    /// <summary>Mac toolbarMustStayOpen: an open menu, flyout or popover, a drag of the toolbar, or typing in a field.</summary>
+    /// <summary>
+    /// Mac toolbarMustStayOpen: an open menu, flyout or popover, a drag of the toolbar, typing in a field, the pointer on the
+    /// toolbar, a pending zoom, or what <see cref="HoldsOpen"/> reports (the tutorial card, the Tools window under the
+    /// pointer, an arrow being built).
+    /// </summary>
     private bool ToolbarMustStayOpen()
     {
         if (_docking.IsTracking || !_typingReturn.IsNull)
         {
             return true;
         }
+        if (WindowChrome.TryCursor() is { } pointer && Frame is var frame
+            && pointer.X >= frame.X && pointer.X < frame.X + frame.Width && pointer.Y >= frame.Y && pointer.Y < frame.Y + frame.Height)
+        {
+            return true;
+        }
+        if (PendingZoomPresentation.For((_view ?? _model.Snapshot).ZoomStart) is not null || HoldsOpen?.Invoke() == true)
+        {
+            return true;
+        }
         return _root.XamlRoot is { } root && VisualTreeHelper.GetOpenPopupsForXamlRoot(root).Count > 0;
     }
+
+    /// <summary>What else keeps the toolbar from shrinking, from the app (Mac toolbarMustStayOpen).</summary>
+    public Func<bool>? HoldsOpen { get; init; }
 
     /// <summary>The new face fades in after the toolbar shrinks or opens (Reduce Motion keeps the short fade).</summary>
     private void RevealMorph()

@@ -214,7 +214,7 @@ internal sealed class ShrinkDemo
         /// <summary>The Windows arrow pointer, small, with its tip at the canvas position.</summary>
         private static Microsoft.UI.Xaml.Shapes.Path Pointer() => new()
         {
-            Data = Glyphs.Geometry("M0.5,0.5 L0.5,14.5 L4,11 L6.5,16.5 L8.5,15.5 L6,10.5 L10.5,10.5 Z"),
+            Data = Glyphs.Geometry("M 0.5,0.5 L 0.5,14.5 L 4,11 L 6.5,16.5 L 8.5,15.5 L 6,10.5 L 10.5,10.5 Z"),
             Fill = new SolidColorBrush(Colors.White),
             Stroke = new SolidColorBrush(Colors.Black),
             StrokeThickness = 1,

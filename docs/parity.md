@@ -393,7 +393,8 @@ platform that departs from the specifications, unless an ADR changes them.
   turned off in Settings without leaving a gap. Properties are shown or
   hidden, and stay on one row: the toolbar grows sideways to fit them. After
   the delay chosen in Settings, the toolbar shrinks to one capsule with the
-  mark and Draw or Apps (Core `ToolbarMorph` timings); pointing at it opens it
+  mark and Draw or Apps (Core `ToolbarMorph` timings for the faces; the
+  window resizes at once, DV-12); pointing at it opens it
   at once, and Settings plays a short demo of it. Focus rings appear only
   during keyboard navigation. Pick from screen replaces the Mac's system color
   sampler with a magnifier loupe that follows the pointer; a click reads only
@@ -740,6 +741,19 @@ These need owner approval before Windows release.
   Mac says the update is ready to install, and the automatic check's question
   offers Open Downloads page..., Copy winget command and Not now instead of
   Sparkle's install window. A Store copy keeps the Store's install.
+- **DV-12 Toolbar frame motion**: when the toolbar shrinks to one button or
+  opens again, the Mac animates the window's frame between the two sizes
+  (Core `ToolbarMorph`, 0.3 s and 0.34 s) and cross-fades the faces; when the
+  properties row needs more room, it widens the window over 0.22 s
+  (`MotionTiming.ToolbarResizeDuration`). A WinUI window lays its content out
+  a frame after each resize, so a frame-by-frame resize flickers and cuts the
+  buttons off. Windows resizes the toolbar window at once and fades the new
+  face or properties in (Motion.fadeIn, or Motion.reduced with Animation
+  effects off).
+- **DV-13 Off-screen frames**: while the properties row scrolls sideways on a
+  narrow screen, UI Automation gives no frame to the properties scrolled out
+  of view (they report IsOffscreen), where the Mac's accessibility tree keeps
+  their frames. Their names, values and order match.
 
 ## Owner decisions
 

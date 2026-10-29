@@ -33,28 +33,30 @@ internal partial class ReadingOrderGrid : Grid
 
         protected override bool IsContentElementCore() => false;
 
-        protected override IList<AutomationPeer> GetChildrenCore()
+        protected override IList<AutomationPeer> GetChildrenCore() => Sort(base.GetChildrenCore());
+    }
+
+    /// <summary>Puts automation peers in SwiftUI's reading order (<see cref="Compare"/>), keeping equal frames in order.</summary>
+    public static AutomationPeerList Sort(IList<AutomationPeer>? children)
+    {
+        var sorted = new AutomationPeerList();
+        if (children is null)
         {
-            IList<AutomationPeer>? children = base.GetChildrenCore();
-            var sorted = new AutomationPeerList();
-            if (children is null)
-            {
-                return sorted;
-            }
-            var frames = new List<WinRect>(children.Count);
-            foreach (AutomationPeer child in children)
-            {
-                WinRect frame = child.GetBoundingRectangle();
-                // A stable insertion sort: equal frames keep the layout's order.
-                int index = sorted.Count;
-                while (index > 0 && Compare(frame, frames[index - 1]) < 0)
-                {
-                    index--;
-                }
-                sorted.Insert(index, child);
-                frames.Insert(index, frame);
-            }
             return sorted;
         }
+        var frames = new List<WinRect>(children.Count);
+        foreach (AutomationPeer child in children)
+        {
+            WinRect frame = child.GetBoundingRectangle();
+            // A stable insertion sort: equal frames keep the layout's order.
+            int index = sorted.Count;
+            while (index > 0 && Compare(frame, frames[index - 1]) < 0)
+            {
+                index--;
+            }
+            sorted.Insert(index, child);
+            frames.Insert(index, frame);
+        }
+        return sorted;
     }
 }

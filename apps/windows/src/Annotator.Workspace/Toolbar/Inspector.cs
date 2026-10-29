@@ -253,6 +253,9 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
     /// <summary>Mac CycleOptions' help: "Pattern: Solid. Click for dashed."</summary>
     public static string CycleHelp(string name, string current, string next) => $"{name}: {current}. Click for {next.ToLowerInvariant()}.";
 
+    /// <summary>Mac CycleOptions' accessibilityHint, which screen readers read instead of the tooltip: "Changes to dashed".</summary>
+    public static string CycleHint(string next) => $"Changes to {next.ToLowerInvariant()}";
+
     /// <summary>The corner radius the Rounded corners switch sets.</summary>
     public const double RoundedCornerRadius = 14;
 

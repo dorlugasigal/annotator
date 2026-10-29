@@ -734,7 +734,11 @@ internal sealed class DrawingCanvas : IOverlayCanvas
         CursorHandle = 0;
     }
 
-    private void OnChanged(CanvasChange change) => RequestRender();
+    private void OnChanged(CanvasChange change)
+    {
+        _factory.NoteArrow(this, _controller.ConstructingArrow);
+        RequestRender();
+    }
 
     /// <summary>
     /// Draws what changed now, or once at the end of the input the text editor is handling, or after an input method's edit

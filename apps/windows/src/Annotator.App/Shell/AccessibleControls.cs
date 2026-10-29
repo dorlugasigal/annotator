@@ -61,6 +61,9 @@ internal sealed partial class ParityButton : Button
     /// <summary>The visible content whose frame UI Automation reports, or null for the whole button.</summary>
     public FrameworkElement? BoundsElement { get; set; }
 
+    /// <summary>UI Automation reads the button as one element, as SwiftUI reads a button whose label is a picture and words.</summary>
+    public bool HidesChildren { get; init; }
+
     protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
 
     private sealed partial class Peer(ParityButton owner) : ButtonAutomationPeer(owner), IValueProvider, ISelectionItemProvider
@@ -98,6 +101,8 @@ internal sealed partial class ParityButton : Button
 
         protected override WinRect GetBoundingRectangleCore() =>
             AutomationFrames.Of(owner.BoundsElement is { IsLoaded: true } content ? content : owner, base.GetBoundingRectangleCore());
+
+        protected override IList<AutomationPeer> GetChildrenCore() => owner.HidesChildren ? new AutomationPeerList() : base.GetChildrenCore();
     }
 }
 

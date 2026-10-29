@@ -6,6 +6,7 @@ using Annotator.Workspace.Toolbar;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -19,8 +20,8 @@ namespace Annotator.App.Settings;
 /// Port of the Mac ArrangerControlTile: one of the toolbar's own buttons in the arranger. In the strip it is drawn small,
 /// as on the toolbar (Undo, Redo, Clear all, Properties, Settings and Hide as icons, More tools with its key, Board and
 /// Draw as their buttons), with a red minus on hover that takes it off. In "More tools" it is a tile with its name and a
-/// green plus that puts it back. Its key, if it has one, stays in "Keys for toolbar buttons". Dragging these buttons is
-/// not ported yet; their badges, context menu and keys work.
+/// green plus that puts it back. Its key, if it has one, stays in "Keys for toolbar buttons". Dragging it out of Your
+/// toolbar takes it off, and dragging it in puts it back at its own place (ToolbarArrangerView).
 /// </summary>
 internal sealed partial class ArrangerControlTile : UserControl
 {
@@ -47,13 +48,26 @@ internal sealed partial class ArrangerControlTile : UserControl
         _focus = new Border { CornerRadius = new CornerRadius(radius), BorderThickness = new Thickness(2), Opacity = 0, IsHitTestVisible = false };
         if (inToolbar)
         {
-            (Width, Height) = control switch
+            (double width, double height) = control switch
             {
                 ToolbarControl.Library => (metrics.ButtonWidth, metrics.ButtonHeight),
                 ToolbarControl.Board => (metrics.BoardWidth, metrics.ButtonHeight),
                 ToolbarControl.Mode => (metrics.ModeWidth, metrics.ButtonHeight),
                 _ => (metrics.ActionSize.Width, metrics.ActionSize.Height),
             };
+            // Larger Windows text makes the button grow instead of cutting its words off (WIN-A11Y-03).
+            if (SettingsText.Scaled)
+            {
+                (MinWidth, MinHeight) = (width, height);
+            }
+            else
+            {
+                (Width, Height) = (width, height);
+            }
+        }
+        else if (SettingsText.Scaled)
+        {
+            (MinWidth, MinHeight) = (78, 84);
         }
         else
         {
@@ -69,9 +83,7 @@ internal sealed partial class ArrangerControlTile : UserControl
         ShowFill();
         AutomationProperties.SetName(this, control.Label);
         AutomationProperties.SetAutomationId(this, ToolbarArranger.ControlIdentifier(control, inToolbar));
-        AutomationProperties.SetHelpText(this, inToolbar
-            ? "It keeps its place in your toolbar. Use the Remove from toolbar action to take it off."
-            : ToolbarArranger.TrayHintText);
+        AutomationProperties.SetHelpText(this, inToolbar ? ToolbarArranger.ControlHelp(control) : ToolbarArranger.TrayHintText);
         AutomationProperties.SetItemStatus(this, inToolbar ? "In your toolbar" : ToolbarArranger.TrayValue);
         ToolTipService.SetToolTip(this, inToolbar ? ToolbarArranger.ControlHelp(control) : ToolbarArranger.ControlTrayHelp(control));
         var menu = new MenuFlyout();
@@ -87,6 +99,25 @@ internal sealed partial class ArrangerControlTile : UserControl
     public ToolbarControl Control { get; }
 
     public bool InToolbar { get; }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
+
+    /// <summary>
+    /// In the strip, one element without children (the Mac's AXUnknown); in More tools, a group with its name, as the
+    /// other tiles there.
+    /// </summary>
+    private sealed partial class Peer(ArrangerControlTile owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override AutomationControlType GetAutomationControlTypeCore() =>
+            owner.InToolbar ? AutomationControlType.Custom : AutomationControlType.Group;
+
+        protected override string GetClassNameCore() => owner.InToolbar ? "Grid" : "Group";
+
+        protected override bool IsControlElementCore() => true;
+
+        protected override IList<AutomationPeer> GetChildrenCore() =>
+            owner.InToolbar ? new AutomationPeerList() : base.GetChildrenCore() ?? new AutomationPeerList();
+    }
 
     /// <summary>The control as the toolbar draws it (Mac ArrangerControlTile.face).</summary>
     private static FrameworkElement Face(ToolbarControl control, ToolbarMetrics metrics, string? libraryKey)
@@ -106,7 +137,8 @@ internal sealed partial class ArrangerControlTile : UserControl
                 stack.Children.Add(Centered(Glyphs.ForSymbol(control.Symbol, metrics.Minimal ? 16 : 19), metrics.Minimal ? 20 : 24));
                 if (metrics.ShowsKeyLabels)
                 {
-                    TextBlock key = SettingsText.Static(libraryKey ?? " ", 10, "AnnotatorSecondaryText");
+                    // As the toolbar's own Tool library button draws its key (ToolbarWindow.Stacked).
+                    TextBlock key = Annotator.App.Toolbar.ToolbarParts.Label(libraryKey ?? " ", 10, "AnnotatorSecondaryText");
                     key.HorizontalAlignment = HorizontalAlignment.Center;
                     stack.Children.Add(key);
                 }

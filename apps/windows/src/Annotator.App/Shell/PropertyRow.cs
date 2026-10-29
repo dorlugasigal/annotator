@@ -1,5 +1,6 @@
 using Annotator.Workspace.Toolbar;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Foundation;
 
@@ -23,6 +24,9 @@ internal sealed partial class PropertyRow : Panel, IExactSize
     private Rect[] _frames = [];
 
     public double Spacing { get; init; } = PropertyLayout.Spacing;
+
+    /// <summary>UI Automation reads the items by rows, titles before controls, as SwiftUI does inside a ScrollView.</summary>
+    public bool ReadsByRows { get; set; }
 
     /// <summary>The middle of the row's controls from its top, after measuring.</summary>
     public double Middle { get; private set; }
@@ -69,6 +73,8 @@ internal sealed partial class PropertyRow : Panel, IExactSize
         return size;
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
+
     protected override Size ArrangeOverride(Size finalSize)
     {
         double scale = XamlRoot?.RasterizationScale ?? 1;
@@ -85,5 +91,40 @@ internal sealed partial class PropertyRow : Panel, IExactSize
             MacStack.ArrangeExact(child, frame.X + residual.X, frame.Y + residual.Y, frame.Width, frame.Height, margin, scale);
         }
         return finalSize;
+    }
+
+    /// <summary>
+    /// Not an element itself: UI Automation reads the row's items in order, each block's title before its control, as
+    /// SwiftUI reads an HStack. Without it, <see cref="ReadingOrderGrid"/> would sort every title above every control.
+    /// Inside a ScrollView SwiftUI reads by rows instead (<see cref="ReadsByRows"/>).
+    /// </summary>
+    private sealed partial class Peer(PropertyRow owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override bool IsControlElementCore() => false;
+
+        protected override bool IsContentElementCore() => false;
+
+        protected override IList<AutomationPeer> GetChildrenCore() =>
+            owner.ReadsByRows ? ReadingOrderGrid.Sort(Flattened(this)) : base.GetChildrenCore();
+
+        /// <summary>The children, with nested rows' items in their place: SwiftUI sorts all of them together.</summary>
+        private static AutomationPeerList Flattened(Peer peer)
+        {
+            var items = new AutomationPeerList();
+            foreach (AutomationPeer child in peer.BaseChildren() ?? [])
+            {
+                if (child is Peer nested)
+                {
+                    items.AddRange(Flattened(nested));
+                }
+                else
+                {
+                    items.Add(child);
+                }
+            }
+            return items;
+        }
+
+        private IList<AutomationPeer>? BaseChildren() => base.GetChildrenCore();
     }
 }

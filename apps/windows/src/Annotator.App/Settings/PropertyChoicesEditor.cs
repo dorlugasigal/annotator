@@ -22,9 +22,11 @@ namespace Annotator.App.Settings;
 /// </summary>
 internal sealed class PropertyChoicesEditor
 {
+    private const double OptionHeight = 75;
     private readonly WorkspaceModel _model;
     private readonly HyperlinkButton _reset;
     private readonly Dictionary<(PropertyChoice Choice, bool All), (Border Ring, TextBlock Caption, FrameworkElement Check, ParityButton Button)> _options = [];
+    private readonly Dictionary<PropertyChoice, Grid> _cards = [];
     private readonly SolidColorBrush _ink = new(PropertiesInk.Color());
 
     public PropertyChoicesEditor(WorkspaceModel model)
@@ -85,12 +87,37 @@ internal sealed class PropertyChoicesEditor
             check.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
             button.AccessibleSelected = selected;
             button.AccessibleValue = selected ? "Selected" : string.Empty;
+            if (!SettingsText.Scaled)
+            {
+                button.Width = OptionWidth(choice, all, selected);
+            }
+        }
+        if (!SettingsText.Scaled)
+        {
+            foreach ((PropertyChoice choice, Grid card) in _cards)
+            {
+                bool all = preferences.ShowsAllChoices(choice);
+                card.Width = 10 + OptionWidth(choice, false, !all) + 8 + OptionWidth(choice, true, all) + 10;
+            }
         }
     }
+
+    /// <summary>
+    /// An option's width on the Mac, set exactly so the cards line up with the Mac's: all choices are 36-point buttons 5 apart
+    /// with 8 points of padding on each side; one button is the 52-point preview with its padding, or SF Pro's semibold
+    /// "One button" and the check mark (72.5 points, D-4) while it's chosen.
+    /// </summary>
+    private static double OptionWidth(PropertyChoice choice, bool all, bool selected) =>
+        all ? 16 + choice.ChoiceCount * 36 + (choice.ChoiceCount - 1) * 5 : selected ? 72.5 : 68;
 
     private FrameworkElement Card(PropertyChoice choice)
     {
         var card = new Grid { CornerRadius = new CornerRadius(12), Background = SettingsColors.Primary(0.03), Padding = new Thickness(10) };
+        if (!SettingsText.Scaled)
+        {
+            // 10 points of padding, the 15-point title, 8 points and the options, so the next line starts where the Mac's does.
+            card.Height = 10 + 15 + 8 + OptionHeight + 10;
+        }
         card.Children.Add(new Border
         {
             CornerRadius = new CornerRadius(12),
@@ -100,17 +127,28 @@ internal sealed class PropertyChoicesEditor
             IsHitTestVisible = false,
         });
         var stack = new MacStack { Orientation = Orientation.Vertical, Spacing = 8 };
-        var label = new MacStack { Orientation = Orientation.Horizontal, Spacing = 5 };
+        // SwiftUI's Label: UI Automation reads the symbol and the words as one static text.
+        var title = new AccessibleElement(AutomationControlType.Text) { InSettings = true, HorizontalAlignment = HorizontalAlignment.Left };
+        if (!SettingsText.Scaled)
+        {
+            title.Height = 15;
+        }
+        AutomationProperties.SetName(title, choice.Label);
+        var label = new MacStack { Orientation = Orientation.Horizontal, Spacing = 5, VerticalAlignment = VerticalAlignment.Center };
         FrameworkElement icon = Glyphs.ForSymbol(Symbol(choice), 12);
         icon.VerticalAlignment = VerticalAlignment.Center;
         label.Children.Add(icon);
-        label.Children.Add(SettingsText.Static(choice.Label, 12, "AnnotatorPrimaryText", FontWeights.SemiBold));
-        stack.Children.Add(label);
+        TextBlock words = SettingsText.Static(choice.Label, 12, "AnnotatorPrimaryText", FontWeights.SemiBold);
+        words.VerticalAlignment = VerticalAlignment.Center;
+        label.Children.Add(words);
+        title.Children.Add(label);
+        stack.Children.Add(title);
         var options = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8 };
         options.Children.Add(Option(choice, all: false));
         options.Children.Add(Option(choice, all: true));
         stack.Children.Add(options);
         card.Children.Add(stack);
+        _cards[choice] = card;
         var group = new AccessibleGroup(choice.Label, $"property-choice-{choice.RawValue}");
         group.Children.Add(card);
         return group;
@@ -119,18 +157,19 @@ internal sealed class PropertyChoicesEditor
     private FrameworkElement Option(PropertyChoice choice, bool all)
     {
         string names = List(choice.Choices);
-        var preview = new Grid { MinWidth = 52, MinHeight = 44, Padding = new Thickness(8, 6, 8, 6), IsHitTestVisible = false };
+        // frame(minWidth: 52, minHeight: 44), then 8 and 6 points of padding around the background and ring.
+        var preview = new Grid { Padding = new Thickness(8, 6, 8, 6), IsHitTestVisible = false };
         preview.Children.Add(new Border { CornerRadius = new CornerRadius(10), Background = SettingsColors.Window, Margin = new Thickness(-8, -6, -8, -6) });
         var ring = new Border { CornerRadius = new CornerRadius(10), Margin = new Thickness(-8, -6, -8, -6) };
         FrameworkElement face = Preview(choice, all);
         face.HorizontalAlignment = HorizontalAlignment.Center;
         face.VerticalAlignment = VerticalAlignment.Center;
-        preview.Children.Add(face);
+        preview.Children.Add(new Grid { MinWidth = 52, MinHeight = 44, Children = { face } });
         preview.Children.Add(ring);
-        AutomationProperties.SetAccessibilityView(preview, AccessibilityView.Raw);
-        TextBlock caption = SettingsText.Static(all ? "All choices" : "One button", 11, "AnnotatorSecondaryText");
+        // The Mac's .caption: 10 points.
+        TextBlock caption = SettingsText.Static(all ? "All choices" : "One button", 10, "AnnotatorSecondaryText");
         caption.VerticalAlignment = VerticalAlignment.Center;
-        FrameworkElement check = Glyphs.ForSymbol("checkmark.circle.fill", 11, "AnnotatorGlyphAccent");
+        FrameworkElement check = Glyphs.ForSymbol("checkmark.circle.fill", 10, "AnnotatorGlyphAccent");
         check.VerticalAlignment = VerticalAlignment.Center;
         check.Visibility = Visibility.Collapsed;
         var captionRow = new MacStack { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center };
@@ -144,10 +183,18 @@ internal sealed class PropertyChoicesEditor
             Style = AppResources.Style("AnnotatorPlainButton"),
             Content = content,
             Padding = new Thickness(0),
+            HidesChildren = true,
         };
+        if (!SettingsText.Scaled)
+        {
+            // The preview (44 and 12 points of padding), 6 points, and one 13-point caption line, as on the Mac.
+            button.Height = OptionHeight;
+        }
+        string help = all ? $"{names}, side by side." : $"One button. Click it to go to the next choice: {names}.";
         AutomationProperties.SetName(button, $"{choice.Label}: {(all ? "all choices" : "one button")}");
         AutomationProperties.SetAutomationId(button, $"property-choice-{choice.RawValue}-{(all ? "all" : "one")}");
-        ToolTipService.SetToolTip(button, all ? $"{names}, side by side." : $"One button. Click it to go to the next choice: {names}.");
+        AutomationProperties.SetHelpText(button, help);
+        ToolTipService.SetToolTip(button, help);
         button.Click += (_, _) => _model.SetShowsAllChoices(choice, all);
         _options[(choice, all)] = (ring, caption, check, button);
         return button;

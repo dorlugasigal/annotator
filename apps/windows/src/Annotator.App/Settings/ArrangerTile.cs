@@ -51,6 +51,7 @@ internal sealed partial class ArrangerTile : UserControl
     private readonly Grid _placeholder = new() { Visibility = Visibility.Collapsed, IsHitTestVisible = false };
     private readonly Canvas _badgeLayer = new() { HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top, Width = 0, Height = 0 };
     private FrameworkElement? _badge;
+    private readonly AccessibleElement? _menuName;
     private bool _hovering;
     private bool _placeholderShown;
 
@@ -105,6 +106,16 @@ internal sealed partial class ArrangerTile : UserControl
                 chevron.HorizontalAlignment = HorizontalAlignment.Center;
                 _content.Children.Add(chevron);
             }
+            if (!inToolbar)
+            {
+                // With no key below it, SwiftUI reports the tile's name over the whole tile.
+                foreach (TextBlock words in _content.Children.OfType<Grid>().SelectMany(area => area.Children.OfType<TextBlock>()))
+                {
+                    AutomationProperties.SetAccessibilityView(words, AccessibilityView.Raw);
+                }
+                _menuName = new AccessibleElement(AutomationControlType.Text) { InSettings = true, IsHitTestVisible = false };
+                AutomationProperties.SetName(_menuName, item.Label);
+            }
         }
         else
         {
@@ -128,6 +139,10 @@ internal sealed partial class ArrangerTile : UserControl
         centered.Children.Add(_content);
         centered.Children.Add(new MacSpacer());
         _root.Children.Add(centered);
+        if (_menuName is not null)
+        {
+            _root.Children.Add(_menuName);
+        }
         _root.Children.Add(_focus);
         _root.Children.Add(_placeholder);
         _root.Children.Add(_badgeLayer);

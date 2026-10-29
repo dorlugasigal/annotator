@@ -213,6 +213,7 @@ internal sealed partial class AppHost
             ArrowHeads = OpenArrowHeads,
             ToolLibrary = () => OpenToolLibrary(null),
             Settings = () => OpenSettings(SettingsTab.General),
+            HoldsOpen = () => _tutorial is { IsVisible: true } || _canvases.ConstructingArrow || ToolsUnderPointer(),
         };
         canvases.ToolbarWindow = (nint)_toolbar.Hwnd;
         // Open board, Save board, Export PNG and Insert image (WIN-SYS-04): dialogs over the toolbar, file work off the app thread.
@@ -731,6 +732,18 @@ internal sealed partial class AppHost
         _tools ??= new ToolsWindow(_registry, _model, _library, _thumbnails,
             () => _model.Snapshot.ToolbarVisible ? _toolbar.Frame : null, TrayFocusTarget, OpenSettings, _files);
         _tools.Show(section);
+    }
+
+    /// <summary>Mac toolbarMustStayOpen: the Tools window is open and the pointer is on it.</summary>
+    private bool ToolsUnderPointer()
+    {
+        if (_tools is not { IsShown: true } tools || WindowChrome.TryCursor() is not { } pointer)
+        {
+            return false;
+        }
+        PointInt32 origin = tools.AppWindow.Position;
+        SizeInt32 size = tools.AppWindow.Size;
+        return pointer.X >= origin.X && pointer.X < origin.X + size.Width && pointer.Y >= origin.Y && pointer.Y < origin.Y + size.Height;
     }
 
     /// <summary>

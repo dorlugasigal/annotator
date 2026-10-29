@@ -42,7 +42,8 @@ internal static class PropertyMetrics
         "Smart Draw" => (1, 83.5),
         "Start" => (1.5, 47),
         "End" => (1.5, 40.5),
-        "Arrow type" => (1.5, 77),
+        "Arrow type" => (1.5, 79),
+        "Curved" => (1.5, 59),
         "Head size" => (1.5, 73),
         "Font" => (1.5, 47),
         "Size" => (1.5, 45.5),
@@ -78,6 +79,9 @@ internal static class PropertyMetrics
         (InspectorPlan.CounterCaption, 10) => 206.5,
         (InspectorPlan.RulerCaption, 10) => 223.5,
         (InspectorPlan.CoverCaption, 10) => 483,
+        ("Editing Rectangle", 11) => 99.5,
+        ("Editing Diamond", 11) => 93.5,
+        ("Editing 2 selected objects", 11) => 145,
         _ => 0,
     };
 
@@ -138,7 +142,11 @@ internal sealed partial class AccessibleText : Grid
 /// (<see cref="ReadingOrderGrid"/>): by rows from top to bottom, and from left to right within a row. Groups such as
 /// "Arrow properties" keep their own order inside.
 /// </summary>
-internal sealed partial class PropertiesRoot : ReadingOrderGrid;
+internal sealed partial class PropertiesRoot : ReadingOrderGrid
+{
+    /// <summary>The one row below a horizontal toolbar; null for the column beside a vertical one.</summary>
+    public PropertyRow? Row { get; set; }
+}
 
 /// <summary>
 /// Draws a property sample's display list (<see cref="InspectorSample"/>) with XAML shapes in the theme's ink: the

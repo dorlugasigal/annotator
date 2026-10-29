@@ -49,7 +49,8 @@
   - Shift: a line and an arrow snap to 45 degrees, a rectangle becomes a square and a highlighter stroke is straight;
   - Toolbar & Shortcuts (spec 005, ADR 0012), on its tab in the Settings window: J becomes Pen's key, 1 moves from Select
     to Pen and Undo gives it back, and Delete removes a key; dragging Highlighter to More tools takes it out of the
-    toolbar, and Reset brings the default tools and keys back; Show / hide records
+    toolbar, and Reset brings the default tools and keys back; Enter on their More tools tiles puts the Spotlight and
+    Zoom menus back; Show / hide records
     Ctrl+Alt+Shift+9 (held by the check's own registrar until it quits) and recording Draw then refuses it through the
     recording gate; the canvas uses the new key. The check never presses a default global shortcut;
   - on-screen tip (spec 009): right after Resume drawing wakes it, the canvas reads the tip as static text
@@ -1351,7 +1352,12 @@ try {
         # Dragging Highlighter down to More tools takes it out of the toolbar; Reset puts the default tools and keys back.
         ScrollPage 0
         $tile = ById $page 'toolbar-tool-highlighter'
-        $tray = Find 'More tools' $page
+        # The tray group, not the More tools button in the strip (toolbar-control-library) nor the tray's heading.
+        $tray = ([Windows.Automation.AutomationElement]::FromHandle($page)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+            [Windows.Automation.AndCondition]::new(
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, 'More tools'),
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::Group),
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::AutomationIdProperty, '')))
         if ($null -ne $tile -and $null -ne $tray) {
             $from = Center $tile
             $r = $tray.Current.BoundingRectangle
@@ -1365,6 +1371,64 @@ try {
         Check 'reset-default-tools' (WaitFor { $null -ne (ById $page 'toolbar-tool-highlighter') -and $null -ne (Find 'Highlighter') }) "in the strip: $($null -ne (ById $page 'toolbar-tool-highlighter')); toolbar button: $($null -ne (Find 'Highlighter'))"
         ChooseReset 'Default keys for tools and buttons'
         Check 'reset-default-keys' (WaitFor { (KeyValue 'Pen key') -eq '7' }) "Pen key '$(KeyValue 'Pen key')'"
+        # The default tools leave the Spotlight and Zoom menus in More tools; Enter on their tiles puts them back for the
+        # steps below that use them.
+        foreach ($menu in 'more-action-focusMenu', 'more-action-zoomMenu') {
+            $menuTile = ById $page $menu
+            if ($null -ne $menuTile) {
+                $menuTile.SetFocus()
+                Note "Enter on ${menu}: $([LiveInput]::Tap(0x0D, $appPid))"
+            }
+        }
+        Check 'menus-added-back' (WaitFor { $null -ne (Find 'Spotlight menu') -and $null -ne (Find 'Zoom menu') }) "Spotlight menu $($null -ne (Find 'Spotlight menu')); Zoom menu $($null -ne (Find 'Zoom menu'))"
+
+        # Shrink (Mac toolbarCollapseDelay): with After 3 seconds, the toolbar becomes one button once the pointer has been
+        # off it that long, and pointing at the button opens it at once. Never turns it off again.
+        function ChooseShrink([string]$item) {
+            $popUp = $null
+            $scroller = ([Windows.Automation.AutomationElement]::FromHandle($page)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+                ([Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::IsScrollPatternAvailableProperty, $true)))
+            foreach ($percent in (0..20 | ForEach-Object { $_ * 5 })) {
+                ScrollPage $percent
+                $popUp = Typed 'Shrink' ([Windows.Automation.ControlType]::ComboBox) $page
+                if ((Placed $popUp) -and $null -ne $scroller) {
+                    $c = Center $popUp
+                    $view = $scroller.Current.BoundingRectangle
+                    if ($c[1] -gt $view.Top + 20 -and $c[1] -lt $view.Bottom - 20 -and [LiveInput]::TopLevelAt($c[0], $c[1]) -eq $page) { break }
+                }
+                $popUp = $null
+            }
+            if ($null -eq $popUp) { Note "the Shrink pop-up is not on screen"; return }
+            Note "click Shrink: $(ClickTyped 'Shrink' ([Windows.Automation.ControlType]::ComboBox) $page)"
+            if (WaitFor { Placed (MenuItem $item) }) {
+                $c = Center (MenuItem $item)
+                $target = [LiveInput]::TopLevelAt($c[0], $c[1])
+                if ([LiveInput]::OwnerOf($target) -eq $appPid) { Note "click ${item}: $([LiveInput]::Click($c[0], $c[1], $target))" }
+                else { Note "refused: $item is under $([LiveInput]::Describe($target))" }
+            }
+            else { Note "the Shrink menu did not show $item" }
+            Start-Sleep -Milliseconds 300
+        }
+        ChooseShrink 'After 3 seconds'
+        Check 'shrink-chosen' (WaitFor { (PopUpValue 'Shrink' $page) -eq 'After 3 seconds' }) "Shrink '$(PopUpValue 'Shrink' $page)'"
+        $bar = ([Windows.Automation.AutomationElement]::FromHandle($toolbar)).Current.BoundingRectangle
+        $pageRect = ([Windows.Automation.AutomationElement]::FromHandle($page)).Current.BoundingRectangle
+        $rest = @([int]($pageRect.X + 40), [int]($pageRect.Bottom - 40))
+        if ($rest[0] -ge $bar.Left -and $rest[0] -le $bar.Right -and $rest[1] -ge $bar.Top -and $rest[1] -le $bar.Bottom) { $rest[1] = [int]($bar.Bottom + 40) }
+        Note "pointer on Settings, off the toolbar: $([LiveInput]::Hover($rest[0], $rest[1], $page))"
+        Check 'shrink-collapses' (WaitFor { $null -ne (ById $toolbar 'collapsed-toolbar') } 6000) "one button: $($null -ne (ById $toolbar 'collapsed-toolbar'))"
+        $capsule = ById $toolbar 'collapsed-toolbar'
+        if ($null -ne $capsule) {
+            $c = Center $capsule
+            $opening = [Diagnostics.Stopwatch]::StartNew()
+            Note "point at the button: $([LiveInput]::Hover($c[0], $c[1], $toolbar))"
+            Check 'shrink-opens-on-pointing' (WaitFor { $null -eq (ById $toolbar 'collapsed-toolbar') -and $null -ne (Find 'Pen') } 1000) "one button: $($null -ne (ById $toolbar 'collapsed-toolbar')), Pen shown: $($null -ne (Find 'Pen')) after $($opening.ElapsedMilliseconds) ms"
+            # The pointer stays on the toolbar, which keeps it open.
+            Start-Sleep -Milliseconds 3500
+            Check 'shrink-stays-open-under-pointer' ($null -eq (ById $toolbar 'collapsed-toolbar')) "one button: $($null -ne (ById $toolbar 'collapsed-toolbar'))"
+        }
+        ChooseShrink 'Never'
+        Check 'shrink-never' (WaitFor { (PopUpValue 'Shrink' $page) -eq 'Never' -and $null -eq (ById $toolbar 'collapsed-toolbar') }) "Shrink '$(PopUpValue 'Shrink' $page)'"
         ScrollPage 0
         Record 'Pen key' 0x4A
         [void](WaitFor { (KeyValue 'Pen key') -eq 'J' })

@@ -81,7 +81,7 @@ internal sealed partial class ShortcutsPageBody : Grid
     /// <summary>Mac Picker("Shrink"): Never, or after 3, 5, 10 or 30 seconds with the pointer off the toolbar.</summary>
     private readonly ChoicePopUp _shrink = new("Shrink", 152);
     private readonly ShrinkDemo _shrinkDemo = new();
-    private readonly TextBlock _shrinkCaption = SettingsText.Label(ShrinkDemoText.Caption(null), 10, "AnnotatorSecondaryText");
+    private readonly TextBlock _shrinkCaption = SettingsText.Wrapping(ShrinkDemoText.Caption(null), 10);
     private readonly PropertyChoicesEditor _choices;
     private readonly List<KeyChip> _rowChips = [];
     private readonly List<GlobalKeyButton> _globals = [];
@@ -229,14 +229,14 @@ internal sealed partial class ShortcutsPageBody : Grid
         var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 16 };
         row.Children.Add(_shrinkDemo.Root);
         var words = new MacStack { Orientation = Orientation.Vertical, Spacing = 4, MaxWidth = 280, VerticalAlignment = VerticalAlignment.Center };
-        words.Children.Add(SettingsText.Label("Shrink", 13, "AnnotatorPrimaryText", FontWeights.SemiBold));
-        _shrinkCaption.TextWrapping = TextWrapping.Wrap;
+        words.Children.Add(SettingsText.Static("Shrink", 13, "AnnotatorPrimaryText", FontWeights.SemiBold));
         words.Children.Add(_shrinkCaption);
         row.Children.Add(words);
         return new Border
         {
             Child = row,
-            Padding = new Thickness(12),
+            // The Mac's strokeBorder overlay takes no room; WinUI's border does, so the padding is 1 point less.
+            Padding = new Thickness(11),
             CornerRadius = new CornerRadius(12),
             Background = SettingsColors.Primary(0.03),
             BorderBrush = SettingsColors.Primary(0.07),

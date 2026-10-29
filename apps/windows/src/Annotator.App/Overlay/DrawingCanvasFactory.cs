@@ -51,6 +51,8 @@ internal sealed class DrawingCanvasFactory : IOverlayCanvasFactory, IOverlayFram
     private long _pointerSeen;
     private int _pointerPosted;
     private volatile bool _tracksPointer;
+    private readonly HashSet<DrawingCanvas> _arrows = [];
+    private volatile bool _constructingArrow;
     private bool _disposed;
 
     /// <param name="report">Shows overlay failures to the person (called on the overlay thread).</param>
@@ -63,6 +65,21 @@ internal sealed class DrawingCanvasFactory : IOverlayCanvasFactory, IOverlayFram
     }
 
     public ITextMeasurer TextMeasurer => _measurer;
+
+    /// <summary>
+    /// Mac isConstructingArrow: a clicked arrow is being built on some display. Read on the app thread; the overlay thread
+    /// sets it (<see cref="NoteArrow"/>).
+    /// </summary>
+    public bool ConstructingArrow => _constructingArrow;
+
+    /// <summary>A canvas started or stopped building a clicked arrow (overlay thread).</summary>
+    public void NoteArrow(DrawingCanvas canvas, bool constructing)
+    {
+        if (constructing ? _arrows.Add(canvas) : _arrows.Remove(canvas))
+        {
+            _constructingArrow = _arrows.Count > 0;
+        }
+    }
 
     /// <summary>Caret positions, selections and hit tests for the text editor, on the renderer's DirectWrite layouts.</summary>
     public ITextEditingLayout TextLayout => _measurer;
@@ -270,6 +287,7 @@ internal sealed class DrawingCanvasFactory : IOverlayCanvasFactory, IOverlayFram
     {
         _canvases.Remove(canvas);
         _animating.Remove(canvas);
+        NoteArrow(canvas, false);
         Track(canvas, false);
         _sharing?.CanvasRemoved(canvas);
         if (_backdrops.Remove(canvas, out var backdrop))

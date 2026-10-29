@@ -11,6 +11,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -35,7 +36,7 @@ internal sealed class ToolbarArrangerView : IArrangerTileHost
     private readonly ShortcutEditor _editor;
     private readonly Action<string> _say;
     private readonly DispatcherQueue _queue;
-    private readonly AccessibleGroup _stripGroup = new("Your toolbar", "toolbar-arrangement") { HorizontalAlignment = HorizontalAlignment.Stretch };
+    private readonly Grid _stripGroup = new() { HorizontalAlignment = HorizontalAlignment.Stretch };
     private readonly Grid _stripSurface = new() { HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
     private readonly Border _stripFill = new();
     private readonly Rectangle _stripOutline = new();
@@ -91,7 +92,7 @@ internal sealed class ToolbarArrangerView : IArrangerTileHost
         // and a narrower window scrolls the line sideways without a scroll bar instead of wrapping it. The margins leave
         // room for the remove badges, which the scroll area would otherwise cut.
         _stripSurface.Margin = new Thickness(2, 10, 2, 10);
-        _stripGroup.Children.Add(new ScrollViewer
+        var stripScroll = new ScrollViewer
         {
             Content = _stripSurface,
             Margin = new Thickness(-2, -10, -2, -10),
@@ -101,7 +102,11 @@ internal sealed class ToolbarArrangerView : IArrangerTileHost
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             ZoomMode = ZoomMode.Disabled,
             IsTabStop = false,
-        });
+        };
+        // The Mac's ScrollView is the element: UI Automation reads one scroll area named Your toolbar.
+        AutomationProperties.SetName(stripScroll, "Your toolbar");
+        AutomationProperties.SetAutomationId(stripScroll, "toolbar-arrangement");
+        _stripGroup.Children.Add(stripScroll);
         layout.Children.Add(_stripGroup);
         var trayHeader = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8 };
         trayHeader.Children.Add(SettingsText.Static("More tools", 13, "AnnotatorPrimaryText", FontWeights.SemiBold, SettingsText.MacWidth("More tools")));
@@ -358,22 +363,150 @@ internal sealed class ToolbarArrangerView : IArrangerTileHost
     }
 
     /// <summary>One of the toolbar's own buttons: small in the strip, or a tile in the tray's "Toolbar buttons" group.</summary>
-    private ArrangerControlTile ControlTile(ToolbarControl control, bool inToolbar, ToolbarMetrics metrics) =>
-        new(control, inToolbar, metrics, _libraryKey,
-            add: item =>
+    private ArrangerControlTile ControlTile(ToolbarControl control, bool inToolbar, ToolbarMetrics metrics)
+    {
+        var tile = new ArrangerControlTile(control, inToolbar, metrics, _libraryKey, AddControl, RemoveControl);
+        tile.PointerPressed += (_, args) => PressControl(tile, args);
+        tile.PointerMoved += (_, args) => MoveControl(tile, args);
+        tile.PointerReleased += (_, args) => ReleaseControl(tile, args);
+        tile.PointerCaptureLost += (_, _) => EndControlDrag();
+        tile.PointerCanceled += (_, _) => EndControlDrag();
+        return tile;
+    }
+
+    private void AddControl(ToolbarControl control)
+    {
+        if (ToolbarArranger.AddControl(_model, control) is { } message)
+        {
+            _say(message);
+        }
+    }
+
+    private void RemoveControl(ToolbarControl control)
+    {
+        if (ToolbarArranger.RemoveControl(_model, control) is { } message)
+        {
+            _say(message);
+        }
+    }
+
+    // MARK: Dragging the toolbar's own buttons
+
+    /// <summary>A press on one of the toolbar's own buttons, and the copy that follows the pointer once it lifts.</summary>
+    private sealed class ControlDrag(ArrangerControlTile source, Windows.Foundation.Point start, Windows.Foundation.Point grab)
+    {
+        public ArrangerControlTile Source { get; } = source;
+
+        public Windows.Foundation.Point Start { get; } = start;
+
+        public Windows.Foundation.Point Grab { get; } = grab;
+
+        public ArrangerControlTile? Floating { get; set; }
+    }
+
+    private ControlDrag? _controlDrag;
+
+    private void PressControl(ArrangerControlTile tile, PointerRoutedEventArgs args)
+    {
+        if (_drag is not null || _controlDrag is not null || !args.GetCurrentPoint(Root).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+        Windows.Foundation.Point point = args.GetCurrentPoint(Root).Position;
+        Windows.Foundation.Point center = tile.TransformToVisual(Root).TransformPoint(new Windows.Foundation.Point(tile.ActualWidth / 2, tile.ActualHeight / 2));
+        _controlDrag = new ControlDrag(tile, point, new Windows.Foundation.Point(point.X - center.X, point.Y - center.Y));
+        tile.CapturePointer(args.Pointer);
+    }
+
+    /// <summary>
+    /// Mac dragChanged for a toolbar button: past 4 points the button lifts and a copy follows the pointer, scaled to 1.1 and
+    /// tilted. The button keeps its place; only where it's dropped counts.
+    /// </summary>
+    private void MoveControl(ArrangerControlTile tile, PointerRoutedEventArgs args)
+    {
+        if (_controlDrag is not { } drag || !ReferenceEquals(drag.Source, tile))
+        {
+            return;
+        }
+        Windows.Foundation.Point point = args.GetCurrentPoint(Root).Position;
+        if (drag.Floating is null)
+        {
+            if (Math.Abs(point.X - drag.Start.X) < ToolbarArranger.DragStart && Math.Abs(point.Y - drag.Start.Y) < ToolbarArranger.DragStart)
             {
-                if (ToolbarArranger.AddControl(_model, item) is { } message)
-                {
-                    _say(message);
-                }
-            },
-            remove: item =>
+                return;
+            }
+            if (_editor.Recording is not null)
             {
-                if (ToolbarArranger.RemoveControl(_model, item) is { } message)
-                {
-                    _say(message);
-                }
-            });
+                _editor.Stop();
+            }
+            var floating = new ArrangerControlTile(tile.Control, tile.InToolbar, _metrics, _libraryKey, _ => { }, _ => { })
+            {
+                IsHitTestVisible = false,
+                IsTabStop = false,
+            };
+            AutomationProperties.SetAccessibilityView(floating, AccessibilityView.Raw);
+            var shadow = new ThemeShadow();
+            shadow.Receivers.Add(_layout);
+            floating.Shadow = shadow;
+            drag.Floating = floating;
+            _overlay.Children.Add(floating);
+            tile.Opacity = 0.35;
+        }
+        args.Handled = true;
+        bool overStrip = OverStrip(point);
+        bool reduce = PageMotion.ReducesMotion;
+        ArrangerControlTile copy = drag.Floating;
+        double width = drag.Source.ActualWidth, height = drag.Source.ActualHeight;
+        Canvas.SetLeft(copy, point.X - drag.Grab.X - width / 2);
+        Canvas.SetTop(copy, point.Y - drag.Grab.Y - height / 2);
+        copy.CenterPoint = new Vector3((float)(width / 2), (float)(height / 2), 0);
+        float scale = reduce ? 1 : (float)ShortcutEditorMotion.LiftScale;
+        copy.Scale = new Vector3(scale, scale, 1);
+        copy.Rotation = reduce ? 0 : (float)(overStrip ? -ShortcutEditorMotion.LiftTilt : ShortcutEditorMotion.LiftTilt);
+        copy.Translation = new Vector3(0, 0, 32);
+        copy.Opacity = tile.InToolbar && !overStrip ? 0.6 : 1;
+    }
+
+    /// <summary>Mac dragEnded: dropped outside Your toolbar, the button turns off; dropped on it, a button that was off comes back.</summary>
+    private void ReleaseControl(ArrangerControlTile tile, PointerRoutedEventArgs args)
+    {
+        if (_controlDrag is not { Floating: not null } drag || !ReferenceEquals(drag.Source, tile))
+        {
+            EndControlDrag();
+            return;
+        }
+        args.Handled = true;
+        bool overStrip = OverStrip(args.GetCurrentPoint(Root).Position);
+        ToolbarControl control = tile.Control;
+        bool fromToolbar = tile.InToolbar;
+        EndControlDrag();
+        if (fromToolbar && !overStrip)
+        {
+            RemoveControl(control);
+        }
+        else if (!fromToolbar && overStrip)
+        {
+            AddControl(control);
+        }
+    }
+
+    private void EndControlDrag()
+    {
+        if (_controlDrag is not { } drag)
+        {
+            return;
+        }
+        _controlDrag = null;
+        if (drag.Floating is { } floating)
+        {
+            _overlay.Children.Remove(floating);
+        }
+        drag.Source.Opacity = 1;
+        drag.Source.ReleasePointerCaptures();
+    }
+
+    private bool OverStrip(Windows.Foundation.Point point) =>
+        Frame(_stripGroup) is { } strip && Inflate(strip, ToolbarArranger.StripReach).Contains(point);
 
     /// <summary>A toolbar item with its family break: 9 points of space and a 1-point divider before a new family.</summary>
     private Grid Wrapper(ShortcutCommand item, bool familyBreak)

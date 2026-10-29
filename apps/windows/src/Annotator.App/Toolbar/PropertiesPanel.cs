@@ -97,7 +97,7 @@ internal sealed class PropertiesPanel
             VerticalContentAlignment = VerticalAlignment.Stretch,
         };
         _updates.Add(state => enabled.IsEnabled = !state.SelectionIsLocked);
-        Root = new PropertiesRoot { Width = hugs ? double.NaN : width, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
+        Root = new PropertiesRoot { Width = hugs ? double.NaN : width, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Row = stack as PropertyRow };
         Root.Children.Add(enabled);
     }
 
@@ -160,7 +160,7 @@ internal sealed class PropertiesPanel
     /// <summary>The "Editing …" line (Mac selected-object-context): 11-point semibold with the dashed square.</summary>
     private FrameworkElement Context()
     {
-        var label = new AccessibleText(_plan.Context!, "selected-object-context") { Height = 14 };
+        var label = new AccessibleText(_plan.Context!, "selected-object-context");
         var row = new MacStack { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center, IsHitTestVisible = false };
         FrameworkElement icon = Glyphs.ForSymbol("square.dashed", 12);
         icon.VerticalAlignment = VerticalAlignment.Center;
@@ -169,12 +169,21 @@ internal sealed class PropertiesPanel
         text.VerticalAlignment = VerticalAlignment.Center;
         row.Children.Add(text);
         label.Children.Add(row);
+        // The Mac's words are wider than Segoe UI's (D-4); its frame starts at the square's drawn edge, 1.5 points in.
+        void Fit(string context)
+        {
+            text.MinWidth = PropertyMetrics.TextWidth(context, 11);
+            text.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+            label.Bounds = new WinRect(1.5, 0, 12 + 6 + Math.Max(text.MinWidth, text.DesiredSize.Width) - 1.5, 14);
+        }
+        Fit(_plan.Context!);
         _updates.Add(state =>
         {
             if (InspectorPlan.ContextText(state) is { } context && context != text.Text)
             {
                 text.Text = context;
                 AutomationProperties.SetName(label, context);
+                Fit(context);
             }
         });
         return label;
@@ -407,11 +416,31 @@ internal sealed class PropertiesPanel
         content.Children.Add(face);
         content.Children.Add(dots);
         (ParityButton button, Action<bool> _) = Choice(name, content, choice: false);
+        // The faces slide inside the button (Mac .clipped()).
+        content.Clip = new RectangleGeometry { Rect = new WinRect(0, 0, 36, 36) };
         int index = 0;
         button.Click += (_, _) =>
         {
             _host.Interacted();
             choose(values[(index + 1) % values.Count].Value);
+        };
+        // Mac accessibilityAdjustableAction: Up goes to the next choice and Down to the one before, for screen readers and
+        // the keyboard.
+        button.KeyDown += (_, args) =>
+        {
+            int step = args.Key switch
+            {
+                Windows.System.VirtualKey.Up => 1,
+                Windows.System.VirtualKey.Down => values.Count - 1,
+                _ => 0,
+            };
+            if (step == 0)
+            {
+                return;
+            }
+            args.Handled = true;
+            _host.Interacted();
+            choose(values[(index + step) % values.Count].Value);
         };
         var menu = new MenuFlyout();
         var items = new List<ToggleMenuFlyoutItem>();
@@ -452,8 +481,13 @@ internal sealed class PropertiesPanel
             {
                 return;
             }
+            bool changed = shown != -1;
             shown = index;
             face.Content = values[index].Face();
+            if (changed && face.Content is UIElement arrived)
+            {
+                CycleSlide.Start(arrived);
+            }
             for (int position = 0; position < marks.Count; position++)
             {
                 marks[position].Fill = position == index ? AppResources.Brush("AnnotatorAccentBrush")
@@ -461,7 +495,7 @@ internal sealed class PropertiesPanel
             }
             string next = values[(index + 1) % values.Count].Label;
             button.AccessibleValue = values[index].Label;
-            ToolbarParts.Help(button, InspectorPlan.CycleHelp(name, values[index].Label, next));
+            ToolbarParts.Help(button, InspectorPlan.CycleHint(next), InspectorPlan.CycleHelp(name, values[index].Label, next));
         });
         return button;
     }
@@ -741,16 +775,20 @@ internal sealed class PropertiesPanel
             (double value, ref CoreStyle style) => style.HeadScale = value, out FrameworkElement band);
         AutomationProperties.SetName(head, "Arrowhead size");
         slider.Children.Add(band);
-        TextBlock percent = ToolbarParts.Text(string.Empty, 10, Secondary);
-        percent.MinWidth = 34;
+        TextBlock percent = PropertyMetrics.Text(string.Empty, 10, Secondary);
         percent.VerticalAlignment = VerticalAlignment.Center;
-        slider.Children.Add(percent);
+        percent.HorizontalAlignment = HorizontalAlignment.Left;
+        // frame(minWidth: 34, alignment: .leading): UI Automation reads the words' own frame, not the 34 points.
+        var percentFrame = new Grid { MinWidth = 34, VerticalAlignment = VerticalAlignment.Center };
+        percentFrame.Children.Add(percent);
+        slider.Children.Add(percentFrame);
         _updates.Add(state =>
         {
             string text = InspectorPlan.HeadSizeText(state.Style.HeadScale);
             if (percent.Text != text)
             {
                 percent.Text = text;
+                percent.MinWidth = PropertyMetrics.TextWidth(text, 10);
             }
         });
         var frame = new Grid { Height = PropertyRow.ControlHeight };

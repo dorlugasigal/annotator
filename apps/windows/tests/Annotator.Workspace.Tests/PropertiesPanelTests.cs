@@ -149,6 +149,8 @@ public sealed class PropertiesPanelTests
         Assert.Equal(["Left", "Center", "Right"], InspectorPlan.AlignmentChoices.Select(choice => choice.Name));
         Assert.Equal(["Solid", "Hatch", "Crosshatch"], InspectorPlan.FillStyleChoices.Select(choice => choice.Name));
         Assert.Equal("Pattern: Solid. Click for dashed.", InspectorPlan.CycleHelp("Pattern", "Solid", "Dashed"));
+        // Mac CycleOptions' accessibilityHint, which screen readers read.
+        Assert.Equal("Changes to dashed", InspectorPlan.CycleHint("Dashed"));
         Assert.Equal("Blurred details can still be readable. Remove private info before you share.", InspectorPlan.CoverCaption);
     }
 

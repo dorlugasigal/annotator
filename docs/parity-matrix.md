@@ -48,6 +48,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Labeled mode control, undo, redo, clear, hide reachable unless turned off in Settings; their keys keep working | XAML | I | UI tests |
 | Every toolbar button can be turned off (`hiddenToolbarControls`); the room goes back to the tools | XAML and Workspace layout | I | Corpus, workspace tests |
 | Full properties are one row that never wraps; the toolbar grows sideways to fit it, and a vertical toolbar's column scrolls without a scroll bar | `PropertyRow` and `ToolbarToolLayout.GrownWidth` | I | Workspace tests, UX reference |
+| The toolbar's window animates its size when it grows sideways or shrinks to one capsule | Resizes at once; the new face or properties fade in | D (DV-12) | UX reference |
 | Few-choice properties are one cycling button or an on and off button, or all choices side by side (`expandedPropertyChoices`); width and text size are a slider with its value | XAML and Workspace `InspectorPlan` | I | Corpus, workspace tests |
 | Spotlight and Zoom menus are tool-sized toolbar items, off by default and without keys | XAML and core | I | Corpus |
 | The toolbar shrinks to one capsule with the mark and Draw or Apps after the chosen delay (`toolbarCollapseDelay`); pointing at it or clicking it opens the toolbar | `ToolbarCollapseTimer` and XAML | I | Core and workspace tests |

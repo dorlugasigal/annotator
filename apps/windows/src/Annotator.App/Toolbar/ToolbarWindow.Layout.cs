@@ -164,13 +164,18 @@ internal sealed partial class ToolbarWindow
         row.Children.Add(properties);
         row.Children.Add(new MacSpacer());
         row.Children.Add(menus);
-        var group = new AccessibleGroup("Tool properties", "contextual-inspector-viewport");
         if (fits)
         {
+            var group = new AccessibleGroup("Tool properties", "contextual-inspector-viewport");
             group.Children.Add(row);
             return group;
         }
-        group.Children.Add(new ScrollViewer
+        // The Mac's ScrollView is the viewport itself: UI Automation reads one scroll area named Tool properties, by rows.
+        if ((properties as PropertiesRoot ?? (properties as ScaledContent)?.Child as PropertiesRoot)?.Row is { } readsByRows)
+        {
+            readsByRows.ReadsByRows = true;
+        }
+        var scroll = new ScrollViewer
         {
             Width = inner,
             Content = row,
@@ -180,8 +185,10 @@ internal sealed partial class ToolbarWindow
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             ZoomMode = ZoomMode.Disabled,
             IsTabStop = false,
-        });
-        return group;
+        };
+        AutomationProperties.SetName(scroll, "Tool properties");
+        AutomationProperties.SetAutomationId(scroll, "contextual-inspector-viewport");
+        return scroll;
     }
 
     /// <summary>
