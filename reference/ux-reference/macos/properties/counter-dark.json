@@ -100,14 +100,14 @@
  "background": "window",
  "image": "properties/counter-dark.png",
  "kind": "view",
- "notes": "Full properties for Numbered counter, 648 points wide.",
+ "notes": "Full properties for Numbered counter, 932 points wide: one row.",
  "pixels": [
-  1296,
+  1864,
   176
  ],
  "scale": 2,
  "size": [
-  648,
+  932,
   88
  ],
  "spec": [

@@ -346,11 +346,12 @@ internal static partial class ReferenceStates
 
     /// <summary>
     /// The full properties of UXReferenceCaptureTests.test02PropertiesAndPickers: each tool with its default style in a
-    /// drawing workspace, 648 points wide, and the variants with a fill, a curved arrow, Smart Draw and a 932-point width.
+    /// drawing workspace, 932 points wide so each shows on one row, and the variants with a fill, a curved arrow, Smart Draw,
+    /// a 932-point Diamond and a 648-point Rectangle whose Edges wraps to a second row.
     /// </summary>
     private static ReferenceScenario? Properties(string state)
     {
-        static ReferenceScenario Panel(Tool tool, Action<WorkspaceModel>? change = null, double width = 648) =>
+        static ReferenceScenario Panel(Tool tool, Action<WorkspaceModel>? change = null, double width = 932) =>
             new(ReferenceSurface.Properties)
             {
                 Width = width,
@@ -367,6 +368,7 @@ internal static partial class ReferenceStates
             "arrow-curved" => Panel(Tool.Arrow, model => model.ApplyStyle((ref Style style) => style.Curved = true)),
             "pen-smart-draw" => Panel(Tool.Pen, model => model.SetSmartDraw(true)),
             "diamond-wide" => Panel(Tool.Diamond, width: 932),
+            "rectangle-narrow" => Panel(Tool.Rectangle, width: 648),
             _ when Tool.FromRawValue(state) is { } tool => Panel(tool) with { ClipboardHasImage = tool == Tool.Image },
             _ => null,
         };

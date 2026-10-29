@@ -101,14 +101,14 @@
  "background": "window",
  "image": "properties/eraser-dark.png",
  "kind": "view",
- "notes": "Full properties for Eraser, 648 points wide.",
+ "notes": "Full properties for Eraser, 932 points wide: one row.",
  "pixels": [
-  1296,
+  1864,
   230
  ],
  "scale": 2,
  "size": [
-  648,
+  932,
   115
  ],
  "spec": [

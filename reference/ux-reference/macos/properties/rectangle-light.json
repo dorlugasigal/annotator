@@ -58,6 +58,17 @@
   {
    "enabled": true,
    "frame": [
+    571,
+    16,
+    56,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Edges"
+  },
+  {
+   "enabled": true,
+   "frame": [
     16,
     36,
     36,
@@ -192,6 +203,31 @@
    "role": "AXButton"
   },
   {
+   "enabled": true,
+   "frame": [
+    569.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Sharp corners",
+   "label": "Sharp corners",
+   "role": "AXButton",
+   "selected": true
+  },
+  {
+   "enabled": true,
+   "frame": [
+    610.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Rounded corners",
+   "label": "Rounded corners",
+   "role": "AXButton"
+  },
+  {
    "children": [
     {
      "enabled": true,
@@ -239,57 +275,21 @@
    ],
    "role": "AXStaticText",
    "value": "pt"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    17.5,
-    113,
-    56,
-    14
-   ],
-   "role": "AXStaticText",
-   "value": "Edges"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    133,
-    36,
-    36
-   ],
-   "help": "Sharp corners",
-   "label": "Sharp corners",
-   "role": "AXButton",
-   "selected": true
-  },
-  {
-   "enabled": true,
-   "frame": [
-    57,
-    133,
-    36,
-    36
-   ],
-   "help": "Rounded corners",
-   "label": "Rounded corners",
-   "role": "AXButton"
   }
  ],
  "appearance": "light",
  "background": "window",
  "image": "properties/rectangle-light.png",
  "kind": "view",
- "notes": "Full properties for Rectangle, 648 points wide.",
+ "notes": "Full properties for Rectangle, 932 points wide: one row.",
  "pixels": [
-  1296,
-  370
+  1864,
+  230
  ],
  "scale": 2,
  "size": [
-  648,
-  185
+  932,
+  115
  ],
  "spec": [
   "002 design.md",

@@ -58,6 +58,17 @@
   {
    "enabled": true,
    "frame": [
+    634.5,
+    16,
+    83.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Smart Draw"
+  },
+  {
+   "enabled": true,
+   "frame": [
     16,
     36,
     36,
@@ -204,6 +215,20 @@
    "role": "AXButton"
   },
   {
+   "enabled": true,
+   "frame": [
+    633.5,
+    36,
+    36,
+    36
+   ],
+   "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
+   "identifier": "wand.and.stars",
+   "label": "Smart Draw",
+   "role": "AXButton",
+   "value": "Off"
+  },
+  {
    "children": [
     {
      "enabled": true,
@@ -273,46 +298,21 @@
    ],
    "role": "AXStaticText",
    "value": "Ink"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    17,
-    113,
-    83.5,
-    14
-   ],
-   "role": "AXStaticText",
-   "value": "Smart Draw"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    16,
-    133,
-    36,
-    36
-   ],
-   "help": "Turn on Smart Draw to turn pen strokes into rectangles and ellipses.",
-   "identifier": "wand.and.stars",
-   "label": "Smart Draw",
-   "role": "AXButton",
-   "value": "Off"
   }
  ],
  "appearance": "dark",
  "background": "window",
  "image": "properties/pen-dark.png",
  "kind": "view",
- "notes": "Full properties for Pen, 648 points wide.",
+ "notes": "Full properties for Pen, 932 points wide: one row.",
  "pixels": [
-  1296,
-  370
+  1864,
+  230
  ],
  "scale": 2,
  "size": [
-  648,
-  185
+  932,
+  115
  ],
  "spec": [
   "002 design.md",

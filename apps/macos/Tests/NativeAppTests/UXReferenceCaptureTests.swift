@@ -239,6 +239,9 @@ final class UXReferenceCaptureTests: XCTestCase {
 
     // MARK: Properties and pickers
 
+    /// Wide enough for every tool's properties on one row, as the toolbar shows them.
+    static let propertiesWidth: CGFloat = 932
+
     func test02PropertiesAndPickers() async throws {
         let recorder = try UXReferenceRecorder("properties")
         let spec = ["002 design.md", "001 color and gradient paint", "WIN-UI-02"]
@@ -248,25 +251,29 @@ final class UXReferenceCaptureTests: XCTestCase {
                          .blur, .pixelate, .distort, .eraser, .counter, .ruler] {
                 use(model, tool: tool)
                 try await recorder.view(ContextualInspector(model: model).padding(16), state: tool.rawValue, dark: dark,
-                                        background: .window, width: 648,
-                                        notes: "Full properties for \(tool.label), 648 points wide.", spec: spec)
+                                        background: .window, width: Self.propertiesWidth,
+                                        notes: "Full properties for \(tool.label), \(Int(Self.propertiesWidth)) points wide: one row.", spec: spec)
             }
             use(model, tool: .rectangle)
             model.applyStyle { $0.setFillEnabled(true) }
             try await recorder.view(ContextualInspector(model: model).padding(16), state: "rectangle-filled", dark: dark,
-                                    background: .window, width: 648, notes: "Fill on: fill pattern and opacity appear.", spec: spec)
+                                    background: .window, width: Self.propertiesWidth, notes: "Fill on: fill pattern and opacity appear.", spec: spec)
             use(model, tool: .arrow)
             model.applyStyle { $0.curved = true }
             try await recorder.view(ContextualInspector(model: model).padding(16), state: "arrow-curved", dark: dark,
-                                    background: .window, width: 648, notes: "Curved arrow.", spec: spec)
+                                    background: .window, width: Self.propertiesWidth, notes: "Curved arrow.", spec: spec)
             use(model, tool: .pen)
             model.smartDraw = true
             try await recorder.view(ContextualInspector(model: model).padding(16), state: "pen-smart-draw", dark: dark,
-                                    background: .window, width: 648, notes: "Pen with Smart draw on.", spec: spec)
+                                    background: .window, width: Self.propertiesWidth, notes: "Pen with Smart draw on.", spec: spec)
             model.smartDraw = false
             use(model, tool: .diamond)
             try await recorder.view(ContextualInspector(model: model).padding(16), state: "diamond-wide", dark: dark,
                                     background: .window, width: 932, notes: "Wide layout: one row.", spec: spec)
+            use(model, tool: .rectangle)
+            try await recorder.view(ContextualInspector(model: model).padding(16), state: "rectangle-narrow", dark: dark,
+                                    background: .window, width: 648, notes: "Narrow layout, 648 points wide: Edges wraps to a second row.",
+                                    spec: spec)
 
             let pickers = try UXReferenceRecorder("pickers")
             use(model, tool: .rectangle)

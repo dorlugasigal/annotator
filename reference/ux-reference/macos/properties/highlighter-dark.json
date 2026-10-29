@@ -126,14 +126,14 @@
  "background": "window",
  "image": "properties/highlighter-dark.png",
  "kind": "view",
- "notes": "Full properties for Highlighter, 648 points wide.",
+ "notes": "Full properties for Highlighter, 932 points wide: one row.",
  "pixels": [
-  1296,
+  1864,
   230
  ],
  "scale": 2,
  "size": [
-  648,
+  932,
   115
  ],
  "spec": [
