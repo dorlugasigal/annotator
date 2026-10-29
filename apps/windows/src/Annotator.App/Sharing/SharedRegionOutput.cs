@@ -104,6 +104,11 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
     private ElementList _motionDocument;
     private RGBA? _motionBoard;
 
+    // The laser pointer's trail as the output shows it: the canvas's list, through screen zoom's viewport when there is one.
+    private DisplayList? _laserSource;
+    private Viewport? _laserView;
+    private DisplayList? _laserShown;
+
     public SharedRegionOutput(Compositor compositor, WindowRegistry registry, IDisplayCapture capture, Action<OverlayEvent> report,
                               ITextMeasurer measurer, Func<ISystemColorResolver> colors, PointerEffectsHost pointerEffects, string title)
     {
@@ -199,6 +204,7 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
             return;
         }
         Apply(output, display);
+        UpdateLaser();
     }
 
     /// <summary>A canvas drew a change; the shared view follows its source canvas at once.</summary>
@@ -207,8 +213,50 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
         if (ReferenceEquals(canvas, _source) && _output is { Capturing: true })
         {
             Refresh();
+            UpdateLaser();
         }
     }
+
+    /// <summary>
+    /// Mac SharedRegionPointerView: the shared display's laser pointer trail over the region, its covers and effects, below
+    /// the halo and the arrow, through screen zoom's viewport as the display shows it. Nothing shows while the drawings are
+    /// hidden or the output isn't live.
+    /// </summary>
+    private void UpdateLaser()
+    {
+        if (_effects is not { } effects)
+        {
+            return;
+        }
+        DisplayList? trail = null;
+        if (_source is { } source && _workspace is { WorkspaceHidden: false } && _output is { Capturing: true } && !_failed
+            && source.LaserTrail is { } list)
+        {
+            Viewport? view = source.ZoomView;
+            if (!ReferenceEquals(list, _laserSource) || view != _laserView || _laserShown is null)
+            {
+                _laserSource = list;
+                _laserView = view;
+                _laserShown = view is { } zoom ? Through(zoom, list) : list;
+            }
+            trail = _laserShown;
+        }
+        else
+        {
+            _laserSource = null;
+            _laserView = null;
+            _laserShown = null;
+        }
+        effects.ShowLaser(trail);
+    }
+
+    /// <summary>The trail as screen zoom shows it: scaled by the zoom and moved so the zoomed part fills the display.</summary>
+    private static DisplayList Through(Viewport view, DisplayList list) => new DisplayListBuilder()
+        .Add(DisplayItem.PushTransform(AffineTransform.Scale(view.Output.Width / view.Source.Width, view.Output.Height / view.Source.Height)
+            .Translated(-view.Source.X, -view.Source.Y)))
+        .AddRange(list)
+        .Add(DisplayItem.PopTransform())
+        .ToList();
 
     /// <summary>A canvas went away with its overlay; the next frame finds the new one.</summary>
     public void CanvasRemoved(DrawingCanvas canvas)

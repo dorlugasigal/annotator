@@ -22,8 +22,8 @@ namespace Annotator.App.Toolbar;
 /// toolbar items, Tool library, Board background, Draw or Use apps, Undo, Redo, Clear, Properties, Settings and Hide,
 /// the properties of the current tool, and the active board. It is a borderless window that never activates
 /// (WS_EX_NOACTIVATE), so clicking it leaves the person's app active (WIN-OVR-03); a value field activates it only
-/// while the person types. Drag the background to move it inside the work area, or to a display edge to dock it there
-/// (WIN-OVR-10, ToolbarWindow.Docking.cs).
+/// while the person types. Drag the background, or press and hold anywhere on it, to move it inside the work area, or to
+/// a display edge to dock it there (WIN-OVR-10, ToolbarWindow.Docking.cs and ToolbarWindow.Hold.cs).
 /// </summary>
 internal sealed partial class ToolbarWindow : Window, IPropertiesHost
 {
@@ -100,6 +100,7 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         Content = _root;
         ApplyZoom();
         WireKeyboard();
+        WatchHold();
         AppResources.SystemLookChanged += OnSystemLookChanged;
 
         // Alt+F4 releases drawing input like Use apps and never closes the toolbar (WIN-OVR-12).

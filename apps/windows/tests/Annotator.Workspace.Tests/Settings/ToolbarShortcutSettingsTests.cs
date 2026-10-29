@@ -308,7 +308,8 @@ public sealed class ToolbarArrangerTests
         ToolbarArranger.Add(model, ShortcutCommand.ForTool(Tool.Blur));
         Assert.Equal([ShortcutCommand.ForAction(ShortcutAction.Spotlight), ShortcutCommand.ForTool(Tool.Blur)], Items(model).TakeLast(2));
         Assert.Equal(new[] { "tool.select", "tool.rectangle", "tool.diamond", "tool.ellipse", "tool.arrow", "tool.line", "tool.pen", "tool.text",
-                      "tool.highlighter", "tool.eraser", "tool.cover", "action.spotlight", "tool.blur" }, model.Snapshot.Preferences.ToolbarItems!.Value.ToArray());
+                      "tool.highlighter", "tool.laser", "tool.eraser", "tool.cover", "action.spotlight", "tool.blur" },
+            model.Snapshot.Preferences.ToolbarItems!.Value.ToArray());
         Assert.Equal(Tool.Blur, ToolbarToolLayout.Identity(Tool.Blur, [.. Items(model)]));
         Assert.Equal(Tool.Cover, ToolbarToolLayout.Identity(Tool.Distort, [.. Items(model)]));
         Assert.Equal("toolbar-action-spotlight", ToolbarArranger.Identifier(ShortcutCommand.ForAction(ShortcutAction.Spotlight), inToolbar: true));
@@ -337,7 +338,7 @@ public sealed class ToolbarArrangerTests
         ShortcutCommand star = ShortcutCommand.ForTool(Tool.Star);
         var drag = ArrangerDrag.Start(star, fromToolbar: false, new Point(100, 300), default, Items(model));
         Assert.False(drag.OverStrip);
-        Point end = new(12 + 11 * 51 - 20, 40);
+        Point end = new(12 + 12 * 51 - 20, 40);
         Assert.True(drag.Update(end, overStrip: true, item => Frame(drag.Order, item)));
         Assert.True(drag.Adding);
         Assert.Equal("Star is in your toolbar now.", drag.End(model));
@@ -351,7 +352,7 @@ public sealed class ToolbarArrangerTests
         Assert.Null(drag.End(model));
         Assert.Equal(Tool.Pen, Tools(model)[0]);
 
-        drag = ArrangerDrag.Start(star, fromToolbar: true, new Point(12 + 11 * 51 + 24, 40), default, Items(model));
+        drag = ArrangerDrag.Start(star, fromToolbar: true, new Point(12 + 12 * 51 + 24, 40), default, Items(model));
         drag.Update(new Point(300, 250), overStrip: false, item => Frame(drag.Order, item));
         Assert.True(drag.Removing);
         Assert.Equal(("Let go to remove it from your toolbar", "minus.circle.fill", true), drag.TrayMessage);

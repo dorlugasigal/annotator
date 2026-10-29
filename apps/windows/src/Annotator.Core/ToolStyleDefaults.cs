@@ -16,6 +16,11 @@ public partial struct Style
             style.Color = new RGBA(0.93, 1, 0.05);
             style.Width = 4;
         }
+        if (tool == Tool.Laser)
+        {
+            style.Color = LaserTrail.DefaultColor;
+            style.Width = LaserTrail.DefaultWidth;
+        }
         return style;
     }
 
@@ -40,11 +45,11 @@ public static class ToolFirstUseExtensions
     {
         /// <summary>
         /// Swift `Tool.startsWithGradient`: shapes, lines, arrows, pen and text start with a gradient in a new profile. The
-        /// highlighter keeps its yellow, and tools whose color is not ink keep their defaults.
+        /// highlighter keeps its yellow, the laser pointer its red, and tools whose color is not ink keep their defaults.
         /// </summary>
         public bool StartsWithGradient => tool switch
         {
-            Tool.Select or Tool.Highlighter or Tool.Eraser or Tool.Cover or Tool.Blur or Tool.Pixelate or Tool.Distort
+            Tool.Select or Tool.Highlighter or Tool.Laser or Tool.Eraser or Tool.Cover or Tool.Blur or Tool.Pixelate or Tool.Distort
                 or Tool.Ruler or Tool.Counter or Tool.Image => false,
             _ => true,
         };

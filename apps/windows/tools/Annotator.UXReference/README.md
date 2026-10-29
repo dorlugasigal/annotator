@@ -87,10 +87,10 @@ Mac capture does, at screen zoom's default 2x; their group reports the union of
 its children's frames, as SwiftUI does.
 
 `cursors --out <folder>` compares every entry of `cursors/cursors.json`: the
-pen, highlighter, eraser and rotation cursors that Annotator draws by size,
-hot spot and 2x pixels (mean alpha difference at most 2, at most 1% of pixels
-off by more than 32, mean color difference at most 8), and the crosshair and
-I-beam by kind, since each system draws its own. It writes
+pen, highlighter, eraser, laser pointer and rotation cursors that Annotator
+draws by size, hot spot and 2x pixels (mean alpha difference at most 2, at
+most 1% of pixels off by more than 32, mean color difference at most 8), and
+the crosshair and I-beam by kind, since each system draws its own. It writes
 `cursors/cursors.sheet.png` and `cursors.diff.txt`. The pointer effects
 (cursor halo, spotlight and click effects) have no Windows state yet.
 

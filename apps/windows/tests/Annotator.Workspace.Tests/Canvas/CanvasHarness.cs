@@ -141,6 +141,7 @@ internal sealed class CanvasHarness : IDisposable
             TextEditor = textEditing ? textEditor ?? Editor : null,
             Coordinator = Coordinator,
             ReducesMotion = () => ReducesMotion,
+            Clock = () => Now,
         };
         ReducesMotion = reducesMotion;
         foreach (DisplayDescriptor display in Displays)
@@ -170,6 +171,9 @@ internal sealed class CanvasHarness : IDisposable
     public Point? DesktopPointer { get; set; }
 
     public bool ReducesMotion { get; set; }
+
+    /// <summary>The canvases' clock in seconds (<see cref="CanvasOptions.Clock"/>): the laser pointer stamps its trail with it.</summary>
+    public double Now { get; set; } = 100;
 
     public List<CanvasRequest> Requests { get; } = [];
 

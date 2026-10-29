@@ -18,8 +18,9 @@ using CoreSize = Annotator.Core.Geometry.Size;
 namespace Annotator.App.Toolbar;
 
 /// <summary>
-/// The toolbar's drag and docking (WIN-OVR-10, spec 009). A drag on the empty background moves the toolbar inside the
-/// work area of the display under the pointer. With the pointer at the outermost point of a display edge a mouse-transparent
+/// The toolbar's drag and docking (WIN-OVR-10, spec 009). A drag on the empty background, or a press and hold anywhere on
+/// the toolbar (ToolbarWindow.Hold.cs), moves the toolbar inside the work area of the display under the pointer, with
+/// Windows' move cursor (the Mac's closed hand). With the pointer at the outermost point of a display edge a mouse-transparent
 /// ghost shows exactly where it will dock; releasing there docks it flush against that edge of the work area, centered,
 /// vertical at the left and right edges and horizontal at the top and bottom, and saves the edge. The drag is the app's
 /// own, not a window manager move, so Snap layouts never compete with it. The rules are <see cref="ToolbarDocking"/>'s;
@@ -46,7 +47,8 @@ internal sealed partial class ToolbarWindow
         surface.PointerReleased += OnPointerReleased;
         surface.PointerCaptureLost += (_, _) =>
         {
-            if (_docking.IsTracking)
+            // A press and hold moves the pointer to the toolbar's root; only the surface's own drag ends here.
+            if (_docking.IsTracking && ReferenceEquals(_dragSurface, surface))
             {
                 CancelDrag();
             }
@@ -83,6 +85,7 @@ internal sealed partial class ToolbarWindow
                 MoveTo(step.Frame);
             }
             ShowGhost(step.Preview);
+            _root.ShowMoveCursor(true);
             args.Handled = true;
         }
     }
@@ -158,6 +161,7 @@ internal sealed partial class ToolbarWindow
     /// </summary>
     public void CancelDrag()
     {
+        ClearHold();
         bool tracking = _docking.IsTracking;
         _docking.Cancel();
         UIElement? surface = _dragSurface;
@@ -174,6 +178,7 @@ internal sealed partial class ToolbarWindow
 
     private void EndDrag()
     {
+        _root.ShowMoveCursor(false);
         _dragSurface = null;
         _dragAvailable = null;
         _dragDisplays = [];

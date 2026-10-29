@@ -172,6 +172,7 @@ public sealed partial class CanvasController : IDisposable
         {
             CancelGesture();
         }
+        FollowLaser();
         if (_workspace.WorkspaceHidden || !IsDrawing)
         {
             FinishTransitions();
@@ -193,9 +194,13 @@ public sealed partial class CanvasController : IDisposable
         Publish(kinds | CanvasChangeKinds.Content | CanvasChangeKinds.Adornments, null);
     }
 
-    /// <summary>Mac cancelGesture: drops the gesture, text edit, clicked arrow or region choice without changing the document.</summary>
+    /// <summary>
+    /// Mac cancelGesture: drops the gesture, text edit, clicked arrow or region choice without changing the document, and
+    /// lets a held laser pointer stroke go, so it fades.
+    /// </summary>
     public void CancelGesture()
     {
+        ReleaseLaser(null);
         bool changed = HasActiveEdit || _marquee is not null || !_eraseIds.IsEmpty || _smartPreview is not null || _working;
         DropLocal(cancelReportedEdit: true);
         if (changed)
@@ -407,7 +412,7 @@ public sealed partial class CanvasController : IDisposable
     }
 
     private CanvasCursor ToolCursor() =>
-        IsDrawing ? CanvasCursor.ForTool(Workspace.Tool, Workspace.Style.Width * ScreenZoom) : CanvasCursor.Arrow;
+        IsDrawing ? CanvasCursor.ForTool(Workspace.Tool, Workspace.Style.Width * ScreenZoom, Workspace.Style.Color) : CanvasCursor.Arrow;
 
     /// <summary>The objects to draw (Mac visibleElements without the text editor), cached until something but a stroke changes.</summary>
     private ElementList ShownElements()
@@ -529,6 +534,8 @@ public sealed partial class CanvasController : IDisposable
             MorphProgress = _morphProgress,
             EraseFade = _fade,
             EraseFadeProgress = _fadeProgress,
+            Laser = _laser,
+            LaserTime = _laserTime,
             HasActiveEdit = HasActiveEdit,
             ConstructingArrow = _linearId is not null,
         };

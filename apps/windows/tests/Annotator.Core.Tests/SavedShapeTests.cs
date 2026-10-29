@@ -19,7 +19,7 @@ public class SavedShapeTests
     [Fact]
     public void SavingPreservesSourceAndRoundTripsAllDrawingKinds()
     {
-        var tools = Tool.AllCases.Where(tool => !tool.IsProtection && tool is not (Tool.Select or Tool.Eraser or Tool.Image));
+        var tools = Tool.AllCases.Where(tool => !tool.IsProtection && tool is not (Tool.Select or Tool.Eraser or Tool.Laser or Tool.Image));
         var elements = tools.Select(tool =>
         {
             var item = new Element(tool, new Rect(10, 20, 80, 70),

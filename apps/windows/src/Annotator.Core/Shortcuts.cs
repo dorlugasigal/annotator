@@ -170,8 +170,11 @@ public static class ShortcutActionExtensions
 
     extension(Tool tool)
     {
-        /// <summary>Tools that take part when "Share style between tools" is on.</summary>
-        public bool SharesStyle => !tool.IsProtection && tool is not (Tool.Select or Tool.Eraser or Tool.Image);
+        /// <summary>
+        /// Tools that take part when "Share style between tools" is on. The laser pointer keeps its own color: it points,
+        /// it doesn't draw.
+        /// </summary>
+        public bool SharesStyle => !tool.IsProtection && tool is not (Tool.Select or Tool.Eraser or Tool.Image or Tool.Laser);
     }
 }
 

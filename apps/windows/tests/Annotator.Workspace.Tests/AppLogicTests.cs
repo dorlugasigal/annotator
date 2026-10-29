@@ -267,9 +267,9 @@ public sealed class ToolbarLayoutTests
     [Fact]
     public void DefaultToolsFitTheMacMeasurements()
     {
-        // 11 tools of 44 points: select | 5 shapes and connectors | 3 ink tools | eraser | effects.
-        Assert.Equal(11 * 44 + 6 * 2 + 4 * 11, ToolbarToolLayout.Width(Defaults));
-        Assert.Equal(923, ToolbarToolLayout.HorizontalWidth(Defaults, 1000));
+        // 12 tools of 44 points: select | 5 shapes and connectors | 4 ink tools with the laser pointer | eraser | effects.
+        Assert.Equal(12 * 44 + 7 * 2 + 4 * 11, ToolbarToolLayout.Width(Defaults));
+        Assert.Equal(969, ToolbarToolLayout.HorizontalWidth(Defaults, 1000));
         Assert.Equal(44 + 383, ToolbarToolLayout.HorizontalWidth([ShortcutCommand.ForTool(Tool.Select)], 1000));
         Assert.Equal(15, new ToolbarMetrics(ToolbarSize.Expanded).CornerRadius);
         Assert.Equal(44, new ToolbarMetrics(ToolbarSize.Expanded).ButtonWidth);
@@ -284,6 +284,7 @@ public sealed class ToolbarLayoutTests
         Assert.Equal(1, ToolbarToolLayout.Family(Tool.Arrow));
         Assert.Equal(1, ToolbarToolLayout.Family(Tool.Server));
         Assert.Equal(2, ToolbarToolLayout.Family(Tool.Highlighter));
+        Assert.Equal(2, ToolbarToolLayout.Family(Tool.Laser));
         Assert.Equal(3, ToolbarToolLayout.Family(Tool.Eraser));
         Assert.Equal(4, ToolbarToolLayout.Family(Tool.Blur));
         Assert.Equal(5, ToolbarToolLayout.Family(Tool.Ruler));

@@ -134,6 +134,8 @@ public class JsonCompatibilityTests
     {
         var profile = WorkspacePreferences.Read(Utf8(ProfileV1));
         var expected = new WorkspacePreferences();
+        // Written before the laser pointer had its L key: a saved profile keeps its own keys.
+        expected.ToolShortcuts = expected.ToolShortcuts.Remove("l");
         expected.ToolStyles = expected.ToolStyles.SetItem("pen", new Style());
         expected.Theme = AppTheme.Dark;
         var halo = new CursorHighlightSettings();

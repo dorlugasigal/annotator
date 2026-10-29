@@ -35,7 +35,7 @@ public sealed class ToolbarCustomizationTests
     {
         ValueList<ShortcutCommand> items = WorkspacePreferences.DefaultToolbar.Map(ShortcutCommand.ForTool);
         double full = ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400);
-        Assert.Equal(923, full);
+        Assert.Equal(969, full);
         Assert.Equal(full, ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, hidden: None));
         var all = new HashSet<ToolbarControl>(ToolbarControl.AllCases);
         double bare = ToolbarToolLayout.HorizontalWidth(items.AsSpan(), 1400, hidden: all);

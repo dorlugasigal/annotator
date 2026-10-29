@@ -78,6 +78,24 @@ public static class ToolbarControlExtensions
 }
 
 /// <summary>
+/// Swift `ToolbarHold`: press and hold anywhere on the toolbar to move it, on a button, a label or empty space. A press
+/// that stays within <see cref="Slop"/> points for <see cref="Delay"/> seconds picks the toolbar up, and the control under
+/// the pointer never gets the press. Letting go or moving sooner presses the control as usual. Sliders and number fields
+/// get their press at once, because holding them is how people use them.
+/// </summary>
+public static class ToolbarHold
+{
+    /// <summary>Seconds a press has to stay still before it picks the toolbar up.</summary>
+    public const double Delay = 0.4;
+
+    /// <summary>Points the pointer can move during the hold and still pick the toolbar up.</summary>
+    public const double Slop = 3.0;
+
+    /// <summary>Whether a press that moved by (<paramref name="dx"/>, <paramref name="dy"/>) points is still a hold.</summary>
+    public static bool IsStill(double dx, double dy) => Math.Sqrt(dx * dx + dy * dy) <= Slop;
+}
+
+/// <summary>
 /// Swift `PropertyChoice`: properties with a few choices. Each shows as one button that steps through its choices, which
 /// is the default, or as all its choices side by side.
 /// </summary>

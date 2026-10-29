@@ -21,7 +21,8 @@ public enum CanvasLayers
 /// and covers with the selection. <see cref="Live"/>, drawn above it, holds the object being drawn, the Smart Draw
 /// candidate, the morph and erase transitions, the region dimming, the marquee, attach hints and eraser outlines; while
 /// it shows a drawing, the covers and pixel effects follow again with the selection, so nothing drawn live shows through
-/// a cover. Unchanged parts keep their display lists: a growing stroke changes only its own list, and an unchanged state
+/// a cover. The laser pointer's trail comes last, above the covers, as the Mac draws it after everything else on the
+/// canvas. Unchanged parts keep their display lists: a growing stroke changes only its own list, and an unchanged state
 /// changes nothing. Use it on the canvas thread.
 /// </summary>
 public sealed class CanvasScene
@@ -70,6 +71,9 @@ public sealed class CanvasScene
     private EraseFade? _fade;
     private double _fadeProgress;
     private DisplayList[] _fadeLists = [];
+    private LaserTrail _laser;
+    private double _laserTime;
+    private DisplayList? _laserList;
     private CanvasTextSession? _edited;
     private DisplayList? _editedList;
     private DisplayList? _draftList;
@@ -89,6 +93,12 @@ public sealed class CanvasScene
 
     /// <summary>The gesture in progress, transitions and adornments; <see cref="SceneSnapshot.Empty"/> while there are none.</summary>
     public SceneSnapshot Live { get; private set; } = SceneSnapshot.Empty;
+
+    /// <summary>
+    /// The laser pointer's trail as the last update drew it, in canvas points (the last list of <see cref="Live"/>), or null
+    /// without one. The shared region draws it too (Mac SharedRegionPointerView).
+    /// </summary>
+    public DisplayList? Laser => _laserList;
 
     /// <summary>
     /// Builds both layers for <paramref name="state"/>. <paramref name="bounds"/> is the canvas in points (the region
@@ -198,6 +208,9 @@ public sealed class CanvasScene
         _morphLists = [];
         _fade = null;
         _fadeLists = [];
+        _laser = default;
+        _laserTime = 0;
+        _laserList = null;
         _edited = null;
         _editedList = null;
         _draftList = null;
@@ -335,6 +348,10 @@ public sealed class CanvasScene
                 _parts.Add(Scene.Selection);
             }
         }
+        if (LaserList(state.Laser, state.LaserTime) is { } laser)
+        {
+            _parts.Add(laser);
+        }
         ReadOnlySpan<DisplayList> parts = CollectionsMarshal.AsSpan(_parts);
         if (SameLists(parts, Live.Elements))
         {
@@ -366,6 +383,27 @@ public sealed class CanvasScene
         _edited = session;
         _editedList = _liveBuilder.EditedText(text, session.PaintFrame, session.FirstBaseline(session.Text));
         return _editedList;
+    }
+
+    /// <summary>Mac LaserTrailRenderer.draw(laserTrail, at:): the trail at its frame time, rebuilt only when either changed.</summary>
+    private DisplayList? LaserList(in LaserTrail trail, double time)
+    {
+        if (trail.IsEmpty)
+        {
+            _laser = default;
+            _laserList = null;
+            return null;
+        }
+        if (time == _laserTime && trail == _laser)
+        {
+            return _laserList;
+        }
+        _lists.Clear();
+        LaserTrailRenderer.Draw(trail, time, _lists);
+        _laserList = _lists.Count == 0 ? null : _lists.ToList();
+        _laser = trail;
+        _laserTime = time;
+        return _laserList;
     }
 
     /// <summary>Mac drawSnapMorph: the fading candidate, the line moving onto the outline (or the fading ink), then the shape fading in.</summary>

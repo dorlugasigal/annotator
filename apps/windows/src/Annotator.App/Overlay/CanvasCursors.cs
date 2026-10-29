@@ -12,9 +12,9 @@ namespace Annotator.App.Overlay;
 
 /// <summary>
 /// The canvas cursors as real system cursors for each monitor scale (WIN-OVR-11): the arrow, text and crosshair from
-/// Windows, and the footprint and rotation cursors drawn by <see cref="CursorArtwork"/>. Drawn cursors are cached; like
-/// the Mac's ToolCursorFactory, the cache holds at most 32 and then starts over, keeping the cursors canvases still show.
-/// Use it on the overlay thread.
+/// Windows, and the footprint, laser pointer and rotation cursors drawn by <see cref="CursorArtwork"/>. Drawn cursors are
+/// cached by kind, tool, width, color and scale; like the Mac's ToolCursorFactory, the cache holds at most 32 and then
+/// starts over, keeping the cursors canvases still show. Use it on the overlay thread.
 /// </summary>
 internal sealed unsafe class CanvasCursors : IDisposable
 {
@@ -22,7 +22,7 @@ internal sealed unsafe class CanvasCursors : IDisposable
     private static readonly HCURSOR s_ibeam = PInvoke.LoadCursor(HINSTANCE.Null, PInvoke.IDC_IBEAM);
     private static readonly HCURSOR s_crosshair = PInvoke.LoadCursor(HINSTANCE.Null, PInvoke.IDC_CROSS);
 
-    private readonly Dictionary<(CanvasCursorKind Kind, Tool Tool, double Width, double Scale), nint> _drawn = [];
+    private readonly Dictionary<(CanvasCursorKind Kind, Tool Tool, double Width, RGBA Color, double Scale), nint> _drawn = [];
     private readonly Func<IEnumerable<nint>> _inUse;
     private bool _disposed;
 
@@ -48,15 +48,19 @@ internal sealed unsafe class CanvasCursors : IDisposable
             case CanvasCursorKind.Crosshair:
                 return (nint)s_crosshair;
         }
-        var key = (cursor.Kind, cursor.Kind == CanvasCursorKind.Footprint ? cursor.Tool : Tool.Select,
-                   cursor.Kind == CanvasCursorKind.Footprint ? cursor.Width : 0, scale);
+        bool sized = cursor.Kind is CanvasCursorKind.Footprint or CanvasCursorKind.Laser;
+        var key = (cursor.Kind, sized ? cursor.Tool : Tool.Select, sized ? cursor.Width : 0,
+                   cursor.Kind == CanvasCursorKind.Laser ? cursor.Color : default, scale);
         if (_drawn.TryGetValue(key, out nint known))
         {
             return known;
         }
-        CursorArtwork.Image image = cursor.Kind == CanvasCursorKind.Footprint
-            ? CursorArtwork.Footprint(cursor, scale)
-            : CursorArtwork.Rotation(scale);
+        CursorArtwork.Image image = cursor.Kind switch
+        {
+            CanvasCursorKind.Footprint => CursorArtwork.Footprint(cursor, scale),
+            CanvasCursorKind.Laser => CursorArtwork.Laser(cursor, scale),
+            _ => CursorArtwork.Rotation(scale),
+        };
         if (_drawn.Count >= CacheLimit)
         {
             Trim();

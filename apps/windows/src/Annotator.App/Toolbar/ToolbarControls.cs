@@ -102,6 +102,7 @@ internal static class ToolbarParts
         "Ellipse" => 36,
         "Eraser" => 35.5,
         "Highlighter" => 61.5,
+        "Laser pointer" => 72.5,
         "Line" => 23,
         "Paste image" => 67,
         "Pen" => 20.5,

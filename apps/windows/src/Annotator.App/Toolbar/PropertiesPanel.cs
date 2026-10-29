@@ -248,26 +248,26 @@ internal sealed class PropertiesPanel
             case InspectorItem.FillColor:
                 return Titled(Well(fill: true));
             case InspectorItem.Width:
-                return Block(InspectorPlan.WidthTitle(tool), "lineweight", SliderOnly(StyleParameter.Width));
+                return Block(InspectorPlan.WidthTitle(tool), SliderOnly(StyleParameter.Width));
             case InspectorItem.Opacity:
                 return Value(StyleParameter.Opacity, _compact ? 64 : 90, showLabel: true);
             case InspectorItem.Pattern:
-                return Block("Pattern", "line.3.horizontal",
+                return Block("Pattern",
                     Choices(PropertyChoice.Pattern, "Pattern",
                         InspectorPlan.PatternChoices.Select(choice => (choice.Value, choice.Name, InspectorSample.ForPattern(choice.Value))),
                         style => style.Pattern, pattern => _model.ApplyStyle((ref CoreStyle style) => style.Pattern = pattern)));
             case InspectorItem.Roughness:
-                return Block("Roughness", "scribble",
+                return Block("Roughness",
                     Choices(PropertyChoice.Roughness, "Roughness",
                         InspectorPlan.RoughnessChoices.Select(choice => (choice.Value, choice.Name, InspectorSample.Roughness(choice.Value))),
                         style => style.Roughness, roughness => _model.ApplyStyle((ref CoreStyle style) => style.Roughness = roughness)));
             case InspectorItem.FillStyle:
-                return Block("Fill style", "square.lefthalf.filled",
+                return Block("Fill style",
                     Choices(PropertyChoice.FillStyle, "Fill style",
                         InspectorPlan.FillStyleChoices.Select(choice => (choice.Value, choice.Name, InspectorSample.Fill(choice.Value))),
                         style => style.FillPattern, pattern => _model.ApplyStyle((ref CoreStyle style) => style.FillPattern = pattern)));
             case InspectorItem.Edges:
-                return Block("Edges", "rectangle", _plan.ShowsAllChoices(PropertyChoice.Edges)
+                return Block("Edges", _plan.ShowsAllChoices(PropertyChoice.Edges)
                     ? Options(new[] { (false, "Sharp corners", InspectorSample.Edges(false)), (true, "Rounded corners", InspectorSample.Edges(true)) },
                         style => style.CornerRadius > 0,
                         rounded => _model.ApplyStyle((ref CoreStyle style) => style.CornerRadius = rounded ? InspectorPlan.RoundedCornerRadius : 0))
@@ -282,7 +282,7 @@ internal sealed class PropertiesPanel
             case InspectorItem.Axes:
                 return Axes();
             case InspectorItem.Pressure:
-                return Block("Pressure", "pencil.tip", _plan.ShowsAllChoices(PropertyChoice.Pressure)
+                return Block("Pressure", _plan.ShowsAllChoices(PropertyChoice.Pressure)
                     ? Options(new[] { (false, "Constant pressure", InspectorSample.Pressure(false)), (true, "Ink pressure", InspectorSample.Pressure(true)) },
                         style => style.Pressure, pressure => _model.ApplyStyle((ref CoreStyle style) => style.Pressure = pressure))
                     : Toggle("Ink pressure", InspectorSample.Pressure(true), style => style.Pressure,
@@ -293,18 +293,25 @@ internal sealed class PropertiesPanel
                 var smart = new SmartDrawToggle(_model, 36);
                 smart.Root.Click += (_, _) => _host.Interacted();
                 _updates.Add(smart.Update);
-                return Block("Smart Draw", "wand.and.stars", smart.Root);
+                return Block("Smart Draw", smart.Root);
             case InspectorItem.Caption:
-                return PropertyMetrics.Text(_plan.Caption ?? string.Empty, 10, Secondary);
+                TextBlock caption = PropertyMetrics.Text(_plan.Caption ?? string.Empty, 10, Secondary);
+                if (_compact && tool == Tool.Laser)
+                {
+                    // fixedSize(horizontal: !compact, vertical: true): one line on the row, wrapped in the column.
+                    caption.TextWrapping = TextWrapping.Wrap;
+                    caption.MinWidth = 0;
+                }
+                return caption;
             case InspectorItem.Font:
                 if (_plan.ShowsAllChoices(PropertyChoice.Font))
                 {
                     var fonts = new MacStack { Orientation = Orientation.Horizontal, Spacing = 5 };
                     fonts.Children.Add(Left(FontChoice("System", "system", SystemFont)));
                     fonts.Children.Add(Left(FontChoice("Mono", "monospace", MonoFont)));
-                    return Block("Font", "textformat", fonts);
+                    return Block("Font", fonts);
                 }
-                return Block("Font", "textformat", Cycle("Font",
+                return Block("Font", Cycle("Font",
                     [
                         ("system", "System", () => Glyph("Aa", 16, SystemFont)),
                         ("monospace", "Mono", () => Glyph("Aa", 16, MonoFont)),
@@ -312,7 +319,7 @@ internal sealed class PropertiesPanel
                     style => string.Equals(style.FontName, "monospace", StringComparison.Ordinal) ? "monospace" : "system",
                     name => _model.ApplyStyle((ref CoreStyle style) => style.FontName = name)));
             case InspectorItem.TextSize:
-                return Block("Size", "textformat.size", SliderOnly(StyleParameter.TextSize));
+                return Block("Size", SliderOnly(StyleParameter.TextSize));
             case InspectorItem.Weight:
                 (ParityButton bold, Action<bool> boldSelect) = Choice("Bold", Symbol("bold", 17));
                 AutomationProperties.SetAutomationId(bold, "bold");
@@ -322,7 +329,7 @@ internal sealed class PropertiesPanel
                     boldSelect(state.Style.Bold);
                     bold.AccessibleValue = state.Style.Bold ? "On" : "Off";
                 });
-                return Block("Weight", "bold", bold);
+                return Block("Weight", bold);
             case InspectorItem.Alignment:
                 if (_plan.ShowsAllChoices(PropertyChoice.Alignment))
                 {
@@ -336,9 +343,9 @@ internal sealed class PropertiesPanel
                         _updates.Add(state => select(state.Style.Alignment == alignment));
                         alignments.Children.Add(Left(button));
                     }
-                    return Block("Alignment", "text.alignleft", alignments);
+                    return Block("Alignment", alignments);
                 }
-                return Block("Alignment", "text.alignleft", Cycle("Alignment",
+                return Block("Alignment", Cycle("Alignment",
                     [.. InspectorPlan.AlignmentChoices.Select(choice =>
                         (choice.Value, choice.Name, (Func<UIElement>)(() => Symbol(AlignmentSymbol(choice.Value), 15))))],
                     style => style.Alignment, alignment => _model.ApplyStyle((ref CoreStyle style) => style.Alignment = alignment)));
@@ -539,44 +546,20 @@ internal sealed class PropertiesPanel
         _model.ApplyStyle(mutation);
     }
 
-    /// <summary>Port of PropertyBlock: the title with its symbol, 6 points above the content.</summary>
-    private static MacStack Block(string name, string symbol, params FrameworkElement[] content)
+    /// <summary>
+    /// Port of PropertyBlock: the property's name, 6 points above the content. The name is plain text, 11-point medium in
+    /// the secondary color like the color pickers' names, so every name on the row starts at the block's leading edge.
+    /// </summary>
+    private static MacStack Block(string name, params FrameworkElement[] content)
     {
         var block = new MacStack { Spacing = 6 };
         PropertyRow.SetTitled(block, true);
-        block.Children.Add(Left(BlockTitle(name, symbol)));
+        block.Children.Add(Left(PropertyMetrics.Text(name, 11, Secondary, FontWeights.Medium)));
         foreach (FrameworkElement part in content)
         {
             block.Children.Add(Left(part));
         }
         return block;
-    }
-
-    /// <summary>
-    /// SwiftUI's Label at 11 points medium in the secondary color. UI Automation reads it as one static text with the Mac's
-    /// frame: from the symbol's drawn edge to the end of the words.
-    /// </summary>
-    private static FrameworkElement BlockTitle(string name, string symbol)
-    {
-        (double offset, double width) = PropertyMetrics.Label(name);
-        TextBlock title = ToolbarParts.Label(name, 11, Secondary, FontWeights.Medium);
-        title.LineHeight = 14;
-        title.VerticalAlignment = VerticalAlignment.Center;
-        FrameworkElement icon = Glyphs.ForSymbol(symbol, 12, "AnnotatorGlyphSecondary");
-        if (width <= 0)
-        {
-            title.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
-            width = 19 + Math.Ceiling(title.DesiredSize.Width);
-        }
-        var label = new AccessibleText(name) { Width = offset + width, Height = 14, Bounds = new WinRect(offset, 0, width, 14) };
-        Canvas.SetLeft(icon, offset - 1);
-        Canvas.SetTop(icon, 1);
-        var art = new Canvas { IsHitTestVisible = false };
-        art.Children.Add(icon);
-        label.Children.Add(art);
-        title.HorizontalAlignment = HorizontalAlignment.Right;
-        label.Children.Add(title);
-        return label;
     }
 
     /// <summary>
@@ -761,15 +744,15 @@ internal sealed class PropertiesPanel
     {
         var group = new UnionGroup("Arrow properties");
         Panel layout = Layout();
-        layout.Children.Add(Left(Block("Start", "arrow.left", ArrowEnd(start: true))));
-        layout.Children.Add(Left(Block("End", "arrow.right", ArrowEnd(start: false))));
+        layout.Children.Add(Left(Block("Start", ArrowEnd(start: true))));
+        layout.Children.Add(Left(Block("End", ArrowEnd(start: false))));
         FrameworkElement type = _plan.ShowsAllChoices(PropertyChoice.ArrowType)
             ? Options(new[] { (false, "Straight arrow", InspectorSample.Route(false)), (true, "Curved arrow", InspectorSample.Route(true)) },
                 style => style.Curved, curved => _model.ApplyStyle((ref CoreStyle style) => style.Curved = curved))
             : Toggle("Curved arrow", InspectorSample.Route(true), style => style.Curved,
                 "Curved arrow is on. Click for a straight arrow.", "Straight arrow. Click to curve it.",
                 curved => (ref CoreStyle style) => style.Curved = !curved);
-        layout.Children.Add(Left(Block(_plan.ArrowTypeTitle, "arrow.turn.up.right", type)));
+        layout.Children.Add(Left(Block(_plan.ArrowTypeTitle, type)));
         var slider = new MacStack { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
         ParitySlider head = RawSlider(86, 0.5, 2, style => style.HeadScale ?? 1,
             (double value, ref CoreStyle style) => style.HeadScale = value, out FrameworkElement band);
@@ -793,7 +776,7 @@ internal sealed class PropertiesPanel
         });
         var frame = new Grid { Height = PropertyRow.ControlHeight };
         frame.Children.Add(slider);
-        layout.Children.Add(Left(Block("Head size", "arrow.up.left.and.arrow.down.right", frame)));
+        layout.Children.Add(Left(Block("Head size", frame)));
         group.Children.Add(layout);
         return group;
     }
@@ -869,7 +852,7 @@ internal sealed class PropertiesPanel
         slider.Children.Add(percent);
         layout.Children.Add(Left(slider));
         layout.Children.Add(Left(PropertyMetrics.Text(InspectorPlan.ImageHint, 10, Secondary)));
-        return Block("Image opacity", "photo", layout);
+        return Block("Image opacity", layout);
     }
 
     /// <summary>Port of CoverPropertiesView in the panel: the effect choice and its strength, or the note for a selected solid cover.</summary>

@@ -16,7 +16,7 @@ namespace Annotator.Core;
 
 public enum Tool
 {
-    Select, Pen, Highlighter, Line, Arrow, Rectangle, Ellipse, Diamond, Text, Eraser, Cover, Blur,
+    Select, Pen, Highlighter, Laser, Line, Arrow, Rectangle, Ellipse, Diamond, Text, Eraser, Cover, Blur,
     Pixelate, Distort, Ruler, Counter, Image,
     Database, Queue, Person, Grid, Axes,
     Triangle, Hexagon, Star,
@@ -27,7 +27,7 @@ public enum Tool
 public static class ToolExtensions
 {
     internal static readonly RawValueMap<Tool> RawValues = new(
-        "select", "pen", "highlighter", "line", "arrow", "rectangle", "ellipse", "diamond", "text", "eraser", "cover", "blur",
+        "select", "pen", "highlighter", "laser", "line", "arrow", "rectangle", "ellipse", "diamond", "text", "eraser", "cover", "blur",
         "pixelate", "distort", "ruler", "counter", "image",
         "database", "queue", "person", "grid", "axes",
         "triangle", "hexagon", "star",
@@ -59,6 +59,7 @@ public static class ToolExtensions
             Tool.Select => "Select",
             Tool.Pen => "Pen",
             Tool.Highlighter => "Highlighter",
+            Tool.Laser => "Laser pointer",
             Tool.Line => "Line",
             Tool.Arrow => "Arrow",
             Tool.Rectangle => "Rectangle",
@@ -103,6 +104,9 @@ public static class ToolExtensions
         public bool IsProtection => tool == Tool.Cover || tool.IsPixelEffect;
 
         public bool IsFreehand => tool is Tool.Pen or Tool.Highlighter;
+
+        /// <summary>The laser pointer draws a trail that fades by itself (<see cref="LaserTrail"/>); it never adds anything to a drawing.</summary>
+        public bool IsLaser => tool == Tool.Laser;
 
         public bool IsConnector => tool is Tool.Line or Tool.Arrow;
 
@@ -484,7 +488,7 @@ public partial struct Element : IEquatable<Element>
         }
         if (!Frame.IsValid || !AllFinite(Points) || !double.IsFinite(Rotation) || !PressuresValid(Pressures)
             || !(Pressures.IsEmpty || Pressures.Count == Points.Count)
-            || SwiftText.Utf8Count(Text) > 1_000_000 || Tool == Tool.Select || Tool == Tool.Eraser)
+            || SwiftText.Utf8Count(Text) > 1_000_000 || Tool == Tool.Select || Tool == Tool.Eraser || Tool == Tool.Laser)
         {
             throw CanvasError.InvalidGeometry;
         }

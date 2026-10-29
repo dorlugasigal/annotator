@@ -6,8 +6,8 @@ namespace Annotator.Workspace.Artwork;
 
 /// <summary>
 /// The canvas cursors Windows does not provide, drawn as the Mac's ToolCursorFactory draws them: the tool footprint of
-/// the pen, highlighter and eraser, and the rotation cursor. Images are rendered for one monitor scale, so each becomes
-/// a sharp system cursor there (WIN-OVR-11). The hotspot is the image center, where the ink lands.
+/// the pen, highlighter and eraser, the laser pointer's dot and the rotation cursor. Images are rendered for one monitor
+/// scale, so each becomes a sharp system cursor there (WIN-OVR-11). The hotspot is the image center, where the ink lands.
 /// </summary>
 public static class CursorArtwork
 {
@@ -53,6 +53,27 @@ public static class CursorArtwork
             canvas.Stroke(cross, 2 * scale, White);
             canvas.Stroke(cross, 0.7 * scale, Black);
         }
+        return canvas.ToImage();
+    }
+
+    /// <summary>
+    /// Mac ToolCursorFactory.laserCursor(width:color:): a dot as wide as the trail's head in the laser's color, inside a
+    /// 1.5-point white ring and a 5-point glow of the color at alpha 0.28, in a square of <see cref="CanvasCursor.ImageSide"/>
+    /// points at <paramref name="scale"/> pixels per point.
+    /// </summary>
+    public static Image Laser(CanvasCursor cursor, double scale)
+    {
+        if (cursor.Kind != CanvasCursorKind.Laser)
+        {
+            throw new ArgumentException("Only the laser pointer has laser artwork.", nameof(cursor));
+        }
+        var canvas = new Raster(cursor.ImageSide, scale);
+        double center = canvas.Center;
+        double radius = cursor.LaserRadius * scale;
+        var solid = new RGBA(cursor.Color.Red, cursor.Color.Green, cursor.Color.Blue);
+        canvas.Fill(Shape.Disk(center, center, radius + 5 * scale), solid with { Alpha = 0.28 });
+        canvas.Fill(Shape.Disk(center, center, radius + 1.5 * scale), White);
+        canvas.Fill(Shape.Disk(center, center, radius), solid);
         return canvas.ToImage();
     }
 

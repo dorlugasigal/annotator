@@ -66,23 +66,35 @@ public sealed partial class CanvasController
                     Down(e);
                     break;
                 case PointerPhase.Move:
-                    if (_gesture is { } gesture && gesture.PointerId == e.PointerId)
+                    if (_laserPointer == e.PointerId)
+                    {
+                        MoveLaser(e);
+                    }
+                    else if (_gesture is { } gesture && gesture.PointerId == e.PointerId)
                     {
                         Drag(e, e.Samples);
                     }
-                    else if (_gesture is null)
+                    else if (_gesture is null && _laserPointer is null)
                     {
                         Hover(e.Position);
                     }
                     break;
                 case PointerPhase.Up:
-                    if (_gesture is { } active && active.PointerId == e.PointerId)
+                    if (_laserPointer == e.PointerId)
+                    {
+                        ReleaseLaser(e.Position);
+                    }
+                    else if (_gesture is { } active && active.PointerId == e.PointerId)
                     {
                         Up(e);
                     }
                     break;
                 case PointerPhase.Cancel:
-                    if (_gesture is { } cancelled && cancelled.PointerId == e.PointerId)
+                    if (_laserPointer == e.PointerId)
+                    {
+                        ReleaseLaser(null);
+                    }
+                    else if (_gesture is { } cancelled && cancelled.PointerId == e.PointerId)
                     {
                         CancelGesture();
                     }
@@ -178,7 +190,7 @@ public sealed partial class CanvasController
     /// <summary>Mac mouseDown.</summary>
     private void Down(in PointerEvent e)
     {
-        if (!CanStartEdit || _gesture is not null)
+        if (!CanStartEdit || _gesture is not null || _laserPointer is not null)
         {
             return;
         }
@@ -197,6 +209,11 @@ public sealed partial class CanvasController
             _gesture = new Gesture(GestureKind.Marquee, e.PointerId) { Start = point };
             _marquee = new Rect(point, point);
             Publish(CanvasChangeKinds.Adornments, null);
+            return;
+        }
+        if (Workspace.Tool == Tool.Laser)
+        {
+            PressLaser(e);
             return;
         }
         Tool tool = Workspace.Tool;

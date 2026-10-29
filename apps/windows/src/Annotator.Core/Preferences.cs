@@ -249,12 +249,12 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         ("6", "line"), ("7", "pen"), ("8", "text"), ("9", "highlighter"), ("0", "eraser"),
         ("u", "blur"), ("s", "cover"), ("x", "pixelate"), ("t", "distort"), ("m", "ruler"),
         ("n", "counter"), ("i", "image"), ("d", "database"), ("q", "queue"), ("h", "person"),
-        ("f", "grid"), ("a", "axes"));
+        ("f", "grid"), ("a", "axes"), ("l", "laser"));
 
     public static ValueList<Tool> DefaultToolbar { get; } =
     [
         Tool.Select, Tool.Rectangle, Tool.Diamond, Tool.Ellipse, Tool.Arrow, Tool.Line, Tool.Pen, Tool.Text,
-        Tool.Highlighter, Tool.Eraser, Tool.Cover,
+        Tool.Highlighter, Tool.Laser, Tool.Eraser, Tool.Cover,
     ];
 
     internal static ImmutableSortedDictionary<string, Style> EmptyStyles { get; } =

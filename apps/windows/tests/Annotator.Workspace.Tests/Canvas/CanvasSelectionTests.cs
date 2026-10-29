@@ -20,7 +20,7 @@ public sealed class CanvasSelectionTests
         using CanvasHarness h = Single();
         foreach (Tool tool in Tool.AllCases)
         {
-            if (tool is Tool.Select or Tool.Eraser)
+            if (tool is Tool.Select or Tool.Eraser or Tool.Laser)
             {
                 continue;
             }

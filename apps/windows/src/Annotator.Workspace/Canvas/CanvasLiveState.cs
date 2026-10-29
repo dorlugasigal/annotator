@@ -20,14 +20,21 @@ public enum CanvasCursorKind
 
     /// <summary>The rotation cursor over a rotation handle and while rotating.</summary>
     Rotation,
+
+    /// <summary>
+    /// The laser pointer (Mac ToolCursorFactory.laserCursor): a dot as wide as the trail's head in the laser's color, inside
+    /// a white ring and a soft glow, scaled by width and zoom.
+    /// </summary>
+    Laser,
 }
 
 /// <summary>
 /// The cursor a canvas asks for (Mac hoverCursor and ToolCursorFactory). For <see cref="CanvasCursorKind.Footprint"/>,
 /// <see cref="Tool"/> and <see cref="Width"/> (stroke width times zoom, in points) describe the footprint; the platform
-/// draws it as a real cursor at each monitor scale.
+/// draws it as a real cursor at each monitor scale. <see cref="CanvasCursorKind.Laser"/> also has the laser's
+/// <see cref="Color"/>, opaque.
 /// </summary>
-public readonly record struct CanvasCursor(CanvasCursorKind Kind, Tool Tool = Tool.Select, double Width = 0)
+public readonly record struct CanvasCursor(CanvasCursorKind Kind, Tool Tool = Tool.Select, double Width = 0, RGBA Color = default)
 {
     public static CanvasCursor Arrow => new(CanvasCursorKind.Arrow);
 
@@ -35,18 +42,34 @@ public readonly record struct CanvasCursor(CanvasCursorKind Kind, Tool Tool = To
 
     public static CanvasCursor Rotation => new(CanvasCursorKind.Rotation);
 
-    /// <summary>Mac ToolCursorFactory.cursor(tool:width:): Select uses the arrow, Text the text cursor, and other non-freehand tools a crosshair.</summary>
-    public static CanvasCursor ForTool(Tool tool, double width) =>
+    /// <summary>
+    /// Mac ToolCursorFactory.cursor(tool:width:color:): Select uses the arrow, Text the text cursor, the laser pointer its dot
+    /// in <paramref name="color"/> (the laser's default red without one), and other non-freehand tools a crosshair.
+    /// </summary>
+    public static CanvasCursor ForTool(Tool tool, double width, RGBA? color = null) =>
         tool == Tool.Select ? Arrow
         : tool == Tool.Text ? IBeam
+        : tool == Tool.Laser ? Laser(width, color ?? LaserTrail.DefaultColor)
         : !tool.IsFreehand && tool != Tool.Eraser ? new CanvasCursor(CanvasCursorKind.Crosshair, tool, width)
         : new CanvasCursor(CanvasCursorKind.Footprint, tool, width);
+
+    /// <summary>Mac ToolCursorFactory.laserCursor(width:color:): the color counts without its alpha.</summary>
+    public static CanvasCursor Laser(double width, RGBA color) =>
+        new(CanvasCursorKind.Laser, Tool.Laser, width, new RGBA(color.Red, color.Green, color.Blue));
+
+    /// <summary>The laser dot's radius in points: half the width, between 2 and 250.</summary>
+    public double LaserRadius => Math.Min(250, Math.Max(2, Width / 2));
 
     /// <summary>The footprint's size in points: five widths for the highlighter, two for the eraser, at most 500.</summary>
     public double FootprintSize => Math.Min(500, Tool == Tool.Highlighter ? Width * 5 : Tool == Tool.Eraser ? Width * 2 : Width);
 
-    /// <summary>The square cursor image's side in points: the footprint plus 10, between 24 and 520.</summary>
-    public double ImageSide => Math.Min(520, Math.Max(24, Math.Ceiling(FootprintSize) + 10));
+    /// <summary>
+    /// The square cursor image's side in points: the footprint plus 10, between 24 and 520; for the laser, its glow's
+    /// diameter plus 2, rounded up.
+    /// </summary>
+    public double ImageSide => Kind == CanvasCursorKind.Laser
+        ? Math.Ceiling(LaserRadius * 2 + 12)
+        : Math.Min(520, Math.Max(24, Math.Ceiling(FootprintSize) + 10));
 
     /// <summary>
     /// The drawn nib, centered in the image: a rectangle 1.6 widths wide for the highlighter (a vertical chisel), else a
@@ -81,7 +104,7 @@ public enum CanvasChangeKinds
     /// <summary>The text being edited.</summary>
     Text = 16,
 
-    /// <summary>The Smart Draw morph or the eraser fade started, moved on or ended.</summary>
+    /// <summary>The Smart Draw morph or the eraser fade started, moved on or ended, or the laser pointer's trail changed.</summary>
     Transitions = 32,
 
     /// <summary>An edit started or ended (<see cref="CanvasLiveState.HasActiveEdit"/>).</summary>
@@ -224,14 +247,27 @@ public readonly struct CanvasLiveState
     /// <summary>Linear time of <see cref="EraseFade"/> from 0 to 1.</summary>
     public double EraseFadeProgress { get; init; }
 
+    /// <summary>
+    /// The laser pointer's trail on this display (Mac DrawingCanvas.laserTrail), empty without one: draw it as it shows at
+    /// <see cref="LaserTime"/>, above the drawings and covers (<see cref="Annotator.Core.Scene.LaserTrailRenderer"/>). It is
+    /// never part of the document.
+    /// </summary>
+    public LaserTrail Laser { get; init; }
+
+    /// <summary>When the trail is drawn, in seconds on <see cref="CanvasOptions.Clock"/>.</summary>
+    public double LaserTime { get; init; }
+
     /// <summary>A gesture, text edit, clicked arrow or region choice is in progress (Escape cancels or finishes it).</summary>
     public bool HasActiveEdit { get; init; }
 
     /// <summary>A clicked arrow is being built: Enter or a double-click finishes it.</summary>
     public bool ConstructingArrow { get; init; }
 
-    /// <summary>A transition runs: call <see cref="CanvasController.AdvanceTransitions"/> on each frame until it returns false.</summary>
-    public bool HasTransitions => Morph is not null || EraseFade is not null;
+    /// <summary>
+    /// A transition runs, or the laser pointer's trail moves or fades: call <see cref="CanvasController.AdvanceTransitions"/>
+    /// on each frame until it returns false. A held laser resting on one spot needs no frames.
+    /// </summary>
+    public bool HasTransitions => Morph is not null || EraseFade is not null || (!Laser.IsEmpty && !Laser.IsResting);
 
     /// <summary><see cref="Elements"/> with <see cref="Draft"/> in place: one list for a scene builder. Allocates.</summary>
     public ElementList ComposeElements()

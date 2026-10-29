@@ -20,17 +20,15 @@ namespace Annotator.RenderHarness;
 /// The pointer mode: draws the pointer references of UXReferenceCaptureTests.test08PointerCursorsAndIcons with the
 /// Windows renderer (WARP, so every run draws the same pixels) and compares them with reference/ux-reference/macos/pointer:
 /// the seven halo shapes with each outline, with and without glow, in both themes; Spotlight at its default radius over
-/// the capture's backdrop; and the Pulse, Ripple and Turn click effects at 60 frames per second, compared tile by tile
-/// with the Mac's contact sheets. Writes, per state, the Windows image (.windows.png), a sheet with the Mac image, the
+/// the capture's backdrop; and the laser pointer's trail and the Pulse, Ripple and Turn click effects at 60 frames per
+/// second, compared tile by tile with the Mac's contact sheets. Writes, per state, the Windows image (.windows.png), a sheet with the Mac image, the
 /// Windows image and their difference four times stronger (.sheet.png), and summary.md and summary.json.
 /// </summary>
 internal static unsafe class PointerPictures
 {
     private const double Scale = 2;
     private const int SheetMargin = 12;
-    private const int SheetTile = 140;
     private const int SheetCaption = 26;
-    private const int SheetColumns = 4;
 
     public static void Run(HarnessOptions options)
     {
@@ -55,9 +53,10 @@ internal static unsafe class PointerPictures
                     rows.Add(Compare(reference, output, state, theme, HaloRow(canvas, effects, pattern, glow, dark)));
                 }
             }
+            rows.Add(CompareSequence(reference, output, "laser-trail", theme, time => LaserFrame(canvas, renderer, time, dark)));
             foreach (CursorClickEffect effect in new[] { CursorClickEffect.Pulse, CursorClickEffect.Ripple, CursorClickEffect.Turn })
             {
-                rows.Add(CompareSequence(reference, output, $"click-{effect.RawValue}", theme, canvas, effects, effect, dark));
+                rows.Add(CompareSequence(reference, output, $"click-{effect.RawValue}", theme, time => ClickFrame(canvas, effects, effect, time, dark)));
             }
         }
         WriteSummary(output, reference, rows);
@@ -101,6 +100,53 @@ internal static unsafe class PointerPictures
             CursorHighlightFrame frame = CursorHighlightFrame.Create(settings, new Point(70, 70), time / CursorHighlightSettings.ClickDuration, new Point(70, 70));
             effects.DrawHalo((nint)context, frame, area);
         });
+    }
+
+    /// <summary>
+    /// One laser frame: a 360 by 220-point picture of the theme's gray with the trail of <see cref="LaserSwoosh"/> as drawn at
+    /// <paramref name="time"/> (Mac test08's laser-trail).
+    /// </summary>
+    private static RasterImage LaserFrame(OffscreenCanvas canvas, DisplayListRenderer renderer, double time, bool dark)
+    {
+        int width = (int)(360 * Scale), height = (int)(220 * Scale);
+        var area = new DrawArea(Scale, 0, 0, new PixelRect(0, 0, width, height));
+        if (LaserTrailRenderer.List(LaserSwoosh(time), time) is not { } list)
+        {
+            return canvas.Render(width, height, context => Fill(context, dark ? 0.16 : 0.92));
+        }
+        renderer.Enter(list);
+        try
+        {
+            return canvas.Render(width, height, context =>
+            {
+                Fill(context, dark ? 0.16 : 0.92);
+                renderer.Draw((nint)context, list, area);
+            });
+        }
+        finally
+        {
+            renderer.Leave(list);
+        }
+    }
+
+    /// <summary>
+    /// Mac UXReferenceCaptureTests.laserSwoosh(until:): a swoosh across the picture with the button down for half a second,
+    /// one point each 60th of a second, as far as it got at <paramref name="time"/>.
+    /// </summary>
+    private static LaserTrail LaserSwoosh(double time)
+    {
+        var trail = new LaserTrail();
+        trail.Press(new Point(40, 150), 0, LaserTrail.DefaultColor, LaserTrail.DefaultWidth);
+        for (int step = 1; step <= 30 && step / 60.0 <= time; step++)
+        {
+            double share = step / 30.0;
+            trail.Move(new Point(40 + 280 * share, 150 - 90 * Math.Sin(share * Math.PI)), step / 60.0);
+        }
+        if (time >= 0.5)
+        {
+            trail.Release(null, 0.5);
+        }
+        return trail;
     }
 
     /// <summary>
@@ -183,32 +229,36 @@ internal static unsafe class PointerPictures
     }
 
     /// <summary>
-    /// The click effect's 28 frames, then the Mac contact sheet's tiles compared with the Windows frames at 1x: the
-    /// Windows sheet is the Mac sheet with the Windows frames in its tiles, so the captions stay the Mac's.
+    /// The frames of the Mac contact sheet's tiles (<paramref name="frame"/> draws one at 2x for a time), compared with the
+    /// tiles at 1x: the Windows sheet is the Mac sheet with the Windows frames in its tiles, so the captions stay the Mac's.
+    /// Tiles are the frame's size in points, four to a row, or two when a frame is 400 points wide or more
+    /// (tools/macos/ux_reference.py).
     /// </summary>
-    private static Row CompareSequence(string reference, string output, string state, string theme, OffscreenCanvas canvas,
-                                       PointerEffectsRenderer effects, CursorClickEffect effect, bool dark)
+    private static Row CompareSequence(string reference, string output, string state, string theme, Func<double, RasterImage> frame)
     {
         string folder = Path.Combine(reference, "pointer", "motion");
         JsonNode metadata = JsonNode.Parse(File.ReadAllText(Path.Combine(folder, $"{state}-{theme}.json")))!;
         double[] times = [.. metadata["contactSheetFrames"]!.AsArray().Select(time => time!.GetValue<double>())];
+        JsonArray size = metadata["size"]!.AsArray();
+        int tileWidth = (int)size[0]!.GetValue<double>(), tileHeight = (int)size[1]!.GetValue<double>();
+        int columns = tileWidth < 400 ? 4 : 2;
         RasterImage mac = RasterAsset.Decode(File.ReadAllBytes(Path.Combine(folder, metadata["contactSheet"]!.GetValue<string>())));
         byte[] pixels = mac.Pixels.ToArray();
         double total = 0, visible = 0;
         for (int index = 0; index < times.Length; index++)
         {
             // The Mac's frames are k / 60 s; the sheet lists them rounded to four places.
-            int frame = (int)Math.Round(times[index] * 60);
-            RasterImage tile = Half(ClickFrame(canvas, effects, effect, frame / 60.0, dark));
-            int left = SheetMargin + index % SheetColumns * (SheetTile + SheetMargin);
-            int top = SheetMargin + index / SheetColumns * (SheetTile + SheetCaption + SheetMargin);
-            RasterImage macTile = Crop(mac, left, top, SheetTile, SheetTile);
+            int number = (int)Math.Round(times[index] * 60);
+            RasterImage tile = Half(frame(number / 60.0));
+            int left = SheetMargin + index % columns * (tileWidth + SheetMargin);
+            int top = SheetMargin + index / columns * (tileHeight + SheetCaption + SheetMargin);
+            RasterImage macTile = Crop(mac, left, top, tileWidth, tileHeight);
             Difference difference = Measure(macTile, tile);
             total += difference.Mean;
             visible += difference.Visible;
-            for (int row = 0; row < SheetTile; row++)
+            for (int row = 0; row < tileHeight; row++)
             {
-                tile.Pixels.Slice(row * tile.Stride, SheetTile * 4).CopyTo(pixels.AsSpan((top + row) * mac.Stride + left * 4, SheetTile * 4));
+                tile.Pixels.Slice(row * tile.Stride, tileWidth * 4).CopyTo(pixels.AsSpan((top + row) * mac.Stride + left * 4, tileWidth * 4));
             }
         }
         var windows = new RasterImage(mac.Width, mac.Height, mac.Stride, pixels);
