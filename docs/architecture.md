@@ -90,7 +90,9 @@ main-actor (Mac) or UI-thread (Windows) isolated.
   under the pointer.
 - **Region sharing**: one region on one display at a time, shown in one
   window, **Annotator - Shared Region**, that people pick in their meeting app.
-  A missing display or invalid region is never silently replaced.
+  Meeting apps send that window at its own size, so it opens at the region's
+  size, or as large as fits. A missing display or invalid region is never
+  silently replaced.
 - **Break timer**: no app can draw on the lock screen. The break screen covers
   every display, and the first real input locks the computer with the system
   lock.

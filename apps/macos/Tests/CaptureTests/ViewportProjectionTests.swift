@@ -120,3 +120,47 @@ private func projectedPixel(_ image: CIImage, x: Int, y: Int) throws -> [UInt8] 
         }
     }
 }
+
+private func projectedPixels(_ image: CIImage, size: CGSize) throws -> [[UInt8]] {
+    let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
+    let width = Int(size.width), height = Int(size.height)
+    var bytes = [UInt8](repeating: 0, count: width * height * 4)
+    try bytes.withUnsafeMutableBytes { raw in
+        let address = try #require(raw.baseAddress)
+        CIContext(options: [.cacheIntermediates: false]).render(image, toBitmap: address, rowBytes: width * 4,
+            bounds: CGRect(origin: .zero, size: size), format: .RGBA8, colorSpace: space)
+    }
+    return stride(from: 0, to: bytes.count, by: 4).map { Array(bytes[$0..<($0 + 4)]) }
+}
+
+@Test @MainActor func sharedViewScalesDownSmoothlyWithoutDroppingPixelsOrReadingOutsideTheRegion() throws {
+    // One-pixel black and white columns, with red outside the shared part.
+    let width = 80, height = 24
+    var bytes: [UInt8] = []
+    for y in 0..<height {
+        for x in 0..<width {
+            let inside = (8..<72).contains(x) && (4..<20).contains(y)
+            bytes += inside ? (x % 2 == 0 ? [0, 0, 0, 255] : [255, 255, 255, 255]) : [255, 0, 0, 255]
+        }
+    }
+    let image = CIImage(bitmapData: Data(bytes), bytesPerRow: width * 4, size: CGSize(width: width, height: height),
+                        format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB))
+    let source = Rect(x: 8, y: 4, width: 64, height: 16)
+    func project(_ size: CGSize, smooth: Bool) throws -> [[UInt8]] {
+        try projectedPixels(ViewportProjection.imageForMetal(image, sourceSize: CGSize(width: width, height: height),
+            viewport: Viewport(output: Rect(x: 0, y: 0, width: size.width, height: size.height), source: source),
+            targetSize: size, smoothDownscaling: smooth), size: size)
+    }
+    let half = CGSize(width: 32, height: 8)
+    #expect(try project(half, smooth: false).allSatisfy { $0[0] == $0[1] && ($0[0] == 0 || $0[0] == 255) },
+            "Nearest-neighbor keeps one column in two: the fixture shows the dropped pixels.")
+    for pixel in try project(half, smooth: true) {
+        #expect((96...160).contains(Int(pixel[0])), "Both columns must count: \(pixel)")
+        #expect(abs(Int(pixel[0]) - Int(pixel[1])) <= 2, "No red from outside the region: \(pixel)")
+        #expect(pixel[3] == 255)
+    }
+    for size in [CGSize(width: 64, height: 16), CGSize(width: 128, height: 32)] {
+        #expect(try project(size, smooth: true).allSatisfy { $0[0] == $0[1] && ($0[0] == 0 || $0[0] == 255) },
+                "At its own size and larger, the picture keeps its exact pixels.")
+    }
+}

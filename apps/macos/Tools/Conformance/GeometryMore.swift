@@ -79,6 +79,40 @@ extension GeometryExport {
             records.append(["call": "sharingRegion", "bounds": bounds.json, "display": displays[0].json,
                             "result": outcome { .value(try SharingRegion(bounds: bounds, displayBounds: displays[0]).bounds) }])
         }
+        // The output window's content: a macOS title bar and a Windows caption with borders, on displays with a menu bar
+        // and a dock or taskbar, then custom regions, a display too small for the margins and invalid input.
+        let frames = [FrameInsets(top: 28), FrameInsets(top: 31, left: 1, bottom: 1, right: 1)]
+        func insets(_ value: FrameInsets) -> J {
+            ["top": .double(value.top), "left": .double(value.left), "bottom": .double(value.bottom), "right": .double(value.right)]
+        }
+        for display in displays + [Rect(x: 0, y: 0, width: 5120, height: 1440)] {
+            let available = Rect(x: display.x, y: display.y + 25, width: display.width, height: display.height - 85)
+            for preset in ShareRegionPreset.allCases {
+                for frame in frames {
+                    records.append(["call": "sharingOutput", "preset": .string(preset.rawValue), "display": display.json,
+                                    "available": available.json, "frame": insets(frame), "result": outcome {
+                                        .value(try SharingRegion(preset: preset, displayBounds: display)
+                                            .outputContentFrame(available: available, frame: frame))
+                                    }])
+                }
+            }
+        }
+        let laptop = Rect(x: 0, y: 25, width: 1512, height: 957)
+        for (bounds, available, frame) in [
+            (Rect(x: 100, y: 100, width: 800, height: 600), laptop, frames[0]),
+            (displays[0], laptop, frames[1]),
+            (Rect(x: 0, y: 0, width: 40, height: 40), laptop, frames[0]),
+            (Rect(x: 0, y: 0, width: 40, height: 40), Rect(x: 0, y: 0, width: 200, height: 120), frames[1]),
+            (Rect(x: 0, y: 0, width: 40, height: 40), Rect.zero, frames[0]),
+            (Rect(x: 0, y: 0, width: 40, height: 40), laptop, FrameInsets(top: -1)),
+            (Rect(x: 0, y: 0, width: 40, height: 40), laptop, FrameInsets(top: .nan))
+        ] {
+            records.append(["call": "sharingOutput", "bounds": bounds.json, "display": displays[0].json,
+                            "available": available.json, "frame": insets(frame), "result": outcome {
+                                .value(try SharingRegion(bounds: bounds, displayBounds: displays[0])
+                                    .outputContentFrame(available: available, frame: frame))
+                            }])
+        }
         try corpus.lines("geometry/viewports.jsonl", records)
     }
 

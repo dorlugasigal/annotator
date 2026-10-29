@@ -51,6 +51,8 @@ final class RegionSharingCaptureTests: XCTestCase {
             throw RenderFailure.invalidSize
         }
         configuration.height = Int((frame.height / frame.width * 640).rounded())
+        // The window fills the snapshot at any size, so color fractions are fractions of the window.
+        configuration.scalesToFit = true
         configuration.showsCursor = false
         configuration.ignoreShadowsSingleWindow = true
         configuration.colorSpaceName = CGColorSpace.sRGB

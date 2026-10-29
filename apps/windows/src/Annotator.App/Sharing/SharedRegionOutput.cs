@@ -87,6 +87,7 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
     private bool _failed;
     private bool _reportedLive;
     private SharedRegionScene? _scene;
+    private (SharingRegion Region, string Display)? _fitted;
     private (int X, int Y)? _pointerAt;
     private PixelRect _fit;
 
@@ -192,6 +193,10 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
             {
                 return;
             }
+        }
+        else if (display is not null && !TryFit(output, display))
+        {
+            return;
         }
         Apply(output, display);
     }
@@ -408,7 +413,7 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
             _pointer.SetVisible(true, animate: false, reduceMotion: true);
             _window.CloseRequested += OnCloseRequested;
             _window.Resized += Layout;
-            _window.Place(display);
+            Fit(output.Region, display);
             _accessibility = new OverlayAccessibility(_window.ContentHandle, _window.ClientScreenRect(), Tree());
             _window.Accessibility = _accessibility;
             _window.ShowBehind();
@@ -417,7 +422,7 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
             Layout();
             return true;
         }
-        catch (Exception error) when (error is NativeCallException or InvalidOperationException or ArgumentException)
+        catch (Exception error) when (error is NativeCallException or InvalidOperationException or ArgumentException or CanvasError)
         {
             Close();
             _report(new OverlayEvent.Failure("Open the shared region window", error));
@@ -457,6 +462,7 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
         _pointerLayer = null;
         _window?.Dispose();
         _window = null;
+        _fitted = null;
         _output = null;
         _display = null;
         _coverMessage = null;
@@ -465,6 +471,45 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
     }
 
     private void OnCloseRequested() => _report(new OverlayEvent.SharingClosed());
+
+    /// <summary>
+    /// Mac SharedRegionWindow.fit: meeting apps send the window at its own size, so it shows the region at the region's
+    /// size, or as large as fits on its display, beside the region when there is room. It keeps the size people give it
+    /// until the region changes.
+    /// </summary>
+    private void Fit(SharingRegion region, DisplayInfo display)
+    {
+        if (_window is not { } window || _fitted == (region, display.DeviceName))
+        {
+            return;
+        }
+        // A size that cannot be set is reported once for this region, not on every frame.
+        _fitted = (region, display.DeviceName);
+        double scale = display.Scale;
+        (int top, int left, int bottom, int right) = SharedRegionWindow.VisibleFrame(display.Dpi);
+        PixelRect work = display.WorkArea, bounds = display.Bounds;
+        Rect content = region.OutputContentFrame(
+            new Rect((work.Left - bounds.Left) / scale, (work.Top - bounds.Top) / scale, work.Width / scale, work.Height / scale),
+            new FrameInsets(top / scale, left / scale, bottom / scale, right / scale));
+        int x = bounds.Left + (int)Math.Round(content.X * scale), y = bounds.Top + (int)Math.Round(content.Y * scale);
+        window.Place(display, PixelRect.FromSize(x, y, (int)Math.Round(content.Width * scale), (int)Math.Round(content.Height * scale)));
+    }
+
+    /// <summary>Mac start: the open window fits a new region before the region shows.</summary>
+    private bool TryFit(RegionSharingOutput output, DisplayInfo display)
+    {
+        try
+        {
+            Fit(output.Region, display);
+            return true;
+        }
+        catch (Exception error) when (error is NativeCallException or CanvasError)
+        {
+            _report(new OverlayEvent.Failure("Size the shared region window", error));
+            _report(new OverlayEvent.SharingFailed(output.Generation, RegionSharingText.Unavailable, Capture: false));
+            return false;
+        }
+    }
 
     /// <summary>Mac receive: covers a new generation, keeps the cover while sharing is off and shows the region otherwise.</summary>
     private void Apply(RegionSharingOutput output, DisplayInfo? display)
@@ -1048,6 +1093,18 @@ internal sealed class SharedRegionOutput : IVisibilityMirror, IDisposable
             {
                 presenter.Visual.Offset = new Vector3(_fit.Left, _fit.Top, 0);
                 presenter.Visual.Size = new Vector2(_fit.Width, _fit.Height);
+                if (_display is { } shown)
+                {
+                    try
+                    {
+                        PixelRect pixels = SharedRegionPresenter.RegionPixels(region, shown.Scale, shown.Bounds.Width, shown.Bounds.Height);
+                        presenter.SmoothDownscaling = _fit.Width < pixels.Width || _fit.Height < pixels.Height;
+                    }
+                    catch (ArgumentException)
+                    {
+                        // The region no longer fits its display; the region's own check stops sharing.
+                    }
+                }
             }
             PlaceEffects();
         }

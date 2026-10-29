@@ -46,3 +46,58 @@ import AnnotationCore
     #expect(region.sourceBounds(through: nil) == region.bounds)
     #expect(throws: CanvasError.invalidGeometry) { try region.aspectFit(in: .zero) }
 }
+
+@Test func sharingOutputShowsHalfAnUltrawideDisplayBesideTheRegion() throws {
+    let display = Rect(x: 0, y: 0, width: 5120, height: 1440)
+    let region = try SharingRegion(preset: .leftHalf, displayBounds: display)
+    let available = Rect(x: 0, y: 25, width: 5120, height: 1415)
+    let content = try region.outputContentFrame(available: available, frame: FrameInsets(top: 28))
+    #expect(content.height == 1415 - 2 * 24 - 28)
+    #expect(abs(content.width / content.height - 2560.0 / 1440) < 0.000001)
+    #expect(content.maxX == 5120 - 24)
+    #expect(content.y == 25 + 24 + 28)
+    #expect(content.x > region.bounds.maxX, "The window stays out of the shared half.")
+}
+
+@Test func sharingOutputKeepsTheRegionsOwnSizeWhenItFits() throws {
+    let display = Rect(x: 0, y: 0, width: 1920, height: 1080)
+    let region = try SharingRegion(bounds: Rect(x: 100, y: 100, width: 800, height: 600), displayBounds: display)
+    let content = try region.outputContentFrame(available: Rect(x: 0, y: 25, width: 1920, height: 1055),
+                                                frame: FrameInsets(top: 28))
+    #expect(content == Rect(x: 1096, y: 77, width: 800, height: 600))
+}
+
+@Test func sharingOutputTakesTheCornerThatCoversTheLeastOfTheRegion() throws {
+    let laptop = Rect(x: 0, y: 0, width: 1512, height: 982)
+    let right = try SharingRegion(preset: .rightHalf, displayBounds: laptop)
+    let besideRight = try right.outputContentFrame(available: Rect(x: 0, y: 38, width: 1512, height: 944),
+                                                   frame: FrameInsets(top: 28))
+    #expect(besideRight.x == 24 && besideRight.y == 38 + 24 + 28)
+    #expect(besideRight.height == 944 - 2 * 24 - 28)
+    #expect(besideRight.maxX < right.bounds.x)
+
+    let wide = Rect(x: 0, y: 0, width: 1920, height: 1080)
+    let top = try SharingRegion(preset: .topHalf, displayBounds: wide)
+    let belowTop = try top.outputContentFrame(available: Rect(x: 0, y: 25, width: 1920, height: 1055),
+                                              frame: FrameInsets(top: 28))
+    #expect(belowTop == Rect(x: 24, y: 529.5, width: 1872, height: 526.5))
+
+    let whole = try SharingRegion(bounds: wide, displayBounds: wide)
+    let tie = try whole.outputContentFrame(available: Rect(x: 0, y: 25, width: 1920, height: 1055),
+                                           frame: FrameInsets(top: 28))
+    #expect(tie.maxX == 1920 - 24 && tie.y == 25 + 24 + 28, "Every corner covers the region, so the window opens top right.")
+}
+
+@Test func sharingOutputHasAMinimumSizeAndChecksItsInputs() throws {
+    let display = Rect(x: -1440, y: 0, width: 1440, height: 900)
+    let small = try SharingRegion(bounds: Rect(x: -1440, y: 0, width: 40, height: 40), displayBounds: display)
+    let content = try small.outputContentFrame(available: display, frame: FrameInsets(top: 28, left: 1, bottom: 1, right: 1))
+    #expect(content == Rect(x: -24 - 1 - 320, y: 24 + 28, width: 320, height: 200))
+    #expect(throws: CanvasError.invalidGeometry) { try small.outputContentFrame(available: .zero, frame: FrameInsets(top: 28)) }
+    #expect(throws: CanvasError.invalidGeometry) {
+        try small.outputContentFrame(available: display, frame: FrameInsets(top: -1))
+    }
+    #expect(throws: CanvasError.invalidGeometry) {
+        try small.outputContentFrame(available: display, frame: FrameInsets(top: .nan))
+    }
+}

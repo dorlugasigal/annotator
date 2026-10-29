@@ -23,18 +23,10 @@ namespace Annotator.Platform.Sharing;
 /// </summary>
 public sealed class SharedRegionWindow : IDisposable
 {
-    /// <summary>The Mac window's content size at first, in points.</summary>
-    public const double DefaultWidth = 720;
-
-    public const double DefaultHeight = 440;
-
-    /// <summary>The Mac's contentMinSize, in points.</summary>
+    /// <summary>The Mac's contentMinSize, in points (SharingRegion.OutputMinimumWidth and OutputMinimumHeight).</summary>
     public const double MinimumWidth = 320;
 
     public const double MinimumHeight = 200;
-
-    /// <summary>The Mac's distance from the display's visible frame, in points.</summary>
-    public const double Margin = 24;
 
     // No minimize button, as on the Mac: meeting apps cannot capture a minimized window.
     private const WINDOW_STYLE Style = WINDOW_STYLE.WS_CAPTION | WINDOW_STYLE.WS_SYSMENU | WINDOW_STYLE.WS_THICKFRAME |
@@ -140,35 +132,43 @@ public sealed class SharedRegionWindow : IDisposable
     }
 
     /// <summary>
-    /// The Mac's first frame: <see cref="DefaultWidth"/> by <see cref="DefaultHeight"/> points of content, at most the work
-    /// area, with the window's visible frame <see cref="Margin"/> points from the top-right corner of
-    /// <paramref name="display"/>'s work area. Call it before the window first shows.
+    /// The window's visible frame around its client area on a display with <paramref name="dpi"/>, in physical pixels: the
+    /// caption and the borders people see, without the invisible resize borders Windows draws outside them.
     /// </summary>
-    public unsafe void Place(DisplayInfo display)
+    public static unsafe (int Top, int Left, int Bottom, int Right) VisibleFrame(uint dpi)
+    {
+        var rect = default(RECT);
+        if (!PInvoke.AdjustWindowRectExForDpi(ref rect, Style, false, ExStyle, dpi))
+        {
+            throw NativeCallException.FromLastError("AdjustWindowRectExForDpi (shared region frame)");
+        }
+        int invisible = Math.Max(0, -rect.left - (int)Math.Round(dpi / 96.0));
+        return (-rect.top, -rect.left - invisible, rect.bottom - invisible, rect.right - invisible);
+    }
+
+    /// <summary>
+    /// Moves and sizes the window so its client area is <paramref name="client"/>, in physical pixels on
+    /// <paramref name="display"/> (Mac SharedRegionWindow.fit), without activating it or changing its stacking.
+    /// </summary>
+    public unsafe void Place(DisplayInfo display, PixelRect client)
     {
         Verify();
         ArgumentNullException.ThrowIfNull(display);
-        PixelRect work = display.WorkArea;
-        double scale = display.Scale;
-        uint dpi = display.Dpi;
-        var rect = new RECT { left = 0, top = 0, right = (int)Math.Round(DefaultWidth * scale), bottom = (int)Math.Round(DefaultHeight * scale) };
-        if (!PInvoke.AdjustWindowRectExForDpi(ref rect, Style, false, ExStyle, dpi))
+        var rect = new RECT { left = client.Left, top = client.Top, right = client.Right, bottom = client.Bottom };
+        if (!PInvoke.AdjustWindowRectExForDpi(ref rect, Style, false, ExStyle, display.Dpi))
         {
             throw NativeCallException.FromLastError("AdjustWindowRectExForDpi (shared region)");
         }
-        int width = Math.Min(rect.right - rect.left, work.Width);
-        int height = Math.Min(rect.bottom - rect.top, work.Height);
-        // Windows draws invisible resize borders outside the visible frame on the left, right and bottom.
-        int border = Math.Max(0, -rect.left - (int)Math.Round(scale));
-        int margin = (int)Math.Round(Margin * scale);
-        int left = Math.Max(work.Left - border, work.Right - width + border - margin);
-        int top = work.Top + Math.Max(0, Math.Min(work.Height - height, margin));
         using PerMonitorDpiScope scope = PerMonitorDpiScope.Enter();
         const SET_WINDOW_POS_FLAGS flags = SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER |
             SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER;
-        if (!PInvoke.SetWindowPos(_frame.Handle, HWND.Null, left, top, width, height, flags))
+        // Moving to a display with another DPI applies Windows' suggested size first; the second call sets the exact size.
+        for (int pass = 0; pass < 2; pass++)
         {
-            throw NativeCallException.FromLastError("SetWindowPos (shared region placement)");
+            if (!PInvoke.SetWindowPos(_frame.Handle, HWND.Null, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, flags))
+            {
+                throw NativeCallException.FromLastError("SetWindowPos (shared region placement)");
+            }
         }
         UpdateSize();
     }

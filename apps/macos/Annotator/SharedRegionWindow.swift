@@ -12,6 +12,7 @@ final class SharedRegionWindow: NSObject, NSWindowDelegate {
     let window: NSWindow
     let content: SharedRegionView
     var onClosed: (() -> Void)?
+    private var fitted: (region: SharingRegion, display: CGRect)?
 
     init(region: SharingRegion, displayFrame: CGRect) throws {
         content = try SharedRegionView(region: region)
@@ -24,16 +25,29 @@ final class SharedRegionWindow: NSObject, NSWindowDelegate {
         window.isOpaque = true
         window.backgroundColor = .black
         window.sharingType = .readOnly
-        window.contentMinSize = CGSize(width: 320, height: 200)
+        window.contentMinSize = CGSize(width: SharingRegion.outputMinimumWidth, height: SharingRegion.outputMinimumHeight)
         window.contentView = content
         window.delegate = self
-        let available = NSScreen.screens.first { $0.frame == displayFrame }?.visibleFrame ?? displayFrame
-        var frame = window.frame
-        frame.size.width = min(frame.width, available.width)
-        frame.size.height = min(frame.height, available.height)
-        frame.origin.x = max(available.minX, available.maxX - frame.width - 24)
-        frame.origin.y = max(available.minY, available.maxY - frame.height - 24)
-        window.setFrame(frame, display: false)
+        try fit(region: region, displayFrame: displayFrame)
+    }
+
+    /// Meeting apps send the window at its own size, so it shows the region at the region's size, or as large as fits
+    /// on its display, beside the region when there is room. It keeps the size people give it until the region changes.
+    func fit(region: SharingRegion, displayFrame: CGRect) throws {
+        if let fitted, fitted.region == region, fitted.display == displayFrame { return }
+        let visible = NSScreen.screens.first { $0.frame == displayFrame }?.visibleFrame ?? displayFrame
+        let probe = CGRect(x: 0, y: 0, width: 100, height: 100)
+        let outer = window.frameRect(forContentRect: probe)
+        let insets = FrameInsets(top: outer.maxY - probe.maxY, left: probe.minX - outer.minX,
+                                 bottom: probe.minY - outer.minY, right: outer.maxX - probe.maxX)
+        let available = Rect(x: visible.minX - displayFrame.minX, y: displayFrame.maxY - visible.maxY,
+                             width: visible.width, height: visible.height)
+        let content = RegionSharingGuide.screenFrame(
+            for: try region.outputContentFrame(available: available, frame: insets), on: displayFrame)
+        let whole = CGRect(x: content.minX.rounded(), y: (content.maxY - content.height.rounded(.down)).rounded(),
+                           width: content.width.rounded(.down), height: content.height.rounded(.down))
+        window.setFrame(window.frameRect(forContentRect: whole), display: window.isVisible)
+        fitted = (region, displayFrame)
     }
 
     func show(inBackground: Bool = false) {
@@ -69,6 +83,7 @@ final class SharedRegionView: NSView {
         didSet { pixels.onFrameMetrics = onFrameMetrics }
     }
     var drawingRenderCount: Int { drawings.renderCount }
+    var smoothDownscaling: Bool { pixels.smoothDownscaling }
     var isCovered: Bool { !coverView.isHidden }
     var contentFrame: CGRect { pixels.frame }
     override var isOpaque: Bool { true }
@@ -77,6 +92,7 @@ final class SharedRegionView: NSView {
     init(region: SharingRegion) throws {
         self.region = region
         pixels = try PixelEffectsView(renderingFrame: CGRect(x: 0, y: 0, width: 720, height: 440))
+        pixels.smoothDownscaling = true
         super.init(frame: CGRect(x: 0, y: 0, width: 720, height: 440))
         wantsLayer = true
         layer?.backgroundColor = NSColor.black.cgColor
