@@ -59,7 +59,7 @@ internal static class UpdateDialog
 
     /// <summary>
     /// The portable copy's question after an automatic check found a release (Sparkle's update window on the Mac):
-    /// "Annotator 0.1.0-beta.13 is available", Open Downloads page, Copy winget command and Not now. Annotator never
+    /// "Annotator 0.2.0 is available", Open Downloads page, Copy winget command and Not now. Annotator never
     /// downloads or installs it itself. Not now is the default button.
     /// </summary>
     public static async Task<ReleaseChoice> AskAboutReleaseAsync(FrameworkElement host, ReleaseFeedEntry release)

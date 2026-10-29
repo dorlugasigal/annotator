@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "test:distribution": "node scripts/test-distribution.mjs",
-    "test:published-alpha": "node scripts/test-distribution.mjs published-alpha",
+    "test:published-zip": "node scripts/test-distribution.mjs published-zip",
+    "test:published-legacy": "node scripts/test-distribution.mjs published-legacy",
     "test:pages": "node scripts/test-pages.mjs",
     "test:windows": "node scripts/test-windows.mjs"
   },

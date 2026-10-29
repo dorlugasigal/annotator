@@ -338,7 +338,7 @@ internal sealed class TrayFlyout : PopoverWindow
         OwnColors.Mark(tile);
         var texts = new MacStack { Spacing = 3, VerticalAlignment = VerticalAlignment.Center };
         texts.Children.Add(Line("Annotator", 20, 27, FontWeights.SemiBold, "AnnotatorPrimaryText"));
-        texts.Children.Add(Line($"Version {BuildInfo.VersionLabel}", 11, 15, FontWeights.Normal, "AnnotatorSecondaryText"));
+        texts.Children.Add(Line($"Version {BuildInfo.Version}", 11, 15, FontWeights.Normal, "AnnotatorSecondaryText"));
         var header = new MacStack { Orientation = Orientation.Horizontal, Spacing = 12 };
         header.Children.Add(tile);
         header.Children.Add(texts);

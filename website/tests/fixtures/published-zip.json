@@ -1,0 +1,8 @@
+{
+  "release": {
+    "releaseVersion": "0.2.0",
+    "downloadURL": "https://github.com/example/annotator-releases/releases/download/v0.2.0/annotator-0.2.0-arm64.zip",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "architecture": "arm64"
+  }
+}

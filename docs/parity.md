@@ -480,7 +480,7 @@ platform that departs from the specifications, unless an ADR changes them.
   ordinary launch after Check for updates, and quietly, with the tray icon
   only, after an update the Store installed by itself.
   There is no separate updater. The portable copy (WIN-DST-09) checks the
-  website's feed (`updates/windows-<track>.json`, written by
+  website's feed (`updates/windows-stable.json`, written by
   `tools/release/distribution.py`) at launch and when the tray flyout or
   Settings opens, at most once a day while Automatically check for updates is
   on (the default, like the Mac's daily Sparkle check). Opening the tray
@@ -546,8 +546,8 @@ platform that departs from the specifications, unless an ADR changes them.
   HTTPS request for the website's feed, sending only the app version as its
   user agent; Automatically check for updates turns the daily check off) and
   links the person opens.
-- **WIN-PRV-04**: Support information stays coarse: app version and build,
-  Windows version and build number, architecture and capability states, with no
+- **WIN-PRV-04**: Support information stays coarse: app version and build
+  stamp, Windows version and build number, architecture and capability states, with no
   paths, user names or document names.
 
 ### Distribution and updates
@@ -559,14 +559,16 @@ platform that departs from the specifications, unless an ADR changes them.
 - **WIN-DST-02**: Website and help give the `winget` command with the Store
   product ID: `winget install --id <ID> --source msstore`. No winget-pkgs
   manifest is needed for the Store channel.
-- **WIN-DST-03**: Alpha and beta testers use Store package flights limited to
-  the owner's tester groups. The listing stays private until the owner's launch
-  decision, matching the Mac prerelease rules.
-- **WIN-DST-04**: The MSIX version is `(Major + 1).Minor.Build.0`. Build is the
-  shared, always-increasing build number (`CURRENT_PROJECT_VERSION`). The Store
-  requires the first number to be at least 1 and reserves the fourth, so
-  0.1.0 build 26 becomes 1.1.26.0, and every later release still sorts higher.
-  About shows the shared label, such as `0.1.0-beta.8 (26)`.
+- **WIN-DST-03**: Every release goes to the public Store listing, as every Mac
+  release goes to everyone (owner decision, 2026-10-29: plain versions, no
+  pre-releases). There are no tester builds or package flights.
+- **WIN-DST-04**: The shared version is a plain `X.Y.Z`, and About shows it,
+  such as `0.2.0`. The MSIX version is `(Major + 1).Minor.Patch.0`: the Store
+  requires the first number to be at least 1 and reserves the fourth, so 0.2.0
+  becomes 1.2.0.0, and every later version sorts higher. Releases up to
+  0.1.0-beta.17 used the counted build in place of the patch, up to 1.1.35.0.
+  The build, where a number must grow (release notes, What's changed, the
+  portable update check), is derived: `major * 10000 + minor * 100 + patch`.
 - **WIN-DST-05**: An owner-run, resumable Windows publisher mirrors the Mac
   release handoff: freeze source, build, run local validation, run the
   Windows App Certification Kit, then submit with the Microsoft Store CLI only
@@ -581,7 +583,7 @@ platform that departs from the specifications, unless an ADR changes them.
   actually published listing.
 - **WIN-DST-09** (owner decision, 2026-10-22): every release also ships the
   Windows app for people without the Microsoft Store: a portable ZIP per
-  architecture (`Annotator-<label>-windows-<x64|arm64>.zip`, Annotator.exe at
+  architecture (`Annotator-<version>-windows-<x64|arm64>.zip`, Annotator.exe at
   the root) on the same public GitHub release as the Mac files, described by
   `annotator-windows.json`, and our own winget package
   (`winget install DorLugasiGal.Annotator`, a portable install from those
@@ -933,3 +935,13 @@ The recommended defaults were adopted on 2026-10-18 (see the records below).
   release; DV-12 stands until WinUI can resize a window without the frame's
   delay, and DV-13 until UI Automation reports frames for content scrolled
   out of view.
+- **2026-10-29, plain versions.** The owner wrote: "we want to stop with the
+  alpha beta and rc, and start with semantic versioning ONLY", "that also mean
+  we stop with counting builds as well", and chose 0.2.0 as the first plain
+  version. Applied on both platforms: every release is `X.Y.Z` with a normal
+  GitHub release and tag `vX.Y.Z`; the app shows only the version; the build
+  is derived (`major * 10000 + minor * 100 + patch`) where a growing number is
+  needed; the MSIX version is `(Major + 1).Minor.Patch.0` (WIN-DST-04); every
+  release goes to the public Store listing without tester flights
+  (WIN-DST-03); and copies of 0.1.0-beta.17 and earlier keep updating through
+  the preview feeds, which carry the same newest release.

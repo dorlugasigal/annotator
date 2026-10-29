@@ -11,9 +11,9 @@ body:
   - type: input
     id: version
     attributes:
-      label: App version and build
+      label: App version
       description: Settings > About shows it.
-      placeholder: 0.1.0-beta.11 (29)
+      placeholder: "0.2.0"
     validations:
       required: true
   - type: dropdown

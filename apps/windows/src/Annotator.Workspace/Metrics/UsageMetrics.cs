@@ -61,8 +61,8 @@ public sealed record UsageMetricsBuild(string Version, string Build, int OsMajor
     /// <summary>The platform field of every Windows summary (specification 011).</summary>
     public const string Platform = "windows";
 
-    /// <param name="version">The version with its prerelease suffix, without the build.</param>
-    /// <param name="build">The shared build number, or null when this build has none.</param>
+    /// <param name="version">The version, a plain X.Y.Z such as 0.2.0.</param>
+    /// <param name="build">The build derived from the version (0.2.0 is 200), or null when this build has none.</param>
     public static UsageMetricsBuild ForWindows(string version, int? build, Version os, ProcessArchitecture process) =>
         new(version, build?.ToString(CultureInfo.InvariantCulture) ?? "unknown", WindowsMajor(os), ArchitectureName(process));
 

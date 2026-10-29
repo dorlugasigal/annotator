@@ -4,13 +4,12 @@ import {siteConfig} from "../../site-config.mjs";
 import {readingWords} from "./visitors.mjs";
 const base = siteConfig().base.replace(/\/$/, "");
 const stage=JSON.parse(readFileSync(new URL("../../src/data/stage-demos.json",import.meta.url),"utf8")).demos;
-const metadata=JSON.parse(readFileSync(process.env.DISTRIBUTION_METADATA_FILE||new URL("../../src/data/distribution.json",import.meta.url),"utf8"));
-const release=metadata.stable||metadata.preview;
+const {release}=JSON.parse(readFileSync(process.env.DISTRIBUTION_METADATA_FILE||new URL("../../src/data/distribution.json",import.meta.url),"utf8"));
 const videoFor=(page,name)=>page.locator(`[data-native-take="${name}"] [data-take-video]`);
 
 test("homepage keeps the default reading short and installation direct", async ({page}) => {
   await page.goto(base + "/");
-  // Only prose counts, so the budget is the same for every release track (see readingWords). With a Windows listing,
+  // Only prose counts, so the budget is the same with or without a release (see readingWords). With a Windows listing,
   // windows.spec.mjs counts it for a Mac and a Windows visitor too.
   expect(await readingWords(page)).toBeLessThan(150);
   await expect(page.locator(".site-header nav a")).toHaveCount(3);

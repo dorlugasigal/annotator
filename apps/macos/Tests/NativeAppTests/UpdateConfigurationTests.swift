@@ -8,8 +8,7 @@ final class UpdateConfigurationTests: XCTestCase {
         let source = try String(contentsOf: root.appendingPathComponent("apps/macos/project.yml"), encoding: .utf8)
         for (setting, key) in [
             ("MARKETING_VERSION", "CFBundleShortVersionString"),
-            ("CURRENT_PROJECT_VERSION", "CFBundleVersion"),
-            ("ANNOTATOR_PRERELEASE", "AnnotatorPrerelease")
+            ("CURRENT_PROJECT_VERSION", "CFBundleVersion")
         ] {
             let prefix = "    \(setting):"
             let matches = source.components(separatedBy: .newlines).filter { $0.hasPrefix(prefix) }
@@ -19,17 +18,24 @@ final class UpdateConfigurationTests: XCTestCase {
                 .trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
             XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: key) as? String, expected)
         }
-        XCTAssertEqual(WorkspaceModel.formatVersion(version: "0.1.0", build: "9", prerelease: "alpha.1"), "0.1.0-alpha.1 (9)")
+        XCTAssertFalse(source.contains("ANNOTATOR_PRERELEASE"), "Releases have no pre-release setting.")
+        XCTAssertNil(Bundle.main.object(forInfoDictionaryKey: "AnnotatorPrerelease"), "Releases have no pre-release label.")
     }
 
-    func testReleaseLabelsKeepBuildOrderingSeparateFromPrereleaseNames() {
-        for phase in ["alpha.1", "alpha.2", "beta.1", "rc.1"] {
-            XCTAssertEqual(WorkspaceModel.formatVersion(version: "0.1.0", build: "12", prerelease: phase),
-                           "0.1.0-\(phase) (12)")
-        }
-        for phase: String? in [nil, ""] {
-            XCTAssertEqual(WorkspaceModel.formatVersion(version: "0.1.0", build: "13", prerelease: phase), "0.1.0 (13)")
-        }
+    func testVersionIsPlainAndTheBuildIsDerivedFromIt() throws {
+        let version = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+        XCTAssertNotNil(version.range(of: #"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)$"#, options: .regularExpression),
+                        "\(version) is not a plain X.Y.Z with minor and patch at 99 or lower.")
+        let parts = version.split(separator: ".").compactMap { Int($0) }
+        guard parts.count == 3 else { return XCTFail("\(version) is not X.Y.Z.") }
+        let build = try XCTUnwrap(Int(try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String)))
+        XCTAssertEqual(build, parts[0] * 10_000 + parts[1] * 100 + parts[2], "The build is major * 10000 + minor * 100 + patch.")
+        XCTAssertGreaterThan(build, 35, "Installed betas (0.1.0-beta.17 is build 35) must see this build as newer.")
+        let suite = "version-label-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let model = WorkspaceModel(defaults: defaults)
+        defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        XCTAssertEqual(model.versionLabel, version, "The app shows only X.Y.Z, without the build or a release stage.")
     }
 
     func testUnconfiguredFeedIsExplicitlyDisabled() throws {

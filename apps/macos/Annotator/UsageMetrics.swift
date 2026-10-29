@@ -153,13 +153,11 @@ final class UsageMetrics: ObservableObject {
             return
         }
         defaults.set(today, forKey: Self.lastAttemptKey)
-        let numeric = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
-        let suffix = bundle.object(forInfoDictionaryKey: "AnnotatorPrerelease") as? String ?? ""
         let payload = UsageMetricPayload(
             schema: 1,
             installation: installation,
             since: since,
-            version: numeric + (suffix.isEmpty ? "" : "-\(suffix)"),
+            version: bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown",
             build: bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown",
             osMajor: ProcessInfo.processInfo.operatingSystemVersion.majorVersion,
             architecture: Self.architecture,

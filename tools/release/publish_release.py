@@ -354,7 +354,7 @@ def check_published(settings, source, version, build):
         if any(entry["source"] != source or int(entry["build"]) != build for entry in same):
             raise d.DistributionError("This version was already published from different source. Prepare a new version before building.")
     elif any(int(entry["build"]) >= build for entry in entries):
-        raise d.DistributionError("The candidate build must exceed published builds before preparing an app.")
+        raise d.DistributionError("The candidate version must be newer than every published release before preparing an app.")
 
 
 def build_website(directory, source, site, settings=None):
@@ -423,8 +423,8 @@ def execute(args, settings, progress):
     prep = SimpleNamespace(folder=folder, version=version, candidate=source, **settings)
     with progress.stage("Preflight"):
         if progress.display:
-            progress.display.subtitle = f"{version}  /  build {build}"
-        progress.log(f"Candidate: {version}, build {build}, source {source}")
+            progress.display.subtitle = version
+        progress.log(f"Candidate: {version}, source {source}")
         if os.environ.get("GITHUB_ACTIONS") == "true":
             raise d.DistributionError("This publishing command must run locally, not in Actions.")
         local.candidate(version, source)

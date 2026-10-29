@@ -1,0 +1,11 @@
+{
+  "release": {
+    "releaseVersion": "0.1.0-beta.17",
+    "downloadURL": "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-beta.17/annotator-0.1.0-beta.17-35-universal.zip",
+    "sha256": "2df88a5fc9ad31e3c8091ee5966227bfb2e655bdef7628f8880372f897c41be6",
+    "architecture": "arm64 x86_64",
+    "diskImageURL": "https://github.com/dorlugasigal/annotator/releases/download/v0.1.0-beta.17/annotator-0.1.0-beta.17-35-universal.dmg",
+    "diskImageSHA256": "f2ec0bb3c38c45a24da4ffced3a9102c9e4f1cb0ecb1320de5f0684a0aed4e68",
+    "diskImageSize": 9890932
+  }
+}

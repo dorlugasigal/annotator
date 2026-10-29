@@ -5,34 +5,35 @@ done until every channel below has the new build.
 
 ## Version
 
-The shared version lives in `apps/macos/project.yml`. Change it there, then run
-`make generate`. Never edit the generated Xcode project or Info.plist.
+Every release has a plain semantic version, `MAJOR.MINOR.PATCH`, such as
+`0.2.0`. There are no alpha, beta or release candidate versions, and the app
+shows only the version. Releases up to `0.1.0-beta.17` had pre-release labels
+and counted build numbers; their notes, tags and files keep them.
 
-| Setting | Example | Meaning |
+| Change | Next version | Example |
 | --- | --- | --- |
-| `MARKETING_VERSION` | `0.1.0` | Numeric version. |
-| `ANNOTATOR_PRERELEASE` | `beta.11` | `alpha.N`, `beta.N`, `rc.N`, or empty for stable. |
-| `CURRENT_PROJECT_VERSION` | `29` | Build number. It always goes up and is never reused. |
+| Fixes only | Patch | `0.2.0` to `0.2.1` |
+| New features | Minor | `0.2.1` to `0.3.0` |
+| Breaking change, such as a board file format older apps can't open | Major (minor before 1.0.0) | `1.4.2` to `2.0.0` |
 
-The app shows `0.1.0-beta.11 (29)`. The Windows package version is
-`(Major + 1).Minor.Build.0`, so `0.1.0` build 29 becomes `1.1.29.0`
-(WIN-DST-04). Windows reads the same three settings through
-`apps/windows/src/Annotator.App/SharedVersion.props`.
+The version lives in `apps/macos/project.yml`, and the Windows app reads it
+through `apps/windows/src/Annotator.App/SharedVersion.props`. Two numbers come
+from it, and nobody counts them by hand:
 
-Stages:
+- **Build** (`CURRENT_PROJECT_VERSION`): `major * 10000 + minor * 100 + patch`,
+  so `0.2.0` is `200`. Sparkle, What's changed and the portable Windows update
+  check compare it, and it is above every older build (the last was `35`).
+  Keep minor and patch at 99 or lower.
+- **Windows package** (WIN-DST-04): `(major + 1).minor.patch.0`, so `0.2.0`
+  is `1.2.0.0`, above `1.1.35.0`, the last package before it.
 
-- `alpha.N`: early testing; workflows may still change.
-- `beta.N`: the planned scope is complete; wider testing.
-- `rc.N`: expected to ship if final checks find no blocker.
-- No suffix: stable. After stable, follow semantic versioning: patch for
-  fixes, minor for features, major for breaking file-format changes.
-
-Every new distributed binary gets a new label and a higher build number. Never
-replace a published file or reuse a label. Board file schema numbers change
-only when the format changes, never to match the app version.
-
-`python3 tools/release/release.py plan --change fix` (or `--change feature
---stage beta`) proposes the next label and build without changing anything.
+`python3 tools/release/release.py plan --change fix` (or `feature`,
+`breaking`, `docs`) suggests the next version and changes nothing.
+`python3 tools/release/release.py prepare --version X.Y.Z` writes it with its
+build, moves `unreleased` into a dated entry and renders `CHANGELOG.md`; then
+run `make generate`. Never edit the generated Xcode project or Info.plist, and
+never reuse a version or replace a published file. Board file schema numbers
+change only when the format changes, never to match the app version.
 
 ## Release notes
 
@@ -55,8 +56,8 @@ Every release ships all of these:
 | Channel | What it gets | How |
 | --- | --- | --- |
 | GitHub release | Mac DMG and ZIP; Windows ZIPs for x64 and ARM64 with `annotator-windows.json` | Release workflow, publish job |
-| Sparkle feed | The signed Mac update, with the release's Mac notes in its update window | Website deploy, from the published release manifest |
-| Windows update feed | `updates/windows-<track>.json`: the newest release with Windows ZIPs, which portable copies check daily (they never install it) | Website deploy, from the published `annotator-windows.json` |
+| Sparkle feed | `updates/stable.xml`: the signed Mac update, with the release's Mac notes in its update window | Website deploy, from the published release manifest |
+| Windows update feed | `updates/windows-stable.json`: the newest release with Windows ZIPs, which portable copies check daily (they never install it) | Website deploy, from the published `annotator-windows.json` |
 | Homebrew | `brew install --cask dorlugasigal/annotator/annotator`; the cask says `auto_updates true`, so `brew upgrade` leaves Sparkle's updates alone unless asked with `--greedy` | Release workflow, publish job: `tools/release/distribution.py tap` writes `dorlugasigal/homebrew-annotator` once the new release is listed |
 | winget | `winget install DorLugasiGal.Annotator` (portable ZIP) | `tools/windows/winget.py manifests`, then a pull request to microsoft/winget-pkgs |
 | Microsoft Store | Signed MSIX bundle; Store updates | Release workflow: every release goes to the public listing (`windows_store` is `public` by default) |
@@ -66,15 +67,23 @@ Every release ships all of these:
 It is `partOfReleases: true` now: every run that signs the Mac release builds
 the Windows packages from the same commit.
 
+## Update feeds
+
+Every copy reads `updates/stable.xml` (Mac) or `updates/windows-stable.json`
+(portable Windows). Copies of `0.1.0-beta.17` and earlier read
+`updates/preview.xml` and `updates/windows-preview.json`; the website writes
+those with the same newest release, so they update too. Keep writing them
+while those copies are around.
+
 ## Checklist
 
 1. **Review**: list the changes since the last release and agree on the next
-   label with the maintainer.
-2. **Bump**: in one pull request, set the three version settings, move the
-   approved `unreleased` items into a new entry (version, build, date, changes
-   and real known issues), run `make generate` and
-   `python3 tools/release/release.py changelog --write`. A release pull request
-   changes only these files, so it needs no issue.
+   version with the maintainer (`release.py plan`).
+2. **Prepare**: in one pull request, run
+   `python3 tools/release/release.py prepare --version X.Y.Z`, review the new
+   entry's known limits, and run `make generate`. A release pull request
+   changes only the version, the Xcode project's version lines,
+   `releases/notes.json` and `CHANGELOG.md`, so it needs no issue.
 3. **Validate** on a Mac:
 
    ```sh
@@ -90,14 +99,15 @@ the Windows packages from the same commit.
 4. **Merge** the release pull request. Releases build only from `main`, so the
    merged commit is the release: the Release run checks that it is clean and
    that its version and notes agree (`release.py check --candidate`), and the
-   published tag and manifest record it. Releases up to 0.1.0-beta.13 also
-   recorded it as the entry's `source`; new entries don't.
-5. **Run Release**: Actions > Release > Run workflow on `main`, with the label,
-   the SHA of the head of `main`, and `notarize` and `publish` on.
-   `windows_store` stays `public`: every release goes to the Store. See
+   published tag `vX.Y.Z` and manifest record it. Releases up to
+   0.1.0-beta.13 also recorded it as the entry's `source`; new entries don't.
+5. **Run Release**: Actions > Release > Run workflow on `main`, with the
+   version, the SHA of the head of `main`, and `notarize` and `publish` on.
+   `windows_store` stays `public`: every release goes to the Store. The run
+   publishes a normal GitHub release, marked latest. See
    [maintainers/release-workflow.md](maintainers/release-workflow.md).
 6. **Website**: check that the Website workflow that follows the release
-   finished, so the site and the Sparkle feeds show it
+   finished, so the site and the update feeds show it
    ([maintainers/website.md](maintainers/website.md)).
 7. **winget**: open the manifest pull request to microsoft/winget-pkgs
    ([maintainers/winget.md](maintainers/winget.md)).

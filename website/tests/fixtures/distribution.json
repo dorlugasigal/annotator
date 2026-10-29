@@ -1,20 +1,11 @@
 {
-  "stable": {
-    "releaseVersion": "0.1.0",
-    "build": "20",
-    "downloadURL": "https://github.com/example/annotator-releases/releases/download/v0.1.0/annotator-0.1.0-20-universal.zip",
+  "release": {
+    "releaseVersion": "0.2.0",
+    "downloadURL": "https://github.com/example/annotator-releases/releases/download/v0.2.0/annotator-0.2.0-universal.zip",
     "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "track": "stable",
     "architecture": "arm64 x86_64",
-    "diskImageURL": "https://github.com/example/annotator-releases/releases/download/v0.1.0/annotator-0.1.0-20-universal.dmg",
+    "diskImageURL": "https://github.com/example/annotator-releases/releases/download/v0.2.0/annotator-0.2.0-universal.dmg",
     "diskImageSHA256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "diskImageSize": 4427901
-  },
-  "preview": {
-    "releaseVersion": "0.2.0-alpha.1",
-    "build": "21",
-    "downloadURL": "https://github.com/example/annotator-releases/releases/download/v0.2.0-alpha.1/annotator-0.2.0-alpha.1-21-arm64.zip",
-    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "track": "preview"
   }
 }

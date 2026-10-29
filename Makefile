@@ -1,7 +1,7 @@
 DEVELOPER_DIR ?= /Applications/Xcode.app/Contents/Developer
 export DEVELOPER_DIR
 
-.PHONY: test build conformance conformance-check conformance-check-data generate app signed-dev signed-alpha native-test signed-native-test clean-check ai-skill preview-package release-check release-tests
+.PHONY: test build conformance conformance-check conformance-check-data generate app signed-dev native-test signed-native-test clean-check ai-skill release-check release-tests
 test:
 	swift test --package-path apps/macos
 
@@ -29,10 +29,6 @@ signed-dev: generate
 	bash tools/macos/build-signed-dev.sh
 	codesign --verify --deep --strict "build/DerivedData/Build/Products/Debug/Annotator Dev.app"
 
-signed-alpha: release-check generate
-	bash tools/macos/build-signed-dev.sh alpha
-	codesign --verify --deep --strict "build/AlphaDerivedData/Build/Products/Release/Annotator Dev.app"
-
 native-test: generate
 	xcodebuild -project apps/macos/Annotator.xcodeproj -scheme Annotator -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath build/UnsignedDerivedData CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO test
 
@@ -56,6 +52,3 @@ release-tests:
 	python3 -m unittest discover -s tools/release -p 'test_package_app.py'
 	python3 -m unittest discover -s tools/release -p 'test_publish_website.py'
 	python3 tools/windows/test_publish_windows.py
-
-preview-package: release-check
-	python3 tools/release/package-app.py --channel preview --output build/distribution/preview

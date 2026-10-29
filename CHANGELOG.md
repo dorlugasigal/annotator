@@ -4,12 +4,15 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+## 0.2.0 - 2026-10-29
+
 ### Added
 
 - There's a new Laser pointer next to the Highlighter. Drag to point at something: a glowing trail follows your pointer and fades away on its own, and nothing is added to your drawing. Pick its color and width in the properties. New setups use the L key for it, and you can give it any key in Settings > Toolbar & Shortcuts. If you've changed your toolbar, drag it in from More tools there.
 
 ### Changed
 
+- Annotator now uses plain version numbers. This release is 0.2.0, and later ones count up from there: there are no alpha, beta or release candidate versions anymore, and the version no longer shows a build number. Copies of 0.1.0-beta.17 and earlier update to it as usual.
 - To move the toolbar, press and hold anywhere on it, even on a button or a name, then drag. A normal click works as before, and sliders keep their own drag.
 - Property names such as Width, Pattern and Roughness no longer have an icon in front, so every name on the row lines up and the row looks cleaner.
 
@@ -18,7 +21,35 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - On Windows, Annotator no longer crashes when it's started without a signed-in desktop, for example by a scheduled task that runs while nobody is signed in. It now quits and says why.
 - On Windows, pressing Esc while you move the toolbar now stops it where it is, as on a Mac. The app in front doesn't get that Esc.
 
-## 0.1.0-beta.17 (build 35) - 2026-10-29
+### Known limits
+
+- The new toolbar options (removable buttons, one-row properties, Your properties and Shrink) passed automated checks on both platforms and scripted live checks on Windows. The owner tried them on a Mac development build; a person still needs to try them on Windows.
+- The Laser pointer and press and hold to move the toolbar passed automated and live checks on both platforms. On Windows, the pointer's shape while you move the toolbar this way still needs a hands-on check.
+- On Windows, the toolbar changes size at once when it shrinks to one button, opens again or grows for its properties. On a Mac, it animates.
+- The sharper Shared Region window was checked on one display on each platform. A region on a second display with different scaling, and how the picture looks in a real Teams, Meet or Zoom call, still need a hands-on check.
+- This is the first release on the single update channel. Copies of 0.1.0-beta.17 and earlier find it through their old update feed. That path, and Update available… with Remind me later and Skip This Version, passed automated checks; updating a real installed beta still needs a hands-on check on both platforms.
+- The toolbar no longer shows a message while an effect waits for capture. This passed automated checks and still needs a hands-on look on both platforms.
+- Ink pressure was tuned with a mouse and a trackpad. Drawing with a pressure-sensitive pen still needs a hands-on check.
+- The on-screen tips, Ink pressure and the new gradients were checked on Windows with automated and live checks. On the Mac they passed automated checks; VoiceOver for the tip's ✕ still needs a hands-on check.
+- The break timer's sound while the computer is locked and its return after sign-in were checked by the owner on the development build only.
+- The animations added in 0.1.0-beta.7 passed automated checks but have not yet been watched by a person on the real desktop. Tell us if any style looks wrong or feels slow.
+- The names of the Selection actions, Spotlight and Zoom menus were checked in the app's accessibility tree. A person still needs to listen to them with VoiceOver.
+- The screen zoom ramp was checked with automated state tests only. The live-capture zoom tests did not run on the validation Mac because the test build had no Screen Recording permission.
+- In the Shared Region window, the spotlight still turns on and off at once instead of fading.
+- Shared animations passed controlled local capture checks. Their appearance in a Teams, Meet or Zoom receiver still needs a hands-on check.
+- The controlled toolbar-sharing check has been inconsistent on this Mac. Check that the toolbar appears in your meeting's shared window before relying on it.
+- The owner confirmed the region highlight works on the current monitor setup. Full-screen browser transitions, Stage Manager and unplugging or reconnecting monitors still need separate checks.
+- Choosing a different area in the configuration window or changing the display setup turns region sharing off. Check the outline before starting it again.
+- Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
+- The Intel app and tests compiled, but runtime tests could not run because Rosetta is missing on the validation Mac. No Intel Mac has run this version yet.
+- Installing on another Mac and updating from an earlier version still need a hands-on check.
+- VoiceOver and Full Keyboard Access checks remain incomplete.
+- With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.
+- Cross-monitor dragging still needs a hands-on check.
+- Effects do not follow moving windows or scrolling content and are not secure redaction.
+- Heavy gradient scenes and long-session resource use still need native performance checks.
+
+## 0.1.0-beta.17 - 2026-10-29
 
 ### Added
 
@@ -68,7 +99,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.16 (build 34) - 2026-10-25
+## 0.1.0-beta.16 - 2026-10-25
 
 ### Changed
 
@@ -102,7 +133,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.15 (build 33) - 2026-10-25
+## 0.1.0-beta.15 - 2026-10-25
 
 ### Fixed
 
@@ -131,7 +162,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.14 (build 32) - 2026-10-25
+## 0.1.0-beta.14 - 2026-10-25
 
 ### Added
 
@@ -175,7 +206,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.13 (build 31) - 2026-10-25
+## 0.1.0-beta.13 - 2026-10-25
 
 ### Added
 
@@ -221,7 +252,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.12 (build 30) - 2026-10-23
+## 0.1.0-beta.12 - 2026-10-23
 
 ### Changed
 
@@ -251,7 +282,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.11 (build 29) - 2026-10-22
+## 0.1.0-beta.11 - 2026-10-22
 
 ### Mac
 
@@ -309,7 +340,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 
-## 0.1.0-beta.10 (build 28) - 2026-10-21
+## 0.1.0-beta.10 - 2026-10-21
 
 ### Mac
 
@@ -363,7 +394,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 
-## 0.1.0-beta.9 (build 27) - 2026-10-21
+## 0.1.0-beta.9 - 2026-10-21
 
 ### Mac
 
@@ -423,7 +454,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 
-## 0.1.0-beta.8 (build 26) - 2026-10-20
+## 0.1.0-beta.8 - 2026-10-20
 
 ### Mac
 
@@ -488,7 +519,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Anything inside a shared region can appear, including notifications. Remove private details before sharing; blur is not secure redaction.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 
-## 0.1.0-beta.7 (build 25) - 2026-10-13
+## 0.1.0-beta.7 - 2026-10-13
 
 ### Added
 
@@ -526,7 +557,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.6 (build 24) - 2026-10-13
+## 0.1.0-beta.6 - 2026-10-13
 
 ### Changed
 
@@ -553,7 +584,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.5 (build 23) - 2026-10-13
+## 0.1.0-beta.5 - 2026-10-13
 
 ### Changed
 
@@ -579,7 +610,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.4 (build 22) - 2026-10-13
+## 0.1.0-beta.4 - 2026-10-13
 
 ### Fixed
 
@@ -600,7 +631,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.3 (build 21) - 2026-10-13
+## 0.1.0-beta.3 - 2026-10-13
 
 ### Fixed
 
@@ -622,7 +653,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.2 (build 20) - 2026-10-12
+## 0.1.0-beta.2 - 2026-10-12
 
 ### Added
 
@@ -653,7 +684,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-beta.1 (build 19) - 2026-10-12
+## 0.1.0-beta.1 - 2026-10-12
 
 ### Added
 
@@ -679,7 +710,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-alpha.10 (build 18) - 2026-10-10
+## 0.1.0-alpha.10 - 2026-10-10
 
 ### Changed
 
@@ -701,7 +732,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 
-## 0.1.0-alpha.9 (build 17) - 2026-09-30
+## 0.1.0-alpha.9 - 2026-09-30
 
 ### Added
 
@@ -731,7 +762,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 - Native usage delivery and the 45-day metrics cleanup still need live checks.
 
-## 0.1.0-alpha.8 (build 16) - 2026-09-30
+## 0.1.0-alpha.8 - 2026-09-30
 
 ### Added
 
@@ -765,7 +796,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 - Native usage delivery and the 45-day metrics cleanup still need live checks.
 
-## 0.1.0-alpha.7 (build 15) - 2026-09-27
+## 0.1.0-alpha.7 - 2026-09-27
 
 ### Added
 
@@ -789,7 +820,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 - Native usage delivery and the 45-day metrics cleanup still need live checks.
 
-## 0.1.0-alpha.6 (build 14) - 2026-09-27
+## 0.1.0-alpha.6 - 2026-09-27
 
 ### Added
 
@@ -831,7 +862,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 - Native usage delivery, scheduled metrics aggregation and cleanup still need live checks.
 
-## 0.1.0-alpha.5 (build 13) - 2026-09-24
+## 0.1.0-alpha.5 - 2026-09-24
 
 ### Added
 
@@ -865,7 +896,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Heavy gradient scenes and long-session resource use still need native performance checks.
 - Native usage delivery, scheduled metrics aggregation and cleanup still need live checks.
 
-## 0.1.0-alpha.4 (build 12) - 2026-09-24
+## 0.1.0-alpha.4 - 2026-09-24
 
 ### Added
 
@@ -896,7 +927,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Whole-app performance targets and long-session resource use are not yet verified.
 
-## 0.1.0-alpha.3 (build 11) - 2026-09-23
+## 0.1.0-alpha.3 - 2026-09-23
 
 ### Added
 
@@ -921,7 +952,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Whole-app performance targets and long-session resource use are not yet verified.
 
-## 0.1.0-alpha.2 (build 10) - 2026-09-23
+## 0.1.0-alpha.2 - 2026-09-23
 
 ### Added
 
@@ -942,7 +973,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 - Effects do not follow moving windows or scrolling content and are not secure redaction.
 - Whole-app performance targets and long-session resource use are not yet verified.
 
-## 0.1.0-alpha.1 (build 9) - 2026-09-23
+## 0.1.0-alpha.1 - 2026-09-23
 
 ### Added
 

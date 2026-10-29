@@ -176,7 +176,7 @@ class PublishReleaseTests(unittest.TestCase):
             def command(*args, **kwargs):
                 return SOURCE if args[0] == "git" else "private-fixture-token"
             with patch.object(p.d, "command", side_effect=command), \
-                 patch.object(p.release, "configured_version", return_value=("0.1.0-alpha.2", 10)), \
+                 patch.object(p.release, "configured_version", return_value=("0.2.1", 201)), \
                  patch.object(p.local, "ROOT", Path("/unrelated-repo")), \
                  patch.object(p.local, "candidate"), patch.object(p, "check_published"), \
                  patch.object(p.local, "credentials", return_value=()), \
@@ -200,14 +200,14 @@ class PublishReleaseTests(unittest.TestCase):
             journal = root / "journal"
             journal.mkdir()
             args = SimpleNamespace(folder=folder, interval=60, apple_timeout=1, site_timeout=1)
-            receipt = dict(source=SOURCE, version="0.1.0-alpha.2", repository=cfg["repository"],
+            receipt = dict(source=SOURCE, version="0.2.1", repository=cfg["repository"],
                            homepage=cfg["homepage"], publicKey=cfg["public_key"],
                            identity=cfg["identity"], team=cfg["team"])
             def command(*args, **kwargs):
                 return SOURCE if args[0] == "git" else "fixture-token"
             with contextlib.ExitStack() as stack:
                 stack.enter_context(patch.object(p.d, "command", side_effect=command))
-                stack.enter_context(patch.object(p.release, "configured_version", return_value=("0.1.0-alpha.2", 10)))
+                stack.enter_context(patch.object(p.release, "configured_version", return_value=("0.2.1", 201)))
                 stack.enter_context(patch.object(p.local, "ROOT", Path("/unrelated-repo")))
                 stack.enter_context(patch.object(p, "windows_part_of_release", return_value=False))
                 stack.enter_context(patch.object(p.local, "candidate"))
@@ -219,7 +219,7 @@ class PublishReleaseTests(unittest.TestCase):
                 submit = stack.enter_context(patch.object(p.local, "submit"))
                 finalize = stack.enter_context(patch.object(p.local, "finalize"))
                 stack.enter_context(patch.object(p, "wait_for_apple"))
-                stack.enter_context(patch.object(p, "verify_final", return_value={**manifest(), "tag": "v0.1.0-alpha.2"}))
+                stack.enter_context(patch.object(p, "verify_final", return_value={**manifest(), "tag": "v0.2.1"}))
                 stack.enter_context(patch.object(p.local, "build_disk_image"))
                 stack.enter_context(patch.object(p.local, "submit_disk_image"))
                 stack.enter_context(patch.object(p, "wait_for_disk_image"))
@@ -261,8 +261,8 @@ class PublishReleaseTests(unittest.TestCase):
             p.check_published(cfg, data["source"], data["releaseVersion"], int(data["build"]))
             with self.assertRaisesRegex(p.d.DistributionError, "different source"):
                 p.check_published(cfg, "b" * 40, data["releaseVersion"], int(data["build"]))
-            with self.assertRaisesRegex(p.d.DistributionError, "exceed"):
-                p.check_published(cfg, SOURCE, "0.1.0-alpha.2", int(data["build"]))
+            with self.assertRaisesRegex(p.d.DistributionError, "newer than every published"):
+                p.check_published(cfg, SOURCE, "0.2.1", int(data["build"]))
 
     def test_resume_rejects_source_change_before_network_or_publication(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -272,7 +272,7 @@ class PublishReleaseTests(unittest.TestCase):
             (journal / "candidate.json").write_text(json.dumps({"source": "b" * 40}))
             args = SimpleNamespace(folder=root / "release")
             with patch.object(p.d, "command", return_value=SOURCE) as command, \
-                 patch.object(p.release, "configured_version", return_value=("0.1.0-alpha.2", 10)), \
+                 patch.object(p.release, "configured_version", return_value=("0.2.1", 201)), \
                  patch.object(p.d, "publish") as publish:
                 with self.assertRaisesRegex(p.d.DistributionError, "source or destinations changed"):
                     p.execute(args, settings(root), p.Progress(journal))

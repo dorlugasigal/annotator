@@ -20,11 +20,11 @@
        "frame": [
         94,
         56.5,
-        244,
+        167.5,
         16
        ],
        "role": "AXStaticText",
-       "value": "You now have version 0.1.0-beta.13 (31)."
+       "value": "You now have version 0.2.0."
       },
       {
        "enabled": true,

@@ -3,7 +3,7 @@ import XCTest
 
 final class IssueReportingTests: XCTestCase {
     func testOnlyConfiguredGitHubNewIssuePagesAreAllowed() throws {
-        let version = "0.1.0-alpha.2 (10)"
+        let version = "0.2.0"
         let url = try XCTUnwrap(IssueReporting.url(base: "https://github.com/example/annotator-releases/issues/new", version: version))
         let parts = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false))
         XCTAssertEqual(parts.queryItems?.first { $0.name == "version" }?.value, version)
@@ -20,7 +20,7 @@ final class IssueReportingTests: XCTestCase {
 
     func testFeedbackAndSupportAreExplicitOptInLinks() throws {
             let url = try XCTUnwrap(IssueReporting.url(base: "https://github.com/example/releases/issues/new",
-                                                     version: "0.1.0-alpha.2 (10)", feedback: true))
+                                                     version: "0.2.0", feedback: true))
             XCTAssertTrue(url.absoluteString.contains("feedback.yml"))
             XCTAssertFalse(url.absoluteString.contains("body="))
             XCTAssertNil(IssueReporting.supportURL(nil))

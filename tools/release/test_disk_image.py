@@ -25,18 +25,17 @@ class DiskImageTests(unittest.TestCase):
         (app / "Contents/Info.plist").write_bytes(plistlib.dumps({
             "CFBundleIdentifier": "com.dorlugasigal.annotator",
             "LSMinimumSystemVersion": "14.0",
-            "CFBundleShortVersionString": "0.1.0",
-            "CFBundleVersion": "10",
-            "AnnotatorPrerelease": "alpha.2",
+            "CFBundleShortVersionString": "0.2.0",
+            "CFBundleVersion": "200",
         }))
         return app
 
     def test_default_name_uses_release_version_and_build(self):
         with tempfile.TemporaryDirectory() as tmp:
             app = self.app(Path(tmp))
-            self.assertEqual(disk_image.default_name(app), "annotator-0.1.0-alpha.2-10-arm64.dmg")
+            self.assertEqual(disk_image.default_name(app), "annotator-0.2.0-arm64.dmg")
             with patch.object(disk_image.packager, "architectures", return_value="arm64 x86_64"):
-                self.assertEqual(disk_image.default_name(app), "annotator-0.1.0-alpha.2-10-universal.dmg")
+                self.assertEqual(disk_image.default_name(app), "annotator-0.2.0-universal.dmg")
 
     def test_build_refuses_overwrite_and_passes_layout(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -59,7 +58,7 @@ class DiskImageTests(unittest.TestCase):
                  patch.object(disk_image, "verify_contents") as verify, \
                  patch.object(disk_image, "command", return_value="") as command:
                 report = disk_image.build(app, out, "-", verify=True)
-            self.assertEqual(report["archive"], "annotator-0.1.0-alpha.2-10-arm64.dmg")
+            self.assertEqual(report["archive"], "annotator-0.2.0-arm64.dmg")
             self.assertEqual(report["volumeName"], "Annotator")
             self.assertEqual(report["iconLocations"], disk_image.ICON_LOCATIONS)
             self.assertEqual(calls[0][1], "Annotator")

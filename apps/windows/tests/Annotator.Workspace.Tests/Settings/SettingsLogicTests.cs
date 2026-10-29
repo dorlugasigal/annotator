@@ -12,7 +12,7 @@ namespace Annotator.Workspace.Tests.Settings;
 /// </summary>
 public sealed class SettingsLogicTests
 {
-    private const string Version = "0.1.0-alpha.2 (10)";
+    private const string Version = "0.2.0";
 
     [Fact]
     public void OnlyConfiguredGitHubNewIssuePagesAreAllowed()
@@ -221,7 +221,7 @@ public sealed class SettingsLogicTests
     {
         var facts = new SupportFacts
         {
-            Version = "0.1.0-beta.7 (25)",
+            Version = "0.2.0",
             BuildLabel = "Release 1a2b3c4",
             Installation = "Microsoft Store package",
             Windows = "11 (build 26200)",

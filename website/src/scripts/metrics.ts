@@ -65,10 +65,8 @@ export function start(): void {
     return;
   }
   if (!started) send(endpoint, { event: "session", session, route, referrer });
-  for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-download-track]")) {
-    link.addEventListener("click", () => {
-      const track = link.dataset.downloadTrack;
-      if (track === "stable" || track === "preview") send(endpoint, { event: "download", session, route, referrer, track });
-    });
+  // There is one release channel. The counting service still expects a track with each download, so it is always "stable".
+  for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-download]")) {
+    link.addEventListener("click", () => send(endpoint, { event: "download", session, route, referrer, track: "stable" }));
   }
 }

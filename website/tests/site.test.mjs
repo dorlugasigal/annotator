@@ -8,6 +8,7 @@ import { readdir } from "node:fs/promises";
 import {createHash} from "node:crypto";
 import { inspectMP4, jpegFrame, jpegSize } from "./media-inspect.mjs";
 import { parseWindowsListing } from "../src/lib/windows-listing.ts";
+import { parseDistribution } from "../src/lib/distribution-metadata.ts";
 
 test("site URLs allow the selected Pages subpath and future root domain", () => {
   assert.deepEqual(siteConfig("https://dorlugasigal.github.io/annotator"),
@@ -138,43 +139,42 @@ test("support, privacy and compatibility pages exist without fake contact endpoi
 });
 
 test("app downloads appear only from verified distribution metadata", async () => {
-  const data = JSON.parse(await readFile(process.env.DISTRIBUTION_METADATA_FILE ||
+  const {release} = JSON.parse(await readFile(process.env.DISTRIBUTION_METADATA_FILE ||
     new URL("../src/data/distribution.json", import.meta.url), "utf8"));
   const html = await readFile(new URL("../dist/downloads/index.html", import.meta.url), "utf8");
-  const entries = [data.stable, data.preview].filter(Boolean);
-  if (!entries.length) {
+  const home = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
+  if (!release) {
     assert.match(html, /This page has no verified download details/);
     assert.doesNotMatch(html, /href="[^"]*\/releases\/download\//);
-  }
-  for (const entry of entries) {
-    assert.ok(html.includes(entry.downloadURL));
-    assert.ok(html.includes(entry.sha256));
+  } else {
+    assert.ok(html.includes(release.downloadURL));
+    assert.ok(html.includes(release.sha256));
     // A release with a disk image offers it first, and keeps the ZIP and both checksums on the page.
-    if (entry.diskImageURL) {
-      assert.ok(html.indexOf(entry.diskImageURL) < html.indexOf(`>ZIP archive<`));
-      assert.ok(html.includes(entry.diskImageSHA256));
+    if (release.diskImageURL) {
+      assert.ok(html.indexOf(release.diskImageURL) < html.indexOf(`>ZIP archive<`));
+      assert.ok(html.includes(release.diskImageSHA256));
     }
-    assert.ok(html.includes(entry.releaseVersion));
-    const url = new URL(entry.downloadURL);
+    // One release, named by its version alone.
+    assert.ok(html.includes(`<h2>Version ${release.releaseVersion}</h2>`));
+    const url = new URL(release.downloadURL);
     const repository = url.pathname.split("/").slice(1, 3).join("/");
-    assert.ok(html.includes(`https://github.com/${repository}/releases/tag/v${entry.releaseVersion}`),
-      "Each download needs notes for that exact version and repository.");
+    assert.ok(html.includes(`https://github.com/${repository}/releases/tag/v${release.releaseVersion}`),
+      "The download needs notes for that exact version and repository.");
   }
-  const home = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
-  const featured = data.stable || data.preview;
-  const downloadURL = featured?.diskImageURL ?? featured?.downloadURL ?? "https://github.com/dorlugasigal/annotator/releases";
+  // There are no release stages, tracks or build numbers to show, even for an older release with a pre-release label.
+  for (const page of [home, html]) {
+    assert.doesNotMatch(page, /Public alpha|Public beta|Release candidate|Testing preview|prerelease|\bStable\b|\bBuild \d/i);
+  }
+  const downloadURL = release?.diskImageURL ?? release?.downloadURL ?? "https://github.com/dorlugasigal/annotator/releases";
   assert.ok(home.includes(`class="button download-action" href="${downloadURL}"`));
   // The first step names the file the button downloads.
-  assert.ok(home.includes(featured?.diskImageURL ? "Download and open the disk image." : "Download and unzip."));
+  assert.ok(home.includes(release?.diskImageURL ? "Download and open the disk image." : "Download and unzip."));
   assert.match(home, /id="homebrew"/);
-  if (entries.length) {
+  if (release) {
     assert.match(home, /Download for Mac/);
     assert.doesNotMatch(home, /not available yet|no verified download details|private preview/i);
-    // The homepage names the track and version beside the download; the build number stays on Downloads.
-    const stage = featured.releaseVersion.match(/-(alpha|beta|rc)\./)?.[1];
-    const label = featured.track === "stable" ? "Version" :
-      {alpha: "Public alpha", beta: "Public beta", rc: "Release candidate"}[stage];
-    assert.ok(home.includes(`${label} ${featured.releaseVersion} · `));
+    // The homepage names the version beside the download.
+    assert.ok(home.includes(`<p class="install-version">Version ${release.releaseVersion} · `));
     // One command: Homebrew adds the homebrew-annotator tap by name, so there is no tap step.
     assert.doesNotMatch(html, /brew tap /);
     assert.match(html, /brew install --cask dorlugasigal\/annotator\/annotator/);
@@ -185,7 +185,8 @@ test("app downloads appear only from verified distribution metadata", async () =
   }
   // Requirements follow verified architectures: Intel appears only once a published release runs on it.
   const docs = await readFile(new URL("../dist/docs/index.html", import.meta.url), "utf8");
-  if (featured?.architecture === "arm64 x86_64") {
+  const intel = release?.architecture === "arm64 x86_64";
+  if (intel) {
     assert.match(home, /Free · macOS 14\+ · Apple Silicon and Intel/);
     assert.match(home, /Needs macOS 14 or later, on an <span class="nowrap">Apple Silicon or Intel Mac\.<\/span>/);
     assert.match(home, /For macOS 14 and later on Apple Silicon and Intel Macs\./);
@@ -195,8 +196,72 @@ test("app downloads appear only from verified distribution metadata", async () =
     assert.match(home, /Needs macOS 14 or later and an <span class="nowrap">Apple M-series chip\.<\/span>/);
     assert.doesNotMatch(home + docs, /Intel Mac|Intel processor|Apple Silicon and Intel/);
   }
-  const everyIntel = entries.length > 0 && entries.every(entry => entry.architecture === "arm64 x86_64");
-  assert.equal(html.includes("on a Mac with Apple Silicon or an Intel processor"), everyIntel);
+  assert.equal(html.includes("on a Mac with Apple Silicon or an Intel processor"), intel);
+});
+
+test("release metadata is null or one release with a plain version, or a legacy label with its build in the file names", async () => {
+  const releases = "https://github.com/dorlugasigal/annotator/releases/download";
+  const plain = {
+    releaseVersion: "0.2.0", downloadURL: `${releases}/v0.2.0/annotator-0.2.0-universal.zip`, sha256: "a".repeat(64),
+    architecture: "arm64 x86_64", diskImageURL: `${releases}/v0.2.0/annotator-0.2.0-universal.dmg`,
+    diskImageSHA256: "c".repeat(64), diskImageSize: 4427901,
+  };
+  const legacy = {
+    ...plain, releaseVersion: "0.1.0-beta.17", downloadURL: `${releases}/v0.1.0-beta.17/annotator-0.1.0-beta.17-35-universal.zip`,
+    diskImageURL: `${releases}/v0.1.0-beta.17/annotator-0.1.0-beta.17-35-universal.dmg`,
+  };
+  const zipOnly = {releaseVersion: "0.2.1", downloadURL: `${releases}/v0.2.1/annotator-0.2.1-arm64.zip`, sha256: "b".repeat(64)};
+  assert.equal(parseDistribution({release: null}), null);
+  assert.deepEqual(parseDistribution({release: plain}), {
+    releaseVersion: "0.2.0", downloadURL: plain.downloadURL, sha256: plain.sha256, architecture: "arm64 x86_64",
+    diskImage: {url: plain.diskImageURL, sha256: plain.diskImageSHA256, size: plain.diskImageSize},
+  });
+  assert.equal(parseDistribution({release: legacy}).releaseVersion, "0.1.0-beta.17");
+  for (const label of ["0.1.0-alpha.2", "0.1.0-rc.1"]) {
+    const name = `annotator-${label}-10-arm64.zip`;
+    assert.equal(parseDistribution({release: {...zipOnly, releaseVersion: label, downloadURL: `${releases}/v${label}/${name}`}})
+      .releaseVersion, label);
+  }
+  // Data without an architecture is from the oldest releases, which ran on Apple Silicon only.
+  assert.deepEqual(parseDistribution({release: zipOnly}), {...zipOnly, architecture: "arm64", diskImage: null});
+  const invalid = [
+    null, [], {}, {release: undefined}, {release: []}, {release: "0.2.0"},
+    // The old two-track file, and the fields that went with it.
+    {stable: null, preview: null}, {release: null, preview: null}, {release: {...plain, build: "36"}}, {release: {...plain, track: "stable"}},
+    ...["0.2", "v0.2.0", "0.2.0.1", "00.2.0", "0.2.0+36", "0.2.0-preview.1", "0.2.0-beta.0", "0.2.0-beta"].map(releaseVersion =>
+      ({release: {...plain, releaseVersion}})),
+    {release: {...plain, sha256: "A".repeat(64)}}, {release: {...plain, sha256: "a".repeat(63)}},
+    {release: {...plain, architecture: "x86_64"}}, {release: {...plain, architecture: null}},
+    // A plain version never names a build in its files, and a legacy label always does.
+    {release: {...plain, downloadURL: `${releases}/v0.2.0/annotator-0.2.0-36-universal.zip`, diskImageURL: `${releases}/v0.2.0/annotator-0.2.0-36-universal.dmg`}},
+    {release: {...legacy, downloadURL: `${releases}/v0.1.0-beta.17/annotator-0.1.0-beta.17-universal.zip`, diskImageURL: `${releases}/v0.1.0-beta.17/annotator-0.1.0-beta.17-universal.dmg`}},
+    ...["0", "035", "3x", ""].map(build => ({release: {...zipOnly, releaseVersion: "0.1.0-beta.17",
+      downloadURL: `${releases}/v0.1.0-beta.17/annotator-0.1.0-beta.17-${build}-arm64.zip`}})),
+    // The file must be that version's archive for its architecture, in that version's GitHub release.
+    ...[`${releases}/v0.2.1/annotator-0.2.0-universal.zip`, `${releases}/v0.2.0/annotator-0.2.0-arm64.zip`,
+      `${releases}/v0.2.0/annotator-0.2.0-universal.dmg`, `${releases}/v0.2.0/Annotator-0.2.0-universal.zip`,
+      "http://github.com/dorlugasigal/annotator/releases/download/v0.2.0/annotator-0.2.0-universal.zip",
+      "https://example.com/dorlugasigal/annotator/releases/download/v0.2.0/annotator-0.2.0-universal.zip",
+      "https://user:token@github.com/dorlugasigal/annotator/releases/download/v0.2.0/annotator-0.2.0-universal.zip",
+      "https://github.com:443/dorlugasigal/annotator/releases/download/v0.2.0/annotator-0.2.0-universal.zip",
+      `${releases}/v0.2.0/annotator-0.2.0-universal.zip?download=1`, `${releases}/v0.2.0/annotator-0.2.0-universal.zip#top`,
+      "https://github.com/a/b/c/releases/download/v0.2.0/annotator-0.2.0-universal.zip",
+      "https://github.com/dorlugasigal/../releases/download/v0.2.0/annotator-0.2.0-universal.zip"]
+      .map(downloadURL => ({release: {...plain, downloadURL, diskImageURL: downloadURL.replace(/\.zip/, ".dmg")}})),
+    // A disk image comes with its checksum and size, next to the same release's ZIP.
+    {release: {...zipOnly, diskImageURL: `${releases}/v0.2.1/annotator-0.2.1-arm64.dmg`}},
+    {release: {...plain, diskImageURL: `${releases}/v0.2.0/annotator-0.2.0-arm64.dmg`}},
+    {release: {...plain, diskImageURL: `${releases}/v0.1.0/annotator-0.2.0-universal.dmg`}},
+    {release: {...plain, diskImageURL: `${plain.diskImageURL}?x=1`}}, {release: {...plain, diskImageURL: null}},
+    {release: {...plain, diskImageSHA256: "c".repeat(65)}},
+    ...[0, -1, 1.5, "4427901"].map(diskImageSize => ({release: {...plain, diskImageSize}})),
+  ];
+  for (const value of invalid) assert.throws(() => parseDistribution(value), undefined, JSON.stringify(value));
+  // The committed file is regenerated when the website is published, and every fixture is one valid release.
+  parseDistribution(JSON.parse(await readFile(new URL("../src/data/distribution.json", import.meta.url), "utf8")));
+  for (const name of ["distribution", "published-zip", "published-legacy"]) {
+    assert.ok(parseDistribution(JSON.parse(await readFile(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"))), name);
+  }
 });
 
 test("the Windows listing setting is null or the Store ID of one listing", async () => {
@@ -279,7 +344,7 @@ test("Windows appears only with a published Microsoft Store listing", async () =
   assert.equal(storeLinks.length, 1);
   assert.ok(storeLinks[0].includes(`href="${listing.listingURL}"`));
   assert.match(storeLinks[0], /class="button store-action"/);
-  assert.doesNotMatch(storeLinks[0], /data-download-track/, "The counting service accepts only Mac release tracks.");
+  assert.doesNotMatch(storeLinks[0], /data-download\b/, "The counting service counts only Mac downloads.");
   assert.doesNotMatch(home, /<img[^>]*(?:badge|microsoft)/i);
   // Both systems are offered behind one switch that starts on the visitor's system; without scripts both show, Mac first.
   assert.match(home, /data-platform-scope data-platform-default="visitor"[^>]*>[\s\S]*?aria-label="Install on" data-platform-switch hidden/);
@@ -382,23 +447,19 @@ test("region sharing explains ultrawide sharing below the drawing shortcut secti
   assert.ok(home.indexOf('id="region-sharing"') > home.indexOf('id="return-title"'));
   assert.match(home, /Hiding the toolbar keeps the region on/);
   assert.match(docs, /id="region-sharing"/);
-  const data = JSON.parse(await readFile(process.env.DISTRIBUTION_METADATA_FILE ||
-    new URL("../src/data/distribution.json", import.meta.url), "utf8"));
-  const release = data.stable || data.preview;
-  if (release && BigInt(release.build) >= 20n) {
-    assert.match(docs, /Share left half or Share right half/);
-    assert.match(docs, /The faint fill clears when sharing starts/);
-    assert.match(docs, /The visible toolbar appears when it is inside the region/);
-    assert.match(docs, /Control-2(?: \(Ctrl\+2 on Windows\))? hides drawings, covers and tools in the shared view too/);
-    assert.match(docs, /keeps updating when covered/);
-    assert.doesNotMatch(docs, /including your drawings and covers/);
-  } else {
-    assert.doesNotMatch(docs, /Control-2(?: \(Ctrl\+2 on Windows\))? hides drawings, covers and tools in the shared view too/);
-  }
-  if (docs.includes("Share &gt; Window &gt; Annotator - Shared Region")) {
-    assert.match(docs, /Share &gt; Window &gt; Annotator - Shared Region/);
-    assert.match(docs, /does not start the meeting&#39;s share, send screen pixels itself, record video or install a camera driver|does not start the meeting's share, send screen pixels itself, record video or install a camera driver/);
-  }
+  // Help and Privacy describe region sharing as it works now, whatever release the site offers.
+  assert.match(docs, /Share left half or Share right half/);
+  assert.match(docs, /The faint fill clears when sharing starts/);
+  assert.match(docs, /The visible toolbar appears when it is inside the region/);
+  assert.match(docs, /Control-2(?: \(Ctrl\+2 on Windows\))? hides drawings, covers and tools in the shared view too/);
+  assert.match(docs, /keeps updating when covered/);
+  assert.match(docs, /<dd>Zoom, live pixel effects and region sharing need to see your screen\./);
+  assert.doesNotMatch(docs, /including your drawings and covers|needs build \d+/);
+  assert.match(docs, /Share &gt; Window &gt; Annotator - Shared Region/);
+  assert.match(docs, /does not start the meeting&#39;s share, send screen pixels itself, record video or install a camera driver|does not start the meeting's share, send screen pixels itself, record video or install a camera driver/);
+  const privacy = await readFile(new URL("../dist/privacy/index.html", import.meta.url), "utf8");
+  assert.match(privacy, /Zoom, live pixel effects and region sharing need Screen Recording permission/);
+  assert.match(privacy, /Region sharing composes a chosen desktop area into a local window\./);
 });
 
 test("region-sharing footage is a fresh, silent recording of the native chooser", async () => {
@@ -530,7 +591,7 @@ test("new showcase media is fresh, bounded, silent-source documented and checksu
   }
 });
 
-test("social metadata retains the alpha indexing policy and uses configured URLs", async () => {
+test("social metadata keeps the noindex policy and uses configured URLs", async () => {
   const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
   assert.match(html, /property="og:title"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);

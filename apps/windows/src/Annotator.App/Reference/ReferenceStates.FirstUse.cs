@@ -39,7 +39,7 @@ internal static partial class ReferenceStates
     /// WhatsChangedTests.swift), so the reference doesn't change with every release.
     /// </summary>
     internal static Annotator.Workspace.Settings.ReleaseNotesEntry WhatsChangedNotes { get; } = new(
-        "0.1.0-beta.13", 31, "2026-10-24",
+        "0.2.0", 200, "2026-10-24",
         [
             ("Added", ["After an update, What's changed shows the new version's notes once."]),
             ("Changed", ["Annotator checks for updates once a day. You can turn this off in Settings."]),

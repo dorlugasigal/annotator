@@ -11,7 +11,7 @@ if (config.base !== "/" || !config.site || new URL(config.site).hostname.endsWit
 }
 const cwd = fileURLToPath(new URL("..", import.meta.url));
 const metadata = JSON.parse(await readFile(new URL("../src/data/distribution.json", import.meta.url), "utf8"));
-if (process.env.CONTEXT === "production" && !metadata.stable && !metadata.preview) {
+if (process.env.CONTEXT === "production" && !metadata.release) {
   throw new Error("Generate verified release metadata before a production website build.");
 }
 const env = {

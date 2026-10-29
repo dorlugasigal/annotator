@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Annotator.App.Native;
+using Annotator.Workspace.Packaging;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.DataExchange;
@@ -22,16 +23,17 @@ internal static class BuildInfo
     public static bool IsDevelopment { get; } = !HasPackageIdentity() && !IsPortable;
 
     /// <summary>
-    /// The website's update feed of the portable release (AnnotatorUpdateFeedURL, set by tools/windows/package.ps1
-    /// -UpdateSite), or null for every other copy and a portable build without one (WIN-SYS-03).
+    /// The website's update feed of the portable release, <c>updates/windows-stable.json</c> (AnnotatorUpdateFeedURL, set by
+    /// tools/windows/package.ps1 -UpdateSite), or null for every other copy and a portable build without one (WIN-SYS-03).
     /// </summary>
     public static Uri? UpdateFeed { get; } = IsPortable ? Annotator.Workspace.Updates.ReleaseFeed.Address(Metadata("AnnotatorUpdateFeedURL")) : null;
 
     /// <summary>
-    /// The Mac's formatVersion from the shared version (WIN-DST-04): version, prerelease suffix and build, for example
-    /// "0.1.0-beta.7 (25)". Development builds carry the same label and show the Local build badge in About, as on the Mac.
+    /// The shared version (WIN-DST-04), a plain X.Y.Z such as "0.2.0", from the assembly version Major.Minor.Patch.0 that
+    /// SharedVersion.props sets. About, the tray flyout, support info and feedback show it, and release notes are matched to
+    /// it. Development builds have the same version and show the Local build badge in About, as on the Mac.
     /// </summary>
-    public static string VersionLabel { get; } = FormatVersion();
+    public static string Version { get; } = SharedVersionOfBuild()?.Version ?? "Version unavailable";
 
     /// <summary>The per-user data folder (the package's local data once packaged, WIN-SYS-05).</summary>
     public static string DataFolder { get; } = Path.Combine(
@@ -57,11 +59,11 @@ internal static class BuildInfo
     public static string BuildLabel { get; } = Metadata("AnnotatorBuildStamp") is { Length: > 0 } stamp && !stamp.Contains("$(", StringComparison.Ordinal)
         ? stamp : "Unstamped development build";
 
-    /// <summary>The build number of <see cref="VersionLabel"/>, or null when the build has none.</summary>
-    public static int? BuildNumber { get; } = typeof(BuildInfo).Assembly.GetName().Version is { Revision: >= 0 } value ? value.Revision : null;
-
-    /// <summary>The version that release notes are matched to: the version and its prerelease suffix, without the build.</summary>
-    public static string NotesVersion { get; } = VersionLabel.Split(' ')[0];
+    /// <summary>
+    /// The build of <see cref="Version"/>, derived and never counted (Major * 10000 + Minor * 100 + Patch, so 0.2.0 is 200),
+    /// or null when the build has no version. Release notes, What's changed, update checks and usage counts use it.
+    /// </summary>
+    public static int? BuildNumber { get; } = SharedVersionOfBuild()?.Build;
 
     private static string? Metadata(string key) =>
         typeof(BuildInfo).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().FirstOrDefault(item => item.Key == key)?.Value;
@@ -89,13 +91,20 @@ internal static class BuildInfo
         return (int)result != AppModelErrorNoPackage;
     }
 
-    private static string FormatVersion()
+    private static SharedVersion? SharedVersionOfBuild()
     {
-        Assembly assembly = typeof(BuildInfo).Assembly;
-        string version = assembly.GetName().Version is { } value ? $"{value.Major}.{value.Minor}.{value.Build}" : "Version unavailable";
-        string build = assembly.GetName().Version?.Revision.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "unknown";
-        string? prerelease = Metadata("AnnotatorPrerelease") is { } suffix && !suffix.Contains("$(", StringComparison.Ordinal) ? suffix : null;
-        return Annotator.Workspace.Packaging.SharedVersion.Format(version, prerelease, build);
+        if (typeof(BuildInfo).Assembly.GetName().Version is not { } version)
+        {
+            return null;
+        }
+        try
+        {
+            return SharedVersion.Create(version.Major, version.Minor, version.Build);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
     }
 }
 

@@ -45,7 +45,7 @@ internal sealed class FeedbackView
         Kind = kind;
         _stack = new MacStack { Spacing = 12, Margin = new Thickness(20), HorizontalAlignment = HorizontalAlignment.Stretch };
         _stack.Children.Add(new FormText(kind.Title, 17, weight: FontWeights.Bold));
-        _stack.Children.Add(SettingsForm.Caption(SettingsCopy.VersionLine(actions.Environment.VersionLabel)));
+        _stack.Children.Add(SettingsForm.Caption(SettingsCopy.VersionLine(actions.Environment.Version)));
         _stack.Children.Add(new FormText(FeedbackDraft.TitleHeading, 12, weight: FontWeights.Bold));
         _title = new TextBox
         {
@@ -150,7 +150,7 @@ internal sealed class FeedbackView
     {
         try
         {
-            string report = Draft.Report(_actions.Environment.VersionLabel);
+            string report = Draft.Report(_actions.Environment.Version);
             if (_actions.Environment.Live)
             {
                 TextClipboard.SetText(_owner(), report);
@@ -175,7 +175,7 @@ internal sealed class FeedbackView
         ShowPlainForm(false);
         try
         {
-            Uri link = Draft.GitHubUrl(_actions.Environment.IssuesUrl, _actions.Environment.VersionLabel);
+            Uri link = Draft.GitHubUrl(_actions.Environment.IssuesUrl, _actions.Environment.Version);
             if (!_actions.OpenLink(link))
             {
                 throw FeedbackFailure.Browser();

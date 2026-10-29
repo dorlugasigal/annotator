@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Annotator's MSIX package manifest (WIN-DST-01, WIN-SYS-01, WIN-SYS-04). The build copies it into obj and sets the
-  Identity Version from the shared version: (Major + 1).Minor.Build.0 (SharedVersion.props, WIN-DST-04).
+  Identity Version from the shared version: (Major + 1).Minor.Patch.0 (SharedVersion.props, WIN-DST-04).
 
   The Store identity comes from Partner Center > Annotator – Screen Annotation > Product management > Product identity
   (Store ID 9NMZ345ZJ6JK, package family DorLugasi-Gal.AnnotatorScreenAnnotation_es65rrkpa6e10), copied exactly on

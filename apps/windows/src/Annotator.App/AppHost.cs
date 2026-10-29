@@ -166,7 +166,7 @@ internal sealed partial class AppHost
             ? new WindowsStoreUpdates(() => _settings is { } settings ? (nint)settings.Hwnd : 0)
             : new FixedStoreUpdates(UpdateChannel.Store) { Answer = StoreUpdateCheck.Available, Outcome = StoreInstallOutcome.Cancelled };
         PortableUpdateSource? portable = check is null && BuildInfo.UpdateFeed is { } feed && BuildInfo.BuildNumber is { } build
-            ? new PortableUpdateSource(new PortableReleaseFeed(feed, BuildInfo.NotesVersion), build, _defaults)
+            ? new PortableUpdateSource(new PortableReleaseFeed(feed, BuildInfo.Version), build, _defaults)
             : null;
         _updates = new AppUpdates(store, () => UpdateQuestion.For(_model.Snapshot), AskBeforeUpdateAsync,
             message => StartupLog.Note("store-update", message), portable: portable);
@@ -176,7 +176,7 @@ internal sealed partial class AppHost
         _whatsChangedTracker = new WhatsChangedTracker(_defaults);
         _whatsChangedDue = check is null && BuildInfo.BuildNumber is { } running
             ? _whatsChangedTracker.Due(running, usedBefore, () => ReleaseNotesCatalog.Load(
-                Path.Combine(AppContext.BaseDirectory, ReleaseNotesView.NotesFile), BuildInfo.NotesVersion, running))
+                Path.Combine(AppContext.BaseDirectory, ReleaseNotesView.NotesFile), BuildInfo.Version, running))
             : null;
         _settingsActions = new SettingsActions(_model, _launch, _updates,
             SettingsEnvironment.ForApp(CollectSupportFacts, check is null ? RegisterProfileShortcuts : null, hasTrayIcon: check is null) with
@@ -866,7 +866,7 @@ internal sealed partial class AppHost
         static string Architecture(System.Runtime.InteropServices.Architecture value) => value.ToString().ToLowerInvariant();
         return new SupportFacts
         {
-            Version = BuildInfo.VersionLabel,
+            Version = BuildInfo.Version,
             BuildLabel = BuildInfo.BuildLabel,
             Installation = Annotator.Platform.Updates.StoreUpdateService.Source switch
             {

@@ -8,8 +8,7 @@ guards     The Store identity check of publish_windows.py --check-store and the 
 receipt    Checks package.ps1's report and bundle, then writes the artifact folder with SHA256SUMS and windows-release.json.
 verify     Checks the downloaded artifact in the Store job against the build job's SHA-256.
 cli        Downloads the pinned Microsoft Store Developer CLI and checks its SHA-256.
-submit     Sends the bundle with the CLI: to the package flight, or to the private audience, and to the public listing only
-           with an explicit "public" input.
+submit     Sends the bundle with the CLI to the public listing; that takes an explicit "public" input.
 
 Nothing here signs a package or runs a test suite: the Store signs what it publishes, and local validation, WACK and the
 first Store submission stay with the owner (tools/windows/publish_windows.py, docs/maintainers/windows-store.md).
@@ -34,12 +33,11 @@ import publish_windows  # noqa: E402
 
 SWITCH = Path("releases/windows.json")
 TOOLCHAIN = Path("tools/windows/toolchain.json")
-TARGETS = ("none", "testers", "public")
+TARGETS = ("none", "public")
 ARCHITECTURES = ["arm64", "x64"]
 RECEIPT = "windows-release.json"
 SOURCE = re.compile(r"[0-9a-f]{40}")
 DIGEST = re.compile(r"[0-9a-f]{64}")
-FLIGHT = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 CREDENTIALS = ("PARTNER_CENTER_TENANT_ID", "PARTNER_CENTER_SELLER_ID", "PARTNER_CENTER_CLIENT_ID",
                "PARTNER_CENTER_CLIENT_SECRET")
 MINUTES = 60
@@ -108,7 +106,7 @@ def plan(environ, root=ROOT):
     msix = publish_windows.msix_version(version, build)
     if target == "public" and environ.get("RELEASE_PUBLISHES") != "true":
         raise Stop("A public Store submission goes out with its published release. Turn on publish, or set windows_store "
-                   "to testers or none for a run that publishes nothing.")
+                   "to none for a run that publishes nothing.")
     if target != "none":
         owner = environ.get("REPOSITORY_OWNER", "")
         if not owner or environ.get("TRIGGERING_ACTOR") != owner:
@@ -125,7 +123,7 @@ def plan(environ, root=ROOT):
     if values["windows"]:
         reason = ("part of this release (releases/windows.json)" if release_build else
                   "for the Store submission that this run asks for" if target != "none" else "as a test artifact")
-        line = f"Windows: this run builds {msix} for {version} ({build}) {reason}."
+        line = f"Windows: this run builds {msix} for {version} {reason}."
         if target != "none":
             line += f" After that, the windows-store job sends it to the Store ({target})."
     elif switch:
@@ -270,7 +268,7 @@ def receipt(packages, output, environ, toolchain_file=None, root=ROOT):
         raise Stop("CANDIDATE_SHA is not a full commit SHA.")
     configured, build = release.configured_version(root)
     if configured != version or publish_windows.msix_version(version, build) != msix:
-        raise Stop(f"The checkout's version {configured} ({build}) is not this run's {version}, package {msix}.")
+        raise Stop(f"The checkout's version {configured} is not this run's {version}, package {msix}.")
     report = read_json(packages / "package-report.json", "package-report.json")
     metrics = environ.get("METRICS_URL", "")
     store_identity = environ.get("STORE_IDENTITY") == "ready"
@@ -279,8 +277,8 @@ def receipt(packages, output, environ, toolchain_file=None, root=ROOT):
     problems = []
     if report.get("version") != msix:
         problems.append(f"the packages are version {report.get('version')}, not {msix}")
-    if report.get("label") != f"{version} ({build})":
-        problems.append(f"the packages say {report.get('label')}, not {version} ({build})")
+    if report.get("label") != version:
+        problems.append(f"the packages say {report.get('label')}, not {version}")
     if report.get("buildStamp") != f"Release {source[:12]}":
         problems.append(f"the build stamp is {report.get('buildStamp')!r}, not 'Release {source[:12]}'")
     if (report.get("metricsUrl") or "") != metrics:
@@ -442,19 +440,16 @@ class StoreCLI:
 
 
 def submit(folder, executable, environ, run=None, out=print):
-    """Signs in with the Partner Center secrets, then sends the bundle: testers go to the package flight when
-    WINDOWS_STORE_FLIGHT_ID is set, otherwise to a private-audience submission; public needs the explicit input."""
+    """Signs in with the Partner Center secrets, then sends the bundle to the public listing (it needs the explicit
+    "public" input)."""
     credentials = [environ.pop(name, "") for name in CREDENTIALS]
     bundle = verify(folder, environ)
     target = environ.get("STORE_TARGET", "")
     store_id = environ.get("WINDOWS_STORE_ID", "")
-    flight = environ.get("WINDOWS_STORE_FLIGHT_ID", "")
-    if target not in ("testers", "public"):
+    if target != "public":
         raise Stop(f"windows_store {target!r} sends nothing to the Store.")
     if not publish_windows.STORE_ID.fullmatch(store_id):
         raise Stop("WINDOWS_STORE_ID is not a 12-character Store ID.")
-    if flight and not FLIGHT.fullmatch(flight):
-        raise Stop("WINDOWS_STORE_FLIGHT_ID is not a flight ID. msstore flights list <Store ID> shows each flight's ID.")
     missing = [name for name, value in zip(CREDENTIALS, credentials) if not value]
     if missing:
         raise Stop("The windows-store environment lacks the secrets " + ", ".join(missing) + ".")
@@ -465,22 +460,8 @@ def submit(folder, executable, environ, run=None, out=print):
         run("reconfigure", "--tenantId", tenant, "--sellerId", seller, "--clientId", client, "--clientSecret", secret,
             timeout=10 * MINUTES, label="reconfigure")
         run("settings", "--enableTelemetry", "false", timeout=5 * MINUTES, label="settings")
-        if target == "testers" and flight:
-            run("publish", str(bundle), "-id", store_id, "-f", flight, timeout=45 * MINUTES, label="publish")
-            result = {"target": "package flight", "flight": flight, "committed": True}
-        elif target == "public":
-            run("publish", str(bundle), "-id", store_id, timeout=45 * MINUTES, label="publish")
-            result = {"target": "public listing", "committed": True}
-        else:
-            run("publish", str(bundle), "-id", store_id, "--noCommit", timeout=45 * MINUTES, label="publish")
-            draft = run("submission", "get", store_id, timeout=10 * MINUTES, label="submission get")
-            visibility = re.findall(r'"visibility"\s*:\s*"([A-Za-z]+)"', draft, re.IGNORECASE)
-            if visibility != ["Private"]:
-                raise Stop("The draft is not limited to a private audience (Partner Center says "
-                           f"{', '.join(visibility) or 'nothing'}), so it was not submitted. Check Pricing and availability "
-                           "in Partner Center and submit the draft there, or set WINDOWS_STORE_FLIGHT_ID and run again.")
-            run("submission", "publish", store_id, timeout=45 * MINUTES, label="submission publish")
-            result = {"target": "private audience", "committed": True}
+        run("publish", str(bundle), "-id", store_id, timeout=45 * MINUTES, label="publish")
+        result = {"target": "public listing", "committed": True}
     finally:
         try:
             run("reconfigure", "--reset", timeout=5 * MINUTES, label="reconfigure")
@@ -534,7 +515,7 @@ def main(argv=None, environ=None):
             summary(["### Windows bundle", "", f"- {data['bundle']['file']}: {data['bundle']['bytes']:,} bytes, "
                      f"{', '.join(data['bundle']['architectures'])}",
                      f"- SHA-256: `{data['bundle']['sha256']}`",
-                     f"- {data['releaseVersion']} ({data['build']}) from `{data['source']}`",
+                     f"- {data['releaseVersion']} from `{data['source']}`",
                      "- For the Store: " + ("yes" if data["storeReady"] else "no, a test build")], environ)
         elif args.command == "resume":
             values = resume(args.folder, environ)

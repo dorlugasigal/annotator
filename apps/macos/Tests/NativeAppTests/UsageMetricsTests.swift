@@ -65,6 +65,8 @@ final class UsageMetricsTests: XCTestCase {
         let body = try XCTUnwrap(requests.first?.httpBody)
         let payload = try JSONDecoder().decode(UsageMetricPayload.self, from: body)
         XCTAssertEqual(payload.schema, 1)
+        XCTAssertEqual(payload.version, Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+        XCTAssertEqual(payload.build, Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String)
         XCTAssertEqual(payload.since, payload.days[0].day)
         XCTAssertEqual(payload.days.count, 1)
         XCTAssertEqual(payload.days[0].features[UsageMetric.drawing.rawValue], "2-5")

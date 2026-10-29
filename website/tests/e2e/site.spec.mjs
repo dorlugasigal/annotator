@@ -5,9 +5,8 @@ import {siteConfig} from "../../site-config.mjs";
 
 const base = siteConfig().base.replace(/\/$/, "");
 const sitePath = path => base + path;
-const metadata = JSON.parse(readFileSync(process.env.DISTRIBUTION_METADATA_FILE ||
+const {release} = JSON.parse(readFileSync(process.env.DISTRIBUTION_METADATA_FILE ||
   new URL("../../src/data/distribution.json", import.meta.url), "utf8"));
-const release = metadata.stable || metadata.preview;
 // The main button offers the disk image when the release has one, otherwise the ZIP.
 const download = release?.diskImageURL || release?.downloadURL || "https://github.com/dorlugasigal/annotator/releases";
 const demo = JSON.parse(readFileSync(new URL("../../src/data/native-demo.json", import.meta.url), "utf8"));
@@ -150,7 +149,9 @@ test("download buttons target the verified disk image, ZIP or public release lis
   for(const button of await buttons.all()) await expect(button).toHaveAttribute("href",download);
   await expect(page.locator(".hero-availability")).toContainText("macOS 14+");
   expect(await page.locator(".hero-availability").evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(14);
-  if(release) await expect(page.locator(".install-version")).toContainText(release.releaseVersion);
+  // The version is named on its own: no release stage, track or build number.
+  if(release) await expect(page.locator(".install-version")).toHaveText(`Version ${release.releaseVersion} · Release notes`);
+  else await expect(page.locator(".install-version")).toHaveCount(0);
   await expect(page.locator('a[href*="checkout"],form[action]')).toHaveCount(0);
   // A disk image link appears only for a release whose verified metadata includes one.
   expect(await page.locator('a[href$=".dmg"]').evaluateAll(links=>links.map(link=>link.href)))
@@ -220,13 +221,12 @@ test("the header and footer link to the public GitHub repository",async({page})=
 test("download details still have exact release notes and Homebrew commands",async({page})=>{
   await page.setViewportSize({width:320,height:900});
   await page.goto(sitePath("/downloads/"));
-  for(const entry of [metadata.stable,metadata.preview].filter(Boolean)){
-    await expect(page.locator(`a[href="${entry.downloadURL}"]`)).toHaveCount(1);
-    const repository=new URL(entry.downloadURL).pathname.split("/").slice(1,3).join("/");
-    await expect(page.getByRole("link",{name:`Read release notes and known limits for ${entry.releaseVersion}`,exact:true}))
-      .toHaveAttribute("href",`https://github.com/${repository}/releases/tag/v${entry.releaseVersion}`);
-  }
   if(release){
+    await expect(page.locator("h2",{hasText:/^Version /})).toHaveText([`Version ${release.releaseVersion}`]);
+    await expect(page.locator(`a[href="${release.downloadURL}"]`)).toHaveCount(1);
+    const repository=new URL(release.downloadURL).pathname.split("/").slice(1,3).join("/");
+    await expect(page.getByRole("link",{name:`Read release notes and known limits for ${release.releaseVersion}`,exact:true}))
+      .toHaveAttribute("href",`https://github.com/${repository}/releases/tag/v${release.releaseVersion}`);
     await expect(page.getByRole("region",{name:"Homebrew install command"}))
       .toHaveText("brew install --cask dorlugasigal/annotator/annotator");
   }

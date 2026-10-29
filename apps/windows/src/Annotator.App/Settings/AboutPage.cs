@@ -34,7 +34,7 @@ internal static class AboutPage
 
         var titles = new MacStack { Spacing = 6, HorizontalAlignment = HorizontalAlignment.Center };
         titles.Children.Add(Centered(new FormText(SettingsCopy.AppName, 26, weight: FontWeights.Bold)));
-        titles.Children.Add(Centered(new FormText(SettingsCopy.VersionLine(environment.VersionLabel), 13, "AnnotatorSecondaryText")));
+        titles.Children.Add(Centered(new FormText(SettingsCopy.VersionLine(environment.Version), 13, "AnnotatorSecondaryText")));
         if (environment.LocalBuild)
         {
             titles.Children.Add(new Border
@@ -158,14 +158,14 @@ internal static class ReleaseNotesView
         ReleaseNotesEntry entry;
         try
         {
-            entry = ReleaseNotesCatalog.Load(Path.Combine(environment.AppFolder, NotesFile), environment.NotesVersion, environment.BuildNumber);
+            entry = ReleaseNotesCatalog.Load(Path.Combine(environment.AppFolder, NotesFile), environment.Version, environment.BuildNumber);
         }
         catch (ReleaseNotesFailure failure)
         {
             stack.Children.Add(new FormText(failure.Message, 12, "AnnotatorSecondaryText", wrapWidth: width));
             return stack;
         }
-        stack.Children.Add(new FormText($"{entry.Version} ({entry.Build})", 13, weight: FontWeights.SemiBold));
+        stack.Children.Add(new FormText(entry.Version, 13, weight: FontWeights.SemiBold));
         stack.Children.Add(SettingsForm.Caption(entry.Date));
         foreach ((string category, IReadOnlyList<string> items) in entry.Changes)
         {

@@ -67,10 +67,10 @@ final class FeedbackSupportTests: XCTestCase {
         let draft = FeedbackDraft(kind: .issue, title: "Toolbar click", details: "Expected the button to open. It did not.")
         let pasteboard = NSPasteboard.withUniqueName()
         defer { pasteboard.releaseGlobally() }
-        try draft.copy(version: "0.1.0-alpha.1 (9)", to: pasteboard)
+        try draft.copy(version: "0.2.0", to: pasteboard)
         let text = try XCTUnwrap(pasteboard.string(forType: .string))
         XCTAssertTrue(text.contains("Toolbar click"))
-        XCTAssertTrue(text.contains("Version: 0.1.0-alpha.1 (9)"))
+        XCTAssertTrue(text.contains("Version: 0.2.0\n"))
         XCTAssertFalse(text.contains("Screen Recording"))
         XCTAssertThrowsError(try FeedbackDraft(kind: .feedback).report(version: "test"))
     }

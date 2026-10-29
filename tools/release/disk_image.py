@@ -97,7 +97,7 @@ def detach(mount):
 
 
 def inspect_release_app(app):
-    return packager.inspect_app(Path(app), "release")
+    return packager.inspect_app(Path(app))
 
 
 def default_name(app):

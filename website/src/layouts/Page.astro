@@ -4,12 +4,12 @@ import "../styles/editorial.css";
 import "../styles/motion.css";
 import { sitePath } from "../lib/paths";
 import { supportURL } from "../data/support";
-import { distribution, githubURL, runsOnIntel } from "../lib/distribution";
+import { githubURL, release, runsOnIntel } from "../lib/distribution";
 import { windowsListing } from "../lib/windows";
 import { metricsEndpoint } from "../scripts/metrics";
 import { siteConfig } from "../../site-config.mjs";
 interface Props { title: string; description?: string }
-const macs = runsOnIntel(distribution.stable ?? distribution.preview) ? "Apple Silicon and Intel Macs" : "Apple Silicon";
+const macs = runsOnIntel(release) ? "Apple Silicon and Intel Macs" : "Apple Silicon";
 const desktop = windowsListing ? "Mac or Windows desktop" : "Mac desktop";
 const { title, description = `Draw on your live ${desktop} with editable arrows, shapes and highlights. All tools are free. For macOS 14 and later on ${macs}.${windowsListing ? " Also for Windows 11." : ""}` } = Astro.props;
 const path = Astro.url.pathname;

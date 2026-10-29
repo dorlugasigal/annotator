@@ -50,12 +50,12 @@ class Pending(Exception):
     """The owner has a step to do first, then runs the same command again (exit 3)."""
 
 
-def msix_version(version, build):
-    """WIN-DST-04: (Major + 1).Minor.Build.0 of the shared version, as SharedVersion.props computes it."""
-    (major, minor, _), _, _ = release.parse_version(version)
-    if not isinstance(build, int) or build < 1:
-        raise Stop("The shared build number must be a positive integer.")
-    return f"{major + 1}.{minor}.{build}.0"
+def msix_version(version, build=None):
+    """WIN-DST-04: the package version (Major + 1).Minor.Patch.0 of the shared version, as SharedVersion.props computes it."""
+    try:
+        return release.msix_version(version, build)
+    except release.ReleaseError as error:
+        raise Stop(str(error)) from error
 
 
 def metrics_url(value):
@@ -218,12 +218,11 @@ def running_as_admin():
 class Publisher:
     """The five stages over one release folder. The command runner, git and the system probes can be replaced in tests."""
 
-    def __init__(self, folder, *, rehearsal=False, store_id=None, flight_id=None, metrics="", root=ROOT, run=None, git=None,
+    def __init__(self, folder, *, rehearsal=False, store_id=None, metrics="", root=ROOT, run=None, git=None,
                  admin=running_as_admin, appcert=APPCERT, platform=os.name, environ=None, out=print):
         self.folder = Path(folder)
         self.rehearsal = rehearsal
         self.store_id = store_id
-        self.flight_id = flight_id
         self.metrics = metrics_url(metrics)
         self.root = Path(root)
         self.run = run or self._run
@@ -407,13 +406,11 @@ class Publisher:
             self.log("  REHEARSAL: the identity is not the Store's or ARM64 was skipped, so there is nothing to submit.")
             return {"submitted": False, "rehearsal": True}
         command = f'msstore publish "{bundle}" -id {self.store_id or "<Store product ID>"} --noCommit'
-        if self.flight_id:
-            command += f" -f {self.flight_id}"
         self.log("  Nothing was submitted. When you approve this candidate, submit it yourself:")
         self.log(f"    Partner Center: open Annotator's submission, then Packages, and upload {bundle}")
         self.log("    or, once Annotator has a published submission, the Microsoft Store Developer CLI (after msstore "
                  f"reconfigure): {command}")
-        self.log("  Both leave a draft. Check the listing, the package flight and the notes in Partner Center, then submit.")
+        self.log("  Both leave a draft. Check the listing and the notes in Partner Center, then submit.")
         return {"submitted": False, "command": command}
 
     # Run ----------------------------------------------------------------------------------------------------------
@@ -434,14 +431,14 @@ class Publisher:
             built = self.stage("Build packages", lambda: self.build(frozen))
             self.stage("Certify with WACK", lambda: self.certify(frozen, built))
             self.stage("Hand off to the Store", lambda: self.hand_off(frozen, built))
-            self.log(f"COMPLETE: {frozen['version']} ({frozen['build']}), package {frozen['msix']}, is ready for the owner.")
+            self.log(f"COMPLETE: {frozen['version']}, package {frozen['msix']}, is ready for the owner.")
         finally:
             lock.unlink(missing_ok=True)
 
     def plan(self):
         version, build = release.configured_version(self.root)
         identity = package_identity(self.root / MANIFEST)
-        self.out(f"Candidate: {version} ({build}), MSIX package {msix_version(version, build)}")
+        self.out(f"Candidate: {version}, MSIX package {msix_version(version)}")
         self.out(f"Release folder: {self.folder}")
         for index, name in enumerate(STAGES, 1):
             self.out(f"[{index}/{len(STAGES)}] {name}")
@@ -475,7 +472,6 @@ def main(argv=None):
     parser.add_argument("--rehearsal", action="store_true",
                         help="Allow the PLACEHOLDER identity and an x64-only bundle; the last stage then submits nothing.")
     parser.add_argument("--store-id", help="The 12-character Store ID from Partner Center > Product identity.")
-    parser.add_argument("--flight-id", help="The package flight for testers (WIN-DST-03) in the printed submission command.")
     parser.add_argument("--metrics-url", default="",
                         help="The usage-count service's origin (the website's HTTPS root), built in as AnnotatorMetricsUrl.")
     args = parser.parse_args(argv)
@@ -488,8 +484,7 @@ def main(argv=None):
         if args.check_store:
             return 0 if check_store(ROOT, args.store_id) else 1
         folder = args.folder.resolve()
-        publisher = Publisher(folder, rehearsal=args.rehearsal, store_id=args.store_id, flight_id=args.flight_id,
-                              metrics=args.metrics_url)
+        publisher = Publisher(folder, rehearsal=args.rehearsal, store_id=args.store_id, metrics=args.metrics_url)
         if folder == ROOT or ROOT in folder.parents:
             raise Stop("Keep the release folder outside the source checkout.")
         if args.status:

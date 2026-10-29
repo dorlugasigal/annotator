@@ -485,7 +485,7 @@ final class ProductFeatureRecordingTests: XCTestCase {
                 "toolbarRect": sourceRect(toolbar.frame), "actions": actions, "pointerSamples": samples,
                 "source": "Fresh real-time ScreenCaptureKit recording of the live native desktop overlay and real toolbar. Isolated test-owned windows only.",
                 "input": "Timed native UI actions and canvas events, with a deterministic scripted pointer. Not a human or computer-use-provider recording.",
-                "imageWorkspace": false, "sourceRevision": showcase ? "website-showcase-working-tree" : "working alpha.4 candidate",
+                "imageWorkspace": false, "sourceRevision": showcase ? "website-showcase-working-tree" : "working-tree",
                 "toolbarAppearance": "dark", "ink": take == "draw" ? "teal" : take == "arrow" ? "blue" :
                     take == "style" ? "lagoon gradient" : take == "tools" ? "blue grid" : "native blur",
                 "preparedControls": preparedControls, "toolbarSamples": toolbarSamples,

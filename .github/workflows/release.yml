@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Approved full release label (for example 0.1.0-alpha.2)
+        description: Approved plain release version X.Y.Z (for example 0.2.0)
         required: true
         type: string
       candidate_sha:
@@ -25,10 +25,10 @@ on:
         default: false
         type: boolean
       windows_store:
-        description: Send this run's Windows bundle to the Microsoft Store (every release goes to the public listing; testers = the package flight; none for a run that publishes nothing)
+        description: Send this run's Windows bundle to the Microsoft Store's public listing (every release does; none for a run that publishes nothing)
         default: public
         type: choice
-        options: [none, testers, public]
+        options: [none, public]
 
 permissions:
   contents: read
@@ -427,7 +427,6 @@ jobs:
         env:
           STORE_TARGET: ${{ needs.preflight.outputs.windows-store }}
           WINDOWS_STORE_ID: ${{ vars.WINDOWS_STORE_ID }}
-          WINDOWS_STORE_FLIGHT_ID: ${{ vars.WINDOWS_STORE_FLIGHT_ID }}
           PARTNER_CENTER_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
           PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
           PARTNER_CENTER_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}

@@ -6,6 +6,8 @@ namespace Annotator.Workspace.FirstUse;
 /// Port of the Mac's <c>WhatsChangedTracker</c>: What's changed follows an update once for each newer build with notes
 /// bundled in the app. A first install, an older or equal build and a build without notes (a development build) never
 /// show it, and record the build at once; a due build is recorded only once the window shows (<see cref="Record"/>).
+/// Builds are derived from the version (0.2.0 is 200) and above the builds of earlier versions (35 and lower), so an
+/// update from any of them shows it.
 /// </summary>
 public sealed class WhatsChangedTracker(AppDefaults defaults)
 {
@@ -81,11 +83,11 @@ public static class WhatsChangedText
     public const string CloseIdentifier = "whats-changed-close";
     public const string KnownLimitsIdentifier = "whats-changed-known-limits";
 
-    /// <summary>The Mac's "You now have version 0.1.0-beta.13 (31)."</summary>
+    /// <summary>The Mac's "You now have version 0.2.0.": the version only, without the build.</summary>
     public static string Version(ReleaseNotesEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        return $"You now have version {entry.Version} ({entry.Build}).";
+        return $"You now have version {entry.Version}.";
     }
 
     /// <summary>The window's fixed size in points (Mac WhatsChangedView.width and height).</summary>

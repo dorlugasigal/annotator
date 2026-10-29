@@ -18,7 +18,7 @@ spec = importlib.util.spec_from_file_location("hosted_release", HERE / "hosted_r
 hosted = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(hosted)
 
-PROJECT = "settings:\n  base:\n    MARKETING_VERSION: 0.1.0\n    ANNOTATOR_PRERELEASE: beta.8\n    CURRENT_PROJECT_VERSION: 26\n"
+PROJECT = "settings:\n  base:\n    MARKETING_VERSION: 0.2.0\n    CURRENT_PROJECT_VERSION: 200\n"
 MANIFEST = """<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10">
   <Identity Name="{name}" Publisher="{publisher}" Version="0.0.0.0" />
@@ -31,7 +31,6 @@ PLACEHOLDER = {"name": "PLACEHOLDER.Annotator", "publisher": "CN=PLACEHOLDER-PAR
 METRICS = "public static class UsageMetrics\n{{\n    public const bool ServiceAcceptsWindows = {value};\n}}\n"
 SOURCE = "0123456789abcdef0123456789abcdef01234567"
 STORE_ID = "9NBLGGH4R315"
-FLIGHT = "43e448df-97c9-4a43-a0bc-2a445e736bcd"
 BUNDLE = b"bundle bytes"
 SECRETS = {"PARTNER_CENTER_TENANT_ID": "tenant-secret", "PARTNER_CENTER_SELLER_ID": "seller-secret",
            "PARTNER_CENTER_CLIENT_ID": "client-secret-id", "PARTNER_CENTER_CLIENT_SECRET": "very-secret-value"}
@@ -118,17 +117,16 @@ class SwitchAndPlanTests(Fixture):
         self.assertFalse(self.plan(RELEASE_PROCEEDS="false")["windows"])
 
     def test_the_package_version_follows_win_dst_04(self):
-        self.assertEqual(self.plan()["msix"], "1.1.26.0")
+        self.assertEqual(self.plan()["msix"], "1.2.0.0")
 
     def test_a_manual_test_build_is_not_for_the_store(self):
         values = self.plan(BUILD_WINDOWS="true")
         self.assertEqual((values["windows"], values["store-ready"], values["store"]), (True, False, "none"))
 
     def test_a_store_submission_builds_store_ready_packages_for_the_owner_only(self):
-        ready = dict(STORE_TARGET="testers", STORE_SUBMISSION_ENABLED="true", WINDOWS_STORE_ID=STORE_ID)
+        ready = dict(STORE_TARGET="public", STORE_SUBMISSION_ENABLED="true", WINDOWS_STORE_ID=STORE_ID, RELEASE_PUBLISHES="true")
         values = self.plan(**ready)
-        self.assertEqual((values["windows"], values["store-ready"], values["store"]), (True, True, "testers"))
-        self.assertEqual(self.plan(**{**ready, "STORE_TARGET": "public", "RELEASE_PUBLISHES": "true"})["store"], "public")
+        self.assertEqual((values["windows"], values["store-ready"], values["store"]), (True, True, "public"))
         # Every release goes to the public listing with its published release; a run that publishes nothing cannot.
         with self.assertRaisesRegex(hosted.Stop, "publish"):
             self.plan(**{**ready, "STORE_TARGET": "public", "RELEASE_PUBLISHES": "false"})
@@ -136,12 +134,13 @@ class SwitchAndPlanTests(Fixture):
                                 ({"REPOSITORY_OWNER": "", "TRIGGERING_ACTOR": ""}, "owner"),
                                 ({"STORE_SUBMISSION_ENABLED": "false"}, "by hand"),
                                 ({"WINDOWS_STORE_ID": "9nblggh4r315"}, "WINDOWS_STORE_ID"),
-                                ({"STORE_TARGET": "everyone"}, "windows_store")]:
+                                ({"STORE_TARGET": "everyone"}, "windows_store"),
+                                ({"STORE_TARGET": "testers"}, "windows_store")]:
             with self.subTest(change=change), self.assertRaisesRegex(hosted.Stop, message):
                 self.plan(**{**ready, **change})
 
     def test_only_a_manual_run_asks_for_windows_inputs(self):
-        for change in ({"BUILD_WINDOWS": "true"}, {"STORE_TARGET": "testers", "STORE_SUBMISSION_ENABLED": "true",
+        for change in ({"BUILD_WINDOWS": "true"}, {"STORE_TARGET": "public", "STORE_SUBMISSION_ENABLED": "true",
                                                    "WINDOWS_STORE_ID": STORE_ID}):
             with self.subTest(change=change), self.assertRaisesRegex(hosted.Stop, "manual run"):
                 self.plan(GITHUB_EVENT_NAME="push", RELEASE_PROCEEDS="true", **change)
@@ -151,7 +150,7 @@ class SwitchAndPlanTests(Fixture):
         environ = self.environ(BUILD_WINDOWS="true", GITHUB_OUTPUT=str(output))
         with redirect_stdout(io.StringIO()):
             hosted.outputs(hosted.plan(environ, self.root), environ)
-        self.assertEqual(output.read_bytes(), b"windows=true\nstore-ready=false\nstore=none\nmsix=1.1.26.0\n")
+        self.assertEqual(output.read_bytes(), b"windows=true\nstore-ready=false\nstore=none\nmsix=1.2.0.0\n")
 
 
 class ToolchainTests(Fixture):
@@ -239,17 +238,17 @@ class GuardTests(Fixture):
 class BundleFixture(Fixture):
     def setUp(self):
         super().setUp()
-        self.packages = self.base / "packages" / "1.1.26.0"
+        self.packages = self.base / "packages" / "1.2.0.0"
         self.packages.mkdir(parents=True)
-        (self.packages / "Annotator_1.1.26.0.msixbundle").write_bytes(BUNDLE)
-        self.report = {"version": "1.1.26.0", "label": "0.1.0-beta.8 (26)", "buildStamp": f"Release {SOURCE[:12]}",
+        (self.packages / "Annotator_1.2.0.0.msixbundle").write_bytes(BUNDLE)
+        self.report = {"version": "1.2.0.0", "label": "0.2.0", "buildStamp": f"Release {SOURCE[:12]}",
                        "metricsUrl": "", "placeholderIdentity": False, "problems": [],
-                       "packages": [{"architecture": "x64", "file": "Annotator_1.1.26.0_x64.msix", "bytes": 3,
+                       "packages": [{"architecture": "x64", "file": "Annotator_1.2.0.0_x64.msix", "bytes": 3,
                                      "sha256": "a" * 64, "files": 99, "payload": "not compared"}],
-                       "bundle": {"file": "Annotator_1.1.26.0.msixbundle", "bytes": len(BUNDLE),
+                       "bundle": {"file": "Annotator_1.2.0.0.msixbundle", "bytes": len(BUNDLE),
                                   "sha256": hashlib.sha256(BUNDLE).hexdigest(), "architectures": ["x64", "arm64"]}}
         self.write_report()
-        self.environ = {"CANDIDATE_SHA": SOURCE, "EXPECTED_VERSION": "0.1.0-beta.8", "MSIX": "1.1.26.0",
+        self.environ = {"CANDIDATE_SHA": SOURCE, "EXPECTED_VERSION": "0.2.0", "MSIX": "1.2.0.0",
                         "STORE_IDENTITY": "ready", "STORE_READY_REQUIRED": "true", "METRICS_URL": "",
                         "GITHUB_RUN_ID": "42", "GITHUB_RUN_ATTEMPT": "1", "GITHUB_SERVER_URL": "https://github.com",
                         "GITHUB_REPOSITORY": "owner/annotator-code"}
@@ -268,14 +267,14 @@ class ReceiptTests(BundleFixture):
         digest = hashlib.sha256(BUNDLE).hexdigest()
         artifact = self.base / "artifact"
         self.assertEqual(sorted(path.name for path in artifact.iterdir()),
-                         ["Annotator_1.1.26.0.msixbundle", "SHA256SUMS", "package-report.json", "windows-release.json"])
-        self.assertEqual((artifact / "SHA256SUMS").read_bytes(), f"{digest}  Annotator_1.1.26.0.msixbundle\n".encode())
-        self.assertEqual((artifact / "Annotator_1.1.26.0.msixbundle").read_bytes(), BUNDLE)
+                         ["Annotator_1.2.0.0.msixbundle", "SHA256SUMS", "package-report.json", "windows-release.json"])
+        self.assertEqual((artifact / "SHA256SUMS").read_bytes(), f"{digest}  Annotator_1.2.0.0.msixbundle\n".encode())
+        self.assertEqual((artifact / "Annotator_1.2.0.0.msixbundle").read_bytes(), BUNDLE)
         saved = json.loads((artifact / "windows-release.json").read_text(encoding="utf-8"))
         self.assertEqual(saved, data)
         self.assertEqual((data["releaseVersion"], data["build"], data["msixVersion"], data["source"]),
-                         ("0.1.0-beta.8", 26, "1.1.26.0", SOURCE))
-        self.assertEqual(data["bundle"], {"file": "Annotator_1.1.26.0.msixbundle", "bytes": len(BUNDLE), "sha256": digest,
+                         ("0.2.0", 200, "1.2.0.0", SOURCE))
+        self.assertEqual(data["bundle"], {"file": "Annotator_1.2.0.0.msixbundle", "bytes": len(BUNDLE), "sha256": digest,
                                           "architectures": ["arm64", "x64"]})
         self.assertTrue(data["storeReady"])
         self.assertEqual(data["run"]["url"], "https://github.com/owner/annotator-code/actions/runs/42")
@@ -290,7 +289,7 @@ class ReceiptTests(BundleFixture):
             self.receipt("second", STORE_IDENTITY="not-ready", STORE_READY_REQUIRED="true")
 
     def test_packages_that_do_not_match_this_run_stop(self):
-        changes = [("version", "1.1.25.0", "version"), ("label", "0.1.0-beta.7 (25)", "say"),
+        changes = [("version", "1.1.35.0", "version"), ("label", "0.2.0 (200)", "say"),
                    ("buildStamp", "Release other", "build stamp"), ("metricsUrl", "https://annotator.example", "usage-count"),
                    ("problems", ["x64 package lacks resources.pri."], "listed problems")]
         for key, value, message in changes:
@@ -303,7 +302,7 @@ class ReceiptTests(BundleFixture):
                 self.report[key] = saved
                 self.write_report()
         for key, value, message in [("architectures", ["x64"], "ARM64"), ("sha256", "b" * 64, "differs"),
-                                    ("bytes", 1, "differs"), ("file", "Other.msixbundle", "Annotator_1.1.26.0")]:
+                                    ("bytes", 1, "differs"), ("file", "Other.msixbundle", "Annotator_1.2.0.0")]:
             with self.subTest(bundle=key):
                 saved = self.report["bundle"][key]
                 self.report["bundle"][key] = value
@@ -313,7 +312,7 @@ class ReceiptTests(BundleFixture):
                 self.report["bundle"][key] = saved
                 self.write_report()
         with self.assertRaisesRegex(hosted.Stop, "version"):
-            self.receipt("artifact-version", EXPECTED_VERSION="0.1.0-beta.9")
+            self.receipt("artifact-version", EXPECTED_VERSION="0.2.1")
         with self.assertRaisesRegex(hosted.Stop, "commit SHA"):
             self.receipt("artifact-source", CANDIDATE_SHA="main")
         self.assertFalse(any(path.name.startswith("artifact") for path in self.base.iterdir()))
@@ -329,17 +328,14 @@ class StoreTests(BundleFixture):
         super().setUp()
         self.receipt()
         self.artifact = self.base / "artifact"
-        self.store = {"CANDIDATE_SHA": SOURCE, "MSIX": "1.1.26.0", "GITHUB_RUN_ID": "42",
+        self.store = {"CANDIDATE_SHA": SOURCE, "MSIX": "1.2.0.0", "GITHUB_RUN_ID": "42",
                       "BUNDLE_SHA256": hashlib.sha256(BUNDLE).hexdigest(), "WINDOWS_STORE_ID": STORE_ID,
-                      "STORE_TARGET": "testers", **SECRETS}
+                      "STORE_TARGET": "public", **SECRETS}
         self.calls = []
-        self.visibility = "Private"
 
     def run_cli(self, *argv, timeout, label):
         self.calls.append(list(argv))
         self.assertGreater(timeout, 0)
-        if argv[:2] == ("submission", "get"):
-            return '{\n  "Id": "1152921505",\n  "Visibility": "%s",\n  "Status": "PendingCommit"\n}' % self.visibility
         return ""
 
     def submit(self, **environ):
@@ -352,24 +348,24 @@ class StoreTests(BundleFixture):
         return [call[0] if call[0] != "submission" else " ".join(call[:2]) for call in self.calls]
 
     def test_verify_accepts_only_this_runs_store_ready_bundle(self):
-        self.assertEqual(hosted.verify(self.artifact, self.store), self.artifact / "Annotator_1.1.26.0.msixbundle")
+        self.assertEqual(hosted.verify(self.artifact, self.store), self.artifact / "Annotator_1.2.0.0.msixbundle")
         for change, message in [({"BUNDLE_SHA256": "c" * 64}, "SHA-256"), ({"BUNDLE_SHA256": ""}, "no SHA-256"),
                                 ({"GITHUB_RUN_ID": "43"}, "another run"), ({"CANDIDATE_SHA": "f" * 40}, "another candidate"),
                                 ({"MSIX": "1.1.27.0"}, "another candidate")]:
             with self.subTest(change=change), self.assertRaisesRegex(hosted.Stop, message):
                 hosted.verify(self.artifact, {**self.store, **change})
-        (self.artifact / "Annotator_1.1.26.0.msixbundle").write_bytes(b"changed")
+        (self.artifact / "Annotator_1.2.0.0.msixbundle").write_bytes(b"changed")
         with self.assertRaisesRegex(hosted.Stop, "SHA-256"):
             hosted.verify(self.artifact, self.store)
 
     def test_resume_accepts_only_the_bundle_that_the_chosen_run_published(self):
         source = {"SOURCE_RUN_ID": "42", "SOURCE_RUN_SHA": SOURCE, "TAG_SHA": SOURCE}
         values = hosted.resume(self.artifact, source)
-        self.assertEqual(values, {"candidate": SOURCE, "msix": "1.1.26.0", "sha256": hashlib.sha256(BUNDLE).hexdigest(),
-                                  "version": "0.1.0-beta.8"})
+        self.assertEqual(values, {"candidate": SOURCE, "msix": "1.2.0.0", "sha256": hashlib.sha256(BUNDLE).hexdigest(),
+                                  "version": "0.2.0"})
         # The later Store job runs with another run ID; BUNDLE_RUN_ID names the run that built the bundle.
         store = {**self.store, "GITHUB_RUN_ID": "99", "BUNDLE_RUN_ID": "42"}
-        self.assertEqual(hosted.verify(self.artifact, store), self.artifact / "Annotator_1.1.26.0.msixbundle")
+        self.assertEqual(hosted.verify(self.artifact, store), self.artifact / "Annotator_1.2.0.0.msixbundle")
         with self.assertRaisesRegex(hosted.Stop, "another run"):
             hosted.verify(self.artifact, {**store, "BUNDLE_RUN_ID": "41"})
         for change, message in [({"SOURCE_RUN_ID": "43"}, "not built in the chosen"),
@@ -391,36 +387,16 @@ class StoreTests(BundleFixture):
         with self.assertRaisesRegex(hosted.Stop, "test build"):
             hosted.verify(self.artifact, self.store)
 
-    def test_testers_get_the_package_flight_when_one_is_set(self):
-        result, _ = self.submit(WINDOWS_STORE_FLIGHT_ID=FLIGHT)
-        self.assertEqual(result["target"], "package flight")
-        publish = self.calls[2]
-        self.assertEqual(publish[:4], ["publish", str(self.artifact / "Annotator_1.1.26.0.msixbundle"), "-id", STORE_ID])
-        self.assertEqual(publish[4:], ["-f", FLIGHT])
+    def test_the_public_listing_needs_the_explicit_input(self):
+        result, _ = self.submit()
+        self.assertEqual(result["target"], "public listing")
+        self.assertEqual(self.calls[2], ["publish", str(self.artifact / "Annotator_1.2.0.0.msixbundle"), "-id", STORE_ID])
         self.assertEqual(self.commands(), ["reconfigure", "settings", "publish", "reconfigure"])
         self.assertEqual(self.calls[-1], ["reconfigure", "--reset"])
-
-    def test_without_a_flight_testers_get_the_private_audience_only(self):
-        result, _ = self.submit()
-        self.assertEqual(result["target"], "private audience")
-        self.assertEqual(self.commands(), ["reconfigure", "settings", "publish", "submission get", "submission publish",
-                                           "reconfigure"])
-        self.assertIn("--noCommit", self.calls[2])
-        for visibility in ("Public", "Hidden", "NotSet"):
-            with self.subTest(visibility=visibility):
-                self.calls.clear()
-                self.visibility = visibility
-                with self.assertRaisesRegex(hosted.Stop, "not limited to a private audience"):
-                    self.submit()
-                self.assertNotIn("submission publish", self.commands())
-                self.assertEqual(self.calls[-1], ["reconfigure", "--reset"])
-
-    def test_the_public_listing_needs_the_explicit_input(self):
-        result, _ = self.submit(STORE_TARGET="public", WINDOWS_STORE_FLIGHT_ID=FLIGHT)
-        self.assertEqual(result["target"], "public listing")
-        self.assertEqual(self.calls[2], ["publish", str(self.artifact / "Annotator_1.1.26.0.msixbundle"), "-id", STORE_ID])
-        with self.assertRaisesRegex(hosted.Stop, "sends nothing"):
-            self.submit(STORE_TARGET="none")
+        # There is no package flight or private audience any more: only the public listing.
+        for target in ("none", "testers", ""):
+            with self.subTest(target=target), self.assertRaisesRegex(hosted.Stop, "sends nothing"):
+                self.submit(STORE_TARGET=target)
 
     def test_credentials_go_only_to_the_cli_sign_in(self):
         environ = {**self.store}
@@ -436,8 +412,7 @@ class StoreTests(BundleFixture):
 
     def test_missing_secrets_or_ids_stop_before_the_cli_runs(self):
         for change, message in [({"PARTNER_CENTER_CLIENT_SECRET": ""}, "PARTNER_CENTER_CLIENT_SECRET"),
-                                ({"WINDOWS_STORE_ID": "annotator"}, "WINDOWS_STORE_ID"),
-                                ({"WINDOWS_STORE_FLIGHT_ID": "beta; rm"}, "flight ID")]:
+                                ({"WINDOWS_STORE_ID": "annotator"}, "WINDOWS_STORE_ID")]:
             with self.subTest(change=change), self.assertRaisesRegex(hosted.Stop, message):
                 self.submit(**change)
         self.assertEqual(self.calls, [])

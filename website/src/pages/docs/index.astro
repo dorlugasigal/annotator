@@ -1,13 +1,10 @@
 ---
 import Page from "../../layouts/Page.astro";
-import { distribution, runsOnIntel, supportsRegionSharing } from "../../lib/distribution";
+import { release, runsOnIntel } from "../../lib/distribution";
 import { windowsListing as windows } from "../../lib/windows";
 import { sitePath } from "../../lib/paths";
-const release = distribution.stable ?? distribution.preview;
 const hasDiskImage = Boolean(release?.diskImage);
 const intel = runsOnIntel(release);
-const regionSharing = supportsRegionSharing(release);
-const refinedRegionSharing = Boolean(release && BigInt(release.build) >= 20n);
 ---
 <Page title="How to use Annotator">
   <article class="prose wrap">
@@ -35,22 +32,18 @@ const refinedRegionSharing = Boolean(release && BigInt(release.build) >= 20n);
     <p>Covers stay where you place them. They do not follow moving windows or scrolling content. Moving or resizing a window, scrolling or changing a page can uncover private details. System windows and windows kept above other apps may appear above covers.</p>
     <p>Blur, Pixelate and Distort can leave details readable. Filled rectangles and covers do not remove the content underneath. They are not secure redaction. Remove private details from the material you plan to share.</p>
     <h2 id="region-sharing">Share part of your screen</h2>
-    {regionSharing ? (
-      <>
-        <p>Open Annotator's menu and choose Configure region, or find Share region in Tools &gt; Focus. Choose a display and a preset. A faint fill and click-through outline show the area on your desktop without starting capture, even when the toolbar is hidden.</p>
-        {refinedRegionSharing && <p>For a quick start, choose Share left half or Share right half from the menu. These actions start sharing on your selected display. The faint fill clears when sharing starts; the outline stays.</p>}
-        <p>For a custom area, choose Draw a custom region and drag a rectangle. Escape cancels. Enter a size provides position and size fields in points. The region must stay inside the display and be at least 32 points wide and high.</p>
-        <p>Click Start region sharing, in the chooser or menu. Allow Screen Recording if macOS asks{windows && ", or allow screen access if Windows asks"}. In Teams, Meet or Zoom, choose Share &gt; Window &gt; Annotator - Shared Region. Move any apps you want to show into the outlined area. Work in those original apps; the shared window is view-only.</p>
-        <p>Drawings, labels, image layers, effects, Spotlight and pointer highlights appear in the output. Screen zoom uses the same view as your desktop. The small floating pointer lens stays local. {refinedRegionSharing ? "The visible toolbar appears when it is inside the region. Selection handles and the region outline stay local." : "The toolbar, selection handles and region outline stay out of the output."}</p>
-        <p>On and Off show whether the region is running. {refinedRegionSharing && "A red dot beside Annotator's menu-bar icon also shows that sharing is on. "}{refinedRegionSharing && windows && "On Windows, the dot is on the tray icon. "}Stop region sharing blanks its content. {refinedRegionSharing ? <>Control-2{windows && " (Ctrl+2 on Windows)"} hides drawings, covers and tools in the shared view too. The region keeps running. Showing drawings restores them.</> : "Hiding the toolbar keeps the region on, including your drawings and covers."} Choosing a different area in configuration, locking {windows ? "your computer" : "the Mac"} or changing the display setup turns sharing off; check the outline before starting again. Closing the output also stops it.</p>
-        <p>{refinedRegionSharing && "The shared window opens behind your other apps and keeps updating when covered. "}Keep that window open while your meeting app shares it. {refinedRegionSharing && "Do not minimize it or close it to hide the preview."}</p>
-        <p>Anything inside the region can appear, including notifications. Remove private details first. Annotator does not start the meeting's share, send screen pixels itself, record video or install a camera driver. Ask someone on the call to confirm what they see.</p>
-      </>
-    ) : <p>Region sharing needs build 19 or later. Check the release notes for your download. It lets you choose an outlined part of your desktop and share one window showing the apps inside it.</p>}
+    <p>Open Annotator's menu and choose Configure region, or find Share region in Tools &gt; Focus. Choose a display and a preset. A faint fill and click-through outline show the area on your desktop without starting capture, even when the toolbar is hidden.</p>
+    <p>For a quick start, choose Share left half or Share right half from the menu. These actions start sharing on your selected display. The faint fill clears when sharing starts; the outline stays.</p>
+    <p>For a custom area, choose Draw a custom region and drag a rectangle. Escape cancels. Enter a size provides position and size fields in points. The region must stay inside the display and be at least 32 points wide and high.</p>
+    <p>Click Start region sharing, in the chooser or menu. Allow Screen Recording if macOS asks{windows && ", or allow screen access if Windows asks"}. In Teams, Meet or Zoom, choose Share &gt; Window &gt; Annotator - Shared Region. Move any apps you want to show into the outlined area. Work in those original apps; the shared window is view-only.</p>
+    <p>Drawings, labels, image layers, effects, Spotlight and pointer highlights appear in the output. Screen zoom uses the same view as your desktop. The small floating pointer lens stays local. The visible toolbar appears when it is inside the region. Selection handles and the region outline stay local.</p>
+    <p>On and Off show whether the region is running. A red dot beside Annotator's menu-bar icon also shows that sharing is on. {windows && "On Windows, the dot is on the tray icon. "}Stop region sharing blanks its content. Control-2{windows && " (Ctrl+2 on Windows)"} hides drawings, covers and tools in the shared view too. The region keeps running. Showing drawings restores them. Choosing a different area in configuration, locking {windows ? "your computer" : "the Mac"} or changing the display setup turns sharing off; check the outline before starting again. Closing the output also stops it.</p>
+    <p>The shared window opens behind your other apps and keeps updating when covered. Keep that window open while your meeting app shares it. Do not minimize it or close it to hide the preview.</p>
+    <p>Anything inside the region can appear, including notifications. Remove private details first. Annotator does not start the meeting's share, send screen pixels itself, record video or install a camera driver. Ask someone on the call to confirm what they see.</p>
     <h2 id="permissions">Choose the permissions you need</h2>
     <p>Drawing and pasted image layers need neither Screen Recording nor Accessibility. Annotator does not use your microphone or camera.</p>
     <dl>
-      <dt>Screen Recording</dt><dd>{regionSharing ? "Zoom, live pixel effects and region sharing" : "Screen zoom and live pixel effects"} need to see your screen. macOS calls this Screen Recording, but Annotator does not record or save a video.</dd>
+      <dt>Screen Recording</dt><dd>Zoom, live pixel effects and region sharing need to see your screen. macOS calls this Screen Recording, but Annotator does not record or save a video.</dd>
       <dt>Accessibility</dt><dd>Option-scroll over other apps needs this permission. The zoom buttons do not need Accessibility, but they still need Screen Recording.</dd>
     </dl>
     <p>Open Annotator Settings &gt; Permissions to check access and open the matching macOS System Settings page. A permission being on does not prove screen access is working; start zoom to check it.</p>

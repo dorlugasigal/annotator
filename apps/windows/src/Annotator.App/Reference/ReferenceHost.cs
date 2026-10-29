@@ -142,7 +142,7 @@ internal sealed partial class ReferenceHost
                     break;
                 case ReferenceSurface.Flyout:
                     // The Mac capture's updates-unavailable state is a build without updates; its other menu states could check.
-                    // Its update-available state found 0.1.0-beta.13 while the person was busy.
+                    // Its update-available state found 0.2.0 while the person was busy.
                     _flyout = new TrayFlyout(_registry, model.Snapshot, trayProblem: null, openedWithKeyboard: false,
                         static previous => previous, static _ => { }, scenario.DeveloperPreview, canCheckUpdates: !scenario.UpdatesUnavailable,
                         scenario.UpdateAvailable ? Annotator.Workspace.Updates.UpdateText.PortableAvailable(ReferenceStates.WhatsChangedNotes.Version)

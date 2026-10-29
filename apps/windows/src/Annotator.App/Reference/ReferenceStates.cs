@@ -179,7 +179,7 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
 
     /// <summary>
     /// A check found a newer release: the flyout reads Update available… with the status under it (the Mac's
-    /// updateReminderVersion "0.1.0-beta.13"). Windows shows a portable copy's words, which say where to get it.
+    /// updateReminderVersion "0.2.0"). Windows shows a portable copy's words, which say where to get it.
     /// </summary>
     public bool UpdateAvailable { get; init; }
 

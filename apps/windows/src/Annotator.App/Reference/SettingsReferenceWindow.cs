@@ -97,7 +97,7 @@ internal sealed class SettingsReferenceWindow : PopoverWindow
 
     private static SupportFacts Facts() => new()
     {
-        Version = BuildInfo.VersionLabel,
+        Version = BuildInfo.Version,
         BuildLabel = BuildInfo.BuildLabel,
         Installation = "development build (not packaged)",
         Windows = "reference",

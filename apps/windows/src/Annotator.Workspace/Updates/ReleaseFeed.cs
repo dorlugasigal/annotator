@@ -3,12 +3,15 @@ using System.Text.Json;
 namespace Annotator.Workspace.Updates;
 
 /// <summary>The newest release a portable copy can get, as the website's update feed describes it (WIN-SYS-03).</summary>
-/// <param name="ReleaseVersion">The shared version label without the build, such as 0.1.0-beta.13.</param>
-/// <param name="Build">The shared, always-increasing build number that decides whether the release is newer.</param>
+/// <param name="ReleaseVersion">The shared version that the app shows, a plain X.Y.Z such as 0.2.0.</param>
+/// <param name="Build">
+/// The release's build, which decides whether it is newer. It is derived from the version (Major * 10000 + Minor * 100 +
+/// Patch, so 0.2.0 is 200), grows with every version and is above the builds of earlier copies (35 and lower).
+/// </param>
 /// <param name="DownloadPage">Where the person downloads it; Annotator downloads nothing itself.</param>
 public readonly record struct ReleaseFeedEntry(string ReleaseVersion, int Build, Uri DownloadPage);
 
-/// <summary>The website's feed for portable copies (<c>updates/windows-&lt;track&gt;.json</c>, written by tools/release).</summary>
+/// <summary>The website's feed for portable copies (<c>updates/windows-stable.json</c>, written by tools/release).</summary>
 public interface IReleaseFeed
 {
     /// <summary>Reads the feed. Throws <see cref="ReleaseFeedFailure"/> when it cannot be read.</summary>
@@ -26,7 +29,8 @@ public static class ReleaseFeed
 
     /// <summary>
     /// The feed's newest release: schema 1, a nonblank version, a positive build and an HTTPS download page without
-    /// credentials. Anything else throws <see cref="ReleaseFeedFailure"/>.
+    /// credentials. Other fields are ignored; whether the release is newer depends on its build alone. Anything else throws
+    /// <see cref="ReleaseFeedFailure"/>.
     /// </summary>
     public static ReleaseFeedEntry Parse(ReadOnlySpan<byte> data)
     {

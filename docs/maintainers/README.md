@@ -55,7 +55,6 @@ Add the owner as a required reviewer on each environment and allow only the
 | `NETLIFY_AUTH_TOKEN` | Secret | `website-publishing` | Netlify personal access token for the website deploy |
 | `NETLIFY_SITE_ID` | Variable | Repository | The Netlify site's ID; the deploy job runs only when it is set |
 | `PARTNER_CENTER_TENANT_ID`, `PARTNER_CENTER_CLIENT_ID`, `PARTNER_CENTER_CLIENT_SECRET`, `PARTNER_CENTER_SELLER_ID` | Secret | `windows-store` | Partner Center app ([windows-store.md, 6.1](windows-store.md#61-a-microsoft-entra-app-for-partner-center)) |
-| `WINDOWS_STORE_FLIGHT_ID` | Variable | `windows-store` | Optional tester flight |
 | `SIGNPATH_API_TOKEN` | Secret | `windows-signing` | SignPath API token of a user who can submit signing requests ([signpath.md](signpath.md)) |
 | `SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG`, `SIGNPATH_SIGNING_POLICY_SLUG` | Variable | `windows-signing` | The SignPath organization ID, project and signing policy |
 | `DISTRIBUTION_REPOSITORY` | Variable | Repository | `dorlugasigal/annotator` (see the note below) |

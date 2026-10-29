@@ -84,8 +84,8 @@ and the sharing output are the app's own windows.
   hides its name. Read their state from the JSON: a switch's `value` is 1 when
   on, and the selected tab is the radio button with `value` 1.
 - Captures run in the development test app. Strings like Annotator Dev,
-  Local build, Developer preview and the version (0.1.0-beta.7, build 25) come
-  from that build. Release builds say Annotator. Windows uses its own version.
+  Local build, Developer preview and the version (such as 0.2.0) come from
+  that build. Release builds say Annotator. Windows uses its own version.
 - The region chooser lists the capturing Mac's display.
 - The canvas uses a fictional backdrop drawn by the test, not a real desktop,
   at the canvas's size (900 x 568 points). Drawings are drawn as vectors at 2x,

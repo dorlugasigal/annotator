@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("publish_windows", HERE / "publish
 publish = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(publish)
 
-PROJECT = "settings:\n  base:\n    MARKETING_VERSION: 0.1.0\n    ANNOTATOR_PRERELEASE: beta.7\n    CURRENT_PROJECT_VERSION: 25\n"
+PROJECT = "settings:\n  base:\n    MARKETING_VERSION: 0.2.0\n    CURRENT_PROJECT_VERSION: 200\n"
 MANIFEST = """<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10">
   <Identity Name="{name}" Publisher="{publisher}" Version="0.0.0.0" />
@@ -56,13 +56,13 @@ class Machine:
         if self.fail == label:
             raise publish.Stop(f"{label} failed with exit code 1")
         if label == "package.ps1":
-            output = Path(argv[argv.index("-Output") + 1]) / "1.1.25.0"
+            output = Path(argv[argv.index("-Output") + 1]) / "1.2.0.0"
             output.mkdir(parents=True, exist_ok=True)
-            bundle = output / "Annotator_1.1.25.0.msixbundle"
+            bundle = output / "Annotator_1.2.0.0.msixbundle"
             bundle.write_bytes(b"bundle bytes")
             architectures = ["x64", "arm64"] if "-RequireArm64" in argv else ["x64"]
             service = str(argv[argv.index("-MetricsUrl") + 1]) if "-MetricsUrl" in argv else ""
-            report = {"version": "1.1.25.0", "problems": [], "metricsUrl": self.reported_service if self.reported_service is not None
+            report = {"version": "1.2.0.0", "problems": [], "metricsUrl": self.reported_service if self.reported_service is not None
                       else service, "bundle": {
                 "file": bundle.name, "sha256": hashlib.sha256(b"bundle bytes").hexdigest(), "architectures": architectures}}
             (output / "package-report.json").write_text(json.dumps(report), encoding="utf-8")
@@ -78,7 +78,7 @@ class Machine:
         raise AssertionError(args)
 
 
-def wack_report(result, version="1.1.25.0"):
+def wack_report(result, version="1.2.0.0"):
     return (f'<?xml version="1.0" encoding="utf-8"?><REPORT OVERALL_RESULT="{result}">'
             f'<APPLICATIONS><Installed_Programs><Program Name="Annotator" Version="{version}" /></Installed_Programs>'
             "</APPLICATIONS></REPORT>")
@@ -126,11 +126,14 @@ class PublisherTests(unittest.TestCase):
     def labels(self):
         return [label for label, _ in self.machine.commands]
 
-    def test_the_msix_version_is_major_plus_one_minor_build_zero(self):
-        self.assertEqual(publish.msix_version("0.1.0-beta.7", 25), "1.1.25.0")
-        self.assertEqual(publish.msix_version("2.3.4", 100), "3.3.100.0")
-        with self.assertRaises(publish.Stop):
-            publish.msix_version("0.1.0", 0)
+    def test_the_msix_version_is_major_plus_one_minor_patch_zero(self):
+        self.assertEqual(publish.msix_version("0.2.0"), "1.2.0.0")
+        self.assertEqual(publish.msix_version("2.3.4"), "3.3.4.0")
+        # Releases up to 0.1.0-beta.17 used their counted build in the third place.
+        self.assertEqual(publish.msix_version("0.1.0-beta.17", 35), "1.1.35.0")
+        for version, build in (("0.1.0-beta.17", None), ("0.2.0-rc.1", None), ("0.2", None)):
+            with self.subTest(version=version), self.assertRaises(publish.Stop):
+                publish.msix_version(version, build)
 
     def test_the_repository_manifest_has_the_placeholders_or_well_formed_store_values(self):
         # Agents keep the PLACEHOLDER values; the owner replaces them with the Partner Center values (WIN-DST-01).
@@ -210,7 +213,7 @@ class PublisherTests(unittest.TestCase):
         self.publisher().plan()
         self.assertFalse(self.folder.exists())
         self.assertEqual(self.machine.commands, [])
-        self.assertIn("Candidate: 0.1.0-beta.7 (25), MSIX package 1.1.25.0", self.lines)
+        self.assertIn("Candidate: 0.2.0, MSIX package 1.2.0.0", self.lines)
         self.assertTrue(any(line.startswith("PLAN ONLY") for line in self.lines))
 
     def test_a_store_run_needs_the_partner_center_identity(self):
@@ -257,16 +260,16 @@ class PublisherTests(unittest.TestCase):
 
     def test_a_store_run_certifies_and_hands_off_without_submitting(self):
         self.machine.admin = True
-        self.publisher(store_id="9NBLGGH4R315", flight_id="flight-1").execute()
+        self.publisher(store_id="9NBLGGH4R315").execute()
         self.assertEqual(self.labels(), ["release notes and changelog check", "validate.ps1 all", "package.ps1",
                                          "appcert reset", "appcert test"])
         self.assertIn("-RequireArm64", self.machine.commands[2][1])
         self.assertTrue(all("msstore" not in " ".join(argv) for _, argv in self.machine.commands))
-        bundle = self.folder / "packages" / "1.1.25.0" / "Annotator_1.1.25.0.msixbundle"
-        command = f'msstore publish "{bundle}" -id 9NBLGGH4R315 --noCommit -f flight-1'
+        bundle = self.folder / "packages" / "1.2.0.0" / "Annotator_1.2.0.0.msixbundle"
+        command = f'msstore publish "{bundle}" -id 9NBLGGH4R315 --noCommit'
         self.assertTrue(any(command in line for line in self.lines))
         state = json.loads((self.folder / "progress.json").read_text(encoding="utf-8"))
-        self.assertEqual(state["stages"]["Freeze source"]["detail"]["msix"], "1.1.25.0")
+        self.assertEqual(state["stages"]["Freeze source"]["detail"]["msix"], "1.2.0.0")
         self.assertEqual(state["stages"]["Certify with WACK"]["detail"]["result"], "PASS")
         self.assertFalse(state["stages"]["Hand off to the Store"]["detail"]["submitted"])
         self.assertTrue((self.folder / "pipeline.log").read_text(encoding="utf-8").count("DONE") >= 5)
@@ -290,9 +293,9 @@ class PublisherTests(unittest.TestCase):
         report = self.folder / "wack" / "report.xml"
         report.write_text(wack_report("PASS", version="1.1.24.0"), encoding="utf-8")
         with self.assertRaisesRegex(publish.Stop, "for another package"):
-            publish.wack_result(report, "1.1.25.0")
+            publish.wack_result(report, "1.2.0.0")
         report.write_text(wack_report("WARNING"), encoding="utf-8")
-        self.assertEqual(publish.wack_result(report, "1.1.25.0"), "WARNING")
+        self.assertEqual(publish.wack_result(report, "1.2.0.0"), "WARNING")
 
     def test_a_resumed_run_needs_the_frozen_checkout_and_mode(self):
         self.machine.fail = "validate.ps1 all"
