@@ -160,6 +160,21 @@ public static class LiveInput
 
     public static bool PostClose(IntPtr hwnd) { return PostMessage(hwnd, 0x0010, IntPtr.Zero, IntPtr.Zero); }
 
+    [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int width, int height, uint flags);
+    [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr hwnd, out RECT rect);
+    [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr hwnd, ref POINT point);
+
+    /// <summary>Sizes an app window as a person dragging its edge would, without moving, activating or restacking it.</summary>
+    public static bool Size(IntPtr hwnd, int width, int height) { return SetWindowPos(hwnd, IntPtr.Zero, 0, 0, width, height, 0x2 | 0x4 | 0x10 | 0x200); }
+
+    /// <summary>A window's client area on the screen, in physical pixels: left, top, width, height.</summary>
+    public static int[] Client(IntPtr hwnd)
+    {
+        RECT r; GetClientRect(hwnd, out r);
+        var origin = new POINT(); ClientToScreen(hwnd, ref origin);
+        return new[] { origin.X, origin.Y, r.Right - r.Left, r.Bottom - r.Top };
+    }
+
     public static string ClassName(IntPtr hwnd) { var b = new StringBuilder(256); GetClassName(hwnd, b, 256); return b.ToString(); }
 
     [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
@@ -1798,6 +1813,18 @@ public static class BoardDialogs
         Check 'sharing-goes-live' (WaitFor { (ValueOf $image) -eq 'Live region. Choose this window in your meeting app.' } 9000) "output $(Show $output), value '$(ValueOf $image)'"
         Check 'sharing-output-ordinary' ($null -ne $output -and ([LiveInput]::ExStyle($output) -band 0x8) -eq 0 -and (Foreground) -ne $output) ('ex-style 0x{0:X}, foreground {1}' -f $(if ($output) { [LiveInput]::ExStyle($output) } else { 0 }), (Show (Foreground)))
         Check 'sharing-badge-on' ($null -ne (Find 'Region sharing is on' $chooser)) "badge: $($null -ne (Find 'Region sharing is on' $chooser))"
+        # The output opens at the region's own size, or as large as fits 24 points from the display's edges, in the corner
+        # that covers the least of the region: beside the left half, on the right (SharingRegion.OutputContentFrame).
+        function FitsHalf([int[]]$client, [string]$side) {
+            $half = @(($area[2] / 2), $area[3])
+            $aspect = [Math]::Abs(($client[2] / $client[3]) / ($half[0] / $half[1]) - 1)
+            $margin = 24 * $scale - 2
+            $inside = $client[0] -ge $area[0] -and $client[1] -ge $area[1] + $margin -and $client[0] + $client[2] -le $area[0] + $area[2] -and $client[3] -ge $area[3] - 110 * $scale
+            $beside = if ($side -eq 'right') { $client[0] -ge $area[0] + $half[0] - 1 } else { $client[0] + $client[2] -le $area[0] + $half[0] + 1 }
+            return $aspect -le 0.015 -and $inside -and $beside
+        }
+        $client = if ($null -ne $output) { [LiveInput]::Client($output) } else { @(0, 0, 1, 1) }
+        Check 'sharing-output-fits-region' (FitsHalf $client 'right') "client $($client -join ', '); area $($area -join ', '); scale $scale"
         # Spotlight and Cursor halo in the shared view (Mac SharedRegionPointerView): Cursor halo turns on while the region is
         # live, with the pointer inside the region, and the output draws it with the overlay (two layers show it; the result
         # checks that). Screen zoom then turns on: the shared view stays live and shows the region through zoom's viewport.
@@ -1870,6 +1897,27 @@ public static class BoardDialogs
         Start-Sleep -Milliseconds 2000
         Note "click Stop region sharing: $(ClickButton 'Stop region sharing' $chooser)"
         Check 'sharing-stop-covers' (WaitFor { (ValueOf $image) -eq 'Region sharing is off' } 3000) "value '$(ValueOf $image)'"
+        if ($null -ne $output) {
+            # A size people give the output stays when the same region starts again; a different region refits it.
+            $before = [LiveInput]::Client($output)
+            $r = New-Object LiveInput+RECT; [void][LiveInput]::GetWindowRect($output, [ref]$r)
+            Note "size the output to 60%: $([LiveInput]::Size($output, [int](($r.Right - $r.Left) * 0.6), [int](($r.Bottom - $r.Top) * 0.6)))"
+            Start-Sleep -Milliseconds 400
+            $resized = [LiveInput]::Client($output)
+            Note "click Start region sharing again: $(ClickButton 'Start region sharing' $chooser)"
+            [void](WaitFor { (ValueOf $image) -eq 'Live region. Choose this window in your meeting app.' } 9000)
+            $again = [LiveInput]::Client($output)
+            Check 'sharing-output-keeps-size' ($resized[2] -lt $before[2] -and $again[2] -eq $resized[2] -and $again[3] -eq $resized[3]) "opened $($before -join ', '); resized $($resized -join ', '); after restart $($again -join ', ')"
+            Note "click Stop region sharing: $(ClickButton 'Stop region sharing' $chooser)"
+            [void](WaitFor { (ValueOf $image) -eq 'Region sharing is off' } 3000)
+            ClickUntil 'Right half' $chooser { Chosen $chooser 'Right half' }
+            Note "click Start region sharing: $(ClickButton 'Start region sharing' $chooser)"
+            [void](WaitFor { (ValueOf $image) -eq 'Live region. Choose this window in your meeting app.' } 9000)
+            $right = [LiveInput]::Client($output)
+            Check 'sharing-output-refits-new-region' (FitsHalf $right 'left') "client $($right -join ', '); area $($area -join ', ')"
+            Note "click Stop region sharing: $(ClickButton 'Stop region sharing' $chooser)"
+            [void](WaitFor { (ValueOf $image) -eq 'Region sharing is off' } 3000)
+        }
         if ($null -ne $output) {
             [void][LiveInput]::PostClose($output)
             Check 'sharing-output-closes' (WaitFor { $null -eq (TitledWindow '*Shared Region') } 3000) "output $(Show (TitledWindow '*Shared Region'))"

@@ -122,6 +122,8 @@ public sealed class SharedRegionWindow : IDisposable
     public unsafe PixelRect ClientScreenRect()
     {
         Verify();
+        // Physical pixels whatever the calling thread's DPI awareness; otherwise Windows scales them for that thread.
+        using PerMonitorDpiScope scope = PerMonitorDpiScope.Enter();
         if (!PInvoke.GetClientRect(_frame.Handle, out RECT client))
         {
             throw NativeCallException.FromLastError("GetClientRect (shared region)");
