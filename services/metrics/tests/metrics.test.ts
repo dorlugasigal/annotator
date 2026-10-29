@@ -154,6 +154,54 @@ test("aggregation computes active, new, WAU/MAU, versions, features and retentio
   assert.ok(!JSON.stringify(summary).includes("fresh"));
 });
 
+test("summaries split each day by platform and count each copy once with its newest report", async () => {
+  const store = new MemoryStore();
+  const record = (v: string, b: string, os: number, a: string, s: string, p?: string) =>
+    JSON.stringify({ v, b, os, a, ...(p ? { p } : {}), s, l: "1", f: {} });
+  await store.set("app/2026-09-10/mac-a", record("0.1.0-beta.1", "1", 15, "arm64", "2026-09-01", "macos"));
+  await store.set("app/2026-09-20/mac-a", record("0.1.0-beta.2", "2", 26, "arm64", "2026-09-01", "macos"));
+  await store.set("app/2026-09-01/mac-b", record("0.1.0-beta.1", "1", 14, "x86_64", "2026-08-30", "macos"));
+  await store.set("app/2026-09-22/win-w", record("0.1.0-beta.2", "2", 11, "x86_64", "2026-09-22", "windows"));
+  await store.set("app/2026-09-23/win-w", record("0.1.0-beta.2", "2", 11, "x86_64", "2026-09-22", "windows"));
+  // Stored before the platform field existed: a Mac's.
+  await store.set("app/2026-09-23/mac-c", record("0.1.0-beta.2", "2", 26, "arm64", "2026-09-23"));
+  await store.set("app/2026-08-01/too-old", record("0.1.0-beta.1", "1", 15, "arm64", "2026-08-01", "macos"));
+  const summary = await aggregateDay(store, "2026-09-23", NOW);
+  assert.deepEqual(summary.app.platforms, { macos: { active: 1, newInstalls: 1 }, windows: { active: 1, newInstalls: 0 } });
+  assert.equal(summary.app.wau, 3);
+  assert.equal(summary.app.mau, 4);
+  const { d7, d30 } = summary.app.unique;
+  assert.equal(d7.macos.count + d7.windows.count, summary.app.wau);
+  assert.equal(d30.macos.count + d30.windows.count, summary.app.mau);
+  assert.deepEqual([d7.macos.count, d7.windows.count, d30.macos.count, d30.windows.count], [2, 1, 3, 1]);
+  // mac-a upgraded during the month and counts once, with its newest version and system.
+  assert.deepEqual(d30.macos.versions, { "0.1.0-beta.2 (2)": 2, "0.1.0-beta.1 (1)": 1 });
+  assert.deepEqual(d30.macos.os, { "macOS 26": 2, "macOS 14": 1 });
+  assert.deepEqual(d30.macos.architectures, { arm64: 2, x86_64: 1 });
+  assert.deepEqual(d7.windows, { count: 1, versions: { "0.1.0-beta.2 (2)": 1 }, os: { "Windows 11": 1 }, architectures: { "windows-x86_64": 1 } });
+  assert.ok(!JSON.stringify(summary).includes("mac-a") && !JSON.stringify(summary).includes("win-w"));
+});
+
+test("aggregation reads at most eight records at once and keeps their order", async () => {
+  const store = new MemoryStore();
+  for (let i = 0; i < 30; i++) {
+    await store.set(`app/2026-09-23/id-${String(i).padStart(2, "0")}`,
+      JSON.stringify({ v: "0.1.0", b: String(i), os: 15, a: "arm64", s: "2026-09-01", l: "1", f: {} }));
+  }
+  let inFlight = 0, most = 0;
+  const get = store.get.bind(store);
+  store.get = async (key: string) => {
+    most = Math.max(most, ++inFlight);
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    inFlight--;
+    return get(key);
+  };
+  const summary = await aggregateDay(store, "2026-09-23", NOW);
+  assert.equal(summary.app.active, 30);
+  assert.equal(Object.keys(summary.app.versions).length, 30);
+  assert.ok(most > 1 && most <= 8, `reads in flight: ${most}`);
+});
+
 test("raw records older than 45 days are removed but summaries remain", async () => {
   const store = new MemoryStore();
   await store.set("app/2026-08-01/x", "{}");
@@ -236,6 +284,24 @@ test("Refresh re-reads GitHub downloads at most every 10 minutes and survives a 
   // Loading the page does not fetch GitHub.
   await handleSummary(new Request("https://metrics.example.test/api/admin/summary", { headers: { Cookie: cookie } }), deps);
   assert.equal(calls, 2);
+});
+
+test("Refresh recounts yesterday and today, because the dashboard's periods end yesterday", async () => {
+  const store = new MemoryStore();
+  const config = env({ ADMIN_PASSWORD_HASH: hashPassword("owner-passphrase") });
+  const deps = { store, env: config, now: () => NOW, fetcher: async () => Response.json([]) };
+  const record = JSON.stringify({ v: "0.1.0", b: "11", os: 11, a: "arm64", p: "windows", s: "2026-09-22", l: "1", f: {} });
+  await store.set("app/2026-09-22/late", record);
+  await store.set("summary/2026-09-22", JSON.stringify({ day: "2026-09-22", stale: true }));
+  const login = await handleLogin(post("/api/admin/login", { password: "owner-passphrase" }), deps);
+  const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
+  const response = await handleSummary(new Request("https://metrics.example.test/api/admin/summary",
+    { method: "POST", headers: { Cookie: cookie, Origin: "https://metrics.example.test" } }), deps);
+  const body = await response.json();
+  assert.deepEqual(body.summaries.map((summary: { day: string }) => summary.day), ["2026-09-22", "2026-09-23"]);
+  assert.deepEqual(body.summaries[0].app.platforms.windows, { active: 1, newInstalls: 1 });
+  assert.equal(body.summaries[1].app.unique.d7.windows.count, 1);
+  assert.equal(body.summaries[1].app.active, 0);
 });
 
 test("password hashes and sessions verify without storing the password", () => {

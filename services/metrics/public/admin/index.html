@@ -43,59 +43,107 @@
     <p id="status" class="status" role="status" hidden></p>
 
     <main class="board">
+      <section class="range reveal" aria-label="Period">
+        <fieldset class="period-picker">
+          <legend class="sr-only">Show</legend>
+          <label><input type="radio" name="period" value="7" /><span>Last 7 days</span></label>
+          <label><input type="radio" name="period" value="30" checked /><span>Last 30 days</span></label>
+        </fieldset>
+        <div class="range-copy">
+          <p class="range-text" id="range-text"></p>
+          <p class="range-note" id="range-note" hidden></p>
+        </div>
+      </section>
+
       <section class="panel hero reveal" aria-labelledby="people-title">
         <div class="hero-figures">
-          <p class="eyebrow" id="people-title">People using the app</p>
-          <p class="hero-number"><span class="inked" id="mau">–</span></p>
-          <p class="hero-caption" id="mau-caption">opted-in copies used Annotator in the last 30 days</p>
+          <p class="eyebrow" id="people-title">People using Annotator</p>
+          <p class="hero-number"><span class="inked" id="copies">–</span></p>
+          <p class="delta" id="copies-change" hidden></p>
+          <p class="hero-caption" id="copies-caption">opted-in copies used Annotator in these days</p>
           <dl class="hero-stats">
-            <div><dt>Last 7 days</dt><dd id="wau">–</dd></div>
-            <div><dt id="active-label">Latest day</dt><dd id="active">–</dd></div>
-            <div><dt>New opt-ins, 7 days</dt><dd id="new-installs">–</dd></div>
+            <div><dt>On Mac</dt><dd id="copies-mac">–</dd></div>
+            <div><dt>On Windows</dt><dd id="copies-windows">–</dd></div>
+            <div><dt>Average a day</dt><dd><span id="per-day">–</span><span class="delta small" id="per-day-change" hidden></span></dd></div>
+            <div><dt>Today so far</dt><dd><span id="today">–</span><small id="today-note"></small></dd></div>
           </dl>
         </div>
         <figure class="chart-figure">
-          <figcaption class="chart-caption"><span>Copies active each day</span><span class="chart-range" id="chart-range"></span></figcaption>
+          <figcaption class="chart-caption"><span>Copies active each day</span>
+            <span class="legend"><span class="key key-now" id="key-now">These days</span><span class="key key-before" id="key-before">The days before</span></span>
+          </figcaption>
           <div class="chart" id="active-chart" tabindex="0" role="group" aria-roledescription="chart"
-            aria-label="Opted-in copies active each day, last 30 days. Use the arrow keys to read each day.">
+            aria-label="Opted-in copies active each day. Use the arrow keys to read each day.">
             <svg class="chart-svg" id="active-svg" aria-hidden="true" focusable="false"></svg>
             <div class="chart-tip" id="chart-tip" hidden></div>
           </div>
           <p class="sr-only" id="chart-live" aria-live="polite"></p>
-          <table class="sr-only" id="chart-table"><caption>Opted-in copies active each day</caption></table>
+          <div class="sr-only"><table id="chart-table"><caption>Opted-in copies active each day</caption></table></div>
         </figure>
-        <p class="definition hero-definition">Counts only copies that turned on Share usage counts. A copy counts once on each day it
-          sends a summary. Copies that never opt in are not counted anywhere.</p>
+        <p class="definition hero-definition">Counts only copies that turned on Share usage counts. A copy counts once in a period,
+          and once on each day it sends a summary. Copies that never opt in are not counted anywhere.</p>
       </section>
 
-      <section class="tiles reveal" aria-label="Last 7 days">
-        <article class="tile" id="tile-new"><h2>New opt-ins</h2><p class="tile-number" data-value>–</p><p class="definition">Copies that first shared counts, last 7 days.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
-        <article class="tile" id="tile-visits"><h2>Website visits</h2><p class="tile-number" data-value>–</p><p class="definition">Browser tabs that opened the site, last 7 days. No cookies.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
-        <article class="tile" id="tile-clicks"><h2>Download clicks</h2><p class="tile-number" data-value>–</p><p class="definition">Clicks on a Download button, last 7 days. Not finished downloads.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
-        <article class="tile" id="tile-github"><h2>GitHub downloads</h2><p class="tile-number" data-value>–</p><p class="definition" data-detail>All release files, all time.</p><svg class="spark" aria-hidden="true" focusable="false"></svg></article>
+      <section class="panel funnel reveal" aria-labelledby="funnel-title">
+        <header class="panel-head"><h2 id="funnel-title">From website visit to opt-in</h2><p class="panel-note" data-range></p></header>
+        <ol class="steps">
+          <li class="step" id="step-visits">
+            <h3>Website visits</h3><p class="step-number" data-value>–</p><p class="delta" data-change hidden></p>
+            <p class="step-extra" data-extra></p><svg class="spark" aria-hidden="true" focusable="false"></svg>
+            <p class="definition">Browser tabs that opened the site. No cookies.</p>
+          </li>
+          <li class="step" id="step-clicks">
+            <h3>Download clicks</h3><p class="step-number" data-value>–</p><p class="delta" data-change hidden></p>
+            <p class="step-extra" data-extra></p><svg class="spark" aria-hidden="true" focusable="false"></svg>
+            <p class="definition">Clicks on a Mac Download button on the site. Not finished downloads.</p>
+          </li>
+          <li class="step" id="step-disk">
+            <h3>Disk image downloads</h3><p class="step-number" data-value>–</p><p class="delta" data-change hidden></p>
+            <p class="step-extra" data-extra></p><svg class="spark" aria-hidden="true" focusable="false"></svg>
+            <p class="definition">Mac disk images downloaded from GitHub, from any page, over about the same days.</p>
+          </li>
+          <li class="step" id="step-optins">
+            <h3>New opt-ins</h3><p class="step-number" data-value>–</p><p class="delta" data-change hidden></p>
+            <p class="step-extra" data-extra></p><svg class="spark" aria-hidden="true" focusable="false"></svg>
+            <p class="definition">Copies that turned on Share usage counts, on Mac or Windows.</p>
+          </li>
+        </ol>
+        <p class="definition">Each step is a separate count. The page doesn't follow people from one step to the next. Most people
+          never turn on Share usage counts, so opt-ins stay far below real installs.</p>
       </section>
 
       <div class="stacks">
         <div class="stack">
+        <section class="panel reveal" aria-labelledby="platforms-title">
+          <header class="panel-head"><h2 id="platforms-title">Mac and Windows</h2><p class="panel-note" data-range></p></header>
+          <div class="platforms" id="platforms"></div>
+          <p class="definition">Each copy counts once, with the system and chip from its newest summary in these days.</p>
+        </section>
+        <section class="panel reveal" aria-labelledby="versions-title">
+          <header class="panel-head"><h2 id="versions-title">Versions in use</h2><p class="panel-note" data-range></p></header>
+          <div class="adoption" id="adoption"></div>
+          <ol class="bars" id="versions"></ol>
+          <p class="definition">Each copy counts once, with the newest version it reported in these days. The newest release is the
+            newest one on GitHub by the last of these days.</p>
+        </section>
         <section class="panel reveal" aria-labelledby="downloads-title">
           <header class="panel-head"><h2 id="downloads-title">Downloads</h2><p class="panel-note" id="downloads-note"></p></header>
-          <div class="split" id="download-kinds"></div>
-          <h3>By release</h3>
+          <div class="kinds" id="download-kinds"></div>
+          <p class="definition" id="downloads-since"></p>
+          <h3>By release, all time</h3>
           <ol class="bars" id="releases"></ol>
           <div class="homebrew" id="homebrew"></div>
         </section>
-        <section class="panel reveal" aria-labelledby="app-title">
-          <header class="panel-head"><h2 id="app-title">App versions and computers</h2><p class="panel-note" id="app-note">Latest day</p></header>
-          <h3>Versions</h3><ol class="bars" id="versions"></ol>
-          <div class="columns">
-            <div><h3>System</h3><ol class="bars" id="os"></ol></div>
-            <div><h3>Chip</h3><ol class="bars" id="chips"></ol></div>
-          </div>
-        </section>
         </div>
         <div class="stack">
+        <section class="panel reveal" aria-labelledby="features-title">
+          <header class="panel-head"><h2 id="features-title">Features used</h2><p class="panel-note" data-range></p></header>
+          <ol class="bars" id="features"></ol>
+          <p class="definition">Share of active install-days on which a copy used the feature. One install-day is one copy on one
+            day. The newest days fill in as copies send again.</p>
+        </section>
         <section class="panel reveal" aria-labelledby="website-title">
-          <header class="panel-head"><h2 id="website-title">Website</h2><p class="panel-note">Last 7 days</p></header>
+          <header class="panel-head"><h2 id="website-title">Website</h2><p class="panel-note" data-range></p></header>
           <div class="columns">
             <div><h3>Pages people opened first</h3><ol class="bars" id="routes"></ol></div>
             <div><h3>Where they came from</h3><ol class="bars" id="referrers"></ol></div>
@@ -104,15 +152,13 @@
           <ol class="bars" id="tracks"></ol>
           <p class="definition">One visit is one browser tab. Sources are broad groups from the referrer, never full addresses.</p>
         </section>
-        <section class="panel reveal" aria-labelledby="features-title">
-          <header class="panel-head"><h2 id="features-title">Features used</h2><p class="panel-note">Last 7 days</p></header>
-          <ol class="bars" id="features"></ol>
-          <p class="definition" id="features-definition">Share of active install-days on which a copy used the feature. One install-day is one copy on one day.</p>
-        </section>
         <section class="panel reveal" aria-labelledby="retention-title">
-          <header class="panel-head"><h2 id="retention-title">Coming back</h2><p class="panel-note">Day 7 and day 30</p></header>
+          <header class="panel-head"><h2 id="retention-title">Coming back</h2><p class="panel-note" data-range></p></header>
+          <div class="pooled" id="retention-pooled"></div>
+          <h3>Newest groups</h3>
           <ol class="cohorts" id="retention"></ol>
-          <p class="definition">Of the copies that first shared counts on a day, how many were active again 7 or 30 days later.</p>
+          <p class="definition">A group is the copies that first shared counts on the same day. Coming back means active again exactly 7
+            or 30 days later. The rates above add up the groups checked in these days.</p>
         </section>
         </div>
       </div>

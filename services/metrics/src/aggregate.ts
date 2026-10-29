@@ -4,8 +4,14 @@ import { addDays, dayString } from "./days.ts";
 
 export const RAW_RETENTION_DAYS = 45;
 const REAGGREGATE_DAYS = 8;
+// Blob reads in flight at once, so a recount fits in a function's time limit.
+const READS_AT_ONCE = 8;
 
 type Counts = Record<string, number>;
+export type Platform = "macos" | "windows";
+
+/** Copies seen in a window, each counted once with the newest summary it sent in that window. */
+export interface CopyCounts { count: number; versions: Counts; os: Counts; architectures: Counts }
 
 export interface DaySummary {
   day: string;
@@ -13,6 +19,9 @@ export interface DaySummary {
     active: number; newInstalls: number; wau: number; mau: number;
     versions: Counts; os: Counts; architectures: Counts; launches: Counts;
     features: Record<string, Counts>;
+    // Summaries stored before these two fields existed don't have them.
+    platforms: Record<Platform, { active: number; newInstalls: number }>;
+    unique: Record<"d7" | "d30", Record<Platform, CopyCounts>>;
   };
   web: { sessions: number; routes: Counts; referrers: Counts; downloads: Counts };
   retention: { d7?: Cohort; d30?: Cohort };
@@ -23,29 +32,74 @@ export interface Cohort { cohort: string; size: number; retained: number }
 
 function bump(counts: Counts, key: string, amount = 1): void { counts[key] = (counts[key] ?? 0) + amount; }
 
-export type IdCache = Map<string, string[]>;
+// Records stored before the platform field existed have no p and are Macs'.
+const platformOf = (record: StoredAppDay): Platform => (record.p === "windows" ? "windows" : "macos");
+const versionKey = (record: StoredAppDay) => `${record.v} (${record.b})`;
+const osKey = (record: StoredAppDay) => `${platformOf(record) === "windows" ? "Windows" : "macOS"} ${record.os}`;
+// A Windows arm64 PC is not Apple silicon, so Windows chips keep their own keys.
+const chipKey = (record: StoredAppDay) => (platformOf(record) === "windows" ? `windows-${record.a}` : record.a);
 
-async function ids(store: KeyValueStore, day: string, cache: IdCache): Promise<string[]> {
-  const cached = cache.get(day);
+/** Reused across the days of one recount: each day's IDs, and records keyed "<day>/<id>". */
+export interface AggregationCache { ids: Map<string, string[]>; records: Map<string, StoredAppDay> }
+export const aggregationCache = (): AggregationCache => ({ ids: new Map(), records: new Map() });
+
+async function inParallel<T, R>(items: T[], work: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await work(items[index]!);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(READS_AT_ONCE, items.length) }, worker));
+  return results;
+}
+
+async function ids(store: KeyValueStore, day: string, cache: AggregationCache): Promise<string[]> {
+  const cached = cache.ids.get(day);
   if (cached) return cached;
   const found = (await store.list(`app/${day}/`)).map((key) => key.slice(`app/${day}/`.length));
-  cache.set(day, found);
+  cache.ids.set(day, found);
   return found;
 }
 
-async function uniqueActive(store: KeyValueStore, day: string, window: number, cache: IdCache): Promise<number> {
-  const seen = new Set<string>();
-  for (let offset = 0; offset < window; offset++) for (const id of await ids(store, addDays(day, -offset), cache)) seen.add(id);
-  return seen.size;
+async function records<T>(store: KeyValueStore, prefix: string): Promise<[string, T][]> {
+  const keys = await store.list(prefix);
+  const values = await inParallel(keys, (key) => store.get(key));
+  const out: [string, T][] = [];
+  keys.forEach((key, index) => {
+    const value = values[index];
+    if (value) out.push([key.slice(prefix.length), JSON.parse(value) as T]);
+  });
+  return out;
 }
 
-async function records<T>(store: KeyValueStore, prefix: string): Promise<[string, T][]> {
-  const out: [string, T][] = [];
-  for (const key of await store.list(prefix)) {
-    const value = await store.get(key);
-    if (value) out.push([key.slice(prefix.length), JSON.parse(value) as T]);
+async function appDay(store: KeyValueStore, day: string, cache: AggregationCache): Promise<[string, StoredAppDay][]> {
+  const found = await records<StoredAppDay>(store, `app/${day}/`);
+  cache.ids.set(day, found.map(([id]) => id));
+  for (const [id, record] of found) cache.records.set(`${day}/${id}`, record);
+  return found;
+}
+
+/** Each copy active in the 30 days ending on `day`, with the newest of those days it sent counts for. */
+async function newestDays(store: KeyValueStore, day: string, cache: AggregationCache): Promise<Map<string, string>> {
+  const newest = new Map<string, string>();
+  for (let offset = 0; offset < 30; offset++) {
+    const date = addDays(day, -offset);
+    for (const id of await ids(store, date, cache)) if (!newest.has(id)) newest.set(id, date);
   }
-  return out;
+  const missing = [...newest].filter(([id, date]) => !cache.records.has(`${date}/${id}`));
+  await inParallel(missing, async ([id, date]) => {
+    const value = await store.get(`app/${date}/${id}`);
+    if (value) cache.records.set(`${date}/${id}`, JSON.parse(value) as StoredAppDay);
+  });
+  return newest;
+}
+
+function copies(): Record<Platform, CopyCounts> {
+  const empty = (): CopyCounts => ({ count: 0, versions: {}, os: {}, architectures: {} });
+  return { macos: empty(), windows: empty() };
 }
 
 async function cohortSize(store: KeyValueStore, cohort: string): Promise<number> {
@@ -54,30 +108,48 @@ async function cohortSize(store: KeyValueStore, cohort: string): Promise<number>
   return (await records<StoredAppDay>(store, `app/${cohort}/`)).filter(([, r]) => r.s === cohort).length;
 }
 
-export async function aggregateDay(store: KeyValueStore, day: string, now = new Date(), cache: IdCache = new Map()): Promise<DaySummary> {
-  const app = await records<StoredAppDay>(store, `app/${day}/`);
+export async function aggregateDay(store: KeyValueStore, day: string, now = new Date(),
+  cache: AggregationCache = aggregationCache()): Promise<DaySummary> {
+  const app = await appDay(store, day, cache);
+  const newest = await newestDays(store, day, cache);
+  const weekStart = addDays(day, -6);
   const summary: DaySummary = {
     day,
     app: {
-      active: app.length, newInstalls: 0, wau: await uniqueActive(store, day, 7, cache), mau: await uniqueActive(store, day, 30, cache),
+      active: app.length, newInstalls: 0,
+      wau: [...newest.values()].filter((date) => date >= weekStart).length, mau: newest.size,
       versions: {}, os: {}, architectures: {}, launches: {}, features: {},
+      platforms: { macos: { active: 0, newInstalls: 0 }, windows: { active: 0, newInstalls: 0 } },
+      unique: { d7: copies(), d30: copies() },
     },
     web: { sessions: 0, routes: {}, referrers: {}, downloads: {} },
     retention: {},
     generatedAt: now.toISOString(),
   };
   for (const [, record] of app) {
-    const windows = record.p === "windows";
-    if (record.s === day) summary.app.newInstalls++;
-    bump(summary.app.versions, `${record.v} (${record.b})`);
-    bump(summary.app.os, `${windows ? "Windows" : "macOS"} ${record.os}`);
-    // A Windows arm64 PC is not Apple silicon, so Windows chips keep their own keys.
-    bump(summary.app.architectures, windows ? `windows-${record.a}` : record.a);
+    const platform = summary.app.platforms[platformOf(record)];
+    platform.active++;
+    if (record.s === day) { summary.app.newInstalls++; platform.newInstalls++; }
+    bump(summary.app.versions, versionKey(record));
+    bump(summary.app.os, osKey(record));
+    bump(summary.app.architectures, chipKey(record));
     bump(summary.app.launches, record.l);
     for (const [feature, bucket] of Object.entries(record.f)) {
       if (bucket === "0") continue;
       summary.app.features[feature] ??= {};
       bump(summary.app.features[feature], bucket);
+    }
+  }
+  for (const [id, date] of newest) {
+    const record = cache.records.get(`${date}/${id}`);
+    for (const window of date >= weekStart ? [summary.app.unique.d7, summary.app.unique.d30] : [summary.app.unique.d30]) {
+      // A record removed after listing still counts, without details, so the platforms add up to the total.
+      const counts = window[record ? platformOf(record) : "macos"];
+      counts.count++;
+      if (!record) continue;
+      bump(counts.versions, versionKey(record));
+      bump(counts.os, osKey(record));
+      bump(counts.architectures, chipKey(record));
     }
   }
   for (const [label, offset] of [["d7", 7], ["d30", 30]] as const) {
@@ -164,7 +236,7 @@ export async function runDaily(store: KeyValueStore, config: ExternalConfig, fet
   await store.set("health/last-run", JSON.stringify({ day: today, status: "started", startedAt: now.toISOString() }));
   const errors: string[] = [];
   const aggregated: string[] = [];
-  const cache: IdCache = new Map();
+  const cache = aggregationCache();
   for (let offset = REAGGREGATE_DAYS; offset >= 0; offset--) {
     const day = addDays(today, -offset);
     await aggregateDay(store, day, now, cache);
