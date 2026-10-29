@@ -39,7 +39,7 @@ struct ContextualInspector: View {
             } else if tool == .select {
                 Text("Select an object to edit its properties.").font(.caption).foregroundStyle(.secondary)
             } else if tool == .image {
-                PropertyBlock(name: "Image opacity", symbol: "photo") {
+                PropertyBlock(name: "Image opacity") {
                     propertyLayout {
                         HStack(spacing: 6) {
                             Slider(
@@ -75,6 +75,14 @@ struct ContextualInspector: View {
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                     if model.selectionCount > 0 { Button("Delete censor") { model.deleteSelected() } }
                 }
+            } else if tool == .laser {
+                propertyLayout {
+                    InspectorColorPicker(model: model)
+                    widthControls
+                    Text("Drag to point. The trail fades on its own.")
+                        .font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: !compact, vertical: true)
+                }
             } else if tool == .text {
                 textControls
             } else {
@@ -89,7 +97,7 @@ struct ContextualInspector: View {
                         roughnessControls
                     }
                     if tool.supportsFill && fillVisible {
-                        PropertyBlock(name: "Fill style", symbol: "square.lefthalf.filled") {
+                        PropertyBlock(name: "Fill style") {
                             let values = FillPattern.allCases.map { ($0, $0.rawValue.capitalized, InspectorSample.fill($0)) }
                             if model.showsAllChoices(.fillStyle) {
                                 SampleOptions(values: values, selection: model.style.fillPattern) { value in
@@ -103,7 +111,7 @@ struct ContextualInspector: View {
                         }.fixedSize(horizontal: true, vertical: false)
                     }
                     if tool == .rectangle || tool == .diamond {
-                        PropertyBlock(name: "Edges", symbol: "rectangle") {
+                        PropertyBlock(name: "Edges") {
                             if model.showsAllChoices(.edges) {
                                 SampleOptions(
                                     values: [(false, "Sharp corners", .edges(false)), (true, "Rounded corners", .edges(true))],
@@ -143,7 +151,7 @@ struct ContextualInspector: View {
                         .fixedSize()
                     }
                     if tool == .pen {
-                        PropertyBlock(name: "Pressure", symbol: "pencil.tip") {
+                        PropertyBlock(name: "Pressure") {
                             if model.showsAllChoices(.pressure) {
                                 SampleOptions(
                                     values: [(false, "Constant pressure", .pressure(false)), (true, "Ink pressure", .pressure(true))],
@@ -158,7 +166,7 @@ struct ContextualInspector: View {
                                 }
                             }
                         }.fixedSize(horizontal: true, vertical: false)
-                        PropertyBlock(name: "Smart Draw", symbol: "wand.and.stars") {
+                        PropertyBlock(name: "Smart Draw") {
                             SmartDrawButton(model: model)
                         }.fixedSize(horizontal: true, vertical: false)
                     }
@@ -174,20 +182,20 @@ struct ContextualInspector: View {
     }
 
     private var widthControls: some View {
-        PropertyBlock(name: tool == .eraser ? "Eraser size" : "Width", symbol: "lineweight") {
+        PropertyBlock(name: tool == .eraser ? "Eraser size" : "Width") {
             StyleValueControl(model: model, parameter: .width, sliderWidth: 96, showLabel: false, showsField: false)
                 .frame(height: 36)
         }.fixedSize(horizontal: true, vertical: false)
     }
     private var arrowControls: some View {
             propertyLayout {
-                PropertyBlock(name: "Start", symbol: "arrow.left") {
+                PropertyBlock(name: "Start") {
                     ArrowEndControl(model: model, start: true)
                 }.fixedSize(horizontal: true, vertical: false)
-                PropertyBlock(name: "End", symbol: "arrow.right") {
+                PropertyBlock(name: "End") {
                     ArrowEndControl(model: model, start: false)
                 }.fixedSize(horizontal: true, vertical: false)
-                PropertyBlock(name: model.showsAllChoices(.arrowType) ? "Arrow type" : "Curved", symbol: "arrow.turn.up.right") {
+                PropertyBlock(name: model.showsAllChoices(.arrowType) ? "Arrow type" : "Curved") {
                     if model.showsAllChoices(.arrowType) {
                         SampleOptions(values: [(false, "Straight arrow", .route(false)), (true, "Curved arrow", .route(true))],
                                       selection: model.style.curved) { curved in model.applyStyle { $0.curved = curved } }
@@ -200,7 +208,7 @@ struct ContextualInspector: View {
                         }
                     }
                 }.fixedSize(horizontal: true, vertical: false)
-                PropertyBlock(name: "Head size", symbol: "arrow.up.left.and.arrow.down.right") {
+                PropertyBlock(name: "Head size") {
                     HStack(spacing: 6) {
                         Slider(value: Binding(get: { model.style.headScale ?? 1 }, set: { value in model.applyStyle { $0.headScale = value } }),
                                in: 0.5...2, onEditingChanged: styleEditing).frame(width: 86).accessibilityLabel("Arrowhead size")
@@ -212,7 +220,7 @@ struct ContextualInspector: View {
             .accessibilityElement(children: .contain).accessibilityLabel("Arrow properties")
     }
     private var patternControls: some View {
-        PropertyBlock(name: "Pattern", symbol: "line.3.horizontal") {
+        PropertyBlock(name: "Pattern") {
             let values = StrokePattern.allCases.map { ($0, $0.rawValue.capitalized, InspectorSample.pattern($0)) }
             if model.showsAllChoices(.pattern) {
                 SampleOptions(values: values, selection: model.style.pattern) { value in model.applyStyle { $0.pattern = value } }
@@ -224,7 +232,7 @@ struct ContextualInspector: View {
         }.fixedSize(horizontal: true, vertical: false)
     }
     private var roughnessControls: some View {
-        PropertyBlock(name: "Roughness", symbol: "scribble") {
+        PropertyBlock(name: "Roughness") {
             let values: [(Double, String, InspectorSample)] =
                 [(0, "Clean", .roughness(0)), (2, "Sketchy", .roughness(2)), (6, "Wild", .roughness(6))]
             if model.showsAllChoices(.roughness) {
@@ -239,7 +247,7 @@ struct ContextualInspector: View {
     private var textControls: some View {
         propertyLayout {
             InspectorColorPicker(model: model)
-            PropertyBlock(name: "Font", symbol: "textformat") {
+            PropertyBlock(name: "Font") {
                 if model.showsAllChoices(.font) {
                     HStack(spacing: 5) {
                         fontChoice("System", name: "system", design: .default)
@@ -253,16 +261,16 @@ struct ContextualInspector: View {
                     ) { name in model.applyStyle { $0.fontName = name } }
                 }
             }.fixedSize(horizontal: true, vertical: false)
-            PropertyBlock(name: "Size", symbol: "textformat.size") {
+            PropertyBlock(name: "Size") {
                 StyleValueControl(model: model, parameter: .textSize, sliderWidth: 96, showLabel: false, showsField: false)
                     .frame(height: 36)
             }.fixedSize(horizontal: true, vertical: false)
-            PropertyBlock(name: "Weight", symbol: "bold") {
+            PropertyBlock(name: "Weight") {
                 InspectorControlButton(name: "Bold", selected: model.style.bold, action: { model.applyStyle { $0.bold.toggle() } }) {
                     Image(systemName: "bold").font(.system(size: 17))
                 }.accessibilityValue(model.style.bold ? "On" : "Off")
             }.fixedSize(horizontal: true, vertical: false)
-            PropertyBlock(name: "Alignment", symbol: "text.alignleft") {
+            PropertyBlock(name: "Alignment") {
                 if model.showsAllChoices(.alignment) {
                     HStack(spacing: 5) {
                         ForEach(AnnotationCore.TextAlignment.allCases, id: \.self) { alignment in

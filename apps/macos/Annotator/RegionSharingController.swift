@@ -416,7 +416,7 @@ final class RegionSharingController: NSObject, ObservableObject, NSWindowDelegat
                         width: frame.screenBounds.width, height: frame.screenBounds.height),
                     region: region.bounds, opacity: frame.opacity)
             }
-            output.content.configurePointer(model: model, sourceFrame: sourceFrame)
+            output.content.configurePointer(model: model, sourceFrame: sourceFrame, laser: session.canvas)
             try output.content.present(frame.pixelBuffer, sourceBounds: source, sourceSize: session.canvas.bounds.size,
                 elements: elements, background: background, screenOverlay: overlay, generation: generation,
                 completingWorkspaceTransition: workspaceTransition?.isFinishing == true)
@@ -425,7 +425,7 @@ final class RegionSharingController: NSObject, ObservableObject, NSWindowDelegat
 
     func refreshPointer() {
         guard state.isCapturing, let model, let output else { return }
-        output.content.configurePointer(model: model, sourceFrame: sourceFrame)
+        output.content.configurePointer(model: model, sourceFrame: sourceFrame, laser: sourceSession?.canvas)
         output.content.refreshPointer()
     }
 

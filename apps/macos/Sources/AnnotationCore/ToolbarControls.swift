@@ -58,6 +58,20 @@ public enum ToolbarControl: String, CaseIterable, Codable, Sendable {
     }
 }
 
+/// Press and hold anywhere on the toolbar to move it: on a button, a label or empty space. A press that stays within
+/// `slop` points for `delay` seconds picks the toolbar up, and the control under the pointer never gets the press. Letting
+/// go or moving sooner presses the control as usual. Sliders and number fields get their press at once, because holding
+/// them is how people use them.
+public enum ToolbarHold {
+    /// Seconds a press has to stay still before it picks the toolbar up.
+    public static let delay = 0.4
+    /// Points the pointer can move during the hold and still pick the toolbar up.
+    public static let slop = 3.0
+
+    /// Whether a press that moved by (`dx`, `dy`) points is still a hold.
+    public static func isStill(dx: Double, dy: Double) -> Bool { (dx * dx + dy * dy).squareRoot() <= slop }
+}
+
 /// Properties with a few choices. Each shows as one button that steps through its choices, which is the default, or as all
 /// its choices side by side.
 public enum PropertyChoice: String, CaseIterable, Codable, Sendable {

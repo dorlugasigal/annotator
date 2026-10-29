@@ -687,6 +687,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.toolbarDockDisplayID = nil
             self?.edgeDocked = false
         }
+        panel.allowsHoldToMove = { [weak self] in
+            guard let self else { return false }
+            return !self.model.visibilityAnimating && !self.model.workspaceHidden
+        }
         panel.imagePasteModel = model
         panel.isFloatingPanel = true
         panel.hidesOnDeactivate = false
@@ -990,11 +994,19 @@ final class InspectorPanel: AnnotationPanel {
     /// Runs before the drag records the frame, so an animation can finish first.
     var onUserDragWillStart: (() -> Void)?
     var onUserDragEnded: ((CGPoint) -> Void)?
+    /// Whether a press and hold can pick the toolbar up now (`ToolbarHold`). `nil` turns press and hold off.
+    var allowsHoldToMove: (() -> Bool)?
+    /// Whether the left mouse button is still down when the hold ends; tests replace it.
+    var leftButtonIsDown: () -> Bool = { NSEvent.pressedMouseButtons & 1 != 0 }
     private var dragOrigin: CGPoint?
     private var dragFrame: CGRect?
     private var gestureOwnsDrag = false
+    /// A press held back while it might become a press and hold that moves the toolbar.
+    private var heldPress: NSEvent?
+    private var holdTimer: Timer?
     private(set) var pointerEventLocation: CGPoint?
     var isTrackingToolbarDrag: Bool { dragOrigin != nil }
+    var isHoldingPress: Bool { heldPress != nil }
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
@@ -1009,6 +1021,7 @@ final class InspectorPanel: AnnotationPanel {
         dragFrame = frame
         gestureOwnsDrag = gestureOwned
         onUserDragStarted?()
+        NSCursor.closedHand.set()
     }
 
     func updateToolbarDrag(to point: CGPoint) {
@@ -1018,6 +1031,7 @@ final class InspectorPanel: AnnotationPanel {
             proposed = ToolbarPlacement.constrainedDragFrame(proposed, visibleFrame: destination.visibleFrame)
         }
         setFrameOrigin(proposed.origin)
+        NSCursor.closedHand.set()
         onUserDragMoved?(point)
     }
 
@@ -1027,6 +1041,7 @@ final class InspectorPanel: AnnotationPanel {
         dragOrigin = nil
         dragFrame = nil
         gestureOwnsDrag = false
+        NSCursor.arrow.set()
         if frame != original { onUserDragEnded?(point) }
         else { onUserDragCancelled?() }
     }
@@ -1049,15 +1064,95 @@ final class InspectorPanel: AnnotationPanel {
             default: break
             }
         }
+        if holdPress(event) { return }
         super.sendEvent(event)
     }
 
+    /// Press and hold (`ToolbarHold`): a left press waits until it lets go, moves or stays still long enough. The first
+    /// two give the press to the control under the pointer; staying still picks the toolbar up instead.
+    private func holdPress(_ event: NSEvent) -> Bool {
+        switch event.type {
+        case .leftMouseDown:
+            // A press whose release went elsewhere is dropped, so its timer can't pick the toolbar up later.
+            clearHold()
+            guard !isTrackingToolbarDrag, onUserDragEnded != nil, allowsHoldToMove?() == true,
+                  !keepsPressAtOnce(event) else { return false }
+            heldPress = event
+            let timer = Timer(timeInterval: ToolbarHold.delay, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated { self?.finishHold() }
+            }
+            RunLoop.main.add(timer, forMode: .common)
+            holdTimer = timer
+            return true
+        case .leftMouseDragged:
+            guard let press = heldPress else { return false }
+            if ToolbarHold.isStill(dx: event.locationInWindow.x - press.locationInWindow.x,
+                                   dy: event.locationInWindow.y - press.locationInWindow.y) { return true }
+            releaseHeldPress(followedBy: event)
+            return true
+        case .leftMouseUp:
+            guard heldPress != nil else { return false }
+            releaseHeldPress(followedBy: event)
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Sliders and number fields get a press at once: holding one is how people use it.
+    private func keepsPressAtOnce(_ event: NSEvent) -> Bool {
+        guard let content = contentView, let container = content.superview else { return false }
+        var view = content.hitTest(container.convert(event.locationInWindow, from: nil))
+        while let current = view, current !== content {
+            if current is NSSlider || current is NSTextView || (current as? NSTextField)?.isEditable == true { return true }
+            view = current.superview
+        }
+        return false
+    }
+
+    /// The hold lasted: the toolbar follows the pointer from where the press started. If the button is already up, the
+    /// press was a slow click, so the control gets it and the queued release after it.
+    private func finishHold() {
+        guard let press = heldPress else { return }
+        guard isVisible, allowsHoldToMove?() == true, leftButtonIsDown() else {
+            releaseHeldPress(followedBy: nil)
+            return
+        }
+        clearHold()
+        beginToolbarDrag(at: convertPoint(toScreen: press.locationInWindow))
+    }
+
+    /// Gives the held press to the control under the pointer, then `event`. A control can track the pointer in its own
+    /// loop that waits for the next event, so `event` waits at the front of the queue, where that loop takes it. When no
+    /// loop took it, it is sent here, so it never trails a newer press.
+    private func releaseHeldPress(followedBy event: NSEvent?) {
+        guard let press = heldPress else { return }
+        clearHold()
+        if let event { NSApp.postEvent(event, atStart: true) }
+        super.sendEvent(press)
+        guard let event else { return }
+        let mask = NSEvent.EventTypeMask(type: event.type)
+        if let next = NSApp.nextEvent(matching: mask, until: .distantPast, inMode: .default, dequeue: false),
+           next.timestamp == event.timestamp, next.locationInWindow == event.locationInWindow,
+           let queued = NSApp.nextEvent(matching: mask, until: .distantPast, inMode: .default, dequeue: true) {
+            sendEvent(queued)
+        }
+    }
+
+    private func clearHold() {
+        holdTimer?.invalidate()
+        holdTimer = nil
+        heldPress = nil
+    }
+
     override func orderOut(_ sender: Any?) {
+        clearHold()
         cancelToolbarDrag()
         super.orderOut(sender)
     }
 
     func cancelToolbarDrag() {
+        if isTrackingToolbarDrag { NSCursor.arrow.set() }
         dragOrigin = nil
         dragFrame = nil
         gestureOwnsDrag = false
@@ -1065,6 +1160,7 @@ final class InspectorPanel: AnnotationPanel {
     }
 
     override func close() {
+        clearHold()
         cancelToolbarDrag()
         onUserDragEnded = nil
         super.close()

@@ -4,6 +4,15 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- There's a new Laser pointer next to the Highlighter. Drag to point at something: a glowing trail follows your pointer and fades away on its own, and nothing is added to your drawing. Pick its color and width in the properties. New setups use the L key for it, and you can give it any key in Settings > Toolbar & Shortcuts. If you've changed your toolbar, drag it in from More tools there.
+
+### Changed
+
+- To move the toolbar, press and hold anywhere on it, even on a button or a name, then drag. A normal click works as before, and sliders keep their own drag.
+- Property names such as Width, Pattern and Roughness no longer have an icon in front, so every name on the row lines up and the row looks cleaner.
+
 ## 0.1.0-beta.17 (build 35) - 2026-10-29
 
 ### Added

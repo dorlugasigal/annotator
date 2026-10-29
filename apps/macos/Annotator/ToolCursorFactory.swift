@@ -6,6 +6,7 @@ enum ToolCursorFactory {
     struct Key: Hashable {
         let tool: Tool
         let width: Double
+        var color: RGBA? = nil
     }
     private static var cache: [Key: NSCursor] = [:]
     static let rotationCursor: NSCursor = {
@@ -23,9 +24,11 @@ enum ToolCursorFactory {
         return NSCursor(image: image, hotSpot: NSPoint(x: 16, y: 16))
     }()
     // Keep legacy style arguments compatible without hiding the tool footprint.
-    static func cursor(tool: Tool, width: Double, style: ToolCursorStyle = .toolPreview) -> NSCursor {
+    static func cursor(tool: Tool, width: Double, color: RGBA = LaserTrail.defaultColor,
+                       style: ToolCursorStyle = .toolPreview) -> NSCursor {
         if tool == .select { return .arrow }
         if tool == .text { return .iBeam }
+        if tool == .laser { return laserCursor(width: width, color: color) }
         if !tool.isFreehand && tool != .eraser { return .crosshair }
         let key = Key(tool: tool, width: width)
         if let cached = cache[key] { return cached }
@@ -48,6 +51,29 @@ enum ToolCursorFactory {
                 cross.lineWidth = 2; cross.stroke()
                 NSColor.black.setStroke(); cross.lineWidth = 0.7; cross.stroke()
             }
+            return true
+        }
+        let cursor = NSCursor(image: image, hotSpot: NSPoint(x: side / 2, y: side / 2))
+        if cache.count >= 32 { cache.removeAll() }
+        cache[key] = cursor
+        return cursor
+    }
+
+    /// The laser pointer: a dot as wide as the trail's head, in the laser's color, inside a white ring and a soft glow.
+    static func laserCursor(width: Double, color: RGBA) -> NSCursor {
+        let solid = RGBA(color.red, color.green, color.blue)
+        let key = Key(tool: .laser, width: width, color: solid)
+        if let cached = cache[key] { return cached }
+        let radius = min(250, max(2, width / 2))
+        let side = ceil(radius * 2 + 12)
+        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+            let center = NSPoint(x: rect.midX, y: rect.midY)
+            func circle(_ r: CGFloat) -> NSBezierPath {
+                NSBezierPath(ovalIn: CGRect(x: center.x - r, y: center.y - r, width: r * 2, height: r * 2))
+            }
+            solid.nsColor.withAlphaComponent(0.28).setFill(); circle(radius + 5).fill()
+            NSColor.white.setFill(); circle(radius + 1.5).fill()
+            solid.nsColor.setFill(); circle(radius).fill()
             return true
         }
         let cursor = NSCursor(image: image, hotSpot: NSPoint(x: side / 2, y: side / 2))

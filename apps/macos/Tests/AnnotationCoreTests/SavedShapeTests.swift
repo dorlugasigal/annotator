@@ -14,7 +14,7 @@ import Testing
     }
 
     @Test func savingPreservesSourceAndRoundTripsAllDrawingKinds() throws {
-        let tools = Tool.allCases.filter { !$0.isProtection && ![.select, .eraser, .image].contains($0) }
+        let tools = Tool.allCases.filter { !$0.isProtection && ![.select, .eraser, .laser, .image].contains($0) }
         let elements = tools.map { tool in
             var item = Element(tool: tool, frame: Rect(x: 10, y: 20, width: 80, height: 70),
                                points: tool.isFreehand || tool.isConnector ? [Point(10, 20), Point(90, 90)] : [],

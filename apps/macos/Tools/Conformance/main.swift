@@ -115,6 +115,7 @@ do {
     try await LibraryExport.run(corpus)
     try EditingExport.run(corpus)
     try GeometryExport.run(corpus)
+    try LaserExport.run(corpus)
     try RecognitionExport.run(corpus)
     try HitTestExport.run(corpus)
     try MotionExport.run(corpus)

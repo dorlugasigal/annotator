@@ -11,13 +11,14 @@ extension VerticalAlignment {
     static let propertyControl = VerticalAlignment(PropertyControl.self)
 }
 
+/// A property's name above its control. The name is plain text, like the color pickers' names, so every name on the row
+/// starts at the same edge.
 struct PropertyBlock<Content: View>: View {
     let name: String
-    let symbol: String
     @ViewBuilder var content: Content
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label(name, systemImage: symbol)
+            Text(name)
                 .font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 6) { content }
                 .alignmentGuide(.propertyControl) { $0[VerticalAlignment.center] }

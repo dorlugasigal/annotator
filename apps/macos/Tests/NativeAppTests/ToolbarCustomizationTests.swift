@@ -733,7 +733,7 @@ final class ToolbarCustomizationTests: XCTestCase {
     func testSettingsShowFifteenToolsAndEveryButtonOnOneLine() async throws {
         let (model, cleanup) = try makeModel("one-line")
         defer { cleanup() }
-        model.configureToolbar(WorkspacePreferences.defaultToolbar + [.triangle, .hexagon, .star, .counter])
+        model.configureToolbar(WorkspacePreferences.defaultToolbar + [.triangle, .hexagon, .star])
         XCTAssertEqual(model.toolbarTools.count, 15)
         let size = SettingsSurfaceView.defaultContentSize
         let host = NSHostingView(rootView: CustomizationView(model: model, showDone: false, initialTab: .toolbar))

@@ -178,8 +178,9 @@ final class SharedRegionView: NSView {
             screenOverlay: screenOverlay, drawImmediately: true)
     }
 
-    func configurePointer(model: WorkspaceModel, sourceFrame: CGRect) {
+    func configurePointer(model: WorkspaceModel, sourceFrame: CGRect, laser: DrawingCanvas? = nil) {
         pointer.model = model
+        pointer.laser = laser
         pointer.sourceFrame = sourceFrame
         pointer.region = region.bounds
         pointer.needsDisplay = true
@@ -208,6 +209,8 @@ final class SharedRegionView: NSView {
 @MainActor
 private final class SharedRegionPointerView: NSView {
     weak var model: WorkspaceModel?
+    /// The shared display's canvas, whose laser pointer trail shows in the output too.
+    weak var laser: DrawingCanvas?
     var sourceFrame = CGRect.zero
     var region = Rect.zero
     override var isFlipped: Bool { true }
@@ -226,6 +229,15 @@ private final class SharedRegionPointerView: NSView {
         if !model.workspaceHidden && model.spotlight {
             do { try SpotlightRenderer.draw(in: context, bounds: region.cgRect, center: local.cgPoint, radius: model.spotlightRadius) }
             catch { model.report(error) }
+        }
+        if !model.workspaceHidden, let canvas = laser, !canvas.laserTrail.isEmpty {
+            context.saveGState()
+            if let viewport = canvas.session?.presentation?.screenViewport {
+                context.scaleBy(x: viewport.output.width / viewport.source.width, y: viewport.output.height / viewport.source.height)
+                context.translateBy(x: -viewport.source.x, y: -viewport.source.y)
+            }
+            LaserTrailRenderer.draw(canvas.laserTrail, at: CACurrentMediaTime(), in: context)
+            context.restoreGState()
         }
         if !model.workspaceHidden && model.cursorHighlightVisible {
             let click = model.cursorClickLocation.map { CGPoint(x: $0.x - sourceFrame.minX, y: sourceFrame.maxY - $0.y) }

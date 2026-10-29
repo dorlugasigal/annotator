@@ -8,6 +8,10 @@ extension Style {
             style.color = RGBA(0.93, 1, 0.05)
             style.width = 4
         }
+        if tool == .laser {
+            style.color = LaserTrail.defaultColor
+            style.width = LaserTrail.defaultWidth
+        }
         return style
     }
 
@@ -23,11 +27,12 @@ extension Style {
 }
 
 extension Tool {
-    /// Shapes, lines, arrows, pen and text start with a gradient in a new profile. The highlighter keeps its yellow,
-    /// and tools whose color is not ink (select, eraser, censors, ruler, counter, image) keep their defaults.
+    /// Shapes, lines, arrows, pen and text start with a gradient in a new profile. The highlighter keeps its yellow, the
+    /// laser pointer its red, and tools whose color is not ink (select, eraser, censors, ruler, counter, image) keep their
+    /// defaults.
     public var startsWithGradient: Bool {
         switch self {
-        case .select, .highlighter, .eraser, .cover, .blur, .pixelate, .distort, .ruler, .counter, .image: false
+        case .select, .highlighter, .laser, .eraser, .cover, .blur, .pixelate, .distort, .ruler, .counter, .image: false
         default: true
         }
     }

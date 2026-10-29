@@ -119,6 +119,8 @@ struct InspectorColorPalette: View {
     @FocusState private var editingHex: Bool
     private var selected: RGBA? { fill ? model.style.fill : model.style.color }
     private var selectedGradient: ColorGradient? { fill ? model.style.fillGradient : model.style.strokeGradient }
+    /// The laser pointer glows in one color, so its picker has no gradients.
+    private var offersGradients: Bool { fill || model.effectiveTool != .laser }
     private var palette: [RGBA?] {
         [fill ? nil : RGBA(0, 0, 0, 0), .ink, RGBA(0.33, 0.37, 0.39), .white, RGBA(0.53, 0.4, 0.36),
          RGBA(0.0, 0.59, 0.62), .blue, RGBA(0.49, 0.33, 0.72), RGBA(0.69, 0.32, 0.66), RGBA(0.89, 0.26, 0.4),
@@ -149,7 +151,7 @@ struct InspectorColorPalette: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .transaction { $0.animation = nil }
         .onAppear {
-            updateHex(); showingGradients = selectedGradient != nil
+            updateHex(); showingGradients = offersGradients && selectedGradient != nil
         }
     }
 
@@ -185,18 +187,20 @@ struct InspectorColorPalette: View {
                 ).font(.callout)
                     .help("Start with the outline's color or gradient at 40%. You can change it afterwards.")
             }
-            Picker(
-                "Color options",
-                selection: Binding(
-                    get: { showingGradients },
-                    set: {
-                        showingGradients = $0
-                        wheelExpanded = false
-                    })
-            ) {
-                Text("Gradient").tag(true)
-                Text("Solid").tag(false)
-            }.pickerStyle(.segmented).labelsHidden()
+            if offersGradients {
+                Picker(
+                    "Color options",
+                    selection: Binding(
+                        get: { showingGradients },
+                        set: {
+                            showingGradients = $0
+                            wheelExpanded = false
+                        })
+                ) {
+                    Text("Gradient").tag(true)
+                    Text("Solid").tag(false)
+                }.pickerStyle(.segmented).labelsHidden()
+            }
             VStack(alignment: .leading, spacing: 12) {
                 if !wheelExpanded {
                     if !showingGradients {

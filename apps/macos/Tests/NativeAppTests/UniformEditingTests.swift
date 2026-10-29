@@ -66,7 +66,7 @@ final class UniformEditingTests: XCTestCase {
         let editor = NativeCanvasFixture(image: image, defaults: try XCTUnwrap(UserDefaults(suiteName: suite)))
         defer { editor.close(); UserDefaults.standard.removePersistentDomain(forName: suite) }
         let png = try PNGExporter.encode(image)
-        for tool in Tool.allCases where tool != .select && tool != .eraser {
+        for tool in Tool.allCases where tool != .select && tool != .eraser && tool != .laser {
             var item = Element(tool: tool, frame: Rect(x: 200, y: 200, width: 120, height: 100), text: tool == .counter ? "1" : "Editable")
             var hit = item.frame.center
             if tool.isFreehand || tool.isConnector || tool == .ruler {
