@@ -1,8 +1,8 @@
 import type { KeyValueStore } from "./store.ts";
 import { MAX_BODY_BYTES, ValidationError, parseBody, validateApp, validateWeb } from "./validate.ts";
 import { storeApp, storeWeb } from "./collect.ts";
-import { aggregateDay, dashboard, refreshGitHub, runDaily, type Fetcher, type GitHubRefresh } from "./aggregate.ts";
-import { dayString } from "./days.ts";
+import { aggregateDay, aggregationCache, dashboard, refreshGitHub, runDaily, type Fetcher, type GitHubRefresh } from "./aggregate.ts";
+import { addDays, dayString } from "./days.ts";
 import {
   SESSION_COOKIE, clearedCookie, createSession, loginBlocked, readCookie, recordFailure, sessionCookie,
   validSession, verifyPassword,
@@ -127,8 +127,11 @@ export async function handleSummary(request: Request, deps: Deps): Promise<Respo
     let refresh: GitHubRefresh | undefined;
     if (request.method === "POST") {
       if (!sameOrigin(request)) return json(403, { error: "This origin is not allowed." });
-      await aggregateDay(deps.store, dayString(now), now);
-      refresh = await refreshGitHub(deps.store, dayString(now), config(deps.env), deps.fetcher ?? fetch, now);
+      // The dashboard's periods end yesterday, so Refresh recounts yesterday as well as today.
+      const today = dayString(now);
+      const cache = aggregationCache();
+      for (const day of [addDays(today, -1), today]) await aggregateDay(deps.store, day, now, cache);
+      refresh = await refreshGitHub(deps.store, today, config(deps.env), deps.fetcher ?? fetch, now);
     } else if (request.method !== "GET") return json(405, { error: "Use GET or POST." });
     return json(200, { ...(await dashboard(deps.store, now)), ...(refresh ? { refresh } : {}) });
   } catch (error) { return failure(error); }

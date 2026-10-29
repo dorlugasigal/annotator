@@ -62,7 +62,7 @@ source/build/deployment guards without signing an app or changing a release.
 | `POST /api/admin/login` | Owner password check; sets an 8-hour `HttpOnly` session cookie |
 | `POST /api/admin/logout` | Clears the session cookie |
 | `GET /api/admin/summary` | Dashboard data (session required) |
-| `POST /api/admin/summary` | Recompute today's summary, re-read GitHub downloads (at most every 10 minutes), then return dashboard data |
+| `POST /api/admin/summary` | Recompute yesterday's and today's summaries, re-read GitHub downloads (at most every 10 minutes), then return dashboard data |
 | `/admin/` | Unlinked, `noindex` dashboard |
 
 `aggregate-daily` runs at 00:15 UTC and writes a `started` health marker first,
@@ -79,9 +79,27 @@ and does not fail the rest of Refresh.
 
 `public/admin/` holds the dashboard: `index.html`, `admin.css`, `admin.js` and
 `admin-model.js`. The website build copies it to `website/dist/admin/`. The
-model file has the pure helpers (daily gaps, download split, retention rows,
-job health, chart curves) and is tested by `tests/admin-model.test.mjs`.
+model file has the pure helpers, and `overview(data, days)` turns the summary
+response into everything the page shows for the last 7 or 30 days. It is
+tested by `tests/admin-model.test.mjs`.
 `website/tests/e2e/admin.spec.mjs` tests the page under the production CSP.
+
+The dashboard answers, for the chosen period:
+
+| Question | Where it comes from |
+| --- | --- |
+| Is use growing? | Copies seen in the period and per day, against the same number of days before |
+| Mac or Windows? | `app.unique` and `app.platforms` in each summary |
+| Are copies up to date? | Each copy's newest version, against the newest GitHub release out by the period's last day |
+| Do visits turn into downloads and opt-ins? | Website visits, download clicks, disk image downloads gained on GitHub, new opt-ins |
+| Which features are used? | Share of active install-days, against the days before |
+
+Periods are whole UTC days that end yesterday, because today is still being
+counted. The page compares two periods only when both have a summary for every
+day, so a short history or a missed night never reads as growth or decline.
+Summaries written before `app.platforms` and `app.unique` existed have no
+split; when every day of a window has counts and none has a Windows system,
+the page reads that window as all Mac.
 
 The `/admin/*` CSP in the root `netlify.toml` blocks inline scripts and
 styles. Set styles with `element.style.setProperty` or SVG attributes, never a
@@ -98,7 +116,7 @@ itself never reads or stores IP addresses or user-agent strings.
 | `app/<day>/<hmac>` | Version, build, platform, OS major, chip, opt-in day, bucketed counts | 45 days |
 | `web/<day>/<tab-id>` | Route and referrer category | 45 days |
 | `dl/<day>/<tab-id>/<track>` | Download click marker | 45 days |
-| `summary/<day>` | Identifier-free daily totals | Kept |
+| `summary/<day>` | Identifier-free daily totals, and copies seen in the 7 and 30 days to that day by platform, version, system and chip | Kept |
 | `external/github/<day>` | Cumulative release asset downloads and `capturedAt` | Kept |
 | `external/homebrew/<day>` | Homebrew 30/90/365-day installs | Kept |
 | `health/last-run` | Last aggregation result and source errors | Overwritten |
@@ -202,7 +220,10 @@ show no installed copy still reads it.
 - Website visits are browser tabs, not people. Browsers sending Global Privacy
   Control or Do Not Track are not counted.
 - GitHub downloads are cumulative asset downloads, including repeats and bots.
-  The dashboard splits the disk image from the ZIP. Unauthenticated reads from
+  The dashboard splits the Mac disk image, the Mac ZIP (Homebrew installs and
+  in-app updates) and the Windows ZIPs (winget installs and direct downloads),
+  and shows what each gained over the period. Microsoft Store installs aren't
+  counted. Unauthenticated reads from
   Netlify can hit GitHub's rate limit; set `METRICS_GITHUB_TOKEN` if that
   happens often.
 - Homebrew totals come from Homebrew's own opt-out analytics and cover the

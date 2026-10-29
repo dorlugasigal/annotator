@@ -1,21 +1,28 @@
 import {
-  ARCH_LABELS, REFERRER_LABELS, ROUTE_LABELS, TRACK_LABELS, addDays, daily, featureUsage, githubDownloads,
-  homebrewInstalls, jobHealth, merge, niceMax, ranked, retentionRows, segments, smoothPath, total, utcDay,
+  DOWNLOAD_LABELS, PLATFORMS, PLATFORM_LABELS, compare, jobHealth, niceMax, overview, segments, smoothPath,
 } from "/admin/admin-model.js";
 
 const $ = (id) => document.getElementById(id);
 const SVG = "http://www.w3.org/2000/svg";
 const number = new Intl.NumberFormat();
+const decimal = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
 const percent = new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 0 });
 const shortDate = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
 const longDate = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
 const time = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
 const dateTime = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 const dayLabel = (day) => shortDate.format(new Date(`${day}T00:00:00Z`));
-const format = (value) => (value === null || value === undefined ? "–" : number.format(value));
+const rangeLabel = (days) => `${dayLabel(days[0])} – ${dayLabel(days.at(-1))}`;
+const format = (value, formatter = number) => (value === null || value === undefined ? "–" : formatter.format(value));
 const plural = (count, one, many) => `${number.format(count)} ${count === 1 ? one : many}`;
+const DOWNLOAD_NOTES = {
+  macDiskImage: "From the website or the GitHub release page.",
+  macZip: "Homebrew installs and in-app updates download this file.",
+  windowsZip: "winget installs and direct downloads. Microsoft Store installs aren't counted here.",
+};
 
 let lastData = null;
+let periodLength = /^#7-days$/.test(location.hash) ? 7 : 30;
 
 function view(name) {
   document.body.dataset.view = name;
@@ -41,15 +48,17 @@ function svg(tag, attrs = {}, parent) {
   return node;
 }
 
-function setNumber(node, value) {
-  const text = format(value);
+function setNumber(node, value, formatter = number) {
+  const text = format(value, formatter);
   node.classList.toggle("is-empty", value === null || value === undefined);
-  if (node.textContent !== text && node.textContent !== "–" && document.body.dataset.drawn !== undefined) {
+  if (node.firstChild?.nodeType === Node.TEXT_NODE && node.firstChild.textContent !== text && node.firstChild.textContent !== "–"
+    && document.body.dataset.drawn !== undefined) {
     node.classList.remove("changed");
     void node.offsetWidth;
     node.classList.add("changed");
   }
-  node.textContent = text;
+  const ring = node.querySelector(":scope > .ink-ellipse");
+  node.replaceChildren(text, ...(ring ? [ring] : []));
 }
 
 function status(message, tone = "info") {
@@ -57,6 +66,42 @@ function status(message, tone = "info") {
   line.hidden = !message;
   line.textContent = message ?? "";
   line.dataset.tone = tone;
+}
+
+/**
+ * "↑ 25% · was 4". The arrow is decorative and hidden from screen readers, which hear "Up" or "Down".
+ * Small earlier values show the difference instead of a percentage, so one more copy never reads as +100%.
+ * The direction follows the numbers as shown, so "37%" never sits next to "down, was 37%".
+ */
+function showChange(node, change, { formatter = number, share = false } = {}) {
+  // Nothing then and nothing now isn't news.
+  node.hidden = !change || (change.previous === 0 && change.diff === 0);
+  if (node.hidden) {
+    node.dataset.trend = "";
+    node.replaceChildren();
+    return;
+  }
+  const shown = share ? percent : formatter;
+  const was = shown.format(change.previous);
+  const trend = shown.format(change.previous + change.diff) === was ? "same" : change.trend;
+  node.dataset.trend = trend;
+  if (trend === "same") {
+    node.replaceChildren(`No change · was ${was}`);
+    return;
+  }
+  const amount = share ? "" : change.ratio !== null && change.previous >= 10
+    ? `${percent.format(Math.abs(change.ratio))} · ` : `${formatter.format(Math.abs(change.diff))} · `;
+  node.replaceChildren(
+    el("span", { className: "arrow", text: trend === "up" ? "↑ " : "↓ ", attrs: { "aria-hidden": "true" } }),
+    el("span", { className: "sr-only", text: trend === "up" ? "Up, " : "Down, " }),
+    `${amount}was ${was}`,
+  );
+}
+
+function changeNode(change, options, tag = "span") {
+  const node = el(tag, { className: "delta" });
+  showChange(node, change, options);
+  return node;
 }
 
 /** A labelled bar list. Bars are decorative; the label and value carry the meaning. */
@@ -69,21 +114,19 @@ function bars(list, rows, { empty, value = (row) => format(row.value), max } = {
   const peak = max ?? Math.max(...rows.map((row) => row.value), 1);
   rows.forEach((row, index) => {
     const fill = el("span", { className: "bar-fill" });
-    fill.style.setProperty("--share", `${Math.max(2, (row.value / peak) * 100)}%`);
+    fill.style.setProperty("--share", `${row.value > 0 ? Math.max(2, (row.value / peak) * 100) : 0}%`);
     fill.style.setProperty("--order", String(index));
     const valueNode = el("span", { className: "bar-value" });
     const shown = value(row);
-    if (Array.isArray(shown)) valueNode.append(shown[0], el("small", { text: shown[1] }));
+    if (Array.isArray(shown)) valueNode.append(shown[0], typeof shown[1] === "string" ? el("small", { text: shown[1] }) : shown[1]);
     else valueNode.textContent = shown;
-    list.append(el("li", {}, [
-      el("span", { className: "bar-label", text: row.label, attrs: { title: row.label } }),
-      el("span", { className: "bar-track", attrs: { "aria-hidden": "true" } }, [fill]),
-      valueNode,
-    ]));
+    const label = el("span", { className: "bar-label", text: row.label, attrs: { title: row.label } });
+    if (row.tag) label.append(" ", el("span", { className: "tag", text: row.tag }));
+    list.append(el("li", {}, [label, el("span", { className: "bar-track", attrs: { "aria-hidden": "true" } }, [fill]), valueNode]));
   });
 }
 
-/* ---------- The 30-day ink chart ---------- */
+/* ---------- The daily ink chart ---------- */
 
 const chart = { points: [], focus: -1, geometry: null };
 
@@ -92,7 +135,7 @@ function drawChart(points) {
   const width = Math.max(320, Math.round(box.width)), height = Math.max(200, Math.round(box.height));
   const pad = { top: 16, right: 14, bottom: 30, left: 34 };
   const plotW = width - pad.left - pad.right, plotH = height - pad.top - pad.bottom;
-  const values = points.map((point) => point.value).filter((value) => value !== null);
+  const values = points.flatMap((point) => [point.value, point.previous]).filter((value) => value !== null);
   const max = niceMax(Math.max(0, ...values));
   const x = (index) => pad.left + (points.length > 1 ? (index / (points.length - 1)) * plotW : plotW / 2);
   const y = (value) => pad.top + plotH - (value / max) * plotH;
@@ -111,25 +154,25 @@ function drawChart(points) {
     const label = svg("text", { class: "axis-label", x: pad.left - 10, y: y(tick) + 4, "text-anchor": "end" }, root);
     label.textContent = number.format(tick);
   }
-  const labelDays = [0, Math.floor((points.length - 1) / 2), points.length - 1];
-  for (const index of new Set(labelDays)) {
+  for (const index of new Set([0, Math.floor((points.length - 1) / 2), points.length - 1])) {
     const anchor = index === 0 ? "start" : index === points.length - 1 ? "end" : "middle";
     const label = svg("text", { class: "axis-label", x: x(index), y: height - 8, "text-anchor": anchor }, root);
     label.textContent = dayLabel(points[index].day);
   }
 
-  if (!values.length) {
+  if (!points.some((point) => point.value !== null)) {
     const note = svg("text", { class: "no-data", x: pad.left + plotW / 2, y: pad.top + plotH * 0.3, "text-anchor": "middle" }, root);
-    note.textContent = "No opted-in copies have sent counts in these 30 days.";
+    note.textContent = `No counts in these ${points.length} days.`;
   }
-  for (const run of segments(points.map((point, index) => ({ ...point, index })))) {
-    const coords = run.map((point) => ({ x: x(point.index), y: y(point.value) }));
-    const line = smoothPath(coords);
-    if (coords.length > 1) {
-      const area = `${line}L${coords.at(-1).x},${y(0)}L${coords[0].x},${y(0)}Z`;
-      svg("path", { class: "area", d: area }, root);
-    }
-    svg("path", { class: "ink-line", d: coords.length > 1 ? line : `${line}h0.01`, pathLength: 1 }, root);
+  const line = (pick) => segments(points.map((point, index) => ({ value: pick(point), index })))
+    .map((run) => run.map((point) => ({ x: x(point.index), y: y(point.value) })));
+  for (const coords of line((point) => point.previous)) {
+    svg("path", { class: "previous-line", d: coords.length > 1 ? smoothPath(coords) : `${smoothPath(coords)}h0.01` }, root);
+  }
+  for (const coords of line((point) => point.value)) {
+    const path = smoothPath(coords);
+    if (coords.length > 1) svg("path", { class: "area", d: `${path}L${coords.at(-1).x},${y(0)}L${coords[0].x},${y(0)}Z` }, root);
+    svg("path", { class: "ink-line", d: coords.length > 1 ? path : `${path}h0.01`, pathLength: 1 }, root);
   }
   points.forEach((point, index) => {
     if (point.newInstalls > 0) svg("circle", { class: "new-mark", cx: x(index), cy: y(point.value ?? 0), r: 4.5 }, root);
@@ -137,6 +180,14 @@ function drawChart(points) {
   chart.guide = svg("line", { class: "guide", y1: pad.top, y2: pad.top + plotH, visibility: "hidden" }, root);
   chart.dot = svg("circle", { class: "focus-dot", r: 6, visibility: "hidden" }, root);
   if (chart.focus >= 0) focusDay(chart.focus, false);
+}
+
+function describeDay(point) {
+  const when = longDate.format(new Date(`${point.day}T00:00:00Z`));
+  const extras = [point.newInstalls ? `${number.format(point.newInstalls)} new` : "", point.windows ? `${number.format(point.windows)} on Windows` : ""]
+    .filter(Boolean);
+  const before = `${dayLabel(point.previousDay)}: ${point.previous === null ? "no count" : plural(point.previous, "copy", "copies")}`;
+  return { when, extras, before };
 }
 
 function focusDay(index, announce = true) {
@@ -157,17 +208,19 @@ function focusDay(index, announce = true) {
   chart.dot.setAttribute("cx", px);
   chart.dot.setAttribute("cy", py);
   chart.dot.setAttribute("visibility", point.value === null ? "hidden" : "visible");
-  const detail = point.value === null ? "No count stored for this day"
-    : `${plural(point.value, "copy", "copies")} active${point.newInstalls ? ` · ${number.format(point.newInstalls)} new` : ""}`;
-  const when = longDate.format(new Date(`${point.day}T00:00:00Z`));
+  const { when, extras, before } = describeDay(point);
   tip.replaceChildren(el("strong", { text: point.value === null ? "–" : plural(point.value, "copy", "copies") }),
-    el("span", { text: point.value === null ? `${when} · no count stored` : point.newInstalls ? `${when} · ${number.format(point.newInstalls)} new` : when }));
+    el("span", { text: [when, ...(point.value === null ? ["no count stored"] : extras)].join(" · ") }),
+    el("span", { className: "tip-before", text: before }));
   const box = $("active-chart").getBoundingClientRect();
-  const scale = box.width / geometry.width;
-  tip.style.left = `${Math.min(Math.max(px * scale, 80), box.width - 80)}px`;
+  tip.style.left = `${Math.min(Math.max(px * (box.width / geometry.width), 80), box.width - 80)}px`;
   tip.style.top = `${py * (box.height / geometry.height)}px`;
   tip.hidden = false;
-  if (announce) $("chart-live").textContent = `${longDate.format(new Date(`${point.day}T00:00:00Z`))}: ${detail}.`;
+  if (announce) {
+    const detail = point.value === null ? "No count stored for this day"
+      : [`${plural(point.value, "copy", "copies")} active`, ...extras].join(", ");
+    $("chart-live").textContent = `${when}: ${detail}. ${before}.`;
+  }
 }
 
 function setUpChartInput() {
@@ -192,148 +245,234 @@ function setUpChartInput() {
   new ResizeObserver(() => { if (chart.points.length) drawChart(chart.points); }).observe(area);
 }
 
-/** Spans the days that have data. Daily counts scale from zero; a running total scales to its own range. */
-function sparkline(node, values, { runningTotal = false } = {}) {
+/** Spans the days that have data, scaled from zero. */
+function sparkline(node, values) {
   node.replaceChildren();
   const known = values.map((value, index) => ({ value, index })).filter((point) => point.value !== null);
   if (known.length < 2) return;
   const width = 220, height = 34;
-  const numbers = known.map((point) => point.value);
-  const low = runningTotal ? Math.min(...numbers) : 0, high = Math.max(...numbers);
+  const high = Math.max(...known.map((point) => point.value));
   const first = known[0].index, span = Math.max(1, known.at(-1).index - first);
   node.setAttribute("viewBox", `0 0 ${width} ${height}`);
   node.setAttribute("preserveAspectRatio", "none");
-  const flat = high === low;
   const coords = known.map((point) => ({
     x: ((point.index - first) / span) * width,
-    y: flat ? (runningTotal ? height / 2 : height - 3) : height - 3 - ((point.value - low) / (high - low)) * (height - 6),
+    y: high === 0 ? height - 3 : height - 3 - (point.value / high) * (height - 6),
   }));
   const line = smoothPath(coords);
-  if (!flat) svg("path", { class: "spark-area", d: `${line}L${coords.at(-1).x},${height}L${coords[0].x},${height}Z` }, node);
+  if (high > 0) svg("path", { class: "spark-area", d: `${line}L${coords.at(-1).x},${height}L${coords[0].x},${height}Z` }, node);
   svg("path", { d: line, "vector-effect": "non-scaling-stroke" }, node);
 }
 
 /* ---------- Sections ---------- */
 
-function renderPeople(summaries, end) {
-  const latest = summaries.at(-1);
-  const week = summaries.filter((summary) => summary.day > addDays(end, -7));
-  const points = daily(summaries, end, 30, (summary) => summary.app.active)
-    .map((point) => ({ ...point, newInstalls: summaries.find((summary) => summary.day === point.day)?.app.newInstalls ?? 0 }));
-  setNumber($("mau"), latest?.app.mau ?? null);
-  $("mau-caption").textContent = `${latest?.app.mau === 1 ? "opted-in copy" : "opted-in copies"} used Annotator in the last 30 days`;
-  if (!$("mau").querySelector("svg")) {
+function renderRange(data) {
+  const { period: span, comparable, covered, hasData, stillCounting } = data;
+  $("range-text").replaceChildren(el("strong", { text: rangeLabel(span.days) }),
+    comparable ? `, compared with ${rangeLabel(span.previous)}.` : ".",
+    " Whole days in UTC. Today isn't over yet, so it's shown on its own.");
+  const notes = [];
+  if (!hasData) {
+    notes.push("No counts yet. App numbers appear after a copy turns on Share usage counts and the nightly count runs at 00:15 UTC. You can also press Refresh.");
+  } else if (!covered) notes.push(`No counts in these ${span.length} days.`);
+  else if (covered < span.length) {
+    notes.push(`Only ${covered} of these ${span.length} days have counts. Totals leave out the missing days, so nothing is compared.`);
+  } else if (!comparable) notes.push(`There aren't ${span.length} counted days before this period yet, so nothing is compared.`);
+  if (stillCounting) notes.push(`${dayLabel(span.end)} is still being counted. The nightly count finishes it at 00:15 UTC, or press Refresh.`);
+  $("range-note").hidden = !notes.length;
+  $("range-note").textContent = notes.join(" ");
+  for (const node of document.querySelectorAll("[data-range]")) node.textContent = rangeLabel(span.days);
+  for (const input of document.querySelectorAll('input[name="period"]')) input.checked = Number(input.value) === span.length;
+}
+
+function renderPeople(data) {
+  const { people, platforms, period: span, asOf } = data;
+  const copies = $("copies");
+  if (!copies.querySelector(".ink-ellipse")) {
     const ring = svg("svg", { class: "ink-ellipse", viewBox: "0 0 300 110", preserveAspectRatio: "none", "aria-hidden": "true", focusable: "false" });
     svg("path", { pathLength: 1, d: "M62 20C124 4 232 6 272 28C299 45 290 82 236 95C170 110 72 106 30 86C3 72 9 38 52 24C92 12 152 8 206 14" }, ring);
-    $("mau").append(ring);
+    copies.append(ring);
   }
-  setNumber($("wau"), latest?.app.wau ?? null);
-  setNumber($("active"), latest?.app.active ?? null);
-  $("active-label").textContent = latest ? `Active on ${dayLabel(latest.day)}` : "Latest day";
-  setNumber($("new-installs"), latest ? week.reduce((sum, summary) => sum + summary.app.newInstalls, 0) : null);
-  $("chart-range").textContent = `${dayLabel(points[0].day)} – ${dayLabel(points.at(-1).day)} (UTC days)`;
-  chart.points = points;
-  drawChart(points);
-  const table = $("chart-table");
-  table.replaceChildren(el("caption", { text: "Opted-in copies active each day" }),
-    el("tr", {}, [el("th", { text: "Day" }), el("th", { text: "Active" }), el("th", { text: "New" })]),
-    ...points.map((point) => el("tr", {}, [el("td", { text: point.day }), el("td", { text: format(point.value) }),
-      el("td", { text: point.value === null ? "–" : number.format(point.newInstalls) })])));
+  setNumber(copies, people.copies.value);
+  showChange($("copies-change"), people.copies.change);
+  const days = asOf && asOf !== span.end ? `in the ${span.length} days to ${dayLabel(asOf)}` : `in these ${span.length} days`;
+  $("copies-caption").textContent = `${people.copies.value === 1 ? "opted-in copy" : "opted-in copies"} used Annotator ${days}`;
+  setNumber($("copies-mac"), platforms.macos.copies.value);
+  setNumber($("copies-windows"), platforms.windows.copies.value);
+  setNumber($("per-day"), people.perDay.value, decimal);
+  showChange($("per-day-change"), people.perDay.change, { formatter: decimal });
+  setNumber($("today"), people.today?.active ?? null);
+  $("today-note").textContent = people.today ? `counted ${time.format(new Date(people.today.countedAt))}` : "Press Refresh";
+  $("key-now").textContent = `These ${span.length} days`;
+  $("key-before").textContent = `The ${span.length} days before`;
+  $("active-chart").setAttribute("aria-label", `Opted-in copies active each day in these ${span.length} days, with the ${span.length} days `
+    + "before as a dashed line. Use the arrow keys to read each day.");
+  if (chart.points.length !== data.chart.length) chart.focus = -1;
+  chart.points = data.chart;
+  drawChart(data.chart);
+  $("chart-table").replaceChildren(el("caption", { text: "Opted-in copies active each day" }),
+    el("tr", {}, ["Day", "Active", "New", "On Windows", "Day before", "Active then"].map((text) => el("th", { text }))),
+    ...data.chart.map((point) => el("tr", {}, [point.day, format(point.value), point.value === null ? "–" : number.format(point.newInstalls),
+      point.value === null ? "–" : number.format(point.windows), point.previousDay, format(point.previous)].map((text) => el("td", { text })))));
 }
 
-function renderTiles(summaries, end, github, githubSnapshots) {
-  const week = summaries.filter((summary) => summary.day > addDays(end, -7));
-  const month = (pick) => daily(summaries, end, 30, pick).map((point) => point.value);
-  const clicks = (summary) => total(summary.web.downloads);
-  const has = summaries.length > 0;
-  const tile = (id) => ({ value: $(id).querySelector("[data-value]"), spark: $(id).querySelector(".spark") });
-  const tiles = { newest: tile("tile-new"), visits: tile("tile-visits"), clicks: tile("tile-clicks"), github: tile("tile-github") };
-  setNumber(tiles.newest.value, has ? week.reduce((sum, s) => sum + s.app.newInstalls, 0) : null);
-  sparkline(tiles.newest.spark, month((s) => s.app.newInstalls));
-  setNumber(tiles.visits.value, has ? week.reduce((sum, s) => sum + s.web.sessions, 0) : null);
-  sparkline(tiles.visits.spark, month((s) => s.web.sessions));
-  setNumber(tiles.clicks.value, has ? week.reduce((sum, s) => sum + clicks(s), 0) : null);
-  sparkline(tiles.clicks.spark, month(clicks));
-  setNumber(tiles.github.value, github?.total ?? null);
-  const change = github?.change;
-  $("tile-github").querySelector("[data-detail]").textContent = github
-    ? `All release files, all time${change === null ? "" : change === 0 ? `. No change since ${dayLabel(github.since)}`
-      : `. ${change > 0 ? "+" : ""}${number.format(change)} since ${dayLabel(github.since)}`}.`
-    : "No download count yet. Press Refresh.";
-  const byDay = new Map(githubSnapshots.map((snapshot) => [snapshot.day, snapshot.total]));
-  sparkline(tiles.github.spark, Array.from({ length: 30 }, (_, index) => byDay.get(addDays(end, index - 29)) ?? null), { runningTotal: true });
+function renderFunnel(data) {
+  const { funnel, github } = data;
+  const step = (id, metric, extra = []) => {
+    const node = $(id);
+    setNumber(node.querySelector("[data-value]"), metric.value);
+    showChange(node.querySelector("[data-change]"), metric.change);
+    node.querySelector("[data-extra]").replaceChildren(...extra);
+    sparkline(node.querySelector(".spark"), metric.daily);
+  };
+  step("step-visits", funnel.visits);
+  step("step-clicks", funnel.clicks, funnel.clicks.rate === null ? [] : [`${percent.format(funnel.clicks.rate)} of visits `,
+    changeNode(compare(funnel.clicks.rate, funnel.clicks.previousRate), { share: true })]);
+  step("step-disk", funnel.diskImages, [!github ? "Press Refresh to read GitHub"
+    : github.since ? `On GitHub since ${dayLabel(github.since)}` : "Needs a second GitHub count"]);
+  step("step-optins", funnel.optIns);
 }
 
-function renderDownloads(github, homebrew) {
+function platformColumn(data, platform) {
+  const metrics = data.platforms[platform];
+  const name = PLATFORM_LABELS[platform];
+  const column = el("div", { className: "platform", attrs: { "data-platform": platform } }, [el("h3", { text: name })]);
+  const count = metrics.copies.value;
+  if (count === null) {
+    column.append(el("p", { className: "empty", text: data.hasData
+      ? `${name} numbers appear after the next nightly count, or press Refresh.` : "No counts yet." }));
+    return column;
+  }
+  column.append(
+    el("p", { className: "platform-number" }, [number.format(count), el("small", { text: count === 1 ? " copy" : " copies" })]),
+    changeNode(metrics.copies.change, undefined, "p"),
+  );
+  if (count === 0) {
+    column.append(el("p", { className: "empty", text: platform === "windows" && !data.everWindows
+      ? "No Windows copy has shared counts yet." : `No ${name} copy shared counts in these days.` }));
+    return column;
+  }
+  column.append(el("p", { className: "platform-facts", text: `${format(metrics.perDay.value, decimal)} a day on average · `
+    + `${metrics.newInstalls.value === null ? "new opt-ins unknown" : plural(metrics.newInstalls.value, "new opt-in", "new opt-ins")}` }));
+  if (!metrics.os) {
+    column.append(el("p", { className: "empty", text: "Systems and chips appear after the next nightly count, or press Refresh." }));
+  } else {
+    const systems = el("ol", { className: "bars" }), chips = el("ol", { className: "bars" });
+    bars(systems, metrics.os);
+    bars(chips, metrics.architectures);
+    column.append(el("h4", { text: "Systems" }), systems, el("h4", { text: "Chips" }), chips);
+  }
+  return column;
+}
+
+function renderPlatforms(data) {
+  $("platforms").replaceChildren(...PLATFORMS.map((platform) => platformColumn(data, platform)));
+}
+
+function renderVersions(data) {
+  const box = $("adoption");
+  const versions = data.versions;
+  box.replaceChildren();
+  if (!versions?.of) {
+    box.append(el("p", { className: "empty", text: versions ? "No copy reported a version in these days."
+      : data.hasData ? "Versions appear after the next nightly count, or press Refresh." : "No versions reported yet." }));
+    $("versions").replaceChildren();
+    return;
+  }
+  const split = PLATFORMS.filter((platform) => versions.platforms[platform].of)
+    .map((platform) => `${PLATFORM_LABELS[platform]} ${number.format(versions.platforms[platform].on)} of ${number.format(versions.platforms[platform].of)}`);
+  box.append(
+    el("p", { className: "adoption-number", text: percent.format(versions.share) }),
+    el("p", { className: "adoption-text" }, [`of copies ran the newest ${versions.fromGitHub ? "release" : "version seen"}, `,
+      el("strong", { text: versions.newest }), ` (${number.format(versions.on)} of ${number.format(versions.of)}).`]),
+  );
+  if (split.length > 1) box.append(el("p", { className: "adoption-detail", text: split.join(" · ") }));
+  const today = versions.today?.of
+    ? `${number.format(versions.today.on)} of ${number.format(versions.today.of)} (${percent.format(versions.today.share)})` : null;
+  if (versions.later) {
+    box.append(el("p", { className: "adoption-detail" }, [el("strong", { text: versions.later }),
+      ` came out after ${dayLabel(data.period.end)}. `, today ? `Counting today so far, ${today} run it.` : "Press Refresh to count today."]));
+  } else if (today) box.append(el("p", { className: "adoption-detail", text: `Counting today so far: ${today}.` }));
+  bars($("versions"), versions.rows.map((row) => ({ ...row, tag: row.label === versions.newest ? "newest" : undefined })));
+}
+
+function renderDownloads(data) {
+  const { github, homebrew } = data;
   $("downloads-note").textContent = github
     ? `GitHub counted ${github.capturedAt ? dateTime.format(new Date(github.capturedAt)) : `on ${dayLabel(github.day)}`}`
     : "Not counted yet";
   const kinds = $("download-kinds");
   kinds.replaceChildren();
   if (github) {
-    kinds.append(
-      el("div", { className: "kind" }, [el("strong", { text: number.format(github.kinds.dmg) }), el("span", { text: "Disk image" }),
-        el("p", { text: "Downloads from the website or the GitHub release page." })]),
-      el("div", { className: "kind" }, [el("strong", { text: number.format(github.kinds.zip) }), el("span", { text: "ZIP" }),
-        el("p", { text: "Also counts Homebrew installs and in-app updates, which download the same file." })]),
-    );
+    for (const [kind, label] of Object.entries(DOWNLOAD_LABELS)) {
+      const counts = github.kinds[kind];
+      kinds.append(el("div", { className: "kind", attrs: { "data-kind": kind } }, [
+        el("strong", { text: counts.gained === null ? "–" : `${counts.gained > 0 ? "+" : ""}${number.format(counts.gained)}` }),
+        el("span", { text: label }),
+        changeNode(compare(counts.gained, counts.previous), undefined, "p"),
+        el("p", { text: `${number.format(counts.total)} in all. ${DOWNLOAD_NOTES[kind]}` }),
+      ]));
+    }
   } else kinds.append(el("p", { className: "empty", text: "The nightly count or Refresh reads GitHub's release numbers." }));
-  bars($("releases"), github?.releases ?? [], { empty: "No release downloads counted yet." });
+  $("downloads-since").textContent = github?.since ? `New downloads since GitHub's count on ${dayLabel(github.since)}. GitHub counts `
+    + "repeats and bots too." : github ? "Only one GitHub count so far, so there are no new downloads to show yet." : "";
+  const releases = github?.releases ?? [];
+  const shown = releases.slice(0, 6);
+  const older = releases.slice(6);
+  if (older.length) shown.push({ key: "older", label: plural(older.length, "older release", "older releases"), value: older.reduce((sum, row) => sum + row.value, 0) });
+  bars($("releases"), shown, { empty: "No release downloads counted yet." });
 
   const box = $("homebrew");
   box.replaceChildren(el("h3", { text: "Homebrew installs" }));
   if (homebrew.status === "reported") {
-    box.append(el("div", { className: "counts" }, ["30d", "90d", "365d"].map((period) =>
-      el("div", {}, [el("strong", { text: format(homebrew.counts[period] ?? null) }), el("span", { text: `${period.replace("d", "")} days` })]))));
+    box.append(el("div", { className: "counts" }, ["30d", "90d", "365d"].map((key) =>
+      el("div", {}, [el("strong", { text: format(homebrew.counts[key] ?? null) }), el("span", { text: `${key.replace("d", "")} days` })]))));
   } else if (homebrew.status === "unreported") {
     box.append(
       el("p", { text: "Not reported yet. Homebrew sends install counts for the homebrew-annotator tap. Macs that added the tap with the older two-line command used a custom address, which Homebrew treats as private, so their installs aren't counted." }),
-      el("p", {}, ["Homebrew installs still download the ZIP from GitHub, so they are inside the ZIP count above. Checked ",
+      el("p", {}, ["Homebrew installs still download the Mac ZIP from GitHub, so they are inside the Mac ZIP count above. Checked ",
         dayLabel(homebrew.day), " in Homebrew's public report for ", el("code", { text: "dorlugasigal/annotator/annotator" }), "."]),
     );
   } else box.append(el("p", { text: "The nightly count hasn't checked Homebrew yet." }));
 }
 
-function renderWebsite(week) {
-  const routes = {}, referrers = {}, tracks = {};
-  for (const summary of week) {
-    merge(routes, summary.web.routes);
-    merge(referrers, summary.web.referrers);
-    merge(tracks, summary.web.downloads);
-  }
-  bars($("routes"), ranked(routes, ROUTE_LABELS), { empty: "No visits in the last 7 days." });
-  bars($("referrers"), ranked(referrers, REFERRER_LABELS), { empty: "No visits in the last 7 days." });
-  bars($("tracks"), ranked(tracks, TRACK_LABELS), { empty: "No download clicks in the last 7 days." });
-}
-
-function renderApp(latest) {
-  $("app-note").textContent = latest ? `${dayLabel(latest.day)} (UTC)` : "Latest day";
-  const empty = "No opted-in copy reported that day.";
-  bars($("versions"), ranked(latest?.app.versions), { empty });
-  bars($("os"), ranked(latest?.app.os), { empty });
-  bars($("chips"), ranked(latest?.app.architectures, ARCH_LABELS), { empty });
-}
-
-function renderFeatures(week) {
-  const usage = featureUsage(week);
-  bars($("features"), usage.rows, {
-    max: Math.max(usage.activeDays, 1),
-    value: (row) => [percent.format(row.share), `${number.format(row.value)} of ${number.format(usage.activeDays)}`],
-    empty: usage.activeDays ? "No feature use reported in the last 7 days." : "No opted-in copy was active in the last 7 days.",
+function renderFeatures(data) {
+  const { features } = data;
+  bars($("features"), features.activeDays ? features.rows : [], {
+    max: Math.max(features.activeDays, 1),
+    value: (row) => [percent.format(row.share), row.previousShare === null
+      ? `${number.format(row.value)} of ${number.format(features.activeDays)}`
+      : changeNode(compare(row.share, row.previousShare), { share: true }, "small")],
+    empty: data.hasData ? "No opted-in copy was active in these days." : "No feature use reported yet.",
   });
 }
 
-function renderRetention(summaries) {
+function renderWebsite(data) {
+  const empty = `No visits in these ${data.period.length} days.`;
+  bars($("routes"), data.website.routes, { empty });
+  bars($("referrers"), data.website.referrers, { empty });
+  bars($("tracks"), data.website.tracks, { empty: `No download clicks in these ${data.period.length} days.` });
+}
+
+function renderRetention(data) {
+  $("retention-pooled").replaceChildren(...[["d7", 7], ["d30", 30]].map(([key, days]) => {
+    const pool = data.retention[key];
+    return el("div", { className: "pool" }, [
+      el("strong", { className: pool ? "" : "is-empty", text: pool ? percent.format(pool.rate) : "–" }),
+      el("span", { text: `came back on day ${days}` }),
+      el("small", { text: pool ? `${number.format(pool.retained)} of ${plural(pool.size, "copy", "copies")}` : "No group was checked in these days." }),
+      changeNode(pool?.change ?? null, { share: true }, "small"),
+    ]);
+  }));
   const list = $("retention");
   list.replaceChildren();
-  const rows = retentionRows(summaries);
-  if (!rows.length) {
+  if (!data.cohorts.length) {
     list.append(el("li", { className: "empty", text: "Not enough history yet. The first day-7 result appears a week after a copy first shares counts." }));
     return;
   }
-  rows.forEach((row, index) => {
+  data.cohorts.forEach((row, index) => {
     const fill = el("span", { className: "bar-fill" });
-    fill.style.setProperty("--share", `${Math.max(2, row.rate * 100)}%`);
+    fill.style.setProperty("--share", `${row.rate > 0 ? Math.max(2, row.rate * 100) : 0}%`);
     fill.style.setProperty("--order", String(index));
     list.append(el("li", {}, [
       el("span", { className: "cohort-period" }, [`Day ${row.period}`, el("span", { className: "cohort-when", text: `from ${dayLabel(row.cohort)}` })]),
@@ -367,22 +506,19 @@ function renderHealth(record, generatedAt) {
 
 function render(data) {
   lastData = data;
-  const summaries = data.summaries ?? [];
-  const now = new Date(data.generatedAt);
-  const end = summaries.at(-1)?.day ?? utcDay(now);
-  const latest = summaries.at(-1);
-  const week = summaries.filter((summary) => summary.day > addDays(end, -7));
-  const github = githubDownloads(data.github ?? []);
-  renderPeople(summaries, end);
-  renderTiles(summaries, end, github, data.github ?? []);
-  renderDownloads(github, homebrewInstalls(data.homebrew ?? []));
-  renderWebsite(week);
-  renderApp(latest);
-  renderFeatures(week);
-  renderRetention(summaries);
+  const shown = overview(data, periodLength);
+  renderRange(shown);
+  renderPeople(shown);
+  renderFunnel(shown);
+  renderPlatforms(shown);
+  renderVersions(shown);
+  renderDownloads(shown);
+  renderFeatures(shown);
+  renderWebsite(shown);
+  renderRetention(shown);
   renderHealth(data.health, data.generatedAt);
-  $("freshness").replaceChildren("Loaded ", el("strong", { text: time.format(now) }),
-    latest ? ` · counts to ${dayLabel(latest.day)}` : " · no counts yet");
+  $("freshness").replaceChildren("Loaded ", el("strong", { text: time.format(new Date(data.generatedAt)) }),
+    shown.hasData ? ` · whole days to ${dayLabel(shown.period.end)}` : " · no counts yet");
   document.querySelectorAll(".reveal").forEach((node, index) => node.style.setProperty("--order", String(index)));
 }
 
@@ -427,9 +563,9 @@ async function load(method = "GET") {
 function reportRefresh(body) {
   const at = time.format(new Date(body.generatedAt));
   const github = body.refresh?.github;
-  if (github === "failed") status(`Recounted today at ${at}. GitHub didn't answer (${body.refresh.error}), so downloads are from the last count.`, "warn");
-  else if (github === "recent") status(`Recounted today at ${at}. GitHub downloads were read less than 10 minutes ago.`);
-  else status(`Recounted today and read GitHub downloads at ${at}.`);
+  if (github === "failed") status(`Recounted yesterday and today at ${at}. GitHub didn't answer (${body.refresh.error}), so downloads are from the last count.`, "warn");
+  else if (github === "recent") status(`Recounted yesterday and today at ${at}. GitHub downloads were read less than 10 minutes ago.`);
+  else status(`Recounted yesterday and today, and read GitHub downloads, at ${at}.`);
 }
 
 $("login").addEventListener("submit", async (event) => {
@@ -454,6 +590,13 @@ $("login").addEventListener("submit", async (event) => {
   }
 });
 
+for (const input of document.querySelectorAll('input[name="period"]')) {
+  input.addEventListener("change", () => {
+    periodLength = Number(input.value);
+    history.replaceState(null, "", `#${periodLength}-days`);
+    if (lastData) render(lastData);
+  });
+}
 $("refresh").addEventListener("click", () => load("POST"));
 $("logout").addEventListener("click", async () => {
   try {
