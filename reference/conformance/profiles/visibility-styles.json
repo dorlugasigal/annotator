@@ -197,7 +197,7 @@
     },
     {
       "action" : "properties",
-      "detail" : "Quick controls, full properties or tools only.",
+      "detail" : "Show or hide the properties below the tools.",
       "id" : "properties",
       "label" : "Properties",
       "symbol" : "slider.horizontal.3"

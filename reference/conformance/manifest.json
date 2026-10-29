@@ -764,9 +764,9 @@
       "sha256" : "133586b779d52c9e6115177f71fbb35e32c4d9a1ab14c15856e763bf200993ac"
     },
     {
-      "bytes" : 3635,
+      "bytes" : 3599,
       "path" : "motion/durations.json",
-      "sha256" : "ab31fc73abf1d7420a8d2b64c472d40fd340b8775dc1b67d38dcdeb18ab400d7"
+      "sha256" : "494e3ad5bf1ed7a80fa23f875c79673cbe61ba7051156e9ed532a956f646fb63"
     },
     {
       "bytes" : 93195,
@@ -1089,9 +1089,9 @@
       "sha256" : "1e260eb2975eefdf25debce1064fbbffdd459947437ba7ba728dce68983aef40"
     },
     {
-      "bytes" : 4224,
+      "bytes" : 4222,
       "path" : "profiles/visibility-styles.json",
-      "sha256" : "d441b08156c3f651cf524359e378a8062c26181f9ffe6ce96d62c720f3d2a8b8"
+      "sha256" : "9e8f1ee7a1875009ddfbaacd283b4e4a93b32a55467b3206a0ce7b04b86213a7"
     },
     {
       "bytes" : 614,
@@ -1289,9 +1289,9 @@
       "sha256" : "5552884510daa36d98dfeebefdb1db65c1828080c65a285ac63e92afaec03112"
     },
     {
-      "bytes" : 13579,
+      "bytes" : 13561,
       "path" : "shortcuts/commands.json",
-      "sha256" : "3081246e2fb3c692c618a19a76156a55e77aa6f454c5c6a7757248ec190a8817"
+      "sha256" : "e4849bc92327d8ba69a7cd0c348b9bc08c70295111b4c3b1a4b575ee41604a2c"
     },
     {
       "bytes" : 4645,
@@ -1331,9 +1331,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "e5e918a102f2109b0abdb093d30fec63888bab07",
+    "commit" : "bdffbeff05887f128759600a856899ab98c3a4a7",
     "date" : "2026-10-29",
-    "fingerprint" : "db0c9fdd79e925cca0524c4eeb44701e3905ea541c07c629fe0639baedfc120e",
+    "fingerprint" : "cc70c00369db5fb8d454e463999b1c18d1b36ad6df7aebec5ac7d0eddd6b110e",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

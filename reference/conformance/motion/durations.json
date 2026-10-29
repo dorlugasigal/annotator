@@ -20,7 +20,6 @@
   "spotlightResizeDuration" : 0.12,
   "toolbarCollapseDuration" : 0.3,
   "toolbarExpandDuration" : 0.34,
-  "toolbarExpandHoverDelay" : 0.25,
   "toolbarHideDuration" : 0.28,
   "toolbarMorphIncomingStart" : 0.35,
   "toolbarMorphOutgoingEnd" : 0.5,

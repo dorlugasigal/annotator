@@ -148,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    641,
+    632,
     20.5,
     22.5,
     32.5
@@ -161,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    680,
+    671,
     12,
     60,
     48
@@ -174,7 +174,7 @@
   {
    "enabled": true,
    "frame": [
-    752,
+    743,
     30,
     12,
     12
@@ -187,7 +187,7 @@
   {
    "enabled": false,
    "frame": [
-    782,
+    773,
     30,
     12,
     12
@@ -200,7 +200,7 @@
   {
    "enabled": true,
    "frame": [
-    812,
+    803,
     29,
     12.5,
     14.5
@@ -213,21 +213,21 @@
   {
    "enabled": true,
    "frame": [
-    836,
+    827,
     23,
     24,
     26
    ],
-   "help": "Show full properties",
+   "help": "Hide the properties",
    "identifier": "toolbar-properties",
    "label": "Properties",
    "role": "AXButton",
-   "value": "Quick controls"
+   "value": "Shown"
   },
   {
    "enabled": true,
    "frame": [
-    871,
+    862,
     29,
     14,
     14
@@ -240,7 +240,7 @@
   {
    "enabled": true,
    "frame": [
-    903,
+    894,
     31,
     10.5,
     10.5
@@ -251,134 +251,196 @@
    "role": "AXButton"
   },
   {
-   "enabled": true,
-   "frame": [
-    233,
-    87,
-    55,
-    14
-   ],
-   "role": "AXStaticText",
-   "value": "Rectangle"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    304,
-    89,
-    26.5,
-    10
-   ],
-   "role": "AXStaticText",
-   "value": "Stroke"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    333.5,
-    80,
-    28,
-    28
-   ],
-   "help": "Stroke color",
-   "label": "Stroke color",
-   "role": "AXButton",
-   "value": "#F04538FF"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    371.5,
-    89,
-    12,
-    10
-   ],
-   "role": "AXStaticText",
-   "value": "Fill"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    386.5,
-    80,
-    28,
-    28
-   ],
-   "help": "Transparent fill",
-   "label": "Fill color",
-   "role": "AXButton",
-   "value": "Transparent"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    458,
-    87.5,
-    28.5,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "Width"
-  },
-  {
    "children": [
     {
      "enabled": true,
      "frame": [
+      13.5,
+      108,
+      116,
+      14
+     ],
+     "identifier": "selected-object-context",
+     "role": "AXStaticText",
+     "value": "Editing Rectangle"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143.5,
+      77,
+      65.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Stroke color"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      143.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Stroke color",
+     "label": "Stroke color",
+     "role": "AXButton",
+     "value": "#F04538FF"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      219,
+      77,
+      15.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Fill"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      219,
+      97,
+      36,
+      36
+     ],
+     "help": "Transparent fill",
+     "label": "Fill color",
+     "role": "AXButton",
+     "value": "Transparent"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      270.5,
+      77,
+      51,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Width"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        273,
+        108,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      269,
+      108,
+      96,
+      14
+     ],
+     "label": "Width",
+     "role": "AXSlider",
+     "value": 3
+    },
+    {
+     "enabled": true,
+     "frame": [
+      420.5,
+      77,
+      60.5,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Pattern"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      419,
+      97,
+      36,
+      36
+     ],
+     "help": "Changes to dashed",
+     "label": "Pattern",
+     "role": "AXButton",
+     "value": "Solid"
+    },
+    {
+     "enabled": true,
+     "frame": [
       496,
-      86,
-      20,
+      77,
+      80,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Roughness"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      495,
+      97,
+      36,
+      36
+     ],
+     "help": "Changes to sketchy",
+     "label": "Roughness",
+     "role": "AXButton",
+     "value": "Clean"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      591.5,
+      77,
+      56,
+      14
+     ],
+     "role": "AXStaticText",
+     "value": "Edges"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      590,
+      97,
+      36,
+      36
+     ],
+     "help": "Sharp corners. Click to round them.",
+     "label": "Rounded corners",
+     "role": "AXButton",
+     "value": "Off"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      874,
+      107,
+      37,
       16
      ],
-     "role": "AXValueIndicator"
+     "label": "Selection actions",
+     "role": "AXMenuButton"
     }
    ],
    "enabled": true,
    "frame": [
-    492.5,
-    86,
-    90,
-    16
+    12,
+    77,
+    899,
+    56
    ],
-   "label": "Width",
-   "role": "AXSlider",
-   "value": 3
-  },
-  {
-   "enabled": true,
-   "frame": [
-    588.5,
-    83.5,
-    48,
-    21
-   ],
-   "help": "Width: 1–40 pt",
-   "label": "Precise width",
-   "placeholder": "Width",
-   "role": "AXTextField",
-   "value": "3"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    642.5,
-    87.5,
-    10,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "pt"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    662.5,
-    86,
-    37,
-    16
-   ],
-   "label": "Selection actions",
-   "role": "AXMenuButton"
+   "identifier": "contextual-inspector-viewport",
+   "label": "Tool properties",
+   "role": "AXGroup"
   }
  ],
  "appearance": "dark",
@@ -387,13 +449,13 @@
  "kind": "view",
  "notes": "One shape selected with Select.",
  "pixels": [
-  1864,
-  246
+  1846,
+  290
  ],
  "scale": 2,
  "size": [
-  932,
-  123
+  923,
+  145
  ],
  "spec": [
   "002 design.md",

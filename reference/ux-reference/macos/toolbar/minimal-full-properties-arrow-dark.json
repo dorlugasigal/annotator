@@ -149,7 +149,7 @@
   {
    "enabled": true,
    "frame": [
-    498.5,
+    489.5,
     18.5,
     17.5,
     15
@@ -163,7 +163,7 @@
   {
    "enabled": true,
    "frame": [
-    528,
+    519,
     8,
     46,
     36
@@ -176,7 +176,7 @@
   {
    "enabled": false,
    "frame": [
-    583,
+    574,
     20,
     12,
     12
@@ -189,7 +189,7 @@
   {
    "enabled": false,
    "frame": [
-    609,
+    600,
     20,
     12,
     12
@@ -202,7 +202,7 @@
   {
    "enabled": false,
    "frame": [
-    635,
+    626,
     19,
     12.5,
     14.5
@@ -215,21 +215,21 @@
   {
    "enabled": true,
    "frame": [
-    656,
+    647,
     14,
     22,
     24
    ],
-   "help": "Show tools only",
+   "help": "Hide the properties",
    "identifier": "toolbar-properties",
    "label": "Properties",
    "role": "AXButton",
-   "value": "Full properties"
+   "value": "Shown"
   },
   {
    "enabled": true,
    "frame": [
-    686,
+    677,
     19,
     14,
     14
@@ -242,7 +242,7 @@
   {
    "enabled": true,
    "frame": [
-    714,
+    705,
     21,
     10.5,
     10.5
@@ -497,7 +497,7 @@
    "frame": [
     8,
     61,
-    722,
+    713,
     43.5
    ],
    "identifier": "contextual-inspector-viewport",
@@ -511,12 +511,12 @@
  "kind": "view",
  "notes": "Minimal toolbar: full properties keep the expanded layout, drawn at the minimal button size, on one row.",
  "pixels": [
-  1476,
+  1458,
   225
  ],
  "scale": 2,
  "size": [
-  738,
+  729,
   112.5
  ],
  "spec": [

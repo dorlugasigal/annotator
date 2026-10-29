@@ -2,7 +2,7 @@
   "actions" : [
     {
       "canBeInToolbar" : false,
-      "detail" : "Switch between quick controls, full properties and tools only.",
+      "detail" : "Show or hide the properties below the tools.",
       "id" : "action.properties",
       "isMenu" : false,
       "label" : "Properties",

@@ -71,11 +71,11 @@
       24,
       26
      ],
-     "help": "Show quick controls",
+     "help": "Show the properties",
      "identifier": "toolbar-properties",
      "label": "Properties",
      "role": "AXButton",
-     "value": "Tools only"
+     "value": "Hidden"
     },
     {
      "enabled": true,
@@ -196,7 +196,7 @@
  "background": "none",
  "image": "toolbar/expanded-vertical-tools-only-dark.png",
  "kind": "view",
- "notes": "Expanded toolbar, vertical, tools only. Pen selected.",
+ "notes": "Expanded toolbar, vertical, properties hidden. Pen selected.",
  "pixels": [
   136,
   1144

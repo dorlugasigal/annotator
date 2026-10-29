@@ -148,7 +148,7 @@
   {
    "enabled": true,
    "frame": [
-    641,
+    632,
     20.5,
     22.5,
     32.5
@@ -161,7 +161,7 @@
   {
    "enabled": true,
    "frame": [
-    680,
+    671,
     12,
     60,
     48
@@ -174,7 +174,7 @@
   {
    "enabled": false,
    "frame": [
-    752,
+    743,
     30,
     12,
     12
@@ -187,7 +187,7 @@
   {
    "enabled": false,
    "frame": [
-    782,
+    773,
     30,
     12,
     12
@@ -200,7 +200,7 @@
   {
    "enabled": false,
    "frame": [
-    812,
+    803,
     29,
     12.5,
     14.5
@@ -213,21 +213,21 @@
   {
    "enabled": true,
    "frame": [
-    836,
+    827,
     23,
     24,
     26
    ],
-   "help": "Show full properties",
+   "help": "Hide the properties",
    "identifier": "toolbar-properties",
    "label": "Properties",
    "role": "AXButton",
-   "value": "Quick controls"
+   "value": "Shown"
   },
   {
    "enabled": true,
    "frame": [
-    871,
+    862,
     29,
     14,
     14
@@ -240,7 +240,7 @@
   {
    "enabled": true,
    "frame": [
-    903,
+    894,
     31,
     10.5,
     10.5
@@ -251,71 +251,96 @@
    "role": "AXButton"
   },
   {
-   "enabled": true,
-   "frame": [
-    317.5,
-    84,
-    120,
-    20
-   ],
-   "identifier": "cover-mode",
-   "role": "AXPopUpButton",
-   "value": "Blur"
-  },
-  {
-   "enabled": true,
-   "frame": [
-    445.5,
-    87.5,
-    19.5,
-    13
-   ],
-   "role": "AXStaticText",
-   "value": "Blur"
-  },
-  {
    "children": [
     {
      "enabled": true,
      "frame": [
-      536,
-      87,
-      18,
+      12,
+      87.5,
+      120,
+      20
+     ],
+     "identifier": "cover-mode",
+     "role": "AXPopUpButton",
+     "value": "Blur"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      140,
+      91,
+      19.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Blur"
+    },
+    {
+     "children": [
+      {
+       "enabled": true,
+       "frame": [
+        230.5,
+        90.5,
+        18,
+        14
+       ],
+       "role": "AXValueIndicator"
+      }
+     ],
+     "enabled": true,
+     "frame": [
+      165.5,
+      90.5,
+      90,
       14
      ],
-     "role": "AXValueIndicator"
+     "label": "Blur",
+     "role": "AXSlider",
+     "value": 18
+    },
+    {
+     "enabled": true,
+     "frame": [
+      261.5,
+      87,
+      48,
+      21
+     ],
+     "help": "Blur: 0–100 ",
+     "label": "Precise blur",
+     "placeholder": "Blur",
+     "role": "AXTextField",
+     "value": "18"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      323.5,
+      91,
+      358.5,
+      13
+     ],
+     "role": "AXStaticText",
+     "value": "Blurred details can still be readable. Remove private info before you share."
     }
    ],
    "enabled": true,
    "frame": [
-    471,
-    87,
-    90,
-    14
+    12,
+    77,
+    899,
+    31
    ],
-   "label": "Blur",
-   "role": "AXSlider",
-   "value": 18
-  },
-  {
-   "enabled": true,
-   "frame": [
-    567,
-    83.5,
-    48,
-    21
-   ],
-   "help": "Blur: 0–100 ",
-   "label": "Precise blur",
-   "placeholder": "Blur",
-   "role": "AXTextField",
-   "value": "18"
+   "identifier": "contextual-inspector-viewport",
+   "label": "Tool properties",
+   "role": "AXGroup"
   },
   {
    "enabled": true,
    "frame": [
     13,
-    119,
+    116,
     258,
     13
    ],
@@ -326,7 +351,7 @@
    "enabled": true,
    "frame": [
     13,
-    120.5,
+    117.5,
     8.5,
     10
    ],
@@ -341,13 +366,13 @@
  "kind": "view",
  "notes": "A capture failure warning in the toolbar; effect regions stay opaque.",
  "pixels": [
-  1864,
-  288
+  1846,
+  282
  ],
  "scale": 2,
  "size": [
-  932,
-  144
+  923,
+  141
  ],
  "spec": [
   "002 design.md",
