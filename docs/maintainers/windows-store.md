@@ -613,11 +613,8 @@ In the source repository (`dorlugasigal/annotator`), open
 `windows-store`.
 
 1. **Deployment branches and tags**: if GitHub offers it, allow only `main`.
-2. **Required reviewers**: if GitHub offers it, add yourself. GitHub then waits
-   for your approval before the Store job starts. On a free plan, GitHub
-   offers reviewers for public repositories on every plan, so add yourself.
-   The workflow's own gate also applies: only a run that you start by hand
-   can submit.
+2. **Required reviewers**: leave them off. The workflow's own gate decides:
+   only a run that you start by hand can submit.
 3. **Environment secrets**: add the four secrets from 6.1.
 
 Then, under **Settings** > **Secrets and variables** > **Actions** >

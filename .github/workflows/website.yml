@@ -85,7 +85,7 @@ jobs:
     name: Deploy getannotator.app
     needs: build
     # Off until a maintainer adds the NETLIFY_AUTH_TOKEN secret and the NETLIFY_SITE_ID variable.
-    if: ${{ vars.NETLIFY_SITE_ID != '' && github.ref == 'refs/heads/main' }}
+    if: ${{ vars.NETLIFY_SITE_ID != '' && github.ref == 'refs/heads/main' && github.triggering_actor == github.repository_owner }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: website-publishing

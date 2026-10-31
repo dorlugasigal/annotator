@@ -99,7 +99,7 @@ jobs:
       release-validation: true
   sign:
     needs: [preflight, validate]
-    if: ${{ inputs.notarize && vars.RELEASE_AUTOMATION_ENABLED == 'true' }}
+    if: ${{ inputs.notarize && github.triggering_actor == github.repository_owner && vars.RELEASE_AUTOMATION_ENABLED == 'true' }}
     runs-on: macos-26
     # macOS minutes cost ten times Linux ones. Two Apple waits normally take a few minutes each.
     timeout-minutes: 45
@@ -157,7 +157,7 @@ jobs:
     # The Windows ZIPs join the release when releases/windows.json makes Windows part of releases.
     # windows-package is skipped when Windows is not part of releases, and windows-sign while SignPath signing is off;
     # a failed or cancelled one stops publishing.
-    if: ${{ always() && inputs.publish && vars.PUBLICATION_ENABLED == 'true' && needs.sign.result == 'success' && needs.windows-package.result != 'failure' && needs.windows-package.result != 'cancelled' && needs.windows-sign.result != 'failure' && needs.windows-sign.result != 'cancelled' }}
+    if: ${{ always() && inputs.publish && github.triggering_actor == github.repository_owner && vars.PUBLICATION_ENABLED == 'true' && needs.sign.result == 'success' && needs.windows-package.result != 'failure' && needs.windows-package.result != 'cancelled' && needs.windows-sign.result != 'failure' && needs.windows-sign.result != 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: release-publishing
@@ -221,7 +221,7 @@ jobs:
       MSIX: ${{ needs.preflight.outputs.msix }}
       STORE_READY_REQUIRED: ${{ needs.preflight.outputs.windows-store-ready }}
       # SignPath signs the portable ZIPs only in a run that publishes them, and only once the owner turns it on.
-      SIGN_PORTABLE: ${{ inputs.publish && vars.SIGNPATH_ENABLED == 'true' }}
+      SIGN_PORTABLE: ${{ inputs.publish && github.triggering_actor == github.repository_owner && vars.SIGNPATH_ENABLED == 'true' }}
       DOTNET_CLI_TELEMETRY_OPTOUT: "1"
       DOTNET_NOLOGO: "1"
       PYTHONUTF8: "1"
@@ -318,7 +318,7 @@ jobs:
     name: Windows code signing
     needs: [preflight, windows-package]
     # Off until the owner sets the repository variable SIGNPATH_ENABLED to true (docs/maintainers/signpath.md).
-    if: ${{ inputs.publish && vars.SIGNPATH_ENABLED == 'true' }}
+    if: ${{ inputs.publish && github.triggering_actor == github.repository_owner && vars.SIGNPATH_ENABLED == 'true' }}
     runs-on: windows-2025-vs2026
     # SignPath Foundation waits for the owner to approve each request; see wait-for-completion-timeout-in-seconds.
     timeout-minutes: 45

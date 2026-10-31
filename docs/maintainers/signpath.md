@@ -84,8 +84,9 @@ Store signs it.
    </artifact-configuration>
    ```
 
-3. In GitHub, create the `windows-signing` environment. Add the owner as a
-   required reviewer and allow only the `main` branch. Then add:
+3. In GitHub, create the `windows-signing` environment and allow only the
+   `main` branch. It needs no required reviewers: the signing job runs only in
+   a run the owner started. Then add:
 
    | Name | Kind | Where | Value |
    | --- | --- | --- | --- |
