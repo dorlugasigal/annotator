@@ -51,6 +51,7 @@ public sealed class StoreUpdateService
     private static readonly Lazy<PackageSource> s_source = new(ReadSource);
 
     private StoreContext? _context;
+    private nint _contextOwner;
     private IReadOnlyList<StorePackageUpdate> _updates = [];
 
     /// <summary>Where this copy came from; read once, without the Store.</summary>
@@ -95,6 +96,10 @@ public sealed class StoreUpdateService
     /// <exception cref="InvalidOperationException">This copy was not installed from the Microsoft Store, or no update was found.</exception>
     public async Task<StoreInstallState> InstallAsync(nint owner)
     {
+        if (owner == 0)
+        {
+            throw new InvalidOperationException("Installing a Store update needs a window for Windows' question.");
+        }
         StoreContext context = Context(owner);
         if (_updates.Count == 0)
         {
@@ -115,14 +120,18 @@ public sealed class StoreUpdateService
         _ => StoreInstallState.Failed,
     };
 
-    /// <summary>The Store context for this user, made once and tied to the owner window, as a desktop app's must be.</summary>
+    /// <summary>
+    /// The Store context for this user, tied to <paramref name="owner"/>, as a desktop app's must be. A new owner gets a new
+    /// context: the tray menu's quiet check runs without a window and Settings gets a new window each time it opens, and the
+    /// Store refused to install through a context tied to no window or a closed one ("Invalid window handle").
+    /// </summary>
     private StoreContext Context(nint owner)
     {
         if (Source != PackageSource.Store)
         {
             throw new InvalidOperationException("Only a copy installed from the Microsoft Store can get updates from it.");
         }
-        if (_context is { } context)
+        if (_context is { } context && _contextOwner == owner)
         {
             return context;
         }
@@ -132,6 +141,7 @@ public sealed class StoreUpdateService
             InitializeWithWindow(context, owner);
         }
         _context = context;
+        _contextOwner = owner;
         return context;
     }
 

@@ -22,6 +22,14 @@ public sealed class StoreUpdateServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.InstallAsync(0));
     }
 
+    [Fact]
+    public async Task InstallingNeedsAWindowForWindowsQuestion()
+    {
+        // The tray menu's quiet check has no window; an install through such a context failed with "Invalid window handle".
+        InvalidOperationException install = await Assert.ThrowsAsync<InvalidOperationException>(() => new StoreUpdateService().InstallAsync(0));
+        Assert.Equal("Installing a Store update needs a window for Windows' question.", install.Message);
+    }
+
     [Theory]
     [InlineData(StorePackageUpdateState.Completed, StoreInstallState.Completed)]
     [InlineData(StorePackageUpdateState.Canceled, StoreInstallState.Canceled)]
