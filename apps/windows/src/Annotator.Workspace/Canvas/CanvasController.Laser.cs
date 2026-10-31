@@ -14,6 +14,14 @@ public sealed partial class CanvasController
     private uint? _laserPointer;
     private double _laserTime;
     private Rect? _laserDrawn;
+    private long _laserSampleTime;
+
+    /// <summary>
+    /// The trail keeps at most one position this many milliseconds apart, plus the newest of each event: about as many as
+    /// the Mac gets, one per display frame. Windows gives up to 1,000 a second; every position kept is drawn on every frame
+    /// until it fades, and a stroke keeps at most <see cref="LaserTrail.MaximumSamples"/>, so a long Fade would lose its tail.
+    /// </summary>
+    private const long LaserSampleSpacing = 8;
 
     /// <summary>Whether the laser pointer's trail is still being drawn or fading (Mac isLaserFading).</summary>
     public bool IsLaserFading => LaserMoves;
@@ -29,11 +37,13 @@ public sealed partial class CanvasController
         _laser.Lifetime = Workspace.Preferences.LaserFade ?? LaserTrail.DefaultLifetime;
         _laser.Press(e.Position, now, style.Color, style.Width);
         _laserPointer = e.PointerId;
+        _laserSampleTime = e.Samples[^1].Timestamp;
         StepLaser(now);
     }
 
     /// <summary>
-    /// Mac mouseDragged while the laser draws: the trail follows every sample of the move. While frames already come
+    /// Mac mouseDragged while the laser draws: the trail follows the samples of the move, at most one every
+    /// <see cref="LaserSampleSpacing"/> milliseconds and always the newest. While frames already come
     /// (<see cref="CanvasLiveState.HasTransitions"/>), the next frame draws it, as the Mac's needsDisplay waits for the
     /// display: drawing the whole trail for every pointer message as well kept the overlay thread so busy that Windows
     /// merged the moves into a few long, straight steps.
@@ -41,9 +51,16 @@ public sealed partial class CanvasController
     private void MoveLaser(in PointerEvent e)
     {
         double now = _options.Clock();
-        foreach (PointerSample sample in e.Samples)
+        ReadOnlySpan<PointerSample> samples = e.Samples;
+        for (int index = 0; index < samples.Length; index++)
         {
-            _laser.Move(sample.Position, now);
+            long time = samples[index].Timestamp;
+            if (index < samples.Length - 1 && time - _laserSampleTime < LaserSampleSpacing)
+            {
+                continue;
+            }
+            _laser.Move(samples[index].Position, now);
+            _laserSampleTime = time;
         }
         if (_state.HasTransitions && LaserMoves)
         {

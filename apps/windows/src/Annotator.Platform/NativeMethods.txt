@@ -342,3 +342,4 @@ WinHttpQueryHeaders
 WinHttpCloseHandle
 WinHttpSetTimeouts
 WinHttpSetOption
+GetMouseMovePointsEx
