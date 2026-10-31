@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On Windows, the Laser pointer's trail now follows fast moves smoothly. Before, it could stutter, freeze for a moment and turn curves into long straight lines.
+
 ## 0.2.1 - 2026-10-30
 
 ### Added

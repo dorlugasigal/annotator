@@ -1,6 +1,10 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Fixed": [
+      "On Windows, the Laser pointer's trail now follows fast moves smoothly. Before, it could stutter, freeze for a moment and turn curves into long straight lines."
+    ]
+  },
   "releases": [
     {
       "version": "0.2.1",

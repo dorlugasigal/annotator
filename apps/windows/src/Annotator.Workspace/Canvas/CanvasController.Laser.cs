@@ -32,13 +32,22 @@ public sealed partial class CanvasController
         StepLaser(now);
     }
 
-    /// <summary>Mac mouseDragged while the laser draws: the trail follows every sample of the move.</summary>
+    /// <summary>
+    /// Mac mouseDragged while the laser draws: the trail follows every sample of the move. While frames already come
+    /// (<see cref="CanvasLiveState.HasTransitions"/>), the next frame draws it, as the Mac's needsDisplay waits for the
+    /// display: drawing the whole trail for every pointer message as well kept the overlay thread so busy that Windows
+    /// merged the moves into a few long, straight steps.
+    /// </summary>
     private void MoveLaser(in PointerEvent e)
     {
         double now = _options.Clock();
         foreach (PointerSample sample in e.Samples)
         {
             _laser.Move(sample.Position, now);
+        }
+        if (_state.HasTransitions && LaserMoves)
+        {
+            return;
         }
         StepLaser(now);
     }

@@ -32,8 +32,13 @@ public sealed class CanvasLaserTests
         Assert.Null(canvas.State.Draft);
         h.Now = 100.05;
         h.Move(Main, new Point(140, 100));
+        Assert.True(canvas.State.HasTransitions);
+        Assert.Equal(100.05, canvas.State.LaserTime);
         h.Now = 100.1;
         h.Move(Main, new Point(180, 110));
+        // Frames are running, so the next frame draws this move rather than the pointer message.
+        Assert.Equal(100.05, canvas.State.LaserTime);
+        Assert.True(canvas.AdvanceTransitions(100.1));
         Assert.True(canvas.State.HasTransitions);
         Assert.Equal(100.1, canvas.State.LaserTime);
         LaserTrail.Stroke stroke = Assert.Single(canvas.State.Laser.Strokes);

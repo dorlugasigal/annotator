@@ -39,9 +39,10 @@ public static class LaserTrailRenderer
         {
             return;
         }
+        LaserTrail.Dot[] dots = Simplify(shape.Dots.AsSpan());
         foreach (ref readonly LaserTrail.Pass pass in LaserTrail.Passes)
         {
-            PathData path = Outline(shape.Dots, pass);
+            PathData path = Outline(dots, pass);
             if (path.IsEmpty)
             {
                 continue;
@@ -50,6 +51,99 @@ public static class LaserTrailRenderer
             builder.Add(DisplayItem.FillPath(path, FillRule.NonZero,
                 Paint.Solid(new RGBA(color.Red, color.Green, color.Blue, color.Alpha * pass.Alpha * shape.Opacity))));
         }
+    }
+
+    /// <summary>
+    /// How far, in points, a dot's circle may move when <see cref="Simplify"/> leaves it out: well under the drawing's
+    /// own flattening tolerance at any display scale.
+    /// </summary>
+    public const double SimplifyTolerance = 0.05;
+
+    /// <summary>
+    /// The dots worth drawing, in order. A fast drag leaves a dot every pixel or two, and each one is a circle and a band in
+    /// six layers, so drawing them all on every frame left too little time to read the pointer. A dot within
+    /// <see cref="SimplifyTolerance"/> of the line from the dot before to the dot after (its center and its widest layer's
+    /// radius) is drawn by that line already and is left out. The ends, every empty dot and the dots next to one stay,
+    /// because a layer's radius jumps where a dot's width starts.
+    /// </summary>
+    public static LaserTrail.Dot[] Simplify(ReadOnlySpan<LaserTrail.Dot> dots)
+    {
+        if (dots.Length < 3)
+        {
+            return dots.ToArray();
+        }
+        double widest = 0;
+        foreach (ref readonly LaserTrail.Pass pass in LaserTrail.Passes)
+        {
+            widest = Math.Max(widest, pass.Scale);
+        }
+        var keep = new bool[dots.Length];
+        keep[0] = keep[^1] = true;
+        for (int index = 0; index < dots.Length; index++)
+        {
+            if (!(dots[index].Radius > 0))
+            {
+                keep[index] = true;
+                keep[Math.Max(0, index - 1)] = true;
+                keep[Math.Min(dots.Length - 1, index + 1)] = true;
+            }
+        }
+        var spans = new Stack<(int First, int Last)>();
+        int start = 0;
+        for (int index = 1; index < dots.Length; index++)
+        {
+            if (keep[index])
+            {
+                if (index - start > 1)
+                {
+                    spans.Push((start, index));
+                }
+                start = index;
+            }
+        }
+        while (spans.TryPop(out (int First, int Last) span))
+        {
+            LaserTrail.Dot first = dots[span.First], last = dots[span.Last];
+            Point along = last.Center - first.Center;
+            double length = along.X * along.X + along.Y * along.Y;
+            double farthest = SimplifyTolerance;
+            int split = -1;
+            for (int index = span.First + 1; index < span.Last; index++)
+            {
+                LaserTrail.Dot dot = dots[index];
+                Point offset = dot.Center - first.Center;
+                double share = length > 0 ? Math.Clamp((offset.X * along.X + offset.Y * along.Y) / length, 0, 1) : 0;
+                double error = dot.Center.Distance(first.Center + along * share)
+                    + widest * Math.Abs(dot.Radius - (first.Radius + (last.Radius - first.Radius) * share));
+                if (error > farthest)
+                {
+                    farthest = error;
+                    split = index;
+                }
+            }
+            if (split < 0)
+            {
+                continue;
+            }
+            keep[split] = true;
+            if (split - span.First > 1)
+            {
+                spans.Push((span.First, split));
+            }
+            if (span.Last - split > 1)
+            {
+                spans.Push((split, span.Last));
+            }
+        }
+        var kept = new List<LaserTrail.Dot>(dots.Length);
+        for (int index = 0; index < dots.Length; index++)
+        {
+            if (keep[index])
+            {
+                kept.Add(dots[index]);
+            }
+        }
+        return [.. kept];
     }
 
     /// <summary>One layer's outline: a circle around each dot and a band to the next dot, counterclockwise with y up.</summary>
