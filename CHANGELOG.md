@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On Windows, Check for updates now installs the update from the Microsoft Store. Before, it could say the Store could not install the update after you had opened the tray menu.
+
 ## 0.2.2 - 2026-10-31
 
 ### Fixed
