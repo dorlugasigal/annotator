@@ -176,3 +176,7 @@ PlaySound
 MessageBeep
 ShowCursor
 GetAsyncKeyState
+PeekMessage
+TranslateMessage
+DispatchMessage
+QUEUE_STATUS_FLAGS

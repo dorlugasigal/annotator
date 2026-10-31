@@ -193,6 +193,32 @@ public class LaserTrailTests
         }
     }
 
+    /// <summary>
+    /// Windows only: a fast drag leaves a dot every pixel or two, so the renderer leaves out the dots its neighbours' line
+    /// already draws. Ends, corners, empty dots and the dots next to them stay.
+    /// </summary>
+    [Fact]
+    public void DotsOnTheLineBetweenTheirNeighboursAreLeftOut()
+    {
+        var straight = new LaserTrail.Dot[41];
+        for (int index = 0; index < straight.Length; index++)
+        {
+            straight[index] = new LaserTrail.Dot(new Point(index * 2, 10), 1 + index * 0.05);
+        }
+        straight[0] = straight[0] with { Radius = 0 };
+        LaserTrail.Dot[] kept = LaserTrailRenderer.Simplify(straight);
+        Assert.Equal(new[] { straight[0], straight[1], straight[40] }, kept);
+
+        LaserTrail.Dot[] corner = [.. straight[1..21], .. Enumerable.Range(1, 20).Select(step => new LaserTrail.Dot(new Point(40, 10 + step * 2), 2))];
+        Assert.Equal(new[] { corner[0], corner[19], corner[39] }, LaserTrailRenderer.Simplify(corner));
+
+        LaserTrail.Dot[] widening = [new(new Point(0, 0), 2), new(new Point(10, 0), 6), new(new Point(20, 0), 2)];
+        Assert.Equal(widening, LaserTrailRenderer.Simplify(widening));
+
+        LaserTrail.Dot[] gap = [new(new Point(0, 0), 2), new(new Point(10, 0), 2), new(new Point(20, 0), 0), new(new Point(30, 0), 2), new(new Point(40, 0), 2), new(new Point(50, 0), 2)];
+        Assert.Equal(new[] { gap[0], gap[1], gap[2], gap[3], gap[5] }, LaserTrailRenderer.Simplify(gap));
+    }
+
     [Fact]
     public void ATrailThatFadedDrawsNothing()
     {

@@ -115,6 +115,9 @@ internal sealed class CanvasHarness : IDisposable
 
     private readonly Dictionary<DisplayId, CanvasController> _canvases = [];
     private long _time = 10_000;
+
+    /// <summary>The time stamp of the newest pointer sample sent, in milliseconds.</summary>
+    public long SampleTime => _time;
     private ulong _delivered;
 
     /// <summary>A workspace with only <see cref="MainDisplay"/>.</summary>

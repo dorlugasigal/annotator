@@ -40,6 +40,9 @@ public sealed unsafe class OverlayWindow
     internal const WINDOW_EX_STYLE PassThroughExStyle = WINDOW_EX_STYLE.WS_EX_TRANSPARENT | WINDOW_EX_STYLE.WS_EX_NOACTIVATE;
 
     private const int MaxStackSamples = 32;
+
+    /// <summary>The most positions Windows keeps in its mouse history (GetMouseMovePointsEx).</summary>
+    private const int MouseMoveHistory = 64;
     private const int MousePointerId = 1;
     private const uint PointerModShift = 0x0004;
     private const uint PointerModCtrl = 0x0008;
@@ -61,6 +64,9 @@ public sealed unsafe class OverlayWindow
     private DesktopWindowTarget? _target;
     private PointerButtons _mouseButtons;
     private Vector2 _lastMousePosition;
+
+    /// <summary>The last mouse position delivered while a button is down (screen pixels and Windows' event time), or null.</summary>
+    private (DrawingPoint Point, uint Time)? _mouseTrail;
     private uint _capturedPointerId;
     private bool _trackingMouseLeave;
     private bool _releasingCapture;
@@ -259,6 +265,7 @@ public sealed unsafe class OverlayWindow
                 return default;
 
             case PInvoke.WM_CAPTURECHANGED:
+                _mouseTrail = null;
                 if (!_releasingCapture && _mouseButtons != PointerButtons.None)
                 {
                     _mouseButtons = PointerButtons.None;
@@ -412,6 +419,9 @@ public sealed unsafe class OverlayWindow
             ? stackalloc POINTER_INFO[count]
             : (rented = ArrayPool<POINTER_INFO>.Shared.Rent(count)).AsSpan(0, count);
         Span<PointerSample> samples = count <= MaxStackSamples ? stackalloc PointerSample[count] : new PointerSample[count];
+        Span<PointerSample> filled = type == POINTER_INPUT_TYPE.PT_MOUSE && kind == PointerInputKind.Move
+            ? stackalloc PointerSample[MouseMoveHistory]
+            : default;
         try
         {
             history[0] = info;
@@ -439,8 +449,20 @@ public sealed unsafe class OverlayWindow
                 POINTER_INFO entry = history[count - 1 - i];
                 samples[i] = new PointerSample(ToClient(entry.ptPixelLocation, origin), 0f, entry.dwTime);
             }
+            ReadOnlySpan<PointerSample> delivered = samples[..count];
             if (type == POINTER_INPUT_TYPE.PT_MOUSE)
             {
+                bool held = ButtonsFrom(info.pointerFlags) != PointerButtons.None;
+                if (kind == PointerInputKind.Move && held && _mouseTrail is { } end)
+                {
+                    int older = MouseMovesSince(end, info.ptPixelLocation, info.dwTime, origin, filled);
+                    if (older > 0)
+                    {
+                        filled[older] = samples[count - 1];
+                        delivered = filled[..(older + 1)];
+                    }
+                }
+                _mouseTrail = held && kind is PointerInputKind.Down or PointerInputKind.Move ? (info.ptPixelLocation, info.dwTime) : null;
                 _lastMousePosition = samples[count - 1].Position;
             }
 
@@ -453,13 +475,13 @@ public sealed unsafe class OverlayWindow
                 ChangedButton = ChangedButtonFrom(info.ButtonChangeType),
                 Modifiers = ModifiersFrom(info.dwKeyStates),
                 WheelDelta = wheelDelta,
-                Samples = samples[..count],
+                Samples = delivered,
             };
             _sink.OnPointer(this, in input);
             if (InputLatencyProbe.IsEnabled)
             {
                 InputLatencyProbe.Add(new InputLatencyProbe.Record((long)info.PerformanceCount, dispatch, Stopwatch.GetTimestamp(), info.ptPixelLocation.X,
-                                                                   info.ptPixelLocation.Y, (int)kind, count));
+                                                                   info.ptPixelLocation.Y, (int)kind, delivered.Length));
                 if (kind is PointerInputKind.Up or PointerInputKind.Canceled)
                 {
                     InputLatencyProbe.Flush();
@@ -756,6 +778,58 @@ public sealed unsafe class OverlayWindow
     }
 
     private static Vector2 ToClient(DrawingPoint screen, Vector2 origin) => new Vector2(screen.X, screen.Y) - origin;
+
+    /// <summary>
+    /// The mouse positions Windows recorded after <paramref name="end"/> and before <paramref name="newest"/>, oldest first, in
+    /// <paramref name="output"/>; returns how many. Windows gives a window one move per message, and while the overlay thread
+    /// animates, messages can come a frame or more apart: a fast drag then moves tens of pixels between them, and a laser
+    /// pointer trail or a stroke made of those moves turns into long straight lines. Windows keeps the last 64 positions, so
+    /// the drag keeps its real path. Returns 0 when Windows no longer has <paramref name="newest"/>.
+    /// </summary>
+    private static unsafe int MouseMovesSince((DrawingPoint Point, uint Time) end, DrawingPoint newest, uint time, Vector2 origin,
+                                              Span<PointerSample> output)
+    {
+        Span<MOUSEMOVEPOINT> points = stackalloc MOUSEMOVEPOINT[MouseMoveHistory];
+        // Display points take and give 16-bit coordinates; positions left of or above the main display wrap around.
+        var search = new MOUSEMOVEPOINT { x = newest.X & 0xFFFF, y = newest.Y & 0xFFFF, time = time };
+        int found;
+        fixed (MOUSEMOVEPOINT* buffer = points)
+        {
+            found = PInvoke.GetMouseMovePointsEx((uint)sizeof(MOUSEMOVEPOINT), &search, buffer, MouseMoveHistory,
+                                                 GET_MOUSE_MOVE_POINTS_EX_RESOLUTION.GMMP_USE_DISPLAY_POINTS);
+            if (found <= 0)
+            {
+                // The message's time can differ from the move's; the newest match of the position is the move.
+                search.time = 0;
+                found = PInvoke.GetMouseMovePointsEx((uint)sizeof(MOUSEMOVEPOINT), &search, buffer, MouseMoveHistory,
+                                                     GET_MOUSE_MOVE_POINTS_EX_RESOLUTION.GMMP_USE_DISPLAY_POINTS);
+            }
+        }
+        // The newest entry is the position searched for; an older match than the last delivered move is not this move.
+        if (found <= 1 || unchecked((int)(points[0].time - end.Time)) < 0)
+        {
+            return 0;
+        }
+        int older = 0;
+        for (int index = 1; index < found && older < output.Length - 1; index++)
+        {
+            MOUSEMOVEPOINT point = points[index];
+            int age = unchecked((int)(point.time - end.Time));
+            if (age < 0 || age == 0 && Unwrap(point.x) == end.Point.X && Unwrap(point.y) == end.Point.Y)
+            {
+                break;
+            }
+            older++;
+        }
+        for (int index = 0; index < older; index++)
+        {
+            MOUSEMOVEPOINT point = points[older - index];
+            output[index] = new PointerSample(ToClient(new DrawingPoint(Unwrap(point.x), Unwrap(point.y)), origin), 0f, point.time);
+        }
+        return older;
+
+        static int Unwrap(int coordinate) => coordinate > short.MaxValue ? coordinate - 0x10000 : coordinate;
+    }
 
     private static int LowSigned(LPARAM value) => (short)(value.Value & 0xFFFF);
 

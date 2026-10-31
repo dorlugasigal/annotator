@@ -32,8 +32,13 @@ public sealed class CanvasLaserTests
         Assert.Null(canvas.State.Draft);
         h.Now = 100.05;
         h.Move(Main, new Point(140, 100));
+        Assert.True(canvas.State.HasTransitions);
+        Assert.Equal(100.05, canvas.State.LaserTime);
         h.Now = 100.1;
         h.Move(Main, new Point(180, 110));
+        // Frames are running, so the next frame draws this move rather than the pointer message.
+        Assert.Equal(100.05, canvas.State.LaserTime);
+        Assert.True(canvas.AdvanceTransitions(100.1));
         Assert.True(canvas.State.HasTransitions);
         Assert.Equal(100.1, canvas.State.LaserTime);
         LaserTrail.Stroke stroke = Assert.Single(canvas.State.Laser.Strokes);
@@ -144,6 +149,21 @@ public sealed class CanvasLaserTests
         Assert.True(canvas.State.Laser.IsEmpty);
         Assert.False(canvas.State.HasTransitions);
         Assert.False(canvas.AdvanceTransitions(h.Now + 0.1));
+    }
+
+    [Fact]
+    public void ATrailKeepsAboutOnePositionPerFrame()
+    {
+        using CanvasHarness h = Single();
+        CanvasController canvas = h[Main];
+        h.Choose(Tool.Laser);
+        h.Down(Main, new Point(0, 100));
+        long start = h.SampleTime;
+        // One message with 20 positions a millisecond apart, as Windows' mouse history gives for a fast drag.
+        PointerSample[] fast = [.. Enumerable.Range(1, 20).Select(step => new PointerSample(new Point(step * 5, 100), 1, start + step))];
+        h.Samples(Main, fast);
+        // At most one every 8 ms, and always the newest, so a long Fade keeps its whole trail.
+        Assert.Equal(new[] { 0.0, 40, 80, 100 }, Assert.Single(canvas.State.Laser.Strokes).Samples.Select(sample => sample.Point.X).ToArray());
     }
 
     [Fact]

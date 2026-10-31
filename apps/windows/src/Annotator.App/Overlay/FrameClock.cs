@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 using SystemDispatcherQueue = Windows.System.DispatcherQueue;
 
 namespace Annotator.App.Overlay;
@@ -15,6 +17,7 @@ internal sealed class FrameClock : IDisposable
     /// <summary>The longest wait for one compositor clock tick.</summary>
     private const uint FrameTimeoutMilliseconds = 100;
     private const uint WaitFailed = 0xFFFFFFFF;
+    private const int MaximumInputPerFrame = 64;
 
     private readonly SystemDispatcherQueue _queue;
     private readonly Action<double> _tick;
@@ -111,7 +114,27 @@ internal sealed class FrameClock : IDisposable
         }
         if (running)
         {
+            DispatchWaitingInput();
             _tick(Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency);
+        }
+    }
+
+    /// <summary>
+    /// Handles the pointer and key messages that wait on the overlay thread before the frame. Windows hands out posted
+    /// messages, and so every tick, before input: while an animation ran, the overlays got a pointer move only now and then,
+    /// up to 400 ms apart, though the thread was idle most of the time, so the laser pointer's trail jumped in long straight
+    /// lines. A bounded number per frame, so a flood of input cannot hold the frame up.
+    /// </summary>
+    private static unsafe void DispatchWaitingInput()
+    {
+        // QS_TOUCH and QS_POINTER (0x0800, 0x1000) are missing from the generated flags.
+        const uint Input = (uint)QUEUE_STATUS_FLAGS.QS_INPUT | 0x0800 | 0x1000;
+        var remove = (PEEK_MESSAGE_REMOVE_TYPE)((uint)PEEK_MESSAGE_REMOVE_TYPE.PM_REMOVE | Input << 16);
+        MSG message;
+        for (int count = 0; count < MaximumInputPerFrame && PInvoke.PeekMessage(&message, HWND.Null, 0, 0, remove); count++)
+        {
+            PInvoke.TranslateMessage(&message);
+            PInvoke.DispatchMessage(&message);
         }
     }
 }
