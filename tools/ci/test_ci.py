@@ -46,23 +46,26 @@ class ValidationWorkflowTests(unittest.TestCase):
         self.assertNotIn("== push", RELEASE)
         self.assertNotIn("if:", job(RELEASE, "validate"))
         self.assertNotRegex(job(RELEASE, "preflight").split("steps:")[0], r"\n    if:")
+        owner = {"github.triggering_actor": "github.repository_owner"}
         for flag, name in (("true", True), ("false", False), ("", False)):
             for requested in (True, False):
-                values = {"inputs.notarize": requested, "vars.RELEASE_AUTOMATION_ENABLED": flag}
+                values = {"inputs.notarize": requested, "vars.RELEASE_AUTOMATION_ENABLED": flag, **owner}
                 self.assertEqual(condition(job(RELEASE, "sign"), values), requested and name)
+                self.assertFalse(condition(job(RELEASE, "sign"), {**values, "github.triggering_actor": "someone-else"}))
                 for windows in ("success", "skipped"):
                     for signing in ("success", "skipped"):
                         values = {"inputs.publish": requested, "vars.PUBLICATION_ENABLED": flag,
                                   "needs.sign.result": "success", "needs.windows-package.result": windows,
-                                  "needs.windows-sign.result": signing}
+                                  "needs.windows-sign.result": signing, **owner}
                         self.assertEqual(condition(job(RELEASE, "publish"), values), requested and name)
+                        self.assertFalse(condition(job(RELEASE, "publish"), {**values, "github.triggering_actor": "someone-else"}))
                 for blocked in ({"needs.sign.result": "failure", "needs.windows-package.result": "success"},
                                 {"needs.sign.result": "success", "needs.windows-package.result": "failure"},
                                 {"needs.sign.result": "success", "needs.windows-package.result": "cancelled"},
                                 {"needs.sign.result": "success", "needs.windows-sign.result": "failure"},
                                 {"needs.sign.result": "success", "needs.windows-sign.result": "cancelled"}):
                     values = {"inputs.publish": True, "vars.PUBLICATION_ENABLED": "true",
-                              "needs.windows-package.result": "success", "needs.windows-sign.result": "success", **blocked}
+                              "needs.windows-package.result": "success", "needs.windows-sign.result": "success", **owner, **blocked}
                     self.assertFalse(condition(job(RELEASE, "publish"), values))
 
     def test_hosted_validation_scope(self):
@@ -217,7 +220,7 @@ class WindowsReleaseTests(unittest.TestCase):
             self.assertRegex(job(RELEASE, name), r"timeout-minutes: \d+", name)
 
     def test_signpath_signing_stays_off_until_the_owner_turns_it_on(self):
-        gate = "inputs.publish && vars.SIGNPATH_ENABLED == 'true'"
+        gate = "inputs.publish && github.triggering_actor == github.repository_owner && vars.SIGNPATH_ENABLED == 'true'"
         signing = job(RELEASE, "windows-sign")
         self.assertIn("needs: [preflight, windows-package]", signing)
         self.assertIn(f"if: ${{{{ {gate} }}}}", signing)
@@ -226,7 +229,10 @@ class WindowsReleaseTests(unittest.TestCase):
             self.assertNotIn(override, expression)
         for publish, flag, runs in ((True, "true", True), (True, "", False), (True, "false", False),
                                     (False, "true", False), (False, "", False)):
-            self.assertEqual(condition(signing, {"inputs.publish": publish, "vars.SIGNPATH_ENABLED": flag}), runs)
+            self.assertEqual(condition(signing, {"inputs.publish": publish, "vars.SIGNPATH_ENABLED": flag,
+                                                 "github.triggering_actor": "github.repository_owner"}), runs)
+            self.assertFalse(condition(signing, {"inputs.publish": publish, "vars.SIGNPATH_ENABLED": flag,
+                                                 "github.triggering_actor": "someone-else"}))
         self.assertIn("environment: windows-signing", signing)
         self.assertIn("runs-on: windows-2025-vs2026", signing)
         self.assertIn("persist-credentials: false", signing)
@@ -265,6 +271,15 @@ class WindowsReleaseTests(unittest.TestCase):
 
 @unittest.skipUnless(yaml, "PyYAML is not installed")
 class WorkflowStructureTests(unittest.TestCase):
+    def test_only_the_owner_can_sign_publish_or_deploy(self):
+        # Environments have no required reviewers: only the owner's own runs reach the jobs that hold secrets.
+        website = (ROOT / ".github/workflows/website.yml").read_text()
+        for source, name in ((RELEASE, "sign"), (RELEASE, "publish"), (RELEASE, "windows-sign"), (RELEASE, "windows-store"),
+                             (website, "deploy")):
+            expression = re.search(r"if: \$\{\{ (.+) \}\}", job(source, name)).group(1)
+            self.assertIn("github.triggering_actor == github.repository_owner", expression.split(" || ")[0], name)
+            self.assertNotIn("||", expression, name)
+
     def workflows(self):
         for path in sorted((ROOT / ".github/workflows").glob("*.yml")):
             data = yaml.safe_load(path.read_text())

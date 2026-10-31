@@ -35,8 +35,11 @@ validation workflow.
 | `windows-store` | Release: Store job | Partner Center app credentials |
 | `windows-signing` | Release: Windows signing job | The SignPath token and project settings |
 
-Add the owner as a required reviewer on each environment and allow only the
-`main` branch.
+Allow only the `main` branch on each environment. They need no required
+reviewers: every job that uses their secrets runs only when the owner started
+the run (`github.triggering_actor == github.repository_owner`), and the Release
+workflow starts only from **Run workflow**. A website change merged to `main`
+deploys without waiting.
 
 ### Names
 
