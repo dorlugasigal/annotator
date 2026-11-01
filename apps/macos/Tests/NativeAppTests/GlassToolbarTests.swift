@@ -174,8 +174,8 @@ final class GlassToolbarTests: XCTestCase {
             let pen = try control(host) { $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Pen" }
             let state = "glass \(glass), Reduce transparency \(reduce)"
             if lenses {
-                XCTAssertGreaterThan(try backgroundAlpha(of: smartDraw, in: host), 0.9, "Smart draw is on a solid lens: \(state)")
-                XCTAssertGreaterThan(try backgroundAlpha(of: halo, in: host), 0.9, "The Cursor halo chip is on a solid lens: \(state)")
+                XCTAssertGreaterThan(try backgroundAlpha(of: smartDraw, in: host), 0.5, "Smart draw is on a lens: \(state)")
+                XCTAssertGreaterThan(try backgroundAlpha(of: halo, in: host), 0.5, "The Cursor halo chip is on a lens: \(state)")
                 XCTAssertGreaterThan(try backgroundAlpha(of: pen, in: host), 0.5, "The chosen tool is on a lens: \(state)")
             } else {
                 XCTAssertLessThan(try backgroundAlpha(of: smartDraw, in: host), 0.3, "Smart draw keeps its flat tint: \(state)")

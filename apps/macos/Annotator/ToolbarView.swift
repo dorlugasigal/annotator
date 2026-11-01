@@ -163,6 +163,7 @@ struct ToolbarView: View {
     @Environment(\.openSettings) private var openSettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorScheme) private var colorScheme
     /// Hidden or transitioning toolbars change state at once so their snapshots match what lands.
     private var selectionAnimation: Animation? {
         model.workspaceHidden || model.visibilityAnimating ? nil : Motion.resolve(Motion.snappy, reduceMotion: reduceMotion)
@@ -374,15 +375,15 @@ struct ToolbarView: View {
                             VStack(spacing: 3) {
                                 HStack(spacing: 4) {
                                     Image(systemName: mode.symbol)
-                                    Image(systemName: "xmark").font(.system(size: 8, weight: .bold))
+                                    Image(systemName: "xmark").font(.system(size: 8, weight: .bold)).foregroundStyle(chipWords)
                                 }
-                                Text("\(mode.shortTitle) on").font(.system(size: 9, weight: .medium))
+                                Text("\(mode.shortTitle) on").font(.system(size: 9, weight: .medium)).foregroundStyle(chipWords)
                             }
                         } else {
                             HStack(spacing: 6) {
                                 Image(systemName: mode.symbol)
-                                Text(mode.title).font(.system(size: 11, weight: .medium))
-                                Image(systemName: "xmark").font(.system(size: 9, weight: .bold))
+                                Text(mode.title).font(.system(size: 11, weight: .medium)).foregroundStyle(chipWords)
+                                Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundStyle(chipWords)
                             }
                         }
                     }
@@ -583,8 +584,7 @@ struct ToolbarView: View {
                     .foregroundStyle(on ? (lenses ? onSymbol : Color.accentColor) : .primary)
                     .frame(height: metrics.minimal ? 22 : 24)
                 if metrics.showsKeyLabels {
-                    Image(systemName: "chevron.down").font(.system(size: 7, weight: .semibold))
-                        .foregroundStyle(detailStyle(on: on))
+                    Image(systemName: "chevron.down").font(.system(size: 7, weight: .semibold)).foregroundStyle(.secondary)
                         .frame(height: 12)
                 }
             }
@@ -626,7 +626,7 @@ struct ToolbarView: View {
                     .foregroundStyle(on ? (lenses ? onSymbol : Color.accentColor) : .primary)
                     .frame(height: metrics.minimal ? 22 : 24)
                 if metrics.showsKeyLabels {
-                    Text(key.isEmpty ? " " : key).font(.system(size: 10)).foregroundStyle(detailStyle(on: on))
+                    Text(key.isEmpty ? " " : key).font(.system(size: 10)).foregroundStyle(.secondary)
                 }
             }
             .frame(width: metrics.buttonWidth, height: metrics.buttonHeight)
@@ -662,11 +662,9 @@ struct ToolbarView: View {
     }
 
     /// The symbol of a button that's on, on its lens.
-    private var onSymbol: Color { ToolbarLens.onForeground }
-    /// Key labels and the menu mark under a symbol that's on, on its lens. Elsewhere they stay secondary.
-    private func detailStyle(on: Bool) -> AnyShapeStyle {
-        on && lenses ? AnyShapeStyle(ToolbarLens.onDetail) : AnyShapeStyle(.secondary)
-    }
+    private var onSymbol: Color { ToolbarLens.onForeground(dark: colorScheme == .dark) }
+    /// A mode chip's words and stop mark: the primary color on a lens, so they read easily; elsewhere the chip's blue.
+    private var chipWords: Color { lenses ? .primary : .accentColor }
 
     private func toolButton(_ tool: Tool) -> some View {
         let diagram = model.tool.isShape && ![Tool.rectangle, .ellipse, .diamond].contains(model.tool)
@@ -829,12 +827,11 @@ private struct ToolbarSurface: ViewModifier {
 }
 
 /// A chosen or switched-on button on the glass toolbar (WIN-UI-09). A flat tint gets lost in what shows through the
-/// glass, so these buttons sit on a raised lens instead: a body, a bright top edge and a soft shadow. The chosen tool's
-/// lens is clear and slides between tools; anything that's on gets a solid accent lens with white symbols, so it can't
-/// be mistaken for the chosen tool.
+/// glass, so these buttons sit on a raised lens instead: a light body, a bright top edge and a soft shadow. Every lens
+/// looks the same; color stays small: a faint tint, blue symbols for anything that's on and the green dot for Draw.
 struct ToolbarLens: View {
     enum Role: Equatable {
-        /// The chosen tool, with a hint of the accent color.
+        /// The chosen tool. It slides between tools and steps back while apps get the clicks.
         case chosen
         /// Apps get the clicks.
         case neutral
@@ -844,52 +841,39 @@ struct ToolbarLens: View {
         case state(Color)
     }
 
-    /// White symbols and words on the accent lens of something that's on.
-    static let onForeground = Color.white
-    /// Key labels and the menu mark under them.
-    static let onDetail = Color.white.opacity(0.75)
-
     var role: Role
     var radius: CGFloat
     /// While your apps get the clicks, the chosen tool's lens steps back.
     var dimmed = false
     @Environment(\.colorScheme) private var colorScheme
 
+    /// The symbol on a lens for something that's on: the accent color, lightened by 35% in Dark so it stays readable.
+    static func onForeground(dark: Bool) -> Color {
+        guard dark else { return .accentColor }
+        return Color(nsColor: NSColor.controlAccentColor.blended(withFraction: 0.35, of: .white) ?? .controlAccentColor)
+    }
+
     var body: some View {
         let dark = colorScheme == .dark
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-        Group {
-            if role == .on {
-                shape.fill(Color.accentColor)
-                    .overlay {
-                        shape.fill(LinearGradient(colors: [.white.opacity(dark ? 0.20 : 0.28), .white.opacity(0)],
-                                                  startPoint: .top, endPoint: .center))
-                    }
-                    .overlay {
-                        shape.strokeBorder(LinearGradient(colors: [.white.opacity(dark ? 0.45 : 0.60), .white.opacity(0.08)],
-                                                          startPoint: .top, endPoint: .bottom), lineWidth: 1)
-                    }
-            } else {
-                shape.fill(LinearGradient(colors: [.white.opacity(dark ? 0.26 : 0.82), .white.opacity(dark ? 0.10 : 0.50)],
-                                          startPoint: .top, endPoint: .bottom))
-                    .overlay { if let tint { shape.fill(tint.color.opacity(dark ? tint.dark : tint.light)) } }
-                    .overlay {
-                        shape.strokeBorder(LinearGradient(colors: [.white.opacity(dark ? 0.55 : 0.95), .white.opacity(dark ? 0.06 : 0.25)],
-                                                          startPoint: .top, endPoint: .bottom), lineWidth: 1)
-                    }
+        shape.fill(LinearGradient(colors: [.white.opacity(dark ? 0.26 : 0.82), .white.opacity(dark ? 0.10 : 0.50)],
+                                  startPoint: .top, endPoint: .bottom))
+            .overlay { if let tint { shape.fill(tint.color.opacity(dark ? tint.dark : tint.light)) } }
+            .overlay {
+                shape.strokeBorder(LinearGradient(colors: [.white.opacity(dark ? 0.55 : 0.95), .white.opacity(dark ? 0.06 : 0.25)],
+                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
             }
-        }
-        .shadow(color: .black.opacity(dark ? 0.35 : 0.16), radius: 3, y: 1.5)
-        .opacity(dimmed ? 0.5 : 1)
-        .accessibilityHidden(true)
+            .shadow(color: .black.opacity(dark ? 0.35 : 0.16), radius: 3, y: 1.5)
+            .opacity(dimmed ? 0.5 : 1)
+            .accessibilityHidden(true)
     }
 
-    /// The color over a clear lens, and how much of it shows in Light and Dark.
+    /// The faint color in the lens body, and how much of it shows in Light and Dark.
     private var tint: (color: Color, light: Double, dark: Double)? {
         switch role {
-        case .chosen: (.accentColor, 0.10, 0.18)
-        case .neutral, .on: nil
-        case .state(let color): (color, 0.28, 0.38)
+        case .chosen, .on: (.accentColor, 0.10, 0.18)
+        case .neutral: nil
+        case .state(let color): (color, 0.12, 0.16)
         }
     }
 }
