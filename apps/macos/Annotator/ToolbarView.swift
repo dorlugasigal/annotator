@@ -145,6 +145,8 @@ struct ToolbarView: View {
     /// window's edges while the window animates to a new size (`ToolbarWindowLayout`).
     var fillsWindow = false
     private var tools: [Tool] { model.toolbarTools }
+    /// Glass toolbar shows only in the real toolbar window; previews, such as the one in Settings, stay solid.
+    private var glass: Bool { !drawsChrome && model.preferences.glass == true }
     private var items: [ShortcutCommand] { model.toolbarItems }
     @State private var libraryOpen = false
     @State private var librarySection = ToolLibrarySection.shapes
@@ -254,11 +256,11 @@ struct ToolbarView: View {
                 HStack(alignment: .top, spacing: 8) {
                     verticalRail.frame(width: metrics.buttonWidth).padding(metrics.padding)
                         .environment(\.layoutDirection, .leftToRight)
-                        .modifier(ToolbarSurface())
+                        .modifier(ToolbarSurface(glass: glass))
                         .accessibilityElement(children: .contain)
                         .accessibilityLabel("Drawing tool rail")
                     if showsModeStrip {
-                        activeModeStrip.padding(12).modifier(ToolbarSurface())
+                        activeModeStrip.padding(12).modifier(ToolbarSurface(glass: glass))
                             .environment(\.layoutDirection, .leftToRight)
                     }
                     if expanded {
@@ -270,7 +272,7 @@ struct ToolbarView: View {
                         .padding(12)
                         .frame(width: verticalPropertyWidth)
                         .fixedSize(horizontal: false, vertical: true)
-                        .modifier(ToolbarSurface())
+                        .modifier(ToolbarSurface(glass: glass))
                         .accessibilityElement(children: .contain)
                         .accessibilityLabel("Attached tool properties")
                         .accessibilityIdentifier("attached-tool-properties")
@@ -781,10 +783,20 @@ struct ToolbarView: View {
 }
 
 private struct ToolbarSurface: ViewModifier {
+    var glass = false
+
     func body(content: Content) -> some View {
         content
-            .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 15))
-            .overlay { RoundedRectangle(cornerRadius: 15).strokeBorder(Color.primary.opacity(0.07)) }
+            .background {
+                if glass {
+                    ToolbarChromeBackground(cornerRadius: 15, glass: true).accessibilityHidden(true)
+                } else {
+                    RoundedRectangle(cornerRadius: 15).fill(Color(nsColor: .windowBackgroundColor))
+                }
+            }
+            .overlay {
+                if !glass { RoundedRectangle(cornerRadius: 15).strokeBorder(Color.primary.opacity(0.07)) }
+            }
     }
 }
 

@@ -1259,6 +1259,7 @@ final class ToolbarContentView: NSView {
         addSubview(host)
         changes = model.$preferences.combineLatest(model.$toolbarCollapsed).sink { [weak self] preferences, collapsed in
             self?.state = (preferences.toolbarOrientation == .vertical, preferences.toolbarSize == .minimal, collapsed)
+            self?.chrome.glass = preferences.glass == true
             self?.refreshChrome()
         }
     }
