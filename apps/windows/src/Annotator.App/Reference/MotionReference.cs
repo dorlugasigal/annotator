@@ -40,6 +40,9 @@ internal sealed record MotionReferenceRequest(VisibilityAnimationStyle Style, Pi
     /// </summary>
     public MacLiveTake? Take { get; init; }
 
+    /// <summary><c>--glass</c>: the sample board's hide and show with Glass toolbar on (WIN-UI-09).</summary>
+    public bool Glass { get; init; }
+
     public static MotionReferenceRequest Parse(IReadOnlyList<string> args)
     {
         var style = VisibilityAnimationStyle.FromRawValue(Value(args, Switch))
@@ -72,6 +75,7 @@ internal sealed record MotionReferenceRequest(VisibilityAnimationStyle Style, Pi
             Array.IndexOf([.. args], "--reduce-motion") >= 0, Option(args, "--theme") == "dark", Math.Clamp(objects, 0, 64))
         {
             Take = take,
+            Glass = Array.IndexOf([.. args], "--glass") >= 0,
         };
     }
 
@@ -168,7 +172,12 @@ internal sealed partial class MotionReferenceHost
         var scale = monitor.Scale;
         var bounds = new CoreRect(area.Left, area.Top, area.Width, area.Height);
         var display = new DisplayDescriptor(new Annotator.Workspace.DisplayId(DisplayName), bounds, bounds, scale);
-        var preferences = new WorkspacePreferences { VisibilityAnimationStyle = _request.Style, AnimateVisibility = true };
+        var preferences = new WorkspacePreferences
+        {
+            VisibilityAnimationStyle = _request.Style,
+            AnimateVisibility = true,
+            Glass = _request.Glass ? true : null,
+        };
         var model = new WorkspaceModel(new WorkspaceOptions
         {
             Displays = () => [display],

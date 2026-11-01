@@ -39,6 +39,8 @@
                     <SolidColorBrush x:Key="AnnotatorControlSelectedFillBrush" Color="#14000000" />
                     <SolidColorBrush x:Key="AnnotatorControlStrokeBrush" Color="#29000000" />
                     <SolidColorBrush x:Key="AnnotatorAccentBrush" Color="{ThemeResource AnnotatorAccentColor}" />
+                    <!-- Glass toolbar's symbols that are on, on their lens (WIN-UI-09): the accent. -->
+                    <SolidColorBrush x:Key="AnnotatorLensAccentBrush" Color="{ThemeResource AnnotatorAccentColor}" />
                     <SolidColorBrush x:Key="AnnotatorSelectionFillBrush" Color="{ThemeResource AnnotatorAccentColor}" Opacity="0.17" />
                     <SolidColorBrush x:Key="AnnotatorBoardFillBrush" Color="{ThemeResource AnnotatorAccentColor}" Opacity="0.15" />
                     <SolidColorBrush x:Key="AnnotatorModeStripFillBrush" Color="{ThemeResource AnnotatorAccentColor}" Opacity="0.13" />
@@ -94,6 +96,9 @@
                     <SolidColorBrush x:Key="AnnotatorControlSelectedFillBrush" Color="#14FFFFFF" />
                     <SolidColorBrush x:Key="AnnotatorControlStrokeBrush" Color="#29FFFFFF" />
                     <SolidColorBrush x:Key="AnnotatorAccentBrush" Color="{ThemeResource AnnotatorAccentColor}" />
+                    <!-- Glass toolbar's symbols that are on, on their lens (WIN-UI-09): the accent mixed 35% toward white, so
+                         it stays readable on the dark glass. -->
+                    <SolidColorBrush x:Key="AnnotatorLensAccentBrush" Color="#FF59A9FF" />
                     <SolidColorBrush x:Key="AnnotatorSelectionFillBrush" Color="{ThemeResource AnnotatorAccentColor}" Opacity="0.17" />
                     <SolidColorBrush x:Key="AnnotatorBoardFillBrush" Color="{ThemeResource AnnotatorAccentColor}" Opacity="0.15" />
                     <SolidColorBrush x:Key="AnnotatorModeStripFillBrush" Color="{ThemeResource AnnotatorAccentColor}" Opacity="0.13" />
@@ -143,6 +148,7 @@
                     <SolidColorBrush x:Key="AnnotatorControlSelectedFillBrush" Color="{ThemeResource SystemColorWindowColor}" />
                     <SolidColorBrush x:Key="AnnotatorControlStrokeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
                     <SolidColorBrush x:Key="AnnotatorAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="AnnotatorLensAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
                     <SolidColorBrush x:Key="AnnotatorSelectionFillBrush" Color="{ThemeResource SystemColorWindowColor}" />
                     <SolidColorBrush x:Key="AnnotatorBoardFillBrush" Color="{ThemeResource SystemColorWindowColor}" />
                     <SolidColorBrush x:Key="AnnotatorModeStripFillBrush" Color="{ThemeResource SystemColorWindowColor}" />
@@ -247,6 +253,10 @@
             <Style x:Key="AnnotatorAccentText" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{ThemeResource AnnotatorAccentBrush}" />
             </Style>
+            <!-- Words that are on, on Glass toolbar's lens (WIN-UI-09). -->
+            <Style x:Key="AnnotatorLensAccentText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{ThemeResource AnnotatorLensAccentBrush}" />
+            </Style>
             <Style x:Key="AnnotatorOrangeText" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{ThemeResource AnnotatorOrangeBrush}" />
             </Style>
@@ -296,6 +306,14 @@
             <Style x:Key="AnnotatorGlyphOnColorFilled" TargetType="Path">
                 <Setter Property="Stroke" Value="#FFFFFFFF" />
                 <Setter Property="Fill" Value="#FFFFFFFF" />
+            </Style>
+            <!-- Symbols that are on, on Glass toolbar's lens (WIN-UI-09). -->
+            <Style x:Key="AnnotatorGlyphLensAccent" TargetType="Path">
+                <Setter Property="Stroke" Value="{ThemeResource AnnotatorLensAccentBrush}" />
+            </Style>
+            <Style x:Key="AnnotatorGlyphLensAccentFilled" TargetType="Path">
+                <Setter Property="Stroke" Value="{ThemeResource AnnotatorLensAccentBrush}" />
+                <Setter Property="Fill" Value="{ThemeResource AnnotatorLensAccentBrush}" />
             </Style>
             <Style x:Key="AnnotatorGlyphError" TargetType="Path">
                 <Setter Property="Stroke" Value="{ThemeResource AnnotatorErrorBrush}" />

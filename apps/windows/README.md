@@ -91,7 +91,8 @@ unavailable while the label follows the stroke, a palette color gives the
 label its own paint, and Match outline makes it follow the stroke again;
 Escape closes the popover and commits the label); Settings (Ctrl+, opens it
 on General with the keyboard; the share style switch and the theme change the
-in-memory profile; Share usage counts shows off and unavailable; About and
+in-memory profile; Glass toolbar turns on and stays on for the rest of the
+check, the idle measurement included; Share usage counts shows off and unavailable; About and
 Permissions show, and About's Check for updates asks before installing while
 the canvas has drawings, with the check's fixed Store answers (it never calls
 the Microsoft Store); the Pointer tab's Show halo turns

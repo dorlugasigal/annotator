@@ -35,6 +35,7 @@ internal sealed partial class GeneralPage
     private readonly SettingsSwitch _tray = new(SettingsCopy.ShowTrayIcon);
     private readonly SettingsSwitch _share = new(SettingsCopy.ShareStyles);
     private readonly SettingsSwitch _tips = new(SettingsCopy.ShowTips);
+    private readonly SettingsSwitch _glass = new(SettingsCopy.GlassToolbar);
     private readonly SettingsSwitch _usageSwitch = new(SettingsCopy.ShareUsageCounts);
     private readonly FormText _usageStatus;
     private readonly Annotator.Workspace.Metrics.UsageMetrics _usage;
@@ -52,11 +53,14 @@ internal sealed partial class GeneralPage
         _tray.Toggled += visible => Act(() => actions.Model.SetTrayIconVisible(visible));
         _share.Toggled += shared => Act(() => actions.Model.SetShareToolStyles(shared));
         _tips.Toggled += visible => Act(() => actions.Model.SetShortcutHints(visible));
+        _glass.Toggled += on => Act(() => actions.Model.SetGlass(on));
         AutomationProperties.SetAutomationId(_share, "share-tool-styles");
+        AutomationProperties.SetAutomationId(_glass, "glass-toolbar");
         _theme.Chosen += index => Act(() => actions.Model.SetTheme(s_themes[index].Theme));
         _animation.Chosen += index => Act(() => actions.Model.SetAnimationStyle(s_animations[index].Style));
         SettingsHelp.Set(_tray, SettingsCopy.ShowTrayIconHelp);
         SettingsHelp.Set(_theme, SettingsCopy.ThemeHelp);
+        SettingsHelp.Set(_glass, SettingsCopy.GlassToolbarHelp);
         SettingsHelp.Set(_tips, SettingsCopy.ShowTipsHelp);
         SettingsHelp.Set(_animation, SettingsCopy.WorkspaceAnimationHelp);
         var introduction = new SettingsButton(SettingsCopy.ShowTutorial, ButtonLook.Bordered, SettingsWidths.Button(SettingsCopy.ShowTutorial));
@@ -80,6 +84,7 @@ internal sealed partial class GeneralPage
         form.Children.Add(SettingsForm.Card(
         [
             SettingsForm.PopUp(SettingsCopy.Theme, _theme),
+            SettingsForm.Toggle(SettingsCopy.GlassToolbar, _glass),
             SettingsForm.Toggle(SettingsCopy.ShowTips, _tips),
             SettingsForm.PopUp(SettingsCopy.WorkspaceAnimation, _animation),
             SettingsForm.Single(Indented(SettingsLabel.Make("eye.slash", SettingsCopy.HidingHidesCovers, 10, "AnnotatorPrimaryText", "AnnotatorGlyph", 11, 4))),
@@ -164,6 +169,7 @@ internal sealed partial class GeneralPage
         _tray.IsOn = preferences.ShowMenuBarIcon ?? true;
         _share.IsOn = preferences.ShareToolStyles == true;
         _tips.IsOn = preferences.ShowShortcutHints ?? true;
+        _glass.IsOn = preferences.Glass == true;
         _theme.ChosenIndex = ThemeIndex(preferences);
         _animation.ChosenIndex = AnimationIndex(preferences);
     }

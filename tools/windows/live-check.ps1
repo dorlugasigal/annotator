@@ -40,7 +40,8 @@
     screen recording settings (the packaged flow needs a registered package; see the README's screen access notes);
   - Settings (WIN-UI-03): Ctrl+, on the canvas opens Settings on General with the keyboard and the app icon in its title
     bar; Share style between tools and
-    the theme (Dark, then System) change the in-memory profile; Share usage counts is off and unavailable with the
+    the theme (Dark, then System) change the in-memory profile; Glass toolbar (WIN-UI-09) turns on, and the rest of the
+    check, the idle measurement included, uses the glass toolbar; Share usage counts is off and unavailable with the
     Windows words (WIN-PRV-01); the About and Permissions tabs show; About's Check for updates (WIN-SYS-03) asks before
     installing while the canvas has drawings, and Not now and Install update end as the live check's fixed Store answers
     (it never calls the Microsoft Store); the Pointer tab's
@@ -1234,6 +1235,10 @@ try {
         Check 'settings-theme-dark' (WaitFor { (PopUpValue 'Theme' $settings) -eq 'Dark' }) "Theme: '$(PopUpValue 'Theme' $settings)'"
         ChooseTheme 'System' $settings
         Check 'settings-theme-system' (WaitFor { (PopUpValue 'Theme' $settings) -eq 'System' } 4000) "Theme: '$(PopUpValue 'Theme' $settings)'"
+        # Glass toolbar (WIN-UI-09): the switch under Theme. It stays on, so the toolbar's later clicks, drags and the idle
+        # measurement run on the glass.
+        Note "click Glass toolbar: $(ClickTyped 'Glass toolbar' ([Windows.Automation.ControlType]::CheckBox) $settings)"
+        Check 'settings-glass-toolbar-on' (WaitFor { Toggled 'Glass toolbar' $settings }) "on: $(Toggled 'Glass toolbar' $settings)"
         Note "click About: $(ClickTyped 'About' ([Windows.Automation.ControlType]::TabItem) $settings)"
         Check 'settings-about-tab' (WaitFor { (Chosen $settings 'About') -and $null -ne (Find 'Annotator app icon' $settings) }) "About chosen: $(Chosen $settings 'About')"
         # Check for updates (WIN-SYS-03): the live check's Store has an update, never installs it and never calls Windows. The

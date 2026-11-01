@@ -151,6 +151,8 @@ internal sealed partial class AppHost
         ApplyAppearance(_model.Snapshot);
         // Windows that stay open follow a contrast theme or a text size the person turns on later (WIN-A11Y-03).
         AppResources.WatchSystem(_queue);
+        // A glass toolbar follows Transparency effects and the energy saver (WIN-UI-09).
+        Transparency.Watch(_queue);
         // Launch at sign-in reads the package's startup task; the live check never touches it (WIN-SYS-01).
         _launch = new LaunchAtSignIn(check is not null ? new FixedStartupTask(LaunchAtSignInState.NotPackaged)
             : BuildInfo.IsPortable ? new RunKeyStartupTask() : new WindowsStartupTask(),

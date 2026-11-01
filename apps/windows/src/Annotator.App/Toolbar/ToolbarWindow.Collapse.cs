@@ -118,10 +118,20 @@ internal sealed partial class ToolbarWindow
     /// <summary>What else keeps the toolbar from shrinking, from the app (Mac toolbarMustStayOpen).</summary>
     public Func<bool>? HoldsOpen { get; init; }
 
-    /// <summary>The new face fades in after the toolbar shrinks or opens (Reduce Motion keeps the short fade).</summary>
+    /// <summary>
+    /// The new face fades in after the toolbar shrinks or opens (Reduce Motion keeps the short fade). With Glass toolbar the
+    /// material shows at once and the layers over it fade in, since Windows doesn't blur a material that is fading.
+    /// </summary>
     private void RevealMorph()
     {
-        if (_root.Children.Count > 0 && _root.Children[0] is FrameworkElement face)
+        if (_glassSurfaces.Count > 0)
+        {
+            foreach (GlassSurface glass in _glassSurfaces)
+            {
+                PropertiesReveal.Start(glass.Layer);
+            }
+        }
+        else if (_face is { } face)
         {
             PropertiesReveal.Start(face);
         }

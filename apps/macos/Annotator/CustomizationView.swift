@@ -101,6 +101,9 @@ struct CustomizationView: View {
                     Text("Dark").tag(AppTheme.dark)
                 }
                 .help("Changes app controls and windows, not your drawings.")
+                Toggle("Glass toolbar", isOn: Binding(get: { model.preferences.glass == true }, set: { model.setGlass($0) }))
+                    .accessibilityIdentifier("glass-toolbar")
+                    .help("Your desktop and drawings show softly through the toolbar. When Reduce transparency is on in System Settings, the toolbar stays solid.")
                 Toggle("Show tips on screen", isOn: Binding(get: { model.preferences.showShortcutHints ?? true }, set: { model.setShortcutHints($0) }))
                     .help("Tips in the top-left corner show your keys and what to do next while you draw.")
                 Picker("Workspace animation", selection: Binding(

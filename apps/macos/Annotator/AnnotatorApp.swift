@@ -1026,6 +1026,18 @@ final class InspectorPanel: AnnotationPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
+    /// AppKit draws Liquid Glass in full (clear, with refraction and a bright edge) only in windows that look active, and
+    /// the toolbar rarely has the keyboard: the canvas or your other apps do. While Glass toolbar shows, this private
+    /// AppKit hook keeps the toolbar looking active without taking the keyboard. If a later macOS stops asking, the glass
+    /// falls back to its flatter inactive look and nothing else changes.
+    @objc func _hasActiveAppearanceIgnoringKeyFocus() -> Bool {
+        if #available(macOS 26, *), (contentView as? ToolbarContentView)?.chrome.showsGlass == true { return true }
+        let selector = #selector(_hasActiveAppearanceIgnoringKeyFocus)
+        guard let inherited = class_getInstanceMethod(AnnotationPanel.self, selector) else { return isKeyWindow }
+        typealias Getter = @convention(c) (AnyObject, Selector) -> Bool
+        return unsafeBitCast(method_getImplementation(inherited), to: Getter.self)(self, selector)
+    }
+
     override func performDrag(with event: NSEvent) {
         beginToolbarDrag(at: convertPoint(toScreen: event.locationInWindow))
     }
@@ -1257,10 +1269,25 @@ final class ToolbarContentView: NSView {
         wantsLayer = true
         addSubview(chrome)
         addSubview(host)
+        chrome.onGlassChanged = { [weak self] in self?.refreshShadow() }
         changes = model.$preferences.combineLatest(model.$toolbarCollapsed).sink { [weak self] preferences, collapsed in
             self?.state = (preferences.toolbarOrientation == .vertical, preferences.toolbarSize == .minimal, collapsed)
+            self?.chrome.glass = preferences.glass == true
             self?.refreshChrome()
         }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        refreshShadow()
+    }
+
+    /// The window's shadow draws a crisp dark line around the translucent glass, so glass goes without it; its own light
+    /// edge outlines the toolbar.
+    private func refreshShadow() {
+        guard let window, window.hasShadow == chrome.showsGlass else { return }
+        window.hasShadow = !chrome.showsGlass
+        window.invalidateShadow()
     }
 
     static func toolbar(model: WorkspaceModel, availableSize: CGSize) -> ToolbarView {

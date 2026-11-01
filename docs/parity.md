@@ -400,8 +400,8 @@ platform that departs from the specifications, unless an ADR changes them.
   tool targets, 34 for Minimal, a 15-point corner radius, and the same
   controls, states and separators. Only a screen narrower than 700 points
   (420 for Minimal) moves the buttons to a second row. The background is the
-  theme's window background color rather than Acrylic, so live and snapshot
-  appearances are identical. Every one of the toolbar's own buttons can be
+  theme's window background color, so live and snapshot appearances are
+  identical, unless Glass toolbar is on (WIN-UI-09). Every one of the toolbar's own buttons can be
   turned off in Settings without leaving a gap. Properties are shown or
   hidden, and stay on one row: the toolbar grows sideways to fit them. After
   the delay chosen in Settings, the toolbar shrinks to one capsule with the
@@ -444,6 +444,36 @@ platform that departs from the specifications, unless an ADR changes them.
   contrast themes change app window colors and never annotation colors.
 - **WIN-UI-08**: The Applications move offer is N/A: Windows installs MSIX
   packages in a managed location.
+- **WIN-UI-09**: Glass toolbar (Settings > General > Appearance, off by
+  default, saved as `glass`) draws the toolbar, its properties and the
+  one-button toolbar on the system's glass material instead of the window
+  background color, in Light and Dark. The Mac uses Liquid Glass on macOS 26
+  and later and a behind-window blur on macOS 14 and 15; Windows uses
+  Acrylic clipped to the same shapes, with a light rim drawn on top. Both
+  keep the toolbar's size and shapes, keep labels readable over white,
+  black or busy screens (the Mac mixes in 25% of the window background
+  color; Windows sets the glass to the theme's brightness, a light or dark
+  gray, which gives the same colors), keep the solid toolbar's hairline
+  edge, drop the window shadow, and keep the glass in its active look while
+  another window has the keyboard. When Reduce transparency (Mac) or
+  Transparency effects off, a contrast theme or the energy saver (Windows)
+  asks for it, the toolbar is solid again, at once.
+  Only system materials are used: no screen capture, permission or extra
+  rendering work (DV-14).
+  On glass, a flat tint gets lost, so the chosen tool and anything that's on
+  sit on the same raised lens (`ToolbarLens`), in the button's own size and
+  radius: a white body (82% → 50% Light, 26% → 10% Dark, top to bottom), a
+  1 px white rim (95% → 25%, 55% → 6%) and a shadow (black 16% Light, 35%
+  Dark, blur 3, y +1.5). Color stays small. The lenses of the chosen tool
+  and of anything that's on add 10% (Light) or 18% (Dark) accent; Draw adds
+  12% or 16% green, a waiting zoom the same orange, and Apps nothing. The
+  chosen tool's lens slides between tools and drops to 50% while Apps get
+  the clicks. Anything that's on (a toggle, a menu with something on,
+  Properties while shown, Board while White or Black, the mode-strip chips)
+  shows its symbol in the accent color, mixed 35% toward white in Dark; a
+  chip's words and stop mark use the primary color. Wherever the toolbar is
+  solid, the flat tints stay, and the accessibility tree is the same with
+  glass on or off.
 
 ### Motion
 
@@ -659,6 +689,8 @@ platform that departs from the specifications, unless an ADR changes them.
 | VoiceOver | Narrator and UI Automation | E |
 | Reduce Motion | Animation effects | E |
 | Increase Contrast | Contrast themes | E |
+| Reduce Transparency | Transparency effects off | E |
+| Liquid Glass (`NSGlassEffectView`) | Acrylic with a drawn rim | E (DV-14) |
 | Sleep, lock and Space notifications | Power, session and virtual desktop notifications | E |
 | Display reconfiguration | Display, DPI and work-area change messages | E |
 | Developer ID and notarization | Store signing | E |
@@ -716,6 +748,7 @@ Command shortcut, because the Mac canvas uses no Command-W or Command-B.
 | Screenshot tool (Shift-Command-5) | Snipping Tool (Win+Shift+S), including its recorder |
 | VoiceOver | Narrator |
 | Reduce motion | Animation effects |
+| Reduce transparency | Transparency effects |
 | Spaces | virtual desktops |
 | Quit | Quit (same automation identifier) |
 | this Mac, your Mac (break timer) | this computer, your computer |
@@ -776,6 +809,16 @@ These need owner approval before Windows release.
   frame to the properties scrolled out of view (they report IsOffscreen),
   where the Mac's accessibility tree keeps their frames. Their names, values
   and order match.
+- **DV-14 Glass**: with Glass toolbar on, Windows blurs and tints what is
+  behind the toolbar but doesn't bend it at the edges as Liquid Glass does.
+  WinUI's backdrop effects can't run a custom shader, and refraction from
+  captured screen pixels would need screen-capture consent, lag a frame and
+  keep the GPU busy, so Windows uses Acrylic only. Windows also blurs the
+  material only while it is fully opaque, so while the toolbar shows or
+  hides, the glass shows its tint without the blur until the toolbar lands.
+  When the toolbar shrinks to one button or opens again, the glass stays put
+  and only the controls fade. The raised lenses have round corners where the
+  Mac's are continuous, which WinUI's rounded shapes can't draw.
 
 ## Owner decisions
 

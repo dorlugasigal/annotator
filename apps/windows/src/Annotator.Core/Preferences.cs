@@ -240,6 +240,10 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
     /// </summary>
     public double? LaserFade;
 
+    /// <summary><c>true</c> draws the toolbar on the system's glass material instead of the solid window color. <c>null</c>
+    /// is off.</summary>
+    public bool? Glass;
+
     private const int MaximumBytes = 256 * 1_024;
 
     public WorkspacePreferences()
@@ -496,7 +500,7 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         && ShareToolStyles == other.ShareToolStyles && ToolbarItems == other.ToolbarItems
         && BreakTimer == other.BreakTimer && BreakShortcut == other.BreakShortcut
         && HiddenToolbarControls == other.HiddenToolbarControls && ToolbarCollapseDelay == other.ToolbarCollapseDelay
-        && ExpandedPropertyChoices == other.ExpandedPropertyChoices;
+        && ExpandedPropertyChoices == other.ExpandedPropertyChoices && Glass == other.Glass;
 
     public override readonly bool Equals(object? obj) => obj is WorkspacePreferences other && Equals(other);
 

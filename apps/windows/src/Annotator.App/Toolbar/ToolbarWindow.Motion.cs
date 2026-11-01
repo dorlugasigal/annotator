@@ -3,7 +3,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Annotator.App.Overlay;
 using Annotator.Workspace.Motion;
+using Annotator.Workspace.Toolbar;
 using Microsoft.UI.Composition;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Win32;
@@ -54,19 +56,47 @@ internal sealed partial class ToolbarWindow
         {
             var bitmap = new RenderTargetBitmap();
             // Zoomed, the panel holds the toolbar as it shows (WIN-A11Y-03).
-            await bitmap.RenderAsync(_zoom ?? (Microsoft.UI.Xaml.UIElement)_root);
+            UIElement shown = _zoom ?? (UIElement)_root;
+            await bitmap.RenderAsync(shown);
             byte[] pixels = (await bitmap.GetPixelsAsync()).ToArray();
             int width = bitmap.PixelWidth, height = bitmap.PixelHeight;
             if (width <= 0 || height <= 0 || pixels.Length < width * height * 4)
             {
                 return new ToolbarImage(chain, null, 0, 0);
             }
+            TintGlass(pixels, width, height, shown);
             return new ToolbarImage(chain, pixels, width, height);
         }
         catch (Exception error) when (error is ArgumentException or InvalidOperationException or COMException or UnauthorizedAccessException)
         {
             StartupLog.Note("toolbar-snapshot", error.Message);
             return new ToolbarImage(chain, null, 0, 0);
+        }
+    }
+
+    /// <summary>
+    /// With Glass toolbar, the snapshot gets the material's tint under each glass surface, since it can't hold what Windows
+    /// blurs behind the window (WIN-UI-09); the real glass shows again when the toolbar lands.
+    /// </summary>
+    private void TintGlass(byte[] pixels, int width, int height, UIElement shown)
+    {
+        if (_glass is not { } glass || shown is not FrameworkElement { ActualWidth: > 0 } target)
+        {
+            return;
+        }
+        double scale = width / target.ActualWidth;
+        foreach (GlassSurface surface in _glassSurfaces)
+        {
+            if (surface.Surface.ActualWidth <= 0 || !surface.Surface.IsLoaded)
+            {
+                continue;
+            }
+            Windows.Foundation.Rect bounds = surface.Surface.TransformToVisual(target)
+                .TransformBounds(new Windows.Foundation.Rect(0, 0, surface.Surface.ActualWidth, surface.Surface.ActualHeight));
+            double zoom = bounds.Width / surface.Surface.ActualWidth;
+            ToolbarGlass.TintUnder(pixels, width, height,
+                new Annotator.Core.Rect(bounds.X * scale, bounds.Y * scale, bounds.Width * scale, bounds.Height * scale),
+                surface.CornerRadius * zoom * scale, glass.SnapshotTint);
         }
     }
 

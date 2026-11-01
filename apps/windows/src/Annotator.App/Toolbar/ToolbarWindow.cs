@@ -56,6 +56,14 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
     private double _rasterization;
     /// <summary>The properties layout the person last saw (Mac settledPropertiesMode); null while the toolbar is hidden.</summary>
     private ToolbarPropertiesMode? _settledProperties;
+    /// <summary>Glass toolbar's material for the surfaces built last (WIN-UI-09); null while the toolbar is solid.</summary>
+    private GlassMaterial? _glass;
+    /// <summary>The window's glass materials once Glass toolbar has shown; they stay in the window from then on.</summary>
+    private GlassMaterial? _glassMaterials;
+    /// <summary>The toolbar's controls as built last: the horizontal or vertical toolbar, or the one-button toolbar.</summary>
+    private FrameworkElement? _face;
+    /// <summary>The surfaces built last on <see cref="_glass"/>, with the layer over each one's material.</summary>
+    private readonly List<GlassSurface> _glassSurfaces = [];
     private bool _shown;
     private bool _placed;
     private bool _firstFrame;
@@ -102,6 +110,8 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         WireKeyboard();
         WatchHold();
         AppResources.SystemLookChanged += OnSystemLookChanged;
+        // Transparency effects or the energy saver turn the glass toolbar solid, or glass again, at once (WIN-UI-09).
+        Transparency.Changed += OnTransparencyChanged;
 
         // Alt+F4 releases drawing input like Use apps and never closes the toolbar (WIN-OVR-12).
         AppWindow.Closing += (_, args) =>
@@ -115,6 +125,7 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         Closed += (_, _) =>
         {
             AppResources.SystemLookChanged -= OnSystemLookChanged;
+            Transparency.Changed -= OnTransparencyChanged;
             _registration.Dispose();
             _escape = null;
             try
@@ -136,6 +147,15 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
     {
         ApplyZoom();
         RebuildForTheme();
+    }
+
+    /// <summary>Transparency effects or the energy saver changed: a glass toolbar turns solid or glass again (WIN-UI-09).</summary>
+    private void OnTransparencyChanged()
+    {
+        if ((_view ?? _model.Snapshot).Preferences.Glass == true)
+        {
+            RebuildForTheme();
+        }
     }
 
     /// <summary>Raised once when the toolbar draws its first frame (startup measurement).</summary>
@@ -213,14 +233,18 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
             _controlMotion = null;
         }
         _vertical = look.Vertical;
+        // Glass toolbar shows while it is chosen and Windows allows transparency (WIN-UI-09); either change builds the
+        // surfaces again. Windows' settings are read only while it is chosen.
+        bool glass = snapshot.Preferences.Glass == true && ToolbarGlass.Shows(snapshot.Preferences, Transparency.Current);
+        string structure = glass ? look.Structure + "|glass" : look.Structure;
         bool rebuilt = false;
-        if (look.Structure != _structure)
+        if (structure != _structure)
         {
-            _structure = look.Structure;
+            _structure = structure;
             // A different layout from the one the person saw means they just changed it: the new properties fade in
             // (Mac revealingProperties, never while hidden or during a show or hide).
             ToolbarPropertiesMode? revealedFrom = _shown && moves && _settledProperties != look.Properties ? _settledProperties : null;
-            Build(look, snapshot, revealedFrom);
+            Build(look, snapshot, revealedFrom, glass);
             rebuilt = true;
         }
         // Mac onToolbarLayoutChanged: another orientation, dock edge, toolbar size or set of items docks the toolbar again.

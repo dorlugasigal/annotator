@@ -106,6 +106,8 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     /// Seconds the laser pointer's trail stays before it fades, within `LaserTrail.lifetimeRange`. `nil` means
     /// `LaserTrail.defaultLifetime`.
     public var laserFade: Double?
+    /// `true` draws the toolbar on the system's glass material instead of the solid window color. `nil` is off.
+    public var glass: Bool?
     public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
                                                  .laser, .eraser, .cover]
 

@@ -43,23 +43,83 @@ enum ToolbarPin: Equatable {
     }
 }
 
-/// The toolbar's background and outline, drawn by AppKit so they follow the window while it resizes.
+/// The toolbar's background and outline, drawn by AppKit so they follow the window while it resizes. With Glass toolbar on,
+/// the system's glass replaces the solid color (WIN-UI-09), unless Reduce transparency is on.
 final class ToolbarChromeView: NSView {
-    var cornerRadius: CGFloat = 15 { didSet { if cornerRadius != oldValue { needsDisplay = true } } }
+    var cornerRadius: CGFloat = 15 { didSet { if cornerRadius != oldValue { needsDisplay = true; shapeBackdrop() } } }
+    var glass = false { didSet { if glass != oldValue { refreshBackdrop() } } }
+    /// Reduce transparency in System Settings > Accessibility > Display; tests replace it.
+    var reducesTransparency: @MainActor () -> Bool = { ToolbarGlass.reducesTransparency } {
+        didSet { refreshBackdrop() }
+    }
+    /// Runs when the glass appears or goes, for example after Reduce transparency changes.
+    var onGlassChanged: (() -> Void)?
+    private var backdrop: NSView?
     override var isOpaque: Bool { false }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    // Decoration only: screen readers see the same toolbar with or without glass.
+    override func isAccessibilityElement() -> Bool { false }
+    override func accessibilityChildren() -> [Any]? { [] }
+
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(displayOptionsChanged),
+            name: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil)
+    }
+
+    convenience init(cornerRadius: CGFloat, glass: Bool) {
+        self.init(frame: .zero)
+        self.cornerRadius = cornerRadius
+        self.glass = glass
+        refreshBackdrop()
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    /// True while the glass shows, false for the solid background.
+    var showsGlass: Bool { backdrop != nil }
 
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         needsDisplay = true
+        if let backdrop { ToolbarGlass.restyle(backdrop, for: effectiveAppearance) }
     }
 
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         needsDisplay = true
+        shapeBackdrop()
+    }
+
+    @objc private func displayOptionsChanged() { refreshBackdrop() }
+
+    private func refreshBackdrop() {
+        let showed = showsGlass
+        defer { if showsGlass != showed { onGlassChanged?() } }
+        if glass && !reducesTransparency() {
+            if backdrop == nil {
+                let view = ToolbarGlass.makeBackdrop()
+                view.frame = bounds
+                view.autoresizingMask = [.width, .height]
+                addSubview(view)
+                backdrop = view
+                ToolbarGlass.restyle(view, for: effectiveAppearance)
+            }
+            shapeBackdrop()
+        } else {
+            backdrop?.removeFromSuperview()
+            backdrop = nil
+        }
+        needsDisplay = true
+    }
+
+    private func shapeBackdrop() {
+        guard let backdrop else { return }
+        ToolbarGlass.shape(backdrop, radius: max(0, min(cornerRadius, bounds.width / 2, bounds.height / 2)))
     }
 
     override func draw(_ dirtyRect: NSRect) {
+        guard backdrop == nil else { return }
         let radius = min(cornerRadius, bounds.width / 2, bounds.height / 2)
         let shape = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
         NSColor.windowBackgroundColor.setFill()
@@ -69,6 +129,88 @@ final class ToolbarChromeView: NSView {
         NSColor.labelColor.withAlphaComponent(0.07).setStroke()
         outline.lineWidth = 1
         outline.stroke()
+    }
+}
+
+/// The system glass behind the toolbar: Liquid Glass on macOS 26 and later, a behind-window blur on macOS 14 and 15.
+/// The system draws both, so they ask for no permission and add no work of Annotator's own (DV-14).
+@MainActor
+enum ToolbarGlass {
+    /// How much of the window color stays in the glass, so labels stay readable over white, black or busy screens.
+    static let bodyOpacity: CGFloat = 0.25
+    static var reducesTransparency: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency }
+    private static var masks: [CGFloat: NSImage] = [:]
+
+    /// On macOS 26 and later: Liquid Glass with a light body of the window color, clipped to the toolbar's shape with the
+    /// solid toolbar's hairline edge. The clip keeps the glass's edge light inside the toolbar, so the window never cuts it
+    /// off, and the toolbar keeps its size. The toolbar window keeps the glass in its active look (`InspectorPanel`).
+    static func makeBackdrop() -> NSView {
+        if #available(macOS 26, *) {
+            let shape = NSView()
+            shape.wantsLayer = true
+            shape.layer?.cornerCurve = .continuous
+            shape.layer?.masksToBounds = true
+            shape.layer?.borderWidth = 1
+            let glass = NSGlassEffectView()
+            glass.style = .regular
+            glass.autoresizingMask = [.width, .height]
+            let body = NSView()
+            body.wantsLayer = true
+            glass.contentView = body
+            shape.addSubview(glass)
+            return shape
+        }
+        let blur = NSVisualEffectView()
+        blur.material = .popover
+        blur.blendingMode = .behindWindow
+        blur.state = .active
+        return blur
+    }
+
+    static func shape(_ backdrop: NSView, radius: CGFloat) {
+        if #available(macOS 26, *), let glass = backdrop.subviews.first as? NSGlassEffectView {
+            backdrop.layer?.cornerRadius = radius
+            glass.frame = backdrop.bounds
+            glass.cornerRadius = radius
+        } else if let blur = backdrop as? NSVisualEffectView {
+            blur.maskImage = mask(radius: radius.rounded())
+        }
+    }
+
+    /// The body and edge colors for Light or Dark.
+    static func restyle(_ backdrop: NSView, for appearance: NSAppearance) {
+        guard #available(macOS 26, *), let glass = backdrop.subviews.first as? NSGlassEffectView else { return }
+        appearance.performAsCurrentDrawingAppearance {
+            backdrop.layer?.borderColor = NSColor.labelColor.withAlphaComponent(0.07).cgColor
+            glass.contentView?.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(bodyOpacity).cgColor
+        }
+    }
+
+    /// A stretchable rounded rectangle, the supported way to round a visual effect view's corners.
+    private static func mask(radius: CGFloat) -> NSImage {
+        if let mask = masks[radius] { return mask }
+        let edge = radius * 2 + 1
+        let mask = NSImage(size: NSSize(width: edge, height: edge), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+            return true
+        }
+        mask.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        mask.resizingMode = .stretch
+        masks[radius] = mask
+        return mask
+    }
+}
+
+/// The toolbar's background in SwiftUI, for the vertical toolbar's separate surfaces.
+struct ToolbarChromeBackground: NSViewRepresentable {
+    var cornerRadius: CGFloat
+    var glass: Bool
+
+    func makeNSView(context: Context) -> ToolbarChromeView { ToolbarChromeView(cornerRadius: cornerRadius, glass: glass) }
+    func updateNSView(_ view: ToolbarChromeView, context: Context) {
+        view.cornerRadius = cornerRadius
+        view.glass = glass
     }
 }
 
@@ -133,8 +275,11 @@ struct CollapsedToolbarButton: View {
     var drawsChrome = true
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     private var metrics: ToolbarMetrics { ToolbarMetrics(model.toolbarSize) }
     private var drawing: Bool { model.mode == .draw }
+    /// On glass, the Draw or Apps mark sits on a lens like the Draw button (`ToolbarLens`).
+    private var lens: Bool { !drawsChrome && model.preferences.glass == true && !reduceTransparency }
 
     static func size(vertical: Bool, toolbarSize: ToolbarSize) -> CGSize {
         let minimal = toolbarSize == .minimal
@@ -194,8 +339,9 @@ struct CollapsedToolbarButton: View {
                     .frame(width: metrics.minimal ? 52 : 58, height: metrics.minimal ? 24 : 28)
             }
         }
-        .background(drawing ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1),
+        .background(lens ? Color.clear : drawing ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1),
                     in: RoundedRectangle(cornerRadius: vertical ? 7 : 14))
+        .background { if lens { ToolbarLens(role: drawing ? .state(.green) : .neutral, radius: vertical ? 7 : 14) } }
         .animation(Motion.resolve(Motion.snappy, reduceMotion: reduceMotion), value: drawing)
     }
 

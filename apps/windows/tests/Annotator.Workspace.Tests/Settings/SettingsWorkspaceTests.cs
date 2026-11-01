@@ -5,7 +5,7 @@ using static Annotator.Workspace.Tests.TestWorkspace;
 namespace Annotator.Workspace.Tests.Settings;
 
 /// <summary>
-/// Settings > General and its profiles in the workspace (Mac WorkspaceModel: setTheme, setShareToolStyles,
+/// Settings > General and its profiles in the workspace (Mac WorkspaceModel: setTheme, setGlass, setShareToolStyles,
 /// setAnimationStyle, setShortcutHints, setMenuBarVisible, exportPreferences, importPreferences and captureVerified).
 /// </summary>
 public sealed class SettingsWorkspaceTests
@@ -42,6 +42,22 @@ public sealed class SettingsWorkspaceTests
         Assert.Equal(VisibilityAnimationStyle.Slide, WorkspaceModel.ShownAnimationStyle(new WorkspacePreferences()));
         Assert.Equal(VisibilityAnimationStyle.None, WorkspaceModel.ShownAnimationStyle(new WorkspacePreferences { AnimateVisibility = false }));
         Assert.Null(model.Snapshot.ErrorMessage);
+    }
+
+    [Fact]
+    public void GlassToolbarIsOffUntilChosen()
+    {
+        var store = new MemoryPreferencesStore();
+        WorkspaceModel model = Create(store: store);
+        Assert.Null(model.Snapshot.Preferences.Glass);
+
+        model.SetGlass(true);
+        Assert.True(WorkspacePreferences.Read(store.Data!).Glass);
+
+        // Off is the default, so it isn't stored, as on the Mac.
+        model.SetGlass(false);
+        Assert.Null(model.Snapshot.Preferences.Glass);
+        Assert.DoesNotContain("\"glass\"", System.Text.Encoding.UTF8.GetString(store.Data!), StringComparison.Ordinal);
     }
 
     [Fact]
