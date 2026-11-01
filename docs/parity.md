@@ -815,7 +815,8 @@ These need owner approval before Windows release.
   material only while it is fully opaque, so while the toolbar shows or
   hides, the glass shows its tint without the blur until the toolbar lands.
   When the toolbar shrinks to one button or opens again, the glass stays put
-  and only the controls fade.
+  and only the controls fade. The raised lenses have round corners where the
+  Mac's are continuous, which WinUI's rounded shapes can't draw.
 
 ## Owner decisions
 

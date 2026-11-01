@@ -61,9 +61,11 @@ internal static class ZoomControls
 
     /// <summary>
     /// Mac PendingZoomControl: the orange Cancel control while zoom starts, 44 points wide on the compact rail ("Zoom", the
-    /// phase, Cancel) and 130 otherwise (an hourglass with "Zoom starting" over "Cancel").
+    /// phase, Cancel) and 130 otherwise (an hourglass with "Zoom starting" over "Cancel"). On Glass toolbar's
+    /// <paramref name="material"/> it sits on a raised lens with an orange tint (WIN-UI-09).
     /// </summary>
-    public static ParityButton Pending(WorkspaceModel model, PendingZoomPresentation pending, bool compact, Action interacted)
+    public static ParityButton Pending(WorkspaceModel model, PendingZoomPresentation pending, bool compact, Action interacted,
+                                       GlassMaterial? material)
     {
         var stack = new MacStack { Spacing = 3, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
         if (compact)
@@ -90,10 +92,11 @@ internal static class ZoomControls
         var surface = new Border
         {
             CornerRadius = new CornerRadius(8),
-            Background = AppResources.Brush("AnnotatorPendingStripFillBrush"),
+            Background = material is null ? AppResources.Brush("AnnotatorPendingStripFillBrush") : null,
             Child = stack,
         };
-        ParityButton button = ToolbarParts.Button(compact ? 44 : 130, 44, surface, "Cancel pending zoom", 8);
+        ParityButton button = ToolbarParts.Button(compact ? 44 : 130, 44,
+            material is null ? surface : material.OnLens(surface, ToolbarLensRole.Waiting, 8), "Cancel pending zoom", 8);
         button.AccessibleValue = pending.Detail;
         AutomationProperties.SetAutomationId(button, "cancel-pending-zoom");
         ToolbarParts.Help(button, $"{pending.Detail}. Click to cancel the zoom request.");

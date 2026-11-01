@@ -18,7 +18,8 @@ internal sealed record GlassSurface(Grid Surface, Grid Layer, double CornerRadiu
 /// Glass toolbar's material for one toolbar window (WIN-UI-09): Windows' Acrylic behind each surface (<see cref="GlassBackdrop"/>),
 /// clipped to the surface's corners (<see cref="SystemBackdropElement"/>), with a light rim and a soft highlight at the top drawn
 /// over it, the Mac's Liquid Glass edge. Windows blurs what is behind the window: Annotator reads no screen pixels and runs no
-/// shader of its own (DV-14).
+/// shader of its own (DV-14). It also makes the raised lenses of the chosen tool and the buttons that are on
+/// (<see cref="Lens"/>), in the build's theme.
 /// <para>
 /// The materials sit in <see cref="Host"/>, under the toolbar's controls, and stay there for as long as the window lives; after
 /// each layout they are placed over the surfaces (<see cref="Place"/>). Rebuilding the toolbar never takes them out of the
@@ -116,6 +117,29 @@ internal sealed partial class GlassMaterial
     /// </summary>
     public RGBA SnapshotTint => Dark ? Gray(0x2A, 0.78) : Gray(0xF6, 0.78);
 
+    /// <summary>A raised lens for <paramref name="role"/> in this build's theme (WIN-UI-09, <see cref="ToolbarLens"/>).</summary>
+    public GlassLens Lens(ToolbarLensRole role, double cornerRadius, double outsetX = 0, double outsetY = 0) =>
+        new(Look(role), cornerRadius, outsetX, outsetY);
+
+    /// <summary><paramref name="content"/> over a raised lens for <paramref name="role"/>, which fills the same space.</summary>
+    public Grid OnLens(UIElement content, ToolbarLensRole role, double cornerRadius, double outsetX = 0, double outsetY = 0)
+    {
+        var grid = new Grid();
+        grid.Children.Add(Lens(role, cornerRadius, outsetX, outsetY));
+        grid.Children.Add(content);
+        return grid;
+    }
+
+    /// <summary>
+    /// Draw's lens, for the Draw or Apps button and the one-button toolbar. For Apps, the neutral lens, its green tint fades
+    /// out and its shadow fades to <c>AppsShadow</c>.
+    /// </summary>
+    public (GlassLens Lens, double AppsShadow) ModeLens(double cornerRadius)
+    {
+        ToolbarLensLook draw = Look(ToolbarLensRole.Draw);
+        return (new GlassLens(draw, cornerRadius), Look(ToolbarLensRole.Neutral).ShadowOpacity / draw.ShadowOpacity);
+    }
+
     /// <summary>The Liquid Glass edge, over a surface's controls: a light rim just inside its outline, brightest at the top.</summary>
     public UIElement Rim(double cornerRadius) => new Border
     {
@@ -133,6 +157,13 @@ internal sealed partial class GlassMaterial
             set(value);
         }
     }
+
+    private ToolbarLensLook Look(ToolbarLensRole role) =>
+        ToolbarLens.For(role, Dark, ThemeColor("AnnotatorAccentBrush"), ThemeColor("AnnotatorDrawDotBrush"), ThemeColor("AnnotatorOrangeBrush"));
+
+    private static RGBA ThemeColor(string key) => AppResources.Brush(key) is SolidColorBrush { Color: var color }
+        ? new RGBA(color.R / 255.0, color.G / 255.0, color.B / 255.0)
+        : new RGBA(0, 0, 0);
 
     private static WinColor White(double alpha) => WinColor.FromArgb((byte)Math.Round(alpha * 255), 255, 255, 255);
 

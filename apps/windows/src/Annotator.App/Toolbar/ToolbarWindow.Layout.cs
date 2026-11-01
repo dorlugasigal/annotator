@@ -445,7 +445,7 @@ internal sealed partial class ToolbarWindow
         Panel layer = Background(surface, cornerRadius);
         if (marker)
         {
-            layer.Children.Add(_markers.Layer());
+            layer.Children.Add(_markers.Layer(_glass));
         }
         content.Margin = new Thickness(padding);
         layer.Children.Add(content);
@@ -546,8 +546,19 @@ internal sealed partial class ToolbarWindow
     }
 
     /// <summary>The glyph over the key label, as the Mac's VStack(spacing: 2) of a tool or button.</summary>
-    private static MacStack Stacked(FrameworkElement glyph, ToolbarMetrics metrics, string key)
+    private static MacStack Stacked(FrameworkElement glyph, ToolbarMetrics metrics, string key) =>
+        Stacked(glyph, metrics, key, lensed: false, out _, out _);
+
+    /// <summary>
+    /// The glyph over the key label. A <paramref name="lensed"/> button can be "On" on Glass toolbar's accent lens, which
+    /// shows the key in white at 75% (WIN-UI-09): <paramref name="onKey"/> lies over <paramref name="plainKey"/>, hidden,
+    /// for the change between them.
+    /// </summary>
+    private static MacStack Stacked(FrameworkElement glyph, ToolbarMetrics metrics, string key, bool lensed, out TextBlock? plainKey,
+                                    out TextBlock? onKey)
     {
+        plainKey = null;
+        onKey = null;
         glyph.HorizontalAlignment = HorizontalAlignment.Center;
         glyph.VerticalAlignment = VerticalAlignment.Center;
         var host = new Grid { Height = metrics.Minimal ? 22 : 24 };
@@ -558,14 +569,26 @@ internal sealed partial class ToolbarWindow
         {
             TextBlock label = ToolbarParts.Label(key.Length == 0 ? " " : key, 10, "AnnotatorSecondaryText");
             label.HorizontalAlignment = HorizontalAlignment.Center;
-            stack.Children.Add(label);
+            if (!lensed)
+            {
+                stack.Children.Add(label);
+                return stack;
+            }
+            TextBlock white = ToolbarParts.Label(label.Text, 10, "AnnotatorOnColorSecondaryText");
+            white.HorizontalAlignment = HorizontalAlignment.Center;
+            var keys = new Grid { HorizontalAlignment = HorizontalAlignment.Center };
+            keys.Children.Add(label);
+            keys.Children.Add(white);
+            stack.Children.Add(keys);
+            plainKey = label;
+            onKey = white;
         }
         return stack;
     }
 
     /// <summary>
     /// Mac actionButton: a toolbar button such as Spotlight, Cursor halo or Smart draw, On or Off. Buttons whose feature is not
-    /// built are unavailable.
+    /// built are unavailable. On Glass toolbar, On is a raised accent lens with a white symbol and key (WIN-UI-09).
     /// </summary>
     private ToggleButton ActionButton(ToolbarLook look, WorkspaceSnapshot snapshot, ShortcutAction action)
     {
@@ -573,12 +596,14 @@ internal sealed partial class ToolbarWindow
         string key = snapshot.Preferences.ShortcutFor(ShortcutCommand.ForAction(action)) is { } shortcut
             ? Annotator.Workspace.Shortcuts.WindowsShortcuts.Label(shortcut) : string.Empty;
         double radius = metrics.Minimal ? 8 : 10;
-        var marker = new Border { CornerRadius = new CornerRadius(radius), Background = AppResources.Brush("AnnotatorSelectionFillBrush") };
+        UIElement marker = _glass is { } glass ? glass.Lens(ToolbarLensRole.On, radius)
+            : new Border { CornerRadius = new CornerRadius(radius), Background = AppResources.Brush("AnnotatorSelectionFillBrush") };
         var grid = new Grid { Width = metrics.ButtonWidth, Height = metrics.ButtonHeight };
         grid.Children.Add(marker);
         var glyph = new Grid { IsHitTestVisible = false };
-        grid.Children.Add(Stacked(glyph, metrics, key));
-        var button = new ToggleButton
+        grid.Children.Add(Stacked(glyph, metrics, key, _glass is not null, out TextBlock? plainKey, out TextBlock? onKey));
+        // Its frame for UI Automation is the button's own: the On lens's shadow reaches past it.
+        var button = new ParityToggleButton
         {
             Style = AppResources.Style("AnnotatorToolButton"),
             Width = metrics.ButtonWidth,
@@ -591,12 +616,14 @@ internal sealed partial class ToolbarWindow
         // Mac: the on state's fill and accent symbol change with selectionAnimation.
         double size = metrics.Minimal ? 15 : 17;
         FrameworkElement plain = Glyphs.ForSymbol(action.Symbol, size, button.IsEnabled ? "AnnotatorGlyph" : "AnnotatorGlyphDisabled");
-        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, "AnnotatorGlyphAccent");
+        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, _glass is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphOnColor");
         glyph.Children.Add(plain);
         glyph.Children.Add(accent);
         Tween fill = Tween.Opacity(marker, 0);
         Tween plainShown = Tween.Opacity(plain, 1);
         Tween accentShown = Tween.Opacity(accent, 0);
+        Tween? plainKeyShown = plainKey is null ? null : Tween.Opacity(plainKey, 1);
+        Tween? onKeyShown = onKey is null ? null : Tween.Opacity(onKey, 0);
         AutomationProperties.SetName(button, action.Label);
         AutomationProperties.SetAutomationId(button, $"toolbar-action-{action.RawValue}");
         ToolbarParts.Help(button, key.Length == 0 ? action.Detail : $"{action.Detail} Key {key}.",
@@ -620,6 +647,8 @@ internal sealed partial class ToolbarWindow
             fill.To(on ? 1 : 0, motion);
             plainShown.To(on ? 0 : 1, motion);
             accentShown.To(on ? 1 : 0, motion);
+            plainKeyShown?.To(on ? 0 : 1, motion);
+            onKeyShown?.To(on ? 1 : 0, motion);
         });
         return button;
     }
@@ -646,7 +675,10 @@ internal sealed partial class ToolbarWindow
         return button;
     }
 
-    /// <summary>Mac boardMenu: cycles Desktop, Whiteboard and Blackboard on the drawing display.</summary>
+    /// <summary>
+    /// Mac boardMenu: cycles Desktop, Whiteboard and Blackboard on the drawing display. On Glass toolbar, White or Black is a
+    /// raised accent lens with a white symbol and word (WIN-UI-09).
+    /// </summary>
     private ParityButton BoardButton(ToolbarLook look)
     {
         ToolbarMetrics metrics = look.Metrics;
@@ -656,28 +688,36 @@ internal sealed partial class ToolbarWindow
             Board.Whiteboard => "rectangle",
             _ => "rectangle.fill",
         };
+        GlassMaterial? lensed = look.Board == Board.Desktop ? null : _glass;
         var stack = new MacStack { Spacing = 3, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-        FrameworkElement glyph = ToolbarParts.SymbolGlyph(symbol, metrics.Minimal, look.Board == Board.Blackboard ? "AnnotatorGlyphFilled" : "AnnotatorGlyph");
+        FrameworkElement glyph = ToolbarParts.SymbolGlyph(symbol, metrics.Minimal, (look.Board == Board.Blackboard, lensed is null) switch
+        {
+            (true, true) => "AnnotatorGlyphFilled",
+            (true, false) => "AnnotatorGlyphOnColorFilled",
+            (false, true) => "AnnotatorGlyph",
+            (false, false) => "AnnotatorGlyphOnColor",
+        });
         glyph.HorizontalAlignment = HorizontalAlignment.Center;
         stack.Children.Add(glyph);
         if (!metrics.Minimal)
         {
             TextBlock text = ToolbarParts.Label(look.Board switch { Board.Desktop => "Desk", Board.Whiteboard => "White", _ => "Black" },
-                9, "AnnotatorPrimaryText", FontWeights.Medium);
+                9, lensed is null ? "AnnotatorPrimaryText" : "AnnotatorOnColorText", FontWeights.Medium);
             text.HorizontalAlignment = HorizontalAlignment.Center;
             stack.Children.Add(text);
         }
         var surface = new Border
         {
             CornerRadius = new CornerRadius(7),
-            Background = look.Board == Board.Desktop ? null : AppResources.Brush("AnnotatorBoardFillBrush"),
+            Background = look.Board == Board.Desktop || lensed is not null ? null : AppResources.Brush("AnnotatorBoardFillBrush"),
             // A contrast theme outlines the active board instead of tinting it.
             BorderBrush = AppResources.Brush("AnnotatorSelectedOutlineBrush"),
             BorderThickness = new Thickness(look.Board != Board.Desktop && ContrastTheme.IsOn ? 2 : 0),
             Child = stack,
         };
+        UIElement content = lensed is null ? surface : lensed.OnLens(surface, ToolbarLensRole.On, 7);
         double height = look.Vertical ? (metrics.Minimal ? 30 : 36) : metrics.ButtonHeight;
-        ParityButton button = ToolbarParts.Button(metrics.BoardWidth, height, surface, "Board background");
+        ParityButton button = ToolbarParts.Button(metrics.BoardWidth, height, content, "Board background");
         button.AccessibleValue = look.Board.RawValue;
         button.BoundsElement = look.Board == Board.Desktop ? (metrics.Minimal ? glyph : stack) : null;
         if (metrics.Minimal)
@@ -721,14 +761,9 @@ internal sealed partial class ToolbarWindow
         var stack = new MacStack { Spacing = metrics.Minimal ? 1 : 3, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
         stack.Children.Add(icon);
         stack.Children.Add(dotRow);
-        var drawSurface = new Border { Style = AppResources.Style("AnnotatorModeDraw") };
-        var appsSurface = new Border { Style = AppResources.Style("AnnotatorModeApps") };
         var surface = new Grid();
-        surface.Children.Add(appsSurface);
-        surface.Children.Add(drawSurface);
+        Action<bool, MotionSamples?> showMode = ModeLook(surface, 7);
         surface.Children.Add(stack);
-        Tween drawShown = Tween.Opacity(drawSurface, 0);
-        Tween appsShown = Tween.Opacity(appsSurface, 1);
         Tween drawDotShown = Tween.Opacity(drawDot, 0);
         Tween appsDotShown = Tween.Opacity(appsDot, 1);
         Tween drawDotScale = Tween.Scale(drawDot, 1);
@@ -763,8 +798,7 @@ internal sealed partial class ToolbarWindow
             MotionSamples? motion = shown is null ? null : _controlMotion;
             shown = state.Mode;
             label.Text = drawing ? "Draw" : "Apps";
-            drawShown.To(drawing ? 1 : 0, motion);
-            appsShown.To(drawing ? 0 : 1, motion);
+            showMode(drawing, motion);
             drawDotShown.To(drawing ? 1 : 0, motion);
             appsDotShown.To(drawing ? 0 : 1, motion);
             Tween arriving = drawing ? drawIconShown : appsIconShown;
@@ -792,6 +826,38 @@ internal sealed partial class ToolbarWindow
             button.AccessibleValue = drawing ? "Drawing is active" : "Apps receive input";
         });
         return button;
+    }
+
+    /// <summary>
+    /// The Draw or Apps look behind the mode's words (Mac modeButton and CollapsedToolbarButton): the green Draw fill and the
+    /// gray Apps fill, or on Glass toolbar Draw's raised lens, which turns into the neutral lens for Apps (WIN-UI-09). Adds it
+    /// to <paramref name="surface"/> and returns what shows Draw (true) or Apps.
+    /// </summary>
+    private Action<bool, MotionSamples?> ModeLook(Panel surface, double cornerRadius)
+    {
+        if (_glass is { } glass)
+        {
+            (GlassLens lens, double appsShadow) = glass.ModeLens(cornerRadius);
+            surface.Children.Add(lens);
+            Tween tint = Tween.Opacity(lens.Tint!, 0);
+            Tween shadow = Tween.Opacity(lens.CastShadow, appsShadow);
+            return (drawing, motion) =>
+            {
+                tint.To(drawing ? 1 : 0, motion);
+                shadow.To(drawing ? 1 : appsShadow, motion);
+            };
+        }
+        var drawSurface = new Border { Style = AppResources.Style("AnnotatorModeDraw"), CornerRadius = new CornerRadius(cornerRadius) };
+        var appsSurface = new Border { Style = AppResources.Style("AnnotatorModeApps"), CornerRadius = new CornerRadius(cornerRadius) };
+        surface.Children.Add(appsSurface);
+        surface.Children.Add(drawSurface);
+        Tween drawShown = Tween.Opacity(drawSurface, 0);
+        Tween appsShown = Tween.Opacity(appsSurface, 1);
+        return (drawing, motion) =>
+        {
+            drawShown.To(drawing ? 1 : 0, motion);
+            appsShown.To(drawing ? 0 : 1, motion);
+        };
     }
 
     /// <summary>
@@ -880,14 +946,21 @@ internal sealed partial class ToolbarWindow
         return button;
     }
 
-    /// <summary>Mac propertiesButton: shows or hides the properties below or beside the tools.</summary>
+    /// <summary>
+    /// Mac propertiesButton: shows or hides the properties below or beside the tools. On Glass toolbar, shown properties put a
+    /// raised accent lens behind it, a little larger than its frame, with a white symbol (WIN-UI-09).
+    /// </summary>
     private ParityButton PropertiesButton(ToolbarLook look)
     {
         (double width, double height) = look.Metrics.ActionSize;
-        FrameworkElement glyph = ToolbarParts.SymbolGlyph("slider.horizontal.3", style: look.Expanded ? "AnnotatorGlyphAccent" : "AnnotatorGlyph");
+        GlassMaterial? lensed = look.Expanded ? _glass : null;
+        FrameworkElement glyph = ToolbarParts.SymbolGlyph("slider.horizontal.3",
+            style: !look.Expanded ? "AnnotatorGlyph" : lensed is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphOnColor");
         var host = new ContentControl { Content = glyph, IsTabStop = false, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+        UIElement content = lensed is null ? host
+            : lensed.OnLens(host, ToolbarLensRole.On, ToolbarLens.PropertiesRadius, ToolbarLens.PropertiesOutsetX, ToolbarLens.PropertiesOutsetY);
         // The Mac button takes clicks over its whole cell, so its accessible frame is the cell, not the glyph.
-        ParityButton button = ToolbarParts.Button(width, height, host, "Properties");
+        ParityButton button = ToolbarParts.Button(width, height, content, "Properties");
         AutomationProperties.SetAutomationId(button, "toolbar-properties");
         ToolbarPropertiesMode mode = look.Properties;
         ToolbarPropertiesMode next = mode.Next;
@@ -917,7 +990,7 @@ internal sealed partial class ToolbarWindow
         var strip = new MacStack { Orientation = look.Vertical ? Orientation.Vertical : Orientation.Horizontal, Spacing = 6 };
         if (look.PendingZoom is { } pending)
         {
-            strip.Children.Add(ZoomControls.Pending(_model, pending, look.CompactRail, _interacted));
+            strip.Children.Add(ZoomControls.Pending(_model, pending, look.CompactRail, _interacted, _glass));
         }
         foreach (ActiveToolbarMode mode in look.ActiveModes)
         {
@@ -936,21 +1009,25 @@ internal sealed partial class ToolbarWindow
 
     /// <summary>
     /// One mode's Stop button: its symbol, title and a cross in the accent color on a 13% accent fill, 130 by 44 points, or
-    /// 44 by 44 with "Spot on" and the like on a compact rail.
+    /// 44 by 44 with "Spot on" and the like on a compact rail. On Glass toolbar they are white on a raised accent lens
+    /// (WIN-UI-09).
     /// </summary>
     private ParityButton StopButton(ToolbarLook look, ActiveToolbarMode mode)
     {
+        bool lensed = _glass is not null;
+        string accent = lensed ? "AnnotatorGlyphOnColor" : "AnnotatorGlyphAccent";
+        string words = lensed ? "AnnotatorOnColorText" : "AnnotatorAccentText";
         // The Windows glyph for rectangle.fill is the outline that rectangle uses; the filled style fills it.
-        string glyphStyle = mode == ActiveToolbarMode.Whiteboard ? "AnnotatorGlyphAccentFilled" : "AnnotatorGlyphAccent";
+        string glyphStyle = mode == ActiveToolbarMode.Whiteboard ? accent + "Filled" : accent;
         FrameworkElement content;
         if (look.CompactRail)
         {
             var icons = new MacStack { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center };
             icons.Children.Add(Glyphs.ForSymbol(mode.Symbol, 14, glyphStyle));
-            icons.Children.Add(Glyphs.ForSymbol("xmark", 8, "AnnotatorGlyphAccent"));
+            icons.Children.Add(Glyphs.ForSymbol("xmark", 8, accent));
             var stack = new MacStack { Spacing = 3, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             stack.Children.Add(icons);
-            TextBlock caption = ToolbarParts.Label($"{mode.ShortTitle} on", 9, "AnnotatorAccentText", FontWeights.Medium);
+            TextBlock caption = ToolbarParts.Label($"{mode.ShortTitle} on", 9, words, FontWeights.Medium);
             caption.HorizontalAlignment = HorizontalAlignment.Center;
             stack.Children.Add(caption);
             content = stack;
@@ -961,10 +1038,10 @@ internal sealed partial class ToolbarWindow
             FrameworkElement glyph = Glyphs.ForSymbol(mode.Symbol, 16, glyphStyle);
             glyph.VerticalAlignment = VerticalAlignment.Center;
             row.Children.Add(glyph);
-            TextBlock text = ToolbarParts.Label(mode.Title, 11, "AnnotatorAccentText", FontWeights.Medium);
+            TextBlock text = ToolbarParts.Label(mode.Title, 11, words, FontWeights.Medium);
             text.VerticalAlignment = VerticalAlignment.Center;
             row.Children.Add(text);
-            FrameworkElement close = Glyphs.ForSymbol("xmark", 9, "AnnotatorGlyphAccent");
+            FrameworkElement close = Glyphs.ForSymbol("xmark", 9, accent);
             close.VerticalAlignment = VerticalAlignment.Center;
             row.Children.Add(close);
             content = row;
@@ -972,13 +1049,14 @@ internal sealed partial class ToolbarWindow
         var surface = new Border
         {
             CornerRadius = new CornerRadius(8),
-            Background = AppResources.Brush("AnnotatorModeStripFillBrush"),
+            Background = lensed ? null : AppResources.Brush("AnnotatorModeStripFillBrush"),
             // A contrast theme outlines the active mode instead of tinting it.
             BorderBrush = AppResources.Brush("AnnotatorSelectedOutlineBrush"),
             BorderThickness = new Thickness(ContrastTheme.IsOn ? 2 : 0),
             Child = content,
         };
-        ParityButton stop = ToolbarParts.Button(look.CompactRail ? 44 : 130, 44, surface, $"Stop {mode.Title.ToLowerInvariant()}", 8);
+        ParityButton stop = ToolbarParts.Button(look.CompactRail ? 44 : 130, 44,
+            _glass is { } glass ? glass.OnLens(surface, ToolbarLensRole.On, 8) : surface, $"Stop {mode.Title.ToLowerInvariant()}", 8);
         stop.AccessibleValue = "Active";
         AutomationProperties.SetAutomationId(stop, $"stop-active-{mode.RawValue}");
         ToolbarParts.Help(stop, mode.StopHint, $"{mode.Title} is active. Click to stop.");
@@ -1034,18 +1112,20 @@ internal sealed partial class ToolbarWindow
 
     /// <summary>
     /// Mac menuButton: the Spotlight or Zoom menu as a toolbar item the size of a tool, with a chevron where a tool shows
-    /// its key. It lights up while something in it is on (Spotlight or Cursor halo; the pointer lens or screen zoom).
+    /// its key. It lights up while something in it is on (Spotlight or Cursor halo; the pointer lens or screen zoom): on
+    /// Glass toolbar with a raised accent lens, a white symbol and a white chevron at 75% (WIN-UI-09).
     /// </summary>
     private FrameworkElement MenuButton(ToolbarLook look, WorkspaceSnapshot snapshot, ShortcutAction action)
     {
         ToolbarMetrics metrics = look.Metrics;
         double radius = metrics.Minimal ? 8 : 10;
-        var marker = new Border { CornerRadius = new CornerRadius(radius), Background = AppResources.Brush("AnnotatorSelectionFillBrush") };
+        UIElement marker = _glass is { } glass ? glass.Lens(ToolbarLensRole.On, radius)
+            : new Border { CornerRadius = new CornerRadius(radius), Background = AppResources.Brush("AnnotatorSelectionFillBrush") };
         var grid = new Grid { Width = metrics.ButtonWidth, Height = metrics.ButtonHeight };
         grid.Children.Add(marker);
         double size = metrics.Minimal ? 15 : 17;
         FrameworkElement plain = Glyphs.ForSymbol(action.Symbol, size);
-        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, "AnnotatorGlyphAccent");
+        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, _glass is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphOnColor");
         var glyph = new Grid { IsHitTestVisible = false, HorizontalAlignment = HorizontalAlignment.Center };
         glyph.Children.Add(plain);
         glyph.Children.Add(accent);
@@ -1053,11 +1133,27 @@ internal sealed partial class ToolbarWindow
         host.Children.Add(glyph);
         var stack = new MacStack { Spacing = 2, VerticalAlignment = VerticalAlignment.Center, IsHitTestVisible = false };
         stack.Children.Add(host);
+        Tween? plainChevronShown = null;
+        Tween? onChevronShown = null;
         if (metrics.ShowsKeyLabels)
         {
             FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 9, 12, 9, "AnnotatorGlyphSecondary");
             chevron.HorizontalAlignment = HorizontalAlignment.Center;
-            stack.Children.Add(chevron);
+            if (_glass is null)
+            {
+                stack.Children.Add(chevron);
+            }
+            else
+            {
+                FrameworkElement white = ToolbarParts.GlyphBox("chevron.down", 9, 12, 9, "AnnotatorGlyphOnColorSecondary");
+                white.HorizontalAlignment = HorizontalAlignment.Center;
+                var chevrons = new Grid { HorizontalAlignment = HorizontalAlignment.Center };
+                chevrons.Children.Add(chevron);
+                chevrons.Children.Add(white);
+                stack.Children.Add(chevrons);
+                plainChevronShown = Tween.Opacity(chevron, 1);
+                onChevronShown = Tween.Opacity(white, 0);
+            }
         }
         grid.Children.Add(stack);
         ParityButton button = ToolbarParts.Button(metrics.ButtonWidth, metrics.ButtonHeight, grid, action.Label, radius);
@@ -1082,6 +1178,8 @@ internal sealed partial class ToolbarWindow
             fill.To(on ? 1 : 0, motion);
             plainShown.To(on ? 0 : 1, motion);
             accentShown.To(on ? 1 : 0, motion);
+            plainChevronShown?.To(on ? 0 : 1, motion);
+            onChevronShown?.To(on ? 1 : 0, motion);
         });
         return button;
     }
@@ -1189,15 +1287,12 @@ internal sealed partial class ToolbarWindow
         };
         status.Children.Add(dot);
         status.Children.Add(word);
-        var drawSurface = new Border { Style = AppResources.Style("AnnotatorModeDraw"), CornerRadius = new CornerRadius(vertical ? 7 : 14) };
-        var appsSurface = new Border { Style = AppResources.Style("AnnotatorModeApps"), CornerRadius = new CornerRadius(vertical ? 7 : 14) };
         var badge = new Grid
         {
             Width = vertical ? (metrics.Minimal ? 36 : 46) : (metrics.Minimal ? 52 : 58),
             Height = vertical ? (metrics.Minimal ? 30 : 36) : (metrics.Minimal ? 24 : 28),
         };
-        badge.Children.Add(appsSurface);
-        badge.Children.Add(drawSurface);
+        Action<bool, MotionSamples?> showMode = ModeLook(badge, vertical ? 7 : 14);
         badge.Children.Add(status);
         var face = new MacStack
         {
@@ -1251,8 +1346,6 @@ internal sealed partial class ToolbarWindow
         menu.Items.Add(modeItem);
         menu.Opening += (_, _) => modeItem.Text = _model.Snapshot.Mode == WorkspaceMode.Draw ? "Use Apps" : "Draw";
         button.ContextFlyout = menu;
-        Tween drawShown = Tween.Opacity(drawSurface, 0);
-        Tween appsShown = Tween.Opacity(appsSurface, 1);
         Tween drawDotShown = Tween.Opacity(drawDot, 0);
         Tween appsDotShown = Tween.Opacity(appsDot, 1);
         WorkspaceMode? shown = null;
@@ -1269,8 +1362,7 @@ internal sealed partial class ToolbarWindow
             MotionSamples? motion = shown is null ? null : _controlMotion;
             shown = state.Mode;
             word.Text = drawing ? "Draw" : "Apps";
-            drawShown.To(drawing ? 1 : 0, motion);
-            appsShown.To(drawing ? 0 : 1, motion);
+            showMode(drawing, motion);
             drawDotShown.To(drawing ? 1 : 0, motion);
             appsDotShown.To(drawing ? 0 : 1, motion);
         });

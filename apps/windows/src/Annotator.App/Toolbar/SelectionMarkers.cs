@@ -1,5 +1,6 @@
 using System.Numerics;
 using Annotator.Workspace.Motion;
+using Annotator.Workspace.Toolbar;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Foundation;
@@ -9,8 +10,9 @@ namespace Annotator.App.Toolbar;
 /// <summary>
 /// Mac selectionMarker (ToolbarView): one highlight behind the current tool that slides from the tool it left to the chosen
 /// tool (matchedGeometryEffect) and changes between the Draw look, an accent fill, and the Use apps look, a gray outline,
-/// on the same spring. It lives in a layer between the toolbar's background and its controls, so no button clips it, and
-/// moves to the new layer when the toolbar is rebuilt for the new tool's properties.
+/// on the same spring. With Glass toolbar it is a raised lens instead, at full strength for Draw and half for Use apps
+/// (WIN-UI-09). It lives in a layer between the toolbar's background and its controls, so no button clips it, and moves to
+/// the new layer when the toolbar is rebuilt for the new tool's properties.
 /// </summary>
 internal sealed class SelectionMarkers
 {
@@ -20,6 +22,8 @@ internal sealed class SelectionMarkers
     private readonly Border _outline;
     private readonly Tween _fillShown;
     private readonly Tween _outlineShown;
+    private GlassLens? _lens;
+    private Tween? _lensShown;
     private Canvas? _layer;
     private FrameworkElement? _current;
     private FrameworkElement? _chosen;
@@ -43,11 +47,28 @@ internal sealed class SelectionMarkers
         _outlineShown = Tween.Opacity(_outline, 0);
     }
 
-    /// <summary>The marker's layer for a new toolbar surface, which goes between its background and its controls.</summary>
-    public Canvas Layer()
+    /// <summary>
+    /// The marker's layer for a new toolbar surface, which goes between its background and its controls. On
+    /// <paramref name="glass"/> the marker is a lens in that build's theme.
+    /// </summary>
+    public Canvas Layer(GlassMaterial? glass)
     {
         // Parent is not reliable once the old surface left the window, so the marker remembers its layer.
         _layer?.Children.Remove(_marker);
+        _marker.Children.Clear();
+        if (glass is not null)
+        {
+            _lens = glass.Lens(ToolbarLensRole.Chosen, _radius);
+            _lensShown = Tween.Opacity(_lens, _drawing ? 1 : ToolbarLens.AppsOpacity);
+            _marker.Children.Add(_lens);
+        }
+        else
+        {
+            _lens = null;
+            _lensShown = null;
+            _marker.Children.Add(_fill);
+            _marker.Children.Add(_outline);
+        }
         var layer = new Canvas { IsHitTestVisible = false };
         layer.Children.Add(_marker);
         _layer = layer;
@@ -78,6 +99,11 @@ internal sealed class SelectionMarkers
         _outline.CornerRadius = radius;
         _fillShown.To(_drawing ? 1 : 0, motion);
         _outlineShown.To(_drawing ? 0 : 1, motion);
+        if (_lens is { } lens)
+        {
+            lens.Radius = _radius;
+            _lensShown!.To(_drawing ? 1 : ToolbarLens.AppsOpacity, motion);
+        }
         if (ReferenceEquals(chosen, _current))
         {
             if (chosen is not null && LaidOut(chosen) && !Sliding)

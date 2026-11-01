@@ -17,6 +17,9 @@ internal sealed record UiaElement(string Type, string Name, string Id, string He
     /// <summary>A person can use it: it has Invoke, Toggle, ExpandCollapse, SelectionItem or a writable Value or RangeValue.</summary>
     public bool Usable => Patterns.Any(pattern => pattern is "Invoke" or "Toggle" or "ExpandCollapse" or "SelectionItem" or "Value" or "RangeValue");
 
+    /// <summary>Its bounding rectangle from the window's top-left corner, as UI Automation reports it.</summary>
+    public System.Windows.Rect Bounds { get; init; }
+
     public override string ToString() => $"{Type} \"{Name}\"{(Id.Length > 0 ? $" ({Id})" : string.Empty)}";
 }
 
@@ -27,11 +30,36 @@ internal static class Uia
     {
         var elements = new List<UiaElement>();
         AutomationElement root = AutomationElement.FromHandle(window);
-        Walk(root, elements, 0);
+        Walk(root, root.Current.BoundingRectangle.TopLeft, elements, 0);
         return elements;
     }
 
-    private static void Walk(AutomationElement parent, List<UiaElement> into, int depth)
+    /// <summary>
+    /// Toggles the element named <paramref name="name"/>, as Narrator's Toggle command does, and waits a bounded time for
+    /// the element named <paramref name="then"/> to appear, if any.
+    /// </summary>
+    public static void Toggle(nint window, string name, string? then = null)
+    {
+        AutomationElement root = AutomationElement.FromHandle(window);
+        AutomationElement element = root.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, name))
+            ?? throw new InvalidOperationException($"The window has no element named {name}.");
+        ((TogglePattern)element.GetCurrentPattern(TogglePattern.Pattern)).Toggle();
+        if (then is null)
+        {
+            return;
+        }
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        while (root.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, then)) is null)
+        {
+            if (clock.Elapsed > TimeSpan.FromSeconds(10))
+            {
+                throw new TimeoutException($"{then} did not appear within 10 s after toggling {name}.");
+            }
+            Thread.Sleep(100);
+        }
+    }
+
+    private static void Walk(AutomationElement parent, System.Windows.Point origin, List<UiaElement> into, int depth)
     {
         if (depth > 40)
         {
@@ -67,9 +95,14 @@ internal static class Uia
                 patterns.Add("RangeValue");
             }
             string type = current.ControlType.ProgrammaticName.Replace("ControlType.", string.Empty, StringComparison.Ordinal);
+            System.Windows.Rect bounds = current.BoundingRectangle;
+            if (!bounds.IsEmpty)
+            {
+                bounds.Offset(-origin.X, -origin.Y);
+            }
             into.Add(new UiaElement(type, current.Name ?? string.Empty, current.AutomationId ?? string.Empty, current.HelpText ?? string.Empty,
-                current.IsEnabled, current.IsKeyboardFocusable, patterns));
-            Walk(child, into, depth + 1);
+                current.IsEnabled, current.IsKeyboardFocusable, patterns) { Bounds = bounds });
+            Walk(child, origin, into, depth + 1);
         }
     }
 }

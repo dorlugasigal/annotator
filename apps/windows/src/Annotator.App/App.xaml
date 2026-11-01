@@ -247,6 +247,13 @@
             <Style x:Key="AnnotatorAccentText" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{ThemeResource AnnotatorAccentBrush}" />
             </Style>
+            <!-- Words on Glass toolbar's accent lens (WIN-UI-09): white, and white at 75% for key labels. -->
+            <Style x:Key="AnnotatorOnColorText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#FFFFFFFF" />
+            </Style>
+            <Style x:Key="AnnotatorOnColorSecondaryText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#BFFFFFFF" />
+            </Style>
             <Style x:Key="AnnotatorOrangeText" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{ThemeResource AnnotatorOrangeBrush}" />
             </Style>
@@ -296,6 +303,10 @@
             <Style x:Key="AnnotatorGlyphOnColorFilled" TargetType="Path">
                 <Setter Property="Stroke" Value="#FFFFFFFF" />
                 <Setter Property="Fill" Value="#FFFFFFFF" />
+            </Style>
+            <!-- The menu chevron on Glass toolbar's accent lens (WIN-UI-09). -->
+            <Style x:Key="AnnotatorGlyphOnColorSecondary" TargetType="Path">
+                <Setter Property="Stroke" Value="#BFFFFFFF" />
             </Style>
             <Style x:Key="AnnotatorGlyphError" TargetType="Path">
                 <Setter Property="Stroke" Value="{ThemeResource AnnotatorErrorBrush}" />
