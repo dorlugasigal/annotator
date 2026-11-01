@@ -806,6 +806,16 @@ final class WorkspaceModel: ObservableObject {
         onThemeChanged?(theme)
     }
 
+    func setGlass(_ on: Bool) {
+        if let owner = globalSettingsOwner {
+            owner.setGlass(on)
+            preferences.glass = owner.preferences.glass
+            return
+        }
+        preferences.glass = on ? true : nil
+        persistPreferences()
+    }
+
     func openPreferences(tab: CustomizationTab = .general) {
         if let owner = globalSettingsOwner { owner.openPreferences(tab: tab); return }
         settingsTab = tab

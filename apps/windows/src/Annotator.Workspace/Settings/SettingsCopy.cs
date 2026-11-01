@@ -31,6 +31,9 @@ public static class SettingsCopy
     public const string Appearance = "Appearance";
     public const string Theme = "Theme";
     public const string ThemeHelp = "Changes app controls and windows, not your drawings.";
+    public const string GlassToolbar = "Glass toolbar";
+    public const string GlassToolbarHelp =
+        "Your desktop and drawings show softly through the toolbar. When Transparency effects are off in Windows Settings, the toolbar stays solid.";
     public const string ShowTips = "Show tips on screen";
     public const string ShowTipsHelp = "Tips in the top-left corner show your keys and what to do next while you draw.";
     public const string WorkspaceAnimation = "Workspace animation";

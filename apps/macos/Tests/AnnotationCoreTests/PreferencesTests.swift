@@ -151,3 +151,11 @@ func legacyDrawingCursorPreferencesStillRoundTrip(_ style: ToolCursorStyle) thro
     object["laserFade"] = 0.1
     #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).laserFade == 0.5)
 }
+
+@Test func glassIsOffUntilChosenAndRoundTrips() throws {
+    var preferences = WorkspacePreferences()
+    #expect(preferences.glass == nil, "A new profile keeps the solid toolbar.")
+    #expect(!String(decoding: try preferences.data(), as: UTF8.self).contains("glass"))
+    preferences.glass = true
+    #expect(try WorkspacePreferences.read(preferences.data()).glass == true)
+}

@@ -4,7 +4,7 @@ namespace Annotator.Workspace;
 
 /// <summary>
 /// The preferences that Settings > General changes and the profiles of its footer (Mac WorkspaceModel: setMenuBarVisible,
-/// setShareToolStyles, setTheme, setShortcutHints, setAnimationStyle, exportPreferences and importPreferences). The host
+/// setShareToolStyles, setTheme, setGlass, setShortcutHints, setAnimationStyle, exportPreferences and importPreferences). The host
 /// reads the results from <see cref="WorkspaceSnapshot.Preferences"/>: the theme of its windows and the tray icon.
 /// </summary>
 public sealed partial class WorkspaceModel
@@ -48,6 +48,16 @@ public sealed partial class WorkspaceModel
     {
         using ChangeScope scope = Change();
         _preferences.Theme = theme;
+        PersistPreferences();
+    }
+
+    /// <summary>
+    /// Mac setGlass: Glass toolbar draws the toolbar on the system's glass material. Off is the default and is not stored.
+    /// </summary>
+    public void SetGlass(bool on)
+    {
+        using ChangeScope scope = Change();
+        _preferences.Glass = on ? true : null;
         PersistPreferences();
     }
 
