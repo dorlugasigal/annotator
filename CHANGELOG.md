@@ -6,7 +6,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Added
 
-- There's a new Glass toolbar switch in Settings > General. Turn it on and your desktop and drawings show softly through the toolbar, in Light or Dark. Macs with macOS 26 or later get Liquid Glass, and Windows uses Acrylic. If Reduce transparency is on (Mac) or Transparency effects are off (Windows), the toolbar stays solid.
+- There's a new Glass toolbar switch in Settings > General. Turn it on and your desktop and drawings show softly through the toolbar, in Light or Dark, and the chosen tool and anything that's on stand out on raised buttons. Macs with macOS 26 or later get Liquid Glass, and Windows uses Acrylic. If Reduce transparency is on (Mac) or Transparency effects are off (Windows), the toolbar stays solid.
 
 ## 0.2.4 - 2026-11-01
 

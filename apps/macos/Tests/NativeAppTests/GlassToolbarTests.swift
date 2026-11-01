@@ -120,6 +120,91 @@ final class GlassToolbarTests: XCTestCase {
         XCTAssertTrue(Self.chromeViews(in: content.host).isEmpty, "Without glass, the vertical surfaces are solid again")
     }
 
+    /// A toolbar in the toolbar window (no chrome of its own) with a chosen tool and buttons that are on.
+    private func showOnStates(_ model: WorkspaceModel, reduceTransparency: Bool = false) throws -> (NSPanel, NSView) {
+        model.configureToolbar(items: WorkspacePreferences.defaultToolbar.map(ShortcutCommand.tool)
+                               + [.action(.smartDraw), .action(.focusMenu)])
+        model.setPropertiesShown(true)
+        model.beginDrawing()
+        model.tool = .pen
+        model.smartDraw = true
+        model.cursorHalo = true
+        let panel = NSPanel(contentRect: CGRect(x: -10_000, y: -10_000, width: 1300, height: 400),
+                            styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        panel.isReleasedWhenClosed = false
+        panel.appearance = NSAppearance(named: .aqua)
+        let toolbar = ToolbarView(model: model, availableSize: CGSize(width: 1300, height: 900), drawsChrome: false)
+        let host = NSHostingView(rootView: AnyView(toolbar.environment(\._accessibilityReduceTransparency, reduceTransparency)))
+        panel.contentView = host
+        host.layoutSubtreeIfNeeded()
+        host.displayIfNeeded()
+        return (panel, host)
+    }
+
+    /// How opaque the toolbar's own drawing is 3 points inside a control's leading edge, where only its background is.
+    private func backgroundAlpha(of node: NativeAccessibilityNode, in host: NSView) throws -> CGFloat {
+        let window = try XCTUnwrap(host.window)
+        let frame = host.convert(window.convertFromScreen(node.accessibilityFrame()), from: nil)
+        let point = CGPoint(x: frame.minX + 3, y: frame.midY)
+        let bitmap = try XCTUnwrap(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: bitmap)
+        let fromTop = host.isFlipped ? point.y : host.bounds.height - point.y
+        let x = Int((point.x / host.bounds.width * CGFloat(bitmap.pixelsWide)).rounded(.down))
+        let y = Int((fromTop / host.bounds.height * CGFloat(bitmap.pixelsHigh)).rounded(.down))
+        return try XCTUnwrap(bitmap.colorAt(x: x, y: y)).alphaComponent
+    }
+
+    private func control(_ host: NSView, where match: (NativeAccessibilityNode) -> Bool) throws -> NativeAccessibilityNode {
+        try XCTUnwrap(NativeAccessibilityNode.nodes(in: host).first(where: match))
+    }
+
+    /// On glass, the chosen tool and anything that's on sit on raised lenses. The solid toolbar and Reduce transparency
+    /// keep today's light, flat tints.
+    func testChosenAndOnButtonsSitOnLensesOnlyOnGlass() throws {
+        NativeAccessibilityNode.enable()
+        for (glass, reduce) in [(true, false), (false, false), (true, true)] {
+            let (model, cleanup) = try makeModel("lenses")
+            defer { cleanup() }
+            model.setGlass(glass)
+            let (panel, host) = try showOnStates(model, reduceTransparency: reduce)
+            defer { panel.contentView = nil; panel.close() }
+            let lenses = glass && !reduce
+            let smartDraw = try control(host) { $0.accessibilityIdentifier() == "toolbar-action-smartDraw" }
+            let halo = try control(host) { $0.accessibilityIdentifier() == "stop-active-cursorHalo" }
+            let pen = try control(host) { $0.accessibilityRole() == .button && $0.accessibilityLabel() == "Pen" }
+            let state = "glass \(glass), Reduce transparency \(reduce)"
+            if lenses {
+                XCTAssertGreaterThan(try backgroundAlpha(of: smartDraw, in: host), 0.9, "Smart draw is on a solid lens: \(state)")
+                XCTAssertGreaterThan(try backgroundAlpha(of: halo, in: host), 0.9, "The Cursor halo chip is on a solid lens: \(state)")
+                XCTAssertGreaterThan(try backgroundAlpha(of: pen, in: host), 0.5, "The chosen tool is on a lens: \(state)")
+            } else {
+                XCTAssertLessThan(try backgroundAlpha(of: smartDraw, in: host), 0.3, "Smart draw keeps its flat tint: \(state)")
+                XCTAssertLessThan(try backgroundAlpha(of: halo, in: host), 0.3, "The chip keeps its flat tint: \(state)")
+                XCTAssertLessThan(try backgroundAlpha(of: pen, in: host), 0.3, "The chosen tool keeps its flat tint: \(state)")
+            }
+        }
+    }
+
+    /// Glass changes only the look: names, values, identifiers and their order stay the same, as on Windows (WIN-UI-09).
+    func testGlassKeepsTheAccessibilityTree() throws {
+        NativeAccessibilityNode.enable()
+        func tree(glass: Bool) throws -> [String] {
+            let (model, cleanup) = try makeModel("tree")
+            defer { cleanup() }
+            model.setGlass(glass)
+            let (panel, host) = try showOnStates(model)
+            defer { panel.contentView = nil; panel.close() }
+            return NativeAccessibilityNode.nodes(in: host).compactMap { node in
+                guard let role = node.accessibilityRole() else { return nil }
+                return [role.rawValue, node.accessibilityLabel() ?? "", node.accessibilityIdentifier() ?? "",
+                        node.accessibilityValue().map { String(describing: $0) } ?? ""].joined(separator: " | ")
+            }
+        }
+        let solid = try tree(glass: false)
+        XCTAssertTrue(solid.contains { $0.contains("stop-active-cursorHalo") }, "The toolbar shows its on states")
+        XCTAssertEqual(try tree(glass: true), solid)
+    }
+
     func testSettingsPreviewsStaySolid() throws {
         let (model, cleanup) = try makeModel("preview")
         defer { cleanup() }

@@ -105,6 +105,8 @@ struct PendingZoomPresentation {
 struct PendingZoomControl: View {
     let presentation: PendingZoomPresentation
     var compact: Bool
+    /// On the glass toolbar, the control sits on an orange lens (`ToolbarLens`).
+    var lens = false
     let cancel: () -> Void
 
     var body: some View {
@@ -122,7 +124,8 @@ struct PendingZoomControl: View {
             }
             .foregroundStyle(Color.orange)
             .frame(width: compact ? 44 : 130, height: 44)
-            .background(Color.orange.opacity(0.13), in: RoundedRectangle(cornerRadius: 8))
+            .background(lens ? Color.clear : Color.orange.opacity(0.13), in: RoundedRectangle(cornerRadius: 8))
+            .background { if lens { ToolbarLens(role: .state(.orange), radius: 8) } }
             .contentShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
@@ -147,6 +150,9 @@ struct ToolbarView: View {
     private var tools: [Tool] { model.toolbarTools }
     /// Glass toolbar shows only in the real toolbar window; previews, such as the one in Settings, stay solid.
     private var glass: Bool { !drawsChrome && model.preferences.glass == true }
+    /// On glass, the chosen tool and the buttons that are on sit on raised lenses (`ToolbarLens`). The solid toolbar, and
+    /// glass with Reduce transparency on, keep their flat tints.
+    private var lenses: Bool { glass && !reduceTransparency }
     private var items: [ShortcutCommand] { model.toolbarItems }
     @State private var libraryOpen = false
     @State private var librarySection = ToolLibrarySection.shapes
@@ -156,6 +162,7 @@ struct ToolbarView: View {
     @Namespace private var selectionSpace
     @Environment(\.openSettings) private var openSettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     /// Hidden or transitioning toolbars change state at once so their snapshots match what lands.
     private var selectionAnimation: Animation? {
         model.workspaceHidden || model.visibilityAnimating ? nil : Motion.resolve(Motion.snappy, reduceMotion: reduceMotion)
@@ -358,7 +365,7 @@ struct ToolbarView: View {
         let layout = vertical ? AnyLayout(VStackLayout(spacing: 6)) : AnyLayout(HStackLayout(spacing: 6))
         return layout {
             if let pendingZoom {
-                PendingZoomControl(presentation: pendingZoom, compact: compactRail) { model.cancelPendingZoom() }
+                PendingZoomControl(presentation: pendingZoom, compact: compactRail, lens: lenses) { model.cancelPendingZoom() }
             }
             ForEach(activeModes, id: \.self) { mode in
                 Button { mode.stop(in: model) } label: {
@@ -379,9 +386,10 @@ struct ToolbarView: View {
                             }
                         }
                     }
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(lenses ? onSymbol : Color.accentColor)
                     .frame(width: compactRail ? 44 : 130, height: 44)
-                    .background(Color.accentColor.opacity(0.13), in: RoundedRectangle(cornerRadius: 8))
+                    .background(lenses ? Color.clear : Color.accentColor.opacity(0.13), in: RoundedRectangle(cornerRadius: 8))
+                    .background { if lenses { ToolbarLens(role: .on, radius: 8) } }
                     .contentShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
@@ -450,7 +458,8 @@ struct ToolbarView: View {
         } label: {
             Image(systemName: "slider.horizontal.3")
                 .frame(width: metrics.actionSize.width, height: metrics.actionSize.height)
-                .foregroundStyle(expanded ? Color.accentColor : .primary)
+                .background { if lenses && expanded { ToolbarLens(role: .on, radius: 7).padding(.horizontal, -3).padding(.vertical, -2) } }
+                .foregroundStyle(expanded ? (lenses ? onSymbol : Color.accentColor) : .primary)
                 // The whole cell takes the click, not only the symbol's lines.
                 .contentShape(Rectangle())
         }
@@ -571,15 +580,17 @@ struct ToolbarView: View {
             VStack(spacing: 2) {
                 Image(systemName: action.symbol)
                     .font(.system(size: metrics.minimal ? 15 : 17))
-                    .foregroundStyle(on ? Color.accentColor : .primary)
+                    .foregroundStyle(on ? (lenses ? onSymbol : Color.accentColor) : .primary)
                     .frame(height: metrics.minimal ? 22 : 24)
                 if metrics.showsKeyLabels {
-                    Image(systemName: "chevron.down").font(.system(size: 7, weight: .semibold)).foregroundStyle(.secondary)
+                    Image(systemName: "chevron.down").font(.system(size: 7, weight: .semibold))
+                        .foregroundStyle(detailStyle(on: on))
                         .frame(height: 12)
                 }
             }
             .frame(width: metrics.buttonWidth, height: metrics.buttonHeight)
-            .background(on ? Color.accentColor.opacity(0.17) : .clear, in: RoundedRectangle(cornerRadius: radius))
+            .background(on && !lenses ? Color.accentColor.opacity(0.17) : .clear, in: RoundedRectangle(cornerRadius: radius))
+            .background { if on && lenses { ToolbarLens(role: .on, radius: radius) } }
             .contentShape(RoundedRectangle(cornerRadius: radius))
             .animation(selectionAnimation, value: on)
         }
@@ -612,14 +623,15 @@ struct ToolbarView: View {
         return Button { model.performShortcutAction(action) } label: {
             VStack(spacing: 2) {
                 Image(systemName: action.symbol).font(.system(size: metrics.minimal ? 15 : 17))
-                    .foregroundStyle(on ? Color.accentColor : .primary)
+                    .foregroundStyle(on ? (lenses ? onSymbol : Color.accentColor) : .primary)
                     .frame(height: metrics.minimal ? 22 : 24)
                 if metrics.showsKeyLabels {
-                    Text(key.isEmpty ? " " : key).font(.system(size: 10)).foregroundStyle(.secondary)
+                    Text(key.isEmpty ? " " : key).font(.system(size: 10)).foregroundStyle(detailStyle(on: on))
                 }
             }
             .frame(width: metrics.buttonWidth, height: metrics.buttonHeight)
-            .background(on ? Color.accentColor.opacity(0.17) : .clear, in: RoundedRectangle(cornerRadius: radius))
+            .background(on && !lenses ? Color.accentColor.opacity(0.17) : .clear, in: RoundedRectangle(cornerRadius: radius))
+            .background { if on && lenses { ToolbarLens(role: .on, radius: radius) } }
             .contentShape(RoundedRectangle(cornerRadius: radius))
             .animation(selectionAnimation, value: on)
         }
@@ -632,15 +644,28 @@ struct ToolbarView: View {
         .accessibilityIdentifier("toolbar-action-\(action.rawValue)")
     }
 
-    /// One shared highlight that slides between tools instead of jumping.
+    /// One shared highlight that slides between tools instead of jumping. While your apps get the clicks, it steps back.
     private func selectionMarker(radius: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: radius)
-            .fill(Color.accentColor.opacity(model.mode == .draw ? 0.17 : 0))
-            .overlay {
+        Group {
+            if lenses {
+                ToolbarLens(role: .chosen, radius: radius, dimmed: model.mode != .draw)
+            } else {
                 RoundedRectangle(cornerRadius: radius)
-                    .strokeBorder(Color.secondary.opacity(model.mode == .draw ? 0 : 0.3))
+                    .fill(Color.accentColor.opacity(model.mode == .draw ? 0.17 : 0))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: radius)
+                            .strokeBorder(Color.secondary.opacity(model.mode == .draw ? 0 : 0.3))
+                    }
             }
-            .matchedGeometryEffect(id: "tool-selection", in: selectionSpace)
+        }
+        .matchedGeometryEffect(id: "tool-selection", in: selectionSpace)
+    }
+
+    /// The symbol of a button that's on, on its lens.
+    private var onSymbol: Color { ToolbarLens.onForeground }
+    /// Key labels and the menu mark under a symbol that's on, on its lens. Elsewhere they stay secondary.
+    private func detailStyle(on: Bool) -> AnyShapeStyle {
+        on && lenses ? AnyShapeStyle(ToolbarLens.onDetail) : AnyShapeStyle(.secondary)
     }
 
     private func toolButton(_ tool: Tool) -> some View {
@@ -709,9 +734,11 @@ struct ToolbarView: View {
                         .font(.system(size: 9, weight: .medium))
                 }
             }
+            .foregroundStyle(lenses && model.board != .transparent ? AnyShapeStyle(onSymbol) : AnyShapeStyle(.foreground))
             .frame(width: metrics.boardWidth, height: vertical ? (metrics.minimal ? 30 : 36) : metrics.buttonHeight)
-            .background(model.board == .transparent ? Color.clear : Color.accentColor.opacity(0.15),
+            .background(model.board == .transparent || lenses ? Color.clear : Color.accentColor.opacity(0.15),
                         in: RoundedRectangle(cornerRadius: 7))
+            .background { if lenses && model.board != .transparent { ToolbarLens(role: .on, radius: 7) } }
         }
         .buttonStyle(.plain).fixedSize()
         .accessibilityLabel("Board background")
@@ -737,8 +764,9 @@ struct ToolbarView: View {
                 }
             }
                 .frame(width: vertical ? metrics.buttonWidth : metrics.modeWidth, height: vertical ? 36 : metrics.buttonHeight)
-                .background(model.mode == .draw ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1),
+                .background(lenses ? Color.clear : model.mode == .draw ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1),
                             in: RoundedRectangle(cornerRadius: 7))
+                .background { if lenses { ToolbarLens(role: model.mode == .draw ? .state(.green) : .neutral, radius: 7) } }
                 .animation(selectionAnimation, value: model.mode)
         }.buttonStyle(.plain)
             .onChange(of: model.mode) { _, mode in
@@ -797,6 +825,72 @@ private struct ToolbarSurface: ViewModifier {
             .overlay {
                 if !glass { RoundedRectangle(cornerRadius: 15).strokeBorder(Color.primary.opacity(0.07)) }
             }
+    }
+}
+
+/// A chosen or switched-on button on the glass toolbar (WIN-UI-09). A flat tint gets lost in what shows through the
+/// glass, so these buttons sit on a raised lens instead: a body, a bright top edge and a soft shadow. The chosen tool's
+/// lens is clear and slides between tools; anything that's on gets a solid accent lens with white symbols, so it can't
+/// be mistaken for the chosen tool.
+struct ToolbarLens: View {
+    enum Role: Equatable {
+        /// The chosen tool, with a hint of the accent color.
+        case chosen
+        /// Apps get the clicks.
+        case neutral
+        /// Something that's on: a toggle, a menu with something on, the properties, a board or a mode you can stop.
+        case on
+        /// A state color: green while you draw, orange while a zoom waits.
+        case state(Color)
+    }
+
+    /// White symbols and words on the accent lens of something that's on.
+    static let onForeground = Color.white
+    /// Key labels and the menu mark under them.
+    static let onDetail = Color.white.opacity(0.75)
+
+    var role: Role
+    var radius: CGFloat
+    /// While your apps get the clicks, the chosen tool's lens steps back.
+    var dimmed = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        let dark = colorScheme == .dark
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        Group {
+            if role == .on {
+                shape.fill(Color.accentColor)
+                    .overlay {
+                        shape.fill(LinearGradient(colors: [.white.opacity(dark ? 0.20 : 0.28), .white.opacity(0)],
+                                                  startPoint: .top, endPoint: .center))
+                    }
+                    .overlay {
+                        shape.strokeBorder(LinearGradient(colors: [.white.opacity(dark ? 0.45 : 0.60), .white.opacity(0.08)],
+                                                          startPoint: .top, endPoint: .bottom), lineWidth: 1)
+                    }
+            } else {
+                shape.fill(LinearGradient(colors: [.white.opacity(dark ? 0.26 : 0.82), .white.opacity(dark ? 0.10 : 0.50)],
+                                          startPoint: .top, endPoint: .bottom))
+                    .overlay { if let tint { shape.fill(tint.color.opacity(dark ? tint.dark : tint.light)) } }
+                    .overlay {
+                        shape.strokeBorder(LinearGradient(colors: [.white.opacity(dark ? 0.55 : 0.95), .white.opacity(dark ? 0.06 : 0.25)],
+                                                          startPoint: .top, endPoint: .bottom), lineWidth: 1)
+                    }
+            }
+        }
+        .shadow(color: .black.opacity(dark ? 0.35 : 0.16), radius: 3, y: 1.5)
+        .opacity(dimmed ? 0.5 : 1)
+        .accessibilityHidden(true)
+    }
+
+    /// The color over a clear lens, and how much of it shows in Light and Dark.
+    private var tint: (color: Color, light: Double, dark: Double)? {
+        switch role {
+        case .chosen: (.accentColor, 0.10, 0.18)
+        case .neutral, .on: nil
+        case .state(let color): (color, 0.28, 0.38)
+        }
     }
 }
 

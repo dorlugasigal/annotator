@@ -275,8 +275,11 @@ struct CollapsedToolbarButton: View {
     var drawsChrome = true
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     private var metrics: ToolbarMetrics { ToolbarMetrics(model.toolbarSize) }
     private var drawing: Bool { model.mode == .draw }
+    /// On glass, the Draw or Apps mark sits on a lens like the Draw button (`ToolbarLens`).
+    private var lens: Bool { !drawsChrome && model.preferences.glass == true && !reduceTransparency }
 
     static func size(vertical: Bool, toolbarSize: ToolbarSize) -> CGSize {
         let minimal = toolbarSize == .minimal
@@ -336,8 +339,9 @@ struct CollapsedToolbarButton: View {
                     .frame(width: metrics.minimal ? 52 : 58, height: metrics.minimal ? 24 : 28)
             }
         }
-        .background(drawing ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1),
+        .background(lens ? Color.clear : drawing ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1),
                     in: RoundedRectangle(cornerRadius: vertical ? 7 : 14))
+        .background { if lens { ToolbarLens(role: drawing ? .state(.green) : .neutral, radius: vertical ? 7 : 14) } }
         .animation(Motion.resolve(Motion.snappy, reduceMotion: reduceMotion), value: drawing)
     }
 
