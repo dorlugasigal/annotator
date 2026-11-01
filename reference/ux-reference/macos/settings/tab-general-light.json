@@ -221,6 +221,31 @@
        "frame": [
         368,
         524,
+        80,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Glass toolbar"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        1015,
+        523.5,
+        38,
+        18
+       ],
+       "help": "Your desktop and drawings show softly through the toolbar. When Reduce transparency is on in System Settings, the toolbar stays solid.",
+       "identifier": "glass-toolbar",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        368,
+        561.5,
         122.5,
         16
        ],
@@ -231,7 +256,7 @@
        "enabled": true,
        "frame": [
         1015,
-        523.5,
+        561,
         38,
         18
        ],
@@ -244,7 +269,7 @@
        "enabled": true,
        "frame": [
         368,
-        561.5,
+        599,
         130,
         16
        ],
@@ -255,7 +280,7 @@
        "enabled": true,
        "frame": [
         963,
-        557.5,
+        595,
         89,
         24
        ],
@@ -267,7 +292,7 @@
        "enabled": true,
        "frame": [
         369.5,
-        601,
+        638.5,
         239,
         13
        ],
@@ -278,7 +303,7 @@
        "enabled": true,
        "frame": [
         368,
-        655.5,
+        693,
         53.5,
         16
        ],
@@ -289,7 +314,7 @@
        "enabled": false,
        "frame": [
         368,
-        691.5,
+        729,
         147,
         24
        ],
@@ -300,7 +325,7 @@
        "enabled": false,
        "frame": [
         368,
-        736.5,
+        774,
         195,
         16
        ],
@@ -311,7 +336,7 @@
        "enabled": false,
        "frame": [
         1015,
-        736,
+        773.5,
         38,
         18
        ],
@@ -323,7 +348,7 @@
        "enabled": true,
        "frame": [
         368,
-        775.5,
+        813,
         354.5,
         13
        ],
@@ -334,7 +359,7 @@
        "enabled": true,
        "frame": [
         345.5,
-        815,
+        852.5,
         210,
         16
        ],
@@ -346,7 +371,7 @@
        "enabled": true,
        "frame": [
         368,
-        865,
+        902.5,
         47,
         16
        ],
@@ -357,7 +382,7 @@
        "enabled": true,
        "frame": [
         368,
-        902,
+        939.5,
         120,
         16
        ],
@@ -368,7 +393,7 @@
        "enabled": true,
        "frame": [
         1015,
-        901.5,
+        939,
         38,
         18
        ],
@@ -380,7 +405,7 @@
        "enabled": true,
        "frame": [
         368,
-        941,
+        978.5,
         103.5,
         13
        ],
@@ -391,7 +416,7 @@
        "enabled": true,
        "frame": [
         345.5,
-        980.5,
+        1018,
         128,
         16
        ],
@@ -403,7 +428,7 @@
        "enabled": true,
        "frame": [
         368,
-        1021.5,
+        1059,
         88,
         16
        ],
@@ -418,7 +443,7 @@
           1383,
           50,
           11,
-          230
+          222
          ],
          "role": "AXValueIndicator",
          "value": 0
@@ -437,9 +462,9 @@
          "enabled": false,
          "frame": [
           1383,
-          280.5,
+          272.5,
           11,
-          251.5
+          259.5
          ],
          "role": "AXButton",
          "subrole": "AXIncrementPage"
