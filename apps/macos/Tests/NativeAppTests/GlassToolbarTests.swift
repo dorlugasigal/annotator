@@ -47,12 +47,24 @@ final class GlassToolbarTests: XCTestCase {
         chrome.reducesTransparency = { false }
         chrome.frame = CGRect(x: 0, y: 0, width: 112, height: 44)
         let backdrop = try XCTUnwrap(chrome.subviews.first)
-        XCTAssertEqual(backdrop.frame, chrome.bounds)
+        XCTAssertEqual(backdrop.frame, chrome.bounds, "The glass keeps the toolbar's size")
         if #available(macOS 26, *) {
-            let glass = try XCTUnwrap(backdrop as? NSGlassEffectView, "Liquid Glass on macOS 26 and later")
+            let glass = try XCTUnwrap(backdrop.subviews.first as? NSGlassEffectView, "Liquid Glass on macOS 26 and later")
+            XCTAssertEqual(glass.style, .regular)
+            XCTAssertEqual(glass.frame, backdrop.bounds)
             XCTAssertEqual(glass.cornerRadius, 15)
+            XCTAssertEqual(backdrop.layer?.cornerRadius, 15)
+            XCTAssertEqual(backdrop.layer?.masksToBounds, true, "The glass's edge light stays inside the toolbar")
             chrome.cornerRadius = .greatestFiniteMagnitude
             XCTAssertEqual(glass.cornerRadius, 22, "The one-button toolbar is a capsule")
+            XCTAssertEqual(backdrop.layer?.cornerRadius, 22)
+
+            chrome.appearance = NSAppearance(named: .aqua)
+            let light = try XCTUnwrap(glass.contentView?.layer?.backgroundColor, "A light body keeps labels readable")
+            XCTAssertEqual(light.alpha, ToolbarGlass.bodyOpacity, accuracy: 0.001)
+            chrome.appearance = NSAppearance(named: .darkAqua)
+            let dark = try XCTUnwrap(glass.contentView?.layer?.backgroundColor)
+            XCTAssertNotEqual(light, dark, "The body follows Light and Dark")
         } else {
             let blur = try XCTUnwrap(backdrop as? NSVisualEffectView, "A behind-window blur on macOS 14 and 15")
             XCTAssertEqual(blur.blendingMode, .behindWindow)
@@ -76,9 +88,22 @@ final class GlassToolbarTests: XCTestCase {
         let content = try XCTUnwrap(app.toolbarWindow?.contentView as? ToolbarContentView)
         content.chrome.reducesTransparency = { false }
         XCTAssertFalse(content.chrome.showsGlass, "Glass toolbar is off at first")
+        let panel = try XCTUnwrap(app.toolbarWindow as? InspectorPanel)
+        XCTAssertTrue(panel.hasShadow, "The solid toolbar keeps its shadow")
+        XCTAssertFalse(panel.isKeyWindow)
+        XCTAssertFalse(panel._hasActiveAppearanceIgnoringKeyFocus(), "The solid toolbar follows the window's own state")
         model.setGlass(true)
         XCTAssertTrue(content.chrome.showsGlass)
         XCTAssertEqual(content.chrome.subviews.first?.frame, content.chrome.bounds, "The glass fills the toolbar")
+        XCTAssertFalse(panel.hasShadow, "The window shadow would draw a dark line around the glass")
+        content.chrome.reducesTransparency = { true }
+        XCTAssertTrue(panel.hasShadow, "Reduce transparency brings the solid toolbar and its shadow back")
+        content.chrome.reducesTransparency = { false }
+        XCTAssertFalse(panel.hasShadow)
+        if #available(macOS 26, *) {
+            XCTAssertTrue(panel._hasActiveAppearanceIgnoringKeyFocus(), "The glass keeps its active look without the keyboard")
+            XCTAssertFalse(panel.isKeyWindow, "The toolbar doesn't take the keyboard for it")
+        }
 
         model.setToolbarOrientation(.vertical)
         model.setPropertiesShown(true)
@@ -89,6 +114,8 @@ final class GlassToolbarTests: XCTestCase {
 
         model.setGlass(false)
         XCTAssertFalse(content.chrome.showsGlass)
+        XCTAssertFalse(panel._hasActiveAppearanceIgnoringKeyFocus())
+        XCTAssertTrue(panel.hasShadow, "The shadow comes back with the solid toolbar")
         try await Task.sleep(for: .milliseconds(200))
         XCTAssertTrue(Self.chromeViews(in: content.host).isEmpty, "Without glass, the vertical surfaces are solid again")
     }

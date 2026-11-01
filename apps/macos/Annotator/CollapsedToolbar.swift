@@ -52,6 +52,8 @@ final class ToolbarChromeView: NSView {
     var reducesTransparency: @MainActor () -> Bool = { ToolbarGlass.reducesTransparency } {
         didSet { refreshBackdrop() }
     }
+    /// Runs when the glass appears or goes, for example after Reduce transparency changes.
+    var onGlassChanged: (() -> Void)?
     private var backdrop: NSView?
     override var isOpaque: Bool { false }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
@@ -80,6 +82,7 @@ final class ToolbarChromeView: NSView {
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         needsDisplay = true
+        if let backdrop { ToolbarGlass.restyle(backdrop, for: effectiveAppearance) }
     }
 
     override func setFrameSize(_ newSize: NSSize) {
@@ -91,6 +94,8 @@ final class ToolbarChromeView: NSView {
     @objc private func displayOptionsChanged() { refreshBackdrop() }
 
     private func refreshBackdrop() {
+        let showed = showsGlass
+        defer { if showsGlass != showed { onGlassChanged?() } }
         if glass && !reducesTransparency() {
             if backdrop == nil {
                 let view = ToolbarGlass.makeBackdrop()
@@ -98,6 +103,7 @@ final class ToolbarChromeView: NSView {
                 view.autoresizingMask = [.width, .height]
                 addSubview(view)
                 backdrop = view
+                ToolbarGlass.restyle(view, for: effectiveAppearance)
             }
             shapeBackdrop()
         } else {
@@ -130,14 +136,29 @@ final class ToolbarChromeView: NSView {
 /// The system draws both, so they ask for no permission and add no work of Annotator's own (DV-14).
 @MainActor
 enum ToolbarGlass {
+    /// How much of the window color stays in the glass, so labels stay readable over white, black or busy screens.
+    static let bodyOpacity: CGFloat = 0.25
     static var reducesTransparency: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency }
     private static var masks: [CGFloat: NSImage] = [:]
 
+    /// On macOS 26 and later: Liquid Glass with a light body of the window color, clipped to the toolbar's shape with the
+    /// solid toolbar's hairline edge. The clip keeps the glass's edge light inside the toolbar, so the window never cuts it
+    /// off, and the toolbar keeps its size. The toolbar window keeps the glass in its active look (`InspectorPanel`).
     static func makeBackdrop() -> NSView {
         if #available(macOS 26, *) {
+            let shape = NSView()
+            shape.wantsLayer = true
+            shape.layer?.cornerCurve = .continuous
+            shape.layer?.masksToBounds = true
+            shape.layer?.borderWidth = 1
             let glass = NSGlassEffectView()
             glass.style = .regular
-            return glass
+            glass.autoresizingMask = [.width, .height]
+            let body = NSView()
+            body.wantsLayer = true
+            glass.contentView = body
+            shape.addSubview(glass)
+            return shape
         }
         let blur = NSVisualEffectView()
         blur.material = .popover
@@ -147,10 +168,21 @@ enum ToolbarGlass {
     }
 
     static func shape(_ backdrop: NSView, radius: CGFloat) {
-        if #available(macOS 26, *), let glass = backdrop as? NSGlassEffectView {
+        if #available(macOS 26, *), let glass = backdrop.subviews.first as? NSGlassEffectView {
+            backdrop.layer?.cornerRadius = radius
+            glass.frame = backdrop.bounds
             glass.cornerRadius = radius
         } else if let blur = backdrop as? NSVisualEffectView {
             blur.maskImage = mask(radius: radius.rounded())
+        }
+    }
+
+    /// The body and edge colors for Light or Dark.
+    static func restyle(_ backdrop: NSView, for appearance: NSAppearance) {
+        guard #available(macOS 26, *), let glass = backdrop.subviews.first as? NSGlassEffectView else { return }
+        appearance.performAsCurrentDrawingAppearance {
+            backdrop.layer?.borderColor = NSColor.labelColor.withAlphaComponent(0.07).cgColor
+            glass.contentView?.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(bodyOpacity).cgColor
         }
     }
 
