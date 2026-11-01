@@ -1,11 +1,13 @@
 using System.Globalization;
+using System.Xml.Linq;
 
 namespace Annotator.App.Tests;
 
 /// <summary>
 /// Glass toolbar (WIN-UI-09): its switch in Settings &gt; General as the Mac names it, and the toolbar's glass and raised
-/// lenses, which add nothing for UI Automation and stay solid in a contrast theme. Like <see cref="WindowAccessibilityTests"/>, the checks start
-/// the development build in its UX reference mode, off screen and never activated, so they are explicit:
+/// lenses, which add nothing for UI Automation and stay solid in a contrast theme. Like
+/// <see cref="WindowAccessibilityTests"/>, the checks that start the development build in its UX reference mode, off screen
+/// and never activated, are explicit:
 /// <code>
 /// dotnet test --project tests/Annotator.App.Tests -- --explicit only
 /// </code>
@@ -15,6 +17,9 @@ public sealed class GlassToolbarTests
     /// <summary>The Mac's help with the Windows term for Reduce transparency (docs/parity.md).</summary>
     private const string Help =
         "Your desktop and drawings show softly through the toolbar. When Transparency effects are off in Windows Settings, the toolbar stays solid.";
+
+    private static readonly XNamespace s_xaml = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+    private static readonly XNamespace s_x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
     private static readonly string[] s_toolbarStates =
         ["toolbar/expanded-horizontal-properties", "toolbar/expanded-vertical-properties", "toolbar/collapsed-expanded-horizontal-draw"];
@@ -84,6 +89,27 @@ public sealed class GlassToolbarTests
             Assert.Skip("Windows doesn't allow transparency on this computer now, so the toolbar is solid.");
         }
         Assert.Equal(10, Count(glass, "GlassLens"));
+    }
+
+    /// <summary>
+    /// A symbol that's on, on its lens (WIN-UI-09): the accent in Light; in Dark the accent mixed 35% toward white, as the Mac
+    /// blends it, so it stays readable on the dark glass.
+    /// </summary>
+    [Fact]
+    public void ALensSymbolIsTheAccentLightenedInDark()
+    {
+        XDocument app = XDocument.Load(Path.Combine(Repository.AppSources, "App.xaml"));
+        XElement Resource(string theme, string key) => app.Descendants(s_xaml + "ResourceDictionary")
+            .Single(dictionary => (string?)dictionary.Attribute(s_x + "Key") == theme).Elements()
+            .Single(element => (string?)element.Attribute(s_x + "Key") == key);
+        Assert.Equal("{ThemeResource AnnotatorAccentColor}", Resource("Light", "AnnotatorLensAccentBrush").Attribute("Color")?.Value);
+        string accent = Resource("Dark", "AnnotatorAccentColor").Value;
+        byte Lifted(int index)
+        {
+            byte channel = Convert.ToByte(accent.Substring(index, 2), 16);
+            return (byte)Math.Round(channel + (255 - channel) * 0.35);
+        }
+        Assert.Equal($"#FF{Lifted(3):X2}{Lifted(5):X2}{Lifted(7):X2}", Resource("Dark", "AnnotatorLensAccentBrush").Attribute("Color")?.Value);
     }
 
     [Fact(Explicit = true)]

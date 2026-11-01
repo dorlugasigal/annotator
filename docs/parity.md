@@ -450,12 +450,14 @@ platform that departs from the specifications, unless an ADR changes them.
   background color, in Light and Dark. The Mac uses Liquid Glass on macOS 26
   and later and a behind-window blur on macOS 14 and 15; Windows uses
   Acrylic clipped to the same shapes, with a light rim drawn on top. Both
-  keep the toolbar's size and shapes, mix in 25% of the window background
-  color so labels stay readable over white, black or busy screens, keep the
-  solid toolbar's hairline edge, drop the window shadow, and keep the glass
-  in its active look while another window has the keyboard. When Reduce
-  transparency (Mac) or Transparency effects off, a contrast theme or the
-  energy saver (Windows) asks for it, the toolbar is solid again, at once.
+  keep the toolbar's size and shapes, keep labels readable over white,
+  black or busy screens (the Mac mixes in 25% of the window background
+  color; Windows sets the glass to the theme's brightness, a light or dark
+  gray, which gives the same colors), keep the solid toolbar's hairline
+  edge, drop the window shadow, and keep the glass in its active look while
+  another window has the keyboard. When Reduce transparency (Mac) or
+  Transparency effects off, a contrast theme or the energy saver (Windows)
+  asks for it, the toolbar is solid again, at once.
   Only system materials are used: no screen capture, permission or extra
   rendering work (DV-14).
   On glass, a flat tint gets lost, so the chosen tool and anything that's on

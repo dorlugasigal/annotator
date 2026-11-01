@@ -16,8 +16,8 @@ internal sealed record GlassSurface(Grid Surface, Grid Layer, double CornerRadiu
 
 /// <summary>
 /// Glass toolbar's material for one toolbar window (WIN-UI-09): Windows' Acrylic behind each surface (<see cref="GlassBackdrop"/>),
-/// clipped to the surface's corners (<see cref="SystemBackdropElement"/>), with a light rim and a soft highlight at the top drawn
-/// over it, the Mac's Liquid Glass edge. Windows blurs what is behind the window: Annotator reads no screen pixels and runs no
+/// clipped to the surface's corners (<see cref="SystemBackdropElement"/>), with a light rim drawn over it, the Mac's Liquid
+/// Glass edge. Windows blurs what is behind the window: Annotator reads no screen pixels and runs no
 /// shader of its own (DV-14). It also makes the raised lenses of the chosen tool and the buttons that are on
 /// (<see cref="Lens"/>), in the build's theme.
 /// <para>
@@ -52,10 +52,9 @@ internal sealed partial class GlassMaterial
     }
 
     /// <summary>
-    /// Puts the glass in a surface: the layer over its material, which starts with a soft highlight that fades out toward the
-    /// middle. Returns that layer, for everything else on the surface. A fade must change the layer, never the material: Windows
-    /// blurs the material only while it is fully opaque. The highlight takes the surface's pointer presses, as the solid
-    /// background does, so a drag can start anywhere on the surface.
+    /// Puts the glass in a surface: the layer over its material, for everything else on the surface. A fade must change the
+    /// layer, never the material: Windows blurs the material only while it is fully opaque. The layer's clear background takes
+    /// the surface's pointer presses, as the solid background does, so a drag can start anywhere on the surface.
     /// </summary>
     public Grid Layer(Panel surface, double cornerRadius)
     {
@@ -69,7 +68,7 @@ internal sealed partial class GlassMaterial
         layer.Children.Add(new Border
         {
             CornerRadius = new CornerRadius(cornerRadius),
-            Background = Gradient(White(Dark ? 0.08 : 0.28), White(0), 0.6),
+            Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
         });
         surface.Children.Add(layer);
         return layer;
@@ -112,10 +111,10 @@ internal sealed partial class GlassMaterial
     }
 
     /// <summary>
-    /// What a snapshot shows for the material, which it can't hold (<see cref="ToolbarGlass.TintUnder"/>): the theme's tint, as
-    /// the material looks without its blur.
+    /// What a snapshot shows for the material, which it can't hold (<see cref="ToolbarGlass.TintUnder"/>): the theme's gray that
+    /// sets the glass's brightness (<see cref="GlassBackdrop"/>), mostly opaque, as the material looks without its blur.
     /// </summary>
-    public RGBA SnapshotTint => Dark ? Gray(0x2A, 0.78) : Gray(0xF6, 0.78);
+    public RGBA SnapshotTint => Dark ? Gray(0x58, 0.85) : Gray(0xCA, 0.85);
 
     /// <summary>A raised lens for <paramref name="role"/> in this build's theme (WIN-UI-09, <see cref="ToolbarLens"/>).</summary>
     public GlassLens Lens(ToolbarLensRole role, double cornerRadius, double outsetX = 0, double outsetY = 0) =>
@@ -140,13 +139,16 @@ internal sealed partial class GlassMaterial
         return (new GlassLens(draw, cornerRadius), Look(ToolbarLensRole.Neutral).ShadowOpacity / draw.ShadowOpacity);
     }
 
-    /// <summary>The Liquid Glass edge, over a surface's controls: a light rim just inside its outline, brightest at the top.</summary>
+    /// <summary>
+    /// The Liquid Glass edge, over a surface's controls: a light rim just inside its outline, a little brighter at the top, as
+    /// strong as the Mac's measures.
+    /// </summary>
     public UIElement Rim(double cornerRadius) => new Border
     {
         Margin = new Thickness(1),
         BorderThickness = new Thickness(1),
         CornerRadius = new CornerRadius(Math.Max(0, cornerRadius - 1)),
-        BorderBrush = Gradient(White(Dark ? 0.24 : 0.85), White(Dark ? 0.06 : 0.3), 1),
+        BorderBrush = Gradient(White(Dark ? 0.14 : 0.3), White(Dark ? 0.06 : 0.2), 1),
         IsHitTestVisible = false,
     };
 
@@ -213,10 +215,10 @@ internal sealed partial class GlassMaterial
 }
 
 /// <summary>
-/// Windows' Acrylic behind one glass surface, with 25% of the theme's window color mixed in so labels stay readable over white,
-/// black or busy screens (WIN-UI-09). It makes its controller when its surface connects and closes it when the surface goes, as
-/// WinUI's own DesktopAcrylicBackdrop does, and follows the theme without connecting again. It stays active while another app
-/// has the keyboard, since the toolbar never activates, so it doesn't turn solid while the person draws.
+/// Windows' Acrylic behind one glass surface, in the Mac's colors (WIN-UI-09, <see cref="Tint"/>). It makes its controller when
+/// its surface connects and closes it when the surface goes, as WinUI's own DesktopAcrylicBackdrop does, and follows the theme
+/// without connecting again. It stays active while another app has the keyboard, since the toolbar never activates, so it
+/// doesn't turn solid while the person draws.
 /// </summary>
 internal sealed partial class GlassBackdrop : SystemBackdrop
 {
@@ -274,14 +276,19 @@ internal sealed partial class GlassBackdrop : SystemBackdrop
         s_closed.Add(disconnectedTarget);
     }
 
-    /// <summary>25% of the window color over the blur; the window color itself whenever Windows can't draw the material.</summary>
+    /// <summary>
+    /// The glass's look (WIN-UI-09): Acrylic keeps the colors behind the toolbar and sets their brightness to the theme's
+    /// gray, with a little of that gray mixed in. Measured over the same purple (#744BA0), it gives the Mac's Liquid Glass
+    /// with 25% of the window color: about #D9BAFA in Light and #67478B in Dark, where the Mac shows #DCB7FB and #6A458A.
+    /// The fixed brightness keeps labels readable over white, black or busy screens. Whenever Windows can't draw the
+    /// material, it shows the window color.
+    /// </summary>
     private void Tint(DesktopAcrylicController controller)
     {
-        WinColor window = _dark ? WinColor.FromArgb(255, 0x1E, 0x1E, 0x1E) : WinColor.FromArgb(255, 0xFF, 0xFF, 0xFF);
-        controller.TintColor = window;
-        controller.TintOpacity = 0.25f;
-        // Acrylic's own safeguard: the window color's brightness keeps labels readable over a plain white or black screen.
-        controller.LuminosityOpacity = _dark ? 0.6f : 0.5f;
-        controller.FallbackColor = window;
+        byte gray = _dark ? (byte)0x58 : (byte)0xCA;
+        controller.TintColor = WinColor.FromArgb(255, gray, gray, gray);
+        controller.TintOpacity = _dark ? 0.2f : 0.1f;
+        controller.LuminosityOpacity = 1;
+        controller.FallbackColor = _dark ? WinColor.FromArgb(255, 0x1E, 0x1E, 0x1E) : WinColor.FromArgb(255, 0xFF, 0xFF, 0xFF);
     }
 }

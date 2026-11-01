@@ -11,7 +11,7 @@ namespace Annotator.App.Toolbar;
 
 /// <summary>
 /// Glass toolbar's raised lens behind a chosen or highlighted button (WIN-UI-09, <see cref="ToolbarLens"/>): a soft shadow,
-/// the body, the role's tint or sheen, and a 1-point rim just inside the edge. It is decoration: it takes no room, input or
+/// the body, the role's faint tint and a 1-point rim just inside the edge. It is decoration: it takes no room, input or
 /// UI Automation node, fills what its parent gives it (plus an outset) and casts its shadow past that.
 /// </summary>
 internal sealed partial class GlassLens : Grid
@@ -40,10 +40,6 @@ internal sealed partial class GlassLens : Grid
         {
             Tint = Shape(new Border { Background = new SolidColorBrush(Color(tint)) });
             Children.Add(Tint);
-        }
-        if (look.Sheen is { } sheen)
-        {
-            Children.Add(Shape(new Border { Background = Gradient(sheen, sheen with { Alpha = 0 }, 0.5) }));
         }
         Children.Add(Shape(new Border { BorderThickness = new Thickness(1), BorderBrush = Gradient(look.RimTop, look.RimBottom, 1) }));
         Radius = cornerRadius;

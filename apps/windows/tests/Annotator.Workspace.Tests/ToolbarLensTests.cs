@@ -16,48 +16,39 @@ public sealed class ToolbarLensTests
     [Theory]
     [InlineData(false, 0.82, 0.5, 0.95, 0.25)]
     [InlineData(true, 0.26, 0.1, 0.55, 0.06)]
-    public void TheBodyAndRimAreWhiteFadingDownward(bool dark, double bodyTop, double bodyBottom, double rimTop, double rimBottom)
+    public void EveryLensHasTheSameWhiteBodyAndRim(bool dark, double bodyTop, double bodyBottom, double rimTop, double rimBottom)
     {
-        foreach (ToolbarLensRole role in new[] { ToolbarLensRole.Chosen, ToolbarLensRole.Neutral, ToolbarLensRole.Draw, ToolbarLensRole.Waiting })
+        foreach (ToolbarLensRole role in Enum.GetValues<ToolbarLensRole>())
         {
             ToolbarLensLook look = Look(role, dark);
             Assert.Equal(new RGBA(1, 1, 1, bodyTop), look.BodyTop);
             Assert.Equal(new RGBA(1, 1, 1, bodyBottom), look.BodyBottom);
             Assert.Equal(new RGBA(1, 1, 1, rimTop), look.RimTop);
             Assert.Equal(new RGBA(1, 1, 1, rimBottom), look.RimBottom);
-            Assert.Null(look.Sheen);
         }
     }
 
     [Theory]
     [InlineData(ToolbarLensRole.Chosen, false, 0.1)]
     [InlineData(ToolbarLensRole.Chosen, true, 0.18)]
-    [InlineData(ToolbarLensRole.Draw, false, 0.28)]
-    [InlineData(ToolbarLensRole.Draw, true, 0.38)]
-    [InlineData(ToolbarLensRole.Waiting, false, 0.28)]
-    [InlineData(ToolbarLensRole.Waiting, true, 0.38)]
-    public void EachRoleTintsTheBodyWithItsColor(ToolbarLensRole role, bool dark, double alpha)
+    [InlineData(ToolbarLensRole.On, false, 0.1)]
+    [InlineData(ToolbarLensRole.On, true, 0.18)]
+    [InlineData(ToolbarLensRole.Draw, false, 0.12)]
+    [InlineData(ToolbarLensRole.Draw, true, 0.16)]
+    [InlineData(ToolbarLensRole.Waiting, false, 0.12)]
+    [InlineData(ToolbarLensRole.Waiting, true, 0.16)]
+    public void EachRoleAddsAFaintTint(ToolbarLensRole role, bool dark, double alpha)
     {
-        RGBA color = role switch { ToolbarLensRole.Chosen => Accent, ToolbarLensRole.Draw => Green, _ => Orange };
+        RGBA color = role switch { ToolbarLensRole.Chosen or ToolbarLensRole.On => Accent, ToolbarLensRole.Draw => Green, _ => Orange };
         Assert.Equal(color with { Alpha = alpha }, Look(role, dark).Tint);
         Assert.Null(Look(ToolbarLensRole.Neutral, dark).Tint);
     }
 
     [Theory]
-    [InlineData(false, 0.28, 0.6, 0.16)]
-    [InlineData(true, 0.2, 0.45, 0.35)]
-    public void AnOnLensIsSolidAccentWithAWhiteSheen(bool dark, double sheen, double rimTop, double shadow)
-    {
-        ToolbarLensLook look = Look(ToolbarLensRole.On, dark);
-        Assert.Equal(Accent, look.BodyTop);
-        Assert.Equal(Accent, look.BodyBottom);
-        Assert.Null(look.Tint);
-        Assert.Equal(new RGBA(1, 1, 1, sheen), look.Sheen);
-        Assert.Equal(new RGBA(1, 1, 1, rimTop), look.RimTop);
-        Assert.Equal(new RGBA(1, 1, 1, 0.08), look.RimBottom);
-        // Nothing shows through a solid body, so its shadow is the whole black 16% or 35%.
-        Assert.Equal(shadow, look.ShadowOpacity, 6);
-    }
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AnythingThatsOnSitsOnTheChosenToolsLens(bool dark) =>
+        Assert.Equal(Look(ToolbarLensRole.Chosen, dark), Look(ToolbarLensRole.On, dark));
 
     [Theory]
     [InlineData(false, 0.16)]
@@ -66,11 +57,10 @@ public sealed class ToolbarLensTests
     {
         double neutral = Look(ToolbarLensRole.Neutral, dark).ShadowOpacity;
         Assert.Equal(black * (dark ? 0.18 : 0.66), neutral, 6);
-        // A tint makes the lens more opaque, and its shadow darker, but never darker than a solid lens's.
-        foreach (ToolbarLensRole role in new[] { ToolbarLensRole.Chosen, ToolbarLensRole.Draw, ToolbarLensRole.Waiting })
+        // A tint makes the lens a little more opaque, and its shadow a little darker.
+        foreach (ToolbarLensRole role in new[] { ToolbarLensRole.Chosen, ToolbarLensRole.On, ToolbarLensRole.Draw, ToolbarLensRole.Waiting })
         {
-            double shadow = Look(role, dark).ShadowOpacity;
-            Assert.InRange(shadow, neutral, black);
+            Assert.InRange(Look(role, dark).ShadowOpacity, neutral, black);
         }
     }
 

@@ -546,19 +546,8 @@ internal sealed partial class ToolbarWindow
     }
 
     /// <summary>The glyph over the key label, as the Mac's VStack(spacing: 2) of a tool or button.</summary>
-    private static MacStack Stacked(FrameworkElement glyph, ToolbarMetrics metrics, string key) =>
-        Stacked(glyph, metrics, key, lensed: false, out _, out _);
-
-    /// <summary>
-    /// The glyph over the key label. A <paramref name="lensed"/> button can be "On" on Glass toolbar's accent lens, which
-    /// shows the key in white at 75% (WIN-UI-09): <paramref name="onKey"/> lies over <paramref name="plainKey"/>, hidden,
-    /// for the change between them.
-    /// </summary>
-    private static MacStack Stacked(FrameworkElement glyph, ToolbarMetrics metrics, string key, bool lensed, out TextBlock? plainKey,
-                                    out TextBlock? onKey)
+    private static MacStack Stacked(FrameworkElement glyph, ToolbarMetrics metrics, string key)
     {
-        plainKey = null;
-        onKey = null;
         glyph.HorizontalAlignment = HorizontalAlignment.Center;
         glyph.VerticalAlignment = VerticalAlignment.Center;
         var host = new Grid { Height = metrics.Minimal ? 22 : 24 };
@@ -569,26 +558,14 @@ internal sealed partial class ToolbarWindow
         {
             TextBlock label = ToolbarParts.Label(key.Length == 0 ? " " : key, 10, "AnnotatorSecondaryText");
             label.HorizontalAlignment = HorizontalAlignment.Center;
-            if (!lensed)
-            {
-                stack.Children.Add(label);
-                return stack;
-            }
-            TextBlock white = ToolbarParts.Label(label.Text, 10, "AnnotatorOnColorSecondaryText");
-            white.HorizontalAlignment = HorizontalAlignment.Center;
-            var keys = new Grid { HorizontalAlignment = HorizontalAlignment.Center };
-            keys.Children.Add(label);
-            keys.Children.Add(white);
-            stack.Children.Add(keys);
-            plainKey = label;
-            onKey = white;
+            stack.Children.Add(label);
         }
         return stack;
     }
 
     /// <summary>
     /// Mac actionButton: a toolbar button such as Spotlight, Cursor halo or Smart draw, On or Off. Buttons whose feature is not
-    /// built are unavailable. On Glass toolbar, On is a raised accent lens with a white symbol and key (WIN-UI-09).
+    /// built are unavailable. On Glass toolbar, On is a raised lens under the accent symbol (WIN-UI-09).
     /// </summary>
     private ToggleButton ActionButton(ToolbarLook look, WorkspaceSnapshot snapshot, ShortcutAction action)
     {
@@ -601,7 +578,7 @@ internal sealed partial class ToolbarWindow
         var grid = new Grid { Width = metrics.ButtonWidth, Height = metrics.ButtonHeight };
         grid.Children.Add(marker);
         var glyph = new Grid { IsHitTestVisible = false };
-        grid.Children.Add(Stacked(glyph, metrics, key, _glass is not null, out TextBlock? plainKey, out TextBlock? onKey));
+        grid.Children.Add(Stacked(glyph, metrics, key));
         // Its frame for UI Automation is the button's own: the On lens's shadow reaches past it.
         var button = new ParityToggleButton
         {
@@ -616,14 +593,12 @@ internal sealed partial class ToolbarWindow
         // Mac: the on state's fill and accent symbol change with selectionAnimation.
         double size = metrics.Minimal ? 15 : 17;
         FrameworkElement plain = Glyphs.ForSymbol(action.Symbol, size, button.IsEnabled ? "AnnotatorGlyph" : "AnnotatorGlyphDisabled");
-        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, _glass is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphOnColor");
+        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, _glass is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphLensAccent");
         glyph.Children.Add(plain);
         glyph.Children.Add(accent);
         Tween fill = Tween.Opacity(marker, 0);
         Tween plainShown = Tween.Opacity(plain, 1);
         Tween accentShown = Tween.Opacity(accent, 0);
-        Tween? plainKeyShown = plainKey is null ? null : Tween.Opacity(plainKey, 1);
-        Tween? onKeyShown = onKey is null ? null : Tween.Opacity(onKey, 0);
         AutomationProperties.SetName(button, action.Label);
         AutomationProperties.SetAutomationId(button, $"toolbar-action-{action.RawValue}");
         ToolbarParts.Help(button, key.Length == 0 ? action.Detail : $"{action.Detail} Key {key}.",
@@ -647,8 +622,6 @@ internal sealed partial class ToolbarWindow
             fill.To(on ? 1 : 0, motion);
             plainShown.To(on ? 0 : 1, motion);
             accentShown.To(on ? 1 : 0, motion);
-            plainKeyShown?.To(on ? 0 : 1, motion);
-            onKeyShown?.To(on ? 1 : 0, motion);
         });
         return button;
     }
@@ -676,8 +649,8 @@ internal sealed partial class ToolbarWindow
     }
 
     /// <summary>
-    /// Mac boardMenu: cycles Desktop, Whiteboard and Blackboard on the drawing display. On Glass toolbar, White or Black is a
-    /// raised accent lens with a white symbol and word (WIN-UI-09).
+    /// Mac boardMenu: cycles Desktop, Whiteboard and Blackboard on the drawing display. On Glass toolbar, White or Black sits
+    /// on a raised lens, its symbol and word in the accent color (WIN-UI-09).
     /// </summary>
     private ParityButton BoardButton(ToolbarLook look)
     {
@@ -693,16 +666,16 @@ internal sealed partial class ToolbarWindow
         FrameworkElement glyph = ToolbarParts.SymbolGlyph(symbol, metrics.Minimal, (look.Board == Board.Blackboard, lensed is null) switch
         {
             (true, true) => "AnnotatorGlyphFilled",
-            (true, false) => "AnnotatorGlyphOnColorFilled",
+            (true, false) => "AnnotatorGlyphLensAccentFilled",
             (false, true) => "AnnotatorGlyph",
-            (false, false) => "AnnotatorGlyphOnColor",
+            (false, false) => "AnnotatorGlyphLensAccent",
         });
         glyph.HorizontalAlignment = HorizontalAlignment.Center;
         stack.Children.Add(glyph);
         if (!metrics.Minimal)
         {
             TextBlock text = ToolbarParts.Label(look.Board switch { Board.Desktop => "Desk", Board.Whiteboard => "White", _ => "Black" },
-                9, lensed is null ? "AnnotatorPrimaryText" : "AnnotatorOnColorText", FontWeights.Medium);
+                9, lensed is null ? "AnnotatorPrimaryText" : "AnnotatorLensAccentText", FontWeights.Medium);
             text.HorizontalAlignment = HorizontalAlignment.Center;
             stack.Children.Add(text);
         }
@@ -948,14 +921,14 @@ internal sealed partial class ToolbarWindow
 
     /// <summary>
     /// Mac propertiesButton: shows or hides the properties below or beside the tools. On Glass toolbar, shown properties put a
-    /// raised accent lens behind it, a little larger than its frame, with a white symbol (WIN-UI-09).
+    /// raised lens behind it, a little larger than its frame, under the accent symbol (WIN-UI-09).
     /// </summary>
     private ParityButton PropertiesButton(ToolbarLook look)
     {
         (double width, double height) = look.Metrics.ActionSize;
         GlassMaterial? lensed = look.Expanded ? _glass : null;
         FrameworkElement glyph = ToolbarParts.SymbolGlyph("slider.horizontal.3",
-            style: !look.Expanded ? "AnnotatorGlyph" : lensed is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphOnColor");
+            style: !look.Expanded ? "AnnotatorGlyph" : lensed is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphLensAccent");
         var host = new ContentControl { Content = glyph, IsTabStop = false, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
         UIElement content = lensed is null ? host
             : lensed.OnLens(host, ToolbarLensRole.On, ToolbarLens.PropertiesRadius, ToolbarLens.PropertiesOutsetX, ToolbarLens.PropertiesOutsetY);
@@ -1009,14 +982,15 @@ internal sealed partial class ToolbarWindow
 
     /// <summary>
     /// One mode's Stop button: its symbol, title and a cross in the accent color on a 13% accent fill, 130 by 44 points, or
-    /// 44 by 44 with "Spot on" and the like on a compact rail. On Glass toolbar they are white on a raised accent lens
-    /// (WIN-UI-09).
+    /// 44 by 44 with "Spot on" and the like on a compact rail. On Glass toolbar it sits on a raised lens, the symbol in the
+    /// accent color and the words and cross in the primary color, so they read easily (WIN-UI-09).
     /// </summary>
     private ParityButton StopButton(ToolbarLook look, ActiveToolbarMode mode)
     {
         bool lensed = _glass is not null;
-        string accent = lensed ? "AnnotatorGlyphOnColor" : "AnnotatorGlyphAccent";
-        string words = lensed ? "AnnotatorOnColorText" : "AnnotatorAccentText";
+        string accent = lensed ? "AnnotatorGlyphLensAccent" : "AnnotatorGlyphAccent";
+        string cross = lensed ? "AnnotatorGlyph" : "AnnotatorGlyphAccent";
+        string words = lensed ? "AnnotatorPrimaryText" : "AnnotatorAccentText";
         // The Windows glyph for rectangle.fill is the outline that rectangle uses; the filled style fills it.
         string glyphStyle = mode == ActiveToolbarMode.Whiteboard ? accent + "Filled" : accent;
         FrameworkElement content;
@@ -1024,7 +998,7 @@ internal sealed partial class ToolbarWindow
         {
             var icons = new MacStack { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center };
             icons.Children.Add(Glyphs.ForSymbol(mode.Symbol, 14, glyphStyle));
-            icons.Children.Add(Glyphs.ForSymbol("xmark", 8, accent));
+            icons.Children.Add(Glyphs.ForSymbol("xmark", 8, cross));
             var stack = new MacStack { Spacing = 3, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             stack.Children.Add(icons);
             TextBlock caption = ToolbarParts.Label($"{mode.ShortTitle} on", 9, words, FontWeights.Medium);
@@ -1041,7 +1015,7 @@ internal sealed partial class ToolbarWindow
             TextBlock text = ToolbarParts.Label(mode.Title, 11, words, FontWeights.Medium);
             text.VerticalAlignment = VerticalAlignment.Center;
             row.Children.Add(text);
-            FrameworkElement close = Glyphs.ForSymbol("xmark", 9, accent);
+            FrameworkElement close = Glyphs.ForSymbol("xmark", 9, cross);
             close.VerticalAlignment = VerticalAlignment.Center;
             row.Children.Add(close);
             content = row;
@@ -1113,7 +1087,7 @@ internal sealed partial class ToolbarWindow
     /// <summary>
     /// Mac menuButton: the Spotlight or Zoom menu as a toolbar item the size of a tool, with a chevron where a tool shows
     /// its key. It lights up while something in it is on (Spotlight or Cursor halo; the pointer lens or screen zoom): on
-    /// Glass toolbar with a raised accent lens, a white symbol and a white chevron at 75% (WIN-UI-09).
+    /// Glass toolbar with a raised lens under the accent symbol (WIN-UI-09).
     /// </summary>
     private FrameworkElement MenuButton(ToolbarLook look, WorkspaceSnapshot snapshot, ShortcutAction action)
     {
@@ -1125,7 +1099,7 @@ internal sealed partial class ToolbarWindow
         grid.Children.Add(marker);
         double size = metrics.Minimal ? 15 : 17;
         FrameworkElement plain = Glyphs.ForSymbol(action.Symbol, size);
-        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, _glass is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphOnColor");
+        FrameworkElement accent = Glyphs.ForSymbol(action.Symbol, size, _glass is null ? "AnnotatorGlyphAccent" : "AnnotatorGlyphLensAccent");
         var glyph = new Grid { IsHitTestVisible = false, HorizontalAlignment = HorizontalAlignment.Center };
         glyph.Children.Add(plain);
         glyph.Children.Add(accent);
@@ -1133,27 +1107,11 @@ internal sealed partial class ToolbarWindow
         host.Children.Add(glyph);
         var stack = new MacStack { Spacing = 2, VerticalAlignment = VerticalAlignment.Center, IsHitTestVisible = false };
         stack.Children.Add(host);
-        Tween? plainChevronShown = null;
-        Tween? onChevronShown = null;
         if (metrics.ShowsKeyLabels)
         {
             FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 9, 12, 9, "AnnotatorGlyphSecondary");
             chevron.HorizontalAlignment = HorizontalAlignment.Center;
-            if (_glass is null)
-            {
-                stack.Children.Add(chevron);
-            }
-            else
-            {
-                FrameworkElement white = ToolbarParts.GlyphBox("chevron.down", 9, 12, 9, "AnnotatorGlyphOnColorSecondary");
-                white.HorizontalAlignment = HorizontalAlignment.Center;
-                var chevrons = new Grid { HorizontalAlignment = HorizontalAlignment.Center };
-                chevrons.Children.Add(chevron);
-                chevrons.Children.Add(white);
-                stack.Children.Add(chevrons);
-                plainChevronShown = Tween.Opacity(chevron, 1);
-                onChevronShown = Tween.Opacity(white, 0);
-            }
+            stack.Children.Add(chevron);
         }
         grid.Children.Add(stack);
         ParityButton button = ToolbarParts.Button(metrics.ButtonWidth, metrics.ButtonHeight, grid, action.Label, radius);
@@ -1178,8 +1136,6 @@ internal sealed partial class ToolbarWindow
             fill.To(on ? 1 : 0, motion);
             plainShown.To(on ? 0 : 1, motion);
             accentShown.To(on ? 1 : 0, motion);
-            plainChevronShown?.To(on ? 0 : 1, motion);
-            onChevronShown?.To(on ? 1 : 0, motion);
         });
         return button;
     }
