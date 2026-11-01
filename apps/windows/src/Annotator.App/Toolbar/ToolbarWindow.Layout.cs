@@ -19,14 +19,91 @@ internal sealed partial class ToolbarWindow
     /// <summary>
     /// Replaces the toolbar's controls. Values that change without a new structure go to <see cref="_updates"/>.
     /// <paramref name="revealedFrom"/> is the properties layout the person just left, so the new properties fade in.
+    /// <paramref name="glass"/> puts the surfaces on Glass toolbar's material (WIN-UI-09).
     /// </summary>
-    private void Build(ToolbarLook look, WorkspaceSnapshot snapshot, ToolbarPropertiesMode? revealedFrom)
+    private void Build(ToolbarLook look, WorkspaceSnapshot snapshot, ToolbarPropertiesMode? revealedFrom, bool glass)
     {
         _updates.Clear();
-        _root.Children.Clear();
-        _root.Children.Add(look.Collapsed ? Collapsed(look)
-            : look.Vertical ? Vertical(look, snapshot, revealedFrom) : Horizontal(look, snapshot, revealedFrom));
+        if (_face is not null)
+        {
+            _root.Children.Remove(_face);
+        }
+        _glassSurfaces.Clear();
+        // One set of materials serves the window's surfaces for as long as it lives; another theme changes their tint.
+        bool dark = AppResources.Brush("AnnotatorWindowBackgroundBrush") is SolidColorBrush { Color: var window } && window.R + window.G + window.B < 384;
+        if (glass && _glassMaterials is null)
+        {
+            _glassMaterials = new GlassMaterial();
+            _root.Children.Insert(0, _glassMaterials.Host);
+            _root.LayoutUpdated += (_, _) => PlaceGlass();
+        }
+        _glassMaterials?.Begin(dark);
+        _glass = glass ? _glassMaterials : null;
+        _face = look.Collapsed ? Collapsed(look)
+            : look.Vertical ? Vertical(look, snapshot, revealedFrom) : Horizontal(look, snapshot, revealedFrom);
+        _root.Children.Insert(_glassMaterials is { } materials ? _root.Children.IndexOf(materials.Host) + 1 : 0, _face);
+        if (!glass)
+        {
+            _glassMaterials?.Place([]);
+        }
     }
+
+    /// <summary>After each layout pass, the glass materials go over the surfaces that show them (<see cref="GlassMaterial"/>).</summary>
+    private void PlaceGlass()
+    {
+        if (_glassMaterials is not { } materials)
+        {
+            return;
+        }
+        var shapes = new List<(Windows.Foundation.Rect Bounds, double CornerRadius)>(_glassSurfaces.Count);
+        if (_glass is not null)
+        {
+            foreach (GlassSurface glass in _glassSurfaces)
+            {
+                if (glass.Surface.ActualWidth <= 0 || glass.Surface.ActualHeight <= 0 || glass.Surface.XamlRoot is null)
+                {
+                    continue;
+                }
+                try
+                {
+                    shapes.Add((glass.Surface.TransformToVisual(materials.Host).TransformBounds(
+                        new Windows.Foundation.Rect(0, 0, glass.Surface.ActualWidth, glass.Surface.ActualHeight)), glass.CornerRadius));
+                }
+                catch (ArgumentException)
+                {
+                    // The surface left the window in this pass; the next layout places the new ones.
+                }
+            }
+        }
+        materials.Place(shapes);
+    }
+
+    /// <summary>
+    /// A surface's background: the window color, or with Glass toolbar the material under a layer for everything else
+    /// (WIN-UI-09). Returns where the rest of the surface goes.
+    /// </summary>
+    private Panel Background(Grid surface, double cornerRadius)
+    {
+        if (_glass is not { } glass)
+        {
+            surface.Children.Add(new Border
+            {
+                Background = AppResources.Brush("AnnotatorWindowBackgroundBrush"),
+                CornerRadius = new CornerRadius(cornerRadius),
+            });
+            return surface;
+        }
+        Grid layer = glass.Layer(surface, cornerRadius);
+        _glassSurfaces.Add(new GlassSurface(surface, layer, cornerRadius));
+        return layer;
+    }
+
+    /// <summary>
+    /// What fades in to reveal <paramref name="surface"/>: itself, or with Glass toolbar the layer over its material, since
+    /// Windows doesn't blur a material that is fading.
+    /// </summary>
+    private FrameworkElement RevealTarget(Grid surface, FrameworkElement solid) =>
+        _glassSurfaces.Find(glass => ReferenceEquals(glass.Surface, surface)) is { } found ? found.Layer : solid;
 
     /// <summary>
     /// ToolbarView's horizontal body: the main row, the narrow toolbar's second row, the active board and the properties
@@ -335,12 +412,13 @@ internal sealed partial class ToolbarWindow
             ScrollViewer viewport = PropertiesPanel.Viewport(this, snapshot, width - 24, look.InspectorLimit, _updates);
             panel.Children.Add(viewport);
             var group = new AccessibleGroup("Attached tool properties", "attached-tool-properties") { FlowDirection = FlowDirection.LeftToRight };
-            group.Children.Add(Surface(panel, 12, 15, width));
+            Grid surface = Surface(panel, 12, 15, width);
+            group.Children.Add(surface);
             group.VerticalAlignment = VerticalAlignment.Top;
             row.Children.Add(group);
             if (revealedFrom == ToolbarPropertiesMode.Hidden)
             {
-                PropertiesReveal.Start(group);
+                PropertiesReveal.Start(RevealTarget(surface, group));
             }
         }
         return row;
@@ -358,29 +436,30 @@ internal sealed partial class ToolbarWindow
     /// The Mac's window surface: the window background with a 7% outline. The outline is an overlay that takes no
     /// layout space, like the Mac's strokeBorder, and the padding is an exact margin: a 1-point border is 1.25 pixels
     /// at 125%, and WinUI's rounding of it shortened the surface. The tool rail's surface holds the selection marker
-    /// between its background and its controls.
+    /// between its background and its controls. With Glass toolbar the background is the glass, and its rim goes over
+    /// the outline (WIN-UI-09).
     /// </summary>
     private Grid Surface(FrameworkElement content, double padding, double cornerRadius, double width, bool marker = false)
     {
         var surface = new Grid { Width = width, VerticalAlignment = VerticalAlignment.Top };
-        surface.Children.Add(new Border
-        {
-            Background = AppResources.Brush("AnnotatorWindowBackgroundBrush"),
-            CornerRadius = new CornerRadius(cornerRadius),
-        });
+        Panel layer = Background(surface, cornerRadius);
         if (marker)
         {
-            surface.Children.Add(_markers.Layer());
+            layer.Children.Add(_markers.Layer());
         }
         content.Margin = new Thickness(padding);
-        surface.Children.Add(content);
-        surface.Children.Add(new Border
+        layer.Children.Add(content);
+        layer.Children.Add(new Border
         {
             BorderBrush = AppResources.Brush("AnnotatorSurfaceStrokeBrush"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(cornerRadius - 1),
             IsHitTestVisible = false,
         });
+        if (_glass is { } glass)
+        {
+            layer.Children.Add(glass.Rim(cornerRadius));
+        }
         Watch(surface);
         return surface;
     }
@@ -1134,15 +1213,19 @@ internal sealed partial class ToolbarWindow
         face.Children.Add(badge);
         var capsule = new Grid { Width = width, Height = height };
         double corner = Math.Min(width, height) / 2;
-        capsule.Children.Add(new Border { Background = AppResources.Brush("AnnotatorWindowBackgroundBrush"), CornerRadius = new CornerRadius(corner) });
-        capsule.Children.Add(face);
-        capsule.Children.Add(new Border
+        Panel layer = Background(capsule, corner);
+        layer.Children.Add(face);
+        layer.Children.Add(new Border
         {
             BorderBrush = AppResources.Brush("AnnotatorSurfaceStrokeBrush"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(corner),
             IsHitTestVisible = false,
         });
+        if (_glass is { } glass)
+        {
+            layer.Children.Add(glass.Rim(corner));
+        }
         ParityButton button = ToolbarParts.Button(width, height, capsule, "Annotator toolbar", corner);
         AutomationProperties.SetAutomationId(button, "collapsed-toolbar");
         button.Click += (_, _) =>

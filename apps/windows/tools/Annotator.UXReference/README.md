@@ -139,7 +139,12 @@ It shows the toolbar without activating it and quits after the timeout. Its
 Stroke and Fill buttons open the real color popover, Pick from screen included.
 Toolbar states follow their own buttons off screen too, so UI Automation can
 invoke full-properties controls and read what they change; the arrowhead
-choices open next to the toolbar without activation.
+choices open next to the toolbar without activation. Add `--glass` to show the
+state with Glass toolbar on (WIN-UI-09): docked, the toolbar shows Windows'
+material over the real desktop; off screen, the picture has the glass's rim and
+highlight but not the material, which only Windows draws.
+`Annotator.exe --motion-reference <style> --glass` plays the sample board's
+hide and show with it.
 
 A development check that changes a state through UI Automation can have the
 surface rendered again: setting the named event

@@ -255,9 +255,12 @@ internal sealed partial class ToolbarWindow
         List<Action<WorkspaceSnapshot>> updates = _updates;
         SelectionMarkers markers = _markers;
         MotionSamples? motion = _controlMotion;
+        // The glass takes no room, and its materials stay on the toolbar that shows.
+        GlassMaterial? glass = _glass;
         _updates = [];
         _markers = new SelectionMarkers(_root);
         _controlMotion = null;
+        _glass = null;
         FrameworkElement? layout = null;
         try
         {
@@ -284,6 +287,7 @@ internal sealed partial class ToolbarWindow
             _updates = updates;
             _markers = markers;
             _controlMotion = motion;
+            _glass = glass;
         }
     }
 

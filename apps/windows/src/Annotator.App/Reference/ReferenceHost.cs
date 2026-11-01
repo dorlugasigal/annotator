@@ -84,6 +84,10 @@ internal sealed partial class ReferenceHost
             }
             var profile = new ReferenceProfile();
             scenario.Profile?.Invoke(profile);
+            if (_request.Glass)
+            {
+                profile.Preferences.Glass = true;
+            }
             SimulateAccessibility();
             if (scenario.Surface == ReferenceSurface.Canvas)
             {

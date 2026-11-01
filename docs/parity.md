@@ -454,9 +454,10 @@ platform that departs from the specifications, unless an ADR changes them.
   color so labels stay readable over white, black or busy screens, keep the
   solid toolbar's hairline edge, drop the window shadow, and keep the glass
   in its active look while another window has the keyboard. When Reduce
-  transparency (Mac) or Transparency effects off (Windows) asks for it, the
-  toolbar is solid again. Only system materials are used: no screen capture,
-  permission or extra rendering work (DV-14).
+  transparency (Mac) or Transparency effects off, a contrast theme or the
+  energy saver (Windows) asks for it, the toolbar is solid again, at once.
+  Only system materials are used: no screen capture, permission or extra
+  rendering work (DV-14).
 
 ### Motion
 
@@ -796,7 +797,11 @@ These need owner approval before Windows release.
   behind the toolbar but doesn't bend it at the edges as Liquid Glass does.
   WinUI's backdrop effects can't run a custom shader, and refraction from
   captured screen pixels would need screen-capture consent, lag a frame and
-  keep the GPU busy, so Windows uses Acrylic only.
+  keep the GPU busy, so Windows uses Acrylic only. Windows also blurs the
+  material only while it is fully opaque, so while the toolbar shows or
+  hides, the glass shows its tint without the blur until the toolbar lands.
+  When the toolbar shrinks to one button or opens again, the glass stays put
+  and only the controls fade.
 
 ## Owner decisions
 

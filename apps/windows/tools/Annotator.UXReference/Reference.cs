@@ -246,6 +246,9 @@ internal static partial class PlatformTerms
         ["If the menu bar is full, macOS may hide the icon. You can still show the tools with your Show / hide shortcut."] = SettingsCopy.ShowTrayIconHelp,
         ["Choose how drawings and tools hide and return. Off turns animation off. When macOS Reduce Motion is on, a short fade replaces any movement."] =
             SettingsCopy.WorkspaceAnimationHelp,
+        // Glass toolbar (WIN-UI-09): Reduce transparency on the Mac is Transparency effects off on Windows.
+        ["Your desktop and drawings show softly through the toolbar. When Reduce transparency is on in System Settings, the toolbar stays solid."] =
+            SettingsCopy.GlassToolbarHelp,
         ["Mac"] = "Display",
         ["Screen Recording"] = SettingsCopy.CaptureTitle,
         ["Open Screen Recording settings"] = SettingsCopy.OpenCaptureSettings,

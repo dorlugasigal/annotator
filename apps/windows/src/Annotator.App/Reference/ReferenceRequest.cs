@@ -15,6 +15,7 @@ internal enum ReferenceTheme
 /// <c>--usage-counts available</c> shows Share usage counts as it will be once Windows may send them (WIN-PRV-01).
 /// <c>--contrast nightsky</c> (aquatic, desert, dusk or nightsky) and <c>--text-scale 2.25</c> show it as in a Windows contrast
 /// theme or with Windows' Text size setting, through WinUI's test hooks (WIN-A11Y-03), for the accessibility checks.
+/// <c>--glass</c> turns Glass toolbar on (WIN-UI-09); with <c>--placement docked</c> it shows the material over the real desktop.
 /// </summary>
 internal sealed record ReferenceRequest(string Surface, string State, ReferenceTheme Theme, string Output, int TimeoutSeconds,
                                        bool Docked = false, bool UsageCountsAvailable = false)
@@ -29,6 +30,9 @@ internal sealed record ReferenceRequest(string Surface, string State, ReferenceT
 
     /// <summary><c>--accessibility</c>: ready.json also reports the keyboard path, context menus, cut-off text and colors.</summary>
     public bool Accessibility { get; init; }
+
+    /// <summary><c>--glass</c>: the profile has Glass toolbar on (WIN-UI-09).</summary>
+    public bool Glass { get; init; }
 
     /// <summary>The state's name as the reference folder spells it, for example "toolbar/off".</summary>
     public string Name => $"{Surface}/{State}";
@@ -83,6 +87,7 @@ internal sealed record ReferenceRequest(string Surface, string State, ReferenceT
             Contrast = contrast,
             TextScale = textScale,
             Accessibility = IndexOf(args, "--accessibility") >= 0,
+            Glass = IndexOf(args, "--glass") >= 0,
         };
     }
 
