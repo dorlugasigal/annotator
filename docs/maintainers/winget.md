@@ -33,12 +33,15 @@ adds Annotator's folder to PATH instead of putting a link to `Annotator.exe`
 in its Links folder. Started through that link, Annotator can't find the
 Windows App SDK files next to it and stops with `DllNotFoundException`.
 
-winget's ARM64 check appears to start `Annotator.exe` without a signed-in
-desktop. Up to 0.1.0-beta.17, Annotator then stops with 0xC0000602, and the
-pull request gets `Validation-Executable-Error`, even though x64 passes. Only
-a winget administrator can clear that label, so explain this in a comment and
-wait. Later releases quit with exit code 0 there instead (WIN-SYS-08 in
-[parity.md](../parity.md)), so the check should pass.
+winget's ARM64 check sometimes starts `Annotator.exe` in session 0, where
+there's no signed-in desktop. Up to 0.1.0-beta.17, Annotator then stops with
+0xC0000602, and the pull request gets `Validation-Executable-Error`, even
+though x64 passes. Only a winget administrator can clear that label, so
+explain this in a comment and wait. Later releases quit with exit code 0 when
+the session has no window station of its own (WIN-SYS-08 in
+[parity.md](../parity.md)), but up to 0.2.3 a start in session 0's
+interactive window station still stopped with 0xC0000602, as 0.2.3's check
+did. Later releases quit with exit code 0 in session 0 too.
 `RestartAgent.exe`, a Windows App SDK helper, also fails when it's started on
 its own; x64 passes anyway.
 

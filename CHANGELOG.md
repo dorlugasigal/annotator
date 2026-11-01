@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On Windows, Annotator now quits quietly when Windows starts it in session 0, where nobody is signed in. Before, it crashed there, and winget's install check could fail.
+
 ## 0.2.3 - 2026-10-31
 
 ### Fixed

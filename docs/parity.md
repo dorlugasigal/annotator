@@ -509,7 +509,8 @@ platform that departs from the specifications, unless an ADR changes them.
   then keeps method B regions opaque. The portable copy's daily update check
   runs at launch and when the tray flyout or Settings opens, never on a timer.
 - **WIN-SYS-08**: Started without a signed-in desktop, for example by a
-  service or by a scheduled task that runs while nobody is signed in,
+  service or by a scheduled task that runs while nobody is signed in, or in
+  session 0 at all (also through its interactive window station),
   Annotator writes why to standard error and quits with exit code 0 before
   WinUI starts. Without this, WinUI stops it with a fail fast (0xC0000602),
   which is what winget's ARM64 check reported. This only concerns Windows

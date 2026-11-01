@@ -38,11 +38,12 @@ public static class Program
     {
         StartupLog.Mark("main");
         AppDomain.CurrentDomain.UnhandledException += (_, e) => StartupLog.Note("crash", (e.ExceptionObject.ToString() ?? "unknown").ReplaceLineEndings(" | "));
-        if (!Environment.UserInteractive)
+        if (!Environment.UserInteractive || Process.GetCurrentProcess().SessionId == 0)
         {
             // WIN-SYS-08: a service or a scheduled task that runs while nobody is signed in has no desktop to draw on,
-            // and WinUI's input setup would stop the process with a fail fast (0xC0000602). Quitting here is expected
-            // there, not a failure, so the exit code is 0.
+            // and WinUI's input setup would stop the process with a fail fast (0xC0000602). Session 0 never has a
+            // signed-in desktop, even for a service that may use its interactive window station (UserInteractive is
+            // then true). Quitting here is expected there, not a failure, so the exit code is 0.
             StartupLog.Note("no-desktop", "quit");
             Console.Error.WriteLine(NoDesktopMessage);
             return 0;
