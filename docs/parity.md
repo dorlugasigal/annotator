@@ -459,19 +459,19 @@ platform that departs from the specifications, unless an ADR changes them.
   Only system materials are used: no screen capture, permission or extra
   rendering work (DV-14).
   On glass, a flat tint gets lost, so the chosen tool and anything that's on
-  sit on a raised lens (`ToolbarLens`): a body, a 1 px rim fading from the
-  top and a shadow (black 16% Light, 35% Dark, blur 3, y +1.5), in the
-  button's own size and radius. Clear lenses have a white body (82% → 50%
-  Light, 26% → 10% Dark) and a white rim (95% → 25%, 55% → 6%). The chosen
-  tool's lens adds 10% (Light) or 18% (Dark) accent, slides between tools
-  and drops to 50% while Apps get the clicks; Apps gets a plain lens; Draw
-  adds 28% or 38% green; a waiting zoom, orange. Anything that's on (a
-  toggle, a menu with something on, Properties while shown, Board while
-  White or Black, the mode-strip chips) gets a solid accent lens with a
-  white sheen (28% or 20% fading to 0 at the middle), a white rim (60% or
-  45% → 8%) and white symbols, with key labels and the menu mark at 75%.
-  Wherever the toolbar is solid, the flat tints stay, and the accessibility
-  tree is the same with glass on or off.
+  sit on the same raised lens (`ToolbarLens`), in the button's own size and
+  radius: a white body (82% → 50% Light, 26% → 10% Dark, top to bottom), a
+  1 px white rim (95% → 25%, 55% → 6%) and a shadow (black 16% Light, 35%
+  Dark, blur 3, y +1.5). Color stays small. The lenses of the chosen tool
+  and of anything that's on add 10% (Light) or 18% (Dark) accent; Draw adds
+  12% or 16% green, a waiting zoom the same orange, and Apps nothing. The
+  chosen tool's lens slides between tools and drops to 50% while Apps get
+  the clicks. Anything that's on (a toggle, a menu with something on,
+  Properties while shown, Board while White or Black, the mode-strip chips)
+  shows its symbol in the accent color, mixed 35% toward white in Dark; a
+  chip's words and stop mark use the primary color. Wherever the toolbar is
+  solid, the flat tints stay, and the accessibility tree is the same with
+  glass on or off.
 
 ### Motion
 
