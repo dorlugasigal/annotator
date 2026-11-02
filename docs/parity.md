@@ -474,6 +474,15 @@ platform that departs from the specifications, unless an ADR changes them.
   chip's words and stop mark use the primary color. Wherever the toolbar is
   solid, the flat tints stay, and the accessibility tree is the same with
   glass on or off.
+  A picture of the toolbar can't hold live glass: it comes out as a solid
+  plate. So on macOS 26 and later, the pictures that show and hide the
+  toolbar, and the face a side toolbar leaves when it shrinks to one button,
+  leave the glass out and carry live glass of the same shapes under them,
+  which moves, fades and blurs with the picture; with Dissolve, the glass
+  fades as the picture breaks up. The picture's window goes at once when the
+  toolbar takes over, so glass never lies on glass. On macOS 14 and 15, and
+  in the shared region's output, which only shows pixels, the pictures are
+  solid. Windows tints its pictures instead (DV-14).
 
 ### Motion
 

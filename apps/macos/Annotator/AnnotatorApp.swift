@@ -1026,16 +1026,10 @@ final class InspectorPanel: AnnotationPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
-    /// AppKit draws Liquid Glass in full (clear, with refraction and a bright edge) only in windows that look active, and
-    /// the toolbar rarely has the keyboard: the canvas or your other apps do. While Glass toolbar shows, this private
-    /// AppKit hook keeps the toolbar looking active without taking the keyboard. If a later macOS stops asking, the glass
-    /// falls back to its flatter inactive look and nothing else changes.
+    /// Keeps the toolbar's glass in its full, active look while another window has the keyboard (`ToolbarGlass`).
     @objc func _hasActiveAppearanceIgnoringKeyFocus() -> Bool {
-        if #available(macOS 26, *), (contentView as? ToolbarContentView)?.chrome.showsGlass == true { return true }
-        let selector = #selector(_hasActiveAppearanceIgnoringKeyFocus)
-        guard let inherited = class_getInstanceMethod(AnnotationPanel.self, selector) else { return isKeyWindow }
-        typealias Getter = @convention(c) (AnyObject, Selector) -> Bool
-        return unsafeBitCast(method_getImplementation(inherited), to: Getter.self)(self, selector)
+        ToolbarGlass.activeAppearance(of: self, showsGlass: (contentView as? ToolbarContentView)?.chrome.showsGlass == true,
+                                      inheritedFrom: AnnotationPanel.self)
     }
 
     override func performDrag(with event: NSEvent) {
@@ -1333,12 +1327,14 @@ final class ToolbarContentView: NSView {
     override func mouseEntered(with event: NSEvent) { onPointerInside?(true) }
     override func mouseExited(with event: NSEvent) { onPointerInside?(false) }
 
-    /// A picture of the toolbar's controls, without the background, for the morph.
+    /// A picture of the toolbar's controls, without the background, for the morph. A side toolbar's glass surfaces are
+    /// left out of it too, and the morph draws live glass under the picture (`beginMorph`), or drawn solid before
+    /// macOS 26 (`ToolbarGlass.animationPicture`).
     func snapshotHost() -> CGImage? {
         host.layoutSubtreeIfNeeded()
         guard host.bounds.width >= 1, host.bounds.height >= 1,
               let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return nil }
-        host.cacheDisplay(in: host.bounds, to: bitmap)
+        ToolbarGlass.picture(of: host, glass: ToolbarGlass.animationPicture) { host.cacheDisplay(in: host.bounds, to: bitmap) }
         return bitmap.cgImage
     }
 
@@ -1352,8 +1348,9 @@ final class ToolbarContentView: NSView {
         morphRadii = radii
         self.chromeFade = chromeFade
         if let image {
-            // A view, not a sublayer, so AppKit keeps it above the new face and the background.
-            let face = MorphFaceView(image: image)
+            // A view, not a sublayer, so AppKit keeps it above the new face and the background. The host still shows
+            // the face that leaves, so its glass surfaces are where the picture's are.
+            let face = MorphFaceView(image: image, glass: ToolbarGlass.movesWithPictures ? ToolbarGlass.surfaces(in: host) : [])
             addSubview(face, positioned: .above, relativeTo: host)
             outgoing = face
         }
@@ -1384,22 +1381,36 @@ final class ToolbarContentView: NSView {
     }
 }
 
-/// The face that leaves during a morph: a picture of the toolbar's controls that fades out while the window changes.
+/// The face that leaves during a morph: a picture of the toolbar's controls that fades out while the window changes,
+/// over live glass where the face had glass (a side toolbar's rail and properties).
 private final class MorphFaceView: NSView {
-    private let image: CGImage
+    private let picture = CALayer()
 
-    init(image: CGImage) {
-        self.image = image
+    init(image: CGImage, glass: [ToolbarGlass.Surface]) {
         super.init(frame: .zero)
         wantsLayer = true
+        for surface in glass {
+            let plate = ToolbarChromeView(cornerRadius: surface.cornerRadius, glass: true)
+            plate.frame = surface.frame
+            addSubview(plate)
+        }
+        picture.contents = image
+        picture.contentsGravity = .resize
+        // The controls stay above their glass.
+        picture.zPosition = 1
+        layer?.addSublayer(picture)
     }
 
     required init?(coder: NSCoder) { nil }
-    override var wantsUpdateLayer: Bool { true }
-    override func updateLayer() {
-        layer?.contents = image
-        layer?.contentsGravity = .resize
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        picture.frame = bounds
+        CATransaction.commit()
     }
+
     // Clicks go to the toolbar under it.
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }

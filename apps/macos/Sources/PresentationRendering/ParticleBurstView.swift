@@ -64,11 +64,23 @@ public final class ParticleBurstView: MTKView, MTKViewDelegate {
     private var lastEncodedProgress: Double?
     public var onFailure: ((Error) -> Void)?
     public var particleCount: Int { Int(gridSize.x) * Int(gridSize.y) }
-    public var currentProgress: Double {
+    public var currentProgress: Double { progress(at: CACurrentMediaTime()) }
+
+    /// How far the burst is at `time`: 0 for the intact picture, 1 when it has broken up.
+    public func progress(at time: CFTimeInterval) -> Double {
         guard let started else { return fromProgress }
-        let time = min(1, max(0, (CACurrentMediaTime() - started) / duration))
-        let eased = time * time * (3 - 2 * time)
+        let share = min(1, max(0, (time - started) / duration))
+        let eased = share * share * (3 - 2 * share)
         return fromProgress + (toProgress - fromProgress) * eased
+    }
+
+    /// How much of the middle of the intact picture shows at `time`: 1 before it breaks up, 0 once it has. It follows
+    /// the shader halfway along the sweep (`localProgress` with `along` 0.5, then `1 - smoothstep(0.0, 0.18, p)`), so
+    /// content drawn with the picture, such as the toolbar's glass, fades with it.
+    public func pictureOpacity(at time: CFTimeInterval) -> Double {
+        let local = min(1, max(0, (progress(at: time) - 0.25 * 0.5) / 0.75))
+        let share = min(1, local / 0.18)
+        return 1 - share * share * (3 - 2 * share)
     }
     public override var isOpaque: Bool { false }
 
@@ -110,6 +122,7 @@ public final class ParticleBurstView: MTKView, MTKViewDelegate {
         return texture
     }
 
+    public var startTime: CFTimeInterval? { started }
     public var endTime: CFTimeInterval? { started.map { $0 + duration } }
     /// Unit vector in screen coordinates (y up) toward where the burst should begin; the facing edge breaks first.
     public var sweepDirection = CGVector(dx: 0, dy: -1)
