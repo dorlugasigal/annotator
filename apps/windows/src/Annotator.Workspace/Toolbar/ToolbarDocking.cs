@@ -295,10 +295,12 @@ public sealed class ToolbarDocking
     /// <summary>
     /// Mac resizeToolbar: the toolbar's content now measures <paramref name="size"/>. During a drag, or while the host
     /// <paramref name="deferred"/> it, the size waits in <see cref="PendingSize"/>. A docked toolbar docks again with the
-    /// new size; a free one keeps its top-left corner, inside the work area. Returns the new frame, or null without a change.
+    /// new size; a free one keeps its top-left corner, or its center when it shrinks to one button or opens from it
+    /// (<paramref name="centered"/>, Mac ToolbarPin.center), inside the work area. Returns the new frame, or null without a
+    /// change.
     /// </summary>
     public Rect? Resize(Rect frame, Size size, IReadOnlyList<DisplayDescriptor> displays, ToolbarOrientation orientation,
-                        ToolbarDockEdge edge, bool deferred = false)
+                        ToolbarDockEdge edge, bool deferred = false, bool centered = false)
     {
         ArgumentNullException.ThrowIfNull(displays);
         if (!(size.Width > 0 && size.Height > 0 && double.IsFinite(size.Width) && double.IsFinite(size.Height)))
@@ -322,12 +324,24 @@ public sealed class ToolbarDocking
             return Changed(frame, Dock(size, frame, displays, orientation, edge));
         }
         var resized = new Rect(frame.X, frame.Y, size.Width, size.Height);
+        if (centered)
+        {
+            // Opening the one button where it shrank goes back to the exact frame it shrank from, without rounding drift.
+            resized = _shrunk is { } shrunk && shrunk.Button == frame && shrunk.Full.Width == size.Width && shrunk.Full.Height == size.Height
+                ? shrunk.Full
+                : new Rect(Math.Round(frame.X + (frame.Width - size.Width) / 2), Math.Round(frame.Y + (frame.Height - size.Height) / 2),
+                    size.Width, size.Height);
+        }
         if (screen is not null)
         {
             resized = ToolbarPlacement.ConstrainedResizedFrame(resized, screen.DesktopWorkArea);
         }
+        _shrunk = centered && size.Width * size.Height < frame.Width * frame.Height ? (frame, resized) : null;
         return Changed(frame, resized);
     }
+
+    /// <summary>The free toolbar's frame before it shrank to one button, and the button's frame.</summary>
+    private (Rect Full, Rect Button)? _shrunk;
 
     /// <summary>
     /// Mac dockToolbar(_:size:): docks at <paramref name="edge"/> in <paramref name="orientation"/> on the docking display, or

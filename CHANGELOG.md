@@ -7,6 +7,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 ### Fixed
 
 - On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout.
+- A toolbar you moved away from the screen's edge now shrinks to one button in its middle, and opens again from there. Before, the button went to the toolbar's left end.
 
 ## 0.3.1 - 2026-11-02
 
