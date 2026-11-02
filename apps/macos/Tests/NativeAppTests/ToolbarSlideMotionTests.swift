@@ -322,6 +322,37 @@ final class ToolbarSlideMotionTests: XCTestCase {
         XCTAssertLessThanOrEqual(Int(grid.x) * Int(grid.y), 32_000)
     }
 
+    /// The toolbar's glass fades with its picture as Dissolve breaks it up: fully there until the middle of the picture
+    /// starts to go (the sweep reaches it at a quarter of the way), gone once it has.
+    func testParticlePictureOpacityFollowsTheMiddleOfTheSweep() throws {
+        let colorSpace = try XCTUnwrap(CGColorSpace(name: CGColorSpace.sRGB))
+        let context = try XCTUnwrap(CGContext(data: nil, width: 40, height: 20, bitsPerComponent: 8,
+            bytesPerRow: 0, space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        let image = try XCTUnwrap(context.makeImage())
+        let frame = CGRect(x: 30, y: 40, width: 40, height: 20)
+        let view = try ParticleBurstView(image: image, imageFrame: frame, frame: frame.insetBy(dx: -50, dy: -50),
+                                         particleLimit: 1_000)
+        let start = CACurrentMediaTime() + 10
+        view.start(appearing: false, duration: 1, at: start)
+        XCTAssertEqual(view.startTime, start)
+        let hiding = (0...20).map { view.pictureOpacity(at: start + Double($0) / 20) }
+        XCTAssertEqual(hiding.first, 1)
+        XCTAssertEqual(hiding.last, 0)
+        XCTAssertEqual(hiding, hiding.sorted(by: >), "Hiding only fades out")
+        for step in 0...20 {
+            let time = start + Double(step) / 20
+            let progress = view.progress(at: time)
+            if progress <= 0.125 { XCTAssertEqual(view.pictureOpacity(at: time), 1, "The middle hasn't started to break up") }
+            if progress >= 0.26 { XCTAssertEqual(view.pictureOpacity(at: time), 0, accuracy: 0.0001, "The middle has gone") }
+        }
+        view.start(appearing: true, duration: 1, at: start)
+        let showing = (0...20).map { view.pictureOpacity(at: start + Double($0) / 20) }
+        XCTAssertEqual(showing.first, 0)
+        XCTAssertEqual(showing.last, 1)
+        XCTAssertEqual(showing, showing.sorted(), "Showing only fades in")
+        view.stop()
+    }
+
     func testMenuBarSymbolIsSizedAndAccessible() {
         let button = NSButton()
         AppDelegate.configureMenuBarButton(button)

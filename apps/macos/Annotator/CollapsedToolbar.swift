@@ -55,6 +55,8 @@ final class ToolbarChromeView: NSView {
     /// Runs when the glass appears or goes, for example after Reduce transparency changes.
     var onGlassChanged: (() -> Void)?
     private var backdrop: NSView?
+    /// How the background draws while a picture of the toolbar is taken (`ToolbarGlass.picture`).
+    private var picture: ToolbarGlass.Picture?
     override var isOpaque: Bool { false }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
     // Decoration only: screen readers see the same toolbar with or without glass.
@@ -78,6 +80,24 @@ final class ToolbarChromeView: NSView {
 
     /// True while the glass shows, false for the solid background.
     var showsGlass: Bool { backdrop != nil }
+
+    /// The corner radius the background draws with: never more than half its width or height.
+    var effectiveCornerRadius: CGFloat { max(0, min(cornerRadius, bounds.width / 2, bounds.height / 2)) }
+
+    /// Leaves the glass out of pictures of the toolbar (`clear`) or draws the solid background in them (`solid`), until
+    /// `endPicture`. The glass on screen is back before the next frame.
+    func beginPicture(_ style: ToolbarGlass.Picture) {
+        guard let backdrop, picture == nil else { return }
+        picture = style
+        backdrop.isHidden = true
+    }
+
+    func endPicture() {
+        guard picture != nil else { return }
+        picture = nil
+        backdrop?.isHidden = false
+        needsDisplay = true
+    }
 
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
@@ -115,12 +135,12 @@ final class ToolbarChromeView: NSView {
 
     private func shapeBackdrop() {
         guard let backdrop else { return }
-        ToolbarGlass.shape(backdrop, radius: max(0, min(cornerRadius, bounds.width / 2, bounds.height / 2)))
+        ToolbarGlass.shape(backdrop, radius: effectiveCornerRadius)
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        guard backdrop == nil else { return }
-        let radius = min(cornerRadius, bounds.width / 2, bounds.height / 2)
+        guard backdrop == nil || picture == .solid else { return }
+        let radius = effectiveCornerRadius
         let shape = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
         NSColor.windowBackgroundColor.setFill()
         shape.fill()
@@ -136,6 +156,60 @@ final class ToolbarChromeView: NSView {
 /// The system draws both, so they ask for no permission and add no work of Annotator's own (DV-14).
 @MainActor
 enum ToolbarGlass {
+    /// What a picture of the toolbar (`cacheDisplay`) shows where the glass is. A picture can't hold live glass: it comes
+    /// out as a dark plate. Animations leave the glass out (`clear`) and draw live glass under the picture; the shared
+    /// region's output, which only shows pixels, gets the solid background (`solid`).
+    enum Picture { case clear, solid }
+
+    /// On macOS 26 and later, live glass moves with pictures of the toolbar (`VisibilityImageView.addGlass`, the morph's
+    /// leaving face). Earlier, the pictures draw the solid background instead.
+    static var movesWithPictures: Bool {
+        if #available(macOS 26, *) { true } else { false }
+    }
+
+    /// How pictures for the toolbar's own animations draw its glass.
+    static var animationPicture: Picture { movesWithPictures ? .clear : .solid }
+
+    /// A glass surface of the toolbar: its frame, measured with y up from the bottom-left of a view, and its corner radius.
+    struct Surface: Equatable {
+        var frame: CGRect
+        var cornerRadius: CGFloat
+    }
+
+    /// The glass surfaces showing in `root`: the toolbar's background, or a side toolbar's rail and properties.
+    static func surfaces(in root: NSView) -> [Surface] {
+        chromeViews(in: root).filter { $0.showsGlass && !$0.isHiddenOrHasHiddenAncestor && $0.alphaValue > 0.01 }.map { chrome in
+            var frame = chrome.convert(chrome.bounds, to: root)
+            if root.isFlipped { frame.origin.y = root.bounds.height - frame.maxY }
+            return Surface(frame: frame, cornerRadius: chrome.effectiveCornerRadius)
+        }
+    }
+
+    /// Runs `body`, which takes a picture of `root`, with the glass in `root` drawn as `style`.
+    static func picture<T>(of root: NSView, glass style: Picture, _ body: () throws -> T) rethrows -> T {
+        let chromes = chromeViews(in: root)
+        chromes.forEach { $0.beginPicture(style) }
+        defer { chromes.forEach { $0.endPicture() } }
+        return try body()
+    }
+
+    private static func chromeViews(in view: NSView) -> [ToolbarChromeView] {
+        (view as? ToolbarChromeView).map { [$0] } ?? view.subviews.flatMap { chromeViews(in: $0) }
+    }
+
+    /// AppKit draws Liquid Glass in full (clear, with refraction and a bright edge) only in windows that look active, and
+    /// the toolbar's windows rarely have the keyboard: the canvas or your other apps do. Windows that show glass answer
+    /// AppKit's private `_hasActiveAppearanceIgnoringKeyFocus` with this: active while they show glass, otherwise what
+    /// `base` would say. They never take the keyboard for it. If a later macOS stops asking, the glass falls back to its
+    /// flatter inactive look and nothing else changes.
+    static func activeAppearance(of window: NSWindow, showsGlass: Bool, inheritedFrom base: AnyClass) -> Bool {
+        if #available(macOS 26, *), showsGlass { return true }
+        let selector = NSSelectorFromString("_hasActiveAppearanceIgnoringKeyFocus")
+        guard let inherited = class_getInstanceMethod(base, selector) else { return window.isKeyWindow }
+        typealias Getter = @convention(c) (AnyObject, Selector) -> Bool
+        return unsafeBitCast(method_getImplementation(inherited), to: Getter.self)(window, selector)
+    }
+
     /// How much of the window color stays in the glass, so labels stay readable over white, black or busy screens.
     static let bodyOpacity: CGFloat = 0.25
     static var reducesTransparency: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency }

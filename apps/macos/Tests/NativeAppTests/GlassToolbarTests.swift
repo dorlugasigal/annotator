@@ -205,6 +205,149 @@ final class GlassToolbarTests: XCTestCase {
         XCTAssertEqual(try tree(glass: true), solid)
     }
 
+    // MARK: Pictures and animations
+
+    /// How opaque `image`, a picture of a view of `size`, is at `point` (y up from the bottom-left).
+    private static func alpha(of image: CGImage, at point: CGPoint, in size: CGSize) throws -> CGFloat {
+        let bitmap = NSBitmapImageRep(cgImage: image)
+        let x = Int((point.x / size.width * CGFloat(bitmap.pixelsWide)).rounded(.down))
+        let y = Int(((size.height - point.y) / size.height * CGFloat(bitmap.pixelsHigh)).rounded(.down))
+        return try XCTUnwrap(bitmap.colorAt(x: x, y: y)).alphaComponent
+    }
+
+    private func showToolbar(_ app: AppDelegate, _ model: WorkspaceModel) async throws -> (NSPanel, ToolbarContentView) {
+        app.activateTools()
+        for _ in 0..<100 where model.visibilityAnimating { try await Task.sleep(for: .milliseconds(20)) }
+        try await Task.sleep(for: .milliseconds(200))
+        let toolbar = try XCTUnwrap(app.toolbarWindow)
+        let content = try XCTUnwrap(toolbar.contentView as? ToolbarContentView)
+        content.chrome.reducesTransparency = { false }
+        return (toolbar, content)
+    }
+
+    /// A picture (`cacheDisplay`) can't hold live glass: it came out as a dark plate. Pictures for animations leave the
+    /// glass out, and the shared region's picture is solid. The toolbar on screen keeps its glass either way.
+    func testPicturesLeaveTheGlassOutOrDrawItSolid() async throws {
+        try XCTSkipUnless(ToolbarGlass.movesWithPictures, "Before macOS 26, animation pictures are solid")
+        let (model, cleanup) = try makeModel("pictures")
+        model.setVisibilityAnimation(false)
+        model.setPropertiesShown(false)
+        model.setGlass(true)
+        let app = AppDelegate(model: model)
+        app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }
+        defer {
+            app.hideTools()
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            cleanup()
+        }
+        let (toolbar, content) = try await showToolbar(app, model)
+        XCTAssertTrue(content.chrome.showsGlass)
+        let animator = WorkspaceVisibilityAnimator(reduceMotion: { false })
+        // On the background, between the left edge and the first tool.
+        let background = CGPoint(x: 6, y: content.bounds.midY)
+        let clear = try animator.snapshotToolbar(toolbar, pixelBudget: 4_000_000)
+        XCTAssertLessThan(try Self.alpha(of: clear, at: background, in: content.bounds.size), 0.05,
+                          "The picture leaves the glass out for the live glass under it")
+        let solid = try animator.snapshotToolbar(toolbar, pixelBudget: 4_000_000, glass: .solid)
+        XCTAssertGreaterThan(try Self.alpha(of: solid, at: background, in: content.bounds.size), 0.95,
+                             "The shared region's picture is solid")
+        XCTAssertTrue(content.chrome.showsGlass)
+        XCTAssertEqual(content.chrome.subviews.first?.isHidden, false, "The glass on screen is back at once")
+    }
+
+    /// Control-2 hides and shows the toolbar by moving a picture of it in a window of its own. With glass, that window
+    /// draws live glass of the toolbar's shape under the picture, in the active look, running the picture's own motion.
+    func testShowAndHideMoveLiveGlassWithThePicture() async throws {
+        try XCTSkipUnless(ToolbarGlass.movesWithPictures, "Before macOS 26, animation pictures are solid")
+        for style in [VisibilityAnimationStyle.slide, .magic, .focus, .dissolve] {
+            let (model, cleanup) = try makeModel("show-hide-\(style.rawValue)")
+            model.setAnimationStyle(style)
+            model.setPropertiesShown(false)
+            model.setGlass(true)
+            let app = AppDelegate(model: model, visibility: WorkspaceVisibilityAnimator(reduceMotion: { false }))
+            app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }
+            let (toolbar, content) = try await showToolbar(app, model)
+            XCTAssertTrue(content.chrome.showsGlass)
+            let open = toolbar.frame
+            app.activateTools()
+            let panels = NSApp.windows.compactMap { $0 as? VisibilityTransitionPanel }.filter { $0.isVisible && $0.showsGlass }
+            XCTAssertEqual(panels.count, 1, "\(style): only the toolbar's picture carries glass")
+            let panel = try XCTUnwrap(panels.first)
+            let view = try XCTUnwrap(panel.contentView as? VisibilityImageView)
+            let plates = view.glassPicture?.subviews.compactMap { $0 as? ToolbarChromeView } ?? []
+            XCTAssertEqual(plates.count, 1)
+            let plate = try XCTUnwrap(plates.first)
+            XCTAssertTrue(plate.showsGlass)
+            XCTAssertEqual(plate.effectiveCornerRadius, content.chrome.effectiveCornerRadius)
+            let onScreen = panel.convertToScreen(plate.convert(plate.bounds, to: nil))
+            XCTAssertEqual(onScreen.minX, open.minX, accuracy: 0.5, "\(style): the glass sits where the toolbar was")
+            XCTAssertEqual(onScreen.minY, open.minY, accuracy: 0.5)
+            XCTAssertEqual(onScreen.size.width, open.width, accuracy: 0.5)
+            XCTAssertEqual(onScreen.size.height, open.height, accuracy: 0.5)
+            // The glass turns around the picture's center, where its layers are anchored.
+            let center = CGPoint(x: view.imageLayer.frame.midX, y: view.imageLayer.frame.midY)
+            XCTAssertEqual(view.glassMotion?.layer?.anchorPoint, .zero)
+            XCTAssertEqual(view.glassMotion?.layer?.position, center)
+            XCTAssertEqual(view.motionContainer.zPosition, 1, "The picture stays above its glass")
+            if style == .dissolve {
+                XCTAssertNotNil(view.glassPicture?.layer?.animation(forKey: VisibilityImageView.glassFadeKey),
+                                "The glass fades with the picture as it breaks up")
+            } else {
+                XCTAssertFalse((view.imageLayer.animationKeys() ?? []).isEmpty)
+                XCTAssertEqual(Set(view.glassPicture?.layer?.animationKeys() ?? []), Set(view.imageLayer.animationKeys() ?? []),
+                               "\(style): the glass runs the picture's motion")
+                XCTAssertEqual(Set(view.glassMotion?.layer?.animationKeys() ?? []),
+                               Set(view.motionContainer.animationKeys() ?? []))
+            }
+            XCTAssertEqual(view.glassMotion?.layer?.filters?.count ?? 0, style == .focus ? 1 : 0, "Soft focus blurs the glass too")
+            XCTAssertEqual(toolbar.alphaValue, 0, "The picture and its glass stand in for the toolbar")
+            XCTAssertEqual(panel.animationBehavior, .none,
+                           "\(style): the picture leaves at once, so its glass never fades over the toolbar it hands over to")
+            if #available(macOS 26, *) {
+                XCTAssertTrue(panel._hasActiveAppearanceIgnoringKeyFocus(), "The glass keeps the toolbar's active look")
+            }
+            for _ in 0..<100 where model.visibilityAnimating { try await Task.sleep(for: .milliseconds(20)) }
+            XCTAssertFalse(panel.isVisible)
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            cleanup()
+        }
+    }
+
+    /// A side toolbar shrinking to one button fades a picture of its tools; its rail and properties keep live glass under
+    /// that picture instead of turning dark.
+    func testSideToolbarShrinksWithLiveGlassUnderItsPicture() async throws {
+        try XCTSkipUnless(ToolbarGlass.movesWithPictures, "Before macOS 26, animation pictures are solid")
+        let (model, cleanup) = try makeModel("side-shrink")
+        model.setVisibilityAnimation(false)
+        model.setToolbarOrientation(.vertical)
+        model.setPropertiesShown(true)
+        model.setToolbarCollapseDelay(3)
+        model.setGlass(true)
+        let app = AppDelegate(model: model)
+        app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }
+        app.collapse.wait = { _ in try await Task.sleep(for: .seconds(30)) }
+        defer {
+            app.hideTools()
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            cleanup()
+        }
+        let (_, content) = try await showToolbar(app, model)
+        let surfaces = ToolbarGlass.surfaces(in: content.host)
+        XCTAssertGreaterThanOrEqual(surfaces.count, 2, "The rail and the properties are glass")
+        let picture = try XCTUnwrap(content.snapshotHost())
+        let rail = try XCTUnwrap(surfaces.min { $0.frame.minX < $1.frame.minX })
+        XCTAssertLessThan(try Self.alpha(of: picture, at: CGPoint(x: rail.frame.minX + 3, y: rail.frame.midY),
+                                         in: content.host.bounds.size), 0.05, "The picture leaves the glass out")
+        app.collapse.collapse()
+        XCTAssertTrue(app.toolbarIsAnimating)
+        let face = try XCTUnwrap(content.subviews.last)
+        XCTAssertFalse(face === content.host)
+        let plates = face.subviews.compactMap { $0 as? ToolbarChromeView }
+        XCTAssertEqual(plates.map(\.frame), surfaces.map(\.frame), "Live glass sits where the rail and properties were")
+        XCTAssertTrue(plates.allSatisfy(\.showsGlass))
+        XCTAssertTrue(model.toolbarCollapsed)
+    }
+
     func testSettingsPreviewsStaySolid() throws {
         let (model, cleanup) = try makeModel("preview")
         defer { cleanup() }

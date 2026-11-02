@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On macOS 26 or later, with Glass toolbar on, the toolbar now stays glass while it hides and shows, for example with Control-2, and while a toolbar on the side shrinks to one button. Before, it turned solid until it landed.
+
 ## 0.3.0 - 2026-11-01
 
 ### Added

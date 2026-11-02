@@ -150,6 +150,9 @@ final class WorkspaceVisibilityAnimator {
         let sharing = model.regionSharingState.isCapturing ? model.regionSharing : nil
         let sharedProtection = sharing?.workspaceProtectionFrames() ?? []
         let style = animationStyle(model)
+        // A picture can't hold live glass, so the toolbar's picture leaves it out and its transition window draws live
+        // glass of the same shapes under it (WIN-UI-09). Before macOS 26, the picture is solid instead.
+        let toolbarGlass = ToolbarGlass.movesWithPictures ? toolbar.contentView.map { ToolbarGlass.surfaces(in: $0) } ?? [] : []
         if animate && ([.dissolve, .slide, .magic, .corners].contains(style) || VisibilityPose.usesPose(style)) {
             do {
                 if style == .dissolve { try ParticleBurstView.prepare() }
@@ -162,8 +165,9 @@ final class WorkspaceVisibilityAnimator {
         }
         if animate, let sharing {
             do {
-                sharedToolbarImage = try retainedSharedToolbarImage ?? toolbarImage ??
-                    snapshotToolbar(toolbar, pixelBudget: 4_000_000)
+                // The shared region's output only shows pixels, so a glass toolbar's picture there is solid.
+                sharedToolbarImage = try retainedSharedToolbarImage ?? (toolbarGlass.isEmpty ? toolbarImage : nil) ??
+                    snapshotToolbar(toolbar, pixelBudget: 4_000_000, glass: .solid)
                 sharedTransition = sharing.beginWorkspaceAnimation()
                 sharedController = sharing
             } catch { sharing.workspaceAnimationFailed(error) }
@@ -208,6 +212,7 @@ final class WorkspaceVisibilityAnimator {
         let started = CACurrentMediaTime()
         transitionImages = images
         var burstDelays: [String: Double] = [:]
+        var toolbarPicture: VisibilityImageView?
         var gatherArrivals: [CFTimeInterval] = []
         for (index, image) in images.enumerated() {
             let delay = reversing ? 0 : (image.elementID == nil ? (showing ? 0 : timing.drawingsEndDelay) :
@@ -318,6 +323,11 @@ final class WorkspaceVisibilityAnimator {
                                             imageFrame: toolbar.frame, level: toolbar.level)
                 panel.level = toolbar.level
                 guard let view = panel.contentView as? VisibilityImageView else { throw RenderFailure.imageUnavailable }
+                if !toolbarGlass.isEmpty {
+                    panel.showsGlass = true
+                    view.addGlass(toolbarGlass)
+                }
+                toolbarPicture = view
                 if style == .dissolve {
                     let particles = try ParticleBurstView(image: toolbarImage, imageFrame: view.imageLayer.frame,
                                                       frame: view.bounds, particleLimit: 32_000)
@@ -346,6 +356,7 @@ final class WorkspaceVisibilityAnimator {
                         view.absorbPulses(at: gatherArrivals)
                     }
                 }
+                view.moveGlassWithPicture()
                 panels.append(panel)
                 panel.orderFrontRegardless()
                 toolbar.alphaValue = 0
@@ -385,6 +396,11 @@ final class WorkspaceVisibilityAnimator {
             let delay = burstDelays[key] ?? 0
             view.start(appearing: showing, duration: duration, at: burstStart + delay,
                        progress: particleStates[key])
+            // The toolbar's glass fades with its picture as the particles break away or settle.
+            if key == "toolbar", let begin = view.startTime, let end = view.endTime {
+                let opacities = (0...30).map { Float(view.pictureOpacity(at: begin + (end - begin) * Double($0) / 30)) }
+                toolbarPicture?.fadeGlass(opacities, from: begin, duration: end - begin)
+            }
         }
         let ends = layerMotions.map(\.endTime) + [toolbarImageMotion?.endTime, toolbarPoof?.endTime].compactMap { $0 } +
             burstViews.compactMap(\.endTime)
@@ -407,13 +423,15 @@ final class WorkspaceVisibilityAnimator {
                             sharedRegion: model.regionSharingState.isCapturing ? model.regionSharing.workspaceAnimationRegion : nil)
     }
 
-    func snapshotToolbar(_ toolbar: NSPanel, pixelBudget: Int) throws -> CGImage {
+    /// A picture of the toolbar. Its glass is left out (`clear`), for a transition window that draws live glass under
+    /// it, or drawn solid (`solid`), for the shared region's output. `nil` is what the toolbar's animations use.
+    func snapshotToolbar(_ toolbar: NSPanel, pixelBudget: Int, glass: ToolbarGlass.Picture? = nil) throws -> CGImage {
         guard let view = toolbar.contentView else { throw RenderFailure.imageUnavailable }
         view.needsLayout = true
         view.layoutSubtreeIfNeeded()
         guard let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds),
               bitmap.pixelsWide * bitmap.pixelsHigh <= min(4_000_000, pixelBudget) else { throw RenderFailure.invalidSize }
-        view.cacheDisplay(in: view.bounds, to: bitmap)
+        ToolbarGlass.picture(of: view, glass: glass ?? ToolbarGlass.animationPicture) { view.cacheDisplay(in: view.bounds, to: bitmap) }
         guard let image = bitmap.cgImage else { throw RenderFailure.imageUnavailable }
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
               let context = CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8,
@@ -490,7 +508,7 @@ final class WorkspaceVisibilityAnimator {
         return style.resolved
     }
 
-    private func transitionPanel(image: CGImage, frame: CGRect, imageFrame: CGRect, level: NSWindow.Level) -> NSPanel {
+    private func transitionPanel(image: CGImage, frame: CGRect, imageFrame: CGRect, level: NSWindow.Level) -> VisibilityTransitionPanel {
         let panel = VisibilityTransitionPanel(contentRect: frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isOpaque = false; panel.backgroundColor = .clear
         panel.hasShadow = false; panel.ignoresMouseEvents = true
