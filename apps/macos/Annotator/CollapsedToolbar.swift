@@ -6,7 +6,7 @@ import MotionCore
 /// Where the toolbar's content sits while its window is bigger or smaller than it, during a resize or a morph.
 /// It is the point both the old and the new frame share, so the content stays put on screen.
 enum ToolbarPin: Equatable {
-    case topLeading, top, bottom, leading, trailing
+    case topLeading, center, top, bottom, leading, trailing
 
     /// The content's rect in a non-flipped view's `bounds`.
     func rect(size: CGSize, in bounds: CGRect) -> CGRect {
@@ -14,6 +14,7 @@ enum ToolbarPin: Equatable {
         let y: CGFloat
         switch self {
         case .topLeading: x = bounds.minX; y = bounds.maxY - size.height
+        case .center: x = bounds.midX - size.width / 2; y = bounds.midY - size.height / 2
         case .top: x = bounds.midX - size.width / 2; y = bounds.maxY - size.height
         case .bottom: x = bounds.midX - size.width / 2; y = bounds.minY
         case .leading: x = bounds.minX; y = bounds.midY - size.height / 2
@@ -28,6 +29,7 @@ enum ToolbarPin: Equatable {
         let y: CGFloat
         switch self {
         case .topLeading: x = frame.minX; y = frame.maxY - size.height
+        case .center: x = frame.midX - size.width / 2; y = frame.midY - size.height / 2
         case .top: x = frame.midX - size.width / 2; y = frame.maxY - size.height
         case .bottom: x = frame.midX - size.width / 2; y = frame.minY
         case .leading: x = frame.minX; y = frame.midY - size.height / 2
@@ -36,7 +38,7 @@ enum ToolbarPin: Equatable {
         return CGRect(x: floor(x), y: floor(y), width: size.width, height: size.height)
     }
 
-    /// The pin for a toolbar docked at `edge`, or for a floating one that keeps its top-left corner.
+    /// The pin for a toolbar docked at `edge`.
     static func docked(orientation: ToolbarOrientation, edge: ToolbarDockEdge) -> Self {
         if orientation == .vertical { return edge == .left ? .leading : .trailing }
         return edge == .bottom ? .bottom : .top

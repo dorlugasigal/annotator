@@ -42,6 +42,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// A collapse or expansion waiting for the new face's measured size.
     private var pendingMorph: PendingToolbarMorph?
     private var morphing = false
+    /// The floating toolbar's frame before it shrank to one button, and the button's frame.
+    private var shrunkToolbar: (full: CGRect, button: CGRect)?
     private var openMenus = 0
     private var tutorialSurface: AnyCancellable?
     private(set) lazy var collapse = ToolbarCollapseController(model: model)
@@ -867,12 +869,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// Where the toolbar's content stays while the window changes: the docked edge's middle, or a floating toolbar's
-    /// top-left corner.
+    /// center, so it shrinks into its middle and opens out from there.
     private var toolbarPin: ToolbarPin {
-        guard let toolbar else { return .topLeading }
+        guard let toolbar else { return .center }
         let frame = frameAnimator.target ?? toolbar.frame
         let docked = edgeDocked || dockedFrame.map { abs(frame.minX - $0.minX) < 1 && abs(frame.minY - $0.minY) < 1 } == true
-        guard docked else { return .topLeading }
+        guard docked else { return .center }
         return .docked(orientation: model.preferences.toolbarOrientation ?? .horizontal,
                        edge: model.preferences.toolbarDockEdge ?? .automatic)
     }
@@ -948,7 +950,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func runToolbarMorph(_ morph: PendingToolbarMorph, size: CGSize) {
         guard let toolbar, let content = toolbar.contentView as? ToolbarContentView else { return }
-        let target = toolbarFrame(size: size, from: morph.start, pin: morph.pin)
+        var target = toolbarFrame(size: size, from: morph.start, pin: morph.pin)
+        // Opening the one button where it shrank goes back to the exact frame it shrank from, without rounding drift.
+        if let shrunk = shrunkToolbar, !morph.collapsing, shrunk.full.size == size,
+           abs(shrunk.button.minX - morph.start.minX) < 1, abs(shrunk.button.minY - morph.start.minY) < 1 {
+            target = toolbarFrame(size: size, from: shrunk.full, pin: .topLeading)
+        }
+        shrunkToolbar = morph.collapsing && morph.pin == .center ? (full: morph.start, button: target) : nil
         let reduced = Motion.systemReducesMotion
         // Reduce Motion: the window changes at once and the faces only cross-fade.
         if reduced { toolbar.setFrame(target, display: true) }

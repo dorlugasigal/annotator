@@ -695,6 +695,51 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertEqual(reopened.maxY, open.maxY, accuracy: 1)
     }
 
+    /// A floating toolbar shrinks into its middle, not toward its left edge, and opens back to the same frame.
+    func testFloatingToolbarShrinksIntoItsCenterAndOpensWhereItWas() async throws {
+        let (model, cleanup) = try makeModel("center")
+        model.setVisibilityAnimation(false)
+        model.setPropertiesShown(false)
+        model.setToolbarCollapseDelay(3)
+        let app = AppDelegate(model: model)
+        app.pointerLocation = { CGPoint(x: -100_000, y: -100_000) }
+        app.collapse.wait = { _ in try await Task.sleep(for: .seconds(30)) }
+        defer {
+            app.hideTools()
+            app.applicationWillTerminate(Notification(name: NSApplication.willTerminateNotification))
+            cleanup()
+        }
+        app.activateTools()
+        model.interact()
+        try await Task.sleep(for: .milliseconds(250))
+        let window = try XCTUnwrap(app.toolbarWindow)
+        let screen = try XCTUnwrap(window.screen)
+        window.setFrameOrigin(CGPoint(x: screen.visibleFrame.midX - window.frame.width / 2 - 37,
+                                      y: screen.visibleFrame.midY - window.frame.height / 2 + 23))
+        let open = window.frame
+        app.finishToolbarDrag(at: CGPoint(x: open.midX, y: open.midY))
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertEqual(window.frame, open, "The toolbar floats")
+
+        for _ in 0..<3 {
+            app.collapse.collapse()
+            for _ in 0..<40 where !(model.toolbarCollapsed && !app.toolbarIsAnimating) {
+                try await Task.sleep(for: .milliseconds(25))
+            }
+            XCTAssertTrue(model.toolbarCollapsed)
+            let pill = window.frame
+            XCTAssertEqual(pill.size, CollapsedToolbarButton.size(vertical: false, toolbarSize: .expanded))
+            XCTAssertEqual(pill.midX, open.midX, accuracy: 1, "The button sits in the toolbar's middle")
+            XCTAssertEqual(pill.midY, open.midY, accuracy: 1, "The button sits in the toolbar's middle")
+
+            model.requestToolbarExpansion()
+            for _ in 0..<40 where model.toolbarCollapsed || app.toolbarIsAnimating {
+                try await Task.sleep(for: .milliseconds(25))
+            }
+            XCTAssertEqual(window.frame, open, "The toolbar opens back where it was, without drifting")
+        }
+    }
+
     // MARK: Settings
 
     func testSettingsPreviewTakesButtonsOffAndPutsThemBack() async throws {

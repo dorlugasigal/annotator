@@ -2,7 +2,8 @@
   "schemaVersion": 1,
   "unreleased": {
     "Fixed": [
-      "On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout."
+      "On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout.",
+      "A toolbar you moved away from the screen's edge now shrinks to one button in its middle, and opens again from there. Before, the button went to the toolbar's left end."
     ]
   },
   "releases": [

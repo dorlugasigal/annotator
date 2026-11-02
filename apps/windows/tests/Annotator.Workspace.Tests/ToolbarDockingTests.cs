@@ -396,6 +396,24 @@ public sealed class ToolbarDockingTests
     }
 
     [Fact]
+    public void AFreeToolbarShrinksIntoItsCenterAndOpensBackWhereItWas()
+    {
+        // Mac ToolbarPin.center: the one button sits in the middle of the toolbar it shrank from.
+        (ToolbarDocking docking, Rect frame) = FreeToolbar(PrimaryDisplay);
+        Rect current = StartDrag(docking, frame, PrimaryDisplay);
+        ToolbarDrop drop = docking.Release(Center(current) + new Point(-20, 30), SizeOf(current), Displays, true, Measure)!.Value;
+        Rect full = docking.Resize(drop.Frame, new Size(701, 239), Displays, ToolbarOrientation.Horizontal, ToolbarDockEdge.Automatic)
+            ?? drop.Frame;
+        Rect button = docking.Resize(full, new Size(80, 80), Displays, ToolbarOrientation.Horizontal, ToolbarDockEdge.Automatic,
+            centered: true)!.Value;
+        Assert.True(Math.Abs(Center(button).X - Center(full).X) <= 0.5 && Math.Abs(Center(button).Y - Center(full).Y) <= 0.5,
+            $"{button} isn't centered on {full}");
+        Rect opened = docking.Resize(button, SizeOf(full), Displays, ToolbarOrientation.Horizontal, ToolbarDockEdge.Automatic,
+            centered: true)!.Value;
+        Assert.Equal(full, opened);
+    }
+
+    [Fact]
     public void SizesThatArriveDuringADragWaitForItsEnd()
     {
         // AppDelegate.resizeToolbar keeps pendingToolbarSize while the panel tracks a drag.

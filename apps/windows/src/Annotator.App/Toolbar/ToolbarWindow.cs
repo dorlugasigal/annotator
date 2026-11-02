@@ -253,7 +253,9 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         _layout = layout;
         if ((rebuilt || relayout) && _root.IsLoaded)
         {
-            FitToContent(redock: relayout);
+            // Mac ToolbarPin.center: a free toolbar shrinks into its middle and opens out from there.
+            bool morphs = _collapseShown is { } wasCollapsed && wasCollapsed != snapshot.ToolbarCollapsed;
+            FitToContent(redock: relayout, centered: morphs);
         }
         _settledProperties = look.Properties;
         foreach (Action<WorkspaceSnapshot> update in _updates)
@@ -416,10 +418,11 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
     /// <summary>
     /// Mac resizeToolbar: sizes the window to its content. A docked toolbar docks again with its new size (flush against
     /// the work area after a drop at an edge, else 12 points in); a free one keeps its top-left corner inside the work
-    /// area. <paramref name="redock"/> docks it at the saved edge first, as the Mac's updateToolbarLayout does when the
+    /// area, or its center when <paramref name="centered"/> (shrinking to one button or opening from it).
+    /// <paramref name="redock"/> docks it at the saved edge first, as the Mac's updateToolbarLayout does when the
     /// orientation, edge, toolbar size or items change. During a drag the size waits for the drop.
     /// </summary>
-    private void FitToContent(bool redock = false)
+    private void FitToContent(bool redock = false, bool centered = false)
     {
         double scale = Scale();
         Size size = Measure();
@@ -441,7 +444,7 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         CoreRect current = ToCore(frame);
         CoreRect? next = redock && !_docking.IsDragging
             ? _docking.Dock(content, current, Displays(), orientation, edge)
-            : _docking.Resize(current, content, Displays(), orientation, edge);
+            : _docking.Resize(current, content, Displays(), orientation, edge, centered: centered);
         if (next is { } placed && placed != current)
         {
             MoveTo(placed);
