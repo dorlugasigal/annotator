@@ -1,12 +1,28 @@
 {
   "schemaVersion": 1,
-  "unreleased": {
-    "Fixed": [
-      "On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout.",
-      "A toolbar you moved away from the screen's edge now shrinks to one button in its middle, and opens again from there. Before, the button went to the toolbar's left end."
-    ]
-  },
+  "unreleased": {},
   "releases": [
+    {
+      "version": "0.3.2",
+      "build": 302,
+      "date": "2026-11-02",
+      "changes": {
+        "Fixed": [
+          "On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout.",
+          "A toolbar you moved away from the screen's edge now shrinks to one button in its middle, and opens again from there. Before, the button went to the toolbar's left end."
+        ]
+      },
+      "knownIssues": [
+        "Effects don't follow windows that move or content that scrolls, and blur is not secure redaction. Remove private details before you share.",
+        "Anything inside a shared region can show up in your meeting, including notifications.",
+        "Choosing a different area or changing your displays turns region sharing off. Check the outline before you start it again.",
+        "In the Shared Region window, the spotlight turns on and off at once instead of fading.",
+        "Some meeting apps may not show the toolbar in a shared window. Check before you rely on it.",
+        "With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.",
+        "On Windows, the toolbar changes size at once when it shrinks to one button, opens again or grows for its properties. On a Mac, it animates.",
+        "On Windows, with Glass toolbar on, the glass loses its blur while the toolbar hides and shows. The blur comes back when the toolbar lands."
+      ]
+    },
     {
       "version": "0.3.1",
       "build": 301,
