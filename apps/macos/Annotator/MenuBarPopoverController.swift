@@ -105,7 +105,7 @@ final class MenuBarPopoverController: NSObject, NSPopoverDelegate {
             }
             if modifiers == .command {
                 let selected: MenuBarAction?
-                switch event.charactersIgnoringModifiers?.lowercased() {
+                switch event.shortcutKey {
                 case "s": selected = model.active != nil ? .saveBoard : nil
                 case "o": selected = .openBoard
                 case ",": selected = .settings

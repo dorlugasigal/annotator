@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout.
+
 ## 0.3.1 - 2026-11-02
 
 ### Fixed

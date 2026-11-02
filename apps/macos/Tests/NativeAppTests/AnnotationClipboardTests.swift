@@ -51,6 +51,19 @@ final class AnnotationClipboardTests: XCTestCase {
             eventNumber: 0, clickCount: count, pressure: 1))
     }
 
+    func testCommandShortcutsWorkOnANonLatinLayout() throws {
+        let box = Element(tool: .rectangle, frame: Rect(x: 40, y: 40, width: 120, height: 80))
+        fixture.session.document = try CanvasDocument(elements: [box])
+        fixture.session.document.select([box.id])
+        let canvas = fixture.session.canvas
+        // On the Hebrew layout the D key gives "ג" and the Z key gives "ז".
+        canvas.keyDown(with: try key("ג", keyCode: 2, in: fixture.session.panel))
+        XCTAssertEqual(document.elements.count, 2, "Command-D duplicates on the Hebrew layout.")
+        canvas.keyDown(with: try key("ז", keyCode: 6, in: fixture.session.panel))
+        XCTAssertEqual(document.elements.count, 1, "Command-Z undoes on the Hebrew layout.")
+        XCTAssertEqual(NSEvent.asciiCharacter(keyCode: 6), "z")
+    }
+
     func testCommandCAndCommandVCopyAnyObjectWithCascadingPlacement() throws {
         var box = Element(tool: .rectangle, frame: Rect(x: 40, y: 40, width: 120, height: 80))
         box.label = ShapeLabel(text: "Orders")
