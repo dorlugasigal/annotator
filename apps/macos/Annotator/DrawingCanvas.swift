@@ -1079,8 +1079,9 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
             else { model.interact() }
             return
         }
-        let key = event.charactersIgnoringModifiers?.lowercased() ?? ""
         let modifiers = event.modifierFlags.intersection([.control, .command, .option, .shift])
+        let key = modifiers.isDisjoint(with: [.command, .control])
+            ? event.charactersIgnoringModifiers?.lowercased() ?? "" : event.shortcutKey
         if modifiers == .command, key == "l", model.toolLibraryShortcut != nil {
             model.openToolLibrary()
             return

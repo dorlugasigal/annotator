@@ -1,6 +1,10 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Fixed": [
+      "On a Mac with a non-Latin keyboard layout, such as Hebrew, Command-Z and other Command shortcuts now work. Before, they did nothing unless you switched to an English layout."
+    ]
+  },
   "releases": [
     {
       "version": "0.3.1",

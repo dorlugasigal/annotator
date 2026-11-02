@@ -65,6 +65,34 @@ final class GlobalHotkey {
     }
 }
 
+extension NSEvent {
+    /// The lowercased key for Command and Control shortcuts. On a non-Latin layout such as Hebrew the Z key gives "ז",
+    /// so like AppKit's menus this falls back to the current ASCII-capable layout, which gives "z".
+    var shortcutKey: String {
+        let key = charactersIgnoringModifiers?.lowercased() ?? ""
+        guard !key.isEmpty, !key.unicodeScalars.allSatisfy(\.isASCII),
+              let latin = Self.asciiCharacter(keyCode: keyCode) else { return key }
+        return latin
+    }
+
+    static func asciiCharacter(keyCode: UInt16) -> String? {
+        guard let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
+              let property = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else { return nil }
+        let data = Unmanaged<CFData>.fromOpaque(property).takeUnretainedValue() as Data
+        var deadKeys: UInt32 = 0
+        var length = 0
+        var characters = [UniChar](repeating: 0, count: 4)
+        let status = data.withUnsafeBytes { bytes -> OSStatus in
+            guard let layout = bytes.baseAddress?.assumingMemoryBound(to: UCKeyboardLayout.self) else { return -1 }
+            return UCKeyTranslate(layout, keyCode, UInt16(kUCKeyActionDown), 0, UInt32(LMGetKbdType()),
+                                  OptionBits(kUCKeyTranslateNoDeadKeysBit), &deadKeys, characters.count, &length, &characters)
+        }
+        guard status == noErr, length > 0 else { return nil }
+        let text = String(utf16CodeUnits: characters, count: length).lowercased()
+        return text.unicodeScalars.allSatisfy(\.isASCII) ? text : nil
+    }
+}
+
 enum HotkeyError: LocalizedError {
     case registration(OSStatus, shortcut: String? = nil)
     var errorDescription: String? {

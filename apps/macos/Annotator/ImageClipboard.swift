@@ -65,7 +65,7 @@ class AnnotationPanel: NSPanel {
             }
         }
         if flags == .command, !(firstResponder is NSTextView), let model = imagePasteModel {
-            switch event.charactersIgnoringModifiers?.lowercased() {
+            switch event.shortcutKey {
             case "v": model.paste(); return true
             case "c": if model.copySelection() { return true }
             case "x": if model.copySelection(cut: true) { return true }
