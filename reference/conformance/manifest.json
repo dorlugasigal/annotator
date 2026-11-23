@@ -1,9 +1,9 @@
 {
   "environment" : {
-    "build" : "26B123",
+    "build" : "26B131",
     "cpu" : "Apple M4 Max",
     "gpu" : "Apple M4 Max",
-    "macOS" : "27.2.0",
+    "macOS" : "27.2.1",
     "machine" : "arm64"
   },
   "fileCount" : 268,
@@ -614,9 +614,9 @@
       "sha256" : "95d2cc4d2ab6b3e0fc70dae2af978501f90e97c8e733a16bda3a028b8351e5ad"
     },
     {
-      "bytes" : 67739,
+      "bytes" : 395834,
       "path" : "geometry/viewports.jsonl",
-      "sha256" : "aee8fd0171d8c24be63a9415b91c9e83e43afd4d8637172a79c34083443f307c"
+      "sha256" : "20b4207be166ca7d477aec42f7b0fb7ef74eb2e40dd8036450d22264ffd501be"
     },
     {
       "bytes" : 237171,
@@ -939,9 +939,9 @@
       "sha256" : "22b7f927d31ae2e29dbf440002482759081dbd2ea5d867394b674fa806cf7466"
     },
     {
-      "bytes" : 2372,
+      "bytes" : 2392,
       "path" : "profiles/full.json",
-      "sha256" : "e9bbfd3df1d3432a83686329d8da5e8f91d638d7c3b9819c76b353574803e4a6"
+      "sha256" : "0d24932116c3c0acf1c9ea4890a215251079efa0aa214a05580a7737ff9bb055"
     },
     {
       "bytes" : 627,
@@ -994,9 +994,9 @@
       "sha256" : "445fc56d695e961c3f052ed2bd87f6827204259c1a0f96c8c87187d3d3c4e22e"
     },
     {
-      "bytes" : 46519,
+      "bytes" : 46559,
       "path" : "profiles/index.jsonl",
-      "sha256" : "982e2ade22c6a2661aed73dda4cfc97e02bee32390f32fcf88b9366a4fc0dda6"
+      "sha256" : "3ee987890432f195298470b99bf70d1a24d6a6a6f48838ebb498fc8140cfec53"
     },
     {
       "bytes" : 359,
@@ -1367,9 +1367,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "b0f10a7be959f0ebccba52937c9409bf0ddf60bb",
-    "date" : "2026-11-01",
-    "fingerprint" : "30362c50cd7cb5deae5da2beb6bd7ae90b7b8a6ab3098a5ec5ec4b31359952e7",
+    "commit" : "c334722a6887247bc583f68dfd61360e54708e98",
+    "date" : "2026-11-23",
+    "fingerprint" : "66059092c0895226603dd159692e495f6aae9d77ddbb900a43d8600f07a1253d",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
