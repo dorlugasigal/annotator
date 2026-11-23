@@ -4,8 +4,9 @@ namespace Annotator.Workspace;
 
 /// <summary>
 /// The preferences that Settings > General changes and the profiles of its footer (Mac WorkspaceModel: setMenuBarVisible,
-/// setShareToolStyles, setTheme, setGlass, setShortcutHints, setAnimationStyle, exportPreferences and importPreferences). The host
-/// reads the results from <see cref="WorkspaceSnapshot.Preferences"/>: the theme of its windows and the tray icon.
+/// setShareToolStyles, setZoomMap, setTheme, setGlass, setShortcutHints, setAnimationStyle, exportPreferences and
+/// importPreferences). The host reads the results from <see cref="WorkspaceSnapshot.Preferences"/>: the theme of its windows
+/// and the tray icon.
 /// </summary>
 public sealed partial class WorkspaceModel
 {
@@ -41,6 +42,16 @@ public sealed partial class WorkspaceModel
         _preferences.ShareToolStyles = shared ? true : null;
         PersistPreferences();
         _status = shared ? "Your next style change applies to every drawing tool." : "Each tool keeps its own style.";
+    }
+
+    /// <summary>
+    /// Mac setZoomMap: the corner of screen zoom's map, or Off. Bottom right is the default and is not stored.
+    /// </summary>
+    public void SetZoomMap(ZoomMapPosition position)
+    {
+        using ChangeScope scope = Change();
+        _preferences.ZoomMap = position == ZoomMapPosition.BottomRight ? null : position;
+        PersistPreferences();
     }
 
     /// <summary>Mac setTheme: System, Light or Dark for app windows only (WIN-UI-07); drawings keep their colors.</summary>

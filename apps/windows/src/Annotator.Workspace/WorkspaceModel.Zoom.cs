@@ -545,15 +545,23 @@ public sealed partial class WorkspaceModel
     }
 
     /// <summary>
-    /// The center of what the display shows (Mac insertSavedShape): the source center of screen zoom's viewport for the
-    /// pointer now, else the center of the display.
+    /// The center of what the display shows (Mac insertSavedShape): the source center of screen zoom's viewport as the
+    /// display shows it, else as it would be anchored at the pointer now, else the center of the display.
     /// </summary>
     private Point VisibleCenter(Canvas canvas)
     {
         Rect bounds = canvas.Display.Bounds;
         if (canvas.Document.Presentation.Mode == PresentationMode.Screen
-            && _displayedZoom?.Get(canvas.Display.Id) is { Mode: PresentationMode.Screen } shown && _pointer() is { } pointer)
+            && _displayedZoom?.Get(canvas.Display.Id) is { Mode: PresentationMode.Screen } shown)
         {
+            if (_displayedZoom.Source(canvas.Display.Id) is { } source)
+            {
+                return source.Center;
+            }
+            if (_pointer() is not { } pointer)
+            {
+                return bounds.Center;
+            }
             try
             {
                 return Viewport.CursorAnchored(bounds, shown.Magnification, canvas.Display.ToLocal(pointer)).Source.Center;

@@ -28,6 +28,15 @@ final class LivePresentation {
     private var screenPanel: NSPanel?
     private var screenView: PixelEffectsView?
     private var screenCover: NSView?
+    private var mapPanel: NSPanel?
+    private var mapView: PixelEffectsView?
+    private var mapOutline: ZoomMapOutlineView?
+    private var mapOpacity: Double?
+    /// The part of the display that screen zoom showed last. While drawing, zoom continues from it.
+    private var followedSource: Rect?
+    private let slideTicker = MotionTicker()
+    private var lastSlide: CFTimeInterval?
+    private var steppingSlide = false
     private var selectionPanel: NSPanel?
     private var selectionView: SelectionOverlayView?
     private var zoomGestures: ZoomGestureMonitor?
@@ -76,16 +85,29 @@ final class LivePresentation {
             (presentationMode != .off || session?.document.elements.contains(where: { $0.tool.isPixelEffect }) == true)
     }
 
+    /// While drawing, the zoomed part holds still and slides near the display's edges (`ZoomFollow`). Using apps keeps it
+    /// anchored at the pointer, so what's under the pointer is what a click reaches.
     var screenViewport: Viewport? {
         guard model?.workspaceHidden != true, presentationMode == .screen, let session else { return nil }
         if let frozenViewport { return frozenViewport }
         let size = session.canvas.bounds.size
-        let pointer = NSEvent.mouseLocation
-        let local = Point(pointer.x - session.panel.frame.minX, session.panel.frame.maxY - pointer.y)
+        let display = Rect(x: 0, y: 0, width: size.width, height: size.height)
+        let local = localPointer(in: session)
         do {
-            return try Viewport.cursorAnchored(display: Rect(x: 0, y: 0, width: size.width, height: size.height),
-                                               factor: magnification, cursor: local)
+            let viewport = model?.mode == .draw
+                ? try ZoomFollow.viewport(previous: followedSource, display: display, factor: magnification, pointer: local)
+                : try Viewport.cursorAnchored(display: display, factor: magnification, cursor: local)
+            followedSource = viewport.source
+            return viewport
         } catch { model?.report(error); return nil }
+    }
+
+    /// Where the pointer is on the desktop. Tests replace it.
+    var pointerLocation: () -> NSPoint = { NSEvent.mouseLocation }
+
+    private func localPointer(in session: OverlaySession) -> Point {
+        let pointer = pointerLocation()
+        return Point(pointer.x - session.panel.frame.minX, session.panel.frame.maxY - pointer.y)
     }
 
     init(session: OverlaySession, model: WorkspaceModel) { self.session = session; self.model = model }
@@ -223,7 +245,11 @@ final class LivePresentation {
         frozenViewport = current
         return current
     }
-    func releaseTextViewport() { frozenViewport = nil }
+    func releaseTextViewport() {
+        if let frozenViewport { followedSource = frozenViewport.source }
+        frozenViewport = nil
+        updateSliding()
+    }
 
     func stop(preserveSelection: Bool = false) {
         endZoomRamp()
@@ -292,6 +318,9 @@ final class LivePresentation {
     private func clearScreenZoom() {
         let ownedZoomControls = zoomGestures != nil || gestureStartAttempted || screenPanel != nil
         frozenViewport = nil
+        followedSource = nil
+        stopSliding()
+        clearZoomMap()
         zoomGestures?.stop(); zoomGestures = nil
         gestureStartAttempted = false
         if ownedZoomControls { model?.noteZoomGestures(available: false) }
@@ -347,8 +376,48 @@ final class LivePresentation {
             render()
             session?.canvas.needsDisplay = true
             selectionView?.needsDisplay = true
+            updateMapOpacity()
         } else { renderLens() }
     }
+
+    /// The zoom that can slide now: screen zoom on screen while drawing, not held still for text.
+    private var slidingViewport: Viewport? {
+        guard model?.mode == .draw, frozenViewport == nil, requested, screenPanel != nil else { return nil }
+        return screenViewport
+    }
+
+    /// Slides the zoomed part while the pointer rests near an edge, one display frame at a time.
+    private func updateSliding() {
+        guard let session, let viewport = slidingViewport, ZoomFollow.slides(viewport, pointer: localPointer(in: session)) else {
+            stopSliding(); return
+        }
+        guard !slideTicker.isRunning, !steppingSlide else { return }
+        lastSlide = nil
+        slideTicker.start(view: session.canvas) { [weak self] time in self?.slide(at: time) ?? false }
+    }
+
+    private func slide(at time: CFTimeInterval) -> Bool {
+        guard let session, let current = slidingViewport else { lastSlide = nil; return false }
+        let elapsed = lastSlide.map { time - $0 } ?? 0
+        lastSlide = time
+        let pointer = localPointer(in: session)
+        steppingSlide = true
+        defer { steppingSlide = false }
+        do {
+            let next = try ZoomFollow.slide(current, pointer: pointer, elapsed: elapsed)
+            if next != current {
+                followedSource = next.source
+                render()
+                session.canvas.needsDisplay = true
+                selectionView?.needsDisplay = true
+            }
+            if ZoomFollow.slides(next, pointer: pointer) { return true }
+        } catch { model?.report(error) }
+        lastSlide = nil
+        return false
+    }
+
+    private func stopSliding() { slideTicker.stop(); lastSlide = nil }
 
     private func render() {
         guard requested, let frame = lastFrame, let session else { return }
@@ -358,6 +427,7 @@ final class LivePresentation {
             let masks = session.document.elements.filter(\.tool.isProtection)
             let size = session.canvas.bounds.size
             try renderScreenZoom(frame: frame, size: size)
+            updateSliding()
             if masks.contains(where: { $0.tool.isPixelEffect }) {
                 if effectsPanel == nil {
                     let panel = makePanel(frame: session.panel.frame)
@@ -441,9 +511,72 @@ final class LivePresentation {
             screenPanel = panel; screenView = view; screenCover = cover
             panel.orderFrontRegardless()
         }
-        screenView?.present(frame.pixelBuffer, viewport: viewport, sourceSize: size,
-                            effects: session.document.elements.filter(\.tool.isProtection),
+        let protection = session.document.elements.filter(\.tool.isProtection)
+        screenView?.present(frame.pixelBuffer, viewport: viewport, sourceSize: size, effects: protection,
                             generation: version, includeImageLayers: false)
+        try renderZoomMap(frame, viewport: viewport, size: size, effects: protection)
+    }
+
+    /// The map of the whole display in the chosen corner, with the zoomed part outlined. It shows the same protected
+    /// pixels as the zoom.
+    private func renderZoomMap(_ frame: CaptureFrame, viewport: Viewport, size: CGSize, effects: [Element]) throws {
+        let display = Rect(x: 0, y: 0, width: size.width, height: size.height)
+        guard let session, let model, screenCover?.isHidden == true,
+              let map = ZoomMap.frame(display: display, position: model.preferences.zoomMap ?? .bottomRight) else {
+            clearZoomMap(); return
+        }
+        let screenFrame = CGRect(x: session.panel.frame.minX + map.x, y: session.panel.frame.maxY - map.maxY,
+                                 width: map.width, height: map.height)
+        if mapPanel == nil {
+            let bounds = CGRect(origin: .zero, size: screenFrame.size)
+            let panel = makePanel(frame: screenFrame)
+            let view = try PixelEffectsView(renderingFrame: bounds)
+            view.smoothDownscaling = true
+            view.autoresizingMask = [.width, .height]
+            view.onFailure = { [weak self] in self?.fail($0) }
+            let outline = ZoomMapOutlineView(frame: bounds)
+            outline.autoresizingMask = [.width, .height]
+            let container = NSView(frame: bounds)
+            container.wantsLayer = true
+            container.layer?.cornerRadius = ZoomMap.cornerRadius
+            container.layer?.masksToBounds = true
+            container.layer?.borderWidth = ZoomMap.borderWidth
+            container.layer?.borderColor = NSColor.white.withAlphaComponent(ZoomMap.borderOpacity).cgColor
+            container.addSubview(view)
+            container.addSubview(outline)
+            panel.contentView = container
+            panel.alphaValue = 0
+            mapPanel = panel; mapView = view; mapOutline = outline
+        }
+        guard let mapPanel else { return }
+        let level = NSWindow.Level(rawValue: PresentationWindowLevels.base(screenZoom: true) + 4)
+        if mapPanel.level != level { mapPanel.level = level }
+        if mapPanel.frame != screenFrame { mapPanel.setFrame(screenFrame, display: false) }
+        let local = Rect(x: 0, y: 0, width: map.width, height: map.height)
+        mapView?.present(frame.pixelBuffer, viewport: try Viewport(output: local, source: display), sourceSize: size,
+                         effects: effects, generation: version, includeImageLayers: false)
+        let zoomed = ZoomMap.zoomedArea(viewport, in: local).cgRect
+        if mapOutline?.zoomed != zoomed { mapOutline?.zoomed = zoomed; mapOutline?.needsDisplay = true }
+        if !mapPanel.isVisible { mapPanel.orderFrontRegardless() }
+        updateMapOpacity()
+    }
+
+    /// The map fades in, and turns see-through while the pointer is over it.
+    private func updateMapOpacity() {
+        guard let mapPanel, mapPanel.isVisible else { return }
+        let target = mapPanel.frame.contains(pointerLocation()) ? ZoomMap.hoverOpacity : 1
+        guard mapOpacity != target else { return }
+        mapOpacity = target
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = ZoomMap.fadeDuration
+            context.timingFunction = Motion.fade
+            mapPanel.animator().alphaValue = target
+        }
+    }
+
+    private func clearZoomMap() {
+        mapView?.clearFrame(); mapPanel?.orderOut(nil)
+        mapPanel = nil; mapView = nil; mapOutline = nil; mapOpacity = nil
     }
 
     private func renderLens() {
@@ -514,6 +647,26 @@ final class LivePresentation {
         /// Set for a zoom-out ramp: the document zoom to keep once the display reaches 1x and zoom turns off.
         let exitZoom: Double?
         var began: CFTimeInterval?
+    }
+
+    /// Darkens the map outside the zoomed part and outlines it.
+    @MainActor
+    private final class ZoomMapOutlineView: NSView {
+        var zoomed = CGRect.zero
+        override var isFlipped: Bool { true }
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+        override func draw(_ dirtyRect: NSRect) {
+            let dim = NSBezierPath(rect: bounds)
+            dim.appendRect(zoomed)
+            dim.windingRule = .evenOdd
+            NSColor.black.withAlphaComponent(ZoomMap.dimOpacity).setFill()
+            dim.fill()
+            let inset = ZoomMap.outlineWidth / 2
+            let outline = NSBezierPath(rect: zoomed.intersection(bounds).insetBy(dx: inset, dy: inset))
+            outline.lineWidth = ZoomMap.outlineWidth
+            NSColor.white.setStroke()
+            outline.stroke()
+        }
     }
 
     @MainActor

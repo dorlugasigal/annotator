@@ -561,7 +561,7 @@ internal sealed class DrawingCanvas : IOverlayCanvas
         ReadOnlySpan<PlatformSample> source = input.Samples;
         if (_zoom.TracksPointer && source.Length > 0)
         {
-            // Screen zoom's viewport is anchored at this sample, so the point under the pointer is the document's point.
+            // Screen zoom's viewport follows this sample: anchored at it while using apps, held still or sliding while drawing.
             Vector2 last = source[^1].Position;
             _zoom.Track(new System.Drawing.Point((int)Math.Round(_context.Display.DesktopFrame.X + last.X),
                                                  (int)Math.Round(_context.Display.DesktopFrame.Y + last.Y)));
@@ -576,7 +576,7 @@ internal sealed class DrawingCanvas : IOverlayCanvas
             {
                 PlatformSample sample = source[index];
                 // Device pixels from the display's top-left corner become points (WIN-CORE-06); a viewport held still for
-                // text maps them back to the document.
+                // text or while drawing maps them back to the document.
                 samples[index] = new CanvasSample(_zoom.SourcePoint(new Point(sample.Position.X / _scale, sample.Position.Y / _scale)),
                                                   input.HasPressure ? sample.Pressure : 1, Timestamp(sample.Time));
             }

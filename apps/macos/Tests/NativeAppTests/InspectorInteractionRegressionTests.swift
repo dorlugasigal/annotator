@@ -437,8 +437,7 @@ final class InspectorInteractionRegressionTests: XCTestCase {
     func testPendingZoomShowsThePermissionStageAndCancelsWithoutStartingCapture() throws {
         let stages: [(ZoomStartState, String)] = [
             (.screenPermission, "Waiting for Screen Recording permission"),
-            (.gesturePermission, "Waiting for Accessibility permission"),
-            (.starting, "Starting live screen zoom")
+            (.gesturePermission, "Waiting for Accessibility permission")
         ]
         for (state, detail) in stages {
             let controller = ZoomStartController(
@@ -469,6 +468,8 @@ final class InspectorInteractionRegressionTests: XCTestCase {
                 }
             }
         }
+        // Starting takes a moment, so the toolbar shows no Cancel control for it.
+        XCTAssertNil(PendingZoomPresentation(state: .starting))
         XCTAssertNil(PendingZoomPresentation(state: .active))
         XCTAssertNil(PendingZoomPresentation(state: .failed("Permission timed out")))
     }

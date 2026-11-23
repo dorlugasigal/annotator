@@ -816,6 +816,17 @@ final class WorkspaceModel: ObservableObject {
         persistPreferences()
     }
 
+    func setZoomMap(_ position: ZoomMapPosition) {
+        if let owner = globalSettingsOwner {
+            owner.setZoomMap(position)
+            preferences.zoomMap = owner.preferences.zoomMap
+            return
+        }
+        preferences.zoomMap = position == .bottomRight ? nil : position
+        persistPreferences()
+        refreshCanvas()
+    }
+
     func openPreferences(tab: CustomizationTab = .general) {
         if let owner = globalSettingsOwner { owner.openPreferences(tab: tab); return }
         settingsTab = tab
@@ -1509,7 +1520,7 @@ final class WorkspaceModel: ObservableObject {
     private func pasteOrigin(for bounds: Rect, in session: OverlaySession) -> (offset: Point, target: Point, pointer: Point?) {
         let canvas = session.canvas
         let local = Point(canvas.convert(session.panel.convertPoint(fromScreen: screenPointer()), from: nil))
-        let pointer = Rect(canvas.bounds).contains(local) ? local : nil
+        let pointer = Rect(canvas.bounds).contains(local) ? canvas.documentPoint(local) : nil
         let previous = pasteCascade.flatMap {
             $0.changeCount == imagePasteboard.changeCount && $0.document == session.document.identity ? $0 : nil
         }
@@ -1538,7 +1549,7 @@ final class WorkspaceModel: ObservableObject {
             if workspaceHidden { revealWorkspaceSurfaces(); onShowToolbar?() }
             if active == nil || mode != .draw { beginDrawing(recordsUsage: false) }
             guard let active else { throw CanvasError.invalidDocument("No canvas is available.") }
-            let local = active.canvas.convert(active.panel.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)
+            let local = active.canvas.documentPoint(Point(active.canvas.convert(active.panel.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)))
             let scale = min(1, 600 / Double(image.width), 450 / Double(image.height))
             let x = max(0, min(local.x, active.canvas.bounds.width - Double(image.width) * scale))
             let y = max(0, min(local.y, active.canvas.bounds.height - Double(image.height) * scale))

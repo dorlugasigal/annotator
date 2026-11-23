@@ -152,6 +152,88 @@ public sealed class ScreenZoomDisplayTests
     }
 
     [Fact]
+    public void WhileDrawingZoomHoldsStillAndUsingAppsAnchorsItAtThePointer()
+    {
+        // Mac testScreenZoomHoldsStillWhileDrawingAndFollowsThePointerWhileUsingApps.
+        var zoom = new ScreenZoomDisplay();
+        zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
+        var center = new Point(640, 360);
+        Viewport start = zoom.ScreenViewport(Display, center, follows: true)!.Value;
+        Assert.Equal(Viewport.CursorAnchored(new Rect(0, 0, Display.Width, Display.Height), 2, center), start);
+        foreach (Point pointer in new[] { new Point(300, 200), new Point(1000, 600), new Point(120, 120) })
+        {
+            Assert.Equal(start, zoom.ScreenViewport(Display, pointer, follows: true));
+            Assert.False(zoom.NeedsFrames);
+        }
+
+        var inside = new Point(300, 200);
+        Point under = start.SourcePoint(inside);
+        zoom.SetMagnification(3);
+        Viewport zoomed = zoom.ScreenViewport(Display, inside, follows: true)!.Value;
+        Assert.True(zoomed.SourcePoint(inside).Distance(under) < 0.0001, "Changing the zoom keeps what's under the pointer.");
+
+        Viewport anchored = zoom.ScreenViewport(Display, inside, follows: false)!.Value;
+        Assert.True(anchored.SourcePoint(inside).Distance(inside) < 0.0001, "Using apps keeps the picture under the pointer.");
+        Assert.Equal(anchored, zoom.ScreenViewport(Display, new Point(600, 400), follows: true));
+    }
+
+    [Fact]
+    public void WhileDrawingZoomSlidesWhileThePointerRestsNearAnEdgeAndStopsAtTheDisplayEdge()
+    {
+        var zoom = new ScreenZoomDisplay();
+        zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
+        Viewport start = zoom.ScreenViewport(Display, new Point(640, 360), follows: true)!.Value;
+        var edge = new Point(1279, 360);
+        Assert.Equal(start, zoom.ScreenViewport(Display, edge, follows: true));
+        Assert.True(zoom.NeedsFrames, "The pointer near an edge slides the zoom without moves.");
+        Assert.True(zoom.Step(10));
+        Assert.Equal(start, zoom.ScreenViewport(Display, edge, follows: true));
+        double now = 10;
+        Viewport shown = start;
+        for (int frame = 0; frame < 1000 && zoom.NeedsFrames; frame++)
+        {
+            now += 1.0 / 60;
+            zoom.Step(now);
+            Viewport next = zoom.ScreenViewport(Display, edge, follows: true)!.Value;
+            Assert.True(next.Source.X >= shown.Source.X);
+            shown = next;
+        }
+        Assert.False(zoom.NeedsFrames);
+        Assert.Equal(Display.Width, shown.Source.MaxX, 9);
+        Assert.Equal(start.Source.Y, shown.Source.Y);
+        Assert.False(zoom.Step(now + 1));
+
+        // Using apps never slides, and the next zoom starts at the pointer again.
+        zoom.ScreenViewport(Display, new Point(1, 360), follows: false);
+        Assert.False(zoom.NeedsFrames);
+        zoom.Apply(new PresentationSettings(PresentationMode.Off, 2), null, false, true);
+        Assert.Null(zoom.ScreenViewport(Display, edge, follows: true));
+        zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
+        Assert.Equal(start, zoom.ScreenViewport(Display, new Point(640, 360), follows: true));
+        zoom.ScreenViewport(Display, edge, follows: true);
+        zoom.StopFollowing();
+        Assert.False(zoom.NeedsFrames);
+        Assert.Equal(Viewport.CursorAnchored(new Rect(0, 0, Display.Width, Display.Height), 2, new Point(100, 100)),
+                     zoom.ScreenViewport(Display, new Point(100, 100), follows: true));
+    }
+
+    [Fact]
+    public void ZoomHeldStillForTextDoesNotSlideAndContinuesFromThereAfter()
+    {
+        var zoom = new ScreenZoomDisplay();
+        zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
+        Viewport start = zoom.ScreenViewport(Display, new Point(640, 360), follows: true)!.Value;
+        var edge = new Point(2, 360);
+        Assert.Equal(start, zoom.FreezeViewportForText(Display, edge, follows: true));
+        Assert.False(zoom.NeedsFrames);
+        Assert.False(zoom.Step(1));
+        Assert.Equal(start, zoom.ScreenViewport(Display, edge, follows: true));
+        Assert.False(zoom.NeedsFrames);
+        zoom.ReleaseTextViewport();
+        Assert.Equal(start, zoom.ScreenViewport(Display, new Point(900, 500), follows: true));
+    }
+
+    [Fact]
     public void AltScrollTakesOnlyAltAndConvertsNotchesToTheMacsPoints()
     {
         // Mac testGlobalAndLocalParserLeaveSystemZoomModifiersAlone and zoomScrollDelta's 12 points per line.

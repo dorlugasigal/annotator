@@ -93,10 +93,7 @@ struct PendingZoomPresentation {
         case .gesturePermission:
             phase = "Waiting"
             detail = "Waiting for Accessibility permission"
-        case .starting:
-            phase = "Starting"
-            detail = "Starting live screen zoom"
-        case .idle, .active, .failed:
+        case .idle, .starting, .active, .failed:
             return nil
         }
     }

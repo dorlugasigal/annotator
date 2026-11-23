@@ -5,7 +5,7 @@ using static Annotator.Workspace.Tests.TestWorkspace;
 namespace Annotator.Workspace.Tests.Settings;
 
 /// <summary>
-/// Settings > General and its profiles in the workspace (Mac WorkspaceModel: setTheme, setGlass, setShareToolStyles,
+/// Settings > General and its profiles in the workspace (Mac WorkspaceModel: setTheme, setGlass, setZoomMap, setShareToolStyles,
 /// setAnimationStyle, setShortcutHints, setMenuBarVisible, exportPreferences, importPreferences and captureVerified).
 /// </summary>
 public sealed class SettingsWorkspaceTests
@@ -58,6 +58,27 @@ public sealed class SettingsWorkspaceTests
         model.SetGlass(false);
         Assert.Null(model.Snapshot.Preferences.Glass);
         Assert.DoesNotContain("\"glass\"", System.Text.Encoding.UTF8.GetString(store.Data!), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ZoomMapIsBottomRightUntilAnotherCornerIsChosen()
+    {
+        var store = new MemoryPreferencesStore();
+        WorkspaceModel model = Create(store: store);
+        Assert.Null(model.Snapshot.Preferences.ZoomMap);
+        Assert.Equal(["Bottom right", "Bottom left", "Top right", "Top left", "Off"],
+                     ZoomMapPosition.AllCases.ToArray().Select(position => position.Label));
+
+        model.SetZoomMap(ZoomMapPosition.TopLeft);
+        Assert.Equal(ZoomMapPosition.TopLeft, WorkspacePreferences.Read(store.Data!).ZoomMap);
+        model.SetZoomMap(ZoomMapPosition.Off);
+        Assert.Equal(ZoomMapPosition.Off, WorkspacePreferences.Read(store.Data!).ZoomMap);
+
+        // Bottom right is the default, so it isn't stored, as on the Mac.
+        model.SetZoomMap(ZoomMapPosition.BottomRight);
+        Assert.Null(model.Snapshot.Preferences.ZoomMap);
+        Assert.DoesNotContain("\"zoomMap\"", System.Text.Encoding.UTF8.GetString(store.Data!), StringComparison.Ordinal);
+        Assert.Null(model.Snapshot.ErrorMessage);
     }
 
     [Fact]

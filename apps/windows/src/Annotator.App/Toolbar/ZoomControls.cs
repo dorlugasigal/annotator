@@ -60,8 +60,8 @@ internal static class ZoomControls
     }
 
     /// <summary>
-    /// Mac PendingZoomControl: the orange Cancel control while zoom starts, 44 points wide on the compact rail ("Zoom", the
-    /// phase, Cancel) and 130 otherwise (an hourglass with "Zoom starting" over "Cancel"). On Glass toolbar's
+    /// Mac PendingZoomControl: the orange Cancel control while zoom waits for a permission, 44 points wide on the compact rail
+    /// ("Zoom", the phase, Cancel) and 130 otherwise (an hourglass with "Zoom waiting" over "Cancel"). On Glass toolbar's
     /// <paramref name="material"/> it sits on a raised lens with an orange tint (WIN-UI-09).
     /// </summary>
     public static ParityButton Pending(WorkspaceModel model, PendingZoomPresentation pending, bool compact, Action interacted,

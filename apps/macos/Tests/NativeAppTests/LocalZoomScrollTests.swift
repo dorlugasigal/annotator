@@ -86,6 +86,40 @@ final class LocalZoomScrollTests: XCTestCase {
         XCTAssertEqual(presentation.presentationMode, .off)
     }
 
+    func testScreenZoomHoldsStillWhileDrawingAndFollowsThePointerWhileUsingApps() throws {
+        let suite = "zoom-follow-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let model = WorkspaceModel(defaults: defaults)
+        defer { model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        model.beginDrawing()
+        let session = try XCTUnwrap(model.active)
+        let presentation = try XCTUnwrap(session.presentation)
+        presentation.suspend()
+        defer { presentation.stop() }
+        let frame = session.panel.frame
+        var pointer = NSPoint(x: frame.midX, y: frame.midY)
+        presentation.pointerLocation = { pointer }
+        try session.document.setPresentation(PresentationSettings(mode: .screen, zoom: 2))
+        model.synchronize()
+        let start = try XCTUnwrap(presentation.screenViewport)
+        pointer = NSPoint(x: frame.minX + frame.width * 0.3, y: frame.minY + frame.height * 0.7)
+        XCTAssertEqual(presentation.screenViewport, start, "While drawing, zoom holds still as the pointer moves inside it.")
+
+        let local = Point(pointer.x - frame.minX, frame.maxY - pointer.y)
+        let under = start.sourcePoint(for: local)
+        XCTAssertEqual(session.canvas.documentPoint(local), under, "Drawing lands on the part of the board under the pointer.")
+        presentation.magnification = 3
+        let zoomed = try XCTUnwrap(presentation.screenViewport)
+        XCTAssertEqual(zoomed.sourcePoint(for: local).distance(to: under), 0, accuracy: 0.0001,
+                       "Changing the zoom keeps what's under the pointer.")
+
+        model.interact()
+        let anchored = try XCTUnwrap(presentation.screenViewport)
+        XCTAssertEqual(anchored.sourcePoint(for: local).distance(to: local), 0, accuracy: 0.0001,
+                       "Using apps keeps the picture under the pointer where a click lands.")
+        XCTAssertEqual(session.canvas.documentPoint(local), local)
+    }
+
     func testContinuousZeroPointScrollDoesNotBecomeAWheelNotch() throws {
         let event = try XCTUnwrap(try scroll(1).cgEvent)
         event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)

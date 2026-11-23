@@ -27,6 +27,11 @@ public static class SettingsCopy
         "When this is on, changing the color, fill, opacity, width or line style of one tool changes it for all drawing tools. " +
         "Effects, the eraser and images keep their own settings. Text size and arrowheads stay separate.";
 
+    // General: Zoom.
+    public const string Zoom = "Zoom";
+    public const string ZoomMap = "Zoom map";
+    public const string ZoomMapHelp = "While you zoom in, a small map shows the whole screen and the part you see.";
+
     // General: Appearance.
     public const string Appearance = "Appearance";
     public const string Theme = "Theme";

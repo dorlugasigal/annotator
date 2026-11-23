@@ -4,6 +4,15 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- While you zoom in, a small map in the corner shows the whole screen and the part you see. Choose its corner, or turn it off, in Settings > General > Zoom map.
+
+### Changed
+
+- While you draw, zoom holds still as you move the pointer. To see more, move the pointer to an edge of the screen and the view slides that way. With Use apps on, zoom still follows the pointer, so clicks land where you see them.
+- The toolbar no longer flashes a Cancel button for a moment when zoom starts.
+
 ## 0.3.2 - 2026-11-02
 
 ### Fixed

@@ -14,8 +14,8 @@ using WinColor = Windows.UI.Color;
 namespace Annotator.App.Settings;
 
 /// <summary>
-/// Settings > General (the Mac's CustomizationView.general): the grouped Form with Startup, Drawing, Appearance, Updates
-/// and Privacy, then the coffee box. Check for updates... follows the Store update service (WIN-SYS-03). Share usage counts
+/// Settings > General (the Mac's CustomizationView.general): the grouped Form with Startup, Drawing, Zoom, Appearance,
+/// Updates and Privacy, then the coffee box. Check for updates... follows the Store update service (WIN-SYS-03). Share usage counts
 /// follows the app's usage counts (the Mac's UsageMetricsSettings), which say they are unavailable while Windows may not
 /// send them (WIN-PRV-01).
 /// </summary>
@@ -41,6 +41,7 @@ internal sealed partial class GeneralPage
     private readonly Annotator.Workspace.Metrics.UsageMetrics _usage;
     private readonly SettingsPopUp _theme;
     private readonly SettingsPopUp _animation;
+    private readonly SettingsPopUp _zoomMap;
 
     public GeneralPage(SettingsActions actions)
     {
@@ -49,6 +50,7 @@ internal sealed partial class GeneralPage
         _launch = new LaunchAtSignInView(actions.Launch, inForm: true);
         _theme = new SettingsPopUp(SettingsCopy.Theme, [.. s_themes.Select(item => item.Title)], ThemeIndex(preferences));
         _animation = new SettingsPopUp(SettingsCopy.WorkspaceAnimation, [.. s_animations.Select(item => item.Title)], AnimationIndex(preferences));
+        _zoomMap = new SettingsPopUp(SettingsCopy.ZoomMap, [.. ZoomMapPosition.AllCases.Select(position => position.Label)], ZoomMapIndex(preferences));
 
         _tray.Toggled += visible => Act(() => actions.Model.SetTrayIconVisible(visible));
         _share.Toggled += shared => Act(() => actions.Model.SetShareToolStyles(shared));
@@ -56,13 +58,16 @@ internal sealed partial class GeneralPage
         _glass.Toggled += on => Act(() => actions.Model.SetGlass(on));
         AutomationProperties.SetAutomationId(_share, "share-tool-styles");
         AutomationProperties.SetAutomationId(_glass, "glass-toolbar");
+        AutomationProperties.SetAutomationId(_zoomMap, "zoom-map");
         _theme.Chosen += index => Act(() => actions.Model.SetTheme(s_themes[index].Theme));
         _animation.Chosen += index => Act(() => actions.Model.SetAnimationStyle(s_animations[index].Style));
+        _zoomMap.Chosen += index => Act(() => actions.Model.SetZoomMap(ZoomMapPosition.AllCases[index]));
         SettingsHelp.Set(_tray, SettingsCopy.ShowTrayIconHelp);
         SettingsHelp.Set(_theme, SettingsCopy.ThemeHelp);
         SettingsHelp.Set(_glass, SettingsCopy.GlassToolbarHelp);
         SettingsHelp.Set(_tips, SettingsCopy.ShowTipsHelp);
         SettingsHelp.Set(_animation, SettingsCopy.WorkspaceAnimationHelp);
+        SettingsHelp.Set(_zoomMap, SettingsCopy.ZoomMapHelp);
         var introduction = new SettingsButton(SettingsCopy.ShowTutorial, ButtonLook.Bordered, SettingsWidths.Button(SettingsCopy.ShowTutorial));
         introduction.Click += (_, _) => actions.ShowTutorial?.Invoke();
 
@@ -80,6 +85,8 @@ internal sealed partial class GeneralPage
             SettingsForm.Toggle(SettingsCopy.ShareStyles, _share),
             SettingsForm.Single(SettingsForm.Caption(SettingsCopy.ShareStylesDetail, wrapWidth: SettingsForm.RowWidth)),
         ]));
+        form.Children.Add(SettingsForm.Header(SettingsCopy.Zoom, first: false));
+        form.Children.Add(SettingsForm.Card([SettingsForm.PopUp(SettingsCopy.ZoomMap, _zoomMap)]));
         form.Children.Add(SettingsForm.Header(SettingsCopy.Appearance, first: false));
         form.Children.Add(SettingsForm.Card(
         [
@@ -172,6 +179,7 @@ internal sealed partial class GeneralPage
         _glass.IsOn = preferences.Glass == true;
         _theme.ChosenIndex = ThemeIndex(preferences);
         _animation.ChosenIndex = AnimationIndex(preferences);
+        _zoomMap.ChosenIndex = ZoomMapIndex(preferences);
     }
 
     public void Detach()
@@ -203,6 +211,9 @@ internal sealed partial class GeneralPage
         int index = Array.FindIndex(s_animations, item => item.Style == style);
         return index < 0 ? 1 : index;
     }
+
+    private static int ZoomMapIndex(in WorkspacePreferences preferences) =>
+        Math.Max(0, Array.IndexOf(ZoomMapPosition.AllCases.ToArray(), preferences.ZoomMap ?? ZoomMapPosition.BottomRight));
 
     /// <summary>SwiftUI's Label starts its icon 1.5 points in from the row's edge.</summary>
     private static FormText Indented(FormText label)

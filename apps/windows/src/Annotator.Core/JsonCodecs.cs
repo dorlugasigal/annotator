@@ -88,7 +88,7 @@ internal static class Codecs
         "lastCoverMode", "toolbarTools", "showMenuBarIcon", "cursorStyle", "quickPreferencesExpanded", "inspectorPinned",
         "animateVisibility", "visibilityAnimationStyle", "theme", "showShortcutHints", "cursorHighlight",
         "commandShortcuts", "toolbarSize", "shareToolStyles", "toolbarItems", "breakTimer", "breakShortcut",
-        "hiddenToolbarControls", "toolbarCollapseDelay", "expandedPropertyChoices", "laserFade", "glass");
+        "hiddenToolbarControls", "toolbarCollapseDelay", "expandedPropertyChoices", "laserFade", "glass", "zoomMap");
     private static readonly JsonKeys BreakTimerKeys = new(
         "minutes", "title", "background", "palette", "showEndTime", "chime", "countOver", "allDisplays", "lockWhenTouched");
 
@@ -786,6 +786,7 @@ internal static class Codecs
                 case 31: preferences.ExpandedPropertyChoices = isNull ? null : state.Read(ref reader, key, count, ReadStringArray); break;
                 case 32: preferences.LaserFade = isNull ? null : state.Read(ref reader, key, count, Json.ReadDouble); break;
                 case 33: preferences.Glass = isNull ? null : state.Read(ref reader, key, count, Json.ReadBool); break;
+                case 34: preferences.ZoomMap = isNull ? null : state.Read(ref reader, key, count, ReadZoomMap); break;
             }
         }
         state.Finish(PreferenceKeys, 0b111_0111);
@@ -879,6 +880,10 @@ internal static class Codecs
         {
             writer.WriteString("visibilityAnimationStyle"u8, animationStyle.RawValue);
         }
+        if (value.ZoomMap is { } zoomMap)
+        {
+            writer.WriteString("zoomMap"u8, zoomMap.RawValue);
+        }
         WriteOptional(writer, "zoomShortcut"u8, value.ZoomShortcut);
         writer.WriteEndObject();
     }
@@ -934,6 +939,9 @@ internal static class Codecs
         Json.ReadEnum(ref reader, VisibilityAnimationStyleExtensions.RawValues, "VisibilityAnimationStyle");
 
     private static AppTheme ReadTheme(ref Utf8JsonReader reader) => Json.ReadEnum(ref reader, AppThemeExtensions.RawValues, "AppTheme");
+
+    private static ZoomMapPosition ReadZoomMap(ref Utf8JsonReader reader) =>
+        Json.ReadEnum(ref reader, ZoomMapPositionExtensions.RawValues, "ZoomMapPosition");
 
     private static ToolCursorStyle ReadCursorStyle(ref Utf8JsonReader reader) =>
         Json.ReadEnum(ref reader, ToolCursorStyleExtensions.RawValues, "ToolCursorStyle");
