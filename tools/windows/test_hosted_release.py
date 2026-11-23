@@ -154,7 +154,7 @@ class SwitchAndPlanTests(Fixture):
 
 
 class ToolchainTests(Fixture):
-    RUNNER = {"dotnet": "10.0.402", "fxcPath": "fxc.exe", "fxc": "10.0.26100.7705",
+    RUNNER = {"dotnet": "10.0.404", "fxcPath": "fxc.exe", "fxc": "10.0.26100.7705",
               "visualStudioX64": "18.5.1", "visualStudioArm64": "18.5.1"}
 
     def check(self, **changes):
@@ -162,7 +162,7 @@ class ToolchainTests(Fixture):
         return problems, {name: status for name, _, _, status in rows}
 
     def test_pins_give_the_exact_dotnet_sdk(self):
-        self.assertEqual(hosted.pins(self.root), {"dotnet": "10.0.402"})
+        self.assertEqual(hosted.pins(self.root), {"dotnet": "10.0.404"})
 
     def test_the_pinned_toolchain_passes(self):
         problems, statuses = self.check()
