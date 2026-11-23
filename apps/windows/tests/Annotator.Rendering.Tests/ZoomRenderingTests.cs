@@ -241,7 +241,7 @@ public sealed class ZoomRenderingTests
 
         public int Changes { get; private set; }
 
-        public static async Task<Harness> Start()
+        public static async Task<Harness> Start(bool smoothDownscaling = false)
         {
             var harness = new Harness();
             await harness.Run(() =>
@@ -258,6 +258,7 @@ public sealed class ZoomRenderingTests
                     Display = Display,
                     PixelWidth = 200,
                     PixelHeight = 120,
+                    SmoothDownscaling = smoothDownscaling,
                 });
                 harness.View.Changed += (_, _) => harness.Changes++;
                 harness.Effects = EffectsPresenter.Create(new EffectsPresenterOptions
@@ -371,6 +372,31 @@ public sealed class ZoomRenderingTests
             Assert.False(view.Presented);
         });
         Assert.True(lease.Disposed);
+    }
+
+    [Theory]
+    [InlineData(false, CompositionBitmapInterpolationMode.NearestNeighbor)]
+    [InlineData(true, CompositionBitmapInterpolationMode.Linear)]
+    public async Task CapturedViewsUseTheRequestedDownscaling(bool smoothDownscaling, CompositionBitmapInterpolationMode expected)
+    {
+        await using var harness = await Harness.Start(smoothDownscaling);
+        await harness.Run(() => harness.View.Show(ViewOf(new Rect(20, 10, 100, 60))));
+        var lease = harness.Capture.Current;
+        await harness.Until(() => harness.View.Presented, "the first zoomed frame", lease);
+        await harness.Run(() =>
+        {
+            var content = Assert.IsType<SpriteVisual>(harness.View.Visual.Children.Last());
+            var brush = Assert.IsType<CompositionSurfaceBrush>(content.Brush);
+            Assert.Equal(expected, brush.BitmapInterpolationMode);
+        });
+        await harness.Run(() => harness.View.Resize(220, 120));
+        await harness.Until(() => harness.View.Presented, "a frame after the resize", lease);
+        await harness.Run(() =>
+        {
+            var content = Assert.IsType<SpriteVisual>(harness.View.Visual.Children.Last());
+            var brush = Assert.IsType<CompositionSurfaceBrush>(content.Brush);
+            Assert.Equal(expected, brush.BitmapInterpolationMode);
+        });
     }
 
     // The owner's rule: no steady-state per-frame allocation. A captured view at a still pointer draws every captured frame.

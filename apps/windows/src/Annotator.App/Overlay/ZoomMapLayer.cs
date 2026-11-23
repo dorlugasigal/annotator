@@ -82,6 +82,7 @@ internal sealed class ZoomMapLayer : IDisposable
                 Display = display,
                 PixelWidth = _frame.Width,
                 PixelHeight = _frame.Height,
+                SmoothDownscaling = true,
             });
         }
         catch

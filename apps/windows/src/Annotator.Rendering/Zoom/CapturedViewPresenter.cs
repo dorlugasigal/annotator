@@ -47,6 +47,9 @@ public sealed record CapturedViewOptions
 
     public required int PixelHeight { get; init; }
 
+    /// <summary>Scale a view smaller than its captured pixels smoothly, rather than dropping rows and columns.</summary>
+    public bool SmoothDownscaling { get; init; }
+
     /// <summary>The color under the view until its first frame (the Mac's black cover).</summary>
     public Windows.UI.Color Cover { get; init; } = Windows.UI.Color.FromArgb(255, 0, 0, 0);
 }
@@ -100,6 +103,7 @@ public sealed unsafe class CapturedViewPresenter : IDisposable
     private readonly CompositionColorBrush coverBrush;
     private readonly IDisplayCapture capture;
     private readonly DisplayInfo display;
+    private readonly bool smoothDownscaling;
     private readonly SystemDispatcherQueue queue;
     private readonly int threadId = Environment.CurrentManagedThreadId;
     private readonly Consumer consumer;
@@ -151,6 +155,7 @@ public sealed unsafe class CapturedViewPresenter : IDisposable
         root = options.Root;
         capture = options.Capture;
         display = options.Display;
+        smoothDownscaling = options.SmoothDownscaling;
         PixelWidth = options.PixelWidth;
         PixelHeight = options.PixelHeight;
         this.queue = queue;
@@ -528,6 +533,9 @@ public sealed unsafe class CapturedViewPresenter : IDisposable
                                                     DirectXAlphaMode.Premultiplied);
             brush = compositor.CreateSurfaceBrush(surface);
             brush.Stretch = CompositionStretch.Fill;
+            brush.BitmapInterpolationMode = smoothDownscaling
+                ? CompositionBitmapInterpolationMode.Linear
+                : CompositionBitmapInterpolationMode.NearestNeighbor;
             content.Brush = brush;
             nint interop = Annotator.Platform.Interop.CompositionInterop.DrawingSurfaceInterop(surface);
             using (NonPumpingLock.Enter(renderGate))
