@@ -116,7 +116,7 @@ jobs:
       - name: Read the pinned toolchain
         id: pins
         run: python tools/windows/hosted_release.py pins
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73
         env:
           DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
