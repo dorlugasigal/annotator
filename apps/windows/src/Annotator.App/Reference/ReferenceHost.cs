@@ -66,6 +66,8 @@ internal sealed partial class ReferenceHost
 
     private string ImagePath => Path.Combine(_request.Output, "surface.bgra");
 
+    private string PopupImagePath => Path.Combine(_request.Output, "zoom-map-popup.bgra");
+
     private string LayoutPath => Path.Combine(_request.Output, "layout.txt");
 
     private void Run()
@@ -398,6 +400,19 @@ internal sealed partial class ReferenceHost
             await bitmap.RenderAsync(surface);
             byte[] pixels = (await bitmap.GetPixelsAsync()).ToArray();
             await File.WriteAllBytesAsync(ImagePath, pixels);
+            RenderTargetBitmap? popupBitmap = null;
+            FrameworkElement? popupElement = null;
+            if (_request.State == "tab-general-zoom-map-open")
+            {
+                popupElement = VisualTreeHelper.GetOpenPopupsForXamlRoot(surface.XamlRoot)
+                    .Select(item => item.Child)
+                    .OfType<FrameworkElement>()
+                    .FirstOrDefault(item => item is MenuFlyoutPresenter)
+                    ?? throw new InvalidOperationException("The Zoom map menu did not open for its reference capture.");
+                popupBitmap = new RenderTargetBitmap();
+                await popupBitmap.RenderAsync(popupElement);
+                await File.WriteAllBytesAsync(PopupImagePath, (await popupBitmap.GetPixelsAsync()).ToArray());
+            }
             await File.WriteAllTextAsync(LayoutPath, Layout(surface));
             if (!PInvoke.GetWindowRect(_window, out RECT rect))
             {
@@ -424,6 +439,12 @@ internal sealed partial class ReferenceHost
                 writer.WriteEndArray();
                 writer.WriteString("image", Path.GetFileName(ImagePath));
                 Pair(writer, "imageSize", bitmap.PixelWidth, bitmap.PixelHeight);
+                if (popupBitmap is not null)
+                {
+                    writer.WriteString("popupImage", Path.GetFileName(PopupImagePath));
+                    Pair(writer, "popupSurface", popupElement!.ActualWidth, popupElement.ActualHeight);
+                    Pair(writer, "popupImageSize", popupBitmap.PixelWidth, popupBitmap.PixelHeight);
+                }
                 if (_popover is SettingsReferenceWindow { Pointer: { } pointer })
                 {
                     writer.WriteNumber("previewDraws", pointer.Preview.Draws);

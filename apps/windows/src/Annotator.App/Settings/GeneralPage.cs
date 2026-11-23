@@ -169,6 +169,8 @@ internal sealed partial class GeneralPage
 
     public FrameworkElement Root { get; }
 
+    internal void OpenZoomMapForReference() => _zoomMap.OpenForReference();
+
     /// <summary>Shows the saved preferences; the controls never keep a state of their own.</summary>
     public void Apply(WorkspaceSnapshot snapshot)
     {

@@ -76,6 +76,11 @@ internal enum MacLiveTake
     /// three travels and turns off.
     /// </summary>
     ZoomLens,
+
+    /// <summary>
+    /// A Windows-only evidence take: screen zoom, map hover, protected content and edge sliding on an owned full-display stage.
+    /// </summary>
+    ZoomMap,
 }
 
 /// <summary>
@@ -175,8 +180,10 @@ internal sealed partial class MotionReferenceHost
         PixelRect area = _request.Area;
         Shell.MonitorArea monitor = Shell.WindowChrome.MonitorAt(area.Left + area.Width / 2, area.Top + area.Height / 2);
         _scale = monitor.Scale;
-        _display = MacLiveStage.Display(area, _scale);
-        _work = MacLiveStage.WorkArea(_display, _scale);
+        bool zoomMap = _request.Take == MacLiveTake.ZoomMap;
+        _display = zoomMap ? area : MacLiveStage.Display(area, _scale);
+        _work = zoomMap ? _display : MacLiveStage.WorkArea(_display, _scale);
+        double width = _display.Width / _scale, height = _display.Height / _scale;
         var display = new DisplayDescriptor(new Annotator.Workspace.DisplayId(DisplayName),
             new CoreRect(_display.Left, _display.Top, _display.Width, _display.Height), new CoreRect(_work.Left, _work.Top, _work.Width, _work.Height), _scale);
         var preferences = new WorkspacePreferences
@@ -184,6 +191,7 @@ internal sealed partial class MotionReferenceHost
             VisibilityAnimationStyle = _request.Style,
             AnimateVisibility = true,
             ToolbarDockEdge = ToolbarDockEdge.Bottom,
+            ZoomMap = _request.ZoomMap,
         };
         var model = new WorkspaceModel(new WorkspaceOptions
         {
@@ -198,13 +206,24 @@ internal sealed partial class MotionReferenceHost
         });
         _model = model;
         // Mac: app.resumeDrawing(), then addSampleDrawings() with nothing selected; effects-live and sharing-live start on
-        // the bare content.
+        // the bare content. The Windows-only zoom-map take adds one protected sample below.
         model.ResumeDrawing();
         var effects = _request.Take is MacLiveTake.Effects or MacLiveTake.EffectsMeasure or MacLiveTake.ZoomMeasure;
         var sharing = _request.Take is MacLiveTake.Sharing or MacLiveTake.SharingMeasure;
-        var zoom = _request.Take is MacLiveTake.ZoomScreen or MacLiveTake.ZoomLens;
-        MoveScripted(MacLiveStage.Pointer);
-        if (!effects && !sharing && !zoom)
+        var zoom = _request.Take is MacLiveTake.ZoomScreen or MacLiveTake.ZoomLens or MacLiveTake.ZoomMap;
+        MoveScripted(zoomMap ? new CorePoint(width / 2, height / 2) : MacLiveStage.Pointer);
+        if (zoomMap)
+        {
+            DisplaySnapshot canvas = model.Snapshot.Display(display.Id) ?? throw new InvalidOperationException("The stage display has no canvas.");
+            CanvasDocument document = canvas.Document;
+            var cover = new Element(Tool.Cover, new CoreRect(width / 2 - 60, height / 2 - 40, 120, 80));
+            document.Add(cover);
+            if (model.Submit(new EditSubmission(new DisplayEdit(canvas.Id, canvas.Version, document))) is EditResult.Rejected rejected)
+            {
+                throw new InvalidOperationException($"The protected stage sample was refused: {rejected.Reason}.");
+            }
+        }
+        else if (!effects && !sharing && !zoom)
         {
             DisplaySnapshot canvas = model.Snapshot.Display(display.Id) ?? throw new InvalidOperationException("The stage display has no canvas.");
             CanvasDocument document = canvas.Document;
@@ -302,10 +321,15 @@ internal sealed partial class MotionReferenceHost
         _takeStart = Stopwatch.GetTimestamp();
         Phase(4, _takeStart);
         NotePointer(_scriptedPointer);
-        if (take is MacLiveTake.ZoomScreen or MacLiveTake.ZoomLens)
+        if (take is MacLiveTake.ZoomScreen or MacLiveTake.ZoomLens or MacLiveTake.ZoomMap)
         {
-            // The Mac's zoom takes start with the pointer's travel.
-            await (take == MacLiveTake.ZoomScreen ? PlayZoomScreenAsync() : PlayZoomLensAsync());
+            // Zoom takes start with the pointer's travel.
+            await (take switch
+            {
+                MacLiveTake.ZoomScreen => PlayZoomScreenAsync(),
+                MacLiveTake.ZoomLens => PlayZoomLensAsync(),
+                _ => PlayZoomMapAsync(),
+            });
             _takeEnd = Stopwatch.GetTimestamp();
             Phase(0, _takeEnd);
             return;

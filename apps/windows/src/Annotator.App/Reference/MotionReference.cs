@@ -33,12 +33,15 @@ internal sealed record MotionReferenceRequest(VisibilityAnimationStyle Style, Pi
     public const string PhaseMapName = @"Local\Annotator.MotionReference.Phase";
 
     /// <summary>
-    /// <c>--take show-hide|reversal|controls|effects|effects-measure|sharing|sharing-measure|zoom-measure|zoom-screen|zoom-lens</c>:
+    /// <c>--take show-hide|reversal|controls|effects|effects-measure|sharing|sharing-measure|zoom-measure|zoom-screen|zoom-lens|zoom-map</c>:
     /// replays that take of the Mac's live recordings on the Mac's stage, with <c>--area</c> as the recorded 1,440 by 900-point
     /// area, instead of one hide and show of the sample board. The recording shows its own desktop under the canvas, as the
     /// Mac's owned backdrop and sample window. The <c>-measure</c> takes are no Mac takes but measurements on the same stage.
     /// </summary>
     public MacLiveTake? Take { get; init; }
+
+    /// <summary><c>--zoom-map bottom-right|bottom-left|top-right|top-left</c>: the map corner for the zoom-map take.</summary>
+    public ZoomMapPosition? ZoomMap { get; init; }
 
     /// <summary><c>--glass</c>: the sample board's hide and show with Glass toolbar on (WIN-UI-09).</summary>
     public bool Glass { get; init; }
@@ -69,12 +72,27 @@ internal sealed record MotionReferenceRequest(VisibilityAnimationStyle Style, Pi
             "zoom-measure" => MacLiveTake.ZoomMeasure,
             "zoom-screen" => MacLiveTake.ZoomScreen,
             "zoom-lens" => MacLiveTake.ZoomLens,
-            _ => throw new FormatException("--take is show-hide, reversal, controls, effects, effects-measure, sharing, sharing-measure, zoom-measure, zoom-screen or zoom-lens."),
+            "zoom-map" => MacLiveTake.ZoomMap,
+            _ => throw new FormatException("--take is show-hide, reversal, controls, effects, effects-measure, sharing, sharing-measure, zoom-measure, zoom-screen, zoom-lens or zoom-map."),
         };
+        ZoomMapPosition? zoomMap = Option(args, "--zoom-map") switch
+        {
+            null => null,
+            "bottom-right" => ZoomMapPosition.BottomRight,
+            "bottom-left" => ZoomMapPosition.BottomLeft,
+            "top-right" => ZoomMapPosition.TopRight,
+            "top-left" => ZoomMapPosition.TopLeft,
+            _ => throw new FormatException("--zoom-map is bottom-right, bottom-left, top-right or top-left."),
+        };
+        if (take == MacLiveTake.ZoomMap && zoomMap is null)
+        {
+            zoomMap = ZoomMapPosition.BottomRight;
+        }
         return new MotionReferenceRequest(style, PixelRect.FromSize(area[0], area[1], area[2], area[3]), output, Math.Clamp(timeout, 5, 120),
             Array.IndexOf([.. args], "--reduce-motion") >= 0, Option(args, "--theme") == "dark", Math.Clamp(objects, 0, 64))
         {
             Take = take,
+            ZoomMap = zoomMap,
             Glass = Array.IndexOf([.. args], "--glass") >= 0,
         };
     }

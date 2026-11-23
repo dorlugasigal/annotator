@@ -6,7 +6,8 @@ namespace Annotator.UXReference;
 
 /// <summary>What Annotator.exe reported for one reference state (its ready.json).</summary>
 internal sealed record AppReport(string Status, string? Reason, int ProcessId, nint Window, double Scale, double Width, double Height,
-                                 int[]? WindowRect, string? ImagePath, int ImageWidth, int ImageHeight)
+                                 int[]? WindowRect, string? ImagePath, int ImageWidth, int ImageHeight, string? PopupImagePath,
+                                 int PopupImageWidth, int PopupImageHeight)
 {
     /// <summary>A canvas state: the window's own element is the canvas, so the dump starts with it.</summary>
     public bool Canvas { get; init; }
@@ -96,7 +97,10 @@ internal sealed class AppSession : IDisposable
             window,
             json["image"] is JsonNode image ? Path.Combine(folder, image.GetValue<string>()) : null,
             json["imageSize"]?[0]?.GetValue<int>() ?? 0,
-            json["imageSize"]?[1]?.GetValue<int>() ?? 0)
+            json["imageSize"]?[1]?.GetValue<int>() ?? 0,
+            json["popupImage"] is JsonNode popupImage ? Path.Combine(folder, popupImage.GetValue<string>()) : null,
+            json["popupImageSize"]?[0]?.GetValue<int>() ?? 0,
+            json["popupImageSize"]?[1]?.GetValue<int>() ?? 0)
         {
             Canvas = json["canvas"]?.GetValue<bool>() ?? false,
             Elements = json["elements"] is JsonArray elements ? (JsonArray)elements.DeepClone() : null,

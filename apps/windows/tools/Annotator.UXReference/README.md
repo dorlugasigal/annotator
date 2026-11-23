@@ -86,6 +86,11 @@ Spectrum gradient on the stroke. The zoom controls (`pickers/zoom-compact` and
 Mac capture does, at screen zoom's default 2x; their group reports the union of
 its children's frames, as SwiftUI does.
 
+The Windows-only state `settings/tab-general-zoom-map-open` captures the General
+page and the open Zoom map menu. Its menu image is written separately as
+`*.popup.windows.png`, because `RenderTargetBitmap` captures the menu content
+without its system backdrop.
+
 `cursors --out <folder>` compares every entry of `cursors/cursors.json`: the
 pen, highlighter, eraser, laser pointer and rotation cursors that Annotator
 draws by size, hot spot and 2x pixels (mean alpha difference at most 2, at

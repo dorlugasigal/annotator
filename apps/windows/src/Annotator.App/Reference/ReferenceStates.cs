@@ -183,6 +183,9 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
     /// </summary>
     public bool UpdateAvailable { get; init; }
 
+    /// <summary>Whether the Settings General state's Zoom map pop-up opens for a screenshot.</summary>
+    public bool OpenZoomMap { get; init; }
+
     /// <summary>The tutorial card's state, for <see cref="ReferenceSurface.Tutorial"/>: welcome, coach-&lt;step&gt;, coach-arrow-curved, coach-shape-done or finish.</summary>
     public string TutorialState { get; init; } = string.Empty;
 
@@ -261,6 +264,10 @@ internal static partial class ReferenceStates
     private static ReferenceScenario? Settings(string state)
     {
         const string Launch = "launch-at-login-";
+        if (state == "tab-general-zoom-map-open")
+        {
+            return new ReferenceScenario(ReferenceSurface.Settings) { Tab = SettingsTab.General, Height = 700, OpenZoomMap = true };
+        }
         if (state.StartsWith(Launch, StringComparison.Ordinal))
         {
             LaunchAtSignInState? launch = state[Launch.Length..] switch
