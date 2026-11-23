@@ -8,9 +8,10 @@ namespace Annotator.App.Reference;
 /// make WinUI draw every window as in a Windows contrast theme (<c>OverrideHighContrast</c>, which WinUI's own tests use)
 /// and scale text as Windows' Text size setting does (<c>UpdateFontScale</c>), without changing any Windows setting.
 /// The interface is private and its slots belong to one build of Microsoft.UI.Xaml.dll: the slots below were read from
-/// Microsoft's public symbols of Microsoft.UI.Xaml.dll 3.2.3.2609 (Microsoft.WindowsAppSDK.WinUI 2.3.9). Another build of
-/// the DLL is refused before any call, and the reference host checks what each call changed, so the simulation is either
-/// WinUI's own or reported as unavailable, never a made-up state. The released app never calls this class.
+/// Microsoft's public x64 symbols of Microsoft.UI.Xaml.dll 3.3.0.0 (Microsoft.WindowsAppSDK.WinUI 2.7.0; PDB
+/// 41EEA12D-41B0-D03D-6164-8ABB28996270, age 2). Another build of the DLL is refused before any call, and the reference
+/// host checks what each call changed, so the simulation is either WinUI's own or reported as unavailable, never a
+/// made-up state. The released app never calls this class.
 /// </summary>
 internal static unsafe partial class XamlTestHooks
 {
@@ -18,7 +19,7 @@ internal static unsafe partial class XamlTestHooks
     private static readonly Guid s_xamlTestHooks = new("43d4bcbd-4f02-4651-9ecc-dcfec9f786a7");
 
     /// <summary>The build of Microsoft.UI.Xaml.dll whose symbols gave the slots below.</summary>
-    private const string KnownBuild = "3.2.3.2609";
+    private const string KnownBuild = "3.3.0.0";
 
     // Slots of IXamlTestHooks after IUnknown (3) and IXamlLoggerTestHooks (2).
     private const int OverrideHighContrastSlot = 34;
