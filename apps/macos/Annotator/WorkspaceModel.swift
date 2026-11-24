@@ -1928,19 +1928,6 @@ final class WorkspaceModel: ObservableObject {
     }
 
     @discardableResult
-    /// The pointer left the zoomed display: zoom moves to the display it's on now, at the same factor.
-    func moveScreenZoomToPointer() {
-        guard screenZoomEnabled, zoomStartState == .active, !workspaceHidden, let current = active,
-              current.document.presentation.mode == .screen, current.presentation?.isExitingScreenZoom != true else { return }
-        let pointer = screenPointer()
-        guard let target = desktopSessions.first(where: { $0.panel.frame.contains(pointer) }), target !== current else { return }
-        let settings = current.document.presentation
-        switchActiveSession(to: target)
-        do { try target.document.setPresentation(settings) } catch { report(error); return }
-        if mode == .draw { target.panel.makeKey(); target.panel.makeFirstResponder(target.canvas) }
-        synchronize()
-    }
-
     /// Zoom starts on the display under the pointer, not on the one used last.
     private func activateDisplayUnderPointer() {
         let pointer = screenPointer()

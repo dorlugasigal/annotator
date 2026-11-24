@@ -409,45 +409,6 @@ public sealed partial class WorkspaceModel
         }
     }
 
-    /// <summary>
-    /// Mac moveScreenZoomToPointer: the pointer left the zoomed display, so zoom moves to the display it's on now, at the same
-    /// factor.
-    /// </summary>
-    public void MoveScreenZoomToPointer()
-    {
-        using ChangeScope scope = Change();
-        if (_hidden || !_screenZoomEnabled || ZoomStart.State != ZoomStartState.Active || _active is not { } current
-            || current.Document.Presentation.Mode != PresentationMode.Screen
-            || _displayedZoom?.Get(current.Display.Id) is { Exiting: true } || _pointer() is not { } pointer)
-        {
-            return;
-        }
-        Canvas? target = _canvases.Values.FirstOrDefault(canvas => canvas.Display.ContainsDesktopPoint(pointer));
-        if (target is null || target == current)
-        {
-            return;
-        }
-        PresentationSettings settings = current.Document.Presentation;
-        SwitchActiveSession(target, clearsSelection: true);
-        try
-        {
-            Mutate(target, (ref CanvasDocument document) => document.SetPresentation(settings));
-        }
-        catch (Exception error) when (IsReportable(error))
-        {
-            Report(error);
-            return;
-        }
-        if (_mode == WorkspaceMode.Draw)
-        {
-            foreach (Canvas canvas in _canvases.Values)
-            {
-                SetDrawing(canvas, true, focus: canvas == target);
-            }
-        }
-        Synchronize();
-    }
-
     /// <summary>Mac activateDisplayUnderPointer: zoom starts on the display under the pointer, not on the one used last.</summary>
     private void ActivateDisplayUnderPointer()
     {

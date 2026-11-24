@@ -373,10 +373,6 @@ final class LivePresentation {
     private func pointerMoved(_ event: NSEvent) {
         regionSharing?.refreshPointer()
         if presentationMode == .screen {
-            if let session, !session.panel.frame.contains(pointerLocation()) {
-                model?.moveScreenZoomToPointer()
-                return
-            }
             pushZoom(by: Point(event.deltaX, event.deltaY))
             render()
             session?.canvas.needsDisplay = true

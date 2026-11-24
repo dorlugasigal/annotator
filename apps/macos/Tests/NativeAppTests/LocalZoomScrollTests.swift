@@ -142,13 +142,6 @@ final class LocalZoomScrollTests: XCTestCase {
         XCTAssertEqual(other.document.presentation.mode, .screen)
         XCTAssertEqual(first.document.presentation.mode, .off)
         XCTAssertEqual(model.mode, .draw, "Zoom starts in Draw.")
-
-        model.screenPointer = { CGPoint(x: first.panel.frame.midX, y: first.panel.frame.midY) }
-        model.noteZoomPresented()
-        model.moveScreenZoomToPointer()
-        XCTAssertTrue(model.active === first, "Zoom moves to the display the pointer moved to.")
-        XCTAssertEqual(other.document.presentation.mode, .off)
-        XCTAssertEqual(first.document.presentation.mode, .screen)
     }
 
     func testContinuousZeroPointScrollDoesNotBecomeAWheelNotch() throws {

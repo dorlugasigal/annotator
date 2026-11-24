@@ -357,8 +357,8 @@ platform that departs from the specifications, unless an ADR changes them.
   on-screen speed by moves inside an edge zone and slides while the pointer
   rests there (`ZoomFollow`), and drawing input maps through it; with **Zoom
   follows the pointer** on, the origin is `p x (1 - 1/z)` so the pointer stays
-  on the same source point and clicks reach what it shows; zoom moves to the
-  display the pointer moves to; Windows reads the push from pointer positions,
+  on the same source point and clicks reach what it shows; zoom stays on its
+  display when the pointer moves to another one; Windows reads the push from pointer positions,
   so it ends where the pointer stops at the display edge, and the resting slide
   continues from there; a map of the whole display sits in the corner chosen
   in Settings (`ZoomMap`, Bottom right by default, Off hides it) with the same

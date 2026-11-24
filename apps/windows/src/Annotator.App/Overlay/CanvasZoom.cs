@@ -56,9 +56,6 @@ internal sealed class CanvasZoom : IDisposable
     /// <summary>Zoom follows the pointer is off, so the zoomed part holds still and slides near the edges.</summary>
     private bool _follows;
     private ZoomMapPosition _mapPosition = ZoomMapPosition.BottomRight;
-
-    /// <summary>The pointer left this display while it showed screen zoom, and the app was told once.</summary>
-    private bool _pointerLeft;
     private Viewport? _view;
     private bool _screenShown;
     private bool _screenPresented;
@@ -211,17 +208,6 @@ internal sealed class CanvasZoom : IDisposable
         }
         _pointer = local;
         _pointerKnown = true;
-        bool outside = !(local.X >= 0 && local.Y >= 0 && local.X < _size.Width && local.Y < _size.Height);
-        if (_screenShown && outside && !_pointerLeft)
-        {
-            // Mac moveScreenZoomToPointer: zoom moves to the display the pointer is on now.
-            _pointerLeft = true;
-            _factory.Report(new OverlayEvent.ZoomPointerLeft(_display));
-        }
-        else if (!outside)
-        {
-            _pointerLeft = false;
-        }
         if (TracksPointer)
         {
             Viewport? before = _view;

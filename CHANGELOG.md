@@ -15,7 +15,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ### Fixed
 
-- With more than one display, zoom starts on the display under the pointer and moves with the pointer to another display. Before, it could start on the display you drew on last.
+- With more than one display, zoom starts on the display under the pointer. Before, it could start on the display you drew on last.
 
 ## 0.4.0 - 2026-11-24
 
