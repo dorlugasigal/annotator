@@ -4,18 +4,32 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+## 0.5.0 - 2026-11-24
+
 ### Added
 
 - Settings > General > Zoom follows the pointer moves the zoomed view with every pointer move, as before 0.4.0. It's off by default.
 
 ### Changed
 
-- The zoomed view now holds still in Draw and Use apps alike. When the pointer reaches an edge, the view moves as fast as you move the pointer, and keeps sliding while the pointer rests there.
+- The zoomed view now holds still in Draw and Use apps alike. When the pointer reaches an edge, the view moves as fast as you move the pointer, and keeps sliding while the pointer rests there. If the pointer goes on to another display, the view slides all the way to that edge.
 - Zoom starts in Draw, so clicks can't land on an app the zoomed view doesn't show under the pointer. Choose Apps to click your apps while zoomed.
 
 ### Fixed
 
 - With more than one display, zoom starts on the display under the pointer. Before, it could start on the display you drew on last.
+
+### Known limits
+
+- Effects don't follow windows that move or content that scrolls, and blur is not secure redaction. Remove private details before you share.
+- Anything inside a shared region can show up in your meeting, including notifications.
+- Choosing a different area or changing your displays turns region sharing off. Check the outline before you start it again.
+- In the Shared Region window, the spotlight turns on and off at once instead of fading.
+- Some meeting apps may not show the toolbar in a shared window. Check before you rely on it.
+- With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.
+- On Windows, the toolbar changes size at once when it shrinks to one button, opens again or grows for its properties. On a Mac, it animates.
+- On Windows, with Glass toolbar on, the glass loses its blur while the toolbar hides and shows. The blur comes back when the toolbar lands.
+- On Windows, the zoom map's picture looks a little rougher than on a Mac.
 
 ## 0.4.0 - 2026-11-24
 
