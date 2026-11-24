@@ -54,6 +54,17 @@ public sealed partial class WorkspaceModel
         PersistPreferences();
     }
 
+    /// <summary>
+    /// Mac setZoomFollowsPointer: screen zoom moves with every pointer move instead of holding still. Off is the default and is
+    /// not stored.
+    /// </summary>
+    public void SetZoomFollowsPointer(bool on)
+    {
+        using ChangeScope scope = Change();
+        _preferences.ZoomFollowsPointer = on ? true : null;
+        PersistPreferences();
+    }
+
     /// <summary>Mac setTheme: System, Light or Dark for app windows only (WIN-UI-07); drawings keep their colors.</summary>
     public void SetTheme(AppTheme theme)
     {

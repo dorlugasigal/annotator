@@ -36,6 +36,7 @@ internal sealed partial class GeneralPage
     private readonly SettingsSwitch _share = new(SettingsCopy.ShareStyles);
     private readonly SettingsSwitch _tips = new(SettingsCopy.ShowTips);
     private readonly SettingsSwitch _glass = new(SettingsCopy.GlassToolbar);
+    private readonly SettingsSwitch _zoomFollows = new(SettingsCopy.ZoomFollowsPointer);
     private readonly SettingsSwitch _usageSwitch = new(SettingsCopy.ShareUsageCounts);
     private readonly FormText _usageStatus;
     private readonly Annotator.Workspace.Metrics.UsageMetrics _usage;
@@ -56,6 +57,8 @@ internal sealed partial class GeneralPage
         _share.Toggled += shared => Act(() => actions.Model.SetShareToolStyles(shared));
         _tips.Toggled += visible => Act(() => actions.Model.SetShortcutHints(visible));
         _glass.Toggled += on => Act(() => actions.Model.SetGlass(on));
+        _zoomFollows.Toggled += on => Act(() => actions.Model.SetZoomFollowsPointer(on));
+        AutomationProperties.SetAutomationId(_zoomFollows, "zoom-follows-pointer");
         AutomationProperties.SetAutomationId(_share, "share-tool-styles");
         AutomationProperties.SetAutomationId(_glass, "glass-toolbar");
         AutomationProperties.SetAutomationId(_zoomMap, "zoom-map");
@@ -68,6 +71,7 @@ internal sealed partial class GeneralPage
         SettingsHelp.Set(_tips, SettingsCopy.ShowTipsHelp);
         SettingsHelp.Set(_animation, SettingsCopy.WorkspaceAnimationHelp);
         SettingsHelp.Set(_zoomMap, SettingsCopy.ZoomMapHelp);
+        SettingsHelp.Set(_zoomFollows, SettingsCopy.ZoomFollowsPointerHelp);
         var introduction = new SettingsButton(SettingsCopy.ShowTutorial, ButtonLook.Bordered, SettingsWidths.Button(SettingsCopy.ShowTutorial));
         introduction.Click += (_, _) => actions.ShowTutorial?.Invoke();
 
@@ -86,7 +90,12 @@ internal sealed partial class GeneralPage
             SettingsForm.Single(SettingsForm.Caption(SettingsCopy.ShareStylesDetail, wrapWidth: SettingsForm.RowWidth)),
         ]));
         form.Children.Add(SettingsForm.Header(SettingsCopy.Zoom, first: false));
-        form.Children.Add(SettingsForm.Card([SettingsForm.PopUp(SettingsCopy.ZoomMap, _zoomMap)]));
+        form.Children.Add(SettingsForm.Card(
+        [
+            SettingsForm.PopUp(SettingsCopy.ZoomMap, _zoomMap),
+            SettingsForm.Toggle(SettingsCopy.ZoomFollowsPointer, _zoomFollows),
+            SettingsForm.Single(SettingsForm.Caption(SettingsCopy.ZoomFollowsPointerDetail, wrapWidth: SettingsForm.RowWidth)),
+        ]));
         form.Children.Add(SettingsForm.Header(SettingsCopy.Appearance, first: false));
         form.Children.Add(SettingsForm.Card(
         [
@@ -179,6 +188,7 @@ internal sealed partial class GeneralPage
         _share.IsOn = preferences.ShareToolStyles == true;
         _tips.IsOn = preferences.ShowShortcutHints ?? true;
         _glass.IsOn = preferences.Glass == true;
+        _zoomFollows.IsOn = preferences.ZoomFollowsPointer == true;
         _theme.ChosenIndex = ThemeIndex(preferences);
         _animation.ChosenIndex = AnimationIndex(preferences);
         _zoomMap.ChosenIndex = ZoomMapIndex(preferences);

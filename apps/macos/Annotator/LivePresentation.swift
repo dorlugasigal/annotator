@@ -85,8 +85,8 @@ final class LivePresentation {
             (presentationMode != .off || session?.document.elements.contains(where: { $0.tool.isPixelEffect }) == true)
     }
 
-    /// While drawing, the zoomed part holds still and slides near the display's edges (`ZoomFollow`). Using apps keeps it
-    /// anchored at the pointer, so what's under the pointer is what a click reaches.
+    /// The zoomed part holds still and slides near the display's edges (`ZoomFollow`), in Draw and Use apps alike. With
+    /// Zoom follows the pointer on, it stays anchored at the pointer, so what's under the pointer is what a click reaches.
     var screenViewport: Viewport? {
         guard model?.workspaceHidden != true, presentationMode == .screen, let session else { return nil }
         if let frozenViewport { return frozenViewport }
@@ -94,7 +94,7 @@ final class LivePresentation {
         let display = Rect(x: 0, y: 0, width: size.width, height: size.height)
         let local = localPointer(in: session)
         do {
-            let viewport = model?.mode == .draw
+            let viewport = model?.preferences.zoomFollowsPointer != true
                 ? try ZoomFollow.viewport(previous: followedSource, display: display, factor: magnification, pointer: local)
                 : try Viewport.cursorAnchored(display: display, factor: magnification, cursor: local)
             followedSource = viewport.source
@@ -363,16 +363,21 @@ final class LivePresentation {
             }
         }
         pointerMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged, .rightMouseDragged]) {
-            [weak self] _ in MainActor.assumeIsolated { self?.pointerMoved() }
+            [weak self] event in MainActor.assumeIsolated { self?.pointerMoved(event) }
         }
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) {
-            [weak self] event in MainActor.assumeIsolated { self?.pointerMoved() }; return event
+            [weak self] event in MainActor.assumeIsolated { self?.pointerMoved(event) }; return event
         }
     }
 
-    private func pointerMoved() {
+    private func pointerMoved(_ event: NSEvent) {
         regionSharing?.refreshPointer()
         if presentationMode == .screen {
+            if let session, !session.panel.frame.contains(pointerLocation()) {
+                model?.moveScreenZoomToPointer()
+                return
+            }
+            pushZoom(by: Point(event.deltaX, event.deltaY))
             render()
             session?.canvas.needsDisplay = true
             selectionView?.needsDisplay = true
@@ -380,9 +385,18 @@ final class LivePresentation {
         } else { renderLens() }
     }
 
-    /// The zoom that can slide now: screen zoom on screen while drawing, not held still for text.
+    /// A pointer move toward an edge pushes the zoomed part along at the pointer's speed (`ZoomFollow.push`).
+    private func pushZoom(by delta: Point) {
+        guard let session, let viewport = slidingViewport else { return }
+        do {
+            let pushed = try ZoomFollow.push(viewport, pointer: localPointer(in: session), delta: delta)
+            if pushed != viewport { followedSource = pushed.source }
+        } catch { model?.report(error) }
+    }
+
+    /// The zoom that can slide now: screen zoom on screen that holds still, not held still for text.
     private var slidingViewport: Viewport? {
-        guard model?.mode == .draw, frozenViewport == nil, requested, screenPanel != nil else { return nil }
+        guard model?.preferences.zoomFollowsPointer != true, frozenViewport == nil, requested, screenPanel != nil else { return nil }
         return screenViewport
     }
 

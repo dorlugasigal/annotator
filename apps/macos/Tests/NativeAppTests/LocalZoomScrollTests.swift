@@ -86,7 +86,7 @@ final class LocalZoomScrollTests: XCTestCase {
         XCTAssertEqual(presentation.presentationMode, .off)
     }
 
-    func testScreenZoomHoldsStillWhileDrawingAndFollowsThePointerWhileUsingApps() throws {
+    func testScreenZoomHoldsStillInBothModesUnlessItFollowsThePointer() throws {
         let suite = "zoom-follow-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         let model = WorkspaceModel(defaults: defaults)
@@ -114,10 +114,14 @@ final class LocalZoomScrollTests: XCTestCase {
                        "Changing the zoom keeps what's under the pointer.")
 
         model.interact()
+        XCTAssertEqual(try XCTUnwrap(presentation.screenViewport).sourcePoint(for: local).distance(to: under), 0, accuracy: 0.0001,
+                       "Use apps holds still too.")
+        model.setZoomFollowsPointer(true)
+        defer { model.setZoomFollowsPointer(false) }
         let anchored = try XCTUnwrap(presentation.screenViewport)
         XCTAssertEqual(anchored.sourcePoint(for: local).distance(to: local), 0, accuracy: 0.0001,
-                       "Using apps keeps the picture under the pointer where a click lands.")
-        XCTAssertEqual(session.canvas.documentPoint(local), local)
+                       "Zoom follows the pointer keeps the picture under the pointer where a click lands.")
+        XCTAssertEqual(session.canvas.documentPoint(local).distance(to: local), 0, accuracy: 0.0001)
     }
 
     func testZoomStartsInDrawOnTheDisplayUnderThePointer() throws {
@@ -137,7 +141,14 @@ final class LocalZoomScrollTests: XCTestCase {
         XCTAssertTrue(model.active === other, "Zoom starts on the display under the pointer.")
         XCTAssertEqual(other.document.presentation.mode, .screen)
         XCTAssertEqual(first.document.presentation.mode, .off)
-        XCTAssertEqual(model.mode, .draw, "Zoom starts in Draw, where the view holds still.")
+        XCTAssertEqual(model.mode, .draw, "Zoom starts in Draw.")
+
+        model.screenPointer = { CGPoint(x: first.panel.frame.midX, y: first.panel.frame.midY) }
+        model.noteZoomPresented()
+        model.moveScreenZoomToPointer()
+        XCTAssertTrue(model.active === first, "Zoom moves to the display the pointer moved to.")
+        XCTAssertEqual(other.document.presentation.mode, .off)
+        XCTAssertEqual(first.document.presentation.mode, .screen)
     }
 
     func testContinuousZeroPointScrollDoesNotBecomeAWheelNotch() throws {

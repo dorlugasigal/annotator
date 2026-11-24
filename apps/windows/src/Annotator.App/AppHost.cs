@@ -1054,6 +1054,9 @@ internal sealed partial class AppHost
             case OverlayEvent.ZoomPresented:
                 _model.NoteZoomPresented();
                 break;
+            case OverlayEvent.ZoomPointerLeft:
+                _model.MoveScreenZoomToPointer();
+                break;
             case OverlayEvent.ZoomFailed failed:
                 StartupLog.Note("zoom", $"{failed.Display.Value} {failed.Mode}: {failed.Message} {failed.Detail}".ReplaceLineEndings(" | "));
                 _model.ReportZoomFailure(failed.Display, failed.Mode, failed.Message);

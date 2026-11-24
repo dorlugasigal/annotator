@@ -154,7 +154,7 @@ public sealed class ScreenZoomDisplayTests
     [Fact]
     public void WhileDrawingZoomHoldsStillAndUsingAppsAnchorsItAtThePointer()
     {
-        // Mac testScreenZoomHoldsStillWhileDrawingAndFollowsThePointerWhileUsingApps.
+        // Mac testScreenZoomHoldsStillInBothModesUnlessItFollowsThePointer.
         var zoom = new ScreenZoomDisplay();
         zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
         var center = new Point(640, 360);
@@ -184,12 +184,14 @@ public sealed class ScreenZoomDisplayTests
         zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
         Viewport start = zoom.ScreenViewport(Display, new Point(640, 360), follows: true)!.Value;
         var edge = new Point(1279, 360);
-        Assert.Equal(start, zoom.ScreenViewport(Display, edge, follows: true));
+        // The part of the move inside the edge zone (1184 to 1279) pushes the zoom at the pointer's speed on screen.
+        Viewport pushed = zoom.ScreenViewport(Display, edge, follows: true)!.Value;
+        Assert.Equal(start.Source.X + (1279 - 1184) / 2.0, pushed.Source.X, 9);
         Assert.True(zoom.NeedsFrames, "The pointer near an edge slides the zoom without moves.");
         Assert.True(zoom.Step(10));
-        Assert.Equal(start, zoom.ScreenViewport(Display, edge, follows: true));
+        Assert.Equal(pushed, zoom.ScreenViewport(Display, edge, follows: true));
         double now = 10;
-        Viewport shown = start;
+        Viewport shown = pushed;
         for (int frame = 0; frame < 1000 && zoom.NeedsFrames; frame++)
         {
             now += 1.0 / 60;
@@ -210,6 +212,9 @@ public sealed class ScreenZoomDisplayTests
         Assert.Null(zoom.ScreenViewport(Display, edge, follows: true));
         zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
         Assert.Equal(start, zoom.ScreenViewport(Display, new Point(640, 360), follows: true));
+        // A move away from the edge, or toward it outside the zone, doesn't push.
+        Assert.Equal(start, zoom.ScreenViewport(Display, new Point(1000, 360), follows: true));
+        Assert.Equal(start, zoom.ScreenViewport(Display, new Point(700, 360), follows: true));
         zoom.ScreenViewport(Display, edge, follows: true);
         zoom.StopFollowing();
         Assert.False(zoom.NeedsFrames);

@@ -42,7 +42,7 @@ public enum ZoomFollow {
             let zone = edgeZone(length)
             let low = min(1, max(0, (start + zone - value) / zone))
             let high = min(1, max(0, (value - (start + length - zone)) / zone))
-            return (high * high - low * low) * length * 0.5 / factor.squareRoot()
+            return (high * high - low * low) * length * 0.75 / factor.squareRoot()
         }
         return Point(axis(display.x, display.width, pointer.x), axis(display.y, display.height, pointer.y))
     }
@@ -56,6 +56,29 @@ public enum ZoomFollow {
         return try Viewport(output: display, source: Rect(
             x: min(max(source.x + speed.x * step, display.x), display.maxX - source.width),
             y: min(max(source.y + speed.y * step, display.y), display.maxY - source.height),
+            width: source.width, height: source.height))
+    }
+
+    /// The zoomed part after the pointer moved by `delta` display points to `pointer`. The part of a move toward an edge
+    /// that happens inside that edge's zone pushes the zoomed part along as fast as the pointer moves on screen, also once
+    /// the pointer stops at the display's edge.
+    public static func push(_ viewport: Viewport, pointer: Point, delta: Point) throws -> Viewport {
+        let display = viewport.output, source = viewport.source
+        let factor = display.width / source.width
+        guard factor.isFinite, factor > minimumSlidingFactor, pointer.isFinite, delta.isFinite,
+              pointer.x >= display.x, pointer.x <= display.maxX,
+              pointer.y >= display.y, pointer.y <= display.maxY else { return viewport }
+        func axis(_ start: Double, _ length: Double, _ value: Double, _ move: Double) -> Double {
+            let zone = edgeZone(length)
+            if move > 0, value > start + length - zone { return min(move, value - (start + length - zone)) / factor }
+            if move < 0, value < start + zone { return -min(-move, start + zone - value) / factor }
+            return 0
+        }
+        let x = axis(display.x, display.width, pointer.x, delta.x), y = axis(display.y, display.height, pointer.y, delta.y)
+        guard x != 0 || y != 0 else { return viewport }
+        return try Viewport(output: display, source: Rect(
+            x: min(max(source.x + x, display.x), display.maxX - source.width),
+            y: min(max(source.y + y, display.y), display.maxY - source.height),
             width: source.width, height: source.height))
     }
 

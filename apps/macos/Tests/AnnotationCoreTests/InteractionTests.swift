@@ -103,3 +103,17 @@ import Testing
     #expect(abs(area.width - map.width / 2) < 0.000_001)
     #expect(ZoomMap.frame(display: Rect(x: 0, y: 0, width: 160, height: 90), position: .topLeft) == nil)
 }
+
+@Test func zoomPushesAtThePointersSpeedOnlyInsideAnEdgeZone() throws {
+    let screen = Rect(x: 0, y: 0, width: 1512, height: 982)
+    let start = try ZoomFollow.viewport(previous: nil, display: screen, factor: 2, pointer: screen.center)
+    let zone = ZoomFollow.edgeZone(screen.width)
+    #expect(try ZoomFollow.push(start, pointer: Point(800, 491), delta: Point(40, 0)) == start)
+    let entering = try ZoomFollow.push(start, pointer: Point(screen.maxX - 10, 491), delta: Point(200, 0))
+    #expect(abs(entering.source.x - (start.source.x + (zone - 10) / 2)) < 0.000_001)
+    let atEdge = try ZoomFollow.push(start, pointer: Point(screen.maxX, 491), delta: Point(30, 0))
+    #expect(abs(atEdge.source.x - (start.source.x + 15)) < 0.000_001)
+    #expect(try ZoomFollow.push(start, pointer: Point(screen.maxX, 491), delta: Point(-30, 0)) == start)
+    let up = try ZoomFollow.push(start, pointer: Point(756, 0), delta: Point(0, -20))
+    #expect(abs(up.source.y - (start.source.y - 10)) < 0.000_001)
+}

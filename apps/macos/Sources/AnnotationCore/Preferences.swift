@@ -110,6 +110,8 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var glass: Bool?
     /// Where screen zoom shows its map of the whole display. `nil` means `.bottomRight`.
     public var zoomMap: ZoomMapPosition?
+    /// `true` moves screen zoom with every pointer move. `nil` or `false` holds it still until the pointer nears an edge.
+    public var zoomFollowsPointer: Bool?
     public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
                                                  .laser, .eraser, .cover]
 

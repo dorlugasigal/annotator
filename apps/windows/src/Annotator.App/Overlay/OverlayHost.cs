@@ -69,6 +69,9 @@ public abstract record OverlayEvent
     /// <summary>Screen zoom's first zoomed frame is on screen (Mac noteZoomPresented).</summary>
     public sealed record ZoomPresented(DisplayId Display) : OverlayEvent;
 
+    /// <summary>The pointer left a display that shows screen zoom (Mac moveScreenZoomToPointer).</summary>
+    public sealed record ZoomPointerLeft(DisplayId Display) : OverlayEvent;
+
     /// <summary>
     /// Zoom or the lens could not go on (Mac LivePresentation.fail): the app stops it without history and shows
     /// <paramref name="Message"/>; <paramref name="Detail"/> is for the log.

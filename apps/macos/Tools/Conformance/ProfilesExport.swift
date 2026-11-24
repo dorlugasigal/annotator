@@ -184,6 +184,7 @@ enum ProfilesExport {
         preferences.showShortcutHints = false
         preferences.glass = true
         preferences.zoomMap = .topLeft
+        preferences.zoomFollowsPointer = true
         var halo = CursorHighlightSettings()
         halo.shape = .hexagon; halo.visibility = .moving; halo.color = RGBA(0.2, 0.6, 1)
         halo.diameter = 48; halo.borderWidth = 4; halo.glowRadius = 8; halo.borderStyle = .dashed; halo.clickEffect = .ripple

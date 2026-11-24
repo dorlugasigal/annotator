@@ -283,10 +283,9 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
         return currentToolCursor
     }
 
-    /// Where a point of this canvas lands on the board. While drawing, screen zoom holds still, so the pointer can be
-    /// over any part of the zoomed picture.
+    /// Where a point of this canvas lands on the board: the part of the zoomed picture under the pointer.
     func documentPoint(_ local: Point) -> Point {
-        guard model?.mode == .draw, let viewport = session?.presentation?.screenViewport else { return local }
+        guard let viewport = session?.presentation?.screenViewport else { return local }
         return viewport.sourcePoint(for: local)
     }
 

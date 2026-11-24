@@ -816,6 +816,17 @@ final class WorkspaceModel: ObservableObject {
         persistPreferences()
     }
 
+    func setZoomFollowsPointer(_ on: Bool) {
+        if let owner = globalSettingsOwner {
+            owner.setZoomFollowsPointer(on)
+            preferences.zoomFollowsPointer = owner.preferences.zoomFollowsPointer
+            return
+        }
+        preferences.zoomFollowsPointer = on ? true : nil
+        persistPreferences()
+        refreshCanvas()
+    }
+
     func setZoomMap(_ position: ZoomMapPosition) {
         if let owner = globalSettingsOwner {
             owner.setZoomMap(position)
@@ -1853,7 +1864,7 @@ final class WorkspaceModel: ObservableObject {
             zoomStart.fail(errorMessage ?? "A drawing display could not be prepared. Show the toolbar and retry live zoom.")
             return
         }
-        // Zoom starts in Draw, where the zoomed view holds still. Use apps keeps it on the pointer, so clicks land on what it shows.
+        // Zoom starts in Draw, so a click can't land on an app the zoomed view doesn't show under the pointer.
         beginDrawing(recordsUsage: false)
         prepareZoomScrollAccess()
         if let initialScroll { scrollScreenZoom(initialScroll) }
@@ -1917,6 +1928,19 @@ final class WorkspaceModel: ObservableObject {
     }
 
     @discardableResult
+    /// The pointer left the zoomed display: zoom moves to the display it's on now, at the same factor.
+    func moveScreenZoomToPointer() {
+        guard screenZoomEnabled, zoomStartState == .active, !workspaceHidden, let current = active,
+              current.document.presentation.mode == .screen, current.presentation?.isExitingScreenZoom != true else { return }
+        let pointer = screenPointer()
+        guard let target = desktopSessions.first(where: { $0.panel.frame.contains(pointer) }), target !== current else { return }
+        let settings = current.document.presentation
+        switchActiveSession(to: target)
+        do { try target.document.setPresentation(settings) } catch { report(error); return }
+        if mode == .draw { target.panel.makeKey(); target.panel.makeFirstResponder(target.canvas) }
+        synchronize()
+    }
+
     /// Zoom starts on the display under the pointer, not on the one used last.
     private func activateDisplayUnderPointer() {
         let pointer = screenPointer()

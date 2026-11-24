@@ -365,6 +365,14 @@ public sealed class ZoomWorkspaceTests
         Assert.Equal(PresentationMode.Off, Presentation(model).Mode);
         Assert.Equal(Left, model.Snapshot.ZoomEntrance!.Display);
         Assert.Equal(WorkspaceMode.Draw, model.Snapshot.Mode);
+
+        // The pointer moves to the other display while zoomed: zoom moves there at the same factor.
+        double zoom = model.Snapshot.Magnification;
+        pointer = new Point(10, 10);
+        model.NoteZoomPresented();
+        model.MoveScreenZoomToPointer();
+        Assert.Equal(new PresentationSettings(PresentationMode.Screen, zoom), Presentation(model));
+        Assert.Equal(PresentationMode.Off, model.Document(Left).Presentation.Mode);
     }
 
     [Fact]

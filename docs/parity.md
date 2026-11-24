@@ -90,9 +90,9 @@ platform that departs from the specifications, unless an ADR changes them.
 
 1. A presenter shares the entire screen in Teams, draws on PowerPoint, edits
    the drawing, returns to PowerPoint with Use apps and never loses input.
-2. Ctrl+1 zooms in on the display under the pointer and starts Draw; with Use
-   apps, zoom follows the pointer, clicks reach the control under it, and
-   meeting viewers see the zoom.
+2. Ctrl+1 zooms in on the display under the pointer and starts Draw; with
+   **Zoom follows the pointer** on, clicks in Use apps reach the control under
+   the pointer, and meeting viewers see the zoom.
 3. A board saved on a Mac opens on Windows with the same objects, styles,
    labels and positions, and opens again on the Mac after a Windows save.
 4. A Blur region hides part of the live screen from viewers. Any capture
@@ -352,11 +352,15 @@ platform that departs from the specifications, unless an ADR changes them.
 - **WIN-CAP-05**: Zoom matches 003 and 009: Ctrl+1 starts at 1.5x, in Draw, on
   the display under the pointer; Alt+scroll
   changes 1x-16x; ramps take 260 ms in and 200 ms out with the shared curves;
-  in Use apps the viewport origin is `p x (1 - 1/z)` so the pointer stays on
-  the same source point and clicks reach what it shows; in Draw the viewport
-  holds still, keeps the point under the pointer when the factor changes and
-  slides while the pointer is in an edge zone (`ZoomFollow`), and drawing
-  input maps through it; a map of the whole display sits in the corner chosen
+  by default the viewport holds still in Draw and Use apps, keeps the point
+  under the pointer when the factor changes, is pushed at the pointer's
+  on-screen speed by moves inside an edge zone and slides while the pointer
+  rests there (`ZoomFollow`), and drawing input maps through it; with **Zoom
+  follows the pointer** on, the origin is `p x (1 - 1/z)` so the pointer stays
+  on the same source point and clicks reach what it shows; zoom moves to the
+  display the pointer moves to; Windows reads the push from pointer positions,
+  so it ends where the pointer stops at the display edge, and the resting slide
+  continues from there; a map of the whole display sits in the corner chosen
   in Settings (`ZoomMap`, Bottom right by default, Off hides it) with the same
   protection as the zoom; drawings, selection adornments and effects use the
   same viewport in the same frame; text editing freezes the viewport; with
