@@ -45,15 +45,13 @@ public static class ZoomFollow
 
     /// <summary>
     /// How fast the zoomed part slides, in display points per second on each axis, for the pointer at
-    /// <paramref name="pointer"/>. It is zero away from the edges and off the display, and grows as the pointer goes deeper
-    /// into an edge zone.
+    /// <paramref name="pointer"/>. It is zero away from the edges and grows as the pointer goes deeper into an edge zone. A
+    /// pointer on another display counts as at the edge it crossed, so the zoomed part slides on until it reaches that edge.
     /// </summary>
     public static Point Velocity(Rect display, double factor, Point pointer)
     {
         if (!double.IsFinite(factor) || !(factor > MinimumSlidingFactor) || !(factor <= 16) || !pointer.IsFinite
-            || !display.IsValid || !(display.Width > 0) || !(display.Height > 0)
-            || !(pointer.X >= display.X) || !(pointer.X <= display.MaxX)
-            || !(pointer.Y >= display.Y) || !(pointer.Y <= display.MaxY))
+            || !display.IsValid || !(display.Width > 0) || !(display.Height > 0))
         {
             return new Point(0, 0);
         }
@@ -79,15 +77,13 @@ public static class ZoomFollow
     /// <summary>
     /// The zoomed part after the pointer moved by <paramref name="delta"/> display points to <paramref name="pointer"/>. The part
     /// of a move toward an edge that happens inside that edge's zone pushes the zoomed part along as fast as the pointer moves on
-    /// screen, also once the pointer stops at the display's edge.
+    /// screen, also once the pointer stops at the display's edge or goes on to another display.
     /// </summary>
     public static Viewport Push(Viewport viewport, Point pointer, Point delta)
     {
         Rect display = viewport.Output, source = viewport.Source;
         double factor = display.Width / source.Width;
-        if (!double.IsFinite(factor) || !(factor > MinimumSlidingFactor) || !pointer.IsFinite || !delta.IsFinite
-            || !(pointer.X >= display.X) || !(pointer.X <= display.MaxX)
-            || !(pointer.Y >= display.Y) || !(pointer.Y <= display.MaxY))
+        if (!double.IsFinite(factor) || !(factor > MinimumSlidingFactor) || !pointer.IsFinite || !delta.IsFinite)
         {
             return viewport;
         }
@@ -116,9 +112,10 @@ public static class ZoomFollow
         }
     }
 
-    private static double PushAxis(double start, double length, double value, double move, double factor)
+    private static double PushAxis(double start, double length, double position, double move, double factor)
     {
         double zone = EdgeZone(length);
+        double value = SwiftMath.Min(start + length, SwiftMath.Max(start, position));
         if (move > 0 && value > start + length - zone)
         {
             return SwiftMath.Min(move, value - (start + length - zone)) / factor;
@@ -130,9 +127,10 @@ public static class ZoomFollow
         return 0;
     }
 
-    private static double Axis(double start, double length, double value, double factor)
+    private static double Axis(double start, double length, double position, double factor)
     {
         double zone = EdgeZone(length);
+        double value = SwiftMath.Min(start + length, SwiftMath.Max(start, position));
         double low = SwiftMath.Min(1, SwiftMath.Max(0, (start + zone - value) / zone));
         double high = SwiftMath.Min(1, SwiftMath.Max(0, (value - (start + length - zone)) / zone));
         return (high * high - low * low) * length * 0.75 / Math.Sqrt(factor);

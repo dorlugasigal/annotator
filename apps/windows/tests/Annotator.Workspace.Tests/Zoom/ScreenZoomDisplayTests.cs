@@ -223,6 +223,24 @@ public sealed class ScreenZoomDisplayTests
     }
 
     [Fact]
+    public void ThePointerOnAnotherDisplayKeepsTheZoomSlidingToThatEdge()
+    {
+        var zoom = new ScreenZoomDisplay();
+        zoom.Apply(new PresentationSettings(PresentationMode.Screen, 2), null, false, true);
+        zoom.ScreenViewport(Display, new Point(640, 360), follows: true);
+        var away = new Point(-300, 360);
+        zoom.ScreenViewport(Display, away, follows: true);
+        Assert.True(zoom.NeedsFrames);
+        double now = 0;
+        for (int frame = 0; frame < 1000 && zoom.NeedsFrames; frame++)
+        {
+            now += 1.0 / 60;
+            zoom.Step(now);
+        }
+        Assert.Equal(0, zoom.ScreenViewport(Display, away, follows: true)!.Value.Source.X);
+    }
+
+    [Fact]
     public void ZoomHeldStillForTextDoesNotSlideAndContinuesFromThereAfter()
     {
         var zoom = new ScreenZoomDisplay();

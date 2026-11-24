@@ -32,14 +32,14 @@ public enum ZoomFollow {
     }
 
     /// How fast the zoomed part slides, in display points per second on each axis, for the pointer at `pointer`. It is
-    /// zero away from the edges and off the display, and grows as the pointer goes deeper into an edge zone.
+    /// zero away from the edges and grows as the pointer goes deeper into an edge zone. A pointer on another display
+    /// counts as at the edge it crossed, so the zoomed part slides on until it reaches that edge.
     public static func velocity(display: Rect, factor: Double, pointer: Point) -> Point {
         guard factor.isFinite, factor > minimumSlidingFactor, factor <= 16, pointer.isFinite,
-              display.isValid, display.width > 0, display.height > 0,
-              pointer.x >= display.x, pointer.x <= display.maxX,
-              pointer.y >= display.y, pointer.y <= display.maxY else { return Point(0, 0) }
-        func axis(_ start: Double, _ length: Double, _ value: Double) -> Double {
+              display.isValid, display.width > 0, display.height > 0 else { return Point(0, 0) }
+        func axis(_ start: Double, _ length: Double, _ position: Double) -> Double {
             let zone = edgeZone(length)
+            let value = min(start + length, max(start, position))
             let low = min(1, max(0, (start + zone - value) / zone))
             let high = min(1, max(0, (value - (start + length - zone)) / zone))
             return (high * high - low * low) * length * 0.75 / factor.squareRoot()
@@ -61,15 +61,14 @@ public enum ZoomFollow {
 
     /// The zoomed part after the pointer moved by `delta` display points to `pointer`. The part of a move toward an edge
     /// that happens inside that edge's zone pushes the zoomed part along as fast as the pointer moves on screen, also once
-    /// the pointer stops at the display's edge.
+    /// the pointer stops at the display's edge or goes on to another display.
     public static func push(_ viewport: Viewport, pointer: Point, delta: Point) throws -> Viewport {
         let display = viewport.output, source = viewport.source
         let factor = display.width / source.width
-        guard factor.isFinite, factor > minimumSlidingFactor, pointer.isFinite, delta.isFinite,
-              pointer.x >= display.x, pointer.x <= display.maxX,
-              pointer.y >= display.y, pointer.y <= display.maxY else { return viewport }
-        func axis(_ start: Double, _ length: Double, _ value: Double, _ move: Double) -> Double {
+        guard factor.isFinite, factor > minimumSlidingFactor, pointer.isFinite, delta.isFinite else { return viewport }
+        func axis(_ start: Double, _ length: Double, _ position: Double, _ move: Double) -> Double {
             let zone = edgeZone(length)
+            let value = min(start + length, max(start, position))
             if move > 0, value > start + length - zone { return min(move, value - (start + length - zone)) / factor }
             if move < 0, value < start + zone { return -min(-move, start + zone - value) / factor }
             return 0

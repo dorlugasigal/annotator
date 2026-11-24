@@ -76,7 +76,9 @@ import Testing
     var edge = start
     for _ in 0..<200 { edge = try ZoomFollow.slide(edge, pointer: Point(0, 0), elapsed: 0.1) }
     #expect(edge.source.origin == screen.origin && !ZoomFollow.slides(edge, pointer: Point(0, 0)))
-    #expect(ZoomFollow.velocity(display: screen, factor: 2, pointer: Point(-4, 491)) == Point(0, 0))
+    let away = ZoomFollow.velocity(display: screen, factor: 2, pointer: Point(-400, 491))
+    #expect(away.x < 0 && away.y == 0, "A pointer on another display keeps the zoom sliding toward that side.")
+    #expect(away == ZoomFollow.velocity(display: screen, factor: 2, pointer: Point(0, 491)))
 }
 
 @Test func zoomWhileDrawingKeepsThePointUnderThePointerWhenTheFactorChanges() throws {
