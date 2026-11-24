@@ -221,7 +221,43 @@
        "enabled": true,
        "frame": [
         368,
-        543,
+        524,
+        150.5,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Zoom follows the pointer"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        1015,
+        523.5,
+        38,
+        18
+       ],
+       "help": "On: the zoomed view moves with every pointer move, and clicks in Use apps land on what you see. Off: it holds still and slides when you near an edge.",
+       "identifier": "zoom-follows-pointer",
+       "role": "AXCheckBox",
+       "subrole": "AXSwitch",
+       "value": 0
+      },
+      {
+       "enabled": true,
+       "frame": [
+        368,
+        561.5,
+        654,
+        26
+       ],
+       "role": "AXStaticText",
+       "value": "When the zoomed view holds still, a click in Use apps lands where the pointer really is on the screen, which can differ from the zoomed picture. Draw is always accurate."
+      },
+      {
+       "enabled": true,
+       "frame": [
+        368,
+        627.5,
         76.5,
         16
        ],
@@ -232,7 +268,7 @@
        "enabled": true,
        "frame": [
         368,
-        579,
+        663.5,
         42,
         16
        ],
@@ -243,7 +279,7 @@
        "enabled": true,
        "frame": [
         959.5,
-        575,
+        659.5,
         92.5,
         24
        ],
@@ -255,7 +291,7 @@
        "enabled": true,
        "frame": [
         368,
-        617,
+        701.5,
         80,
         16
        ],
@@ -266,7 +302,7 @@
        "enabled": true,
        "frame": [
         1015,
-        616.5,
+        701,
         38,
         18
        ],
@@ -280,7 +316,7 @@
        "enabled": true,
        "frame": [
         368,
-        654.5,
+        739,
         122.5,
         16
        ],
@@ -291,7 +327,7 @@
        "enabled": true,
        "frame": [
         1015,
-        654,
+        738.5,
         38,
         18
        ],
@@ -304,7 +340,7 @@
        "enabled": true,
        "frame": [
         368,
-        692,
+        776.5,
         130,
         16
        ],
@@ -315,7 +351,7 @@
        "enabled": true,
        "frame": [
         963,
-        688.5,
+        773,
         89,
         24
        ],
@@ -327,7 +363,7 @@
        "enabled": true,
        "frame": [
         369.5,
-        732,
+        816.5,
         239,
         13
        ],
@@ -338,7 +374,7 @@
        "enabled": true,
        "frame": [
         368,
-        786.5,
+        871,
         53.5,
         16
        ],
@@ -349,7 +385,7 @@
        "enabled": false,
        "frame": [
         368,
-        822.5,
+        907,
         147,
         24
        ],
@@ -360,7 +396,7 @@
        "enabled": false,
        "frame": [
         368,
-        867.5,
+        952,
         195,
         16
        ],
@@ -371,7 +407,7 @@
        "enabled": false,
        "frame": [
         1015,
-        867,
+        951.5,
         38,
         18
        ],
@@ -383,7 +419,7 @@
        "enabled": true,
        "frame": [
         368,
-        906.5,
+        991,
         354.5,
         13
        ],
@@ -394,7 +430,7 @@
        "enabled": true,
        "frame": [
         345.5,
-        946,
+        1030.5,
         210,
         16
        ],
@@ -406,7 +442,7 @@
        "enabled": true,
        "frame": [
         368,
-        996,
+        1080.5,
         47,
         16
        ],
@@ -417,7 +453,7 @@
        "enabled": true,
        "frame": [
         368,
-        1033,
+        1117.5,
         120,
         16
        ],
@@ -428,7 +464,7 @@
        "enabled": true,
        "frame": [
         1015,
-        1032.5,
+        1117,
         38,
         18
        ],
@@ -440,7 +476,7 @@
        "enabled": true,
        "frame": [
         368,
-        1072,
+        1156.5,
         103.5,
         13
        ],
@@ -451,7 +487,7 @@
        "enabled": true,
        "frame": [
         345.5,
-        1111.5,
+        1196,
         128,
         16
        ],
@@ -463,7 +499,7 @@
        "enabled": true,
        "frame": [
         368,
-        1152.5,
+        1237,
         88,
         16
        ],
