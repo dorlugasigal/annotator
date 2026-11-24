@@ -614,9 +614,9 @@
       "sha256" : "95d2cc4d2ab6b3e0fc70dae2af978501f90e97c8e733a16bda3a028b8351e5ad"
     },
     {
-      "bytes" : 526330,
+      "bytes" : 527081,
       "path" : "geometry/viewports.jsonl",
-      "sha256" : "a017c06db2965c2731bd413f29b61ffb7f628c3587a8e3197b19392f82869b7f"
+      "sha256" : "158640168f42a5a307ab6d773d76fd9c728f4c6b3fe1d923b23380e704f4aa62"
     },
     {
       "bytes" : 237171,
@@ -1367,9 +1367,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "b2e06642f2e7471aefa9123498975e89dd29d96d",
+    "commit" : "36f19f61541b358f9b3f8ddd8f1222a9acbf63d9",
     "date" : "2026-11-24",
-    "fingerprint" : "45f04e25d9151ad5ee1866e020e9c682b33aa324aeba14da2c3492a94657747a",
+    "fingerprint" : "37dfa472967090cfe01290ba96b3082bf36f24e61d1d7cfb00b05af26138fe78",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",
