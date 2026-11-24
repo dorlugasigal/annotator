@@ -47,6 +47,7 @@ final class LiveZoomStartTests: XCTestCase {
             XCTAssertEqual(model.zoomStartState, .active)
             XCTAssertTrue(model.screenZoomEnabled)
             XCTAssertGreaterThan(model.magnification, 1)
+            XCTAssertEqual(model.mode, .draw)
             for drawing in [true, false] {
                 if drawing { model.beginDrawing() } else { model.interact() }
                 model.active?.panel.ignoresMouseEvents = true

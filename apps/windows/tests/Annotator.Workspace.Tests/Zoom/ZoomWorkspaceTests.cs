@@ -184,7 +184,7 @@ public sealed class ZoomWorkspaceTests
     private static PresentationSettings Presentation(WorkspaceModel model) => model.Document(Primary).Presentation;
 
     [Fact]
-    public void LiveZoomShortcutStartsAt150PercentInUseAppsAndTogglesOff()
+    public void LiveZoomShortcutStartsAt150PercentInDrawAndTogglesOff()
     {
         // Mac testControlOneStartsZoomFromOffDrawingAndUsingApps and testGrantedZoomRequestPresentsAdjustsStopsAndRestarts.
         foreach (WorkspaceMode start in new[] { WorkspaceMode.Off, WorkspaceMode.Draw, WorkspaceMode.UseApps })
@@ -204,7 +204,7 @@ public sealed class ZoomWorkspaceTests
             Assert.True(snapshot.ScreenZoomEnabled);
             Assert.Equal(1.5, snapshot.Magnification);
             Assert.Equal(new PresentationSettings(PresentationMode.Screen, 1.5), Presentation(model));
-            Assert.Equal(WorkspaceMode.UseApps, snapshot.Mode);
+            Assert.Equal(WorkspaceMode.Draw, snapshot.Mode);
             Assert.NotNull(snapshot.ZoomEntrance);
             Assert.Equal(Primary, snapshot.ZoomEntrance!.Display);
 
@@ -352,6 +352,22 @@ public sealed class ZoomWorkspaceTests
     }
 
     [Fact]
+    public void ZoomStartsOnTheDisplayUnderThePointer()
+    {
+        // Mac testZoomStartsOnTheDisplayUnderThePointer.
+        Point pointer = new(10, 10);
+        WorkspaceModel model = Create(pointer: () => pointer);
+        model.BeginDrawing();
+        model.UseApps();
+        pointer = new Point(-400, 400);
+        model.ToggleScreenZoomFromShortcut();
+        Assert.Equal(PresentationMode.Screen, model.Document(Left).Presentation.Mode);
+        Assert.Equal(PresentationMode.Off, Presentation(model).Mode);
+        Assert.Equal(Left, model.Snapshot.ZoomEntrance!.Display);
+        Assert.Equal(WorkspaceMode.Draw, model.Snapshot.Mode);
+    }
+
+    [Fact]
     public void AltScrollUpStartsZoomGraduallyFromOneAndScrollDownDoesNot()
     {
         WorkspaceModel model = Create();
@@ -363,7 +379,7 @@ public sealed class ZoomWorkspaceTests
         Assert.Equal(Math.Exp(8 * 0.012), model.Snapshot.Magnification, 9);
         // An Alt+scroll start applies its first scroll instead of ramping in.
         Assert.Null(model.Snapshot.ZoomEntrance);
-        Assert.Equal(WorkspaceMode.UseApps, model.Snapshot.Mode);
+        Assert.Equal(WorkspaceMode.Draw, model.Snapshot.Mode);
     }
 
     [Fact]

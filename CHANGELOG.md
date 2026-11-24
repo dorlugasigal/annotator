@@ -4,6 +4,11 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Fixed
+
+- Zoom now starts in Draw, so the zoomed view holds still while you move the pointer, as 0.4.0 meant it to. Before, zoom switched to Use apps, where the view follows every move. Choose Apps on the toolbar to click your apps while zoomed.
+- With more than one display, zoom now starts on the display under the pointer. Before, it could start on the display you drew on last.
+
 ## 0.4.0 - 2026-11-24
 
 ### Added

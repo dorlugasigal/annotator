@@ -120,6 +120,26 @@ final class LocalZoomScrollTests: XCTestCase {
         XCTAssertEqual(session.canvas.documentPoint(local), local)
     }
 
+    func testZoomStartsInDrawOnTheDisplayUnderThePointer() throws {
+        try XCTSkipUnless(DisplayCapture.hasPermission, "Starting zoom needs Screen Recording.")
+        try XCTSkipUnless(NSScreen.screens.count > 1, "Needs two displays.")
+        let suite = "zoom-display-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let model = WorkspaceModel(defaults: defaults)
+        defer { model.stopZoom(); model.closeAll(); defaults.removePersistentDomain(forName: suite) }
+        model.beginDrawing()
+        model.interact()
+        let first = try XCTUnwrap(model.active)
+        let other = try XCTUnwrap(model.desktopSessions.first { $0 !== first })
+        for session in model.desktopSessions { session.presentation?.suspend() }
+        model.screenPointer = { CGPoint(x: other.panel.frame.midX, y: other.panel.frame.midY) }
+        model.toggleScreenZoom()
+        XCTAssertTrue(model.active === other, "Zoom starts on the display under the pointer.")
+        XCTAssertEqual(other.document.presentation.mode, .screen)
+        XCTAssertEqual(first.document.presentation.mode, .off)
+        XCTAssertEqual(model.mode, .draw, "Zoom starts in Draw, where the view holds still.")
+    }
+
     func testContinuousZeroPointScrollDoesNotBecomeAWheelNotch() throws {
         let event = try XCTUnwrap(try scroll(1).cgEvent)
         event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)

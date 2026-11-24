@@ -90,8 +90,9 @@ platform that departs from the specifications, unless an ADR changes them.
 
 1. A presenter shares the entire screen in Teams, draws on PowerPoint, edits
    the drawing, returns to PowerPoint with Use apps and never loses input.
-2. Ctrl+1 zooms around the pointer; clicks reach the control under the pointer
-   and meeting viewers see the zoom.
+2. Ctrl+1 zooms in on the display under the pointer and starts Draw; with Use
+   apps, zoom follows the pointer, clicks reach the control under it, and
+   meeting viewers see the zoom.
 3. A board saved on a Mac opens on Windows with the same objects, styles,
    labels and positions, and opens again on the Mac after a Windows save.
 4. A Blur region hides part of the live screen from viewers. Any capture
@@ -348,7 +349,8 @@ platform that departs from the specifications, unless an ADR changes them.
   opens that page. The yellow capture
   border must never appear. Spike S-1 confirms a border-free path; if borderless
   capture needs consent, Annotator asks only when a pixel feature starts.
-- **WIN-CAP-05**: Zoom matches 003 and 009: Ctrl+1 starts at 1.5x; Alt+scroll
+- **WIN-CAP-05**: Zoom matches 003 and 009: Ctrl+1 starts at 1.5x, in Draw, on
+  the display under the pointer; Alt+scroll
   changes 1x-16x; ramps take 260 ms in and 200 ms out with the shared curves;
   in Use apps the viewport origin is `p x (1 - 1/z)` so the pointer stays on
   the same source point and clicks reach what it shows; in Draw the viewport
