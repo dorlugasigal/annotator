@@ -88,7 +88,7 @@ internal static class Codecs
         "lastCoverMode", "toolbarTools", "showMenuBarIcon", "cursorStyle", "quickPreferencesExpanded", "inspectorPinned",
         "animateVisibility", "visibilityAnimationStyle", "theme", "showShortcutHints", "cursorHighlight",
         "commandShortcuts", "toolbarSize", "shareToolStyles", "toolbarItems", "breakTimer", "breakShortcut",
-        "hiddenToolbarControls", "toolbarCollapseDelay", "expandedPropertyChoices", "laserFade", "glass", "zoomMap");
+        "hiddenToolbarControls", "toolbarCollapseDelay", "expandedPropertyChoices", "laserFade", "glass", "zoomMap", "zoomFollowsPointer");
     private static readonly JsonKeys BreakTimerKeys = new(
         "minutes", "title", "background", "palette", "showEndTime", "chime", "countOver", "allDisplays", "lockWhenTouched");
 
@@ -787,6 +787,7 @@ internal static class Codecs
                 case 32: preferences.LaserFade = isNull ? null : state.Read(ref reader, key, count, Json.ReadDouble); break;
                 case 33: preferences.Glass = isNull ? null : state.Read(ref reader, key, count, Json.ReadBool); break;
                 case 34: preferences.ZoomMap = isNull ? null : state.Read(ref reader, key, count, ReadZoomMap); break;
+                case 35: preferences.ZoomFollowsPointer = isNull ? null : state.Read(ref reader, key, count, Json.ReadBool); break;
             }
         }
         state.Finish(PreferenceKeys, 0b111_0111);
@@ -880,6 +881,7 @@ internal static class Codecs
         {
             writer.WriteString("visibilityAnimationStyle"u8, animationStyle.RawValue);
         }
+        WriteOptional(writer, "zoomFollowsPointer"u8, value.ZoomFollowsPointer);
         if (value.ZoomMap is { } zoomMap)
         {
             writer.WriteString("zoomMap"u8, zoomMap.RawValue);

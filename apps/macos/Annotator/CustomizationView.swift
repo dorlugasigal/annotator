@@ -100,6 +100,12 @@ struct CustomizationView: View {
                 }
                 .accessibilityIdentifier("zoom-map")
                 .help("While you zoom in, a small map shows the whole screen and the part you see.")
+                Toggle("Zoom follows the pointer", isOn: Binding(
+                    get: { model.preferences.zoomFollowsPointer == true }, set: { model.setZoomFollowsPointer($0) }))
+                    .accessibilityIdentifier("zoom-follows-pointer")
+                    .help("On: the zoomed view moves with every pointer move, and clicks in Use apps land on what you see. Off: it holds still and slides when you near an edge.")
+                Text("When the zoomed view holds still, a click in Use apps lands where the pointer really is on the screen, which can differ from the zoomed picture. Draw is always accurate.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
             Section("Appearance") {
                 Picker("Theme", selection: Binding(

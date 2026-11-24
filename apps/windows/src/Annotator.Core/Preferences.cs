@@ -247,6 +247,10 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
     /// <summary>Where screen zoom shows its map of the whole display. <c>null</c> means <see cref="ZoomMapPosition.BottomRight"/>.</summary>
     public ZoomMapPosition? ZoomMap;
 
+    /// <summary><c>true</c> moves screen zoom with every pointer move. <c>null</c> or <c>false</c> holds it still until the pointer
+    /// nears an edge.</summary>
+    public bool? ZoomFollowsPointer;
+
     private const int MaximumBytes = 256 * 1_024;
 
     public WorkspacePreferences()
@@ -503,7 +507,8 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         && ShareToolStyles == other.ShareToolStyles && ToolbarItems == other.ToolbarItems
         && BreakTimer == other.BreakTimer && BreakShortcut == other.BreakShortcut
         && HiddenToolbarControls == other.HiddenToolbarControls && ToolbarCollapseDelay == other.ToolbarCollapseDelay
-        && ExpandedPropertyChoices == other.ExpandedPropertyChoices && Glass == other.Glass && ZoomMap == other.ZoomMap;
+        && ExpandedPropertyChoices == other.ExpandedPropertyChoices && Glass == other.Glass && ZoomMap == other.ZoomMap
+        && ZoomFollowsPointer == other.ZoomFollowsPointer;
 
     public override readonly bool Equals(object? obj) => obj is WorkspacePreferences other && Equals(other);
 

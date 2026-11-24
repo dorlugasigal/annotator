@@ -816,6 +816,17 @@ final class WorkspaceModel: ObservableObject {
         persistPreferences()
     }
 
+    func setZoomFollowsPointer(_ on: Bool) {
+        if let owner = globalSettingsOwner {
+            owner.setZoomFollowsPointer(on)
+            preferences.zoomFollowsPointer = owner.preferences.zoomFollowsPointer
+            return
+        }
+        preferences.zoomFollowsPointer = on ? true : nil
+        persistPreferences()
+        refreshCanvas()
+    }
+
     func setZoomMap(_ position: ZoomMapPosition) {
         if let owner = globalSettingsOwner {
             owner.setZoomMap(position)
@@ -1845,6 +1856,7 @@ final class WorkspaceModel: ObservableObject {
         pendingScreenZoomScale = nil
         pendingScreenZoomScrollDelta = nil
         if initialScroll == nil && scale <= 1 { scale = 2 }
+        activateDisplayUnderPointer()
         if initialScroll == nil && animatesScreenZoom() { screenZoomEntrance = active?.presentation?.displayedScreenZoomFactor ?? 1 }
         let started = setZoomMode(.screen, scale: scale)
         screenZoomEntrance = nil
@@ -1852,7 +1864,8 @@ final class WorkspaceModel: ObservableObject {
             zoomStart.fail(errorMessage ?? "A drawing display could not be prepared. Show the toolbar and retry live zoom.")
             return
         }
-        interact()
+        // Zoom starts in Draw, so a click can't land on an app the zoomed view doesn't show under the pointer.
+        beginDrawing(recordsUsage: false)
         prepareZoomScrollAccess()
         if let initialScroll { scrollScreenZoom(initialScroll) }
     }
@@ -1915,6 +1928,14 @@ final class WorkspaceModel: ObservableObject {
     }
 
     @discardableResult
+    /// Zoom starts on the display under the pointer, not on the one used last.
+    private func activateDisplayUnderPointer() {
+        let pointer = screenPointer()
+        guard let session = desktopSessions.first(where: { $0.panel.frame.contains(pointer) }), session !== active else { return }
+        switchActiveSession(to: session)
+        synchronize()
+    }
+
     private func setZoomMode(_ mode: PresentationSettings.Mode, scale: Double? = nil) -> Bool {
         let scale = scale ?? magnification
         guard scale.isFinite, (1...16).contains(scale) else {

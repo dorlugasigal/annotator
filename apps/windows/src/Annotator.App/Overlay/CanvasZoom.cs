@@ -53,7 +53,7 @@ internal sealed class CanvasZoom : IDisposable
     private bool _pointerKnown;
     private bool _editingText;
 
-    /// <summary>The workspace is in Draw mode, so the zoomed part holds still and slides near the edges.</summary>
+    /// <summary>Zoom follows the pointer is off, so the zoomed part holds still and slides near the edges.</summary>
     private bool _follows;
     private ZoomMapPosition _mapPosition = ZoomMapPosition.BottomRight;
     private Viewport? _view;
@@ -131,7 +131,7 @@ internal sealed class CanvasZoom : IDisposable
             _shown.SetMagnification(settings.Zoom);
         }
         _hidden = workspace.WorkspaceHidden;
-        _follows = workspace.Mode == WorkspaceMode.Draw;
+        _follows = workspace.Preferences.ZoomFollowsPointer != true;
         _mapPosition = workspace.Preferences.ZoomMap ?? ZoomMapPosition.BottomRight;
         _editingText = editingText;
         if (elements != _elements)
@@ -239,11 +239,8 @@ internal sealed class CanvasZoom : IDisposable
         return _shown.NeedsFrames;
     }
 
-    /// <summary>
-    /// A point of the overlay (display points) as the document has it: through a viewport frozen for text or held still
-    /// while drawing, else as is (a viewport anchored at the pointer keeps the point under it).
-    /// </summary>
-    public Point SourcePoint(Point output) => _view is { } view && (_shown.IsFrozen || _follows) ? view.SourcePoint(output) : output;
+    /// <summary>A point of the overlay (display points) as the document has it: the part of the zoomed picture under it.</summary>
+    public Point SourcePoint(Point output) => _view is { } view ? view.SourcePoint(output) : output;
 
     public void Dispose()
     {

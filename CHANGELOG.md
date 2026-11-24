@@ -4,6 +4,19 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- Settings > General > Zoom follows the pointer moves the zoomed view with every pointer move, as before 0.4.0. It's off by default.
+
+### Changed
+
+- The zoomed view now holds still in Draw and Use apps alike. When the pointer reaches an edge, the view moves as fast as you move the pointer, and keeps sliding while the pointer rests there.
+- Zoom starts in Draw, so clicks can't land on an app the zoomed view doesn't show under the pointer. Choose Apps to click your apps while zoomed.
+
+### Fixed
+
+- With more than one display, zoom starts on the display under the pointer. Before, it could start on the display you drew on last.
+
 ## 0.4.0 - 2026-11-24
 
 ### Added

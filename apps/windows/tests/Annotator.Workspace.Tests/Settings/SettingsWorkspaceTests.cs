@@ -61,6 +61,19 @@ public sealed class SettingsWorkspaceTests
     }
 
     [Fact]
+    public void ZoomFollowsThePointerIsOffUntilTurnedOn()
+    {
+        var store = new MemoryPreferencesStore();
+        WorkspaceModel model = Create(store: store);
+        Assert.Null(model.Snapshot.Preferences.ZoomFollowsPointer);
+        model.SetZoomFollowsPointer(true);
+        Assert.True(WorkspacePreferences.Read(store.Data!).ZoomFollowsPointer);
+        model.SetZoomFollowsPointer(false);
+        Assert.Null(model.Snapshot.Preferences.ZoomFollowsPointer);
+        Assert.DoesNotContain("\"zoomFollowsPointer\"", System.Text.Encoding.UTF8.GetString(store.Data!), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ZoomMapIsBottomRightUntilAnotherCornerIsChosen()
     {
         var store = new MemoryPreferencesStore();

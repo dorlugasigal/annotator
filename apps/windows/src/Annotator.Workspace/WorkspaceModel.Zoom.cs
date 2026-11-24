@@ -374,8 +374,9 @@ public sealed partial class WorkspaceModel
     }
 
     /// <summary>
-    /// Mac beginScreenZoom: shows hidden drawings and tools, starts zoom (from what the display shows, or 1x, with motion, unless
-    /// an Alt+scroll starts it), gives clicks to the apps and applies the first scroll.
+    /// Mac beginScreenZoom: shows hidden drawings and tools, starts zoom on the display under the pointer (from what the display
+    /// shows, or 1x, with motion, unless an Alt+scroll starts it), in Draw, where the zoomed view holds still, and applies the
+    /// first scroll.
     /// </summary>
     private void BeginScreenZoom()
     {
@@ -391,6 +392,7 @@ public sealed partial class WorkspaceModel
         {
             scale = 2;
         }
+        ActivateDisplayUnderPointer();
         _enterScreenZoom = initialScroll is null && !_reducesMotion();
         bool started = SetZoomMode(PresentationMode.Screen, scale);
         _enterScreenZoom = false;
@@ -399,11 +401,28 @@ public sealed partial class WorkspaceModel
             ZoomStart.Fail(_errorMessage ?? ZoomDisplayUnavailable);
             return;
         }
-        UseApps();
+        // Zoom starts in Draw, so a click can't land on an app the zoomed view doesn't show under the pointer.
+        BeginDrawing(recordsUsage: false);
         if (initialScroll is { } delta)
         {
             ScrollScreenZoom(delta);
         }
+    }
+
+    /// <summary>Mac activateDisplayUnderPointer: zoom starts on the display under the pointer, not on the one used last.</summary>
+    private void ActivateDisplayUnderPointer()
+    {
+        if (_pointer() is not { } pointer)
+        {
+            return;
+        }
+        Canvas? session = _canvases.Values.FirstOrDefault(canvas => canvas.Display.ContainsDesktopPoint(pointer));
+        if (session is null || session == _active)
+        {
+            return;
+        }
+        SwitchActiveSession(session, clearsSelection: true);
+        Synchronize();
     }
 
     /// <summary>Mac setZoomMode: the editing target's presentation becomes <paramref name="mode"/>, as one Undo step.</summary>

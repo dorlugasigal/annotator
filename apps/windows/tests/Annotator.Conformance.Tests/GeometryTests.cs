@@ -243,6 +243,14 @@ public class GeometryTests
                 result = Outcome.Of(() => Viewport(ZoomFollow.Viewport(previous, display, NumberOf(record["factor"]), Shapes.Point(record["pointer"]))));
                 break;
             }
+            case "zoomFollowPush":
+            {
+                var pushPointer = Shapes.Point(record["pointer"]);
+                var delta = new Point(NumberOf(record["delta"]![0]), NumberOf(record["delta"]![1]));
+                result = Outcome.Of(() => Viewport(ZoomFollow.Push(ZoomFollow.Viewport(null, display, NumberOf(record["factor"]), display.Center),
+                                                                   pushPointer, delta)));
+                break;
+            }
             case "zoomFollowVelocity":
                 Same(caseName, record, new JsonObject
                 {

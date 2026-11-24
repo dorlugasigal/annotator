@@ -31,6 +31,11 @@ public static class SettingsCopy
     public const string Zoom = "Zoom";
     public const string ZoomMap = "Zoom map";
     public const string ZoomMapHelp = "While you zoom in, a small map shows the whole screen and the part you see.";
+    public const string ZoomFollowsPointer = "Zoom follows the pointer";
+    public const string ZoomFollowsPointerHelp =
+        "On: the zoomed view moves with every pointer move, and clicks in Use apps land on what you see. Off: it holds still and slides when you near an edge.";
+    public const string ZoomFollowsPointerDetail =
+        "When the zoomed view holds still, a click in Use apps lands where the pointer really is on the screen, which can differ from the zoomed picture. Draw is always accurate.";
 
     // General: Appearance.
     public const string Appearance = "Appearance";

@@ -26,6 +26,9 @@ public sealed class ScreenZoomDisplay
     private bool _sliding;
     private Size _slideSize;
     private Point _slidePointer;
+
+    /// <summary>The pointer at the last viewport, so a move toward an edge pushes the zoomed part (Mac pushZoom).</summary>
+    private Point? _lastPointer;
     private double? _lastSlide;
 
     /// <summary>Raised when an exit ramp lands at 1x and zoom turns off, or when an exit is interrupted (Mac screenZoomExitFinished).</summary>
@@ -225,6 +228,13 @@ public sealed class ScreenZoomDisplay
         Viewport viewport = follows
             ? ZoomFollow.Viewport(_followed, display, _magnification, pointer)
             : Viewport.CursorAnchored(display, _magnification, pointer);
+        // Windows reads the move from pointer positions, so the push stops where the pointer stops at the display's edge;
+        // resting there keeps the zoomed part sliding.
+        if (follows && _lastPointer is { } last && last != pointer)
+        {
+            viewport = ZoomFollow.Push(viewport, pointer, new Point(pointer.X - last.X, pointer.Y - last.Y));
+        }
+        _lastPointer = pointer;
         _followed = viewport.Source;
         // Mac updateSliding: the pointer near an edge keeps the zoomed part sliding without moves.
         if (follows && ZoomFollow.Slides(viewport, pointer))
@@ -248,6 +258,8 @@ public sealed class ScreenZoomDisplay
     public Viewport? FreezeViewportForText(Size size, Point pointer, bool follows = false)
     {
         _frozen = null;
+        // Freezing holds what is shown; it is not a pointer move, so it pushes nothing (Mac freezeViewportForText).
+        _lastPointer = pointer;
         _frozen = ScreenViewport(size, pointer, follows);
         if (_frozen is not null)
         {
@@ -270,6 +282,7 @@ public sealed class ScreenZoomDisplay
     public void StopFollowing()
     {
         _followed = null;
+        _lastPointer = null;
         StopSliding();
     }
 

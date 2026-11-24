@@ -134,6 +134,13 @@ extension GeometryExport {
                                             viewport(try ZoomFollow.viewport(previous: before, display: display, factor: factor, pointer: pointer))
                                         }])
                     }
+                    for delta in [Point(12, 0), Point(-12, -7), Point(0, 30), Point(.nan, 0)] {
+                        records.append(["call": "zoomFollowPush", "display": display.json, "factor": .double(factor), "pointer": pointer.json,
+                                        "delta": delta.json, "result": outcome {
+                                            let start = try ZoomFollow.viewport(previous: nil, display: display, factor: factor, pointer: display.center)
+                                            return viewport(try ZoomFollow.push(start, pointer: pointer, delta: delta))
+                                        }])
+                    }
                     records.append(["call": "zoomFollowVelocity", "display": display.json, "factor": .double(factor), "pointer": pointer.json,
                                     "result": ZoomFollow.velocity(display: display, factor: factor, pointer: pointer).json])
                     for elapsed in [0, 1.0 / 60, 0.5, -1, .nan] {
