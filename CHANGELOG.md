@@ -4,6 +4,8 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-24
+
 ### Added
 
 - While you zoom in, a small map in the corner shows the whole screen and the part you see. Choose its corner, or turn it off, in Settings > General > Zoom map.
@@ -12,6 +14,18 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 - While you draw, zoom holds still as you move the pointer. To see more, move the pointer to an edge of the screen and the view slides that way. With Use apps on, zoom still follows the pointer, so clicks land where you see them.
 - The toolbar no longer flashes a Cancel button for a moment when zoom starts.
+
+### Known limits
+
+- Effects don't follow windows that move or content that scrolls, and blur is not secure redaction. Remove private details before you share.
+- Anything inside a shared region can show up in your meeting, including notifications.
+- Choosing a different area or changing your displays turns region sharing off. Check the outline before you start it again.
+- In the Shared Region window, the spotlight turns on and off at once instead of fading.
+- Some meeting apps may not show the toolbar in a shared window. Check before you rely on it.
+- With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.
+- On Windows, the toolbar changes size at once when it shrinks to one button, opens again or grows for its properties. On a Mac, it animates.
+- On Windows, with Glass toolbar on, the glass loses its blur while the toolbar hides and shows. The blur comes back when the toolbar lands.
+- On Windows, the zoom map's picture looks a little rougher than on a Mac.
 
 ## 0.3.2 - 2026-11-02
 
