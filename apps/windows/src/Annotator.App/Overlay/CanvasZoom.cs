@@ -16,11 +16,12 @@ namespace Annotator.App.Overlay;
 /// <summary>
 /// One display's live zoom on the overlay thread, the Windows form of the Mac's LivePresentation screen view and lens
 /// (WIN-CAP-05, WIN-CAP-06). It follows the document's presentation with <see cref="ScreenZoomDisplay"/> (the 260 ms
-/// entrance and 200 ms exit ramps), shows the zoomed screen from the capture service under the drawings, and anchors the
-/// viewport at the pointer, so the point under the pointer stays where it is. <see cref="View"/> is the viewport that the
-/// canvas's drawings, selection, effect layer and caret use in the same composition frame. The lens is its own window
-/// above the canvas. Nothing runs while nothing moves: ramps take frames from the factory's clock, and the pointer is
-/// followed only while zoom or the lens shows.
+/// entrance and 200 ms exit ramps) and shows the zoomed screen from the capture service under the drawings. While drawing,
+/// the zoomed part holds still and slides while the pointer is near an edge; using apps anchors it at the pointer, so the
+/// point under the pointer stays where it is. Screen zoom's map of the whole display sits in a corner above the canvas.
+/// <see cref="View"/> is the viewport that the canvas's drawings, selection, effect layer and caret use in the same
+/// composition frame. The lens is its own window above the canvas. Nothing runs while nothing moves: ramps and slides take
+/// frames from the factory's clock, and the pointer is followed only while zoom or the lens shows.
 /// </summary>
 internal sealed class CanvasZoom : IDisposable
 {
@@ -36,6 +37,7 @@ internal sealed class CanvasZoom : IDisposable
     private readonly int _pixelWidth;
     private readonly int _pixelHeight;
     private CapturedViewPresenter? _screen;
+    private ZoomMapLayer? _map;
     private LensWindow? _lensWindow;
     private CapturedViewPresenter? _lens;
     private ElementList _elements;
@@ -50,6 +52,10 @@ internal sealed class CanvasZoom : IDisposable
     private Point _pointer;
     private bool _pointerKnown;
     private bool _editingText;
+
+    /// <summary>The workspace is in Draw mode, so the zoomed part holds still and slides near the edges.</summary>
+    private bool _follows;
+    private ZoomMapPosition _mapPosition = ZoomMapPosition.BottomRight;
     private Viewport? _view;
     private bool _screenShown;
     private bool _screenPresented;
@@ -88,7 +94,7 @@ internal sealed class CanvasZoom : IDisposable
     /// <summary>Whether the pointer must be followed: screen zoom or the lens shows on this display.</summary>
     public bool TracksPointer => _screenShown || _lensShown;
 
-    /// <summary>A ramp is moving: <see cref="Step"/> wants every composition frame.</summary>
+    /// <summary>A ramp or a slide is moving: <see cref="Step"/> wants every composition frame.</summary>
     public bool NeedsFrames => _shown.NeedsFrames;
 
     /// <summary>
@@ -125,6 +131,8 @@ internal sealed class CanvasZoom : IDisposable
             _shown.SetMagnification(settings.Zoom);
         }
         _hidden = workspace.WorkspaceHidden;
+        _follows = workspace.Mode == WorkspaceMode.Draw;
+        _mapPosition = workspace.Preferences.ZoomMap ?? ZoomMapPosition.BottomRight;
         _editingText = editingText;
         if (elements != _elements)
         {
@@ -218,21 +226,24 @@ internal sealed class CanvasZoom : IDisposable
     /// <summary>Development only (measurements): the zoomed screen's frames drawn and not drawn, while it exists.</summary>
     public EffectsStatistics? ScreenStatistics => _screen?.Statistics;
 
-    /// <summary>Moves a ramp to <paramref name="now"/> seconds; false once nothing moves.</summary>
+    /// <summary>Moves a ramp or a slide to <paramref name="now"/> seconds; false once nothing moves.</summary>
     public bool Step(double now)
     {
         if (_disposed)
         {
             return false;
         }
-        bool moving = _shown.Step(now, stop: _hidden);
+        _shown.Step(now, stop: _hidden);
         _statistics.RampFrames++;
         Refresh();
-        return moving;
+        return _shown.NeedsFrames;
     }
 
-    /// <summary>A point of the overlay (display points) as the document has it: through a viewport frozen for text, else as is.</summary>
-    public Point SourcePoint(Point output) => _view is { } view && _shown.IsFrozen ? view.SourcePoint(output) : output;
+    /// <summary>
+    /// A point of the overlay (display points) as the document has it: through a viewport frozen for text or held still
+    /// while drawing, else as is (a viewport anchored at the pointer keeps the point under it).
+    /// </summary>
+    public Point SourcePoint(Point output) => _view is { } view && (_shown.IsFrozen || _follows) ? view.SourcePoint(output) : output;
 
     public void Dispose()
     {
@@ -243,6 +254,7 @@ internal sealed class CanvasZoom : IDisposable
         _disposed = true;
         _shown.ExitFinished -= OnExitFinished;
         CloseLens();
+        CloseMap();
         if (_screen is not null)
         {
             _screen.Changed -= OnScreenChanged;
@@ -250,6 +262,7 @@ internal sealed class CanvasZoom : IDisposable
             _screen = null;
         }
         _factory.DisplayedZoom?.Set(_display, null);
+        _factory.DisplayedZoom?.SetSource(_display, null);
     }
 
     /// <summary>Mac screenZoomIsVisible: a zoomed frame is on screen.</summary>
@@ -297,17 +310,22 @@ internal sealed class CanvasZoom : IDisposable
         {
             if (_editingText && !_shown.IsFrozen)
             {
-                _shown.FreezeViewportForText(_size, _pointer);
+                _shown.FreezeViewportForText(_size, _pointer, _follows);
             }
             else if (!_editingText && _shown.IsFrozen)
             {
                 _shown.ReleaseTextViewport();
             }
-            view = _shown.ScreenViewport(_size, _pointer);
+            view = _shown.ScreenViewport(_size, _pointer, _follows);
         }
-        else if (_shown.IsFrozen)
+        else
         {
-            _shown.ReleaseTextViewport();
+            if (_shown.IsFrozen)
+            {
+                _shown.ReleaseTextViewport();
+            }
+            // Mac clearScreenZoom: the next zoom starts at the pointer.
+            _shown.StopFollowing();
         }
         if (view is { } shownView && EnsureScreen() is { } presenter)
         {
@@ -337,7 +355,59 @@ internal sealed class CanvasZoom : IDisposable
         if (view != _view)
         {
             _view = view;
+            _factory.DisplayedZoom?.SetSource(_display, view?.Source);
             _viewChanged();
+        }
+        RefreshMap();
+    }
+
+    /// <summary>
+    /// Mac renderZoomMap: while screen zoom shows a zoomed frame, the map of the whole display in the chosen corner, with the
+    /// zoomed screen's protection and the zoomed part outlined.
+    /// </summary>
+    private void RefreshMap()
+    {
+        if (_view is not { } view || !_screenShown || !_screenPresented
+            || ZoomMap.Frame(new Rect(0, 0, _size.Width, _size.Height), _mapPosition) is not { } frame
+            || _screenEffects is not { } effects || _factory.Capture is not { } capture)
+        {
+            CloseMap();
+            return;
+        }
+        try
+        {
+            if (_map is null)
+            {
+                _map = new ZoomMapLayer(_context.Compositor, _content, capture, _context.Overlay.Display, _scale, frame);
+                _map.Failed += OnMapFailed;
+            }
+            bool hovered = _pointer.X >= frame.X && _pointer.Y >= frame.Y && _pointer.X < frame.MaxX && _pointer.Y < frame.MaxY;
+            _map.Show(effects, Crop(new Rect(0, 0, _size.Width, _size.Height)), frame, ZoomMap.ZoomedArea(view, frame), hovered);
+        }
+        catch (Exception error) when (error is NativeCallException or InvalidOperationException or ArgumentException)
+        {
+            CloseMap();
+            Fail(PresentationMode.Screen, ZoomMessages.Drawing(PresentationMode.Screen), error.ToString());
+        }
+    }
+
+    /// <summary>The map goes with screen zoom, so the next zoom's map fades in again (Mac clearZoomMap).</summary>
+    private void CloseMap()
+    {
+        if (_map is null)
+        {
+            return;
+        }
+        _map.Failed -= OnMapFailed;
+        _map.Dispose();
+        _map = null;
+    }
+
+    private void OnMapFailed()
+    {
+        if (!_disposed && _map is { } map && _screenShown)
+        {
+            Fail(PresentationMode.Screen, ZoomMessages.Failure(PresentationMode.Screen, map.Picture), map.Picture.Failure?.ToString());
         }
     }
 
@@ -553,6 +623,7 @@ internal sealed class CanvasZoom : IDisposable
             // Mac onPresented: the cover goes, an entrance that waited for the first zoomed frame starts, and the start is done.
             _screenPresented = true;
             _shown.FirstFramePresented();
+            RefreshMap();
             _factory.Report(new OverlayEvent.ZoomPresented(_display));
             if (_shown.NeedsFrames)
             {

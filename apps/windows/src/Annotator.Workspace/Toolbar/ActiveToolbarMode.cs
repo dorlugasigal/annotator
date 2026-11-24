@@ -132,9 +132,9 @@ public static class ActiveToolbarModes
 }
 
 /// <summary>
-/// Mac <c>PendingZoomPresentation</c>: the orange Cancel control while a zoom request waits or starts. A packaged build waits
-/// for screen access while Windows has not asked yet (WIN-CAP-04); hooks need no permission (WIN-INP-08), so the gesture
-/// phase keeps the Mac's words but never occurs.
+/// Mac <c>PendingZoomPresentation</c>: the orange Cancel control while a zoom request waits for a permission. Starting takes
+/// a moment, so it shows no Cancel control. A packaged build waits for screen access while Windows has not asked yet
+/// (WIN-CAP-04); hooks need no permission (WIN-INP-08), so the gesture phase keeps the Mac's words but never occurs.
 /// </summary>
 public sealed record PendingZoomPresentation(string Phase, string Detail)
 {
@@ -144,7 +144,6 @@ public sealed record PendingZoomPresentation(string Phase, string Detail)
     {
         ZoomStartPhase.ScreenPermission => new("Waiting", Capture.ScreenAccessText.ZoomWaitingDetail),
         ZoomStartPhase.GesturePermission => new("Waiting", "Waiting for Accessibility permission"),
-        ZoomStartPhase.Starting => new("Starting", "Starting live screen zoom"),
         _ => null,
     };
 }

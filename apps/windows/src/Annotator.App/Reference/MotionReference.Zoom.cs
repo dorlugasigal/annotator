@@ -1,14 +1,17 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Annotator.Core;
 using Annotator.Workspace;
 using Annotator.Workspace.Zoom;
 using CorePoint = Annotator.Core.Point;
+using CoreRect = Annotator.Core.Rect;
 
 namespace Annotator.App.Reference;
 
 /// <summary>
-/// The <c>zoom-screen</c> and <c>zoom-lens</c> takes (UXLiveRecordingTests.recordZoom) and the scripted pointer that the
-/// live takes share. The pointer moves as the Mac recorder's does: <see cref="DemoHandMotion"/> with the recorder's seed,
+/// The <c>zoom-screen</c> and <c>zoom-lens</c> takes (UXLiveRecordingTests.recordZoom), the Windows-only <c>zoom-map</c>
+/// evidence take, and the scripted pointer that the live takes share. The pointer moves as the Mac recorder's does:
+/// <see cref="DemoHandMotion"/> with the recorder's seed,
 /// the same travels in the same order and a move every 16 ms. Zoom and the lens follow it as they follow the mouse hook, and
 /// the take writes its path, so the recorder can draw the pointer where the Mac's pointer window showed it.
 /// </summary>
@@ -63,6 +66,51 @@ internal sealed partial class MotionReferenceHost
             await UntilZoomAsync(model, ramp => !ramp.Ramping && !ramp.Exiting, "Screen zoom did not ramp out within 6 seconds.");
         });
         await WaitAsync(0.8);
+    }
+
+    /// <summary>A Windows-only visual take of the map corners, its hover and protection, and screen zoom edge sliding.</summary>
+    private async Task PlayZoomMapAsync()
+    {
+        WorkspaceModel model = _model!;
+        double width = _display.Width / _scale, height = _display.Height / _scale;
+        ZoomMapPosition position = _request.ZoomMap ?? ZoomMapPosition.BottomRight;
+        CoreRect map = ZoomMap.Frame(new CoreRect(0, 0, width, height), position)
+            ?? throw new InvalidOperationException("The selected zoom map does not fit the stage.");
+
+        await EffectSegmentAsync("zoom in", async () =>
+        {
+            model.ToggleScreenZoomFromShortcut();
+            await UntilZoomAsync(model, ramp => model.Snapshot.ZoomStart.Phase == ZoomStartPhase.Active && !ramp.Ramping,
+                "Screen zoom did not become active within 6 seconds.");
+        });
+        await WaitAsync(0.3);
+        await EffectSegmentAsync("map hover", async () =>
+        {
+            await TravelAsync(new CorePoint(map.X + map.Width / 2, map.Y + map.Height / 2), 0.7);
+            await WaitAsync(0.35);
+        });
+
+        foreach (var (label, point) in new[]
+        {
+            ("edge slide right", new CorePoint(width - 1, height / 2)),
+            ("edge slide bottom", new CorePoint(width / 2, height - 1)),
+            ("edge slide left", new CorePoint(1, height / 2)),
+            ("edge slide top", new CorePoint(width / 2, 1)),
+        })
+        {
+            await EffectSegmentAsync(label, async () =>
+            {
+                await TravelAsync(point, 0.7);
+                await WaitAsync(0.6);
+            });
+        }
+
+        await EffectSegmentAsync("zoom out", async () =>
+        {
+            model.StopZoom();
+            await UntilZoomAsync(model, ramp => !ramp.Ramping && !ramp.Exiting, "Screen zoom did not ramp out within 6 seconds.");
+        });
+        await WaitAsync(0.4);
     }
 
     /// <summary>

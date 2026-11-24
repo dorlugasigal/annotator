@@ -36,7 +36,7 @@ public class GeometryTests
         $"{record["constraint"]}{(record["tool"] is { } tool ? " " + tool : "")} to {record["point"]!.ToJsonString()}");
 
     public static TheoryData<string> ViewportCases => CorpusCases.Of("geometry/viewports.jsonl", record =>
-        $"{record["call"]} {record["preset"] ?? record["factor"]?.ToJsonString() ?? record["bounds"]!.ToJsonString()}");
+        $"{record["call"]} {record["preset"] ?? record["position"] ?? record["factor"]?.ToJsonString() ?? record["bounds"]!.ToJsonString()}");
 
     public static TheoryData<string> TransformCases => CorpusCases.Of("geometry/transforms.jsonl", record =>
         $"{record["call"]} {record["case"] ?? record["tool"] ?? record["to"]?.ToJsonString() ?? record["by"]?.ToJsonString()}");
@@ -237,6 +237,45 @@ public class GeometryTests
             case "cursorAnchored":
                 result = Outcome.Of(() => Viewport(Core.Viewport.CursorAnchored(display, NumberOf(record["factor"]), Shapes.Point(record["cursor"]))));
                 break;
+            case "zoomFollow":
+            {
+                Rect? previous = record["previous"] is { } before ? Shapes.Rect(before) : null;
+                result = Outcome.Of(() => Viewport(ZoomFollow.Viewport(previous, display, NumberOf(record["factor"]), Shapes.Point(record["pointer"]))));
+                break;
+            }
+            case "zoomFollowVelocity":
+                Same(caseName, record, new JsonObject
+                {
+                    ["result"] = Shapes.Json(ZoomFollow.Velocity(display, NumberOf(record["factor"]), Shapes.Point(record["pointer"]))),
+                });
+                return;
+            case "zoomFollowSlide":
+            {
+                var pointer = Shapes.Point(record["pointer"]);
+                result = Outcome.Of(() =>
+                {
+                    var start = ZoomFollow.Viewport(null, display, NumberOf(record["factor"]), display.Center);
+                    return new JsonObject
+                    {
+                        ["slides"] = ZoomFollow.Slides(start, pointer),
+                        ["viewport"] = Viewport(ZoomFollow.Slide(start, pointer, NumberOf(record["elapsed"]))),
+                    };
+                });
+                break;
+            }
+            case "zoomMap":
+            {
+                var position = ZoomMapPosition.FromRawValue(record["position"]!.GetValue<string>()) ?? throw new InvalidDataException("Unknown map position.");
+                var mapFrame = ZoomMap.Frame(display, position);
+                var zoomedView = Core.Viewport.CursorAnchored(display, 2.5, new Point(display.X + 300, display.Y + 200));
+                Same(caseName, record, new JsonObject
+                {
+                    ["frame"] = mapFrame is { } map ? Shapes.Json(map) : null,
+                    ["label"] = position.Label,
+                    ["zoomedArea"] = mapFrame is { } area && record["zoomedArea"] is not null ? Shapes.Json(ZoomMap.ZoomedArea(zoomedView, area)) : null,
+                });
+                return;
+            }
             case "sharingRegion" when record["preset"] is { } presetName:
                 var preset = ShareRegionPreset.FromRawValue(presetName.GetValue<string>()) ?? throw new InvalidDataException("Unknown preset.");
                 Assert.Equal(record["title"]!.GetValue<string>(), preset.Title);

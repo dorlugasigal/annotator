@@ -56,6 +56,10 @@ internal sealed class SettingsReferenceWindow : PopoverWindow
                 // The full states are 1500 or 2400 points high, taller than most screens.
                 WindowChrome.AllowAnySize(Hwnd);
                 Surface = _view.Root;
+                if (scenario.OpenZoomMap)
+                {
+                    _view.Root.Loaded += (_, _) => _view.OpenZoomMapForReference();
+                }
                 model.Published += Apply;
                 break;
             case ReferenceSurface.LaunchAtSignIn:

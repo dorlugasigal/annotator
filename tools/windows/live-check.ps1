@@ -763,9 +763,14 @@ try {
             [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, $name),
             [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::MenuItem))
         foreach ($window in [LiveInput]::Windows($appPid)) {
-            $element = ([Windows.Automation.AutomationElement]::FromHandle($window)).FindFirst([Windows.Automation.TreeScope]::Descendants, $condition)
-            if ($null -ne $element) { return $element }
-        }
+                try {
+                    $element = ([Windows.Automation.AutomationElement]::FromHandle($window)).FindFirst([Windows.Automation.TreeScope]::Descendants, $condition)
+                }
+                catch [Windows.Automation.ElementNotAvailableException] {
+                    continue
+                }
+                if ($null -ne $element) { return $element }
+            }
         return $null
     }
     Note "click Spotlight menu: $(ClickButton 'Spotlight menu')"
@@ -1207,7 +1212,26 @@ try {
         if ($null -ne $element -and $element.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern, [ref]$value)) { return $value.Current.Value }
         return $null
     }
+    function ScrollSettings([double]$percent, [IntPtr]$window) {
+        $scroller = ([Windows.Automation.AutomationElement]::FromHandle($window)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+            ([Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::IsScrollPatternAvailableProperty, $true)))
+        $scroll = $null
+        if ($null -eq $scroller) {
+            return $false
+        }
+        if (-not $scroller.TryGetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern, [ref]$scroll)) {
+            return $false
+        }
+        if (-not $scroll.Current.VerticallyScrollable) {
+            return $false
+        }
+        $scroll.SetScrollPercent([Windows.Automation.ScrollPattern]::NoScroll, $percent)
+        Start-Sleep -Milliseconds 400
+        return [Math]::Abs($scroll.Current.VerticalScrollPercent - $percent) -le 1
+    }
     function ChooseTheme([string]$theme, [IntPtr]$window) {
+        # The Zoom section puts Appearance below General's initial viewport, so bring the theme and glass controls into view.
+        if (-not (ScrollSettings 25 $window)) { Note "could not scroll Settings to Appearance" }
         Note "click Theme: $(ClickTyped 'Theme' ([Windows.Automation.ControlType]::ComboBox) $window)"
         if (WaitFor { $null -ne (MenuItem $theme) }) {
             $c = Center (MenuItem $theme)

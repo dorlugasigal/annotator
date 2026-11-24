@@ -187,6 +187,41 @@
        "frame": [
         368,
         449.5,
+        36,
+        16
+       ],
+       "label": "Zoom",
+       "role": "AXHeading"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        368,
+        485.5,
+        65,
+        16
+       ],
+       "role": "AXStaticText",
+       "value": "Zoom map"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        928.5,
+        482,
+        123.5,
+        24
+       ],
+       "help": "While you zoom in, a small map shows the whole screen and the part you see.",
+       "identifier": "zoom-map",
+       "role": "AXPopUpButton",
+       "value": "Bottom right"
+      },
+      {
+       "enabled": true,
+       "frame": [
+        368,
+        543,
         76.5,
         16
        ],
@@ -197,7 +232,7 @@
        "enabled": true,
        "frame": [
         368,
-        485.5,
+        579,
         42,
         16
        ],
@@ -208,7 +243,7 @@
        "enabled": true,
        "frame": [
         959.5,
-        482,
+        575,
         92.5,
         24
        ],
@@ -220,7 +255,7 @@
        "enabled": true,
        "frame": [
         368,
-        524,
+        617,
         80,
         16
        ],
@@ -231,7 +266,7 @@
        "enabled": true,
        "frame": [
         1015,
-        523.5,
+        616.5,
         38,
         18
        ],
@@ -245,7 +280,7 @@
        "enabled": true,
        "frame": [
         368,
-        561.5,
+        654.5,
         122.5,
         16
        ],
@@ -256,7 +291,7 @@
        "enabled": true,
        "frame": [
         1015,
-        561,
+        654,
         38,
         18
        ],
@@ -269,7 +304,7 @@
        "enabled": true,
        "frame": [
         368,
-        599,
+        692,
         130,
         16
        ],
@@ -280,7 +315,7 @@
        "enabled": true,
        "frame": [
         963,
-        595,
+        688.5,
         89,
         24
        ],
@@ -292,7 +327,7 @@
        "enabled": true,
        "frame": [
         369.5,
-        638.5,
+        732,
         239,
         13
        ],
@@ -303,7 +338,7 @@
        "enabled": true,
        "frame": [
         368,
-        693,
+        786.5,
         53.5,
         16
        ],
@@ -314,7 +349,7 @@
        "enabled": false,
        "frame": [
         368,
-        729,
+        822.5,
         147,
         24
        ],
@@ -325,7 +360,7 @@
        "enabled": false,
        "frame": [
         368,
-        774,
+        867.5,
         195,
         16
        ],
@@ -336,7 +371,7 @@
        "enabled": false,
        "frame": [
         1015,
-        773.5,
+        867,
         38,
         18
        ],
@@ -348,7 +383,7 @@
        "enabled": true,
        "frame": [
         368,
-        813,
+        906.5,
         354.5,
         13
        ],
@@ -359,7 +394,7 @@
        "enabled": true,
        "frame": [
         345.5,
-        852.5,
+        946,
         210,
         16
        ],
@@ -371,7 +406,7 @@
        "enabled": true,
        "frame": [
         368,
-        902.5,
+        996,
         47,
         16
        ],
@@ -382,7 +417,7 @@
        "enabled": true,
        "frame": [
         368,
-        939.5,
+        1033,
         120,
         16
        ],
@@ -393,7 +428,7 @@
        "enabled": true,
        "frame": [
         1015,
-        939,
+        1032.5,
         38,
         18
        ],
@@ -405,7 +440,7 @@
        "enabled": true,
        "frame": [
         368,
-        978.5,
+        1072,
         103.5,
         13
        ],
@@ -416,7 +451,7 @@
        "enabled": true,
        "frame": [
         345.5,
-        1018,
+        1111.5,
         128,
         16
        ],
@@ -428,7 +463,7 @@
        "enabled": true,
        "frame": [
         368,
-        1059,
+        1152.5,
         88,
         16
        ],
@@ -443,7 +478,7 @@
           1383,
           50,
           11,
-          222
+          204
          ],
          "role": "AXValueIndicator",
          "value": 0
@@ -462,9 +497,9 @@
          "enabled": false,
          "frame": [
           1383,
-          272.5,
+          254.5,
           11,
-          259.5
+          277.5
          ],
          "role": "AXButton",
          "subrole": "AXIncrementPage"

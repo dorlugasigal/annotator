@@ -471,11 +471,12 @@ public sealed class ZoomWorkspaceTests
         model.BeginDrawing();
         Assert.False(ActiveToolbarModes.ShowsStrip(model.Snapshot));
         model.ToggleScreenZoom();
-        Assert.Equal("Zoom starting", PendingZoomPresentation.For(model.Snapshot.ZoomStart)!.Title);
-        Assert.Equal("Starting live screen zoom", PendingZoomPresentation.For(model.Snapshot.ZoomStart)!.Detail);
+        // Starting takes a moment, so the toolbar shows no Cancel control for it: screen zoom shows as on at once.
+        Assert.Equal(ZoomStartPhase.Starting, model.Snapshot.ZoomStart.Phase);
+        Assert.Null(PendingZoomPresentation.For(model.Snapshot.ZoomStart));
         Assert.True(ActiveToolbarModes.ShowsStrip(model.Snapshot));
-        Assert.Empty(ActiveToolbarModes.Active(model.Snapshot));
-        Assert.False(ActiveToolbarModes.ShowsZoomControls(model.Snapshot));
+        Assert.Equal([ActiveToolbarMode.ScreenZoom], ActiveToolbarModes.Active(model.Snapshot));
+        Assert.True(ActiveToolbarModes.ShowsZoomControls(model.Snapshot));
         model.NoteZoomPresented();
         model.SetBoard(Board.Blackboard);
         Assert.Equal([ActiveToolbarMode.ScreenZoom, ActiveToolbarMode.Blackboard], ActiveToolbarModes.Active(model.Snapshot));

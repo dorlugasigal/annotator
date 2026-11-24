@@ -954,9 +954,9 @@ internal sealed partial class ToolbarWindow
     }
 
     /// <summary>
-    /// Mac activeModeStrip, "Active and pending modes": the orange Cancel control of a starting zoom, a Stop button for each
-    /// active mode (screen zoom, the pointer lens, Spotlight, Cursor halo, the whiteboard or blackboard) and the live zoom
-    /// level, in a row below a horizontal toolbar or a column beside a vertical one.
+    /// Mac activeModeStrip, "Active and pending modes": the orange Cancel control of a zoom that waits for a permission, a
+    /// Stop button for each active mode (screen zoom, the pointer lens, Spotlight, Cursor halo, the whiteboard or blackboard)
+    /// and the live zoom level, in a row below a horizontal toolbar or a column beside a vertical one.
     /// </summary>
     private FrameworkElement ModeStrip(ToolbarLook look)
     {

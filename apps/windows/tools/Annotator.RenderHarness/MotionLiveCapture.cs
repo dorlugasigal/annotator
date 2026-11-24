@@ -164,10 +164,16 @@ internal static unsafe partial class MotionLiveCapture
                                 RasterImage picture)
     {
         // sharing-controls is sharing-live's toolbar steps alone (draw again, tool choices, Use apps), as the app's controls take.
-        var macPath = Path.Combine(reference, (take == "sharing-controls" ? "sharing-live" : take) + ".json");
+        string macTake = take switch
+        {
+            "sharing-controls" => "sharing-live",
+            "zoom-map" => "zoom-screen",
+            _ => take,
+        };
+        var macPath = Path.Combine(reference, macTake + ".json");
         if (!File.Exists(macPath))
         {
-            throw new ArgumentException($"The Mac take '{take}' was not found at {macPath}.");
+            throw new ArgumentException($"The Mac take '{macTake}' was not found at {macPath}.");
         }
         var mac = JsonNode.Parse(File.ReadAllText(macPath))!.AsObject();
         var style = mac["style"]?.GetValue<string>() ?? "slide";
@@ -177,6 +183,7 @@ internal static unsafe partial class MotionLiveCapture
             "sharing-controls" => "controls",
             "sharing-live" => "sharing",
             "effects-live" => "effects",
+            "zoom-map" => "zoom-map",
             "zoom-screen" or "zoom-lens" => take,
             _ => "show-hide",
         };
@@ -197,6 +204,11 @@ internal static unsafe partial class MotionLiveCapture
                  })
         {
             start.ArgumentList.Add(argument);
+        }
+        if (kind == "zoom-map")
+        {
+            start.ArgumentList.Add("--zoom-map");
+            start.ArgumentList.Add(options.ZoomMap ?? "bottom-right");
         }
         if (options.ReduceMotion)
         {
@@ -253,12 +265,19 @@ internal static unsafe partial class MotionLiveCapture
         var toolbarRect = info["toolbar"]!.AsArray();
         var toolbarArea = PixelRect.FromSize(toolbarRect[0]!.GetValue<int>() - area.Left, toolbarRect[1]!.GetValue<int>() - area.Top,
                                              toolbarRect[2]!.GetValue<int>(), toolbarRect[3]!.GetValue<int>());
-        if (recorder.ShowsStage(0, toolbarArea, picture)
-            || (kind is "controls" or "effects" or "sharing" or "zoom-screen" or "zoom-lens" && recorder.ShowsStage(slots, toolbarArea, picture)))
+        const int boundarySettleFrames = 6;
+        int firstToolbarSlot = Math.Min(boundarySettleFrames, slots);
+        int lastToolbarSlot = Math.Max(0, slots - boundarySettleFrames);
+        bool toolbarMissingAtStart = recorder.ShowsStage(firstToolbarSlot, toolbarArea, picture);
+        bool toolbarMissingAtEnd = kind is "controls" or "effects" or "sharing" or "zoom-screen" or "zoom-lens" or "zoom-map"
+            && recorder.ShowsStage(lastToolbarSlot, toolbarArea, picture);
+        if (toolbarMissingAtStart || toolbarMissingAtEnd)
         {
             // Every take starts with the toolbar on screen (and the controls, effects, sharing and zoom takes end with it): the stage was above it.
             Directory.Delete(output, recursive: true);
-            throw new InvalidOperationException($"The stage covered Annotator's toolbar in '{take}', so the take was deleted.");
+            string when = toolbarMissingAtStart && toolbarMissingAtEnd ? "at the start and end"
+                : toolbarMissingAtStart ? "at the start" : "at the end";
+            throw new InvalidOperationException($"The stage covered Annotator's toolbar {when} in '{take}', so the take was deleted.");
         }
         // The Mac's recordings show its scripted pointer (a window of the recorder above everything): draw it where the take's
         // pointer was at each frame.
@@ -875,27 +894,37 @@ internal static unsafe partial class MotionLiveCapture
         }
 
         /// <summary>
-        /// Whether a 24-pixel patch at the middle of <paramref name="rect"/> (area pixels) shows the stage's picture in
-        /// <paramref name="slot"/>, so a window that should be there, such as the toolbar, is missing.
+        /// Whether the sampled 24-pixel patches across <paramref name="rect"/> (area pixels) all show the stage's picture
+        /// in <paramref name="slot"/>, so a window that should be there, such as the toolbar, is missing.
         /// </summary>
         public bool ShowsStage(int slot, PixelRect rect, RasterImage picture)
         {
             const int patch = 24;
             var pixels = Slot(slot);
-            int left = Math.Clamp(rect.Left + rect.Width / 2 - patch / 2, 0, _area.Width - patch);
-            int top = Math.Clamp(rect.Top + rect.Height / 2 - patch / 2, 0, _area.Height - patch);
-            long difference = 0;
-            for (var y = top; y < top + patch; y++)
+            for (var row = 1; row <= 3; row++)
             {
-                for (var x = left; x < left + patch; x++)
+                for (var column = 1; column <= 5; column++)
                 {
-                    var offset = (y * _area.Width + x) * 4;
-                    var expected = picture[x * picture.Width / _area.Width, y * picture.Height / _area.Height];
-                    difference += Math.Abs(pixels[offset + 2] - expected.Red) + Math.Abs(pixels[offset + 1] - expected.Green)
-                                  + Math.Abs(pixels[offset] - expected.Blue);
+                    int left = Math.Clamp(rect.Left + rect.Width * column / 6 - patch / 2, 0, _area.Width - patch);
+                    int top = Math.Clamp(rect.Top + rect.Height * row / 4 - patch / 2, 0, _area.Height - patch);
+                    long difference = 0;
+                    for (var y = top; y < top + patch; y++)
+                    {
+                        for (var x = left; x < left + patch; x++)
+                        {
+                            var offset = (y * _area.Width + x) * 4;
+                            var expected = picture[x * picture.Width / _area.Width, y * picture.Height / _area.Height];
+                            difference += Math.Abs(pixels[offset + 2] - expected.Red) + Math.Abs(pixels[offset + 1] - expected.Green)
+                                          + Math.Abs(pixels[offset] - expected.Blue);
+                        }
+                    }
+                    if (difference > 48L * 3 * patch * patch)
+                    {
+                        return false;
+                    }
                 }
             }
-            return difference <= 48L * 3 * patch * patch;
+            return true;
         }
 
         public void Dispose()

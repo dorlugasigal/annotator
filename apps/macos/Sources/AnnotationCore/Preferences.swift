@@ -108,6 +108,8 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var laserFade: Double?
     /// `true` draws the toolbar on the system's glass material instead of the solid window color. `nil` is off.
     public var glass: Bool?
+    /// Where screen zoom shows its map of the whole display. `nil` means `.bottomRight`.
+    public var zoomMap: ZoomMapPosition?
     public static let defaultToolbar: [Tool] = [.select, .rectangle, .diamond, .ellipse, .arrow, .line, .pen, .text, .highlighter,
                                                  .laser, .eraser, .cover]
 

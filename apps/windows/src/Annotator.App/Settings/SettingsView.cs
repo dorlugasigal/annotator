@@ -73,6 +73,15 @@ internal sealed partial class SettingsView
 
     public void FocusTabs() => _tabs.FocusSelectedTab();
 
+    public void OpenZoomMapForReference()
+    {
+        if (Tab != SettingsTab.General)
+        {
+            throw new InvalidOperationException("The Zoom map pop-up is only available on the General tab.");
+        }
+        _general?.OpenZoomMapForReference();
+    }
+
     /// <summary>Shows the workspace's preferences and capture state on the pages that exist.</summary>
     public void Apply(WorkspaceSnapshot snapshot)
     {

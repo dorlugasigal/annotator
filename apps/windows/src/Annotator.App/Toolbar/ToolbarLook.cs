@@ -69,7 +69,7 @@ internal sealed record ToolbarLook
     /// <summary>The modes with a Stop button in the strip, in the Mac's order (Mac activeModes).</summary>
     public IReadOnlyList<ActiveToolbarMode> ActiveModes { get; init; } = [];
 
-    /// <summary>The orange Cancel control while a zoom request starts (Mac pendingZoom), or null.</summary>
+    /// <summary>The orange Cancel control while a zoom request waits for a permission (Mac pendingZoom), or null.</summary>
     public PendingZoomPresentation? PendingZoom { get; init; }
 
     /// <summary>The live zoom level below the modes while screen zoom is on and not pending.</summary>

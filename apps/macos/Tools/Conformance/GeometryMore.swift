@@ -113,7 +113,52 @@ extension GeometryExport {
                                     .outputContentFrame(available: available, frame: frame))
                             }])
         }
+        try zoomFollow(&records, displays: displays, viewport: viewport)
         try corpus.lines("geometry/viewports.jsonl", records)
+    }
+
+    /// Screen zoom while drawing (`ZoomFollow`) and its map (`ZoomMap`).
+    private static func zoomFollow(_ records: inout [J], displays: [Rect], viewport: (Viewport) -> J) throws {
+        for display in displays {
+            let zone = Point(ZoomFollow.edgeZone(display.width), ZoomFollow.edgeZone(display.height))
+            let pointers = [display.center, display.origin, Point(display.maxX, display.maxY), Point(display.x + 10, display.maxY - 300),
+                            Point(display.x + zone.x / 2, display.center.y), Point(display.maxX - zone.x / 4, display.y + zone.y / 3),
+                            Point(display.x - 5, display.center.y), Point(display.center.x, display.maxY + 1)]
+            let previous: [Rect?] = [nil, Rect(x: display.x + 100, y: display.y + 80, width: display.width / 2, height: display.height / 2),
+                                     Rect(x: display.x, y: display.y, width: display.width / 4, height: display.height / 4), Rect(x: 0, y: 0, width: -1, height: 1)]
+            for factor in [1, 2, 3.7, 16, 0.5, .nan] {
+                for pointer in pointers {
+                    for before in previous {
+                        records.append(["call": "zoomFollow", "display": display.json, "factor": .double(factor), "pointer": pointer.json,
+                                        "previous": before?.json ?? .null, "result": outcome {
+                                            viewport(try ZoomFollow.viewport(previous: before, display: display, factor: factor, pointer: pointer))
+                                        }])
+                    }
+                    records.append(["call": "zoomFollowVelocity", "display": display.json, "factor": .double(factor), "pointer": pointer.json,
+                                    "result": ZoomFollow.velocity(display: display, factor: factor, pointer: pointer).json])
+                    for elapsed in [0, 1.0 / 60, 0.5, -1, .nan] {
+                        records.append(["call": "zoomFollowSlide", "display": display.json, "factor": .double(factor), "pointer": pointer.json,
+                                        "elapsed": .double(elapsed), "result": outcome {
+                                            let start = try ZoomFollow.viewport(previous: nil, display: display, factor: factor, pointer: display.center)
+                                            let moved = try ZoomFollow.slide(start, pointer: pointer, elapsed: elapsed)
+                                            return ["viewport": viewport(moved), "slides": .bool(ZoomFollow.slides(start, pointer: pointer))]
+                                        }])
+                    }
+                }
+            }
+            for position in ZoomMapPosition.allCases {
+                let frame = ZoomMap.frame(display: display, position: position)
+                let zoomed = try Viewport.cursorAnchored(display: display, factor: 2.5, cursor: Point(display.x + 300, display.y + 200))
+                records.append(["call": "zoomMap", "display": display.json, "position": .string(position.rawValue),
+                                "label": .string(position.label), "frame": frame?.json ?? .null,
+                                "zoomedArea": frame.map { ZoomMap.zoomedArea(zoomed, in: $0).json } ?? .null])
+            }
+        }
+        for display in [Rect(x: 0, y: 0, width: 200, height: 100), Rect(x: 0, y: 0, width: 800, height: 3000)] {
+            records.append(["call": "zoomMap", "display": display.json, "position": .string(ZoomMapPosition.bottomRight.rawValue),
+                            "label": .string(ZoomMapPosition.bottomRight.label),
+                            "frame": ZoomMap.frame(display: display, position: .bottomRight)?.json ?? .null, "zoomedArea": .null])
+        }
     }
 
     static func transforms(_ corpus: Corpus) throws {

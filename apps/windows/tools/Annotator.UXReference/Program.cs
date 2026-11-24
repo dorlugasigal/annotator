@@ -154,6 +154,12 @@ internal static class Program
             }
             BitmapSource windows = Sheets.WindowsAt2x(report.ImagePath!, report.ImageWidth, report.ImageHeight, report.Width, report.Height);
             Sheets.Save(windows, stem + ".windows.png");
+            if (report.PopupImagePath is { } popupImage)
+            {
+                BitmapSource popup = Sheets.WindowsAt2x(popupImage, report.PopupImageWidth, report.PopupImageHeight,
+                    report.PopupImageWidth / report.Scale, report.PopupImageHeight / report.Scale);
+                Sheets.Save(popup, stem + ".popup.windows.png");
+            }
             string caption = $"Windows at {report.Scale * 100:0}%, scaled to 2x ({UiaDump.Format(report.Width)} x {UiaDump.Format(report.Height)} DIPs)";
             Sheets.Save(Sheets.Sheet(macos, windows,
                 $"{reference.Name} ({theme}): {reference.Notes}", caption), stem + ".sheet.png");

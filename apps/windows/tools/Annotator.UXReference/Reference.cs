@@ -205,12 +205,13 @@ internal sealed record ReferenceState(string Surface, string State, string Theme
 
     /// <summary>
     /// States that only Windows has, so no macOS capture exists: the screen access explanation and Settings &gt; Permissions
-    /// while Windows has not allowed screen access (WIN-CAP-04), and the stroke color popover while a shape label is edited
-    /// (its Match outline), which the Mac reference does not capture yet. The tool records their trees and pictures for review.
+    /// while Windows has not allowed screen access (WIN-CAP-04), the open Zoom map picker, and the stroke color popover while a
+    /// shape label is edited (its Match outline), which the Mac reference does not capture yet. The tool records their trees
+    /// and pictures for review.
     /// </summary>
     public static IReadOnlyList<string> WindowsOnlyStates { get; } =
         ["dialogs/screen-access", "dialogs/screen-access-asking", "pickers/color-stroke-label", "pickers/color-stroke-label-following",
-         "settings/tab-permissions-not-asked", "settings/tab-permissions-refused"];
+         "settings/tab-permissions-not-asked", "settings/tab-permissions-refused", "settings/tab-general-zoom-map-open"];
 
     /// <summary>True for a state without a macOS capture (<see cref="WindowsOnlyStates"/>).</summary>
     public bool WindowsOnly { get; init; }

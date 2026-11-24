@@ -350,9 +350,14 @@ platform that departs from the specifications, unless an ADR changes them.
   capture needs consent, Annotator asks only when a pixel feature starts.
 - **WIN-CAP-05**: Zoom matches 003 and 009: Ctrl+1 starts at 1.5x; Alt+scroll
   changes 1x-16x; ramps take 260 ms in and 200 ms out with the shared curves;
-  the viewport origin is `p x (1 - 1/z)` so the pointer stays on the same
-  source point; drawings, selection adornments and effects use the same
-  viewport in the same frame; text editing freezes the viewport; with
+  in Use apps the viewport origin is `p x (1 - 1/z)` so the pointer stays on
+  the same source point and clicks reach what it shows; in Draw the viewport
+  holds still, keeps the point under the pointer when the factor changes and
+  slides while the pointer is in an edge zone (`ZoomFollow`), and drawing
+  input maps through it; a map of the whole display sits in the corner chosen
+  in Settings (`ZoomMap`, Bottom right by default, Off hides it) with the same
+  protection as the zoom; drawings, selection adornments and effects use the
+  same viewport in the same frame; text editing freezes the viewport; with
   animation effects off, changes are immediate. Windows' full-screen magnifier
   (`MagSetFullscreenTransform`) is not used: recordings and screen shares do
   not show it (R-4), and its input transform needs UIAccess (R-3).

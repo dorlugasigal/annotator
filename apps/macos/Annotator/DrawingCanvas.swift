@@ -279,9 +279,18 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
             if let textEditor, hit === textEditor || hit.isDescendant(of: textEditor) { return .iBeam }
             return .arrow
         }
-        if isOverRotationHandle(point) { return ToolCursorFactory.rotationCursor }
+        if isOverRotationHandle(documentPoint(point)) { return ToolCursorFactory.rotationCursor }
         return currentToolCursor
     }
+
+    /// Where a point of this canvas lands on the board. While drawing, screen zoom holds still, so the pointer can be
+    /// over any part of the zoomed picture.
+    func documentPoint(_ local: Point) -> Point {
+        guard model?.mode == .draw, let viewport = session?.presentation?.screenViewport else { return local }
+        return viewport.sourcePoint(for: local)
+    }
+
+    private func documentPoint(_ event: NSEvent) -> Point { documentPoint(Point(convert(event.locationInWindow, from: nil))) }
 
     private func updateHoverCursor(_ event: NSEvent) {
         hoverCursor(at: Point(convert(event.locationInWindow, from: nil))).set()
@@ -316,7 +325,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
             item("Cancel edit", #selector(cancelEditFromMenu))
             return menu
         }
-        let point = Point(convert(event.locationInWindow, from: nil))
+        let point = documentPoint(event)
         let hit = ElementStacking.frontmost(at: point, in: session.document.elements)
         if hit.map({ !session.document.selection.contains($0.id) }) ?? true {
             model.useLocalSelection(in: session)
@@ -504,7 +513,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
         model.useLocalSelection(in: session)
         commitTextIfNeeded()
         window?.makeFirstResponder(self)
-        let point = Point(convert(event.locationInWindow, from: nil))
+        let point = documentPoint(event)
         if regionRequest != nil {
             gesture = .marquee(point)
             marquee = Rect(from: point, to: point)
@@ -670,12 +679,12 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
 
     override func mouseDragged(with event: NSEvent) {
         if laserTrail.isDrawing {
-            laserTrail.move(to: Point(convert(event.locationInWindow, from: nil)), time: CACurrentMediaTime())
+            laserTrail.move(to: documentPoint(event), time: CACurrentMediaTime())
             runLaser()
             return
         }
         guard let session, let gesture else { return }
-        let point = Point(convert(event.locationInWindow, from: nil))
+        let point = documentPoint(event)
         var inkRect: CGRect?
         do {
             switch gesture {
@@ -815,7 +824,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
 
     override func mouseUp(with event: NSEvent) {
         if laserTrail.isDrawing {
-            laserTrail.release(at: Point(convert(event.locationInWindow, from: nil)), time: CACurrentMediaTime())
+            laserTrail.release(at: documentPoint(event), time: CACurrentMediaTime())
             runLaser()
             return
         }
@@ -844,7 +853,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
                 }
             case .create(let id, let startPoint):
                 if let element = session.document.elements.first(where: { $0.id == id }) {
-                    let finalPoint = Point(convert(event.locationInWindow, from: nil))
+                    let finalPoint = documentPoint(event)
                     if element.tool == .arrow && startPoint.distance(to: finalPoint) < 4 {
                         try session.document.update(id) { $0.points = [startPoint]; $0.frame = Rect(from: startPoint, to: startPoint) }
                         linearID = id
@@ -1168,7 +1177,7 @@ final class DrawingCanvas: NSView, NSTextViewDelegate {
 
     override func mouseMoved(with event: NSEvent) {
         updateHoverCursor(event)
-        let point = Point(convert(event.locationInWindow, from: nil))
+        let point = documentPoint(event)
         if linearID != nil {
             linearPreview = point
             needsDisplay = true

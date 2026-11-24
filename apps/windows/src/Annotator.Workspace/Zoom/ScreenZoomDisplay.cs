@@ -7,8 +7,9 @@ namespace Annotator.Workspace.Zoom;
 /// <summary>
 /// What one display shows of screen zoom (port of the displayed state in the Mac's <c>LivePresentation</c>): the displayed
 /// mode and factor, which drawing, hit testing and captured pixels share, and the 260 ms entrance and 200 ms exit ramps. The
-/// document's presentation changes at once; this follows it with motion. Platform-neutral and single-threaded: the overlay
-/// thread owns it and calls <see cref="Step"/> on each compositor frame while <see cref="NeedsFrames"/> is true.
+/// document's presentation changes at once; this follows it with motion. While drawing, the zoomed part holds still and
+/// slides near the display's edges (<see cref="ZoomFollow"/>). Platform-neutral and single-threaded: the overlay thread owns
+/// it and calls <see cref="Step"/> on each compositor frame while <see cref="NeedsFrames"/> is true.
 /// </summary>
 public sealed class ScreenZoomDisplay
 {
@@ -17,6 +18,15 @@ public sealed class ScreenZoomDisplay
     private Ramp? _ramp;
     private bool _running;
     private Viewport? _frozen;
+
+    /// <summary>The part of the display shown last (Mac followedSource), which the next viewport continues from.</summary>
+    private Rect? _followed;
+
+    /// <summary>The pointer rests near an edge while drawing: each frame slides the zoomed part (Mac slideTicker).</summary>
+    private bool _sliding;
+    private Size _slideSize;
+    private Point _slidePointer;
+    private double? _lastSlide;
 
     /// <summary>Raised when an exit ramp lands at 1x and zoom turns off, or when an exit is interrupted (Mac screenZoomExitFinished).</summary>
     public event Action? ExitFinished;
@@ -34,8 +44,13 @@ public sealed class ScreenZoomDisplay
     /// <summary>The factor on screen while screen zoom shows, so a new start continues from what the person sees.</summary>
     public double? DisplayedScreenZoomFactor => _mode == PresentationMode.Screen ? _magnification : null;
 
-    /// <summary>A ramp waits for frames: the host calls <see cref="Step"/> with the compositor's time until it returns false.</summary>
-    public bool NeedsFrames => _ramp is not null && _running;
+    /// <summary>
+    /// A ramp or a slide waits for frames: the host calls <see cref="Step"/> with the compositor's time until it returns false.
+    /// </summary>
+    public bool NeedsFrames => (_ramp is not null && _running) || _sliding;
+
+    /// <summary>The pointer rests near an edge while drawing, so the zoomed part slides on each frame.</summary>
+    public bool IsSliding => _sliding;
 
     /// <summary>Text editing holds the viewport still (Mac freezeViewportForText).</summary>
     public bool IsFrozen => _frozen is not null;
@@ -44,7 +59,7 @@ public sealed class ScreenZoomDisplay
     public void SetMode(PresentationMode mode)
     {
         EndRamp();
-        _mode = mode;
+        SetDisplayedMode(mode);
     }
 
     /// <summary>Sets the displayed factor at once, landing any ramp first (Mac magnification's setter).</summary>
@@ -88,7 +103,7 @@ public sealed class ScreenZoomDisplay
                 StartRamp(new Ramp(current, 1, MotionTiming.ZoomOutDuration, MotionCurves.Standard, settings.Zoom), zoomVisible);
                 return false;
             }
-            _mode = settings.Mode;
+            SetDisplayedMode(settings.Mode);
             _magnification = settings.Zoom;
             if (settings.Mode == PresentationMode.Screen && enteringFrom is { } start && double.IsFinite(start) && start >= 1 && start <= 16
                 && Math.Abs(start - settings.Zoom) > 0.001)
@@ -131,10 +146,18 @@ public sealed class ScreenZoomDisplay
     }
 
     /// <summary>
-    /// Mac stepZoomRamp(at:): moves the ramp to <paramref name="now"/> seconds (any steady clock); the first step starts it.
-    /// <paramref name="stop"/> (the workspace hid, or zoom is blocked) lands it at once. Returns false once nothing moves.
+    /// Mac stepZoomRamp(at:) and slide(at:): moves the ramp and the slide to <paramref name="now"/> seconds (any steady
+    /// clock); the first step starts them. <paramref name="stop"/> (the workspace hid, or zoom is blocked) lands the ramp at
+    /// once and stops sliding. Returns false once nothing moves.
     /// </summary>
     public bool Step(double now, bool stop = false)
+    {
+        bool ramping = StepRamp(now, stop);
+        bool sliding = StepSlide(now, stop);
+        return ramping || sliding;
+    }
+
+    private bool StepRamp(double now, bool stop)
     {
         if (_ramp is not { } ramp)
         {
@@ -164,7 +187,7 @@ public sealed class ScreenZoomDisplay
         _running = false;
         if (ramp.ExitZoom is { } exitZoom)
         {
-            _mode = PresentationMode.Off;
+            SetDisplayedMode(PresentationMode.Off);
             _magnification = exitZoom;
             ExitFinished?.Invoke();
         }
@@ -175,36 +198,123 @@ public sealed class ScreenZoomDisplay
     }
 
     /// <summary>
-    /// Mac screenViewport: while screen zoom shows, the cursor-anchored viewport of a display of <paramref name="size"/> points
-    /// for the pointer at <paramref name="pointer"/> (display points), or the viewport held still while text is edited.
+    /// Mac screenViewport: while screen zoom shows, the viewport of a display of <paramref name="size"/> points for the
+    /// pointer at <paramref name="pointer"/> (display points), or the viewport held still while text is edited. While drawing
+    /// (<paramref name="follows"/>) the zoomed part holds still as the pointer moves inside it, keeps the point under the
+    /// pointer when the factor changes, and slides on each frame while the pointer rests near an edge. Using apps keeps it
+    /// anchored at the pointer, so what's under the pointer is what a click reaches.
     /// </summary>
-    public Viewport? ScreenViewport(Size size, Point pointer)
+    public Viewport? ScreenViewport(Size size, Point pointer, bool follows = false)
     {
         if (_mode != PresentationMode.Screen)
         {
+            StopFollowing();
             return null;
         }
         if (_frozen is { } frozen)
         {
+            StopSliding();
             return frozen;
         }
         if (!(size.Width > 0) || !(size.Height > 0) || !pointer.IsFinite)
         {
+            StopSliding();
             return null;
         }
-        return Viewport.CursorAnchored(new Rect(0, 0, size.Width, size.Height), _magnification, pointer);
+        var display = new Rect(0, 0, size.Width, size.Height);
+        Viewport viewport = follows
+            ? ZoomFollow.Viewport(_followed, display, _magnification, pointer)
+            : Viewport.CursorAnchored(display, _magnification, pointer);
+        _followed = viewport.Source;
+        // Mac updateSliding: the pointer near an edge keeps the zoomed part sliding without moves.
+        if (follows && ZoomFollow.Slides(viewport, pointer))
+        {
+            if (!_sliding)
+            {
+                _sliding = true;
+                _lastSlide = null;
+            }
+            _slideSize = size;
+            _slidePointer = pointer;
+        }
+        else
+        {
+            StopSliding();
+        }
+        return viewport;
     }
 
     /// <summary>Mac freezeViewportForText: holds the current viewport still while text is edited and returns it.</summary>
-    public Viewport? FreezeViewportForText(Size size, Point pointer)
+    public Viewport? FreezeViewportForText(Size size, Point pointer, bool follows = false)
     {
         _frozen = null;
-        _frozen = ScreenViewport(size, pointer);
+        _frozen = ScreenViewport(size, pointer, follows);
+        if (_frozen is not null)
+        {
+            StopSliding();
+        }
         return _frozen;
     }
 
-    /// <summary>Mac releaseTextViewport.</summary>
-    public void ReleaseTextViewport() => _frozen = null;
+    /// <summary>Mac releaseTextViewport: the zoom continues from the part held still for text.</summary>
+    public void ReleaseTextViewport()
+    {
+        if (_frozen is { } frozen)
+        {
+            _followed = frozen.Source;
+        }
+        _frozen = null;
+    }
+
+    /// <summary>Screen zoom stopped showing on the display: the next zoom starts at the pointer (Mac clearScreenZoom).</summary>
+    public void StopFollowing()
+    {
+        _followed = null;
+        StopSliding();
+    }
+
+    private void SetDisplayedMode(PresentationMode mode)
+    {
+        _mode = mode;
+        if (mode != PresentationMode.Screen)
+        {
+            StopFollowing();
+        }
+    }
+
+    private bool StepSlide(double now, bool stop)
+    {
+        if (!_sliding || stop || _frozen is not null || _mode != PresentationMode.Screen || _followed is not { } source)
+        {
+            StopSliding();
+            return false;
+        }
+        double elapsed = _lastSlide is { } last ? now - last : 0;
+        _lastSlide = now;
+        try
+        {
+            var display = new Rect(0, 0, _slideSize.Width, _slideSize.Height);
+            Viewport current = ZoomFollow.Viewport(source, display, _magnification, _slidePointer);
+            Viewport next = ZoomFollow.Slide(current, _slidePointer, elapsed);
+            _followed = next.Source;
+            if (ZoomFollow.Slides(next, _slidePointer))
+            {
+                return true;
+            }
+        }
+        catch (CanvasError)
+        {
+            // An unusable factor or pointer: the zoomed part stays where it is.
+        }
+        StopSliding();
+        return false;
+    }
+
+    private void StopSliding()
+    {
+        _sliding = false;
+        _lastSlide = null;
+    }
 
     private void StartRamp(Ramp ramp, bool zoomVisible)
     {

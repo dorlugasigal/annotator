@@ -196,6 +196,8 @@ internal sealed partial class SettingsPopUp : Button
 
     public event Action<int>? Chosen;
 
+    internal void OpenForReference() => Open();
+
     public int ChosenIndex
     {
         get => _chosen;

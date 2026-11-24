@@ -93,6 +93,14 @@ struct CustomizationView: View {
                 Text("When this is on, changing the color, fill, opacity, width or line style of one tool changes it for all drawing tools. Effects, the eraser and images keep their own settings. Text size and arrowheads stay separate.")
                     .font(.caption).foregroundStyle(.secondary)
             }
+            Section("Zoom") {
+                Picker("Zoom map", selection: Binding(
+                    get: { model.preferences.zoomMap ?? .bottomRight }, set: { model.setZoomMap($0) })) {
+                    ForEach(ZoomMapPosition.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                .accessibilityIdentifier("zoom-map")
+                .help("While you zoom in, a small map shows the whole screen and the part you see.")
+            }
             Section("Appearance") {
                 Picker("Theme", selection: Binding(
                     get: { model.preferences.theme ?? .system }, set: { model.setTheme($0) })) {

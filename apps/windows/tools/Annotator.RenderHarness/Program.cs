@@ -777,6 +777,9 @@ internal sealed record HarnessOptions(string Mode, TimeSpan Timeout, int Samples
     /// <summary>motion-live: the takes to replay (default all ten show and hide takes), and the measurements on the stage.</summary>
     public string[]? Takes { get; init; }
 
+    /// <summary>motion-live: the corner for the Windows-only zoom-map take.</summary>
+    public string? ZoomMap { get; init; }
+
     /// <summary>Whether --theme was given; motion-live otherwise uses each Mac take's appearance.</summary>
     public bool ThemeGiven { get; init; }
 
@@ -827,10 +830,12 @@ internal sealed record HarnessOptions(string Mode, TimeSpan Timeout, int Samples
           --reduce-motion       play the motion as with Animation effects off (motion)
           --theme <dark|light>  the sample board's appearance (motion; default light)
           --objects <count>     objects on the sample board, 0 to 64 (motion; default 6)
-          --takes <a,b,...>     the Mac takes to replay (motion-live; default the ten show-hide-* takes; also sharing-live with
+          --takes <a,b,...>     the takes for motion-live (default the ten show-hide-* takes; also sharing-live with
                                 sharing-output, sharing-controls for its toolbar steps alone, effects-live, zoom-screen, zoom-lens,
-                                and effects-measure, sharing-measure and zoom-measure to measure the app's effects, region sharing
-                                and screen zoom on the stage), or to compare (live-compare; default every take under --evidence)
+                                the Windows-only zoom-map take, and effects-measure, sharing-measure and zoom-measure
+                                to measure the app's effects, region sharing and screen zoom on the stage), or to compare
+                                (live-compare; default every take under --evidence)
+          --zoom-map <corner>   motion-live zoom-map corner: bottom-right, bottom-left, top-right or top-left
           --reference <folder>  the Mac's live recordings (motion-live, live-compare, video-check; default reference/ux-reference/macos-live)
           --ffmpeg <path>       an ffmpeg to read the Mac's backdrop and encode the videos (motion-live; default Media Foundation)
           --backdrop <png>      the Mac's desktop for the stage (motion-live; default a frame of show-hide-none.mp4)
@@ -878,6 +883,7 @@ internal sealed record HarnessOptions(string Mode, TimeSpan Timeout, int Samples
         var objects = 6;
         string? reference = null, ffmpeg = null, backdrop = null;
         string[]? takes = null;
+        string? zoomMap = null;
         string? probe = null;
         bool boost = false, directComposition = false, duplication = false, press = false;
         int? gpuPriority = null;
@@ -906,6 +912,13 @@ internal sealed record HarnessOptions(string Mode, TimeSpan Timeout, int Samples
                     break;
                 case "--takes":
                     takes = Value().Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    break;
+                case "--zoom-map":
+                    zoomMap = Value();
+                    if (zoomMap is not ("bottom-right" or "bottom-left" or "top-right" or "top-left"))
+                    {
+                        throw new ArgumentException("--zoom-map is bottom-right, bottom-left, top-right or top-left.");
+                    }
                     break;
                 case "--probe":
                     probe = Value();
@@ -1038,6 +1051,7 @@ internal sealed record HarnessOptions(string Mode, TimeSpan Timeout, int Samples
             Ffmpeg = ffmpeg,
             Backdrop = backdrop,
             Takes = takes,
+            ZoomMap = zoomMap,
             ThemeGiven = themeGiven,
             Cycles = cycles,
             Linger = linger,
