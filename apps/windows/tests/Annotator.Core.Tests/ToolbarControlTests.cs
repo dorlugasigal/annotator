@@ -83,30 +83,31 @@ public class ToolbarControlTests
     }
 
     [Fact]
-    public void PropertiesCanStepThroughTheirChoicesInsteadOfAMenu()
+    public void PropertiesCanOpenAMenuInsteadOfSteppingThroughTheirChoices()
     {
         var preferences = new WorkspacePreferences();
-        Assert.All(PropertyChoice.AllCases, choice => Assert.Equal(PropertyChoiceStyle.Menu, preferences.ChoiceStyle(choice)));
-        preferences.SetChoiceStyle(PropertyChoice.Font, PropertyChoiceStyle.Step);
-        preferences.SetChoiceStyle(PropertyChoice.Pattern, PropertyChoiceStyle.Step);
-        preferences.SetChoiceStyle(PropertyChoice.Edges, PropertyChoiceStyle.Step);
-        // An on and off property has no step.
-        Assert.Equal(["pattern", "font"], preferences.SteppedPropertyChoices!.Value.ToArray());
-        Assert.Equal(PropertyChoiceStyle.Menu, preferences.ChoiceStyle(PropertyChoice.Edges));
+        // The button that steps through the choices is the default.
+        Assert.All(PropertyChoice.AllCases, choice => Assert.Equal(PropertyChoiceStyle.OneButton, preferences.ChoiceStyle(choice)));
+        preferences.SetChoiceStyle(PropertyChoice.Font, PropertyChoiceStyle.Menu);
+        preferences.SetChoiceStyle(PropertyChoice.Pattern, PropertyChoiceStyle.Menu);
+        preferences.SetChoiceStyle(PropertyChoice.Edges, PropertyChoiceStyle.Menu);
+        // An on and off property has no menu.
+        Assert.Equal(["pattern", "font"], preferences.MenuPropertyChoices!.Value.ToArray());
+        Assert.Equal(PropertyChoiceStyle.OneButton, preferences.ChoiceStyle(PropertyChoice.Edges));
         Assert.Equal(preferences, WorkspacePreferences.Read(preferences.Data()));
         preferences.SetChoiceStyle(PropertyChoice.Pattern, PropertyChoiceStyle.All);
         Assert.Equal(PropertyChoiceStyle.All, preferences.ChoiceStyle(PropertyChoice.Pattern));
-        Assert.Equal(["font"], preferences.SteppedPropertyChoices!.Value.ToArray());
+        Assert.Equal(["font"], preferences.MenuPropertyChoices!.Value.ToArray());
         Assert.Equal(["pattern"], preferences.ExpandedPropertyChoices!.Value.ToArray());
-        preferences.SetChoiceStyle(PropertyChoice.Font, PropertyChoiceStyle.Menu);
-        Assert.Null(preferences.SteppedPropertyChoices);
-        Assert.Equal([PropertyChoiceStyle.Menu, PropertyChoiceStyle.All], PropertyChoice.Pressure.Styles.ToArray());
-        Assert.Equal([PropertyChoiceStyle.Menu, PropertyChoiceStyle.Step, PropertyChoiceStyle.All], PropertyChoice.Roughness.Styles.ToArray());
+        preferences.SetChoiceStyle(PropertyChoice.Font, PropertyChoiceStyle.OneButton);
+        Assert.Null(preferences.MenuPropertyChoices);
+        Assert.Equal([PropertyChoiceStyle.OneButton, PropertyChoiceStyle.All], PropertyChoice.Pressure.Styles.ToArray());
+        Assert.Equal([PropertyChoiceStyle.OneButton, PropertyChoiceStyle.Menu, PropertyChoiceStyle.All], PropertyChoice.Roughness.Styles.ToArray());
 
         string json = Encoding.UTF8.GetString(new WorkspacePreferences().Data());
-        string future = json.Insert(1, "\"steppedPropertyChoices\":[\"font\",\"sparkle\",\"font\"],");
-        Assert.Equal(["font"], WorkspacePreferences.Read(Encoding.UTF8.GetBytes(future)).SteppedPropertyChoices!.Value.ToArray());
-        var invalid = new WorkspacePreferences { SteppedPropertyChoices = ["edges"] };
+        string future = json.Insert(1, "\"menuPropertyChoices\":[\"font\",\"sparkle\",\"font\"],");
+        Assert.Equal(["font"], WorkspacePreferences.Read(Encoding.UTF8.GetBytes(future)).MenuPropertyChoices!.Value.ToArray());
+        var invalid = new WorkspacePreferences { MenuPropertyChoices = ["edges"] };
         Assert.Throws<CanvasError>(() => invalid.Data());
     }
 

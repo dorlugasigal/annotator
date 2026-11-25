@@ -939,9 +939,9 @@
       "sha256" : "22b7f927d31ae2e29dbf440002482759081dbd2ea5d867394b674fa806cf7466"
     },
     {
-      "bytes" : 2457,
+      "bytes" : 2454,
       "path" : "profiles/full.json",
-      "sha256" : "8629f91c93a95495efbacc039995aa651ed13b88e3fbc4325856511c65848feb"
+      "sha256" : "ed6f987b36c4ad3cd6e55b79b8b85835c1b18bff28a319d9a104d69ca8757304"
     },
     {
       "bytes" : 627,
@@ -994,9 +994,9 @@
       "sha256" : "445fc56d695e961c3f052ed2bd87f6827204259c1a0f96c8c87187d3d3c4e22e"
     },
     {
-      "bytes" : 50586,
+      "bytes" : 50536,
       "path" : "profiles/index.jsonl",
-      "sha256" : "4ea4a6c2218a3445fa7a977a52314e8e00bf5a564d7f05751065e5d32e3af979"
+      "sha256" : "bcef9e11bf6050a37ac640e6d421603186daea4acc497e200ea569e32a510b44"
     },
     {
       "bytes" : 359,
@@ -1017,6 +1017,21 @@
       "bytes" : 564,
       "path" : "profiles/menu-key.json",
       "sha256" : "0a932035e30795bcb61fc28cfd15de35bed43354c3c27fc8020cb7f8406481b1"
+    },
+    {
+      "bytes" : 579,
+      "path" : "profiles/menu-property-choices-future.json",
+      "sha256" : "3545cf6f4ee17154c1ef884a6cb92ab9b51d6b77d73cd20d6392b73e1b7234d5"
+    },
+    {
+      "bytes" : 553,
+      "path" : "profiles/menu-property-choices-on-off.json",
+      "sha256" : "7fd95898f248264f2b9a530e0857c9b87aad52a63ad116b47b1ffd02b690b19c"
+    },
+    {
+      "bytes" : 555,
+      "path" : "profiles/menu-property-choices-only-future.json",
+      "sha256" : "99f73613f29372e293005e66397485c7ca7467b11c75bf0555c25aa52db210b0"
     },
     {
       "bytes" : 595,
@@ -1047,21 +1062,6 @@
       "bytes" : 522,
       "path" : "profiles/spotlight-49.json",
       "sha256" : "f71b538a533b7438d83b7731b9f715591103ba8293bef61ebb95e4ba8f584511"
-    },
-    {
-      "bytes" : 582,
-      "path" : "profiles/stepped-property-choices-future.json",
-      "sha256" : "280a7908f3765ca1414dae25e2544c2c03af6dab5e00217c4a21acf76a931802"
-    },
-    {
-      "bytes" : 556,
-      "path" : "profiles/stepped-property-choices-on-off.json",
-      "sha256" : "8c0fb60e039c9293a764d2bcf243cb1607500a2249d5d9642b853d4bd804fb80"
-    },
-    {
-      "bytes" : 558,
-      "path" : "profiles/stepped-property-choices-only-future.json",
-      "sha256" : "0a20887b3cf3a809efa9591bd9baf1188f7f49e92f92a0c89d7b1334b93a9803"
     },
     {
       "bytes" : 811,
@@ -1382,9 +1382,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "98b8bb6466f9c58be378e185d1c7cae11c2e6a33",
+    "commit" : "bd03b5a39dcbbe53ae5acbab343bb71313073e6d",
     "date" : "2026-11-25",
-    "fingerprint" : "4b27b2eb7017e2d661eca588235f85813809c4876833661318d762b10535dfc3",
+    "fingerprint" : "f781f0ced95cdf184bdb6f0248b6b249a8a6124cb35f7b17afa8c3e91a9c29ef",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

@@ -2,8 +2,8 @@ import SwiftUI
 import AnnotationCore
 import MotionCore
 
-/// "Your properties": each property with a few choices shows as one button that opens a menu of them, one button that
-/// steps through them, or as all its choices side by side. An on and off property is one button or both choices.
+/// "Your properties": each property with a few choices shows as one button that steps through them, one button that
+/// opens a menu of them, or as all its choices side by side. An on and off property is one button or both choices.
 /// Each way is drawn with the toolbar's own controls; click one to use it.
 struct PropertyChoicesEditor: View {
     @ObservedObject var model: WorkspaceModel
@@ -20,11 +20,11 @@ struct PropertyChoicesEditor: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
-                Button("Use menus everywhere") {
+                Button("Use one button everywhere") {
                     withAnimation(animation) { model.resetPropertyChoices() }
                 }
                 .buttonStyle(.link)
-                .disabled(model.preferences.expandedPropertyChoices == nil && model.preferences.steppedPropertyChoices == nil)
+                .disabled(model.preferences.expandedPropertyChoices == nil && model.preferences.menuPropertyChoices == nil)
                 .accessibilityIdentifier("reset-property-choices")
             }
             FlowLayout(spacing: 10, lineSpacing: 10) {
@@ -77,7 +77,7 @@ struct PropertyChoicesEditor: View {
                         }
                     }
                 HStack(spacing: 4) {
-                    Text(Self.title(choice, style)).font(.caption.weight(selected ? .semibold : .regular))
+                    Text(Self.title(style)).font(.caption.weight(selected ? .semibold : .regular))
                     if selected {
                         Image(systemName: "checkmark.circle.fill").font(.caption).foregroundStyle(.tint)
                             .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
@@ -89,7 +89,7 @@ struct PropertyChoicesEditor: View {
         }
         .buttonStyle(.plain)
         .help(Self.help(choice, style))
-        .accessibilityLabel("\(choice.label): \(Self.title(choice, style).lowercased())")
+        .accessibilityLabel("\(choice.label): \(Self.title(style).lowercased())")
         .accessibilityValue(selected ? "Selected" : "")
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier("property-choice-\(choice.rawValue)-\(Self.identifier(style))")
@@ -177,35 +177,33 @@ struct PropertyChoicesEditor: View {
         }
     }
 
-    static let intro = "Menu saves room: click it to see the choices. Step goes to the next choice with each click. All choices puts them side by side, so each one is a click away."
+    static let intro = "One button saves room: click it to go to the next choice. Menu shows every choice when you click it. All choices puts them side by side, so each one is a click away."
 
-    /// "Menu", "Step" or "All choices"; an on and off property's one button is "One button".
-    static func title(_ choice: PropertyChoice, _ style: PropertyChoiceStyle) -> String {
+    /// "One button", "Menu" or "All choices".
+    static func title(_ style: PropertyChoiceStyle) -> String {
         switch style {
-        case .menu: choice.isOnOff ? "One button" : "Menu"
-        case .step: "Step"
+        case .oneButton: "One button"
+        case .menu: "Menu"
         case .all: "All choices"
         }
     }
 
-    /// The end of an option's identifier: "one" for the default (as before Step), "step" and "all".
+    /// The end of an option's identifier: "one", "menu" or "all".
     static func identifier(_ style: PropertyChoiceStyle) -> String {
         switch style {
-        case .menu: "one"
-        case .step: "step"
+        case .oneButton: "one"
+        case .menu: "menu"
         case .all: "all"
         }
     }
 
-    /// "One button. Click it to choose from Solid, Dashed and Dotted."
+    /// "One button. Click it to go to the next choice: Solid, Dashed and Dotted."
     static func help(_ choice: PropertyChoice, _ style: PropertyChoiceStyle) -> String {
         let names = list(choice.choices)
         switch style {
+        case .oneButton: return "One button. Click it to go to the next choice: \(names)."
+        case .menu: return "A menu. Click it to choose from \(names)."
         case .all: return "\(names), side by side."
-        case .step: return "One button. Each click goes to the next choice: \(names)."
-        case .menu:
-            return choice.isOnOff ? "One button. Click it to switch between \(names)."
-                : "One button. Click it to choose from \(names)."
         }
     }
 

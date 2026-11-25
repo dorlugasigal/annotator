@@ -54,7 +54,7 @@ internal interface IPropertiesHost
 /// The full properties panel, a port of ContextualInspector.swift with NativeInspectorComponents.swift: the "Editing …"
 /// line for a selection and the current tool's property blocks on one row that never wraps (the toolbar grows sideways to
 /// fit it), or in one column beside a vertical toolbar (<c>compact</c>), with the arrow controls at the end. Properties
-/// with a few choices are one button that opens a column of them or steps through them, or all their choices side by side (Settings > Toolbar >
+/// with a few choices are one button that steps through them or opens a column of them, or all their choices side by side (Settings > Toolbar >
 /// Your properties). Every control applies to the tool's style and to the selection through the workspace model;
 /// slider drags and field edits are one Undo step each. The whole panel is unavailable while every selected object is
 /// locked.
@@ -378,7 +378,7 @@ internal sealed class PropertiesPanel
 
     /// <summary>
     /// A property with a few choices (Mac showsAllChoices): all of them side by side (SampleOptions), or one button that
-    /// opens a menu of them or steps through them (ChoiceButton).
+    /// steps through them or opens a menu of them (ChoiceButton).
     /// </summary>
     private FrameworkElement Choices<T>(PropertyChoice choice, string name, IEnumerable<(T Value, string Name, InspectorSample Sample)> values,
                                         Func<CoreStyle, T> current, Action<T> choose)
@@ -392,13 +392,13 @@ internal sealed class PropertiesPanel
     }
 
     /// <summary>
-    /// Port of ChoiceButton: one button for a property with a few choices, a menu of them (<see cref="ChoiceMenu"/>) or,
-    /// when Settings > Toolbar > Your properties says Step, a button that goes to the next one on each click
-    /// (<see cref="Cycle"/>).
+    /// Port of ChoiceButton: one button for a property with a few choices, a button that goes to the next one on each click
+    /// (<see cref="Cycle"/>, the default) or, when Settings > Toolbar > Your properties says Menu, a menu of them
+    /// (<see cref="ChoiceMenu"/>).
     /// </summary>
     private FrameworkElement OneButton<T>(PropertyChoice choice, string name, IReadOnlyList<(T Value, string Label, Func<UIElement> Face)> values,
                                           Func<CoreStyle, T> current, Action<T> choose) =>
-        _plan.Steps(choice) ? Cycle(name, values, current, choose) : ChoiceMenu(name, values, current, choose);
+        _plan.OpensMenu(choice) ? ChoiceMenu(name, values, current, choose) : Cycle(name, values, current, choose);
 
     /// <summary>
     /// Port of ChoiceMenu: one 36-point button for a few choices, such as Solid, Dashed and Dotted. It shows the current

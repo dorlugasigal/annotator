@@ -49,7 +49,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Every toolbar button can be turned off (`hiddenToolbarControls`); the room goes back to the tools | XAML and Workspace layout | I | Corpus, workspace tests |
 | Full properties are one row that never wraps; the toolbar grows sideways to fit it, and a vertical toolbar's column scrolls without a scroll bar | `PropertyRow` and `ToolbarToolLayout.GrownWidth` | I | Workspace tests, UX reference |
 | The toolbar's window animates its size when it grows sideways or shrinks to one capsule | Resizes at once; the new face or properties fade in | D (DV-12) | UX reference |
-| Few-choice properties are one button that opens a column of previews (the default), one button that steps through the choices (`steppedPropertyChoices`), or all choices side by side (`expandedPropertyChoices`); on and off properties are one button or both choices; width and text size are a slider with its value | XAML, `ChoicePalette` popover and Workspace `InspectorPlan` | I | Corpus, workspace tests |
+| Few-choice properties are one button that steps through the choices (the default), one button that opens a column of previews (`menuPropertyChoices`), or all choices side by side (`expandedPropertyChoices`); on and off properties are one button or both choices; width and text size are a slider with its value | XAML, `ChoicePalette` popover and Workspace `InspectorPlan` | I | Corpus, workspace tests |
 | Spotlight and Zoom menus are tool-sized toolbar items, off by default and without keys | XAML and core | I | Corpus |
 | The toolbar shrinks to one capsule with the mark and Draw or Apps after the chosen delay (`toolbarCollapseDelay`); pointing at it or clicking it opens the toolbar | `ToolbarCollapseTimer` and XAML | I | Core and workspace tests |
 | Settings is a persistent nonmodal window | WinUI window | E | UI tests |
@@ -80,7 +80,7 @@ the Gate 0 spike or evidence that covered the row when the Windows edition was b
 | Behavior | Windows mechanism | Level | Gate |
 | --- | --- | --- | --- |
 | Toolbar & Shortcuts tab: your toolbar on one line with its own buttons, more tools, drag to arrange, keys, reset | Settings tab in XAML | I | UI tests |
-| Your properties: Menu, Step or All choices for each few-choice property (One button or All choices for on and off ones), with previews | Settings tab in XAML | I | UI tests |
+| Your properties: One button, Menu or All choices for each few-choice property (One button or All choices for on and off ones), with previews | Settings tab in XAML | I | UI tests |
 | Shrink: never, or after 3, 5, 10 or 30 seconds; pointing at the button opens it at once; Settings plays a demo | Settings tab in XAML | I | Corpus |
 | Key recording rules, refusals, moves with Undo | Settings and core | I | Corpus, UI tests |
 | Global keys need Ctrl, Alt or Win; Shift with digits recorded correctly | Hotkey service | E | S-9 |

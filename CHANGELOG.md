@@ -4,9 +4,9 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
-### Changed
+### Added
 
-- You can choose how Pattern, Roughness, Fill style, Font and Alignment work in Settings > Toolbar > Your properties. Menu, the new default, shows every choice drawn as it looks when you click the button. Step goes to the next choice with each click, as before. All choices puts them side by side.
+- You can now choose a menu for Pattern, Roughness, Fill style, Font and Alignment in Settings > Toolbar > Your properties. Click the button to see every choice drawn as it looks, then click the one you want. One button, which goes to the next choice with each click, is still the default.
 
 ## 0.5.0 - 2026-11-24
 

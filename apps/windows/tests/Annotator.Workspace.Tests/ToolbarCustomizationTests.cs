@@ -69,14 +69,15 @@ public sealed class ToolbarCustomizationTests
         Assert.Equal(["Straight arrow", "Curved arrow"], InspectorPlan.ChoiceNames(PropertyChoice.ArrowType).ToArray());
         Assert.Equal(["System font", "Mono font"], InspectorPlan.ChoiceNames(PropertyChoice.Font).ToArray());
         Assert.Equal(["Align left", "Align center", "Align right"], InspectorPlan.ChoiceNames(PropertyChoice.Alignment).ToArray());
-        model.SetPropertyChoiceStyle(PropertyChoice.Roughness, PropertyChoiceStyle.Step);
-        InspectorPlan stepped = InspectorPlan.For(model.Snapshot);
-        Assert.True(stepped.Steps(PropertyChoice.Roughness));
-        Assert.False(stepped.Steps(PropertyChoice.Pattern));
-        Assert.NotEqual(all.Key, stepped.Key);
+        Assert.False(all.OpensMenu(PropertyChoice.Roughness));
+        model.SetPropertyChoiceStyle(PropertyChoice.Roughness, PropertyChoiceStyle.Menu);
+        InspectorPlan menu = InspectorPlan.For(model.Snapshot);
+        Assert.True(menu.OpensMenu(PropertyChoice.Roughness));
+        Assert.False(menu.OpensMenu(PropertyChoice.Pattern));
+        Assert.NotEqual(all.Key, menu.Key);
         model.ResetPropertyChoices();
         Assert.Null(model.Snapshot.Preferences.ExpandedPropertyChoices);
-        Assert.Null(model.Snapshot.Preferences.SteppedPropertyChoices);
+        Assert.Null(model.Snapshot.Preferences.MenuPropertyChoices);
         Assert.Equal(one.Key, InspectorPlan.For(model.Snapshot).Key);
     }
 
