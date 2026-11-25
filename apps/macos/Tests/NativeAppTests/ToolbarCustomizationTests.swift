@@ -331,7 +331,8 @@ final class ToolbarCustomizationTests: XCTestCase {
         for _ in 0..<30 where cards.count < PropertyChoice.allCases.count {
             try await Task.sleep(for: .milliseconds(100))
             cards = nodes(host).filter { ($0.accessibilityIdentifier() ?? "").hasPrefix("property-choice-") &&
-                !($0.accessibilityIdentifier() ?? "").hasSuffix("-one") && !($0.accessibilityIdentifier() ?? "").hasSuffix("-all") }
+                !($0.accessibilityIdentifier() ?? "").hasSuffix("-one") && !($0.accessibilityIdentifier() ?? "").hasSuffix("-all") &&
+                !($0.accessibilityIdentifier() ?? "").hasSuffix("-menu") }
         }
         XCTAssertEqual(Set(cards.compactMap { $0.accessibilityIdentifier() }),
                        Set(PropertyChoice.allCases.map { "property-choice-\($0.rawValue)" }))
