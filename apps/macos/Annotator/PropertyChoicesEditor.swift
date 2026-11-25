@@ -117,17 +117,15 @@ struct PropertyChoicesEditor: View {
         case .font:
             if all {
                 HStack(spacing: 5) {
-                    InspectorControlButton(name: "System font", selected: true, action: {}) {
-                        Text("Aa").font(.system(size: 17))
-                    }
-                    InspectorControlButton(name: "Mono font", action: {}) {
-                        Text("Aa").font(.system(size: 17, design: .monospaced))
+                    ForEach(TextFontChoice.allCases, id: \.self) { font in
+                        InspectorControlButton(name: "\(font.title) font", selected: font == .system, action: {}) {
+                            Text("Aa").font(font.sample(size: 17))
+                        }
                     }
                 }
             } else {
-                CycleOptions(name: "Font", choices: [("system", "System", .text("Aa", .default)),
-                                                     ("monospace", "Mono", .text("Aa", .monospaced))],
-                             selection: "system") { _ in }
+                CycleOptions(name: "Font", choices: TextFontChoice.allCases.map { ($0, $0.title, .text("Aa", $0.sample(size: 16))) },
+                             selection: TextFontChoice.system) { _ in }
             }
         case .alignment:
             if all {

@@ -172,7 +172,7 @@ function Invoke-PortableBuild([string]$architecture, [string]$folder, [string]$l
         throw "The portable $architecture build failed (exit code $exitCode, $($warnings.Count) warning(s))."
     }
     Get-ChildItem $publish -Recurse -Filter *.pdb | Remove-Item -Force
-    foreach ($required in 'Annotator.exe', 'Annotator.pri', 'notes.json', 'annotator\SKILL.md') {
+    foreach ($required in 'Annotator.exe', 'Annotator.pri', 'notes.json', 'annotator\SKILL.md', 'Fonts\Caveat.ttf', 'Fonts\Caveat-OFL.txt') {
         Assert-That (Test-Path (Join-Path $publish $required)) "The portable $architecture app lacks $required."
     }
     $exeText = [Text.Encoding]::Latin1.GetString([IO.File]::ReadAllBytes((Join-Path $publish 'Annotator.exe')))
@@ -262,7 +262,7 @@ function Test-Package([string]$path, [string]$architecture, [string]$version) {
     Assert-That ($null -ne $association -and $association.SupportedFileTypes.FileType -eq '.annotator' -and $association.Parameters -eq '"%1"') 'The .annotator file type must pass the file path as "%1".'
     $files = $package.Files
     foreach ($required in 'Annotator.exe', 'resources.pri', 'AppxManifest.xml', 'AppxBlockMap.xml', 'Microsoft.ui.xaml.dll', 'notes.json', 'annotator\SKILL.md',
-        'Assets\Lucide-LICENSE.txt', 'RoughJS-LICENSE.txt', 'Text\Unicode-LICENSE.txt') {
+        'Assets\Lucide-LICENSE.txt', 'RoughJS-LICENSE.txt', 'Text\Unicode-LICENSE.txt', 'Fonts\Caveat.ttf', 'Fonts\Caveat-OFL.txt') {
         Assert-That ($files -contains $required) "$architecture package lacks $required."
     }
     foreach ($forbidden in 'Annotator.dll', 'Annotator.pri', 'Annotator.deps.json', 'Annotator.runtimeconfig.json', 'Assets\icon-map.json', 'Package.appxmanifest') {

@@ -116,7 +116,8 @@
     {
       "choices" : [
         "System",
-        "Mono"
+        "Mono",
+        "Handwriting"
       ],
       "id" : "font",
       "label" : "Font"

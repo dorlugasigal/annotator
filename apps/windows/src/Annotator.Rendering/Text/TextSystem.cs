@@ -23,7 +23,10 @@ public readonly record struct ResolvedFont(string Family, FontWeight Weight, ush
 /// size that Windows' own type ramp uses for the point size (Small below 14, Text below 20, Display from 20; the Mac's
 /// SF Pro also switches optical size by point size), and falls back to Segoe UI. <see cref="FontDesign.Monospace"/>
 /// uses Cascadia Mono (shipped with Windows 11), then Consolas, then Courier New. Semibold is weight 600; a family
-/// without it gets DirectWrite's nearest weight.</para>
+/// without it gets DirectWrite's nearest weight. <see cref="FontDesign.Handwriting"/> is Caveat, the font file both apps
+/// ship (<see cref="HandwritingFont"/>), loaded from the app's folder into a private collection; it isn't installed in
+/// Windows. Its Regular is a named instance of the variable font; Bold text uses weight 600 on its weight axis, as on
+/// the Mac, which isn't a named instance and so needs DirectWrite's axis values.</para>
 /// <para>Metrics: AppKit's <c>ascender</c>, <c>-descender</c> and <c>leading</c> map to DirectWrite's
 /// <c>DWRITE_FONT_METRICS</c> <c>ascent</c>, <c>descent</c> and <c>lineGap</c>, scaled by size / designUnitsPerEm.
 /// Lines are ascent + descent + lineGap high, so frames are measured with Windows fonts (D-4). DirectWrite puts the
@@ -38,11 +41,15 @@ internal sealed unsafe class TextSystem : IDisposable
 
     private static readonly string[] MonospaceFamilies = ["Cascadia Mono", "Consolas", "Courier New"];
 
+    /// <summary>The OpenType weight axis, 'wght', as DirectWrite's DWRITE_FONT_AXIS_TAG_WEIGHT.</summary>
+    private const uint WeightAxis = 0x74686777;
+
     private readonly Dictionary<string, bool> availableFamilies = new(StringComparer.Ordinal);
     private readonly Dictionary<(string Family, FontWeight Weight), ResolvedFont> resolved = [];
     private readonly Dictionary<TextFont, nint> formats = [];
     private IDWriteFactory* factory;
     private IDWriteFontCollection* collection;
+    private IDWriteFontCollection* handwriting;
 
     private TextSystem(IDWriteFactory* factory, IDWriteFontCollection* collection)
     {
@@ -82,6 +89,10 @@ internal sealed unsafe class TextSystem : IDisposable
     /// <summary>The family the D-4 rule picks for <paramref name="design"/> at <paramref name="size"/> points on this system.</summary>
     public string Family(FontDesign design, double size)
     {
+        if (design == FontDesign.Handwriting)
+        {
+            return HandwritingFont.Family;
+        }
         if (design == FontDesign.Monospace)
         {
             foreach (var candidate in MonospaceFamilies)
@@ -108,17 +119,18 @@ internal sealed unsafe class TextSystem : IDisposable
         IDWriteFont* match = null;
         try
         {
+            var fonts = Collection(font.Design);
             uint index;
             BOOL exists;
             fixed (char* name = family)
             {
-                Native.Check(collection->FindFamilyName(name, &index, &exists), "IDWriteFontCollection::FindFamilyName");
+                Native.Check(fonts->FindFamilyName(name, &index, &exists), "IDWriteFontCollection::FindFamilyName");
             }
             if (!exists)
             {
                 throw new InvalidOperationException($"The font family {family} is not installed.");
             }
-            Native.Check(collection->GetFontFamily(index, &fontFamily), "IDWriteFontCollection::GetFontFamily");
+            Native.Check(fonts->GetFontFamily(index, &fontFamily), "IDWriteFontCollection::GetFontFamily");
             Native.Check(fontFamily->GetFirstMatchingFont((DWRITE_FONT_WEIGHT)(int)font.Weight, DWRITE_FONT_STRETCH.DWRITE_FONT_STRETCH_NORMAL,
                                                           DWRITE_FONT_STYLE.DWRITE_FONT_STYLE_NORMAL, &match), "IDWriteFontFamily::GetFirstMatchingFont");
             DWRITE_FONT_METRICS metrics;
@@ -241,8 +253,100 @@ internal sealed unsafe class TextSystem : IDisposable
             Native.Release(ref pointer);
         }
         formats.Clear();
+        Native.Release(ref handwriting);
         Native.Release(ref collection);
         Native.Release(ref factory);
+    }
+
+    /// <summary>The collection that holds <paramref name="design"/>'s family: the system's fonts, or the bundled handwriting font.</summary>
+    private IDWriteFontCollection* Collection(FontDesign design) =>
+        design == FontDesign.Handwriting ? HandwritingCollection() : collection;
+
+    /// <summary>
+    /// A private collection with the handwriting font from the app's folder. AddFontFile adds both named instances of
+    /// Caveat's variable font, Regular (400) and Bold (700), as the family "Caveat".
+    /// </summary>
+    private IDWriteFontCollection* HandwritingCollection()
+    {
+        ObjectDisposedException.ThrowIf(factory == null, this);
+        if (handwriting != null)
+        {
+            return handwriting;
+        }
+        var path = Path.Combine(AppContext.BaseDirectory, HandwritingFont.RelativePath);
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException($"The handwriting font is missing from the app's folder: {path}", path);
+        }
+        IDWriteFactory3* factory3 = null;
+        IDWriteFontFile* file = null;
+        IDWriteFontSetBuilder* builder = null;
+        IDWriteFontSetBuilder1* fileBuilder = null;
+        IDWriteFontSet* fontSet = null;
+        IDWriteFontCollection1* loaded = null;
+        try
+        {
+            factory3 = Native.Query<IDWriteFactory3>(factory, IDWriteFactory3.IID_Guid, "QueryInterface(IDWriteFactory3)");
+            fixed (char* name = path)
+            {
+                Native.Check(factory->CreateFontFileReference(name, null, &file), "IDWriteFactory::CreateFontFileReference");
+            }
+            Native.Check(factory3->CreateFontSetBuilder(&builder), "IDWriteFactory3::CreateFontSetBuilder");
+            fileBuilder = Native.Query<IDWriteFontSetBuilder1>(builder, IDWriteFontSetBuilder1.IID_Guid, "QueryInterface(IDWriteFontSetBuilder1)");
+            Native.Check(fileBuilder->AddFontFile(file), "IDWriteFontSetBuilder1::AddFontFile");
+            Native.Check(builder->CreateFontSet(&fontSet), "IDWriteFontSetBuilder::CreateFontSet");
+            Native.Check(factory3->CreateFontCollectionFromFontSet(fontSet, &loaded), "IDWriteFactory3::CreateFontCollectionFromFontSet");
+            handwriting = (IDWriteFontCollection*)loaded;
+            loaded = null;
+            return handwriting;
+        }
+        finally
+        {
+            Native.Release(ref loaded);
+            Native.Release(ref fontSet);
+            Native.Release(ref fileBuilder);
+            Native.Release(ref builder);
+            Native.Release(ref file);
+            Native.Release(ref factory3);
+        }
+    }
+
+    /// <summary>
+    /// The format for <paramref name="font"/>'s family, weight and size. Handwriting's weight 600 is not a named instance
+    /// of the variable font, so it is asked for by its weight axis value; the weight classes reach only named instances
+    /// and would give Bold (700).
+    /// </summary>
+    private IDWriteTextFormat* CreateFormat(TextFont font, string family)
+    {
+        var fonts = Collection(font.Design);
+        fixed (char* name = family)
+        fixed (char* locale = Locale)
+        {
+            if (font.Design == FontDesign.Handwriting && font.Weight != FontWeight.Regular)
+            {
+                var factory6 = Native.TryQuery<IDWriteFactory6>(factory, IDWriteFactory6.IID_Guid);
+                if (factory6 != null)
+                {
+                    try
+                    {
+                        var weight = new DWRITE_FONT_AXIS_VALUE { axisTag = (DWRITE_FONT_AXIS_TAG)WeightAxis, value = (int)font.Weight };
+                        IDWriteTextFormat3* axisFormat;
+                        Native.Check(factory6->CreateTextFormat(name, fonts, &weight, 1, (float)font.Size, locale, &axisFormat),
+                                     "IDWriteFactory6::CreateTextFormat");
+                        return (IDWriteTextFormat*)axisFormat;
+                    }
+                    finally
+                    {
+                        Native.Release(ref factory6);
+                    }
+                }
+            }
+            IDWriteTextFormat* format;
+            Native.Check(factory->CreateTextFormat(name, fonts, (DWRITE_FONT_WEIGHT)(int)font.Weight, DWRITE_FONT_STYLE.DWRITE_FONT_STYLE_NORMAL,
+                                                   DWRITE_FONT_STRETCH.DWRITE_FONT_STRETCH_NORMAL, (float)font.Size, locale, &format),
+                         "IDWriteFactory::CreateTextFormat");
+            return format;
+        }
     }
 
     private IDWriteTextFormat* Format(TextFont font)
@@ -257,14 +361,7 @@ internal sealed unsafe class TextSystem : IDisposable
             throw new ArgumentOutOfRangeException(nameof(font), font.Size, "A font size must be finite and positive.");
         }
         var family = Family(font.Design, font.Size);
-        IDWriteTextFormat* format;
-        fixed (char* name = family)
-        fixed (char* locale = Locale)
-        {
-            Native.Check(factory->CreateTextFormat(name, collection, (DWRITE_FONT_WEIGHT)(int)font.Weight, DWRITE_FONT_STYLE.DWRITE_FONT_STYLE_NORMAL,
-                                                   DWRITE_FONT_STRETCH.DWRITE_FONT_STRETCH_NORMAL, (float)font.Size, locale, &format),
-                         "IDWriteFactory::CreateTextFormat");
-        }
+        IDWriteTextFormat* format = CreateFormat(font, family);
         try
         {
             Native.Check(format->SetWordWrapping(DWRITE_WORD_WRAPPING.DWRITE_WORD_WRAPPING_NO_WRAP), "IDWriteTextFormat::SetWordWrapping");

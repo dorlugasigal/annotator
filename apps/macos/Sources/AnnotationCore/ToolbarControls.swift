@@ -100,7 +100,7 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
         case .edges: ["Sharp corners", "Rounded corners"]
         case .arrowType: ["Straight arrow", "Curved arrow"]
         case .pressure: ["Constant pressure", "Ink pressure"]
-        case .font: ["System", "Mono"]
+        case .font: ["System", "Mono", "Handwriting"]
         case .alignment: ["Left", "Center", "Right"]
         }
     }

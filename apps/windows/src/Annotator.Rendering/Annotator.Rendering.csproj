@@ -41,5 +41,11 @@
     <!-- Capture frame comparison, so frames that change nothing are skipped (Effects/CaptureFrameComparer.cs). -->
     <EffectShader Include="Effects\Shaders\compare.hlsl" Entry="cs_compare" Profile="cs_5_0" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The handwriting font, Caveat, and its SIL Open Font License: the Mac's own files, shipped next to the app
+         (Text/TextSystem.cs loads Fonts\Caveat.ttf; About shows the license). -->
+    <Content Include="..\..\..\macos\Sources\PresentationRendering\Fonts\Caveat.ttf" Link="Fonts\Caveat.ttf" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\..\macos\Sources\PresentationRendering\Fonts\Caveat-OFL.txt" Link="Fonts\Caveat-OFL.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
   <Import Project="Effects\Shaders\Shaders.targets" />
 </Project>

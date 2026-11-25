@@ -30,6 +30,24 @@ public sealed class TextMeasurerTests
     }
 
     [Fact]
+    public void HandwritingTextUsesTheBundledCaveatFont()
+    {
+        var measurer = Warp.Measurer;
+        Assert.Equal("Caveat", measurer.FamilyName(FontDesign.Handwriting, 28));
+        // Caveat's own metrics, the same as on the Mac: 960 and 300 of 1000 units, with no line gap.
+        var regular = new TextFont(FontDesign.Handwriting, FontWeight.Regular, 100);
+        var metrics = measurer.LineMetrics(regular);
+        Assert.Equal(96, metrics.Ascent, 3);
+        Assert.Equal(30, metrics.Descent, 3);
+        Assert.Equal(0, metrics.Leading, 3);
+        // The Mac measures "why the dip?" 423.8 points wide in Regular and 426.8 in weight 600. Caveat's Bold (700), which the
+        // weight classes would pick instead of the weight axis, is 428.3 wide.
+        Assert.InRange(measurer.Measure("why the dip?", regular).Width, 422.8, 424.8);
+        Assert.InRange(measurer.Measure("why the dip?", regular with { Weight = FontWeight.Semibold }).Width, 425.8, 427.6);
+        Assert.NotEqual(measurer.Measure("why the dip?", Body with { Size = 100 }).Width, measurer.Measure("why the dip?", regular).Width);
+    }
+
+    [Fact]
     public void LineMetricsAreTheFontsAscentDescentAndLineGapInPoints()
     {
         var measurer = Warp.Measurer;

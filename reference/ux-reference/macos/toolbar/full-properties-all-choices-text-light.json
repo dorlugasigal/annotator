@@ -327,7 +327,19 @@
     {
      "enabled": true,
      "frame": [
-      182.5,
+      173.5,
+      97,
+      36,
+      36
+     ],
+     "help": "Handwriting font",
+     "label": "Handwriting font",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223.5,
       77,
       23,
       14
@@ -340,7 +352,7 @@
       {
        "enabled": true,
        "frame": [
-        196.5,
+        237.5,
         108,
         18,
         14
@@ -350,7 +362,7 @@
      ],
      "enabled": true,
      "frame": [
-      182.5,
+      223.5,
       108,
       96,
       14
@@ -362,7 +374,7 @@
     {
      "enabled": true,
      "frame": [
-      332.5,
+      373.5,
       77,
       38,
       14
@@ -373,7 +385,7 @@
     {
      "enabled": true,
      "frame": [
-      332.5,
+      373.5,
       97,
       36,
       36
@@ -387,7 +399,7 @@
     {
      "enabled": true,
      "frame": [
-      384.5,
+      425.5,
       77,
       55,
       14
@@ -398,7 +410,7 @@
     {
      "enabled": true,
      "frame": [
-      384.5,
+      425.5,
       97,
       36,
       36
@@ -412,7 +424,7 @@
     {
      "enabled": true,
      "frame": [
-      425.5,
+      466.5,
       97,
       36,
       36
@@ -425,7 +437,7 @@
     {
      "enabled": true,
      "frame": [
-      466.5,
+      507.5,
       97,
       36,
       36

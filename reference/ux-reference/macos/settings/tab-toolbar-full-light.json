@@ -2293,7 +2293,7 @@
             72.5,
             75
            ],
-           "help": "One button. Click it to go to the next choice: System and Mono.",
+           "help": "One button. Click it to go to the next choice: System, Mono and Handwriting.",
            "identifier": "property-choice-font-one",
            "label": "Font: one button",
            "role": "AXButton",
@@ -2305,10 +2305,10 @@
            "frame": [
             355,
             1080,
-            93,
+            134,
             75
            ],
-           "help": "System and Mono, side by side.",
+           "help": "System, Mono and Handwriting, side by side.",
            "identifier": "property-choice-font-all",
            "label": "Font: all choices",
            "role": "AXButton"
@@ -2318,7 +2318,7 @@
          "frame": [
           264.5,
           1047,
-          193.5,
+          234.5,
           118
          ],
          "identifier": "property-choice-font",
@@ -2330,7 +2330,7 @@
           {
            "enabled": true,
            "frame": [
-            479.5,
+            520.5,
             1057,
             82.5,
             15
@@ -2341,7 +2341,7 @@
           {
            "enabled": true,
            "frame": [
-            478,
+            519,
             1080,
             72.5,
             75
@@ -2356,7 +2356,7 @@
           {
            "enabled": true,
            "frame": [
-            558.5,
+            599.5,
             1080,
             134,
             75
@@ -2369,7 +2369,7 @@
          ],
          "enabled": true,
          "frame": [
-          468,
+          509,
           1047,
           234.5,
           118

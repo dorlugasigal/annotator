@@ -46,10 +46,11 @@ public final class SceneRenderer {
 
     public func drawingBounds(for element: Element) -> CGRect {
         var bounds = element.frame.cgRect
+        if element.tool == .text { bounds = NativeTextFont.inkFrame(element) }
         if element.tool.isShape || element.tool.isFreehand || element.tool.isConnector {
             bounds = bounds.union(path(for: element).boundingBox)
         }
-        if let label = ShapeLabelLayout.textElement(for: element) { bounds = bounds.union(label.frame.cgRect) }
+        if let label = ShapeLabelLayout.textElement(for: element) { bounds = bounds.union(NativeTextFont.inkFrame(label)) }
         if element.tool == .counter {
             bounds = bounds.union(element.frame.cgRect.offsetBy(dx: 0, dy: element.frame.height * 0.12))
         }
@@ -483,7 +484,7 @@ public final class SceneRenderer {
         NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: true)
         defer { NSGraphicsContext.restoreGraphicsState() }
         GradientPainter.paint(style.strokeGradient, bounds: paintBounds ?? element.frame.cgRect, in: context,
-                              extent: element.frame.cgRect.insetBy(dx: -2, dy: -2)) {
+                              extent: NativeTextFont.inkFrame(element).insetBy(dx: -2, dy: -2)) {
             (element.text as NSString).draw(in: element.frame.cgRect, withAttributes: [
                 .font: font, .foregroundColor: style.color.nsColor.withAlphaComponent(style.color.alpha * style.opacity),
                 .paragraphStyle: paragraph

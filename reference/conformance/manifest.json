@@ -604,9 +604,9 @@
       "sha256" : "fadda3996947a405dfa172242f10a290fe079daea76181bca1c928b398f989f5"
     },
     {
-      "bytes" : 10103,
+      "bytes" : 13813,
       "path" : "geometry/text.jsonl",
-      "sha256" : "1045cc1a36a1a4cdc1741360b6ed8db51f9d5c94b472c1e12d9c7be1f8fe355c"
+      "sha256" : "f0f30e3c2078bd9c433bb3b55f6e87ff5cd6b5619bdfa9d52e30bbb4ab25913f"
     },
     {
       "bytes" : 18241,
@@ -1124,9 +1124,9 @@
       "sha256" : "10173500904fad6e8b97a5ffbb48c9c69e1fbdd260778eee5ed29e0237698e11"
     },
     {
-      "bytes" : 4254,
+      "bytes" : 4277,
       "path" : "profiles/visibility-styles.json",
-      "sha256" : "b16bdfc48b1ff72730d01cb1760afc5babc66fa8bdcf28f0098aa6f85d27290e"
+      "sha256" : "e86ca8f653de613d493381d064f001d0ba0df8ce5dd4d3c0814249dffdf641c7"
     },
     {
       "bytes" : 626,
@@ -1367,9 +1367,9 @@
     "shortcuts" : "LocalShortcut parsing and labels, command IDs, global shortcut checks, scripted bind and assign sessions, key lookups and the macOS key codes the app stores."
   },
   "source" : {
-    "commit" : "36f19f61541b358f9b3f8ddd8f1222a9acbf63d9",
-    "date" : "2026-11-24",
-    "fingerprint" : "37dfa472967090cfe01290ba96b3082bf36f24e61d1d7cfb00b05af26138fe78",
+    "commit" : "ec58b964d040bc816c8ef2ed64391e7da6e11f7c",
+    "date" : "2026-11-25",
+    "fingerprint" : "79e4bd1be8eeaeabfef12455677b75ecbcda545ba52f90582613d2aab33909cc",
     "paths" : [
       "apps/macos/Package.swift",
       "apps/macos/Sources/AnnotationCore",

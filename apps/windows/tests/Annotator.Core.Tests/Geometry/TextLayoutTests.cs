@@ -1,6 +1,7 @@
 // Port of the label assertions in apps/macos/Tests/RenderingTests/SystemShapeAndLabelTests.swift and GradientRenderingTests.swift,
 // plus the NativeTextFont content-size rules (WIN-REND-03).
 using Annotator.Core.Geometry;
+using Annotator.Core.Scene;
 
 namespace Annotator.Core.Tests;
 
@@ -54,6 +55,24 @@ public class TextLayoutTests
         Assert.Equal(new TextFont(FontDesign.System, FontWeight.Regular, 18), TextFont.Resolve(style));
         style.FontName = "Monospace";
         Assert.Equal(FontDesign.System, TextFont.Resolve(style).Design);
+        style.FontName = "handwriting";
+        style.Bold = true;
+        Assert.Equal(new TextFont(FontDesign.Handwriting, FontWeight.Semibold, 18), TextFont.Resolve(style));
+    }
+
+    [Fact]
+    public void HandwritingTextSitsOnCaveatsBaseline()
+    {
+        // geometry/text.jsonl: Caveat at 28 points has an ascender of 26.88018798828125 and a descender of 8.40008544921875.
+        Assert.Equal(26.88018798828125, MacTextMetrics.Ascender(28, FontDesign.Handwriting));
+        Assert.Equal(8.40008544921875, MacTextMetrics.Descender(28, FontDesign.Handwriting));
+        Assert.Equal(37, MacTextMetrics.ContentHeight("A", 28, FontDesign.Handwriting));
+        Assert.Equal(153, MacTextMetrics.ContentHeight("Ends with a line break\n", 40, FontDesign.Handwriting));
+        var style = new Style { FontName = "handwriting" };
+        var frame = new Rect(4, 10, 200, 40);
+        var run = new TextRun("A", frame, TextFont.Resolve(style), TextAlignment.Left, Paint.Black);
+        Assert.Equal(10 + 26.88018798828125, run.Baseline);
+        Assert.Equal(10 + 26.88018798828125, MacTextMetrics.FirstBaseline(frame, 28, FontDesign.Handwriting));
     }
 
     [Fact]
