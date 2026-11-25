@@ -9,20 +9,24 @@
 //
 // createInk(options) -> { layer, toolbar, state, styles, on, setMode, setTool, setColor, setCollapsed, select, undo, redo,
 //   clear, perform, hideGhost, moveGhost, placeGhost, reflow, render, rectOf, box, add, remove, marks, setBoard,
-//   setProperties, setAppearance, setHidden, setEnabled, setSpotlight, setHalo, setStyle, more, fit, collapsed, enabled,
+//   setProperties, setAppearance, setHidden, setEnabled, setSpotlight, setHalo, setStyle, setGradient, more, fit, collapsed, enabled,
 //   toolbarRect }
 // Options: surface, tool, color, palette, size, tools, collapsed, pillLabel, useLabel, toolbarParent, smart,
 //   appearance ("dark" | "light" | "auto"), glass (true), toolbarPosition ("fixed" | "absolute"), interactive (true),
 //   enabled (true), properties (whether the properties row starts open; open from 600 px wide, and remembered),
-//   style (what drawing tools start with, for example { roughness: 2 }), moreHref ("#install").
+//   style (what drawing tools start with, for example { roughness: 2 }), moreHref ("#install"),
+//   preset ("customized" | "factory": a toolbar someone has set up, or the app as installed), gradient (which of
+//   the app's gradients is the stroke color at the start: "sunset", "lagoon", "ember", "spectrum", "dusk", "citrus",
+//   "ocean", "orchid", "aurora", "cherry", "forest", "copper", "neon", "tropic" or "steel"), toolbarItems and
+//   hiddenControls (the app's own names for the bar's arrangement, to override the preset's).
 // Events: mark, edit, mode, tool, change, clear, smart, shortcut, collapse, board, properties, hide, enabled,
-//   spotlight, halo, style, layout, and more (feature, event): event.preventDefault() keeps the page where it is.
+//   spotlight, halo, style, status, layout, and more (feature, event): event.preventDefault() keeps the page where it is.
 // A mark is the app's element ({ id, tool, frame, points, text, style, rotation, ... }) and also answers to the names
 // pages used before: type, x, y, w, h, x1, y1, x2, y2, cx, cy, head, color, size, n and anchor.
 // Pages can read --ink-toolbar-height on the root element (the open toolbar's height) and set --ink-layer-z on
 // .ink-layer (60 by default).
 import { symbol, mark as brandMark, patternSample, roughnessSample, edgesSample, fillSample, routeSample, headSample, headPaths, pressureSample, APP_PALETTE, INK_KEYS } from "./toolbar-glyphs.js";
-import { P, R, Tool, INK, defaultStyle, makeElement, contains, segmentDistance, Stacking, DragConstraint, selectionGeometry, translate, resize, anchorLocations, anchorPoint, symbolFrame, CanvasDocument, LaserTrail, Motion } from "./annotation-core.js";
+import { P, R, Tool, INK, Paint, GRADIENT_PRESETS, defaultStyle, makeElement, contains, segmentDistance, Stacking, DragConstraint, selectionGeometry, translate, resize, anchorLocations, anchorPoint, symbolFrame, CanvasDocument, LaserTrail, Motion } from "./annotation-core.js";
 import { recognize as recognizeStroke, previewInput } from "./recognition.js";
 import { drawOps, svgMarkup, laserOps, turn, snapOutline, align, resample } from "./scene.js";
 
@@ -223,13 +227,48 @@ const TOOL_LIST = [
   ["ellipse", "Ellipse", "4", "circle", 21, 1], ["arrow", "Arrow", "5", "arrow.up.right", 21.5, 1], ["line", "Line", "6", "line.diagonal", 23, 1],
   ["pen", "Pen", "7", "pencil", 17, 2], ["text", "Text", "8", "textformat", 24, 2], ["highlight", "Highlighter", "9", "highlighter", 21.5, 2],
   ["laser", "Laser pointer", "L", "laser.burst", 26, 2], ["eraser", "Eraser", "0", "eraser", 21, 3],
-  ["counter", "Numbered counter", "N", "1.circle", 21], ["blur", "Blur", "U", "aqi.medium", 22],
+  ["counter", "Numbered counter", "N", "1.circle", 21, 5], ["blur", "Blur region", "U", "aqi.medium", 22, 4],
 ];
 export const TOOLS = Object.fromEntries(TOOL_LIST.map(([id, label, key, name, size, family]) =>
   [id, { label, key, symbol: name, size, family, icon: symbol(name, 22) }]));
-const BAR_TOOLS = TOOL_LIST.filter((tool) => tool[5] !== undefined).map((tool) => tool[0]);
 export const PALETTE = ["#ffb58c", "#ffe14d", "#35d0ba", "#5b8cff", "#ff5d5d", "#f4f6fb"];
-const DEFAULT_TOOLS = [...BAR_TOOLS, "blur"];
+// The bar as the app installs it: its tools in order, then Effects (WorkspacePreferences.toolbarItems).
+const FACTORY_ITEMS = ["select", "rect", "diamond", "ellipse", "arrow", "line", "pen", "text", "highlight", "laser", "eraser", "effects"];
+const DEFAULT_TOOLS = [...FACTORY_ITEMS.filter((id) => id !== "effects"), "blur", "counter"];
+// Bar buttons that are not tools of the demo: Effects, which stands for the last effect, and Pixelate.
+const BAR_EXTRA = {
+  effects: { label: "Effects", key: "S", symbol: "camera.filters", size: 25, family: 4, title: "Effects (S) — Blur, Pixelate or Distort" },
+  pixelate: { label: "Pixelate region", key: "X", symbol: "square.grid.3x3.fill", size: 22, family: 4, more: "effects" },
+};
+// ShortcutAction.toolbarChoices: the buttons people can add beside the tools, with the app's names, help and symbols.
+// The last entry is what "Want to see more?" says for one the demo does not have.
+const ACTIONS = {
+  spotlight: ["Spotlight", "Turn the spotlight on or off.", "flashlight.on.fill", 19, "focus"],
+  cursorHalo: ["Cursor halo", "Turn the ring around your pointer on or off.", "circle.dotted", 19, "focus"],
+  pointerLens: ["Pointer lens", "Turn the zoom lens under your pointer on or off.", "plus.magnifyingglass", 19, "zoom"],
+  smartDraw: ["Smart draw", "Turn shape recognition for the pen on or off.", "wand.and.stars", 19, null],
+  shareRegion: ["Share region", "Choose part of a display and open a window to share in your call.", "rectangle.on.rectangle", 20, "share"],
+  focusMenu: ["Spotlight menu", "Spotlight, cursor halo and cleanup, in one menu.", "light.beacon.max", 20, "focus"],
+  zoomMenu: ["Zoom menu", "Pointer lens, screen zoom and zoom levels, in one menu.", "arrow.up.left.and.down.right.magnifyingglass", 19, "zoom"],
+};
+// ToolbarControl: the bar's own buttons, each of which Settings can turn off.
+const CONTROLS = ["library", "board", "mode", "undo", "redo", "clearAll", "properties", "settings", "hide"];
+// How the demo starts. "factory" is the app's plain defaults (Style.defaults), as in the reference captures.
+// "customized" is a toolbar someone has used and set up: the owner asked for the demo to open that way, so these are
+// deliberate differences from the app's factory defaults. Every one is a state the app itself can be left in, none
+// is invented:
+//   the stroke color of shapes, lines, arrows, the pen and text is Sunset, the gradient the app gives a brand-new
+//   profile (ToolStyleDefaults.firstUseGradient); the counter, highlighter and laser keep their own colors, as there;
+//   Arrow is set to Curved, and Roughness to Wild, its strongest choice, for shapes, lines, arrows and the pen;
+//   the pen, shapes, lines and arrows remember a width of 4 points;
+//   Diamond and Line are taken off the bar, Numbered counter and the Smart draw button are added to it, and the
+//   Redo button is turned off (Settings > Toolbar; compare reference/ux-reference/macos/toolbar/added-buttons and
+//   hidden-buttons). Keys still choose the tools that left the bar, as in the app.
+const PRESETS = {
+  factory: { gradient: null, curved: false, roughness: 0, width: 3, items: FACTORY_ITEMS, hidden: [] },
+  customized: { gradient: "sunset", curved: true, roughness: 6, width: 4, hidden: ["redo"],
+    items: ["select", "rect", "ellipse", "arrow", "pen", "text", "highlight", "laser", "eraser", "effects", "counter", "action.smartDraw"] },
+};
 // The web demo's names for two tools differ from the app's.
 const APP_TOOL = { rect: "rectangle", highlight: "highlighter" }, WEB_TOOL = { rectangle: "rect", highlighter: "highlight" };
 const appTool = (id) => APP_TOOL[id] || id, webTool = (tool) => WEB_TOOL[tool] || tool;
@@ -255,6 +294,11 @@ const MORE = {
   pressure: "Ink pressure: lines that get thinner and thicker as you draw.",
   text: "Fonts, sizes, bold and alignment for text.",
   label: "Text inside a shape: double-click a shape and type.",
+  wheel: "A color wheel, for any color you like.",
+  eyedropper: "Pick a color from anywhere on your screen.",
+  focus: "Spotlight and a halo around your pointer.",
+  zoom: "A zoom lens under your pointer, and screen zoom.",
+  share: "Share one part of your screen in a call.",
 };
 const STORE = "annotator.demo.properties";
 const ACCENT = "#0a84ff";
@@ -272,14 +316,26 @@ export function createInk(options = {}) {
   const palette = options.palette || PALETTE;
   const toolIds = options.tools || DEFAULT_TOOLS;
   const scriptSize = options.size || 5;
-  const stroke = options.color || (options.palette ? palette[0] : INK.coral);
+  const preset = PRESETS[options.preset] || PRESETS.customized;
+  // The stroke color at the start: the gradient the page names, else a page's own solid color, else the preset's
+  // gradient if it has one. A name the app does not have falls back to the first-use gradient, with one warning.
+  const named = (name) => {
+    const found = GRADIENT_PRESETS.find((choice) => choice.id === String(name).toLowerCase());
+    if (!found) console.warn(`Annotator demo: there is no gradient called "${name}". Using "sunset". The app's gradients are ${GRADIENT_PRESETS.map((choice) => choice.id).join(", ")}.`);
+    return (found || GRADIENT_PRESETS[0]).gradient;
+  };
+  const wanted = options.gradient ?? (options.color || options.palette ? null : preset.gradient);
+  const gradient = wanted ? named(wanted) : null;
+  const stroke = gradient ? gradient.colors[0] : options.color || (options.palette ? palette[0] : INK.coral);
   const moreHref = options.moreHref || "#install";
-  // Each tool keeps its own style, as in the app (ToolStyleDefaults.swift): coral, 3 points wide, unless the page asks.
-  const drawn = { color: stroke, width: options.size || 3, roughness: options.style?.roughness ?? options.style?.rough ?? 0, pattern: options.style?.pattern || "solid" };
+  // Each tool keeps its own style, as in the app (ToolStyleDefaults.swift), starting from the preset unless the page asks.
+  const inked = { color: stroke, strokeGradient: gradient && { colors: [...gradient.colors], angle: gradient.angle } };
+  const drawn = { ...inked, width: options.size || preset.width, roughness: options.style?.roughness ?? options.style?.rough ?? preset.roughness, pattern: options.style?.pattern || "solid" };
   const own = (id, extra) => ({ ...defaultStyle(appTool(id)), ...extra });
   const styles = {
-    rect: own("rect", drawn), diamond: own("diamond", drawn), ellipse: own("ellipse", drawn), arrow: own("arrow", drawn), line: own("line", drawn), pen: own("pen", drawn),
-    text: own("text", { color: stroke }), counter: own("counter", { color: stroke }), highlight: own("highlight"), laser: own("laser", { fade: LaserTrail.defaultLifetime }),
+    rect: own("rect", drawn), diamond: own("diamond", drawn), ellipse: own("ellipse", drawn), line: own("line", drawn), pen: own("pen", drawn),
+    arrow: own("arrow", { ...drawn, curved: options.style?.curved ?? preset.curved }),
+    text: own("text", inked), counter: own("counter", { color: options.color || (options.palette ? palette[0] : INK.coral) }), highlight: own("highlight"), laser: own("laser", { fade: LaserTrail.defaultLifetime }),
     eraser: own("eraser"), blur: own("blur", { effectAmount: 18 }), spotlight: { radius: 130 },
   };
   let remembered = null;
@@ -375,7 +431,9 @@ export function createInk(options = {}) {
   }
   function scripted({ anchor, type, color, size, text = "", n, points, x, y, w, h: height, x1, y1, x2, y2, cx, cy, head, seed, pattern, id: _id, ...extras }) {
     const tool = type === "arrow" ? (head === false ? "line" : "arrow") : type === "pixelate" ? "blur" : appTool(type);
-    const m = newMark(tool, { text, style: { ...defaultStyle(tool), color: color || state.color, width: size || scriptSize, pattern: pattern || "solid" } });
+    // A step that names no color gets the selected one, gradient and all.
+    const ink = color ? { color } : { color: state.color, strokeGradient: state.gradient && { colors: [...state.gradient.colors], angle: state.gradient.angle } };
+    const m = newMark(tool, { text, style: { ...defaultStyle(tool), ...ink, width: size || scriptSize, pattern: pattern || "solid" } });
     m.legacy = { seed: seed ?? (Math.random() * 1e9) | 0, ...(type === "pixelate" ? { effect: "pixelate" } : {}), ...extras };
     if (n != null) m.n = n;
     place(m, { points, x, y, w, h: height, x1, y1, x2, y2, cx, cy });
@@ -430,35 +488,55 @@ export function createInk(options = {}) {
   // WorkspaceModel.applyStyle: a change goes to the selected marks and becomes what the next mark of that tool gets.
   // A slider drag is one undo step (beginStyleEdit and finishStyleEdit).
   let styleEdit = false;
-  function write(prop, value, live) {
-    const key = effectiveKey();
-    if (SETTINGS.has(prop)) { if (styles[state.tool]) styles[state.tool][prop] = value; }
-    else {
-      if (key !== "select" && styles[key]) styles[key][prop] = value;
-      if (doc.selection.size) {
-        if (live && !styleEdit && !doc.isEditing) { doc.begin(); styleEdit = true; }
-        doc.editSelection((m) => {
-          if (key === "select" && Tool.isProtection(m.tool)) return;
-          if (m.legacy && !LEGACY_KEEPS.has(prop) && m.tool !== "text" && m.tool !== "counter") modernize(m);
-          m.style[prop] = value;
-        });
-        paint();
-        if (!live) { finishStyleEdit(); selectedMarks().forEach((m) => emit("edit", m)); emit("change", doc.elements); }
-      }
+  const announce = () => { selectedMarks().forEach((m) => emit("edit", m)); emit("change", doc.elements); };
+  // While the color picker is open everything it changes is one undo step, as in the app.
+  function applyStyle(prop, mutate, live, supports = () => true) {
+    const key = effectiveKey(), batch = live || popKind === "color";
+    if (key !== "select" && styles[key]) mutate(styles[key]);
+    if (doc.selection.size) {
+      if (batch && !styleEdit && !doc.isEditing) { doc.begin(); styleEdit = true; }
+      doc.editSelection((m) => {
+        if (!supports(m) || (key === "select" && Tool.isProtection(m.tool))) return;
+        if (m.legacy && !LEGACY_KEEPS.has(prop) && m.tool !== "text" && m.tool !== "counter") modernize(m);
+        mutate(m.style);
+      });
+      paint();
+      if (!batch) { if (styleEdit) finishStyleEdit(); else announce(); }
     }
     syncStyle();
     if (!live) refreshToolbar();
+  }
+  function write(prop, value, live) {
+    const key = effectiveKey();
+    if (SETTINGS.has(prop)) {
+      if (styles[state.tool]) styles[state.tool][prop] = value;
+      syncStyle();
+      if (!live) refreshToolbar();
+    } else applyStyle(prop, (style) => { style[prop] = value; }, live);
     emit("style", { tool: key, prop, value });
+  }
+  // The picker's choices (InspectorColorPalette): a gradient, a solid color, and the paint's opacity. Blur has no paint.
+  const paintable = (m) => !Tool.isProtection(m.tool);
+  function setGradient(gradient) {
+    applyStyle("color", (style) => Paint.setGradient(style, gradient), false, paintable);
+    emit("style", { tool: effectiveKey(), prop: "strokeGradient", value: gradient });
+  }
+  function setSolid(color, useColorAlpha = false) {
+    applyStyle("color", (style) => Paint.setColor(style, color, useColorAlpha), false);
+    emit("style", { tool: effectiveKey(), prop: "color", value: read("color") });
   }
   function finishStyleEdit() {
     if (!styleEdit) return;
     styleEdit = false;
+    const before = doc.generation;
     if (doc.isEditing) doc.commit();
+    if (doc.generation !== before) announce();
   }
   function syncStyle() {
     // The color a script's mark gets when its step names none: the selected mark's, else the tool's, else the pen's.
-    const chosen = selectedMarks().find((m) => !Tool.isProtection(m.tool));
-    state.color = chosen?.style.color || (["blur", "eraser", "select", "spotlight"].includes(state.tool) ? styles.pen : styles[state.tool] || styles.pen).color;
+    const chosen = selectedMarks().find(paintable), from = chosen?.style || (["blur", "eraser", "select", "spotlight"].includes(state.tool) ? styles.pen : styles[state.tool] || styles.pen);
+    state.color = from.color;
+    state.gradient = from.strokeGradient || null;
     layer.style.setProperty("--ink-color", state.color);
     layer.style.setProperty("--ink-spot-size", `${styles.spotlight.radius}px`);
     cursorShown = state.mode === "draw" ? toolCursor() : "";
@@ -503,6 +581,23 @@ export function createInk(options = {}) {
     el.innerHTML = `<path d="M-2 11L11 -2M-2 2L2 -2M7 11L11 7${v.fillStyle === "crosshatch" ? "M-2 -2L11 11M7 -2L11 2M-2 7L2 11" : ""}" stroke="${v.fill}" stroke-width="1.4" fill="none"/>`;
     return `url(#${id})`;
   }
+  // GradientPainter: one gradient across the mark's frame, for its line, its dashes and its arrowheads alike. The
+  // mark's <linearGradient> lives in the layer's defs; text and counters use the same gradient as a CSS background.
+  function gradientPaint(m, frame = m.frame) {
+    let el = defs.querySelector(`[data-grad="${m.id}"]`);
+    const g = m.style.strokeGradient;
+    if (!g) { el?.remove(); return null; }
+    if (!el) el = defs.appendChild(svgEl("linearGradient", { "data-grad": m.id, id: `ink-grad-${uid}-${m.id}`, gradientUnits: "userSpaceOnUse" }));
+    const { start, end } = Paint.line(g, frame), colors = g.colors.join();
+    for (const [name, value] of [["x1", start[0]], ["y1", start[1]], ["x2", end[0]], ["y2", end[1]]]) el.setAttribute(name, f(value));
+    if (el.dataset.colors !== colors) {
+      el.dataset.colors = colors;
+      el.innerHTML = g.colors.map((color, i) => `<stop offset="${i / (g.colors.length - 1)}" stop-color="${color}"/>`).join("");
+    }
+    return `url(#${el.id})`;
+  }
+  // A gradient as a CSS background, at the paint's opacity.
+  const gradientCss = (style) => Paint.css({ ...style.strokeGradient, colors: style.strokeGradient.colors.map((color) => Paint.withAlpha(color, Paint.alpha(style.color))) });
   // Text and counters take their size from what is in them, as the app sizes text from its content.
   function measure(m, el) {
     const w = el.offsetWidth, height = el.offsetHeight;
@@ -518,7 +613,7 @@ export function createInk(options = {}) {
       if (v.amount == null) { el.style.removeProperty("--ink-blur"); el.style.removeProperty("--ink-cell"); }
       else { el.style.setProperty("--ink-blur", `${v.amount / 2}px`); el.style.setProperty("--ink-cell", `${Math.max(4, v.amount * 0.7)}px`); }
     } else if (v.type === "counter") {
-      Object.assign(el.style, { left: `${v.x}px`, top: `${v.y}px`, background: v.color, opacity: v.opacity ?? (m.style.opacity < 1 ? m.style.opacity : "") });
+      Object.assign(el.style, { left: `${v.x}px`, top: `${v.y}px`, background: m.style.strokeGradient ? gradientCss(m.style) : v.color, opacity: v.opacity ?? (m.style.opacity < 1 ? m.style.opacity : "") });
       el.style.setProperty("--ink-counter-text", textOn(v.color));
       el.textContent = v.n;
       measure(m, el);
@@ -526,20 +621,21 @@ export function createInk(options = {}) {
       Object.assign(el.style, {
         left: `${v.x}px`, top: `${v.y}px`, color: v.color, fontSize: v.fontSize ? `${v.fontSize}px` : "", minHeight: v.fontSize ? `${v.fontSize}px` : "",
         fontWeight: v.bold ? "800" : "", fontFamily: v.font === "mono" ? 'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace' : "", textAlign: v.align && v.align !== "left" ? v.align : "",
+        backgroundImage: m.style.strokeGradient ? gradientCss(m.style) : "",
       });
       if (editor?.el !== el && el.textContent !== v.text) el.textContent = v.text;
       measure(m, el);
     } else {
       const host = strokeHost(m), list = legacyParts(v), visible = [...host.querySelectorAll(".ink-stroke")], width = v.type === "highlight" ? v.size * 4.4 : v.size;
       const dash = v.pattern === "dashed" ? `${v.size * 5} ${v.size * 3}` : v.pattern === "dotted" ? `0.01 ${v.size * 3}` : "";
-      const paint = v.fill ? hatch(v) || v.fill : (hatch(v), null);
+      const paint = v.fill ? hatch(v) || v.fill : (hatch(v), null), ink = gradientPaint(m) || v.color;
       list.forEach((part, i) => {
         const path = visible[i] || host.appendChild(svgEl("path", { class: "ink-stroke" }));
         path.setAttribute("d", part.d);
-        path.setAttribute("stroke", v.color);
+        path.setAttribute("stroke", ink);
         path.setAttribute("stroke-width", part.thin ? 0.6 : width);
         if (dash && !part.fill && !part.hollow) path.setAttribute("stroke-dasharray", dash); else path.removeAttribute("stroke-dasharray");
-        path.style.fill = part.fill ? v.color : part.shape && paint ? paint : "";
+        path.style.fill = part.fill ? ink : part.shape && paint ? paint : "";
         path.style.fillOpacity = part.shape && paint && paint === v.fill ? 0.4 : "";
       });
       visible.slice(list.length).forEach((path) => path.remove());
@@ -550,8 +646,15 @@ export function createInk(options = {}) {
   // SceneRenderer.draw for what a visitor draws. An arrow being placed point by point shows a line to the pointer.
   function renderApp(m, el) {
     const s = m.style;
-    if (m.tool === "text") {
-      Object.assign(el.style, { left: `${m.frame.x}px`, top: `${m.frame.y}px`, color: s.color, fontSize: `${s.fontSize}px`, fontWeight: s.bold ? "600" : "400", textAlign: s.alignment });
+    if (m.tool === "counter") {
+      // A filled circle with its number in white: 56% of the circle's height, 12% down from its top.
+      const f0 = m.frame;
+      Object.assign(el.style, { left: `${f0.x}px`, top: `${f0.y}px`, width: `${f0.width}px`, height: `${f0.height}px`, fontSize: `${f0.height * 0.56}px`, paddingTop: `${f0.height * 0.12}px`,
+        background: s.strokeGradient ? gradientCss(s) : s.color });
+      if (el.textContent !== m.text) el.textContent = m.text;
+    } else if (m.tool === "text") {
+      Object.assign(el.style, { left: `${m.frame.x}px`, top: `${m.frame.y}px`, color: Paint.solid(s.color), fontSize: `${s.fontSize}px`, fontWeight: s.bold ? "600" : "400", textAlign: s.alignment,
+        backgroundImage: s.strokeGradient ? gradientCss(s) : "" });
       // Text takes the size of what is in it, until its box is resized: then it wraps inside the box, as in the app.
       Object.assign(el.style, { width: m.sized ? `${m.frame.width}px` : "", height: m.sized ? `${m.frame.height}px` : "" });
       if (editor?.el !== el && el.textContent !== m.text) el.textContent = m.text;
@@ -562,8 +665,8 @@ export function createInk(options = {}) {
       el.style.setProperty("--ink-blur", `${s.effectAmount ?? 18}px`);
     } else {
       let shown = m;
-      if (linear?.id === m.id && linear.preview && !P.same(m.points[m.points.length - 1], linear.preview)) shown = { ...m, points: [...m.points, linear.preview] };
-      const ops = shown.points.length === 1 && Tool.isConnector(m.tool) ? [] : drawOps(shown), paths = [...el.children];
+      if (linear?.id === m.id && linear.preview && !P.same(m.points[m.points.length - 1], linear.preview)) { const points = [...m.points, linear.preview]; shown = { ...m, points, frame: R.enclosing(points) }; }
+      const ops = shown.points.length === 1 && Tool.isConnector(m.tool) ? [] : drawOps(shown, gradientPaint(m, shown.frame)), paths = [...el.children];
       ops.forEach((op, i) => {
         const path = paths[i] || el.appendChild(svgEl("path", { class: "ink-op" }));
         const attrs = op.fill ? { d: op.d, fill: op.color, "fill-opacity": op.opacity, stroke: "none" }
@@ -585,8 +688,10 @@ export function createInk(options = {}) {
       els.set(m.id, el);
     }
     const editing = el.classList.contains("is-editing"), fresh = el.classList.contains("is-new");
-    el.setAttribute("class", `ink-mark ink-${m.type}${m.legacy ? "" : " is-app"}${m.sized ? " is-sized" : ""}${editing ? " is-editing" : ""}${fresh ? " is-new" : ""}`);
-    el.style.opacity = !m.legacy && html && m.style.opacity < 1 ? m.style.opacity : "";
+    el.setAttribute("class", `ink-mark ink-${m.type}${m.legacy ? "" : " is-app"}${m.sized ? " is-sized" : ""}${m.tool === "text" && m.style.strokeGradient ? " is-gradient" : ""}${editing ? " is-editing" : ""}${fresh ? " is-new" : ""}`);
+    // Whole-object opacity; text is also as see-through as its color.
+    const strength = m.style.opacity * (m.tool === "text" && !m.legacy ? Paint.alpha(m.style.color) : 1);
+    el.style.opacity = !m.legacy && html && strength < 1 ? strength : "";
     if (m.legacy) renderLegacy(m, el); else renderApp(m, el);
     if (html) el.style.transform = m.rotation ? `rotate(${m.rotation}rad)` : "";
     else if (m.rotation) el.setAttribute("transform", turn(m)); else el.removeAttribute("transform");
@@ -600,6 +705,7 @@ export function createInk(options = {}) {
     els.delete(id);
     dropInk(id);
     defs.querySelector(`[data-for="${id}"]`)?.remove();
+    defs.querySelector(`[data-grad="${id}"]`)?.remove();
   }
   // Draws the document again: every mark, in order, then the selection.
   function paint() {
@@ -747,8 +853,8 @@ export function createInk(options = {}) {
   }
   // The page's color for every drawing tool, and for the selected marks. Highlighter and laser keep their own.
   function setColor(color) {
-    for (const key of ["rect", "diamond", "ellipse", "arrow", "line", "pen", "text", "counter"]) styles[key].color = color;
-    if (doc.selection.size) { doc.editSelection((m) => { if (!Tool.isProtection(m.tool)) m.style.color = color; }); paint(); emit("change", doc.elements); }
+    for (const key of ["rect", "diamond", "ellipse", "arrow", "line", "pen", "text", "counter"]) Paint.setColor(styles[key], color, true);
+    if (doc.selection.size) { doc.editSelection((m) => { if (paintable(m)) Paint.setColor(m.style, color, true); }); paint(); emit("change", doc.elements); }
     syncStyle();
     refreshToolbar();
   }
@@ -945,10 +1051,12 @@ export function createInk(options = {}) {
     }
     const hit = Stacking.frontmost(p, doc.elements);
     if (tool === "counter") {
-      // Only a page's script chooses this tool. It places the scripted kind of counter.
-      const count = doc.elements.reduce((max, m) => (m.tool === "counter" ? Math.max(max, Number(m.n) || 0) : max), 0) + 1;
-      const m = add({ type: "counter", x: p[0], y: p[1], n: count, color: styles.counter.color }, "user");
-      els.get(m.id).classList.add("is-new");
+      // DrawingCanvas.mouseDown: a click places the next number, in a circle 36 points across.
+      const next = doc.elements.reduce((most, m) => (m.tool === "counter" ? Math.max(most, parseInt(m.legacy ? m.n : m.text, 10) || 0) : most), 0) + 1;
+      const m = newMark("counter", { frame: { x: p[0] - 18, y: p[1] - 18, width: 36, height: 36 }, text: String(next), style: styles.counter });
+      doc.add(m);
+      paint();
+      emit("mark", m);
       settle();
       return;
     }
@@ -1332,7 +1440,7 @@ export function createInk(options = {}) {
     else if (doc.selection.size) act(() => doc.deleteSelection(true));
     else clear();
   }
-  const KEY_TOOLS = { 1: "select", 2: "rect", 3: "diamond", 4: "ellipse", 5: "arrow", 6: "line", 7: "pen", 8: "text", 9: "highlight", 0: "eraser", l: "laser", s: "blur", u: "blur" };
+  const KEY_TOOLS = { 1: "select", 2: "rect", 3: "diamond", 4: "ellipse", 5: "arrow", 6: "line", 7: "pen", 8: "text", 9: "highlight", 0: "eraser", l: "laser", s: "blur", u: "blur", n: "counter" };
   const NUDGE = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
   if (interactive) document.addEventListener("keydown", (e) => {
     if (!enabled) return;
@@ -1371,7 +1479,7 @@ export function createInk(options = {}) {
     if (INK_KEYS[key]) {
       // Color keys are for drawing and text tools, not for blur.
       e.preventDefault();
-      if (!Tool.isProtection(appTool(effectiveKey()))) write("color", INK_KEYS[key][1]);
+      if (!Tool.isProtection(appTool(effectiveKey()))) setSolid(INK_KEYS[key][1]);
       return;
     }
     const id = KEY_TOOLS[key];
@@ -1386,16 +1494,42 @@ export function createInk(options = {}) {
   const useWords = options.useLabel || "Use apps";
 
   const main = h("div", { class: "ink-main" }), rail = h("div", { class: "ink-rail" });
-  const railTools = BAR_TOOLS.filter(hasTool);
-  railTools.forEach((id, i) => {
-    const t = TOOLS[id];
-    if (i && TOOLS[railTools[i - 1]].family !== t.family) rail.append(divider());
-    rail.append(button({ class: "ink-tool", "data-tool": id, "aria-label": t.label, title: `${t.label} (${t.key})`, "aria-description": `Shortcut ${t.key}`, "aria-pressed": "false" },
-      stacked(symbol(t.symbol, t.size, { line: 1.5 }), t.key)));
+  // The bar's tools and added buttons in the order someone arranged them (WorkspacePreferences.toolbarItems), and the
+  // bar's own buttons they turned off (hiddenToolbarControls). A page's `tools` list wins over the preset's tools.
+  const isAction = (id) => id.startsWith("action.");
+  const known = (id) => (isAction(id) ? Boolean(ACTIONS[id.slice(7)]) : Boolean(BAR_EXTRA[id] || TOOLS[id]));
+  const listed = (id) => isAction(id) || (id === "effects" ? hasEffects : hasTool(id));
+  const items = (options.toolbarItems || (options.tools ? [...FACTORY_ITEMS, ...preset.items.filter((id) => !FACTORY_ITEMS.includes(id))].filter(listed) : preset.items)).filter(known);
+  const hiddenControls = new Set((options.hiddenControls || preset.hidden).filter((control) => CONTROLS.includes(control)));
+  if (!hasLibrary) hiddenControls.add("library");
+  const shows = (control) => !hiddenControls.has(control);
+  const familyOf = (id) => (isAction(id) ? 6 : (BAR_EXTRA[id] || TOOLS[id]).family);
+  let effectsButton = null;
+  function itemButton(id) {
+    if (isAction(id)) {
+      // An added button is the size of a tool. It lights up while what it stands for is on.
+      const name = id.slice(7), [label, detail, icon, size, feature] = ACTIONS[name], menu = name.endsWith("Menu");
+      return button({ class: "ink-tool ink-toggle", "data-item": id, "data-id": `toolbar-action-${name}`, "aria-label": label, title: `${label}. ${detail}`, "aria-description": detail, "aria-pressed": "false",
+        ...(feature ? { "data-more": feature, "aria-haspopup": "dialog" } : {}) },
+      menu ? `<span class="ink-glyph">${symbol(icon, size, { line: 1.5 })}</span><span class="ink-key ink-menu-mark">${symbol("chevron.down", 9, { line: 1.4 })}</span>` : stacked(symbol(icon, size, { line: 1.5 }), ""));
+    }
+    const t = BAR_EXTRA[id] || TOOLS[id];
+    const b = button({ class: "ink-tool", "data-tool": id, "aria-label": t.label, title: t.title || `${t.label} (${t.key})`, "aria-description": `Shortcut ${t.key}`, "aria-pressed": "false",
+      ...(t.more ? { "data-more": t.more, "aria-haspopup": "dialog" } : {}) }, stacked(symbol(t.symbol, t.size, { line: 1.5 }), t.key));
+    if (id === "effects") effectsButton = b;
+    return b;
+  }
+  items.forEach((id, i) => {
+    if (i && familyOf(items[i - 1]) !== familyOf(id)) rail.append(divider());
+    rail.append(itemButton(id));
   });
-  const effectsButton = button({ class: "ink-tool", "data-tool": "effects", "aria-label": "Effects", title: "Effects (S) — Blur, Pixelate or Distort", "aria-description": "Shortcut S", "aria-pressed": "false" },
-    stacked(symbol("camera.filters", 25, { line: 1.5 }), "S"));
-  if (hasEffects) { if (railTools.length) rail.append(divider()); rail.append(effectsButton); }
+  // ToolbarToolLayout.identity: the bar button that stands for a tool. Effects stands for Blur unless Blur has its
+  // own button, and Rectangle for a shape that is not on the bar.
+  function barIdentity(tool) {
+    if (tool === "blur" || tool === "pixelate") return items.includes(tool) ? tool : "effects";
+    if (["diamond", "ellipse"].includes(tool) && !items.includes(tool) && items.includes("rect")) return "rect";
+    return tool;
+  }
   const libraryButton = button({ class: "ink-tool ink-library", "data-action": "library", "aria-label": "Tool library", title: `More shapes and tools (${LIBRARY_KEY})`, "aria-haspopup": "dialog" },
     stacked(symbol("square.grid.2x2", 21.5, { line: 1.5 }), LIBRARY_KEY));
   const boardButton = button({ class: "ink-board-button", "data-action": "board", "aria-label": "Board background", "aria-haspopup": "dialog",
@@ -1408,10 +1542,16 @@ export function createInk(options = {}) {
   const propertiesButton = action("properties", "Properties", "slider.horizontal.3", 15, { "data-id": "toolbar-properties" });
   const settingsButton = action("settings", "Settings and shortcuts", "gearshape", 16), hideButton = action("hide", "Hide drawings and tools", "xmark", 19, {}, 1.3);
   const actions = h("div", { class: "ink-actions" });
-  actions.append(undoButton, redoButton, clearButton, propertiesButton, settingsButton, hideButton);
+  const actionButtons = [["undo", undoButton], ["redo", redoButton], ["clearAll", clearButton], ["properties", propertiesButton], ["settings", settingsButton], ["hide", hideButton]].filter(([control]) => shows(control)).map(([, b]) => b);
+  actions.append(...actionButtons);
   main.append(rail);
-  if (hasLibrary) main.append(libraryButton);
-  main.append(h("span", { class: "ink-spacer" }), divider(true), boardButton, modeButton, actions);
+  if (shows("library")) main.append(libraryButton);
+  main.append(h("span", { class: "ink-spacer" }));
+  // The divider before Board and Draw goes when both of them do.
+  if (shows("board") || shows("mode")) main.append(divider(true));
+  if (shows("board")) main.append(boardButton);
+  if (shows("mode")) main.append(modeButton);
+  if (actionButtons.length) main.append(actions);
   const second = h("div", { class: "ink-second" });
   const strip = h("div", { class: "ink-strip", role: "group", "aria-label": "Active and pending modes" });
   const rule = h("span", { class: "ink-rule", "aria-hidden": "true" });
@@ -1483,7 +1623,7 @@ export function createInk(options = {}) {
       if (readout) { readout.textContent = format(v); el.setAttribute("aria-valuetext", format(v)); }
     };
     const snap = (v) => clamp(Math.round(v / step) * step, min, max);
-    const from = (e) => { const r = el.getBoundingClientRect(), knob = 18 * (r.width / el.offsetWidth); return snap(min + clamp((e.clientX - r.left - knob / 2) / (r.width - knob), 0, 1) * (max - min)); };
+    const from = (e) => { const r = el.getBoundingClientRect(), knob = (parseFloat(getComputedStyle(el).getPropertyValue("--knob")) || 18) * (r.width / el.offsetWidth); return snap(min + clamp((e.clientX - r.left - knob / 2) / (r.width - knob), 0, 1) * (max - min)); };
     el.addEventListener("pointerdown", (e) => {
       if (e.button !== 0) return;
       e.preventDefault(); el.focus(); el.setPointerCapture(e.pointerId);
@@ -1532,9 +1672,11 @@ export function createInk(options = {}) {
     const b = button({ class: "ink-well", "data-prop": "color", "aria-label": "Stroke color", title: "Stroke color", "aria-haspopup": "dialog" }, `<span class="ink-paint"></span>${symbol("chevron.down", 10, { line: 1.2 })}`);
     b.onclick = () => openPop("color", b);
     updaters.push(() => {
-      const value = read("color");
-      b.querySelector(".ink-paint").style.background = value || "none";
-      b.setAttribute("aria-description", String(value || "").toUpperCase());
+      // PaintSwatch: the gradient when one is chosen, at the object's opacity.
+      const value = read("color"), gradient = effectiveKey() === "laser" ? null : read("strokeGradient"), face = b.querySelector(".ink-paint");
+      face.style.background = gradient ? Paint.css(gradient) : value || "none";
+      face.style.opacity = (read("opacity") ?? 1) * (gradient ? Paint.alpha(value) : 1);
+      b.setAttribute("aria-description", `#${Paint.hex8(value) || String(value || "").toUpperCase()}`);
     });
     return block("Stroke color", b, 65.5);
   }
@@ -1625,20 +1767,36 @@ export function createInk(options = {}) {
   let pop = null, popAnchor = null, popKind = "";
   function closePop(refocus) {
     if (!pop) return;
+    const picker = popKind === "color";
     pop.remove();
     popAnchor?.setAttribute("aria-expanded", "false");
     if (refocus) popAnchor?.focus();
     pop = popAnchor = null; popKind = "";
+    // What the color picker changed becomes one step for Undo.
+    if (picker) { finishStyleEdit(); refreshToolbar(); }
   }
   function placePop() {
     if (!pop) return;
+    const scrolled = pop.scrollTop;
+    pop.style.maxHeight = "";
     const bar = toolbar.getBoundingClientRect(), a = popAnchor.getBoundingClientRect(), width = pop.offsetWidth, height = pop.offsetHeight;
-    const host = toolbar.offsetParent && getComputedStyle(toolbar).position !== "fixed" ? toolbar.offsetParent.getBoundingClientRect() : { left: 0, top: 0, right: document.documentElement.clientWidth, bottom: innerHeight };
+    // The box the popover has to stay in: the window, cut down by any ancestor that clips what is inside it.
+    const host = { left: 0, top: 0, right: document.documentElement.clientWidth, bottom: innerHeight };
+    if (getComputedStyle(toolbar).position !== "fixed") {
+      for (let el = toolbar.parentElement; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+        const style = getComputedStyle(el);
+        if (style.overflowX === "visible" && style.overflowY === "visible") continue;
+        const r = el.getBoundingClientRect();
+        host.left = Math.max(host.left, r.left); host.top = Math.max(host.top, r.top); host.right = Math.min(host.right, r.right); host.bottom = Math.min(host.bottom, r.bottom);
+      }
+    }
     const left = clamp(a.left + a.width / 2 - width / 2, host.left + 8, Math.max(host.left + 8, host.right - width - 8));
     const above = bar.top - host.top >= height + 16 || bar.top - host.top > host.bottom - bar.bottom;
     pop.style.left = `${f(left - bar.left)}px`;
-    pop.style.top = above ? `${-height - 10}px` : `${f(bar.height + 10)}px`;
+    // A popover taller than its room scrolls, as the app's picker does on a small screen.
     pop.style.maxHeight = `${Math.max(160, (above ? bar.top - host.top : host.bottom - bar.bottom) - 20)}px`;
+    pop.style.top = above ? `${-pop.offsetHeight - 10}px` : `${f(bar.height + 10)}px`;
+    pop.scrollTop = scrolled;
   }
   function openPop(kind, anchor) {
     const again = pop && popKind === kind && popAnchor === anchor;
@@ -1647,12 +1805,15 @@ export function createInk(options = {}) {
     pop = h("div", { class: "ink-pop", "data-kind": kind, role: "dialog" });
     popKind = kind; popAnchor = anchor;
     anchor.setAttribute("aria-expanded", "true");
+    // The picker opens on Gradient when the paint is one; the laser's color has no gradients.
+    if (kind === "color") { showingGradients = effectiveKey() !== "laser" && Boolean(read("strokeGradient")); shadesOpen = false; }
     fillPop();
     toolbar.append(pop);
     placePop();
     pop.querySelector("[autofocus], .is-current, a, button:not(:disabled)")?.focus({ preventScroll: true });
   }
-  const swatch = (name, color, selected) => button({ class: `ink-swatch${selected ? " is-current" : ""}${color ? "" : " is-none"}`, "data-color": color || "none", "aria-label": color ? `${name}, hex ${color.toUpperCase()}` : name, title: name, "aria-pressed": String(selected), style: color ? `--swatch:${color}` : "" }, color ? "" : "<span>None</span>");
+  let showingGradients = false, shadesOpen = false;
+  const swatch = (name, color, selected) => button({ class: `ink-swatch${selected ? " is-current" : ""}`, "data-color": color, "aria-label": `${name}, hex #${Paint.hex8(color)}`, title: name, "aria-pressed": String(selected), style: `--swatch:${color}` });
   // "Want to see more?": what the app does and this page does not, with the way to get the app.
   function more(feature, anchor) {
     const name = MORE[feature] ? feature : "app", target = anchor?.isConnected ? anchor : propertiesButton;
@@ -1678,33 +1839,86 @@ export function createInk(options = {}) {
       });
       return;
     }
-    const chosen = String(read("color") || ""), same = (c) => c.toLowerCase() === chosen.toLowerCase();
+    // InspectorColorPalette: Gradient or Solid, fifteen swatches of either, shades of the chosen color, its hex
+    // value, the paint's opacity and a color from the screen.
+    const color = String(read("color") || ""), parts = Paint.parse(color), offers = effectiveKey() !== "laser", gradient = offers ? read("strokeGradient") : null;
+    const isSelected = (value) => {
+      const v = Paint.parse(value);
+      return !gradient && Boolean(v && parts) && v.red === parts.red && v.green === parts.green && v.blue === parts.blue && (v.alpha === 0 ? parts.alpha === 0 : parts.alpha > 0);
+    };
+    const gradients = offers && showingGradients, percent = () => `${Math.round(Paint.alpha(read("color")) * 100)}%`;
     pop.setAttribute("aria-label", "Stroke color");
     pop.innerHTML = `<p class="ink-pop-title">Stroke color</p>
-      <div class="ink-swatches" role="group" aria-label="Colors"></div>
-      ${options.palette ? '<p class="ink-pop-caption">Page colors</p><div class="ink-swatches ink-page-colors" role="group" aria-label="Page colors"></div>' : ""}
-      <p class="ink-pop-caption">Hex color</p>
-      <label class="ink-hex"><span>#</span><input type="text" spellcheck="false" autocomplete="off" maxlength="9" placeholder="RRGGBB" aria-label="Stroke hex color" value="${chosen.startsWith("#") ? chosen.slice(1).toUpperCase() : ""}"></label>
-      ${window.EyeDropper ? `<button type="button" class="ink-pop-button" data-pick>${symbol("eyedropper", 15)} Pick from screen</button>` : ""}
+      ${offers ? `<div class="ink-seg" role="radiogroup" aria-label="Color options">${[["gradient", "Gradient"], ["solid", "Solid"]].map(([id, label]) =>
+        `<button type="button" role="radio" data-seg="${id}" aria-checked="${(id === "gradient") === gradients}">${label}</button>`).join("")}</div>` : ""}
+      <div class="ink-pick">
+        <div class="ink-swatches" role="group" aria-label="${gradients ? "Gradients" : "Colors"}"></div>
+        ${gradients ? '<p class="ink-pop-caption ink-blend-note">A blend across your whole shape.</p>'
+          : parts ? `<div class="ink-shades"><button type="button" class="ink-disclosure" data-shades aria-expanded="${shadesOpen}">${symbol("chevron.right", 9, { line: 2.2 })}<b>Shades</b></button><div class="ink-shade-row"${shadesOpen ? "" : " hidden"}></div></div>` : ""}
+        <button type="button" class="ink-disclosure ink-wheel" data-more="wheel" data-id="inline-color-wheel" aria-label="Color wheel" aria-haspopup="dialog">${symbol("chevron.right", 9, { line: 1.5 })}<span>Color wheel</span></button>
+        ${gradients ? "" : `<p class="ink-pop-caption">Hex color</p>
+        <label class="ink-hex" title="Six RGB or eight RGBA digits. Entering a hex color switches to solid paint."><span>#</span><input type="text" spellcheck="false" autocomplete="off" maxlength="9" placeholder="RRGGBB or RRGGBBAA" aria-label="Stroke hex color and alpha" value="${Paint.hex8(color)}"></label>
+        <p class="ink-pop-error" hidden>Use six RGB or eight RGBA hex digits.</p>`}
+      </div>
+      <hr>
+      <div class="ink-opacity"><span>Stroke opacity</span><span class="ink-opacity-slider"></span><span class="ink-value">${percent()}</span></div>
+      <button type="button" class="ink-pop-button" data-pick aria-label="Pick from screen" title="Choose a color anywhere on the screen. Escape cancels.">${symbol("eyedropper", 15)} Pick from screen</button>
       <div class="ink-pop-foot"><button type="button" class="ink-pop-done" data-done>Done</button></div>`;
     const grid = pop.querySelector(".ink-swatches");
-    grid.append(swatch("Transparent stroke", "#00000000", same("#00000000")));
-    APP_PALETTE.forEach(([name, color]) => grid.append(swatch(name, color, same(color))));
-    if (options.palette) palette.forEach((color, i) => pop.querySelector(".ink-page-colors").append(swatch(`Page color ${i + 1}`, color, same(color))));
-    const choose = (color) => { write("color", color); fillPop(); placePop(); };
+    if (gradients) {
+      for (const choice of GRADIENT_PRESETS) {
+        const selected = Paint.same(gradient, choice.gradient);
+        grid.append(button({ class: `ink-swatch is-gradient${selected ? " is-current" : ""}`, "data-gradient": choice.id, "aria-label": `${choice.label} gradient`, title: choice.label, "aria-pressed": String(selected), style: `--swatch:${Paint.css(choice.gradient)}` }));
+      }
+    } else {
+      grid.append(swatch("Transparent stroke", "#00000000", isSelected("#00000000")));
+      APP_PALETTE.forEach(([name, value]) => grid.append(swatch(name, value, isSelected(value))));
+      // Five shades of the chosen color: darker by half and a quarter, as it is, lighter by a quarter and a half.
+      if (parts) [0.5, 0.75, 1, 1.25, 1.5].forEach((amount, i) => {
+        const part = (value) => (amount <= 1 ? value * amount : value + (1 - value) * (amount - 1));
+        const shade = Paint.format({ red: part(parts.red), green: part(parts.green), blue: part(parts.blue), alpha: parts.alpha });
+        pop.querySelector(".ink-shade-row").append(swatch(`${["Darker", "Dark", "Current", "Light", "Lighter"][i]} shade of selected color`, shade, isSelected(shade)));
+      });
+    }
+    // The paint's opacity is its color's alpha; the object's own opacity is a different thing.
+    const shown = updaters.length, opacity = slider("paint-opacity", "Stroke opacity", { min: 0, max: 100, width: 126,
+      get: () => Math.round(Paint.alpha(read("color")) * 100),
+      set: (value, live) => {
+        applyStyle("color", (style) => Paint.setOpacity(style, value / 100), live);
+        pop.querySelector(".ink-opacity .ink-value").textContent = percent();
+        const field = pop.querySelector(".ink-hex input");
+        if (field) field.value = Paint.hex8(read("color"));
+      } });
+    updaters.length = shown;
+    opacity.show(Math.round(Paint.alpha(color) * 100));
+    pop.querySelector(".ink-opacity-slider").replaceWith(opacity.el);
+    const redraw = (focus) => { fillPop(); placePop(); if (focus) pop.querySelector(focus)?.focus({ preventScroll: true }); };
+    const hex = pop.querySelector(".ink-hex input");
+    // PaletteHex.parse: six digits keep the paint's opacity, eight bring their own.
+    const applyHex = () => {
+      const value = hex.value.trim().replace(/^#/, "");
+      if (!/^([0-9a-f]{6}|[0-9a-f]{8})$/i.test(value)) { hex.setAttribute("aria-invalid", "true"); pop.querySelector(".ink-pop-error").hidden = false; placePop(); hex.focus(); return false; }
+      setSolid(`#${value.toUpperCase()}`, value.length === 8);
+      return true;
+    };
     pop.onclick = async (e) => {
       const b = e.target.closest("button");
-      if (b?.dataset.color) choose(b.dataset.color);
-      else if (b?.hasAttribute("data-done")) closePop(true);
-      else if (b?.hasAttribute("data-pick")) { try { choose((await new window.EyeDropper().open()).sRGBHex); } catch { /* Escape cancels */ } }
+      if (!b) return;
+      if (b.dataset.seg) { showingGradients = b.dataset.seg === "gradient"; redraw(`[data-seg="${b.dataset.seg}"]`); }
+      else if (b.dataset.gradient) { setGradient(GRADIENT_PRESETS.find((choice) => choice.id === b.dataset.gradient).gradient); redraw(`[data-gradient="${b.dataset.gradient}"]`); }
+      else if (b.dataset.color) { setSolid(b.dataset.color, Paint.alpha(b.dataset.color) === 0); redraw(`[data-color="${b.dataset.color}"]`); }
+      else if (b.hasAttribute("data-shades")) { shadesOpen = !shadesOpen; redraw("[data-shades]"); }
+      else if (b.dataset.more) more(b.dataset.more, popAnchor);
+      else if (b.hasAttribute("data-done")) { if (!hex || hex.value === Paint.hex8(read("color")) || applyHex()) closePop(true); }
+      else if (b.hasAttribute("data-pick")) {
+        if (!window.EyeDropper) { more("eyedropper", popAnchor); return; }
+        try { setSolid((await new window.EyeDropper().open()).sRGBHex.toUpperCase()); if (pop && popKind === "color") redraw("[data-pick]"); } catch { /* Escape cancels */ }
+      }
     };
-    const hex = pop.querySelector(".ink-hex input");
-    hex.addEventListener("keydown", (e) => {
+    hex?.addEventListener("keydown", (e) => {
       e.stopPropagation();
       if (e.key === "Escape") closePop(true);
-      if (e.key !== "Enter") return;
-      const value = hex.value.trim().replace(/^#/, "");
-      if (/^([0-9a-f]{6}|[0-9a-f]{8})$/i.test(value)) choose(`#${value.toUpperCase()}`); else hex.setAttribute("aria-invalid", "true");
+      if (e.key === "Enter" && applyHex()) redraw(".ink-hex input");
     });
   }
   if (interactive) document.addEventListener("pointerdown", (e) => {
@@ -1712,10 +1926,10 @@ export function createInk(options = {}) {
   }, true);
 
   // Fitting: the app's expanded and minimal sizes, then a second row and scrolling tools on a narrow screen.
-  const railWidth = (minimal) => {
-    const ids = [...railTools, ...(hasEffects ? ["effects"] : [])], family = (id) => (id === "effects" ? 4 : TOOLS[id].family);
-    return ids.reduce((sum, id, i) => sum + (i ? (family(ids[i - 1]) === family(id) ? 2 : minimal ? 9 : 11) : 0) + (minimal ? 34 : 44), 0);
-  };
+  // ToolbarToolLayout.width and ToolbarMetrics.regularReserve: the bar is exactly its tools and buttons on one row.
+  const railWidth = (minimal) => items.reduce((sum, id, i) => sum + (i ? (familyOf(items[i - 1]) === familyOf(id) ? 2 : minimal ? 9 : 11) : 0) + (minimal ? 34 : 44), 0);
+  const controlRoom = (control, minimal) => (control === "library" || control === "board" ? (minimal ? 34 : 44) : control === "mode" ? (minimal ? 46 : 60) : minimal ? 22 : 24) + (minimal ? 4 : 6);
+  const hiddenRoom = (minimal) => [...hiddenControls].reduce((sum, control) => sum + controlRoom(control, minimal), 0) + (shows("board") || shows("mode") ? 0 : 1 + (minimal ? 4 : 6));
   // The box the toolbar is dragged in: the window, or its parent with toolbarPosition "absolute".
   const dragArea = () => (inParent && toolbar.offsetParent ? toolbar.offsetParent.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight });
   // Tools that scroll sideways fade out at the edge where more of them wait.
@@ -1739,7 +1953,7 @@ export function createInk(options = {}) {
     const fixed = getComputedStyle(toolbar).position === "fixed", host = fixed ? document.documentElement : toolbar.offsetParent;
     if (!host) return;
     const available = host.clientWidth - 16;
-    const natural = (minimal) => railWidth(minimal) + (minimal ? 307 : 383) - (hasLibrary ? 0 : minimal ? 38 : 50);
+    const natural = (minimal) => railWidth(minimal) + (minimal ? 307 : 383) - hiddenRoom(minimal);
     const minimal = natural(false) > available, rows = minimal && natural(true) > available && available < 560 ? 2 : 1;
     const next = `${minimal}|${rows}|${available}`;
     if (next !== fitted) {
@@ -1747,7 +1961,7 @@ export function createInk(options = {}) {
       toolbar.dataset.size = minimal ? "minimal" : "expanded";
       toolbar.dataset.rows = rows;
       toolbar.style.setProperty("--ink-available", `${available}px`);
-      (rows === 2 ? second : main).append(actions);
+      if (actionButtons.length) (rows === 2 ? second : main).append(actions);
     }
     revealTool();
     fadeRail();
@@ -1775,10 +1989,9 @@ export function createInk(options = {}) {
     toolbar.dataset.mode = state.mode;
     toolbar.dataset.board = state.board;
     toolbar.dataset.properties = shown;
-    rail.querySelectorAll("[data-tool]").forEach((b) => {
-      const current = b.dataset.tool === state.tool || (b === effectsButton && state.tool === "blur");
-      b.setAttribute("aria-pressed", String(current));
-    });
+    const chosen = barIdentity(state.tool);
+    rail.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === chosen)));
+    rail.querySelector('[data-item="action.smartDraw"]')?.setAttribute("aria-pressed", String(state.smart));
     if (boardButton.dataset.board !== state.board) {
       boardButton.dataset.board = state.board;
       boardButton.innerHTML = `<span class="ink-board-icon">${symbol(boardIcon, 21.5, { line: 1.5, filled: state.board === "black" })}</span><span class="ink-board-label">${word}</span>`;
@@ -1833,6 +2046,8 @@ export function createInk(options = {}) {
     const name = b.dataset.action;
     if (b === pill) { setCollapsed(false); setMode("draw"); }
     else if (b.dataset.more) more(b.dataset.more, b);
+    // WorkspaceModel.performShortcutAction: Smart draw turns shape recognition for the pen on or off.
+    else if (b.dataset.item === "action.smartDraw") { state.smart = !state.smart; status(state.smart ? "Smart draw is on." : "Smart draw is off."); setTimeout(() => { if (!linear) status(""); }, 1600); refreshToolbar(); }
     // The app's Effects button chooses the last effect, Blur at first.
     else if (b === effectsButton) setTool("blur");
     else if (b.dataset.tool) setTool(b.dataset.tool);
@@ -1922,7 +2137,7 @@ export function createInk(options = {}) {
   }
   const placeGhost = (p) => { ghost.style.transform = `translate(${f(p[0])}px, ${f(p[1])}px)`; ghost.dataset.x = p[0]; ghost.dataset.y = p[1]; };
   // The toolbar button that stands for a tool: its own, Effects for blur, the Tool library for the rest.
-  const barButton = (tool) => rail.querySelector(`[data-tool="${tool}"]`) || (["blur", "pixelate", "spotlight"].includes(tool) ? effectsButton : libraryButton);
+  const barButton = (tool) => rail.querySelector(`[data-tool="${barIdentity(tool)}"]`) || effectsButton || libraryButton;
   const showTool = (tool) => { state.tool = tool; layer.dataset.tool = tool; syncStyle(); refreshToolbar(); };
   async function perform(steps, { cursor = true, showTool: shows = false, anchored = true, signal } = {}) {
     const made = [], toolBefore = state.tool;
@@ -1933,7 +2148,7 @@ export function createInk(options = {}) {
       const tool = step.tool === "underline" ? "pen" : step.tool, shown = tool === "pixelate" ? "blur" : tool;
       if (shows && TOOLS[shown] && !hasActiveEdit()) { showTool(shown); barButton(tool).classList.add("is-demo"); }
       const g = geometry(step);
-      const base = { type: tool === "line" ? "arrow" : tool, color: step.color || state.color, size: step.size || scriptSize, anchor: anchored ? step : null, ...(tool === "line" ? { head: false } : {}), ...g };
+      const base = { type: tool === "line" ? "arrow" : tool, color: step.color, size: step.size || scriptSize, anchor: anchored ? step : null, ...(tool === "line" ? { head: false } : {}), ...g };
       for (const prop of ["rough", "pattern", "fill", "fillStyle", "round", "start", "end", "headScale", "amount", "effect"]) if (step[prop] !== undefined) base[prop] = step[prop];
       const duration = step.duration ?? 700;
       if (tool === "text") {
@@ -2022,7 +2237,29 @@ export function createInk(options = {}) {
     placeGhost(p) { placeGhost(p); ghost.classList.add("is-on"); },
     setSpotlight: (on) => setLight("spotlight", on), setHalo: (on) => setLight("halo", on),
     // Changes what the next mark of a tool looks like, for example setStyle("pen", { roughness: 2 }).
-    setStyle(tool, patch) { if (styles[tool]) for (const key in patch) styles[tool][STYLE_NAME[key] || key] = patch[key]; syncStyle(); refreshProperties(true); },
+    // Makes one of the app's gradients the stroke color of shapes, lines, arrows, the pen and text, and of what is
+    // selected: setGradient("ocean").
+    setGradient(name) {
+      const value = named(name);
+      for (const key of ["rect", "diamond", "ellipse", "arrow", "line", "pen", "text"]) Paint.setGradient(styles[key], value);
+      if (doc.selection.size) { doc.editSelection((m) => { if (paintable(m)) Paint.setGradient(m.style, value); }); paint(); emit("change", doc.elements); }
+      syncStyle();
+      refreshToolbar();
+      if (pop && popKind === "color") { fillPop(); placePop(); }
+    },
+    // `gradient` takes one of the app's preset names ("sunset") or { colors, angle }; `color` is a solid color.
+    setStyle(tool, patch) {
+      const style = styles[tool];
+      if (style) for (const key in patch) {
+        if (key === "gradient") {
+          const value = typeof patch[key] === "string" ? GRADIENT_PRESETS.find((choice) => choice.id === patch[key])?.gradient : patch[key];
+          if (value) Paint.setGradient(style, value); else style.strokeGradient = null;
+        } else if (key === "color") Paint.setColor(style, patch[key], true);
+        else style[STYLE_NAME[key] || key] = patch[key];
+      }
+      syncStyle();
+      refreshProperties(true);
+    },
     add(mark) { const m = add(mark, "script"); refreshToolbar(); emit("change", doc.elements); return m; },
     remove(id) { remove(id); refreshToolbar(); emit("change", doc.elements); },
     marks: () => doc.elements,

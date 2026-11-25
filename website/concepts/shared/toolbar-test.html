@@ -24,14 +24,23 @@
   .bad { margin: 2px 0 0 44px; color: #ffd9a8; font: 11px/1.4 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
   .live { margin-top: 30px; padding: 16px; border-radius: 12px; background: linear-gradient(120deg, #f7b267, #7d54b8 55%, #2b73e0); }
   .live .slot { height: 190px; }
+  /* The color picker opens under its toolbar here; the slot keeps that room free. */
+  .picker { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .picker .slot { margin-bottom: 500px; }
+  .picker .ink-pop { max-height: none !important; }
+  .picker figure { margin: 0; }
+  .picker figcaption { font: 600 10px/1.6 ui-monospace, Menlo, monospace; opacity: .8; }
 </style>
 </head>
 <body>
 <h1>Toolbar check</h1>
+<p>The web toolbar is checked in its “factory” preset, the app as installed. The demo itself opens in the “customized” preset, shown at the end.</p>
 <p>Each pair shows the app’s picture (reference/ux-reference/macos/toolbar, 2 pixels per point) above the web demo’s toolbar in the same state, both at 1 point per CSS pixel. The frames in the app’s layout data are compared with the web toolbar’s; anything more than 1.5 points off is listed in orange.</p>
 <div id="summary">Checking…</div>
 <div id="states"></div>
-<h2>Glass (the default on the web) <small>over a busy backdrop; no app picture, the reference captures are solid</small></h2>
+<h2>Color picker <small>reference/ux-reference/macos/pickers: solid colors, gradients (Spectrum chosen), and the laser’s, which has no gradients</small></h2>
+<div id="pickers"></div>
+<h2>Glass and the customized preset (the defaults on the web) <small>over a busy backdrop; no app picture: the reference captures are solid and factory-fresh</small></h2>
 <div class="live"><div class="slot" id="glass-dark"></div><div class="slot" id="glass-light"></div></div>
 <script type="module">
 import { createInk } from "./ink.js";
@@ -42,7 +51,16 @@ const layouts = Object.fromEntries(await Promise.all(states.flatMap((state) => [
 const host = document.getElementById("states");
 // How to put the web toolbar into each of the app's captured states.
 const TOOL = { rectangle: "rect", "rectangle-filled": "rect", highlighter: "highlight" };
+// The arrangements of the app's captures with buttons added or turned off (Settings > Toolbar).
+const FACTORY = ["select", "rect", "diamond", "ellipse", "arrow", "line", "pen", "text", "highlight", "laser", "eraser", "effects"];
+const SETUP = {
+  "added-buttons": { toolbarItems: [...FACTORY, "action.spotlight", "action.cursorHalo", "action.pointerLens", "action.smartDraw", "action.shareRegion", "action.focusMenu", "action.zoomMenu", "blur", "pixelate"] },
+  "hidden-buttons": { hiddenControls: ["undo", "redo", "settings", "hide"] },
+  "hidden-buttons-all": { hiddenControls: ["library", "board", "mode", "undo", "redo", "clearAll", "properties", "settings", "hide"] },
+};
 function arrange(ink, state) {
+  // The app's captures have Smart Draw off; the web demo starts with it on.
+  ink.state.smart = false;
   ink.setProperties(!state.includes("tools-only"));
   const tool = /^full-properties-(.+)$/.exec(state)?.[1];
   if (state === "fit-narrow") ink.setTool("arrow");
@@ -55,8 +73,6 @@ function arrange(ink, state) {
   if (state.includes("apps")) ink.setMode("use");
   if (state === "board-whiteboard") ink.setBoard("white");
   if (state === "board-blackboard") ink.setBoard("black");
-  // The app's captures have Smart Draw off; the web demo starts with it on.
-  ink.state.smart = false;
   ink.setStyle("pen", {});
 }
 const center = (r) => [r.x + r.width / 2, r.y + r.height / 2];
@@ -119,7 +135,7 @@ for (const state of states) {
     pair.innerHTML = `<div class="row"><b>app<br>${look}</b><img src="${base}${state}-${look}.png" width="${data.size[0]}" alt="The app’s toolbar, ${state}, ${look}" style="margin-left:8px"></div>
       <div class="row"><b>web<br>${look}</b><div class="slot" style="width:${slotWidth(state, data)}px"><div class="stage"></div></div></div><div class="bad"></div>`;
     const slot = pair.querySelector(".slot");
-    const ink = createInk({ surface: slot.querySelector(".stage"), toolbarParent: slot, appearance: look, glass: false, collapsed: state.startsWith("collapsed") });
+    const ink = createInk({ surface: slot.querySelector(".stage"), toolbarParent: slot, appearance: look, glass: false, preset: "factory", collapsed: state.startsWith("collapsed"), ...SETUP[state] });
     if (state === "fit-narrow") slot.style.width = "406px";
     arrange(ink, state);
     ink.fit();
@@ -128,6 +144,67 @@ for (const state of states) {
     total += check(ink.toolbar, data, problems);
     wrong += problems.length;
     pair.querySelector(".bad").textContent = problems.join("\n");
+  }
+}
+// The color picker, opened from the Stroke color well, against the app's picker.
+const PICKERS = [["color-stroke", "pen", null], ["color-gradient", "pen", "spectrum"], ["color-laser", "laser", null]];
+function pickerFind(pop, node) {
+  const { role, label, value } = node;
+  if (role === "AXStaticText") return [...pop.querySelectorAll(".ink-pop-title, .ink-pop-caption, .ink-opacity > span, .ink-hex > span")].find((el) => el.textContent === value);
+  if (role === "AXRadioGroup") return pop.querySelector(".ink-seg");
+  if (role === "AXRadioButton") return [...pop.querySelectorAll(".ink-seg button")].find((el) => el.textContent === label);
+  if (role === "AXDisclosureTriangle") return pop.querySelector("[data-shades]");
+  if (role === "AXTextField") return pop.querySelector(".ink-hex input");
+  if (role === "AXSlider") return pop.querySelector(`.ink-slider[aria-label="${label}"]`);
+  if (label === "Done") return pop.querySelector("[data-done]");
+  return label ? pop.querySelector(`[aria-label="${CSS.escape(label)}"]`) : null;
+}
+function pickerCheck(pop, data, problems) {
+  const origin = pop.getBoundingClientRect();
+  if (Math.abs(origin.width - data.size[0]) > 1 || Math.abs(origin.height - data.size[1]) > 1) problems.push(`size ${origin.width.toFixed(1)},${origin.height.toFixed(1)} should be ${data.size}`);
+  let checked = 0;
+  const walk = (nodes) => {
+    for (const node of nodes || []) {
+      walk(node.children);
+      if (!node.frame || node.role === "AXValueIndicator" || node.role === "AXOpaqueProviderGroup") continue;
+      const el = pickerFind(pop, node), name = node.label || node.value || node.role;
+      if (!el) { problems.push(`missing: ${node.role} "${name}"`); continue; }
+      checked++;
+      let r = el.getBoundingClientRect();
+      // A swatch's button is the 42-point cell its selection ring is drawn in; the color itself is 38 points.
+      if (el.classList.contains("ink-swatch") && el.getAttribute("aria-pressed") !== "true") r = new DOMRect(r.x + 2, r.y + 2, r.width - 4, r.height - 4);
+      const own = { x: r.x - origin.x, y: r.y - origin.y, width: r.width, height: r.height }, [fx, fy, fw, fh] = node.frame;
+      // Words are compared by their middle line and by where they start or their middle; their width depends on the font.
+      const words = node.role === "AXStaticText" || node.role === "AXRadioButton" || node.identifier === "inline-color-wheel";
+      const deltas = node.role === "AXDisclosureTriangle" ? [own.y + own.height / 2 - (fy + fh / 2)]
+        : words ? [Math.min(Math.abs(own.x - fx), Math.abs(own.x + own.width / 2 - (fx + fw / 2))), own.y + own.height / 2 - (fy + fh / 2)]
+          : [own.x - fx, own.y - fy, own.width - fw, own.height - fh];
+      if (deltas.some((d) => Math.abs(d) > 1.5)) problems.push(`"${name}" off by ${deltas.map((d) => d.toFixed(1)).join(", ")}`);
+    }
+  };
+  walk(data.accessibility);
+  return checked;
+}
+const pickerHost = document.getElementById("pickers");
+for (const [name, tool, gradient] of PICKERS) {
+  for (const look of ["dark", "light"]) {
+    const data = await (await fetch(`${base}pickers/${name}-${look}.json`)).json();
+    const row = pickerHost.appendChild(document.createElement("div"));
+    row.className = "picker";
+    row.innerHTML = `<figure><img src="${base}pickers/${name}-${look}.png" width="${data.size[0]}" alt="The app’s color picker, ${name}, ${look}"><figcaption>app, ${name}, ${look}</figcaption></figure>
+      <figure><div class="slot" style="width:985px"><div class="stage"></div></div><figcaption>web, ${look}</figcaption></figure><div class="bad"></div>`;
+    const slot = row.querySelector(".slot");
+    const ink = createInk({ surface: slot.querySelector(".stage"), toolbarParent: slot, appearance: look, glass: false, preset: "factory", tool });
+    ink.state.smart = false;
+    ink.setProperties(true);
+    ink.setTool(tool);
+    if (gradient) ink.setStyle(tool, { gradient });
+    ink.fit();
+    ink.toolbar.querySelector('[aria-label="Stroke color"]').click();
+    const problems = [];
+    total += pickerCheck(ink.toolbar.querySelector(".ink-pop"), data, problems);
+    wrong += problems.length;
+    row.querySelector(".bad").textContent = problems.join("\n");
   }
 }
 for (const look of ["dark", "light"]) {
@@ -139,7 +216,7 @@ for (const look of ["dark", "light"]) {
   ink.setTool("arrow");
   if (look === "light") ink.setBoard("white");
 }
-document.getElementById("summary").textContent = `${states.length} states in Dark and Light. ${total} frames compared with the app’s layout data, ${wrong} more than 1.5 points off.`;
+document.getElementById("summary").textContent = `${states.length} toolbar states and ${PICKERS.length} color pickers in Dark and Light. ${total} frames compared with the app’s layout data, ${wrong} more than 1.5 points off.`;
 document.documentElement.dataset.done = `${total}/${wrong}`;
 </script>
 </body>

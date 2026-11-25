@@ -10,7 +10,8 @@ const to = new URL("toolbar-reference/", import.meta.url);
 const tools = ["select", "rectangle", "rectangle-filled", "diamond", "ellipse", "arrow", "line", "pen", "text", "highlighter", "laser", "eraser", "blur", "pixelate", "counter"];
 const states = [
   "expanded-horizontal-tools-only", "expanded-horizontal-properties", "use-apps", ...tools.map((tool) => `full-properties-${tool}`),
-  "selection-single", "board-whiteboard", "board-blackboard", "minimal-horizontal-tools-only", "minimal-horizontal-properties",
+  "selection-single", "board-whiteboard", "board-blackboard", "added-buttons", "hidden-buttons", "hidden-buttons-all", "draw-tools-only",
+  "minimal-horizontal-tools-only", "minimal-horizontal-properties",
   "collapsed-expanded-horizontal-draw", "collapsed-expanded-horizontal-apps", "collapsed-minimal-horizontal-draw", "fit-narrow",
 ];
 mkdirSync(to, { recursive: true });
@@ -20,10 +21,19 @@ for (const state of states) {
   }
 }
 writeFileSync(new URL("states.json", to), `${JSON.stringify(states, null, 1)}\n`);
+// The color picker: solid colors, gradients, and the laser's, which has no gradients.
+const pickers = ["color-stroke", "color-gradient", "color-laser"];
+mkdirSync(new URL("pickers/", to), { recursive: true });
+for (const picker of pickers) {
+  for (const look of ["dark", "light"]) {
+    for (const kind of ["png", "json"]) copyFileSync(new URL(`../pickers/${picker}-${look}.${kind}`, from), new URL(`pickers/${picker}-${look}.${kind}`, to));
+  }
+}
 console.log(`${states.length} states -> ${fileURLToPath(to)}`);
 
-// The app's rendered scenes with the elements the web demo draws: strokes, shapes, rough shapes, arrows, turned shapes.
-const scenes = ["strokes", "shapes", "rough", "arrowheads", "opacity-rotation"];
+// The app's rendered scenes with the elements the web demo draws: strokes, shapes, rough shapes, arrows, turned shapes
+// and a gradient stroke.
+const scenes = ["strokes", "shapes", "rough", "arrowheads", "opacity-rotation", "fills"];
 const renderFrom = new URL("../../../reference/conformance/render/", import.meta.url), renderTo = new URL("render-reference/", import.meta.url);
 mkdirSync(renderTo, { recursive: true });
 for (const scene of scenes) {

@@ -1,7 +1,7 @@
 // How the web demo paints what the app paints: a port of SceneRenderer.draw, LaserTrailRenderer and the Smart Draw
 // morph in DrawingCanvas.swift, kept free of the DOM. It returns SVG path data and stroke settings; ink.js makes
 // the nodes and render-test.html compares the result with the app's pictures in reference/conformance/render.
-import { P, R, Tool, pathFor, pathData, arrowHead, LaserTrail } from "./annotation-core.js";
+import { P, R, Tool, Paint, pathFor, pathData, arrowHead, LaserTrail } from "./annotation-core.js";
 
 const n = (v) => Math.round(v * 1000) / 1000;
 const line = (points, close) => `M${points.map((p) => `${n(p[0])} ${n(p[1])}`).join("L")}${close ? "Z" : ""}`;
@@ -25,16 +25,24 @@ function headOps(head, base) {
   if (kind === "filled") return [{ ...fill, d: line([left, tip, right], true) }];
   return [{ ...stroke, d: line([left, tip, right]) }];
 }
+// GradientPainter: a gradient paints the whole element, line, dashes and arrowheads alike, along one line through the
+// middle of its frame. This is that gradient as an SVG <linearGradient> in the element's own coordinates.
+export function gradientMarkup(el, id) {
+  const gradient = el.style.strokeGradient, { start, end } = Paint.line(gradient, el.frame), last = gradient.colors.length - 1;
+  return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${n(start[0])}" y1="${n(start[1])}" x2="${n(end[0])}" y2="${n(end[1])}">${
+    gradient.colors.map((color, i) => `<stop offset="${n(i / last)}" stop-color="${color}"/>`).join("")}</linearGradient>`;
+}
 // The strokes and fills of one shape, line, arrow, pen or highlighter stroke, in drawing order. Each is
-// { d, color, opacity } with `fill: true`, or with width, cap, join and dash for a stroke.
-export function drawOps(el) {
-  const { tool, style, points } = el, marker = tool === "highlighter";
-  const opacity = style.opacity * (marker ? 0.35 : 1);
-  const base = { color: style.color, opacity, width: marker ? style.width * 5 : style.width, cap: marker ? "butt" : "round", join: marker ? "bevel" : "round", dash: dashes(style) };
+// { d, color, opacity } with `fill: true`, or with width, cap, join and dash for a stroke. `paint` stands in for the
+// color when the element has a gradient (a reference to its <linearGradient>); a paint's opacity is its color's alpha.
+export function drawOps(el, paint = null) {
+  const { tool, style, points } = el, marker = tool === "highlighter", color = paint || Paint.solid(style.color);
+  const opacity = style.opacity * Paint.alpha(style.color) * (marker ? 0.35 : 1);
+  const base = { color, opacity, width: marker ? style.width * 5 : style.width, cap: marker ? "butt" : "round", join: marker ? "bevel" : "round", dash: dashes(style) };
   const ops = [];
   if (Tool.isFreehand(tool) && points.length === 1) {
     const [x, y] = points[0], w = style.width;
-    ops.push({ fill: true, color: style.color, opacity, d: marker ? `M${n(x - w * 0.8)} ${n(y - w * 2.5)}h${n(w * 1.6)}v${n(w * 5)}h${n(-w * 1.6)}Z` : circle([x, y], w / 2) });
+    ops.push({ fill: true, color, opacity, d: marker ? `M${n(x - w * 0.8)} ${n(y - w * 2.5)}h${n(w * 1.6)}v${n(w * 5)}h${n(-w * 1.6)}Z` : circle([x, y], w / 2) });
   } else ops.push({ ...base, d: pathData(pathFor(el)) });
   if (tool === "arrow" && points.length >= 2) {
     for (const start of [true, false]) { const head = arrowHead(el, start); if (head) ops.push(...headOps(head, base)); }
@@ -42,8 +50,10 @@ export function drawOps(el) {
   return ops;
 }
 // The same, as SVG markup: for render-test.html and for anything that wants a picture without the engine.
+let serial = 0;
 export function svgMarkup(el) {
-  const body = drawOps(el).map((op) => (op.fill
+  const id = el.style.strokeGradient ? `ink-paint-${++serial}` : null;
+  const body = (id ? `<defs>${gradientMarkup(el, id)}</defs>` : "") + drawOps(el, id && `url(#${id})`).map((op) => (op.fill
     ? `<path d="${op.d}" fill="${op.color}" fill-opacity="${op.opacity}"/>`
     : `<path d="${op.d}" fill="none" stroke="${op.color}" stroke-opacity="${op.opacity}" stroke-width="${op.width}" stroke-linecap="${op.cap}" stroke-linejoin="${op.join}"${op.dash ? ` stroke-dasharray="${op.dash}"` : ""}/>`)).join("");
   return `<g${el.rotation ? ` transform="${turn(el)}"` : ""}>${body}</g>`;

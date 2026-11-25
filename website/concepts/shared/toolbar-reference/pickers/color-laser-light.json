@@ -1,0 +1,345 @@
+{
+ "accessibility": [
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    20,
+    77,
+    16
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke color"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      50,
+      38,
+      38
+     ],
+     "label": "Transparent stroke, hex #00000000",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      50,
+      38,
+      38
+     ],
+     "label": "Dark ink, hex #1F2629FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      50,
+      38,
+      38
+     ],
+     "label": "Slate gray, hex #545E63FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      50,
+      38,
+      38
+     ],
+     "label": "White, hex #FFFFFFFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      50,
+      38,
+      38
+     ],
+     "label": "Brown, hex #87665CFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      104,
+      38,
+      38
+     ],
+     "label": "Teal, hex #00969EFF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      104,
+      38,
+      38
+     ],
+     "label": "Blue, hex #2B73E0FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      104,
+      38,
+      38
+     ],
+     "label": "Purple, hex #7D54B8FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      104,
+      38,
+      38
+     ],
+     "label": "Mauve, hex #B052A8FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      104,
+      38,
+      38
+     ],
+     "label": "Rose, hex #E34266FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      23,
+      158,
+      38,
+      38
+     ],
+     "label": "Green, hex #389E59FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      73,
+      158,
+      38,
+      38
+     ],
+     "label": "Emerald, hex #009E82FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      123,
+      158,
+      38,
+      38
+     ],
+     "label": "Yellow, hex #F5E338FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      173,
+      158,
+      38,
+      38
+     ],
+     "label": "Orange, hex #F29121FF",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      223,
+      158,
+      38,
+      38
+     ],
+     "label": "Coral, hex #F04538FF",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    23,
+    50,
+    238,
+    146
+   ],
+   "role": "AXOpaqueProviderGroup",
+   "subrole": "AXOpaqueProviderGrid"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    -6.5,
+    214,
+    70,
+    13
+   ],
+   "label": "Shades",
+   "role": "AXDisclosureTriangle",
+   "value": false
+  },
+  {
+   "enabled": true,
+   "frame": [
+    18,
+    243,
+    81.5,
+    15
+   ],
+   "identifier": "inline-color-wheel",
+   "label": "Color wheel",
+   "role": "AXButton",
+   "value": "Collapsed"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    270,
+    50,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Hex color"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    26,
+    306,
+    8.5,
+    16
+   ],
+   "help": "Six RGB or eight RGBA digits. Entering a hex color switches to solid paint.",
+   "role": "AXStaticText",
+   "value": "#"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    42.5,
+    306.5,
+    215.5,
+    15
+   ],
+   "help": "Six RGB or eight RGBA digits. Entering a hex color switches to solid paint.",
+   "label": "Stroke hex color and alpha",
+   "placeholder": "RRGGBB or RRGGBBAA",
+   "role": "AXTextField",
+   "value": "FA2933FF"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    350,
+    76,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "Stroke opacity"
+  },
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      206,
+      349,
+      20,
+      16
+     ],
+     "role": "AXValueIndicator"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    100,
+    349,
+    126,
+    16
+   ],
+   "label": "Stroke opacity",
+   "role": "AXSlider",
+   "value": 1
+  },
+  {
+   "enabled": true,
+   "frame": [
+    235.5,
+    350,
+    31.5,
+    14
+   ],
+   "role": "AXStaticText",
+   "value": "100%"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    16,
+    373,
+    252,
+    38
+   ],
+   "help": "Choose a color anywhere on the screen. Escape cancels.",
+   "label": "Pick from screen",
+   "role": "AXButton"
+  },
+  {
+   "enabled": true,
+   "frame": [
+    220.5,
+    419,
+    47.5,
+    20
+   ],
+   "label": "Done",
+   "role": "AXButton"
+  }
+ ],
+ "appearance": "light",
+ "background": "popover",
+ "image": "pickers/color-laser-light.png",
+ "kind": "view",
+ "notes": "Laser pointer color: solid colors only, without the Gradient and Solid choice.",
+ "pixels": [
+  568,
+  910
+ ],
+ "scale": 2,
+ "size": [
+  284,
+  455
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "color-laser",
+ "surface": "pickers"
+}

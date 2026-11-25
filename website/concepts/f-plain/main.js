@@ -5,14 +5,14 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 const $ = (selector) => document.querySelector(selector);
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
 
-// The sample screen: the app's toolbar rests at its bottom edge, and the visitor can draw on it.
-// The toolbar lives in the dock, which is as wide as the window, so the toolbar is never wider than the window.
+// The sample stage: the whole of it can be drawn on, and the app's toolbar rests at its bottom edge.
+// The toolbar lives in the dock, which keeps it a little away from the stage's sides.
 const screen = $("#screen"), number = $("#ring-target");
 const ink = createInk({
   surface: screen, toolbarParent: $("#dock"), toolbarPosition: "absolute",
   appearance: root.dataset.theme || "auto", properties: false, tool: "select", moreHref: "#install",
 });
-// The screen keeps room for the toolbar at the height it has now, so the toolbar never covers the window.
+// The stage has room for the toolbar with its properties open. If the toolbar is ever taller, the stage grows downward.
 let reserved = 0;
 ink.on("layout", ({ height }) => {
   if (!height || ink.collapsed || height === reserved) return;

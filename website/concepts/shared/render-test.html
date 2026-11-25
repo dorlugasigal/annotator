@@ -22,7 +22,7 @@
 </head>
 <body>
 <h1>Rendering check</h1>
-<p>Each scene is one of the app’s pictures (reference/conformance/render, drawn on a Mac) beside the same board drawn by the web demo’s renderer (scene.js), at 1 and 2 pixels per point. Around every element the demo draws, each pixel must lie within the range the other picture shows within one pixel, plus 32/255 for antialiasing: the edge rule of the app’s own rendering tolerance (docs/parity.md, WIN-REND-05). At most 1 pixel in 100 of an element’s ink may break it, to allow for two different rasterizers. Elements the demo does not draw (fills, diagram shapes, ink pressure, other arrowheads) are left out and counted.</p>
+<p>Each scene is one of the app’s pictures (reference/conformance/render, drawn on a Mac) beside the same board drawn by the web demo’s renderer (scene.js), at 1 and 2 pixels per point. Around every element the demo draws, each pixel must lie within the range the other picture shows within one pixel, plus 32/255 for antialiasing: the edge rule of the app’s own rendering tolerance (docs/parity.md, WIN-REND-05). At most 1 pixel in 100 of an element’s ink may break it, to allow for two different rasterizers. Elements the demo does not draw (fills, diagram shapes, ink pressure, other arrowheads) are left out and counted. The pen stroke in “fills” has a gradient.</p>
 <div id="summary">Checking…</div>
 <div id="scenes"></div>
 <script type="module">
@@ -30,13 +30,14 @@ import { svgMarkup } from "./scene.js";
 
 const base = "render-reference/";
 const DRAWN = new Set(["rectangle", "ellipse", "diamond", "triangle", "hexagon", "star", "pen", "highlighter", "line", "arrow"]);
-const css = (c) => `rgb(${[c.red, c.green, c.blue].map((v) => Math.round(v * 255)).join(" ")})`;
+const css = (c) => `#${[c.red, c.green, c.blue].map((v) => Math.round(v * 255).toString(16).padStart(2, "0")).join("")}`;
 // A board element as scene.js reads it. Seeds are 64-bit, so they are read as text.
 const parse = (text) => JSON.parse(text.replace(/"seed"\s*:\s*(\d+)/g, '"seed":"$1"'));
 const element = (v) => ({ ...v, points: v.points.map((p) => [p.x, p.y]), seed: BigInt(v.seed), rotation: v.rotation || 0,
-  style: { ...v.style, color: css(v.style.color), opacity: v.style.opacity * v.style.color.alpha } });
+  style: { ...v.style, color: css(v.style.color), opacity: v.style.opacity * v.style.color.alpha,
+    strokeGradient: v.style.strokeGradient ? { colors: v.style.strokeGradient.colors.map(css), angle: v.style.strokeGradient.angle } : null } });
 // What the demo draws for visitors: outlines, pen, highlighter, lines and arrows with an open head or none.
-const drawn = (v) => DRAWN.has(v.tool) && !v.style.fill && !v.style.fillGradient && !v.style.strokeGradient && !v.style.pressure && !v.label
+const drawn = (v) => DRAWN.has(v.tool) && !v.style.fill && !v.style.fillGradient && !v.style.pressure && !v.label
   && (v.tool !== "arrow" || [v.style.startHead, v.style.endHead].every((head) => head === "none" || head === "open"));
 const image = (src) => new Promise((done, fail) => { const img = new Image(); img.onload = () => done(img); img.onerror = fail; img.src = src; });
 function pixels(img, width, height) {
@@ -51,7 +52,7 @@ function pixels(img, width, height) {
 // How many of the element's ink pixels break the edge rule, in either direction.
 function compare(a, b, width, height, box, others) {
   const x0 = Math.max(1, Math.floor(box.x)), y0 = Math.max(1, Math.floor(box.y)), x1 = Math.min(width - 2, Math.ceil(box.x + box.width)), y1 = Math.min(height - 2, Math.ceil(box.y + box.height));
-  let ink = 0, wrong = 0;
+  let ink = 0, wrong = 0, both = 0, apart = 0;
   const outside = (one, other, x, y) => {
     const at = (y * width + x) * 4;
     for (let channel = 0; channel < 3; channel++) {
@@ -70,9 +71,11 @@ function compare(a, b, width, height, box, others) {
       if (others.some((o) => x >= o.x && x <= o.x + o.width && y >= o.y && y <= o.y + o.height)) continue;
       ink++;
       if (outside(a, b, x, y) || outside(b, a, x, y)) wrong++;
+      // Where both pictures have ink, how far apart its color is: this is what tells a gradient from a wrong one.
+      if (a[at] + a[at + 1] + a[at + 2] < 750 && b[at] + b[at + 1] + b[at + 2] < 750) { both++; apart += (Math.abs(a[at] - b[at]) + Math.abs(a[at + 1] - b[at + 1]) + Math.abs(a[at + 2] - b[at + 2])) / 3; }
     }
   }
-  return { ink, wrong };
+  return { ink, wrong, color: both ? apart / both : 0 };
 }
 const host = document.getElementById("scenes");
 let checked = 0, failed = 0, left = 0;
@@ -102,12 +105,13 @@ for (const scene of await (await fetch(`${base}scenes.json`)).json()) {
     };
     const others = board.elements.filter((v) => !drawn(v)).map(area);
     mine.forEach((v, i) => {
-      const s = v.style, { ink, wrong } = compare(own.data, app.data, width, height, area(v), others);
-      const share = ink ? wrong / ink : 1, pass = ink > 0 && share <= 0.01;
+      const s = v.style, { ink, wrong, color } = compare(own.data, app.data, width, height, area(v), others);
+      // A gradient's colors must also agree where both pictures have ink: 6/255 on average, edges included.
+      const share = ink ? wrong / ink : 1, pass = ink > 0 && share <= 0.01 && (!s.strokeGradient || color <= 6);
       checked++;
       if (!pass) failed++;
-      const what = [v.tool, s.pattern !== "solid" && s.pattern, s.roughness && `roughness ${s.roughness}`, s.cornerRadius && "rounded", s.opacity < 1 && `opacity ${s.opacity}`, v.rotation && "turned", v.points.length === 1 && "one point"].filter(Boolean).join(", ");
-      lines.push(`<span class="${pass ? "" : "bad"}">${pass ? "ok  " : "FAIL"} ${scale}x #${i + 1} ${what}: ${wrong} of ${ink} ink pixels outside the edge rule (${(share * 100).toFixed(2)}%)</span>`);
+      const what = [v.tool, s.strokeGradient && "gradient", s.pattern !== "solid" && s.pattern, s.roughness && `roughness ${s.roughness}`, s.cornerRadius && "rounded", s.opacity < 1 && `opacity ${s.opacity}`, v.rotation && "turned", v.points.length === 1 && "one point"].filter(Boolean).join(", ");
+      lines.push(`<span class="${pass ? "" : "bad"}">${pass ? "ok  " : "FAIL"} ${scale}x #${i + 1} ${what}: ${wrong} of ${ink} ink pixels outside the edge rule (${(share * 100).toFixed(2)}%)${s.strokeGradient ? `, colors ${color.toFixed(1)}/255 apart on average` : ""}</span>`);
     });
   }
   section.querySelector("pre").innerHTML = lines.join("\n");

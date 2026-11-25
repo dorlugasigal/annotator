@@ -654,6 +654,32 @@ export const APP_ICONS = {
    "fill": false
   }
  ],
+ "arrow.up.left.and.down.right.magnifyingglass": [
+  {
+   "d": "M 3 7 L 3 5 A 2 2 0 0 1 5 3 L 7 3",
+   "fill": false
+  },
+  {
+   "d": "M 17 3 L 19 3 A 2 2 0 0 1 21 5 L 21 7",
+   "fill": false
+  },
+  {
+   "d": "M 21 17 L 21 19 A 2 2 0 0 1 19 21 L 17 21",
+   "fill": false
+  },
+  {
+   "d": "M 7 21 L 5 21 A 2 2 0 0 1 3 19 L 3 17",
+   "fill": false
+  },
+  {
+   "d": "M 9 12 A 3 3 0 1 0 15 12 A 3 3 0 1 0 9 12 Z",
+   "fill": false
+  },
+  {
+   "d": "M 16 16 L 14.1 14.1",
+   "fill": false
+  }
+ ],
  "eyedropper": [
   {
    "d": "M 15.6 5.7 A 2.7 2.7 0 1 0 21 5.7 A 2.7 2.7 0 1 0 15.6 5.7 Z",

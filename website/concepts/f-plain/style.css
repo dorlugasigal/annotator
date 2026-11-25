@@ -65,13 +65,15 @@ h1 { max-width: 20ch; font-size: 38px; line-height: 1.08; font-weight: 600; lett
 .get .quiet { font-size: 16px; }
 .get small { font-size: 15px; color: var(--muted); }
 
-.sample { margin-top: 56px; }
+.sample { margin-top: 40px; }
 .sample figcaption, .recording figcaption, .note, .req, .site-footer p { font-size: 15px; line-height: 1.5; color: var(--muted); }
 .sample figcaption { margin-top: 14px; text-wrap: balance; }
-/* The sample screen keeps room under the window for the toolbar, as tall as the toolbar is now (main.js sets --tb-h). */
-.screen { --tb-h: 100px; --tb-bottom: 10px; --inset: 10px; position: relative; isolation: isolate; overflow: hidden; padding: var(--inset); border: 1px solid var(--line); border-radius: 16px; background: var(--desk); }
-.js .screen { padding-bottom: calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap, 14px)); }
-.dock { position: absolute; inset: 0 calc(var(--inset) - 8px); z-index: 100; pointer-events: none; }
+/* The stage: the whole of it can be drawn on. The window sits in it with free room on every side, and the room under
+   the window is tall enough for the toolbar with its properties open, so the stage never changes size under a mark.
+   If the toolbar is ever taller than that, the stage grows downward (main.js sets --tb-h). */
+.screen { --tb-h: 84px; --tb-bottom: 10px; --pad-top: 40px; --pad-x: 14px; --free: 200px; --dock-x: 2px; position: relative; isolation: isolate; overflow: hidden; padding: var(--pad-top) var(--pad-x); border: 1px solid var(--line); border-radius: 16px; background: var(--desk); }
+.js .screen { padding-bottom: max(var(--free), var(--tb-h) + var(--tb-bottom) + 16px); }
+.dock { position: absolute; inset: 0 var(--dock-x); z-index: 100; pointer-events: none; }
 .dock > .ink-toolbar { pointer-events: auto; }
 .dock > .ink-toolbar:not(.is-placed) { bottom: var(--tb-bottom); }
 .screen .ink-layer { --ink-highlight-blend: var(--blend); }
@@ -145,30 +147,40 @@ kbd { display: inline-block; margin-right: 4px; padding: 3px 7px; border: 1px so
   .nav-coffee { padding: 8px; margin: -8px; }
   .nav-coffee svg { width: 20px; height: 20px; }
   .hero { padding-top: 28px; }
-  .sample { margin-top: 40px; }
+  .sample { margin-top: 36px; }
   .tools li { padding-block: 6px; }
 }
 @media (min-width: 600px) {
   h1 { font-size: 48px; }
-  .screen { --tb-h: 52px; --tb-bottom: 18px; --tb-gap: 22px; --inset: 20px; }
+  .screen { --tb-h: 52px; --tb-bottom: 18px; --pad-top: 56px; --pad-x: clamp(20px, 6vw, 64px); --free: 182px; --dock-x: 20px; }
   .report { padding: 24px 28px 28px; }
   .num { font-size: 32px; }
   .metrics { gap: 24px; }
   .video-frame { aspect-ratio: 16 / 9; }
   .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
   .tools ul { columns: 3; column-gap: 40px; font-size: 17px; }
+}
+@media (min-width: 760px) {
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
+}
+@media (max-width: 379px) {
+  .screen { --pad-x: 10px; }
+  .num { font-size: 24px; }
 }
 @media (min-width: 900px) {
   h1 { max-width: none; }
-  .report { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 64px; row-gap: 26px; }
-  .report-head { grid-column: 1 / -1; }
   .facts { gap: 64px; }
 }
-@media (min-width: 1100px) {
+@media (min-width: 1000px) {
+  .report { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: 48px; row-gap: 26px; }
+  .report-head { grid-column: 1 / -1; }
+}
+/* On a wide screen the stage is a little wider than the column. */
+@media (min-width: 1200px) {
   h1 { font-size: 56px; }
-  .hero { padding-top: 56px; }
-  .screen { --tb-h: 72px; --tb-bottom: 22px; --tb-gap: 26px; --inset: 28px; }
+  .hero { padding-top: 44px; }
+  .sample { margin-top: 48px; }
+  .screen { --tb-h: 72px; --tb-bottom: 22px; --pad-x: 112px; --free: 188px; margin-inline: -40px; }
   .report { padding: 28px 36px 34px; }
   .num { font-size: 36px; }
 }

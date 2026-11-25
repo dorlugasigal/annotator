@@ -56,12 +56,73 @@ export const Tool = {
 export const INK = { coral: "#F04538", highlighter: "#EDFF0D", laser: "#FA2933" };
 export function defaultStyle(tool) {
   const style = { color: INK.coral, fill: null, width: 3, opacity: 1, pattern: "solid", fillPattern: "solid", roughness: 0, cornerRadius: 0,
-    fontSize: 28, fontName: "system", bold: false, alignment: "left", curved: false, startHead: "none", endHead: "open", pressure: false };
+    fontSize: 28, fontName: "system", bold: false, alignment: "left", curved: false, startHead: "none", endHead: "open", pressure: false,
+    strokeGradient: null, fillGradient: null };
   if (tool === "arrow") style.headScale = 0.75;
   if (tool === "highlighter") { style.color = INK.highlighter; style.width = 4; }
   if (tool === "laser") { style.color = INK.laser; style.width = 6; }
   return style;
 }
+
+// ColorGradient.swift ------------------------------------------------------------------------------
+// A gradient is { colors: [2 to 8 CSS hex colors], angle in degrees }. Colors here are #RRGGBB, or #RRGGBBAA when
+// they are see-through; a paint's opacity is its color's alpha, as in the app.
+const hex2 = (value) => Math.round(Math.min(1, Math.max(0, value)) * 255).toString(16).padStart(2, "0").toUpperCase();
+const rgb = (red, green, blue) => `#${hex2(red)}${hex2(green)}${hex2(blue)}`;
+const preset = (label, ...colors) => ({ id: label.toLowerCase(), label, gradient: { colors: colors.map((c) => rgb(...c)), angle: 25 } });
+// GradientPreset: the app's fifteen gradients, in the picker's order.
+export const GRADIENT_PRESETS = [
+  preset("Sunset", [0.96, 0.12, 0.67], [1, 0.23, 0.39], [1, 0.48, 0.2]),
+  preset("Lagoon", [0.13, 0.48, 0.96], [0.05, 0.73, 0.89], [0.05, 0.82, 0.66]),
+  preset("Ember", [0.91, 0.19, 0.35], [1, 0.53, 0.16], [1, 0.85, 0.3]),
+  preset("Spectrum", [0.93, 0.19, 0.49], [0.63, 0.27, 0.9], [0.16, 0.48, 0.95], [0.03, 0.72, 0.64], [0.98, 0.74, 0.2], [0.97, 0.31, 0.29]),
+  preset("Dusk", [0.37, 0.28, 0.89], [0.67, 0.29, 0.8], [0.88, 0.32, 0.66]),
+  preset("Citrus", [1, 0.55, 0.12], [0.97, 0.83, 0.2], [0.42, 0.76, 0.3]),
+  preset("Ocean", [0.08, 0.79, 0.74], [0.18, 0.51, 0.94], [0.47, 0.3, 0.85]),
+  preset("Orchid", [0.98, 0.43, 0.69], [0.7, 0.44, 0.91], [0.38, 0.63, 0.97]),
+  preset("Aurora", [0.13, 0.72, 0.47], [0.25, 0.55, 0.95], [0.82, 0.33, 0.88]),
+  preset("Cherry", [0.86, 0.1, 0.22], [0.95, 0.27, 0.47], [0.6, 0.17, 0.76]),
+  preset("Forest", [0.07, 0.55, 0.33], [0.25, 0.7, 0.3], [0.62, 0.8, 0.18]),
+  preset("Copper", [0.72, 0.33, 0.16], [0.88, 0.5, 0.25], [0.86, 0.66, 0.38]),
+  preset("Neon", [0.95, 0.2, 0.75], [0.35, 0.45, 1], [0.1, 0.82, 0.78]),
+  preset("Tropic", [0.98, 0.62, 0.12], [0.94, 0.3, 0.48], [0.42, 0.3, 0.9]),
+  preset("Steel", [0.33, 0.4, 0.5], [0.52, 0.6, 0.7], [0.4, 0.5, 0.65]),
+];
+export const Paint = {
+  // A hex color's parts, each 0 to 1, or null for a color written another way.
+  parse(color) {
+    const digits = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i.exec(String(color || "").trim())?.[1];
+    if (!digits) return null;
+    const part = (i) => parseInt(digits.slice(i, i + 2), 16) / 255;
+    return { red: part(0), green: part(2), blue: part(4), alpha: digits.length === 8 ? part(6) : 1 };
+  },
+  format: (c, alpha = c.alpha) => `${rgb(c.red, c.green, c.blue)}${alpha < 1 ? hex2(alpha) : ""}`,
+  // PaletteHex.format: always eight digits.
+  hex8: (color) => { const c = Paint.parse(color); return c ? `${rgb(c.red, c.green, c.blue).slice(1)}${hex2(c.alpha)}` : ""; },
+  alpha: (color) => Paint.parse(color)?.alpha ?? 1,
+  solid: (color) => { const c = Paint.parse(color); return c ? rgb(c.red, c.green, c.blue) : color; },
+  withAlpha: (color, alpha) => { const c = Paint.parse(color); return c ? Paint.format(c, alpha) : color; },
+  // Style.setPaintColor: a solid color keeps the paint's opacity unless it brings its own, and ends a gradient.
+  setColor(style, color, useColorAlpha = false) {
+    style.color = useColorAlpha ? color : Paint.withAlpha(color, Paint.alpha(style.color));
+    style.strokeGradient = null;
+  },
+  // Style.setGradient: the first color stays behind as the plain color, with the paint's opacity.
+  setGradient(style, gradient) {
+    style.color = Paint.withAlpha(gradient.colors[0] ?? style.color, Paint.alpha(style.color));
+    style.strokeGradient = { colors: [...gradient.colors], angle: gradient.angle };
+  },
+  setOpacity(style, alpha) { style.color = Paint.withAlpha(style.color, alpha); },
+  same: (a, b) => Boolean(a && b) && a.angle === b.angle && a.colors.length === b.colors.length && a.colors.every((c, i) => c.toLowerCase() === b.colors[i].toLowerCase()),
+  // GradientPainter: the gradient runs through the middle of the bounds at its angle, corner to corner.
+  line(gradient, bounds) {
+    const angle = gradient.angle * Math.PI / 180, dx = Math.cos(angle), dy = Math.sin(angle);
+    const length = Math.max(1, Math.abs(dx) * bounds.width + Math.abs(dy) * bounds.height) / 2, c = R.center(bounds);
+    return { start: [c[0] - dx * length, c[1] - dy * length], end: [c[0] + dx * length, c[1] + dy * length] };
+  },
+  // The same gradient as a CSS background: CSS measures its angle from "up", clockwise, and sizes the line the same way.
+  css: (gradient) => `linear-gradient(${gradient.angle + 90}deg, ${gradient.colors.join(", ")})`,
+};
 let tokens = 0;
 export const freshToken = () => ++tokens;
 export function makeElement({ id, tool, frame = R.zero(), points = [], text = "", style = defaultStyle(tool), seed = 1 }) {
@@ -597,7 +658,8 @@ export class LaserTrail {
 // Document.swift: CanvasDocument ---------------------------------------------------------------------
 const utf8Length = (text) => new TextEncoder().encode(text).length;
 // Element.estimatedBytes: the app's history budget counts 528 bytes an element plus its points, pressures and text.
-export const estimatedBytes = (el) => 528 + el.points.length * 16 + el.pressures.length * 8 + utf8Length(el.text || "");
+export const estimatedBytes = (el) => 528 + el.points.length * 16 + el.pressures.length * 8 + utf8Length(el.text || "")
+  + ((el.style.strokeGradient?.colors.length ?? 0) + (el.style.fillGradient?.colors.length ?? 0)) * 32;
 const plain = (value) => JSON.stringify(value, (key, v) => (typeof v === "bigint" ? `${v}n` : v));
 export function validate(el) {
   const s = el.style, bad = (message) => { throw new Error(message); };
@@ -610,6 +672,9 @@ export function validate(el) {
     && s.cornerRadius >= 0 && s.cornerRadius <= 1000 && s.fontSize >= 4 && s.fontSize <= 1024)
     || (s.headScale != null && !(s.headScale >= 0.5 && s.headScale <= 2)) || (s.effectAmount != null && !(s.effectAmount >= 0 && s.effectAmount <= 100))) {
     bad("The drawing contains an unsupported style value.");
+  }
+  for (const gradient of [s.strokeGradient, s.fillGradient]) {
+    if (gradient && !(gradient.colors.length >= 2 && gradient.colors.length <= 8 && Number.isFinite(gradient.angle) && gradient.angle >= 0 && gradient.angle <= 360)) bad("The drawing contains an unsupported style value.");
   }
 }
 export class CanvasDocument {

@@ -20,7 +20,7 @@ const wanted = [
   "flashlight.on.fill", "circle.dotted", "light.beacon.max", "cursorarrow.rays", "square.grid.3x3.fill", "tornado",
   "bold", "text.alignleft", "text.aligncenter", "text.alignright", "square.dashed", "chevron.right", "chevron.up.chevron.down",
   "triangle", "hexagon", "star", "ruler", "photo.on.rectangle", "plus.magnifyingglass", "arrow.up.left.and.arrow.down.right",
-  "rectangle.on.rectangle", "eyedropper", "person", "cylinder", "grid", "chart.xyaxis.line",
+  "rectangle.on.rectangle", "arrow.up.left.and.down.right.magnifyingglass", "eyedropper", "person", "cylinder", "grid", "chart.xyaxis.line",
 ];
 const out = {};
 for (const symbol of wanted) {

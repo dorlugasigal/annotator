@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Annotator: draw on your screen as you explain</title>
+  <meta name="description" content="Annotator is a free app for Mac and Windows. Circle a number, point at a chart, blur what is private. Every mark stays editable.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0a0d14">
+  <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
+  <link rel="preload" href="/concepts/shared/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/concepts/shared/fonts/instrument-sans-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/concepts/shared/ink.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Before the first paint: the visitor's platform, their theme (dark until they choose light) and whether motion
+    // is allowed, so the page never flashes the other one. For looking at the page: ?platform=windows|mac,
+    // ?theme=light|dark, ?motion=off, and ?fade for the theme change browsers without view transitions get.
+    (function () {
+      var root = document.documentElement, query = new URLSearchParams(location.search), saved = null;
+      var system = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+      root.dataset.platform = (query.get("platform") || (/win/i.test(system) ? "windows" : "mac")) === "windows" ? "windows" : "mac";
+      try { saved = localStorage.getItem("annotator.concept-h.theme"); } catch (error) { /* storage is off */ }
+      root.dataset.theme = (query.get("theme") || saved) === "light" ? "light" : "dark";
+      root.classList.add("js");
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches && query.get("motion") !== "off") root.classList.add("motion");
+    })();
+  </script>
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <!-- The app's Ocean gradient, for strokes. Its colors come from the stylesheet. -->
+  <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><defs><linearGradient id="ocean" x1=".05" y1=".29" x2=".95" y2=".71"><stop offset="0"/><stop offset=".5"/><stop offset="1"/></linearGradient></defs></svg>
+  <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
+      <nav aria-label="Site">
+        <a class="nav-link" href="#what">What you can do</a>
+        <a class="nav-link" href="#stage">Try it</a>
+        <a class="nav-link" href="/docs/">Help</a>
+        <a class="nav-link" href="https://github.com/dorlugasigal/annotator">GitHub</a>
+        <a class="nav-coffee" href="https://buymeacoffee.com/dorlugasigal" aria-label="Buy me a coffee">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 8h10v4.5A4.5 4.5 0 0 1 9.500 17h-1A4.500 4.500 0 0 1 4 12.500zM14 9.500h1.200a2.300 2.300 0 0 1 0 4.600H13.700M7 2.500c-.9 1 .9 2 0 3M11 2.500c-.9 1 .9 2 0 3"/></svg>
+          <span>Buy me a coffee</span>
+        </a>
+        <button type="button" class="theme-switch" id="theme-switch" role="switch" aria-checked="false" aria-label="Light theme">
+          <span class="coin-lift" aria-hidden="true">
+            <span class="coin">
+              <span class="face moon"><svg viewBox="0 0 24 24"><path d="M20 14.500A8.500 8.500 0 0 1 9.500 4a8.500 8.500 0 1 0 10.500 10.500z"/></svg></span>
+              <span class="face sun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.500V5M12 19v2.500M2.500 12H5M19 12h2.500M5.300 5.300l1.800 1.800M16.900 16.900l1.800 1.800M5.300 18.700l1.800-1.800M16.900 7.100l1.800-1.800"/></svg></span>
+            </span>
+          </span>
+        </button>
+        <a class="button small" href="#install">Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title" data-words>Draw on your screen as you <span class="inked">explain.<svg viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M4 11C58 3 118 15 176 8S262 5 296 10" stroke="url(#ocean)"/></svg></span></h1>
+        <div class="hero-side">
+          <p class="lede">Annotator is a free app for Mac and Windows. Circle a number, point at a chart, blur what is private. Every mark stays editable.</p>
+          <p class="get" data-for="mac">
+            <a class="button primary" href="/downloads/">Download for Mac</a>
+            <a class="quiet" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
+            <small>Free. No account.</small>
+          </p>
+          <p class="get" data-for="windows">
+            <a class="button primary" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
+            <a class="quiet" href="/downloads/">Download for Mac</a>
+            <small>Free. No account.</small>
+          </p>
+        </div>
+      </div>
+
+      <figure class="stage" id="stage">
+        <div class="stage-space">
+          <div class="screen" id="screen">
+            <div class="desk" aria-hidden="true"></div>
+            <div class="board" id="board">
+            <div class="window" aria-hidden="true">
+              <div class="window-bar"><i></i><i></i><i></i><span>Weekly report</span></div>
+              <div class="report">
+                <div class="report-head">
+                  <p class="week"><strong>Week 47</strong><span>16 to 22 November</span></p>
+                  <p class="sent">Sent to <span id="private">maya.cohen@example.com</span></p>
+                </div>
+                <div class="report-left">
+                  <dl class="metrics">
+                    <div><dt>Visitors</dt><dd><span class="num">12,480</span><span class="delta up">+4%</span></dd></div>
+                    <div><dt>Orders</dt><dd><span class="num">96</span><span class="delta up">+2%</span></dd></div>
+                    <div><dt>Sign-ups</dt><dd><span class="num" id="ring-target">318</span><span class="delta down">&minus;21%</span></dd></div>
+                  </dl>
+                  <ul class="notes">
+                    <li>The newsletter went out on Tuesday.</li>
+                    <li>The new sign-up form shipped on Thursday.</li>
+                  </ul>
+                </div>
+                <div class="chart">
+                  <p>Sign-ups per day</p>
+                  <div class="plot" id="plot">
+                    <svg viewBox="0 0 420 160" focusable="false">
+                      <path class="grid" d="M12 28H408M12 66H408M12 104H408M12 136H408"/>
+                      <path class="area" d="M24 52C45 52 65 44 86 44S127 50 148 50 189 104 210 104 251 62 272 62 313 48 334 48 375 40 396 40V136H24Z"/>
+                      <path class="last" d="M24 60C45 60 65 56 86 56S127 58 148 58 189 64 210 64 251 58 272 58 313 54 334 54 375 50 396 50"/>
+                      <path class="line" d="M24 52C45 52 65 44 86 44S127 50 148 50 189 104 210 104 251 62 272 62 313 48 334 48 375 40 396 40"/>
+                      <circle class="dot" cx="210" cy="104" r="4.500"/>
+                      <g class="days"><text x="24" y="154">M</text><text x="86" y="154">T</text><text x="148" y="154">W</text><text x="210" y="154">T</text><text x="272" y="154">F</text><text x="334" y="154">S</text><text x="396" y="154">S</text></g>
+                    </svg>
+                    <i class="dip" id="dip"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+            <div class="dock" id="dock"></div>
+          </div>
+        </div>
+        <figcaption>
+          <span>This is a web demo of the app. Pick a tool and draw on it.</span>
+          <button type="button" class="chip-button" id="replay" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5 3.500v9M11 3.500v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.700-3.750M3 2.500v2.800h2.800"/></svg><span>Pause demo</span></button>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="what" id="what" aria-labelledby="what-title">
+      <div class="deck-pin">
+        <div class="wrap deck-head">
+          <h2 id="what-title" data-words>What you can do</h2>
+          <div class="deck-tools">
+            <div class="deck-steps" id="deck-steps" role="group" aria-label="Choose an example" hidden></div>
+            <button type="button" class="chip-button" id="clips-toggle" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5 3.500v9M11 3.500v9"/><path class="i-play" d="M5 3.200v9.600L12.500 8z"/></svg><span>Pause clips</span></button>
+          </div>
+        </div>
+        <div class="deck-space">
+          <div class="deck" id="deck">
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media"><video muted loop playsinline preload="none" tabindex="-1" poster="/public/demo/stage-arrow.jpg" src="/public/demo/stage-arrow.mp4" aria-label="Recording of the app: a ring around a number, then a curved arrow to the dip in a chart"></video></div>
+                <div class="tile-text">
+                  <h3>Circle and point</h3>
+                  <p>Put a ring around the number, then bend an arrow to the place it shows up.</p>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media scene scene-private" id="scene-private" aria-hidden="true">
+                  <div class="mini">
+                    <div class="window-bar"><i></i><i></i><i></i><span>Account</span></div>
+                    <dl class="rows">
+                      <div><dt>Name</dt><dd>Maya Cohen</dd></div>
+                      <div><dt>Email</dt><dd><span data-blur>maya.cohen@example.com</span></dd></div>
+                      <div><dt>Plan</dt><dd>Team, 12 seats</dd></div>
+                      <div><dt>Recovery code</dt><dd><span data-blur>4821-7730-1195</span></dd></div>
+                    </dl>
+                  </div>
+                </div>
+                <div class="tile-text">
+                  <h3>Hide what is private</h3>
+                  <p>Cover an email or a code with Blur while you present. It is not secure redaction: details can stay readable.</p>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media"><video muted loop playsinline preload="none" tabindex="-1" poster="/public/demo/stage-smart.jpg" src="/public/demo/stage-smart.mp4" aria-label="Recording of the app: a rough box becomes a neat rectangle, then an arrow and a label are added"></video></div>
+                <div class="tile-text">
+                  <h3>Box it and label it</h3>
+                  <p>Sketch a rough box or arrow in a review. Smart Draw makes it neat, and you type a few words next to it.</p>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media scene scene-steps" id="scene-steps" aria-hidden="true">
+                  <div class="mini">
+                    <div class="window-bar"><i></i><i></i><i></i><span>New project</span></div>
+                    <div class="form">
+                      <p><span>Name</span><b class="field" data-step>Launch week</b></p>
+                      <p><span>Region</span><b class="field select" data-step>Europe</b></p>
+                      <p><b class="mini-button" data-step>Create project</b></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="tile-text">
+                  <h3>Number the steps</h3>
+                  <p>Click to drop 1, 2 and 3 on a screen, so everyone follows the same order.</p>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media"><video muted loop playsinline preload="none" tabindex="-1" poster="/public/demo/stage-spotlight.jpg" src="/public/demo/stage-spotlight.mp4" aria-label="Recording of the app: a spotlight dims everything except the area around the pointer"></video></div>
+                <div class="tile-text">
+                  <h3>Guide the eye</h3>
+                  <p>Dim everything but one spot with Spotlight, zoom in on small text, or point with a laser that fades.</p>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media"><video muted loop playsinline preload="none" tabindex="-1" poster="/public/demo/stage-shapes.jpg" src="/public/demo/stage-shapes.mp4" aria-label="Recording of the app: a database shape from the tool library is drawn next to a phone screen"></video></div>
+                <div class="tile-text">
+                  <h3>Sketch a system</h3>
+                  <p>Drop in databases, servers and queues from the tool library and join them with arrows.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="keys-section wrap" aria-labelledby="keys-title">
+      <div class="keys-copy" data-enter>
+        <h2 id="keys-title" data-words>Two keys</h2>
+        <p class="stay">Your drawings stay.</p>
+        <p class="mode-note">Try them here. The demo at the top is in <span class="mode-pill" id="mode-pill" data-mode="use"><i></i><b>Use apps</b></span> mode.</p>
+      </div>
+      <div class="keys" id="keys" data-scroll>
+        <button type="button" class="combo" data-combo="draw" data-enter style="--i: 1">
+          <span class="plate">
+            <kbd class="key wide" data-key="control"><span class="key-top"><span data-for="mac">control</span><span data-for="windows">Ctrl</span></span><i class="key-side"></i></kbd>
+            <kbd class="key wide" data-key="shift"><span class="key-top">shift</span><i class="key-side"></i></kbd>
+            <kbd class="key" data-key="2"><span class="key-top">2</span><i class="key-side"></i></kbd>
+          </span>
+          <span class="combo-label">to draw.</span>
+        </button>
+        <button type="button" class="combo" data-combo="use" data-enter style="--i: 2">
+          <span class="plate">
+            <kbd class="key" data-key="esc"><span class="key-top">esc</span><i class="key-side"></i></kbd>
+          </span>
+          <span class="combo-label">to go back to your app.</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="reel wrap" aria-labelledby="reel-title">
+      <div class="reel-head">
+        <h2 id="reel-title" data-words>The real app</h2>
+        <p data-enter>A 30-second recording of the real app, with sample content.</p>
+      </div>
+      <figure class="reel-space" data-scroll>
+        <div class="reel-frame">
+          <video id="reel" src="/public/demo/annotator-reel.mp4" poster="reel-poster.jpg" muted loop playsinline controls preload="none" aria-label="Annotator being used over a sample dashboard"></video>
+        </div>
+        <figcaption class="video-controls" hidden>
+          <button type="button" class="chip-button" id="reel-play">Play</button>
+          <button type="button" class="chip-button" id="reel-sound">Turn sound on</button>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="also wrap" aria-labelledby="also-title">
+      <div class="also-head">
+        <h2 id="also-title" data-words>Also in the app</h2>
+        <p data-enter>More than 40 tools, and a few things you might not expect.</p>
+      </div>
+      <ul class="extras">
+        <li class="extra" data-enter data-tilt style="--i: 0">
+          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
+            <rect class="il-panel" x="6" y="8" width="112" height="76" rx="9"/>
+            <path class="il-faint" d="M18 24h40M18 34h28M18 60h26M18 70h20"/>
+            <rect class="il-region" x="56" y="28" width="50" height="36" rx="3"/>
+            <g class="il-pop">
+              <rect class="il-card" x="92" y="46" width="62" height="48" rx="7"/>
+              <path class="il-rule" d="M92 58h62"/>
+              <circle class="il-dot" cx="99.500" cy="52" r="1.800"/><circle class="il-dot" cx="105.500" cy="52" r="1.800"/>
+              <rect class="il-fill" x="99" y="64" width="48" height="23" rx="3"/>
+            </g>
+          </svg>
+          <div><h3>Share region</h3><p>Put one part of your screen in its own window, so a meeting app can share just that.</p></div>
+        </li>
+        <li class="extra" data-enter data-tilt style="--i: 1">
+          <svg class="il il-timer" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
+            <rect class="il-panel" x="12" y="8" width="136" height="88" rx="10"/>
+            <circle class="il-glow a" cx="52" cy="70" r="30"/><circle class="il-glow b" cx="112" cy="34" r="24"/>
+            <text class="il-small" x="80" y="38" text-anchor="middle">Coffee break</text>
+            <text class="il-time t1" x="80" y="72" text-anchor="middle">10:00</text>
+            <text class="il-time t2" x="80" y="72" text-anchor="middle">9:59</text>
+            <text class="il-time t3" x="80" y="72" text-anchor="middle">9:58</text>
+          </svg>
+          <div><h3>Break timer</h3><p>A full-screen countdown for the break. It starts as a 10-minute coffee break.</p></div>
+        </li>
+        <li class="extra" data-enter data-tilt style="--i: 2">
+          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
+            <clipPath id="board-clip"><rect x="12" y="10" width="136" height="84" rx="10"/></clipPath>
+            <g clip-path="url(#board-clip)">
+              <rect class="il-white" x="12" y="10" width="136" height="84"/>
+              <rect class="il-black" x="80" y="10" width="68" height="84"/>
+            </g>
+            <rect class="il-frame" x="12" y="10" width="136" height="84" rx="10"/>
+            <path class="il-ink" pathLength="1" d="M28 62c8-22 18-24 24-6s14 14 22-2 16-18 24-4 14 8 34-16"/>
+          </svg>
+          <div><h3>Whiteboard and blackboard</h3><p>Swap the desktop for a clean board, then switch back.</p></div>
+        </li>
+        <li class="extra" data-enter data-tilt style="--i: 3">
+          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
+            <rect class="il-panel" x="10" y="20" width="46" height="64" rx="9"/>
+            <path class="il-faint" d="M20 72h26"/>
+            <path class="il-star" transform="translate(33 46)" d="M0-13 3.800-4.300 13-4 6 2.200 8 11.400 0 6.500-8 11.400-6 2.200-13-4-3.800-4.300Z"/>
+            <g transform="translate(88 36)"><path class="il-star il-stamp s1" d="M0-13 3.800-4.300 13-4 6 2.200 8 11.400 0 6.500-8 11.400-6 2.200-13-4-3.800-4.300Z"/></g>
+            <g transform="translate(128 54) rotate(14) scale(.82)"><path class="il-star il-stamp s2" d="M0-13 3.800-4.300 13-4 6 2.200 8 11.400 0 6.500-8 11.400-6 2.200-13-4-3.800-4.300Z"/></g>
+            <g transform="translate(96 76) rotate(-10) scale(.62)"><path class="il-star il-stamp s3" d="M0-13 3.800-4.300 13-4 6 2.200 8 11.400 0 6.500-8 11.400-6 2.200-13-4-3.800-4.300Z"/></g>
+          </svg>
+          <div><h3>Saved shapes</h3><p>Save a drawing you use often and drop it in again.</p></div>
+        </li>
+        <li class="extra" data-enter data-tilt style="--i: 4">
+          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
+            <rect class="il-bar" x="12" y="18" width="136" height="32" rx="11"/>
+            <rect class="il-tool" x="24" y="28" width="12" height="12" rx="3.500"/>
+            <rect class="il-tool il-moved" x="44" y="28" width="12" height="12" rx="3.500"/>
+            <rect class="il-tool il-shift" x="64" y="28" width="12" height="12" rx="3.500"/>
+            <rect class="il-tool il-shift" x="84" y="28" width="12" height="12" rx="3.500"/>
+            <rect class="il-tool" x="104" y="28" width="12" height="12" rx="3.500"/>
+            <rect class="il-tool" x="124" y="28" width="12" height="12" rx="3.500"/>
+            <g class="il-pill">
+              <rect class="il-bar" x="52" y="64" width="56" height="26" rx="13"/>
+              <circle class="il-brand" cx="67" cy="77" r="5"/>
+              <rect class="il-go" x="78" y="72" width="22" height="10" rx="5"/>
+            </g>
+          </svg>
+          <div><h3>Your toolbar</h3><p>Drag tools in or out, or shrink it to one button.</p></div>
+        </li>
+        <li class="extra" data-enter data-tilt style="--i: 5">
+          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
+            <path class="il-faint" d="M20 30h46M20 42h30M96 70h44M96 82h28"/>
+            <g class="il-pointer">
+              <circle class="il-click" cx="74" cy="46" r="18"/>
+              <circle class="il-halo" cx="74" cy="46" r="18"/>
+              <path class="il-arrow" transform="translate(72 44)" d="M0 0V19.500l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/>
+            </g>
+          </svg>
+          <div><h3>Cursor halo</h3><p>Give your pointer a color, a glow and a click effect.</p></div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="answers wrap" aria-labelledby="answers-title">
+      <h2 id="answers-title" data-words>Good to know</h2>
+      <div class="answer-grid">
+        <div class="answer" data-enter style="--i: 0"><h3>Will people on my call see it?</h3><p>Share your whole screen and they see your drawings. Sharing one app or window may leave them out, so ask someone on the call what they see.</p></div>
+        <div class="answer" data-enter style="--i: 1"><h3>Does it record my screen?</h3><p><b>No.</b> Annotator is not a screen recorder. Your drawings, your screen and what you type stay on your computer.</p></div>
+        <div class="answer" data-enter style="--i: 2"><h3>Is it really free?</h3><p><b>Yes.</b> All tools are free. No paid tiers, and the code is open source under Apache 2.0.</p></div>
+        <div class="answer" data-enter style="--i: 3"><h3>Is it the same on Mac and Windows?</h3><p><b>Yes.</b> Two native apps, one product. It is not at 1.0 yet, so expect a few rough edges.</p></div>
+      </div>
+    </section>
+
+    <section class="coffee wrap" id="coffee" aria-labelledby="coffee-title">
+      <div class="coffee-panel" data-enter data-scroll>
+        <svg class="cup" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+          <path class="cup-ring" pathLength="1" d="M34 118C22 60 70 22 118 30s66 52 52 96-58 62-98 52-40-44-34-66"/>
+          <g class="steam"><path d="M76 66c-9-11 9-19 0-31"/><path d="M100 60c-9-12 9-21 0-34"/><path d="M124 66c-9-11 9-19 0-31"/></g>
+          <path class="cup-fill" d="M50 84h100v30a44 44 0 0 1-44 44H94a44 44 0 0 1-44-44z"/>
+          <path class="cup-line" stroke="url(#ocean)" d="M50 84h100v30a44 44 0 0 1-44 44H94a44 44 0 0 1-44-44zM150 94h9a19 19 0 0 1 0 38h-13M38 172c40 9 84 9 124 0"/>
+        </svg>
+        <div class="coffee-copy">
+          <h2 id="coffee-title">It&rsquo;s free. Coffee is welcome.</h2>
+          <p>If Annotator saved your demo, buy me a coffee. It keeps the work going, and it unlocks nothing: you have every tool either way.</p>
+          <a class="button primary" href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="install wrap" id="install" aria-labelledby="install-title">
+      <h2 id="install-title" data-words>Install</h2>
+      <div class="platforms">
+        <div class="platform" data-os="mac" data-enter data-tilt style="--i: 0">
+          <h3>Mac</h3>
+          <p class="req">macOS 14 or later, Apple Silicon and Intel. Runs from the menu bar.</p>
+          <a class="button" href="/downloads/">Download for Mac</a>
+          <div class="command">
+            <p>Or with Homebrew</p>
+            <button type="button" data-copy aria-label="Copy the Homebrew command">Copy</button>
+            <code>brew install --cask dorlugasigal/annotator/annotator</code>
+          </div>
+        </div>
+        <div class="platform" data-os="windows" data-enter data-tilt style="--i: 1">
+          <h3>Windows</h3>
+          <p class="req">Windows 11, version 22H2 or later, x64 and ARM64. Runs from the system tray.</p>
+          <a class="button" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it from the Microsoft Store</a>
+          <div class="command">
+            <p>Or with winget</p>
+            <button type="button" data-copy aria-label="Copy the winget command">Copy</button>
+            <code>winget install --id 9NMZ345ZJ6JK --source msstore</code>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
+      <nav aria-label="More">
+        <a href="/docs/">Help</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/support/">Report a problem</a>
+        <a href="https://github.com/dorlugasigal/annotator">GitHub</a>
+        <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
+      </nav>
+      <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+    </div>
+  </footer>
+
+  <p class="visually-hidden" role="status" id="status"></p>
+</body>
+</html>
