@@ -1,12 +1,30 @@
 {
   "schemaVersion": 1,
-  "unreleased": {
-    "Added": [
-      "Text has a third font: Handwriting, next to System and Mono. Choose it under Font in the text properties, and turn on Bold for a heavier pen.",
-      "You can now choose a menu for Pattern, Roughness, Fill style, Font and Alignment in Settings > Toolbar > Your properties. Click the button to see every choice drawn as it looks, then click the one you want. One button, which goes to the next choice with each click, is still the default."
-    ]
-  },
+  "unreleased": {},
   "releases": [
+    {
+      "version": "0.6.0",
+      "build": 600,
+      "date": "2026-11-25",
+      "changes": {
+        "Added": [
+          "Text has a third font: Handwriting, next to System and Mono. Choose it under Font in the text properties, and turn on Bold for a heavier pen.",
+          "You can now choose a menu for Pattern, Roughness, Fill style, Font and Alignment in Settings > Toolbar > Your properties. Click the button to see every choice drawn as it looks, then click the one you want. One button, which goes to the next choice with each click, is still the default."
+        ]
+      },
+      "knownIssues": [
+        "Effects don't follow windows that move or content that scrolls, and blur is not secure redaction. Remove private details before you share.",
+        "Anything inside a shared region can show up in your meeting, including notifications.",
+        "Choosing a different area or changing your displays turns region sharing off. Check the outline before you start it again.",
+        "In the Shared Region window, the spotlight turns on and off at once instead of fading.",
+        "Some meeting apps may not show the toolbar in a shared window. Check before you rely on it.",
+        "With two displays side by side, dropping the toolbar on the edge where they meet docks it on the other display.",
+        "Annotator 0.5.0 and earlier show Handwriting text in the system font. Update every copy that opens your boards.",
+        "On Windows, the toolbar changes size at once when it shrinks to one button, opens again or grows for its properties. On a Mac, it animates.",
+        "On Windows, with Glass toolbar on, the glass loses its blur while the toolbar hides and shows. The blur comes back when the toolbar lands.",
+        "On Windows, the zoom map's picture looks a little rougher than on a Mac."
+      ]
+    },
     {
       "version": "0.5.0",
       "build": 500,
