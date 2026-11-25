@@ -1,6 +1,6 @@
 # Annotator.UXReference
 
-Compares the Windows toolbar, full properties, arrowhead choices, color popover,
+Compares the Windows toolbar, full properties, arrowhead choices, property menus, color popover,
 Tools window, Settings with the Toolbar & Shortcuts, Pointer and Break timer pages,
 keycaps, the tutorial, region sharing, the break screen, the error window, tray flyout,
 drawing canvas and cursors with
@@ -200,7 +200,10 @@ points, or 932 for `diamond-wide`), as `ContextualInspector().padding(16)` is
 captured. The arrowhead choices (`pickers/arrowhead-start` and `-end`) show the
 popover for the Arrow tool's default style. SwiftUI reports their lazy grids as
 `AXOpaqueProviderGroup`; on Windows they are groups with the Grid pattern, like
-the color popover's swatches, which the tool reads as that role.
+the color popover's swatches, which the tool reads as that role. The property
+menus (`pickers/choices-pattern` and `choices-font`) show the open column of a
+property set to Menu in Your properties: Solid, Dashed and Dotted, or System,
+Mono and Handwriting, with the first one current.
 
 The error window state (`dialogs/error-window`) shows the error window's content
 on its own, 460 by 160 points on the window background, with the message the

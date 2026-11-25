@@ -824,6 +824,22 @@ internal sealed class PropertiesPanel
     internal static Canvas SamplePicture(InspectorSample sample, Brush ink) =>
         SampleArt.Draw(sample.Draw(new RGBA(0, 0, 0), s_previewSamples), ink);
 
+    /// <summary>
+    /// A property's menu of choices with nothing to apply, the current choice first: the UX reference's pickers/choices-*
+    /// states (Mac UXReferenceCaptureTests' open ChoicePalette for Pattern and Font).
+    /// </summary>
+    internal static ChoicesRequest ReferenceChoices(PropertyChoice choice, Brush ink) => choice switch
+    {
+        PropertyChoice.Pattern => new ChoicesRequest("Pattern",
+            [.. InspectorPlan.PatternChoices.Select(value =>
+                (value.Name, (Func<UIElement>)(() => SamplePicture(InspectorSample.ForPattern(value.Value), ink))))],
+            0, static _ => { }),
+        PropertyChoice.Font => new ChoicesRequest("Font",
+            [.. InspectorPlan.FontChoices.Select(value => (value.Name, (Func<UIElement>)(() => FontSample(value.Value, 16))))],
+            0, static _ => { }),
+        _ => throw new ArgumentOutOfRangeException(nameof(choice), choice, "The UX reference has a menu for Pattern and Font only."),
+    };
+
     private static TextBlock Glyph(string text, double size, FontFamily? family = null)
     {
         var block = new TextBlock
