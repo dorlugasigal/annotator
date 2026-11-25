@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All the tools. Annotator.</title>
+<meta name="description" content="Every tool in Annotator, by group, with its exact name and key: drawing tools, shapes and system-design icons, focus tools, live effects and extras. All tools are free.">
+<meta name="theme-color" content="#f3efe6">
+<link rel="icon" href="/public/app/app-icon.png">
+<link rel="preload" href="/concepts/shared/fonts/archivo-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./style.css">
+<script>
+(function () {
+  var d = document.documentElement, p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  d.classList.add("js");
+  d.dataset.os = /win/i.test(p) || /Windows/.test(navigator.userAgent) ? "windows" : "mac";
+})();
+</script>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" width="0" height="0">
+  <symbol id="g-star" viewBox="0 0 40 40"><path d="M20 4c1 8 0 24 1 32M5 12c8 4 22 12 30 17M35 11c-8 5-21 12-30 18" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></symbol>
+  <symbol id="g-arrow" viewBox="0 0 40 40"><path d="M4 30C12 14 22 9 34 10M24 4l11 6-8 10" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="g-cup" viewBox="0 0 24 24"><path d="M4.500 10.500h11.500v4.200c0 3.100-2.500 5.300-5.750 5.300s-5.750-2.200-5.750-5.300zM16 12h1.700a2.300 2.300 0 010 4.600H15.700" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round" stroke-linejoin="round"/><path class="cup-steam" d="M8 7.200c-.9-1.300.9-2.200 0-3.700M12.300 7.200c-.9-1.300.9-2.200 0-3.700" fill="none" stroke="currentColor" stroke-width="1.700" stroke-linecap="round"/></symbol>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <a class="wordmark" href="./" aria-label="Annotator, home">annotator<i>.</i></a>
+  <nav class="top-nav" aria-label="Sections">
+    <a href="./#rules" data-label="The rules"><span>The rules</span></a>
+    <a href="./#try" data-label="Try it"><span>Try it</span></a>
+    <a href="./tools.html" data-label="All tools" aria-current="page"><span>All tools</span></a>
+    <a href="./#install" data-label="Install"><span>Install</span></a>
+  </nav>
+  <div class="top-end">
+    <a class="coffee-link" href="https://buymeacoffee.com/dorlugasigal" target="_blank" rel="noopener">
+      <svg width="22" height="22" aria-hidden="true"><use href="#g-cup"/></svg><span>Buy me a coffee</span>
+    </a>
+    <a class="top-gh" href="https://github.com/dorlugasigal/annotator" target="_blank" rel="noopener">GitHub</a>
+    <a class="btn btn-small btn-primary" href="./#install">Get Annotator</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="tools-hero">
+  <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>The whole kit</p>
+  <h1 class="mega">Every tool.</h1>
+  <p class="sec-sub">More than 40 of them, with the names the app uses and the key that picks each one while you draw. All tools are free.</p>
+  <ul class="tools-jump" aria-label="Tool groups">
+    <li><a href="#draw">Draw</a></li>
+    <li><a href="#shapes">Shapes</a></li>
+    <li><a href="#focus">Focus</a></li>
+    <li><a href="#effects">Effects</a></li>
+    <li><a href="#extras">Extras</a></li>
+  </ul>
+</section>
+
+<section class="group" id="draw" aria-labelledby="draw-title">
+  <div class="group-head">
+    <h2 id="draw-title">Draw</h2>
+    <p>The ones you reach for first. Each has a key.</p>
+    <button class="print" type="button" style="--r:-2deg" data-clip="arrow" data-phone="no" aria-label="Play clip: Arrow"><i class="tape"></i><video muted playsinline loop preload="none" poster="/public/demo/stage-arrow.jpg" src="/public/demo/stage-arrow.mp4"></video><span class="print-name">Arrow, in the Mac app</span></button>
+  </div>
+  <ul class="tool-list">
+    <li><b>Select</b><p>Move, resize and restyle a mark. Select several at once, or lock the ones that must stay.</p><kbd>1</kbd></li>
+    <li><b>Pen</b><p>Draw freehand. With Smart Draw on, hand-drawn loops and arrows come out neat.</p><kbd>7</kbd></li>
+    <li><b>Highlighter</b><p>Hold Shift for a straight line.</p><kbd>9</kbd></li>
+    <li><b>Laser pointer</b><p>The trail fades on its own. You choose how fast, from 0.5 to 5 seconds.</p><kbd>L</kbd></li>
+    <li><b>Text</b><p>Type a label on the screen.</p><kbd>8</kbd></li>
+    <li><b>Arrow</b><p>Drag for a straight one, or click to place it point by point. Double-click a selected arrow to add a point, then drag the point to bend it.</p><kbd>5</kbd></li>
+    <li><b>Line</b><p></p><kbd>6</kbd></li>
+    <li><b>Eraser</b><p>Removes unlocked marks. Undo brings them back.</p><kbd>0</kbd></li>
+  </ul>
+</section>
+
+<section class="group" id="shapes" aria-labelledby="shapes-title">
+  <div class="group-head">
+    <h2 id="shapes-title">Shapes</h2>
+    <p>Basic shapes on keys, and a library of ready-made ones for explaining how a system fits together.</p>
+    <button class="print" type="button" style="--r:2deg" data-clip="shapes" data-phone="no" aria-label="Play clip: Shape library"><i class="tape"></i><video muted playsinline loop preload="none" poster="/public/demo/stage-shapes.jpg" src="/public/demo/stage-shapes.mp4"></video><span class="print-name">The shape library, in the Mac app</span></button>
+  </div>
+  <div>
+    <ul class="tool-list">
+      <li><b>Rectangle</b><p></p><kbd>2</kbd></li>
+      <li><b>Diamond</b><p></p><kbd>3</kbd></li>
+      <li><b>Ellipse</b><p></p><kbd>4</kbd></li>
+    </ul>
+    <p class="tool-sub">More shapes</p>
+    <ul class="name-cloud">
+      <li>Triangle</li><li>Hexagon</li><li>Star</li><li>Person</li><li>Cylinder</li><li>Queue</li><li>Grid</li><li>Axes</li>
+    </ul>
+    <p class="tool-sub">System-design icons</p>
+    <ul class="name-cloud">
+      <li>Database</li><li>Server</li><li>Messaging</li><li>Web</li><li>Mobile phone</li><li>Desktop</li><li>Laptop</li><li>Document</li><li>Configuration</li><li>Load balancer</li><li>API gateway</li><li>Envelope</li><li>Cart</li><li>Bell</li>
+    </ul>
+    <p class="tool-sub">My shapes</p>
+    <ul class="tool-list">
+      <li><b>Your own</b><p>Save selected drawings or text to My shapes. Click one later to add an editable copy.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="group" id="focus" aria-labelledby="focus-title">
+  <div class="group-head">
+    <h2 id="focus-title">Focus</h2>
+    <p>For the small part of the screen that nobody at the back can read.</p>
+    <button class="print" type="button" style="--r:-1.500deg" data-clip="spotlight" data-phone="no" aria-label="Play clip: Spotlight"><i class="tape"></i><video muted playsinline loop preload="none" poster="/public/demo/stage-spotlight.jpg" src="/public/demo/stage-spotlight.mp4"></video><span class="print-name">Spotlight, in the Mac app</span></button>
+  </div>
+  <ul class="tool-list">
+    <li><b>Spotlight</b><p>Dims the screen around your pointer.</p></li>
+    <li><b>Cursor halo</b><p>Makes your pointer easier to spot. Choose its shape, color, opacity, glow and click effect.</p></li>
+    <li><b>Pointer lens</b><p>A magnifier at the pointer.</p></li>
+    <li><b>Screen zoom</b><p>Zooms in around the pointer and holds still while you work. A zoom map shows the whole display and where you are.</p><kbd><span data-mac>⌃1</span><span data-win>Ctrl+1</span></kbd></li>
+    <li><b>Share region</b><p>Puts one region of one display in its own window, so a meeting app can share that window. Anything inside the region shows up, including notifications.</p></li>
+  </ul>
+</section>
+
+<section class="group" id="effects" aria-labelledby="effects-title">
+  <div class="group-head">
+    <h2 id="effects-title">Effects</h2>
+    <p>Live covers for a region of the screen. They are not secure redaction: details can stay readable, and a cover doesn't follow a window that moves or a page that scrolls. Remove private details before you share.</p>
+    <button class="print" type="button" style="--r:2.500deg" data-clip="blur" data-phone="no" aria-label="Play clip: Blur"><i class="tape"></i><video muted playsinline loop preload="none" poster="/public/demo/stage-blur.jpg" src="/public/demo/stage-blur.mp4"></video><span class="print-name">Blur, in the Mac app</span></button>
+  </div>
+  <ul class="tool-list">
+    <li><b>Blur</b><p>Covers a region live.</p></li>
+    <li><b>Pixelate</b><p>Covers a region live.</p></li>
+    <li><b>Distort</b><p>Covers a region live.</p></li>
+    <li><b>Censor</b><p>A solid cover.</p></li>
+  </ul>
+</section>
+
+<section class="group" id="extras" aria-labelledby="extras-title">
+  <div class="group-head">
+    <h2 id="extras-title">Extras</h2>
+    <p>The odd jobs.</p>
+  </div>
+  <div>
+    <ul class="tool-list">
+      <li><b>Numbered counter</b><p>Numbers for the steps of whatever you're showing.</p><kbd>N</kbd></li>
+      <li><b>Paste image</b><p>Paste or insert an image.</p></li>
+      <li><b>Pixel ruler</b><p></p></li>
+    </ul>
+    <p class="tool-sub">Not tools, but close</p>
+    <ul class="tool-list">
+      <li><b>Whiteboard</b><p>A white background for the display, in place of the desktop.</p><kbd><span data-mac>⌃W</span><span data-win>Ctrl+W</span></kbd></li>
+      <li><b>Blackboard</b><p>The same, in black.</p><kbd><span data-mac>⌃B</span><span data-win>Ctrl+B</span></kbd></li>
+      <li><b>Break timer</b><p>A full-screen countdown, from 1 to 180 minutes, with a title and a chime.</p><kbd><span data-mac>⌃3</span><span data-win>Ctrl+3</span></kbd></li>
+      <li><b>Tool library</b><p>Every tool, by category.</p><kbd><span data-mac>⌘L</span><span data-win>Ctrl+L</span></kbd></li>
+    </ul>
+    <p class="tool-sub">Colors, while you draw</p>
+    <ul class="name-cloud keys-cloud">
+      <li><kbd>R</kbd>Red</li><li><kbd>G</kbd>Green</li><li><kbd>B</kbd>Blue</li><li><kbd>Y</kbd>Yellow</li><li><kbd>O</kbd>Orange</li><li><kbd>P</kbd>Pink</li><li><kbd>C</kbd>Cyan</li><li><kbd>W</kbd>White</li><li><kbd>K</kbd>Black</li>
+    </ul>
+    <p class="small-print tools-note">You can change every key in Settings.</p>
+  </div>
+</section>
+
+<section class="tools-end">
+  <p>Reading about tools is the slow way. Draw with a few of them.</p>
+  <div>
+    <a class="btn btn-big" href="./#try">Try the web demo <svg width="22" height="22" aria-hidden="true"><use href="#g-arrow"/></svg></a>
+    <a class="btn btn-primary btn-big" href="./#install">Get Annotator</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot foot-plain">
+  <p class="foot-word" aria-hidden="true">annotator<i>.</i></p>
+  <div class="foot-row">
+    <nav aria-label="Footer">
+      <a href="https://github.com/dorlugasigal/annotator" target="_blank" rel="noopener">GitHub</a>
+      <a href="./">Home</a>
+      <a href="/docs/">Help</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/support/">Report a problem</a>
+      <a class="foot-coffee" href="https://buymeacoffee.com/dorlugasigal" target="_blank" rel="noopener"><svg width="20" height="20" aria-hidden="true"><use href="#g-cup"/></svg>Buy me a coffee</a>
+    </nav>
+    <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+  </div>
+</footer>
+
+<script type="module">
+import { setupPrints } from "./prints.js";
+setupPrints();
+</script>
+</body>
+</html>

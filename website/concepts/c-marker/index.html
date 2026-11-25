@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annotator. Stop wiggling your cursor.</title>
+<meta name="description" content="When you share your screen, people can't see what you mean. Annotator is a free, open-source app for macOS and Windows that lets you draw on your live screen: a ring, an arrow, a number.">
+<meta name="theme-color" content="#f3efe6">
+<link rel="icon" href="/public/app/app-icon.png">
+<link rel="preload" href="/concepts/shared/fonts/archivo-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/concepts/shared/ink.css">
+<link rel="stylesheet" href="./style.css">
+<script>
+(function () {
+  var d = document.documentElement, p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  d.classList.add("js");
+  d.dataset.os = /win/i.test(p) || /Windows/.test(navigator.userAgent) ? "windows" : "mac";
+})();
+</script>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" width="0" height="0">
+  <symbol id="g-star" viewBox="0 0 40 40"><path d="M20 4c1 8 0 24 1 32M5 12c8 4 22 12 30 17M35 11c-8 5-21 12-30 18" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></symbol>
+  <symbol id="g-ring" viewBox="0 0 40 40"><path d="M30 8C20 1 5 8 5 21c0 11 11 16 20 13 9-3 13-14 7-22-3-4-8-6-13-6" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></symbol>
+  <symbol id="g-arrow" viewBox="0 0 40 40"><path d="M4 30C12 14 22 9 34 10M24 4l11 6-8 10" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="g-cup" viewBox="0 0 24 24"><path d="M4.500 10.500h11.500v4.200c0 3.100-2.500 5.300-5.750 5.300s-5.750-2.200-5.750-5.300zM16 12h1.700a2.300 2.300 0 010 4.600H15.700" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round" stroke-linejoin="round"/><path class="cup-steam" d="M8 7.200c-.9-1.300.9-2.200 0-3.700M12.300 7.200c-.9-1.300.9-2.200 0-3.700" fill="none" stroke="currentColor" stroke-width="1.700" stroke-linecap="round"/></symbol>
+  <symbol id="g-cursor" viewBox="0 0 22 26"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z" fill="#16181d" stroke="#fffdf7" stroke-width="1.600" stroke-linejoin="round"/></symbol>
+  <symbol id="g-face" viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="var(--face, #fffdf7)" stroke="#16181d" stroke-width="3"/><path d="M21 24v5M39 24v5" fill="none" stroke="#16181d" stroke-width="4" stroke-linecap="round"/></symbol>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <a class="wordmark" href="#top" aria-label="Annotator, back to top">annotator<i>.</i></a>
+  <nav class="top-nav" aria-label="Sections">
+    <a href="#rules" data-label="The rules"><span>The rules</span></a>
+    <a href="#try" data-label="Try it"><span>Try it</span></a>
+    <a href="./tools.html" data-label="All tools"><span>All tools</span></a>
+    <a href="#install" data-label="Install"><span>Install</span></a>
+  </nav>
+  <div class="top-end">
+    <a class="coffee-link" href="https://buymeacoffee.com/dorlugasigal" target="_blank" rel="noopener">
+      <svg width="22" height="22" aria-hidden="true"><use href="#g-cup"/></svg><span>Buy me a coffee</span>
+    </a>
+    <a class="top-gh" href="https://github.com/dorlugasigal/annotator" target="_blank" rel="noopener">GitHub</a>
+    <a class="btn btn-small btn-primary" href="#install">Get Annotator</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" id="top">
+  <h1 class="mega hero-title" aria-label="Stop wiggling your cursor.">
+    <span class="line" style="--i:0" aria-hidden="true"><span class="line-in">Stop</span></span>
+    <span class="line" style="--i:1" aria-hidden="true"><span class="line-in"><span class="hw wiggler" data-hero="wiggling">wiggling</span></span></span>
+    <span class="line line-3" style="--i:2" aria-hidden="true"><span class="line-in"><span class="hw">your</span> <span class="hw">cursor.</span></span></span>
+    <i class="lost-spot" data-hero="lost" aria-hidden="true"><svg class="lost-cursor" width="17" height="20"><use href="#g-cursor"/></svg></i>
+    <i class="note-anchor" data-hero="note" aria-hidden="true"></i>
+    <i class="tail-anchor" data-hero="tail" aria-hidden="true"></i>
+  </h1>
+
+  <a class="sticker" href="#free" aria-label="Free and open source. No account. Read more.">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <defs><path id="sticker-ring" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs>
+      <text><textPath href="#sticker-ring" textLength="456" lengthAdjust="spacing">OPEN SOURCE ✳ NO ACCOUNT ✳ NO PAID TIERS ✳</textPath></text>
+    </svg>
+    <b aria-hidden="true">Free</b>
+  </a>
+
+  <p class="fig fig-hero">Fig. 1<span> — The marks on this page are real. Pick Select in the toolbar and move one.</span></p>
+
+  <div class="hero-foot">
+    <p class="lede">On a shared screen, nobody can tell what you mean. Annotator lets you draw on it: <span class="lw" data-hero="ring">a&nbsp;ring</span>, <span class="lw" data-hero="arrow">an&nbsp;arrow</span>, <span class="lw" data-hero="number">a&nbsp;number</span>.</p>
+    <div class="hero-go">
+      <div class="cta">
+        <a class="btn btn-primary btn-big" href="#install">Get Annotator</a>
+        <button class="btn btn-big" type="button" data-try>Try it here <svg width="22" height="22" aria-hidden="true"><use href="#g-arrow"/></svg></button>
+      </div>
+      <p class="plat">Free · macOS 14+ · Windows 11</p>
+    </div>
+  </div>
+
+  <svg class="nib-trail" aria-hidden="true"><path/></svg>
+  <svg class="nib" viewBox="0 0 30 44" width="30" height="44" aria-hidden="true"><path d="M8 2h14v22l-3 6H11l-3-6z" fill="#16181d"/><path d="M11 30h8l-1 8-3 4-3-4z" fill="#ffd92e" stroke="#16181d" stroke-width="2" stroke-linejoin="round"/></svg>
+</section>
+
+<section class="sec wiggle" id="wiggle" aria-labelledby="wiggle-title">
+  <div class="wig-grid" data-mode="without">
+    <div class="wig-copy">
+      <header data-reveal>
+        <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>First, the problem</p>
+        <h2 class="display display-s" id="wiggle-title">You know <em>this call.</em></h2>
+        <p class="sec-sub">You share your screen. Everyone else gets a small, squashed copy of it. Then you say “this one” and shake the pointer at it.</p>
+      </header>
+      <div class="switch wig-switch" role="group" aria-label="Compare the two ways to point">
+        <button type="button" data-wig="without" aria-pressed="true">Wiggle it</button>
+        <button type="button" data-wig="with" aria-pressed="false">Draw it</button>
+      </div>
+      <div class="wig-side">
+        <p class="wig-who">You say</p>
+        <p class="wig-say" data-say>&nbsp;</p>
+        <p class="wig-who">They say</p>
+        <div class="wig-them">
+          <ul class="viewers" data-mood="wait" aria-hidden="true">
+            <li style="--face:#ffd92e"><svg viewBox="0 0 60 60"><use href="#g-face"/><path class="m m-wait" d="M23 41h14"/><path class="m m-lost" d="M22 43c4-5 9 3 16-2"/><path class="m m-clear" d="M21 38c5 7 13 7 18 0"/></svg></li>
+            <li style="--face:#fffdf7"><svg viewBox="0 0 60 60"><use href="#g-face"/><path class="m m-wait" d="M23 41h14"/><path class="m m-lost" d="M24 43a6 6 0 0112 0"/><path class="m m-clear" d="M21 38c5 7 13 7 18 0"/></svg></li>
+            <li style="--face:#8fd6cb"><svg viewBox="0 0 60 60"><use href="#g-face"/><path class="m m-wait" d="M23 41h14"/><path class="m m-lost" d="M22 41c5 4 10-4 16 1"/><path class="m m-clear" d="M21 38c5 7 13 7 18 0"/></svg></li>
+          </ul>
+          <p class="wig-hear" data-hear>&nbsp;</p>
+        </div>
+        <p class="wig-live sr-only" role="status"></p>
+      </div>
+    </div>
+    <figure class="wig-stage">
+      <div class="wig-surface script-surface" data-wig-surface role="img" aria-label="A sample table of regional sales with many numbers. One cell, the change for West, is red. Without Annotator a small cursor shakes near it. With Annotator a ring and an arrow mark the cell.">
+        <div class="screen"><div class="screen-zoom"><div class="slide is-on">
+            <div class="screen-bar"><i></i><i></i><i></i><b>Regional sales — sample</b><span>Shared screen</span></div>
+            <div class="screen-body table-body">
+              <table class="s-table">
+                <thead><tr><th>Region</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Change</th></tr></thead>
+                <tbody>
+                  <tr><td>North</td><td>412</td><td>431</td><td>455</td><td><b class="up">+6%</b></td></tr>
+                  <tr><td>South</td><td>290</td><td>301</td><td data-w="a">298</td><td><b class="up">+1%</b></td></tr>
+                  <tr><td>East</td><td>366</td><td data-w="b">372</td><td>381</td><td><b class="up" data-w="c">+2%</b></td></tr>
+                  <tr><td>West</td><td>388</td><td>352</td><td data-w="d">341</td><td><b class="down" data-w="cell">−12%</b></td></tr>
+                  <tr><td>Central</td><td>240</td><td>248</td><td>251</td><td><b class="up" data-w="e">+3%</b></td></tr>
+                  <tr><td>Online</td><td>1,204</td><td>1,260</td><td>1,318</td><td><b class="up">+5%</b></td></tr>
+                </tbody>
+              </table>
+              <i class="anchor" data-w="label" style="left:62%;top:84%"></i>
+              <i class="anchor" data-w="tail" style="left:82.500%;top:90%"></i>
+            </div>
+          </div></div>
+          <svg class="wig-cursor" width="17" height="20" aria-hidden="true"><use href="#g-cursor"/></svg>
+          </div>
+      </div>
+      <figcaption class="fig">Fig. 2 — A sample screen. The web demo draws the marks.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="sec perform" id="rules" aria-labelledby="rules-title">
+  <header class="sec-head" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>A field guide</p>
+    <h2 class="display" id="rules-title">Six rules for <em>pointing at things.</em></h2>
+    <p class="sec-sub">Keep scrolling. Every rule comes with a screen to prove it.</p>
+  </header>
+
+  <div class="scrolly">
+    <div class="stage-col">
+      <figure class="stage">
+        <p class="now" aria-hidden="true"><span class="now-n">Rule 0/6</span><span class="now-name">Scroll to start</span><span class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span></p>
+        <div class="stage-surface script-surface" data-stage role="img" aria-label="A sample screen that changes with each rule: a launch review with numbers and a chart, a code file, a whiteboard, a recording of the real app, a blackboard and a settings page. Each rule is drawn on it as you scroll.">
+          <div class="screen">
+            <div class="screen-zoom">
+
+              <div class="slide is-on" data-slide="numbers">
+                <div class="screen-bar"><i></i><i></i><i></i><b>Launch review — sample</b><span>Week 4</span></div>
+                <div class="screen-body">
+                  <div class="s-kpis">
+                    <div class="kpi"><small>Visits</small><b>12,480</b><em class="up">+6%</em></div>
+                    <div class="kpi"><small>Sign-ups</small><b data-t="number">318</b><em class="down">−18%</em></div>
+                    <div class="kpi"><small>Replies</small><b>96</b><em class="up">+4%</em></div>
+                  </div>
+                  <div class="s-chart">
+                    <small>Sign-ups per week</small>
+                    <svg viewBox="0 0 320 200">
+                      <path d="M8 40H312M8 93H312M8 146H312" stroke="#16181d" stroke-opacity=".16" stroke-width="1" stroke-dasharray="3 5"/>
+                      <path d="M24 93L78 72 132 61 186 149 240 104 296 66V182H24z" fill="#16181d" fill-opacity=".06"/>
+                      <path d="M24 93L78 72 132 61 186 149 240 104 296 66" fill="none" stroke="#16181d" stroke-width="3.500" stroke-linejoin="round" stroke-linecap="round"/>
+                      <g fill="#fffdf7" stroke="#16181d" stroke-width="2.500"><circle cx="24" cy="93" r="4.500"/><circle cx="78" cy="72" r="4.500"/><circle cx="132" cy="61" r="4.500"/><circle cx="240" cy="104" r="4.500"/><circle cx="296" cy="66" r="4.500"/></g>
+                      <circle data-t="dip" cx="186" cy="149" r="6" fill="#16181d"/>
+                      <g font-size="10" font-family="Geist Mono, monospace" fill="#16181d" fill-opacity=".6" text-anchor="middle"><text x="24" y="197">W1</text><text x="78" y="197">W2</text><text x="132" y="197">W3</text><text x="186" y="197">W4</text><text x="240" y="197">W5</text><text x="296" y="197">W6</text></g>
+                    </svg>
+                  </div>
+                  <div class="s-shot"><span>Product photo</span></div>
+                  <div class="s-notes">
+                    <small>Notes</small>
+                    <ul>
+                      <li><span data-t="note">Pricing page went live</span></li>
+                      <li><span data-t="note">Sign-up form moved lower</span></li>
+                      <li><span data-t="note">Fix ships Thursday</span></li>
+                    </ul>
+                  </div>
+                  <p class="s-mail">Ask: <span data-t="email">dana@example.com</span></p>
+                </div>
+              </div>
+
+              <div class="slide" data-slide="code">
+                <div class="screen-bar"><i></i><i></i><i></i><b>checkout.js — sample</b><span>Review</span></div>
+                <div class="screen-body code-body">
+                  <pre class="s-nums" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                  <div class="s-code">
+                    <div><span class="c-dim">// sample code for this demo</span></div>
+                    <div><span class="c-key">const</span> token = <span class="c-str">"<span data-t="token">demo-4f9a-27c1-b8e0</span>"</span>;</div>
+                    <div>&nbsp;</div>
+                    <div><span class="c-key">function</span> total(cart) {</div>
+                    <div class="s-block" data-t="block"><div>  <span class="c-key">let</span> sum = 0;</div><div>  <span class="c-key">for</span> (<span class="c-key">const</span> item <span class="c-key">of</span> cart) sum += item.price;</div></div>
+                    <div>  <span class="c-key">return</span> sum;</div>
+                    <div>}</div>
+                    <div><span class="c-key">export</span> { total };</div>
+                    <i class="anchor" data-t="code-note" style="left:58%;top:76%"></i>
+                    <i class="anchor" data-t="code-tail" style="left:56%;top:79%"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="slide slide-white" data-slide="board">
+                <span class="board-tag">Whiteboard</span>
+                <i class="anchor" data-t="b-title" style="left:14%;top:10%"></i>
+                <i class="anchor b-line" data-t="b1" style="left:24%;top:32%"></i>
+                <i class="anchor b-line" data-t="b2" style="left:24%;top:50%"></i>
+                <i class="anchor b-line" data-t="b3" style="left:24%;top:68%"></i>
+              </div>
+
+              <div class="slide slide-clip" data-slide="clip">
+                <video muted playsinline preload="none" poster="/public/demo/stage-spotlight.jpg"></video>
+                <span class="board-tag tag-real">Recorded in the real app</span>
+              </div>
+
+              <div class="slide slide-black" data-slide="system">
+                <span class="board-tag">Blackboard</span>
+                <i class="anchor" data-t="n-web" style="left:7%;top:26%;width:21%;height:24%"></i>
+                <i class="anchor" data-t="t-web" style="left:13.600%;top:34%"></i>
+                <i class="anchor" data-t="n-api" style="left:40%;top:26%;width:21%;height:24%"></i>
+                <i class="anchor" data-t="t-api" style="left:47.200%;top:34%"></i>
+                <i class="anchor" data-t="n-db" style="left:74%;top:21%;width:17%;height:34%"></i>
+                <i class="anchor" data-t="t-db" style="left:78%;top:36%"></i>
+                <i class="anchor" data-t="n-queue" style="left:39.500%;top:66%;width:22%;height:25%"></i>
+                <i class="anchor" data-t="t-queue" style="left:45.200%;top:74.800%"></i>
+              </div>
+
+              <div class="slide" data-slide="support">
+                <div class="screen-bar"><i></i><i></i><i></i><b>Team settings — sample</b><span>Support call</span></div>
+                <div class="screen-body set-body">
+                  <ul class="set-side"><li>Profile</li><li class="is-cur"><span data-t="s1">Team</span></li><li>Billing</li><li>Security</li><li>Alerts</li></ul>
+                  <div class="set-main">
+                    <div class="set-tabs"><span>Overview</span><span class="is-cur" data-t="s2">Members</span><span>Roles</span></div>
+                    <div class="set-head"><b>3 members</b><span class="set-btn" data-t="s3">Invite</span></div>
+                    <ul class="set-list"><li><i></i>Ana<em>Admin</em></li><li><i></i>Ben<em>Editor</em></li><li><i></i>Chi<em>Viewer</em></li></ul>
+                    <i class="anchor" data-t="s-note" style="left:44%;top:74%"></i>
+                    <i class="anchor" data-t="s-tail" style="left:80%;top:76%"></i>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <figcaption class="fig" data-stage-fig>Fig. 3 — Sample screens. The web demo draws the marks as you scroll.</figcaption>
+      </figure>
+    </div>
+
+    <ol class="steps">
+      <li class="step" data-scene="numbers" data-name="Numbers">
+        <p class="rule-no"><span class="counter counter-big" aria-hidden="true">1</span>Rule 1</p>
+        <h3 class="step-name">Circle it.</h3>
+        <p class="moment">Walking the team through numbers</p>
+        <p>“Sign-ups. Third number. No, the one next to it.” Or one ring. Then bend an arrow over to the dip that explains it.</p>
+        <ul class="chips" aria-label="Tools in this rule"><li>Ellipse</li><li>Arrow</li></ul>
+      </li>
+      <li class="step" data-scene="code" data-name="Code review">
+        <p class="rule-no"><span class="counter counter-big" aria-hidden="true">2</span>Rule 2</p>
+        <h3 class="step-name">Box it, name it.</h3>
+        <p class="moment">Reviewing code or a design</p>
+        <p>Drag a box around the part you mean and type your question next to it. And cover that token before anyone starts reading.</p>
+        <ul class="chips" aria-label="Tools in this rule"><li>Rectangle</li><li>Text</li><li>Blur</li></ul>
+      </li>
+      <li class="step" data-scene="board" data-name="Workshop">
+        <p class="rule-no"><span class="counter counter-big" aria-hidden="true">3</span>Rule 3</p>
+        <h3 class="step-name">Take the board.</h3>
+        <p class="moment">Teaching a class or a workshop</p>
+        <p>One key turns the display into a whiteboard. Write the steps, number them, and highlight the one you're on.</p>
+        <ul class="chips" aria-label="Tools in this rule"><li>Whiteboard</li><li>Text</li><li>Numbered counter</li><li>Highlighter</li></ul>
+      </li>
+      <li class="step" data-scene="clip" data-name="Tutorial">
+        <p class="rule-no"><span class="counter counter-big" aria-hidden="true">4</span>Rule 4</p>
+        <h3 class="step-name">Move the light.</h3>
+        <p class="moment">Recording a tutorial</p>
+        <p>Your viewers will watch on small screens. Dim everything except the part that matters, then zoom in around your pointer.</p>
+        <p class="small-print">You still need a recorder. Annotator only draws.</p>
+        <ul class="chips" aria-label="Tools in this rule"><li>Spotlight</li><li>Screen zoom</li><li>Cursor halo</li><li>Laser pointer</li></ul>
+      </li>
+      <li class="step" data-scene="system" data-name="System sketch">
+        <p class="rule-no"><span class="counter counter-big" aria-hidden="true">5</span>Rule 5</p>
+        <h3 class="step-name">Sketch the system.</h3>
+        <p class="moment">Explaining how things connect</p>
+        <p>Someone asks where the data goes. Sketch it while you answer: boxes, arrows, a database.</p>
+        <p class="small-print">The web demo draws plain shapes. The app's tool library has ready-made ones: Database, Server, Load balancer, API gateway and more.</p>
+        <ul class="chips" aria-label="Tools in this rule"><li>Blackboard</li><li>Rectangle</li><li>Diamond</li><li>Arrow</li><li>Database</li></ul>
+      </li>
+      <li class="step" data-scene="support" data-name="Support call">
+        <p class="rule-no"><span class="counter counter-big" aria-hidden="true">6</span>Rule 6</p>
+        <h3 class="step-name">Number the clicks.</h3>
+        <p class="moment">On a support call</p>
+        <p>“Top right. The gear. No, the other gear.” Number the clicks in order and point at the last one.</p>
+        <ul class="chips" aria-label="Tools in this rule"><li>Numbered counter</li><li>Arrow</li></ul>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec keys" id="how" aria-labelledby="how-title">
+  <header class="sec-head" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>How it works</p>
+    <h2 class="display" id="how-title">Three <em>beats.</em></h2>
+  </header>
+  <ol class="beats">
+    <li class="beat">
+      <button class="keygroup" type="button" data-keys="draw" aria-label="Draw: Control Shift 2. Turn on drawing on this page.">
+        <span class="caps">
+          <kbd class="cap" data-key="Control"><b><span data-mac>⌃</span><span data-win>Ctrl</span></b><small data-mac>control</small></kbd>
+          <i class="plus" aria-hidden="true">+</i>
+          <kbd class="cap" data-key="Shift"><b><span data-mac>⇧</span><span data-win>Shift</span></b><small data-mac>shift</small></kbd>
+          <i class="plus" aria-hidden="true">+</i>
+          <kbd class="cap" data-key="2"><b>2</b></kbd>
+        </span>
+      </button>
+      <h3 class="key-name"><span>1</span>Draw</h3>
+      <p class="key-say">Your pointer becomes a pen, on top of whatever app is open.</p>
+    </li>
+    <li class="beat">
+      <button class="keygroup" type="button" data-keys="use" aria-label="Use apps: Escape. Stop drawing on this page.">
+        <span class="caps">
+          <kbd class="cap cap-wide" data-key="Escape"><b><span data-mac>esc</span><span data-win>Esc</span></b></kbd>
+        </span>
+      </button>
+      <h3 class="key-name"><span>2</span>Use apps</h3>
+      <p class="key-say">Click and type in the app underneath again. Your drawings stay where you left them.</p>
+    </li>
+    <li class="beat">
+      <div class="edit-surface script-surface" data-edit aria-hidden="true">
+        <span class="e-chip" data-e="a">this</span>
+        <span class="e-block">in the way</span>
+        <span class="e-chip e-b" data-e="b">goes here</span>
+      </div>
+      <h3 class="key-name"><span>3</span>Fix it</h3>
+      <p class="key-say">Every mark stays editable. Move it, bend it, change its color, lock it, undo it.</p>
+    </li>
+  </ol>
+  <p class="key-live" role="status">Press the keys. This page starts and stops drawing.</p>
+  <ul class="more-keys">
+    <li><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>2</kbd> Show or hide drawings</li>
+    <li><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>1</kbd> Zoom</li>
+    <li><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>3</kbd> Break timer</li>
+    <li><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>W</kbd> Whiteboard</li>
+    <li><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>B</kbd> Blackboard</li>
+    <li><kbd><span data-mac>⌘</span><span data-win>Ctrl</span></kbd><kbd>L</kbd> Tool library</li>
+    <li class="more-note">Single keys pick tools while you draw: <kbd>5</kbd> Arrow, <kbd>7</kbd> Pen, <kbd>N</kbd> Numbered counter. You can change every key in Settings.</li>
+  </ul>
+</section>
+
+<section class="sec try" id="try" aria-labelledby="try-title">
+  <header class="sec-head" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>The web demo</p>
+    <h2 class="display" id="try-title">Your <em>turn.</em></h2>
+    <p class="sec-sub">Three small jobs on the screen from rule 1. The toolbar at the bottom of the page is a copy of the app's.</p>
+  </header>
+
+  <div class="try-grid">
+    <div class="jobs">
+      <ol class="job-list">
+        <li class="job" data-job="circle">
+          <span class="tick" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 17c3 2 6 6 8 10C16 18 21 10 28 4" pathLength="1"/></svg></span>
+          <div><b>Circle the number that dropped</b>
+            <button class="pick" type="button" data-pick="ellipse">Pick the ellipse</button></div>
+        </li>
+        <li class="job" data-job="arrow">
+          <span class="tick" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 17c3 2 6 6 8 10C16 18 21 10 28 4" pathLength="1"/></svg></span>
+          <div><b>Point an arrow at the dip</b>
+            <button class="pick" type="button" data-pick="arrow">Pick the arrow</button></div>
+        </li>
+        <li class="job" data-job="blur">
+          <span class="tick" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 17c3 2 6 6 8 10C16 18 21 10 28 4" pathLength="1"/></svg></span>
+          <div><b>Blur the email</b>
+            <button class="pick" type="button" data-pick="blur">Pick the blur</button></div>
+        </li>
+      </ol>
+      <div class="finish">
+        <p class="finish-wait">Rough is fine. Circle it with the pen and Smart Draw tidies the loop.</p>
+        <div class="finish-done">
+          <p>That's the whole idea. Now do it on your real screen.</p>
+          <a class="btn btn-primary" href="#install" data-download>Get Annotator</a>
+        </div>
+      </div>
+      <p class="job-live sr-only" role="status"></p>
+      <div class="job-foot">
+        <button class="btn btn-small" type="button" data-reset>Start over</button>
+        <p class="honest">This is a web demo with a handful of the tools. The app draws over any app on your Mac or PC.</p>
+      </div>
+    </div>
+
+    <figure class="play">
+      <div class="play-box">
+        <div class="play-surface" data-play role="img" aria-label="The launch review screen again. Sign-ups show 318, down 18 percent. The chart dips in week 4. The email address reads dana@example.com."></div>
+        <button class="play-start" type="button" data-start><span>Click to start drawing</span></button>
+        <svg class="burst" viewBox="0 0 1000 640" preserveAspectRatio="none" aria-hidden="true">
+          <path style="--c:var(--red);--d:0" pathLength="1" d="M40 20l14 44 40-22-28 36 44 16-46 6 10 44-28-36-30 34 8-46-44-6 42-18z"/>
+          <path style="--c:var(--blue);--d:1" pathLength="1" d="M930 70c-22-30-66-10-58 26 8 34 58 34 62 0 3-24-30-34-40-14-8 16 12 28 20 14"/>
+          <path style="--c:var(--teal);--d:2" pathLength="1" d="M20 560l26-30 26 30 26-30 26 30 26-30 26 30"/>
+          <path style="--c:var(--yellow);--d:3" pathLength="1" d="M800 610c40-14 100-14 170 0M812 630c50-10 96-10 150 0"/>
+          <path style="--c:var(--red);--d:4" pathLength="1" d="M960 300c18-20 30-46 34-76M972 330c22-8 40-22 54-42"/>
+          <path style="--c:var(--blue);--d:5" pathLength="1" d="M-20 250c-6 24-6 50 2 76M-44 262c-4 20-2 40 6 58"/>
+          <path style="--c:var(--teal);--d:6" pathLength="1" d="M470 -30c8 14 22 22 40 22 18 0 32-8 40-22"/>
+          <path style="--c:var(--red);--d:7" pathLength="1" d="M300 660c30 16 70 16 100 0"/>
+        </svg>
+        <p class="done-stamp" aria-hidden="true">Done.</p>
+      </div>
+      <figcaption class="fig">Fig. 4 — Same screen. Your pen.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="sec extras" id="extras" aria-labelledby="extras-title">
+  <header class="sec-head" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>Not in the rules</p>
+    <h2 class="display" id="extras-title">Things you <em>don't expect.</em></h2>
+  </header>
+
+  <div class="stories">
+    <article class="story story-wide" data-reveal>
+      <div class="story-text">
+        <p class="story-no">No. 1</p>
+        <h3>Your wobbly loop comes out neat.</h3>
+        <p>Turn on Smart Draw and sketch with the pen. A wobbly loop or a shaky arrow snaps into a clean one.</p>
+      </div>
+      <button class="print" type="button" style="--r:2deg" data-clip="smart" aria-label="Play clip: Smart Draw"><i class="tape"></i><video muted playsinline loop preload="none" poster="/public/demo/stage-smart.jpg" src="/public/demo/stage-smart.mp4"></video><span class="print-name">Smart Draw, recorded in the Mac app</span></button>
+    </article>
+
+    <article class="story" data-reveal>
+      <p class="story-no">No. 2</p>
+      <h3>Share one corner of a wide screen.</h3>
+      <p>Sharing a single window can leave your drawings out, and nobody wants your whole ultrawide. Share region puts one part of a display in its own window. Your meeting app shares that window.</p>
+    </article>
+
+    <article class="story" data-reveal>
+      <p class="story-no">No. 3</p>
+      <h3>Back in ten.</h3>
+      <p>The break timer fills the screen with a countdown, from 1 to 180 minutes, with a title and a chime. Out of the box it's a 10-minute coffee break.</p>
+      <p class="timer" aria-hidden="true"><span>Coffee break</span><b data-timer>10:00</b></p>
+    </article>
+
+    <article class="story" data-reveal>
+      <p class="story-no">No. 4</p>
+      <h3>A toolbar that gets out of the way.</h3>
+      <p>Make it horizontal or vertical, add or remove buttons, and when you leave it alone it shrinks to one button.</p>
+      <button class="pick story-act" type="button" data-shrink>Shrink the one on this page</button>
+    </article>
+
+    <article class="story" data-reveal>
+      <p class="story-no">No. 5</p>
+      <h3>Shapes you draw once and reuse.</h3>
+      <p>Save any drawing or text to My shapes and drop it in again later. You can paste images too.</p>
+    </article>
+
+    <article class="story" data-reveal>
+      <p class="story-no">No. 6</p>
+      <h3>A pointer people can follow.</h3>
+      <p>Give the cursor a halo and choose its shape, color and glow. Or point with the laser: its trail fades on its own.</p>
+      <button class="pick story-act" type="button" data-halo aria-pressed="false">Try a halo on this page</button>
+    </article>
+
+    <article class="story" data-reveal>
+      <p class="story-no">No. 7</p>
+      <h3>An AI assistant can drive it.</h3>
+      <p>An optional skill teaches an AI app that already has computer-use tools to use Annotator the way you do: pick a tool, draw, edit, check. It adds no permissions of its own. The AI provider may receive screenshots under its own privacy settings.</p>
+      <a class="story-link" href="/ai/">How AI control works</a>
+    </article>
+  </div>
+</section>
+
+<section class="bands" id="tools" aria-labelledby="tools-title">
+  <div class="band band-a" aria-hidden="true">
+    <div class="band-track"><div class="band-set">
+      <span>Rectangle</span><svg><use href="#g-star"/></svg><span>Ellipse</span><svg><use href="#g-ring"/></svg><span>Arrow</span><svg><use href="#g-arrow"/></svg><span>Pen</span><svg><use href="#g-star"/></svg><span>Text</span><svg><use href="#g-ring"/></svg><span>Highlighter</span><svg><use href="#g-arrow"/></svg><span>Numbered counter</span><svg><use href="#g-star"/></svg><span>Blur</span><svg><use href="#g-ring"/></svg><span>Pixelate</span><svg><use href="#g-arrow"/></svg><span>Eraser</span><svg><use href="#g-star"/></svg><span>Diamond</span><svg><use href="#g-ring"/></svg><span>Line</span><svg><use href="#g-arrow"/></svg>
+    </div></div>
+  </div>
+  <div class="band band-b" aria-hidden="true">
+    <div class="band-track"><div class="band-set">
+      <span>Spotlight</span><svg><use href="#g-ring"/></svg><span>Cursor halo</span><svg><use href="#g-star"/></svg><span>Laser pointer</span><svg><use href="#g-arrow"/></svg><span>Screen zoom</span><svg><use href="#g-ring"/></svg><span>Pointer lens</span><svg><use href="#g-star"/></svg><span>Pixel ruler</span><svg><use href="#g-arrow"/></svg><span>Share region</span><svg><use href="#g-ring"/></svg><span>Database</span><svg><use href="#g-star"/></svg><span>Load balancer</span><svg><use href="#g-arrow"/></svg><span>Paste image</span><svg><use href="#g-ring"/></svg>
+    </div></div>
+  </div>
+  <div class="bands-foot" data-reveal>
+    <h2 class="bands-title" id="tools-title">More than 40 tools. One page lists every one.</h2>
+    <a class="btn btn-big" href="./tools.html">See all the tools <svg width="22" height="22" aria-hidden="true"><use href="#g-arrow"/></svg></a>
+  </div>
+</section>
+
+<section class="sec answers" id="answers" aria-labelledby="answers-title">
+  <header class="sec-head" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>Straight answers</p>
+    <h2 class="display" id="answers-title">The fine print, <em>in big print.</em></h2>
+  </header>
+
+  <div class="qa-list">
+    <article class="qa" data-reveal>
+      <h3>Will people on my call see my drawings?</h3>
+      <p class="verdict">It depends.</p>
+      <p>Share your whole screen and they see them. We checked that by hand with Teams on a Mac. Share one app or window and the drawings may be left out, so ask someone on the call what they see. Share region is there for that case.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Does it record or upload my screen?</h3>
+      <p class="verdict">No.</p>
+      <p>Annotator is not a screen recorder and saves no video. Your drawings, screen pixels and typed text stay on your computer. It does contact a release server to check for updates.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Is blur safe for secrets?</h3>
+      <p class="verdict" data-answer="blur">No.</p>
+      <p>Blur, Pixelate and Distort cover a region live, but details can stay readable. The cover doesn't follow a window that moves or a page that scrolls, and it's gone when you hide or quit Annotator. Remove private details before you share.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Does it need permissions?</h3>
+      <p class="verdict">For drawing, none.</p>
+      <p>Screen zoom, the live effects and Share region need screen access: Screen Recording on a Mac, the screenshots and screen recording setting on Windows.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Is it the same on Mac and Windows?</h3>
+      <p class="verdict">Yes.</p>
+      <p>It's one product with two native apps. The Windows app matches the Mac app, and where they differ, the difference is written down.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Does it work on more than one display?</h3>
+      <p class="verdict">Yes.</p>
+      <p>Each display has its own drawings.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>What if I draw the wrong thing?</h3>
+      <p class="verdict">Undo it.</p>
+      <p>Undo and redo cover everything, including Clear and the Eraser. Lock a mark and neither of those can remove it.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Can I keep what I drew?</h3>
+      <p class="verdict">Yes.</p>
+      <p>Save a board and open it later with every mark still editable, or export it as a PNG.</p>
+    </article>
+    <article class="qa" data-reveal>
+      <h3>Is it finished?</h3>
+      <p class="verdict">Not yet.</p>
+      <p>The latest release is 0.5.0, and it hasn't reached 1.0. Expect rough edges, and tell us when you find one.</p>
+    </article>
+  </div>
+
+  <div class="free" id="free" data-reveal="plain">
+    <h3 class="free-q">And the big one: is it really free?</h3>
+    <p class="mega free-word">Free.</p>
+    <ul class="stamps">
+      <li class="stamp" style="--r:-1.500deg;--d:0"><span data-fact="0">All tools are free.</span></li>
+      <li class="stamp" style="--r:1deg;--d:1"><span data-fact="1">No account.</span></li>
+      <li class="stamp" style="--r:-.5deg;--d:2"><span data-fact="2">No paid tiers.</span></li>
+      <li class="stamp" style="--r:1.200deg;--d:3"><span data-fact="3">Coffee is optional.</span></li>
+    </ul>
+    <p class="free-foot">Usage counts are off unless you turn them on, and they never include drawings, screenshots or text.</p>
+  </div>
+</section>
+
+<section class="sec ledger" id="new">
+  <div class="ledger-col" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>What's new</p>
+    <h2 class="display display-s">Fresh <em>ink.</em></h2>
+    <ol class="notes">
+      <li><b>0.5.0</b><div><span class="tag">Latest · 24 November 2026</span><p>Zoom holds still while you draw or use apps, and starts on the display under your pointer.</p></div></li>
+      <li><b>0.4.0</b><div><p>A zoom map shows the whole display and where you are zoomed in.</p></div></li>
+      <li><b>0.3.0</b><div><p>A Glass look for the toolbar: Liquid Glass on supported Macs, Acrylic on Windows.</p></div></li>
+      <li><b>0.2.1</b><div><p>The laser pointer leaves a trail, and you set how fast it fades. Drag the toolbar from anywhere on it.</p></div></li>
+    </ol>
+    <a class="story-link" href="https://github.com/dorlugasigal/annotator/releases" target="_blank" rel="noopener">All release notes on GitHub</a>
+  </div>
+
+  <div class="ledger-col open" id="open" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>Open source, Apache 2.0</p>
+    <h2 class="display display-s">Made in <em>the open.</em></h2>
+    <p class="open-lede">Both native apps, Mac and Windows, live in one repository. Read the code, follow the work, or join in.</p>
+    <ul class="open-links">
+      <li><a href="https://github.com/dorlugasigal/annotator" target="_blank" rel="noopener">Read the code</a><span>Everything is on GitHub.</span></li>
+      <li><a href="https://github.com/dorlugasigal/annotator/issues/new/choose" target="_blank" rel="noopener">Report a problem</a><span>Use made-up data and leave private screenshots out.</span></li>
+      <li><a href="https://github.com/dorlugasigal/annotator/discussions" target="_blank" rel="noopener">Ask or suggest</a><span>Questions and ideas go to Discussions.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec install" id="install" aria-labelledby="install-title">
+  <header class="sec-head" data-reveal>
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>Mac or PC</p>
+    <h2 class="display" id="install-title">Get <em>it.</em></h2>
+  </header>
+
+  <div class="install-card" data-reveal>
+    <div class="switch" role="group" aria-label="Choose your computer">
+      <button type="button" data-os-pick="mac" aria-pressed="true">Mac</button>
+      <button type="button" data-os-pick="windows" aria-pressed="false">Windows</button>
+    </div>
+
+    <div class="install-panels">
+      <div class="install-panel" data-panel="mac">
+        <div class="install-get">
+          <a class="btn btn-primary btn-big" href="/downloads/">Download for Mac</a>
+          <p class="req">macOS 14 or later. Apple Silicon and Intel.</p>
+          <p class="cmd-label">Or with Homebrew</p>
+          <div class="cmd"><code>brew install --cask dorlugasigal/annotator/annotator</code><button class="copy" type="button" data-copy="brew install --cask dorlugasigal/annotator/annotator">Copy</button></div>
+        </div>
+        <ol class="how">
+          <li><span class="counter">1</span><span>Open the disk image and drag Annotator to Applications.</span></li>
+          <li><span class="counter">2</span><span>Open it. It lives in the menu bar and updates itself.</span></li>
+          <li><span class="counter">3</span><span>Press <kbd>⌃</kbd><kbd>⇧</kbd><kbd>2</kbd> and draw. The built-in tutorial shows you the rest.</span></li>
+        </ol>
+      </div>
+
+      <div class="install-panel" data-panel="windows" inert>
+        <div class="install-get">
+          <a class="btn btn-primary btn-big" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK" target="_blank" rel="noopener">Get it from the Microsoft Store</a>
+          <p class="req">Windows 11, version 22H2 or later. x64 and ARM64.</p>
+          <p class="cmd-label">Or with winget</p>
+          <div class="cmd"><code>winget install --id 9NMZ345ZJ6JK --source msstore</code><button class="copy" type="button" data-copy="winget install --id 9NMZ345ZJ6JK --source msstore">Copy</button></div>
+        </div>
+        <ol class="how">
+          <li><span class="counter">1</span><span>Get it from the Microsoft Store, or with winget.</span></li>
+          <li><span class="counter">2</span><span>Open it. It lives in the system tray, and the Store keeps it up to date.</span></li>
+          <li><span class="counter">3</span><span>Press <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>2</kbd> and draw. The built-in tutorial shows you the rest.</span></li>
+        </ol>
+      </div>
+    </div>
+    <p class="copy-live sr-only" role="status"></p>
+  </div>
+</section>
+
+<section class="sec coffee" id="coffee" aria-labelledby="coffee-title" data-reveal="plain">
+  <div class="coffee-copy">
+    <p class="kicker"><svg aria-hidden="true"><use href="#g-star"/></svg>Optional, but nice</p>
+    <h2 class="display" id="coffee-title">It's free. <em>Coffee is welcome.</em></h2>
+    <p class="sec-sub">If Annotator saved your demo, buy me a coffee. It keeps the work going.</p>
+    <div class="coffee-cta">
+      <a class="btn btn-primary btn-big btn-coffee" href="https://buymeacoffee.com/dorlugasigal" target="_blank" rel="noopener">
+        <svg width="26" height="26" aria-hidden="true"><use href="#g-cup"/></svg>Buy me a coffee
+      </a>
+      <i class="coffee-note" data-coffee="note" aria-hidden="true"></i>
+    </div>
+  </div>
+  <div class="coffee-art" aria-hidden="true">
+    <svg class="ring" viewBox="0 0 300 300"><path d="M150 22c74-3 131 55 128 128-3 72-60 128-131 126C76 274 22 219 24 148 26 80 80 25 150 22z"/><path d="M152 34c66-1 115 51 113 116-2 64-52 113-116 112-63-1-112-52-110-115C41 85 89 35 152 34z"/></svg>
+    <svg class="cup" viewBox="0 0 320 340">
+      <g class="steam"><path pathLength="1" d="M112 118c-16-22 16-38 0-64s14-30 2-46"/><path pathLength="1" d="M160 112c-16-22 16-38 0-64s14-30 2-46"/><path pathLength="1" d="M208 118c-16-22 16-38 0-64s14-30 2-46"/></g>
+      <path class="cup-fill" d="M62 152h196c2 76-30 128-98 128S60 228 62 152z"/>
+      <g class="cup-line">
+        <path pathLength="1" d="M50 150c70-5 150-5 220 1"/>
+        <path pathLength="1" d="M60 152c-3 78 30 130 100 130s103-52 100-130"/>
+        <path pathLength="1" d="M258 176c58-12 64 70-10 74"/>
+        <path pathLength="1" d="M28 306c80 14 184 14 264-2"/>
+      </g>
+    </svg>
+    <p class="sticky-note"><i class="tape"></i>It unlocks nothing. Everything is free, with or without coffee.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p class="foot-word" aria-hidden="true">annotator<i>.</i></p>
+  <div class="foot-row">
+    <nav aria-label="Footer">
+      <a href="https://github.com/dorlugasigal/annotator" target="_blank" rel="noopener">GitHub</a>
+      <a href="./tools.html">All tools</a>
+      <a href="/docs/">Help</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/support/">Report a problem</a>
+      <a class="foot-coffee" href="https://buymeacoffee.com/dorlugasigal" target="_blank" rel="noopener"><svg width="20" height="20" aria-hidden="true"><use href="#g-cup"/></svg>Buy me a coffee</a>
+    </nav>
+    <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+  </div>
+</footer>
+
+<div class="draw-frame" aria-hidden="true"><span>Drawing on this page · <b data-mac>esc</b><b data-win>Esc</b> to stop</span></div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

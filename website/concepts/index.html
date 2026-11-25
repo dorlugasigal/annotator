@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Annotator website: redesign concepts</title>
+  <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
+  <style>
+    @font-face { font-family: "Bricolage Grotesque"; src: url("/concepts/shared/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+    @font-face { font-family: "Geist Mono"; src: url("/concepts/shared/fonts/geist-mono-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: clamp(24px, 5vw, 72px); background: #0d0f14; color: #f2f3f7; font: 400 18px/1.5 "Bricolage Grotesque", sans-serif; }
+    h1 { margin: 0 0 12px; font-size: clamp(40px, 6vw, 84px); line-height: .98; letter-spacing: -.045em; font-weight: 750; }
+    h1 span { color: #ffb58c; }
+    .intro { max-width: 60ch; margin: 0 0 56px; color: #b1b7c6; font-size: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 28px; }
+    .card { display: grid; grid-template-rows: auto 1fr; overflow: hidden; border-radius: 26px; background: #161922; box-shadow: 0 0 0 1px #ffffff1c; color: inherit; text-decoration: none; transition: transform .35s cubic-bezier(.16, 1, .3, 1), box-shadow .35s ease; }
+    .card:hover, .card:focus-visible { transform: translateY(-6px); box-shadow: 0 0 0 1.5px #ffb58c, 0 40px 80px -40px #000; outline: none; }
+    .shot { aspect-ratio: 16 / 10; overflow: hidden; background: #0a0c10; }
+    .shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .8s cubic-bezier(.16, 1, .3, 1); }
+    .card:hover .shot img { transform: scale(1.04); }
+    .body { padding: 26px 28px 30px; }
+    .tag { color: #ffb58c; font: 500 13px/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    h2 { margin: 12px 0 8px; font-size: 38px; line-height: 1; letter-spacing: -.04em; font-weight: 750; }
+    .card p { margin: 0 0 16px; color: #b1b7c6; }
+    .card .story { margin-bottom: 8px; color: #f2f3f7; font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
+    ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 16px; }
+    li { padding-left: 22px; position: relative; }
+    li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 9px; height: 9px; border-radius: 50%; background: #ffb58c; }
+    .foot { margin-top: 48px; color: #848b9c; font-size: 16px; max-width: 70ch; }
+    @media (prefers-reduced-motion: reduce) { .card, .shot img { transition: none; } }
+  </style>
+</head>
+<body>
+  <h1>Five directions for <span>getannotator.app</span></h1>
+  <p class="intro">Each one is a working homepage with its own story, written from the same checked facts, and a web demo of the app. Open them, scroll, and draw. They run from this computer only.</p>
+  <main class="grid">
+    <a class="card" href="a-live-ink/">
+      <div class="shot"><img src="shots/a.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Concept A · dark, cinematic</span>
+        <h2>Live Ink</h2>
+        <p class="story">“Wait, where?” “Here.”</p>
+        <p>The page opens with your audience’s question and answers it with a ring. Every section after is a question, answered by a mark drawn live.</p>
+        <ul><li>You draw on the whole page</li><li>Three sample screens, each with a small task</li><li>The page’s own marks can be moved and bent</li></ul>
+      </div>
+    </a>
+    <a class="card" href="b-desktop/">
+      <div class="shot"><img src="shots/b.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Concept B · warm, playful</span>
+        <h2>Desktop</h2>
+        <p class="story">A day with Annotator</p>
+        <p>A small desktop you can draw over. The clock runs from 9:30 stand-up to tomorrow morning and the sky changes with it.</p>
+        <ul><li>Windows you can drag while the ink stays put</li><li>Each hour is one moment: review, break, workshop</li><li>Coffee has its own window and a cup in the dock</li></ul>
+      </div>
+    </a>
+    <a class="card" href="c-marker/">
+      <div class="shot"><img src="shots/c.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Concept C · light, loud, editorial</span>
+        <h2>Marker</h2>
+        <p class="story">Stop wiggling your cursor</p>
+        <p>A field guide to pointing at things: six rules in giant type, performed on a sticky screen as you scroll.</p>
+        <ul><li>A Wiggle it / Draw it switch</li><li>The fine print, in big print</li><li>A second page lists every tool</li></ul>
+      </div>
+    </a>
+    <a class="card" href="d-stage/">
+      <div class="shot"><img src="shots/d.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Concept D · dark, 3D, cinematic</span>
+        <h2>Stage</h2>
+        <p class="story">You’re on in five</p>
+        <p>A keynote room with the real recordings on a big screen. The tools happen in the room.</p>
+        <ul><li>The view from the back row</li><li>Spotlight is a real cone of light, the laser a real beam</li><li>Intermission: the break timer, and coffee</li></ul>
+      </div>
+    </a>
+    <a class="card" href="e-glass/">
+      <div class="shot"><img src="shots/e.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Concept E · light, 3D, glass</span>
+        <h2>Glass</h2>
+        <p class="story">A clear layer over your work</p>
+        <p>Real refracting glass over the page: a lens that magnifies whatever is under your pointer, and a glass toolbar.</p>
+        <ul><li>Pull a sheet across a busy table: wiggle or ring</li><li>“What never happens to your screen”</li><li>A second page lists every tool</li></ul>
+      </div>
+    </a>
+  </main>
+  <p class="foot">In every concept the toolbar is a copy of the real one and only the tools that behave like the app are live; the rest say “Want to see more? Try it on your machine”. The clips are today’s recordings of the real Mac app. New recordings come after a direction is chosen.</p>
+</body>
+</html>

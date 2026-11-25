@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wait, where? Here. Annotator (concept A: Live Ink)</title>
+  <meta name="description" content="Annotator draws on top of your screen while you share it, so people see what you mean. For Mac and Windows. All tools are free.">
+  <meta name="theme-color" content="#0b101a">
+  <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
+  <link rel="preload" as="font" type="font/woff2" href="/concepts/shared/fonts/bricolage.woff2" crossorigin>
+  <link rel="stylesheet" href="/concepts/shared/ink.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top wrap">
+    <a class="wordmark" href="#main" aria-label="Annotator home">annotator<span>.</span></a>
+    <nav aria-label="Main navigation">
+      <a href="#moments">Moments</a>
+      <a href="#try">Try it</a>
+      <a href="#answers">Answers</a>
+      <a href="#tools">Tools</a>
+      <a href="/docs/">Help</a>
+      <a href="https://github.com/dorlugasigal/annotator">GitHub</a>
+      <a class="top-coffee" href="https://buymeacoffee.com/dorlugasigal" aria-label="Buy me a coffee"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 9h11l-.9 8.200A3 3 0 0112.100 20H8.900a3 3 0 01-3-2.800zM16 11h1.500a2.500 2.500 0 010 5H15.300M8.500 3.500c-.8 1 .8 1.700 0 2.800M12 3.500c-.8 1 .8 1.700 0 2.800" fill="none" stroke="currentColor" stroke-width="1.700" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Buy me a coffee</span></a>
+    </nav>
+    <a class="top-get" href="#install">Get Annotator</a>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-dots" aria-hidden="true"></div>
+      <p class="kicker" data-load="1"><span class="live-dot"></span>Someone on your call, again</p>
+      <span class="lost" id="lost" aria-hidden="true"><svg viewBox="0 0 22 26" width="11" height="13"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z" fill="#fff" stroke="#0b101a" stroke-width="1.500" stroke-linejoin="round"/></svg></span>
+      <h1 id="hero-title">
+        <span class="line"><span data-load="2">Wait,</span></span>
+        <span class="line"><span data-load="3">where?</span></span>
+      </h1>
+      <div class="hero-foot">
+        <p class="lede" data-load="4"><span class="screen-reader-only">Here. </span>Annotator draws on top of your screen while you share it, so people see what you mean. For Mac and Windows. Free.</p>
+        <div class="cta" data-load="5">
+          <a class="button" href="#install">Get Annotator <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 3.500v12M4.800 10.800L10 16l5.200-5.200" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <button class="button is-ghost" type="button" data-start-drawing>Draw on this page</button>
+          <p class="availability">Open source · macOS 14 or later · Windows 11</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="which wrap" id="problem" aria-labelledby="which-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 1 — the problem</p>
+        <h2 id="which-title">Which one do you mean?</h2>
+        <p>On a call, your cursor is a few pixels in a compressed video. Wiggling it doesn’t help.</p>
+      </header>
+      <div class="call" data-reveal data-call="without">
+        <div class="call-bar" data-pass>
+          <div class="switch" role="group" aria-label="Show the call">
+            <button type="button" data-call-pick="without" aria-pressed="true">Without Annotator</button>
+            <button type="button" data-call-pick="with" aria-pressed="false">With Annotator</button>
+          </div>
+          <p class="call-says" aria-hidden="true">You: <span data-call-says>“this one…”</span></p>
+        </div>
+        <p class="screen-reader-only">Without Annotator, a small cursor wiggles over a table full of numbers. With Annotator, a ring, an arrow and a label mark one number.</p>
+        <div class="window">
+          <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>Regions, this quarter — Sample data</span></div>
+          <div class="call-body">
+            <table class="sheet">
+              <thead><tr><th scope="col">Region</th><th scope="col" class="wide-only">Signups</th><th scope="col">Activation</th><th scope="col">Churn</th><th scope="col" class="wide-only">Tickets</th><th scope="col">Health</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">North</th><td class="wide-only">2,480</td><td>41%</td><td>2.1%</td><td class="wide-only">38</td><td><span class="pill good">Good</span></td></tr>
+                <tr><th scope="row">South</th><td class="wide-only">1,932</td><td>44%</td><td class="bad">3.9%</td><td class="wide-only bad">61</td><td><span class="pill risk">At risk</span></td></tr>
+                <tr><th scope="row">East</th><td class="wide-only">3,104</td><td class="bad">39%</td><td>2.4%</td><td class="wide-only">27</td><td><span class="pill watch">Watch</span></td></tr>
+                <tr><th scope="row">West</th><td class="wide-only">2,267</td><td>46%</td><td class="bad"><span id="call-target">4.8%</span></td><td class="wide-only">44</td><td><span class="pill risk">At risk</span></td></tr>
+                <tr><th scope="row">Central</th><td class="wide-only">1,518</td><td class="bad">37%</td><td>2.2%</td><td class="wide-only bad">52</td><td><span class="pill watch">Watch</span></td></tr>
+                <tr><th scope="row">Coast</th><td class="wide-only">2,955</td><td>43%</td><td>1.9%</td><td class="wide-only">31</td><td><span class="pill good">Good</span></td></tr>
+                <tr><th scope="row">Islands</th><td class="wide-only">864</td><td class="bad">35%</td><td class="bad">3.6%</td><td class="wide-only">19</td><td><span class="pill risk">At risk</span></td></tr>
+              </tbody>
+            </table>
+            <ul class="tiles" aria-hidden="true">
+              <li><i class="face"></i><span class="bubble" data-call-bubble>which one??</span></li>
+              <li><i class="face"></i></li>
+              <li><i class="face"></i></li>
+            </ul>
+            <span class="wiggler" aria-hidden="true"><svg viewBox="0 0 22 26" width="12" height="14"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z" fill="#fff" stroke="#0b101a" stroke-width="1.800" stroke-linejoin="round"/></svg></span>
+          </div>
+        </div>
+        <p class="demo-note">A web drawing of a call, with made-up numbers.</p>
+      </div>
+    </section>
+
+    <section class="reel wrap" aria-labelledby="reel-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 2 — the real thing</p>
+        <h2 id="reel-title">What does the real app look like?</h2>
+        <p>Like this. Thirty seconds, recorded in <span class="mark" id="real-app">the Mac app</span>.</p>
+      </header>
+      <figure class="screen" data-scroll-tilt>
+        <div class="screen-frame">
+          <video id="reel-video" muted loop playsinline preload="none" poster="/public/demo/annotator-reel.jpg"
+            aria-label="A 30-second Annotator reel. Real app clips show circling a number, drawing and bending an arrow, highlighting a note, a rough box that snaps clean, a spotlight and a blur.">
+            <source src="/public/demo/annotator-reel-phone.mp4" type="video/mp4" media="(max-width: 600px)">
+            <source src="/public/demo/annotator-reel.mp4" type="video/mp4">
+          </video>
+          <div class="screen-controls">
+            <button type="button" data-reel-play aria-label="Pause the reel"><span data-label>Pause</span></button>
+            <button type="button" data-reel-sound aria-pressed="false">Sound off</button>
+          </div>
+        </div>
+        <figcaption>A scripted pointer and sample content. Music: “Product Launch Advertising Commercial Music” by lNPLUSMUSIC, from Pixabay.</figcaption>
+      </figure>
+    </section>
+
+    <section class="moments wrap" id="moments" aria-labelledby="moments-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 3 — six moments</p>
+        <h2 id="moments-title">When would I use it?</h2>
+        <p>Whenever someone has to find the thing you’re talking about. Here are six questions you can answer with a drawing.</p>
+      </header>
+      <ol class="moment-list">
+        <li class="moment" data-reveal>
+          <div class="moment-copy">
+            <p class="moment-when">Walking the team through numbers</p>
+            <h3>Which number dropped?</h3>
+            <p>Circle it, then point an arrow at the day it happened. Nobody has to hunt across the dashboard.</p>
+            <ul class="chips" aria-label="Tools in this moment"><li>Ellipse</li><li>Arrow</li></ul>
+          </div>
+          <figure class="shot" data-clips>
+            <div class="shot-screen"><video muted loop playsinline preload="none" data-clip-video poster="/public/demo/stage-circle.jpg" aria-label="The real app: an ellipse is drawn around a number on a dashboard"></video></div>
+            <figcaption>
+              <span class="clip-switch" role="group" aria-label="Choose a clip" data-pass>
+                <button type="button" data-clip="circle" data-clip-label="The real app: an ellipse is drawn around a number on a dashboard" aria-pressed="true">Circle it</button>
+                <button type="button" data-clip="arrow" data-clip-label="The real app: an arrow is drawn to a dip in a chart and then bent" aria-pressed="false">Point at it</button>
+              </span>
+              <span>Real app, sample data</span>
+            </figcaption>
+          </figure>
+        </li>
+
+        <li class="moment" data-reveal data-script="code">
+          <div class="moment-copy">
+            <p class="moment-when">Reviewing code</p>
+            <h3>Which line of code?</h3>
+            <p>Box the line and write your question next to it. If something private is on screen, cover it first.</p>
+            <ul class="chips" aria-label="Tools in this moment"><li>Rectangle</li><li>Text</li><li>Arrow</li><li>Blur</li></ul>
+          </div>
+          <figure class="shot">
+            <div class="window">
+              <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>sync.ts — Sample code</span></div>
+              <pre class="code" tabindex="0" aria-label="Sample code"><code><span class="ln">41</span>  <span class="k">async function</span> <span class="f">sync</span>(account) {
+<span class="ln">42</span>    <span class="k">const</span> key = <span class="s" id="m-key">"key_sample_4f9a1c20"</span>;
+<span class="ln">43</span>    <span class="k">let</span> tries = <span class="n">0</span>;
+<span class="ln">44</span>    <span id="m-line"><span class="k">while</span> (<span class="k">true</span>) {</span>
+<span class="ln">45</span>      <span class="k">if</span> (<span class="k">await</span> <span class="f">push</span>(account, key)) <span class="k">break</span>;
+<span class="ln">46</span>      tries += <span class="n">1</span>;
+<span class="ln">47</span>    }
+<span class="ln">48</span>    <span class="k">return</span> tries;
+<span class="ln">49</span>  }</code></pre>
+            </div>
+            <figcaption><span>Web demo, drawn by the page</span><span>You can move these marks</span></figcaption>
+          </figure>
+        </li>
+
+        <li class="moment" data-reveal data-script="steps">
+          <div class="moment-copy">
+            <p class="moment-when">Teaching a class or a workshop</p>
+            <h3>What are the steps?</h3>
+            <p>Number them as you go and highlight the part people skip. A Whiteboard gives you a clean page when the slides are in the way.</p>
+            <ul class="chips" aria-label="Tools in this moment"><li>Numbered counter</li><li>Highlighter</li><li>Whiteboard</li></ul>
+          </div>
+          <figure class="shot">
+            <div class="board is-white">
+              <span class="board-tag" aria-hidden="true">Whiteboard</span>
+              <p class="board-title">Your first pull request</p>
+              <ul class="board-steps">
+                <li><span id="m-step-1">Make a branch</span></li>
+                <li><span id="m-step-2">Change <span id="m-one">one small thing</span></span></li>
+                <li><span id="m-step-3">Open the pull request</span></li>
+              </ul>
+            </div>
+            <figcaption><span>Web demo, drawn by the page</span><span>Sample lesson</span></figcaption>
+          </figure>
+        </li>
+
+        <li class="moment" data-reveal>
+          <div class="moment-copy">
+            <p class="moment-when">Recording a tutorial</p>
+            <h3>Where should I look?</h3>
+            <p>Dim everything except the part that matters, or zoom in around your pointer. A halo or a laser trail shows where you are between steps.</p>
+            <ul class="chips" aria-label="Tools in this moment"><li>Spotlight</li><li>Screen zoom</li><li>Cursor halo</li><li>Laser pointer</li></ul>
+          </div>
+          <figure class="shot" data-clips>
+            <div class="shot-screen"><video muted loop playsinline preload="none" data-clip-video poster="/public/demo/stage-spotlight.jpg" aria-label="The real app: a spotlight and a cursor halo follow the pointer over a gallery"></video></div>
+            <figcaption>
+              <span class="clip-switch" role="group" aria-label="Choose a clip" data-pass>
+                <button type="button" data-clip="spotlight" data-clip-label="The real app: a spotlight and a cursor halo follow the pointer over a gallery" aria-pressed="true">Spotlight</button>
+                <button type="button" data-clip="zoom" data-clip-label="The real app: the screen zooms in around the pointer on a dashboard" aria-pressed="false">Zoom</button>
+              </span>
+              <span>Real app, sample content</span>
+            </figcaption>
+          </figure>
+        </li>
+
+        <li class="moment" data-reveal data-script="system">
+          <div class="moment-copy">
+            <p class="moment-when">Explaining a system</p>
+            <h3>How do the parts connect?</h3>
+            <p>Sketch it on the spot. Draw boxes and arrows, or drop in ready-made icons for a database, a server or an API gateway.</p>
+            <ul class="chips" aria-label="Tools in this moment"><li>Rectangle</li><li>Arrow</li><li>Database</li><li>Server</li><li>API gateway</li><li>Blackboard</li></ul>
+          </div>
+          <figure class="shot">
+            <div class="board is-black">
+              <span class="board-tag" aria-hidden="true">Blackboard</span>
+              <div class="arch">
+                <span class="node" id="n-app">phone app</span>
+                <span class="node" id="n-api">API</span>
+                <span class="node" id="n-queue">queue</span>
+                <span class="node" id="n-db">database</span>
+              </div>
+            </div>
+            <figcaption><span>Web demo, drawn by the page</span><span>Sample system</span></figcaption>
+          </figure>
+        </li>
+
+        <li class="moment" data-reveal data-script="support">
+          <div class="moment-copy">
+            <p class="moment-when">Helping someone on a support call</p>
+            <h3>Which button do I press?</h3>
+            <p>Show it on your screen. Ring the exact button and point at it, so “the one on the right” is never the wrong one.</p>
+            <ul class="chips" aria-label="Tools in this moment"><li>Ellipse</li><li>Arrow</li><li>Text</li></ul>
+          </div>
+          <figure class="shot">
+            <div class="window">
+              <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>Settings — Sample app</span></div>
+              <div class="settings">
+                <ul class="settings-nav" aria-hidden="true"><li>General</li><li class="is-on">Alerts</li><li>Privacy</li><li>Billing</li></ul>
+                <div class="settings-main">
+                  <p class="settings-title">Alerts</p>
+                  <p class="settings-row"><span>Email me a weekly summary</span><i class="toggle is-on"></i></p>
+                  <p class="settings-row"><span>Tell me about new sign-ins</span><i class="toggle is-on"></i></p>
+                  <p class="settings-row"><span>Play a sound</span><i class="toggle"></i></p>
+                  <p class="settings-foot"><span>Save</span><span>Save as default</span><span id="m-button">Save and close</span></p>
+                </div>
+              </div>
+            </div>
+            <figcaption><span>Web demo, drawn by the page</span><span>Sample app</span></figcaption>
+          </figure>
+        </li>
+      </ol>
+    </section>
+
+    <section class="keys wrap" id="how" aria-labelledby="keys-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 4 — two keys</p>
+        <h2 id="keys-title">Doesn’t it get in the way?</h2>
+        <p>No. One key to draw, one key to get back to your app. Press them now: they work on this page too.</p>
+      </header>
+      <ol class="beats" data-reveal>
+        <li class="beat" data-keys="draw">
+          <span class="keycaps" role="img" aria-label="Control Shift 2"><kbd data-key="Control"><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd data-key="Shift"><span data-mac>⇧</span><span data-win>Shift</span></kbd><kbd data-key="2">2</kbd></span>
+          <p><b>Draw</b>Your pointer becomes a pen. Marks land on top of everything.</p>
+        </li>
+        <li class="beat" data-keys="use">
+          <span class="keycaps" role="img" aria-label="Escape"><kbd data-key="Escape" class="is-wide">esc</kbd></span>
+          <p><b>Use apps</b>Clicks go to your app again. Scroll, type, switch windows. The drawings stay where they are.</p>
+        </li>
+        <li class="beat beat-edit">
+          <div class="edit-stage" aria-hidden="true">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="none"><path d="M0 44C40 30 70 26 104 30S150 58 178 92C190 106 204 104 216 84C236 50 262 34 300 26" fill="none" stroke="#5a50e6" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+            <i id="edit-from"></i><i id="edit-target"></i>
+          </div>
+          <p><b>Change your mind</b>Every mark stays editable. Move it, resize it, bend it, restyle it or undo it.</p>
+          <div class="beat-try" data-pass>
+            <button type="button" data-bend>Bend this arrow</button>
+            <span data-bend-state role="status"></span>
+          </div>
+        </li>
+      </ol>
+      <p class="key-state" data-key-state aria-live="polite">You’re using the page.</p>
+      <ul class="more-keys" data-reveal>
+        <li><span class="keycaps small"><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>2</kbd></span>Show or hide drawings and the toolbar</li>
+        <li><span class="keycaps small"><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>1</kbd></span>Zoom</li>
+        <li><span class="keycaps small"><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>3</kbd></span>Break timer</li>
+        <li><span class="keycaps small"><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>W</kbd></span>Whiteboard</li>
+        <li><span class="keycaps small"><kbd><span data-mac>⌃</span><span data-win>Ctrl</span></kbd><kbd>B</kbd></span>Blackboard</li>
+        <li><span class="keycaps small"><kbd><span data-mac>⌘</span><span data-win>Ctrl</span></kbd><kbd>L</kbd></span>Tool library</li>
+        <li class="more-keys-note">Want other keys? Change them in Settings.</li>
+      </ul>
+    </section>
+
+    <section class="extras wrap" id="more" aria-labelledby="extras-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 5 — surprises</p>
+        <h2 id="extras-title">What else can it do?</h2>
+        <p>A few things you might <span class="mark" id="not-expect">not expect</span> from a drawing app. The small animations are sketches of the idea, apart from the one recording.</p>
+      </header>
+      <ul class="stories">
+        <li class="story is-wide" data-reveal>
+          <div class="vignette v-smart"><video muted loop playsinline preload="none" data-autoplay poster="/public/demo/stage-smart.jpg" aria-label="The real app: a rough hand-drawn box around a button becomes a neat rectangle, then a label is typed"><source src="/public/demo/stage-smart-phone.mp4" type="video/mp4" media="(max-width: 600px)"><source src="/public/demo/stage-smart.mp4" type="video/mp4"></video><span class="tag">Real app</span></div>
+          <div class="story-copy">
+            <p class="story-says">“My boxes look like potatoes.”</p>
+            <h3>Smart Draw tidies them</h3>
+            <p>Turn it on for the Pen. Sketch a rough loop or an arrow, and it becomes a neat one.</p>
+          </div>
+        </li>
+        <li class="story" data-reveal>
+          <div class="vignette v-break" data-palette="forest">
+            <p class="break-title">Coffee break</p>
+            <p class="break-time" data-break-time aria-hidden="true">10:00</p>
+            <div class="break-palettes" role="group" aria-label="Break timer palette">
+              <button type="button" data-palette-pick="forest" aria-pressed="true">Forest</button>
+              <button type="button" data-palette-pick="ocean" aria-pressed="false">Ocean</button>
+              <button type="button" data-palette-pick="sunset" aria-pressed="false">Sunset</button>
+              <button type="button" data-palette-pick="berry" aria-pressed="false">Berry</button>
+              <button type="button" data-palette-pick="graphite" aria-pressed="false">Graphite</button>
+            </div>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“Back in ten.”</p>
+            <h3>A break timer</h3>
+            <p>A full-screen countdown, from 1 to 180 minutes, with a chime if you like. It starts as a 10-minute “Coffee break”.</p>
+          </div>
+        </li>
+        <li class="story" data-reveal>
+          <div class="vignette v-region" aria-hidden="true">
+            <div class="region-wide"><i class="region-frame"></i></div>
+            <svg class="region-arrow" viewBox="0 0 24 30" width="20" height="26"><path d="M12 2v24M4 18l8 9 8-9" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="region-window"><span>Shared region</span><i class="region-view"></i></div>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“My screen is too wide to share.”</p>
+            <h3>Share one region</h3>
+            <p>Share region puts part of a display in its own window, so your meeting app can share just that window. It also helps when window sharing leaves your drawings out. Anything inside the region can show up, notifications too.</p>
+          </div>
+        </li>
+        <li class="story" data-reveal>
+          <div class="vignette v-boards" data-board="desk">
+            <div class="boards-screen" aria-hidden="true">
+              <i class="boards-win"></i><i class="boards-win"></i>
+              <svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet"><path d="M92 52c-30 2-52 16-50 36 2 22 40 34 78 30 36-4 60-22 56-42-4-18-40-28-84-24z" /><path d="M250 30c-18 20-36 34-62 44M196 60l-10 15 18 2"/></svg>
+            </div>
+            <div class="boards-pick" role="group" aria-label="Board background">
+              <button type="button" data-board-pick="desk" aria-pressed="true">Desktop</button>
+              <button type="button" data-board-pick="white" aria-pressed="false">Whiteboard</button>
+              <button type="button" data-board-pick="black" aria-pressed="false">Blackboard</button>
+            </div>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“I just need a blank page.”</p>
+            <h3>Whiteboard and Blackboard</h3>
+            <p>Swap a display’s background for a white or black board, draw, then swap back to the desktop.</p>
+          </div>
+        </li>
+        <li class="story" data-reveal>
+          <div class="vignette v-shapes" aria-hidden="true">
+            <svg class="stamp s1" viewBox="0 0 120 60"><path d="M8 30c2-16 30-24 58-22 26 2 46 10 44 26-2 14-28 22-56 20C28 52 6 44 8 30z"/><text x="60" y="38">ship it</text></svg>
+            <svg class="stamp s2" viewBox="0 0 120 60"><path d="M8 30c2-16 30-24 58-22 26 2 46 10 44 26-2 14-28 22-56 20C28 52 6 44 8 30z"/><text x="60" y="38">ship it</text></svg>
+            <svg class="stamp s3" viewBox="0 0 120 60"><path d="M8 30c2-16 30-24 58-22 26 2 46 10 44 26-2 14-28 22-56 20C28 52 6 44 8 30z"/><text x="60" y="38">ship it</text></svg>
+            <p class="shapes-tray"><span>My shapes</span><svg class="stamp" viewBox="0 0 120 60"><path d="M8 30c2-16 30-24 58-22 26 2 46 10 44 26-2 14-28 22-56 20C28 52 6 44 8 30z"/><text x="60" y="38">ship it</text></svg></p>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“I draw the same thing every week.”</p>
+            <h3>Save it to My shapes</h3>
+            <p>Keep any drawing or text you made, then drop it in again whenever you need it.</p>
+          </div>
+        </li>
+        <li class="story" data-reveal>
+          <div class="vignette v-bar" aria-hidden="true">
+            <div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b><u></u>Draw</b></div>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“The toolbar covers my slide.”</p>
+            <h3>It shrinks to one button</h3>
+            <p>After a short delay, by itself. You can also stand it upright, pick a size, and add or remove buttons.</p>
+          </div>
+        </li>
+        <li class="story" data-reveal>
+          <div class="vignette v-pointer" data-pointer-pad>
+            <span class="halo" aria-hidden="true"><svg viewBox="0 0 22 26" width="15" height="18"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z" fill="#fff" stroke="#0b101a" stroke-width="1.500" stroke-linejoin="round"/></svg></span>
+            <p class="pointer-hint" aria-hidden="true">Move your pointer here, then click.</p>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“Nobody can see my pointer.”</p>
+            <h3>Give it a halo</h3>
+            <p>Choose its shape, color, opacity and glow, and add an effect for clicks.</p>
+          </div>
+        </li>
+        <li class="story is-wide" data-reveal>
+          <div class="vignette v-ai" aria-hidden="true">
+            <p class="ai-prompt"><span>circle the number that dropped</span></p>
+            <div class="ai-card"><span>Activation</span><b>41%</b><small>▼ 6%</small><svg viewBox="0 0 160 80" preserveAspectRatio="none"><path pathLength="1" d="M20 40C22 16 60 6 92 8c34 2 54 14 52 34-2 20-34 30-68 28C42 68 18 60 20 40z"/></svg></div>
+          </div>
+          <div class="story-copy">
+            <p class="story-says">“Can my AI assistant do the drawing?”</p>
+            <h3>It can drive Annotator</h3>
+            <p>An optional skill teaches an AI app that already has computer-use tools to pick tools, draw and edit through the normal toolbar. It adds no permissions of its own, and the AI provider may get screenshots under its own privacy settings. <a href="/ai/">How AI control works</a></p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="try wrap" id="try" aria-labelledby="try-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 6 — your turn</p>
+        <h2 id="try-title">Can I try it right now?</h2>
+        <p>Yes, right here. This is a web demo with a few of the app’s tools. The real one draws over any app on your Mac or PC.</p>
+      </header>
+      <div class="playground" data-reveal>
+        <div class="scene-bar" data-pass>
+          <div class="scene-tabs" role="tablist" aria-label="Sample screens">
+            <button type="button" role="tab" id="tab-demo" aria-controls="scene-demo" aria-selected="true" data-scene="demo">A demo</button>
+            <button type="button" role="tab" id="tab-review" aria-controls="scene-review" aria-selected="false" data-scene="review" tabindex="-1">A code review</button>
+            <button type="button" role="tab" id="tab-lesson" aria-controls="scene-lesson" aria-selected="false" data-scene="lesson" tabindex="-1">A lesson</button>
+          </div>
+          <div class="task" data-task aria-live="polite">
+            <svg class="task-check" viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12"/><path d="M8.500 14.500l3.800 3.800 7.400-8.200" pathLength="1"/></svg>
+            <p data-task-text>Circle the number that dropped.</p>
+            <button type="button" class="task-go" data-task-go>Pick up the Ellipse</button>
+          </div>
+        </div>
+
+        <div class="window" data-playground-window>
+          <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span data-window-title>Weekly numbers — Sample data</span></div>
+
+          <div class="scene scene-demo" id="scene-demo" role="tabpanel" aria-labelledby="tab-demo">
+            <div class="kpis">
+              <div class="kpi"><span>Signups</span><b>2,480</b><small class="up">▲ 18%</small></div>
+              <div class="kpi"><span>Activation</span><b data-target="demo">41%</b><small class="down">▼ 6%</small></div>
+              <div class="kpi"><span>Revenue</span><b>$38.2k</b><small class="up">▲ 9%</small></div>
+            </div>
+            <div class="chart">
+              <p>Daily signups <span>This week vs last week</span></p>
+              <svg viewBox="0 0 800 240" preserveAspectRatio="none" aria-hidden="true">
+                <defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c63ff" stop-opacity=".28"/><stop offset="1" stop-color="#6c63ff" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0 80H800M0 140H800M0 200H800" stroke="#e3e5ee" stroke-width="1"/>
+                <path d="M0 150C90 110 150 96 220 100S330 150 390 205C420 232 450 232 480 190C530 110 600 86 800 62" fill="none" stroke="#b9bdd0" stroke-width="3" stroke-dasharray="7 9" transform="translate(0 22)"/>
+                <path d="M0 150C90 110 150 96 220 100S330 150 390 205C420 232 450 232 480 190C530 110 600 86 800 62V240H0z" fill="url(#chart-fill)"/>
+                <path d="M0 150C90 110 150 96 220 100S330 150 390 205C420 232 450 232 480 190C530 110 600 86 800 62" fill="none" stroke="#5a50e6" stroke-width="5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <ul class="notes">
+              <li>Activation dipped on Thursday.</li>
+              <li>Trial emails went out a day late.</li>
+              <li>Revenue is ahead of plan.</li>
+            </ul>
+          </div>
+
+          <div class="scene scene-review" id="scene-review" role="tabpanel" aria-labelledby="tab-review" hidden>
+            <pre class="code" tabindex="0"><code><span class="ln">12</span>  <span class="k">export async function</span> <span class="f">deploy</span>(target: Target) {
+<span class="ln">13</span>    <span class="k">const</span> build = <span class="k">await</span> <span class="f">bundle</span>(target);
+<span class="ln">14</span><span class="del">-   <span class="k">const</span> token = process.env.DEPLOY_TOKEN;</span>
+<span class="ln">15</span><span class="add">+   <span class="k">const</span> token = <span class="s" data-target="review">"tok_live_definitely_not_real_42"</span>;</span>
+<span class="ln">16</span><span class="add">+   <span class="c">// TODO: take this out before the demo</span></span>
+<span class="ln">17</span>    <span class="k">await</span> <span class="f">upload</span>(build, { token, retries: <span class="n">3</span> });
+<span class="ln">18</span>    <span class="k">return</span> <span class="f">notify</span>(<span class="s">"Shipped. Go get a coffee."</span>);
+<span class="ln">19</span>  }</code></pre>
+          </div>
+
+          <div class="scene scene-lesson" id="scene-lesson" role="tabpanel" aria-labelledby="tab-lesson" hidden>
+            <div class="slide">
+              <div>
+                <p class="slide-kicker">Lesson 4</p>
+                <p class="slide-title">Right triangles</p>
+                <p class="slide-formula">a² + b² = c²</p>
+                <p class="slide-note">The longest side sits opposite the right angle.</p>
+              </div>
+              <svg viewBox="0 0 360 260" aria-hidden="true">
+                <path d="M40 220H300V50z" fill="#eef0ff" stroke="#23283a" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M276 220v-24h24" fill="none" stroke="#23283a" stroke-width="3"/>
+                <text x="166" y="250" class="side">a</text><text x="316" y="142" class="side">b</text>
+                <text x="150" y="118" class="side" data-target="lesson">c</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <p class="playground-foot" data-pass>
+          <span data-progress>0 of 3 done</span>
+          <span class="playground-more">Want to see more? <a href="#install">Try it on your machine</a></span>
+          <button type="button" data-clear>Clear my drawings</button>
+        </p>
+        <div class="finale" data-finale hidden>
+          <p>Now do it <em>on your real screen.</em></p>
+          <a class="button" href="#install">Get Annotator</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbox wrap" id="tools" aria-labelledby="tools-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 7 — the toolbox</p>
+        <h2 id="tools-title">What’s in the toolbox?</h2>
+        <p>More than <span class="mark" id="forty">40 tools</span>. All tools are free.</p>
+      </header>
+      <div class="toolbox-grid">
+        <dl class="tool-groups" data-reveal>
+          <div><dt>Draw</dt><dd><ul><li>Select</li><li>Pen</li><li>Highlighter</li><li>Laser pointer</li><li>Text</li><li>Arrow</li><li>Line</li><li>Eraser</li></ul></dd></div>
+          <div><dt>Shapes</dt><dd><ul><li>Rectangle</li><li>Ellipse</li><li>Diamond</li><li>Triangle</li><li>Hexagon</li><li>Star</li><li>Person</li><li>Cylinder</li><li>Queue</li><li>Grid</li><li>Axes</li></ul></dd></div>
+          <div><dt>Diagram icons</dt><dd><ul><li>Database</li><li>Server</li><li>Messaging</li><li>Web</li><li>Mobile phone</li><li>Desktop</li><li>Laptop</li><li>Document</li><li>Configuration</li><li>Load balancer</li><li>API gateway</li><li>Envelope</li><li>Cart</li><li>Bell</li></ul></dd></div>
+          <div><dt>Focus</dt><dd><ul><li>Spotlight</li><li>Cursor halo</li><li>Pointer lens</li><li>Screen zoom</li><li>Share region</li></ul></dd></div>
+          <div><dt>Effects</dt><dd><ul><li>Blur</li><li>Pixelate</li><li>Distort</li><li>Censor</li></ul></dd></div>
+          <div><dt>Extras</dt><dd><ul><li>Numbered counter</li><li>Pixel ruler</li><li>Paste image</li><li>My shapes</li></ul></dd></div>
+        </dl>
+        <ul class="tool-clips" data-reveal>
+          <li><video muted loop playsinline preload="none" data-autoplay poster="/public/demo/stage-highlight.jpg" aria-label="The real app: the highlighter is dragged across a line of text"><source src="/public/demo/stage-highlight-phone.mp4" type="video/mp4" media="(max-width: 600px)"><source src="/public/demo/stage-highlight.mp4" type="video/mp4"></video><p><b>Highlighter</b>Hold Shift for a straight line.</p></li>
+          <li><video muted loop playsinline preload="none" data-autoplay poster="/public/demo/stage-shapes.jpg" aria-label="The real app: a database icon from the shape library is dropped next to a design"><source src="/public/demo/stage-shapes-phone.mp4" type="video/mp4" media="(max-width: 600px)"><source src="/public/demo/stage-shapes.mp4" type="video/mp4"></video><p><b>Database</b>One of 14 diagram icons.</p></li>
+          <li><video muted loop playsinline preload="none" data-autoplay poster="/public/demo/stage-blur.jpg" aria-label="The real app: a blur region is dragged over a busy picture"><source src="/public/demo/stage-blur-phone.mp4" type="video/mp4" media="(max-width: 600px)"><source src="/public/demo/stage-blur.mp4" type="video/mp4"></video><p><b>Blur</b>A live cover for a busy area.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="answers wrap" id="answers" aria-labelledby="answers-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 8 — the fine print</p>
+        <h2 id="answers-title">What’s the catch?</h2>
+        <p>There isn’t one, but there are limits. Here are the straight answers.</p>
+      </header>
+      <dl class="qa">
+        <div data-reveal><dt>Will people on my call see my drawings?</dt><dd><b id="qa-1">If you share your whole screen.</b> Share one app or window and the drawings may be left out, so ask someone on the call what they see. Whole-screen sharing was checked by hand with Teams on a Mac.</dd></div>
+        <div data-reveal><dt>Does it record or upload my screen?</dt><dd><b id="qa-2">No.</b> Annotator is not a screen recorder and saves no video. Drawings, screen pixels and typed text stay on your computer. Update checks contact a release server, and usage counts stay off unless you turn them on. <a href="/privacy/">Read the privacy page</a></dd></div>
+        <div data-reveal><dt>Is blur safe for secrets?</dt><dd><b id="qa-3">No.</b> Blur, Pixelate and Distort cover an area live, but details can stay readable. The cover doesn’t follow a window that moves or scrolls, and it goes away when you hide or quit Annotator. Take real secrets off the screen first.</dd></div>
+        <div data-reveal><dt>Is it really free?</dt><dd><b id="qa-4">Yes.</b> No account. No paid tiers. Coffee is optional and unlocks nothing.</dd></div>
+        <div data-reveal><dt>Is it the same on Mac and Windows?</dt><dd><b id="qa-5">Yes.</b> It is one product with two native apps. The Windows app matches the Mac app, and where they differ, it is written down.</dd></div>
+        <div data-reveal><dt>Is it finished?</dt><dd><b id="qa-6">Not yet.</b> The latest release is 0.5.0, so it has not reached 1.0. Expect rough edges, and please report the ones you find.</dd></div>
+        <div data-reveal><dt>Does it work on more than one display?</dt><dd><b id="qa-7">Yes.</b> Each display has its own drawings and its own background.</dd></div>
+        <div data-reveal><dt>Does it need special permissions?</dt><dd><b id="qa-8">Not for drawing.</b> Screen zoom, live effects and Share region ask for screen access: Screen Recording on a Mac, the screenshots and screen recording setting on Windows.</dd></div>
+        <div data-reveal><dt>Can I keep what I drew?</dt><dd><b id="qa-9">Yes.</b> Save a board and open it later, still editable, or export it as a PNG.</dd></div>
+      </dl>
+    </section>
+
+    <section class="news wrap" id="new" aria-labelledby="news-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 9 — the changelog</p>
+        <h2 id="news-title">What’s new?</h2>
+        <p>Version <span class="mark" id="latest">0.5.0</span> came out on 24 November 2026. This is what shipped lately.</p>
+      </header>
+      <ol class="releases">
+        <li data-reveal><b>0.5.0</b><p>Zoom holds still while you draw or use your apps, and it starts on the display under your pointer.</p></li>
+        <li data-reveal><b>0.4.0</b><p>A zoom map shows the whole display and the part you are zoomed in on.</p></li>
+        <li data-reveal><b>0.3.0</b><p>The toolbar can wear Glass: Liquid Glass on supported Macs, Acrylic on Windows.</p></li>
+        <li data-reveal><b>0.2.1</b><p>The laser pointer leaves a trail, and you choose how fast it fades. Drag the toolbar from anywhere on it.</p></li>
+        <li data-reveal><b>Earlier</b><p>A toolbar you can rearrange and shrink to one button, and a “What’s changed” window after updates.</p></li>
+      </ol>
+      <p class="news-more" data-reveal><a class="text-link" href="https://github.com/dorlugasigal/annotator/releases">All release notes on GitHub <span aria-hidden="true">↗</span></a></p>
+    </section>
+
+    <section class="open wrap" id="open" aria-labelledby="open-title">
+      <header class="section-head" data-reveal>
+        <p class="fig">Fig. 10 — the workshop</p>
+        <h2 id="open-title">Who makes it?</h2>
+        <p>It is built <span class="mark" id="in-the-open">in the open</span>. Both native apps, Mac and Windows, live in one repository under Apache 2.0.</p>
+      </header>
+      <ul class="open-links" data-reveal>
+        <li><a href="https://github.com/dorlugasigal/annotator"><b>Read the source</b><span>Every line of both apps is on GitHub.</span><i aria-hidden="true">↗</i></a></li>
+        <li><a href="/support/"><b>Report a problem</b><span>Use made-up data, and leave private screenshots out.</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="https://github.com/dorlugasigal/annotator/discussions"><b>Ask or suggest</b><span>Questions and ideas go to GitHub Discussions.</span><i aria-hidden="true">↗</i></a></li>
+      </ul>
+    </section>
+
+    <section class="coffee wrap" id="coffee" aria-labelledby="coffee-title">
+      <div class="coffee-card" data-reveal>
+        <svg class="cup" viewBox="0 0 330 300" aria-hidden="true">
+          <g class="steam"><path d="M118 96c-16-20 16-32 0-54"/><path d="M160 90c-16-22 16-36 0-60"/><path d="M202 96c-16-20 16-32 0-54"/></g>
+          <path class="cup-coffee" d="M82 140c40 10 116 10 156 0l-11 96c-3 20-16 30-36 30h-62c-20 0-33-10-36-30z"/>
+          <path class="cup-line" pathLength="1" d="M68 118c58 7 126 7 184 0l-15 122c-3 22-18 33-40 33h-74c-22 0-37-11-40-33z"/>
+          <path class="cup-line" pathLength="1" d="M249 142c42-10 60 14 53 41-7 26-36 40-66 30"/>
+          <path class="cup-line" pathLength="1" d="M44 286c66 9 166 9 232 0"/>
+        </svg>
+        <div class="coffee-copy">
+          <p class="fig">Fig. 11 — fuel</p>
+          <h2 id="coffee-title">Can I say thanks?</h2>
+          <p class="coffee-answer">It’s free. <span class="mark" id="coffee-word">Coffee is welcome.</span></p>
+          <p>If Annotator saved your demo, buy me a coffee. It keeps the work going. Nothing changes in the app either way.</p>
+          <a class="button is-coffee" href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="install wrap" id="install" aria-labelledby="install-title">
+      <div class="install-card" data-reveal data-platform="mac">
+        <div class="install-copy">
+          <p class="fig">Fig. 12 — your machine</p>
+          <h2 id="install-title">How do I <em id="get-it">get it?</em></h2>
+          <div class="platform-switch" role="group" aria-label="Install on">
+            <button type="button" data-platform-pick="mac" aria-pressed="true">Mac</button>
+            <button type="button" data-platform-pick="windows" aria-pressed="false">Windows</button>
+          </div>
+          <div class="platform" data-platform-part="mac">
+            <a class="button" href="/downloads/">Download for Mac</a>
+            <p class="needs">Needs macOS 14 or later, on an Apple Silicon or Intel Mac.</p>
+            <div class="command" data-copy>
+              <code>brew install --cask dorlugasigal/annotator/annotator</code>
+              <button type="button" data-copy-button>Copy<span class="screen-reader-only"> Homebrew command</span></button>
+            </div>
+          </div>
+          <div class="platform" data-platform-part="windows">
+            <a class="button" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows <span aria-hidden="true">↗</span></a>
+            <p class="needs">Microsoft Store · Windows 11, version 22H2 or later · x64 and ARM64</p>
+            <div class="command" data-copy>
+              <code>winget install --id 9NMZ345ZJ6JK --source msstore</code>
+              <button type="button" data-copy-button>Copy<span class="screen-reader-only"> winget command</span></button>
+            </div>
+          </div>
+          <p class="copy-status" data-copy-status role="status"></p>
+        </div>
+        <div class="install-steps">
+          <ol data-platform-part="mac">
+            <li><span>Download and open the disk image.</span></li>
+            <li><span>Drag Annotator to Applications.</span></li>
+            <li><span>Open it. Pick a tool. Draw. <small>It runs from the menu bar and updates itself.</small></span></li>
+          </ol>
+          <ol data-platform-part="windows">
+            <li><span>Get it from the Microsoft Store or with winget.</span></li>
+            <li><span>Open Annotator from Start.</span></li>
+            <li><span>Pick a tool. Draw. <small>It runs from the system tray, and the Store updates it.</small></span></li>
+          </ol>
+          <img src="/public/app/app-icon.png" width="96" height="96" alt="" class="install-icon">
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-row">
+      <nav aria-label="Footer">
+        <a href="/docs/">Help</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/support/">Report a problem</a>
+        <a href="https://github.com/dorlugasigal/annotator">Source code <span aria-hidden="true">↗</span></a>
+        <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee <span aria-hidden="true">↗</span></a>
+      </nav>
+      <small>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</small>
+    </div>
+    <p class="footer-mark" aria-hidden="true">annotator<span>.</span></p>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

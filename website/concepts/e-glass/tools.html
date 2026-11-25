@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annotator: every tool</title>
+<meta name="description" content="Every tool in Annotator, by group and by name. More than 40 tools for drawing over your screen, all free.">
+<meta name="theme-color" content="#fbf7f1">
+<link rel="icon" href="/public/app/app-icon.png">
+<link rel="preload" href="/concepts/shared/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script>
+  (function () {
+    var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+    document.documentElement.dataset.os = /win/i.test(platform) ? "win" : "mac";
+  })();
+</script>
+<script type="module" src="tools.js"></script>
+</head>
+<body class="tools-page">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top" id="top">
+  <a class="wordmark" href="./" aria-label="Annotator, home">annotator<i>.</i></a>
+  <nav class="top-nav" aria-label="Sections">
+    <a href="./#moments">Moments</a>
+    <a href="./#try">Try it</a>
+    <a href="tools.html" aria-current="page">Tools</a>
+    <a href="./#install">Install</a>
+  </nav>
+  <div class="top-side">
+    <a class="top-link" href="https://github.com/dorlugasigal/annotator">GitHub</a>
+    <a class="top-coffee" href="https://buymeacoffee.com/dorlugasigal" aria-label="Buy me a coffee">
+      <svg viewBox="0 0 48 48" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17h22l-2.4 20.5a4 4 0 01-4 3.5h-9.2a4 4 0 01-4-3.5z"/><path d="M33 22h3.5a5.5 5.5 0 010 11H32"/><path class="steam" d="M17.5 5c-2 2 2 4 0 6.5M26.5 5c-2 2 2 4 0 6.5"/></svg>
+      <span>Coffee</span>
+    </a>
+    <a class="btn btn-solid btn-small" href="./#install">Get Annotator</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="catalog-head" aria-labelledby="catalog-title">
+    <p class="eyebrow">All the tools</p>
+    <h1 id="catalog-title">Every tool, by name.</h1>
+    <p class="sub">Everything in the tool library, group by group. All tools are free. The number after a name is its key while you draw.</p>
+  </section>
+
+  <section class="tools" id="clips" aria-labelledby="clips-title">
+    <div class="section-head">
+      <h2 id="clips-title">Eight of them at work.</h2>
+      <p class="sub">Each clip is a recording of the real app, on a sample dashboard.</p>
+    </div>
+    <div class="rail" id="rail" role="group" aria-roledescription="carousel" aria-label="Tool clips">
+      <ol class="rail-track" id="rail-track" tabindex="-1">
+        <li class="pane" data-clip="circle"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of the Ellipse tool"></video></div><div class="pane-text"><h3>Ellipse</h3><p>Choose Ellipse and circle a number.</p></div></li>
+        <li class="pane" data-clip="arrow"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of the Arrow tool"></video></div><div class="pane-text"><h3>Arrow</h3><p>Drag for a straight arrow, or click to place its points. Double-click it to add a point, then drag that point to bend it.</p></div></li>
+        <li class="pane" data-clip="smart"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of Smart Draw"></video></div><div class="pane-text"><h3>Smart Draw</h3><p>Sketch a loop or an arrow, and Smart Draw makes it neat.</p></div></li>
+        <li class="pane" data-clip="highlight"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of the Highlighter"></video></div><div class="pane-text"><h3>Highlighter</h3><p>Drag it across a line of text.</p></div></li>
+        <li class="pane" data-clip="spotlight"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of the Spotlight"></video></div><div class="pane-text"><h3>Spotlight</h3><p>The screen dims around your pointer.</p></div></li>
+        <li class="pane" data-clip="blur"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of the Blur tool"></video></div><div class="pane-text"><h3>Blur</h3><p>Drag over a busy picture to cover it.</p></div></li>
+        <li class="pane" data-clip="zoom"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of screen zoom"></video></div><div class="pane-text"><h3>Screen zoom</h3><p>Zoom in and keep talking.</p></div></li>
+        <li class="pane" data-clip="shapes"><div class="pane-glass"><video muted loop playsinline preload="none" aria-label="Recording of the tool library"></video></div><div class="pane-text"><h3>Tool library</h3><p>Pick a shape or a diagram icon.</p></div></li>
+      </ol>
+      <div class="rail-controls">
+        <button class="round" type="button" id="rail-prev" aria-label="Previous clip"><svg viewBox="0 0 48 48" width="20" height="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M29 11L16 24l13 13"/></svg></button>
+        <div class="rail-names" id="rail-names" role="group" aria-label="Choose a clip"></div>
+        <button class="round" type="button" id="rail-next" aria-label="Next clip"><svg viewBox="0 0 48 48" width="20" height="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 11l13 13-13 13"/></svg></button>
+      </div>
+      <p class="sr-only" aria-live="polite" id="rail-status"></p>
+    </div>
+  </section>
+
+  <section class="catalog" aria-label="Tools by group">
+    <article class="group" aria-labelledby="g-draw">
+      <div class="group-head"><h2 id="g-draw">Draw</h2><p>Smart Draw is an option for the Pen. Shift keeps the Highlighter straight. Eraser and Clear remove unlocked marks, and Undo brings them back.</p></div>
+      <ul class="toollist">
+        <li data-icon="cursorarrow"><b>Select</b><kbd>1</kbd></li>
+        <li data-icon="pencil"><b>Pen</b><kbd>7</kbd></li>
+        <li data-icon="highlighter"><b>Highlighter</b><kbd>9</kbd></li>
+        <li data-icon="laser.burst"><b>Laser pointer</b><kbd>L</kbd></li>
+        <li data-icon="textformat"><b>Text</b><kbd>8</kbd></li>
+        <li data-icon="arrow.up.right"><b>Arrow</b><kbd>5</kbd></li>
+        <li data-icon="line.diagonal"><b>Line</b><kbd>6</kbd></li>
+        <li data-icon="eraser"><b>Eraser</b><kbd>0</kbd></li>
+      </ul>
+    </article>
+
+    <article class="group" aria-labelledby="g-shapes">
+      <div class="group-head"><h2 id="g-shapes">Shapes</h2><p>Every shape stays editable after you draw it: move it, resize it, restyle it, lock it.</p></div>
+      <ul class="toollist">
+        <li data-icon="rectangle"><b>Rectangle</b><kbd>2</kbd></li>
+        <li data-icon="circle"><b>Ellipse</b><kbd>4</kbd></li>
+        <li data-icon="diamond"><b>Diamond</b><kbd>3</kbd></li>
+        <li data-icon="triangle"><b>Triangle</b></li>
+        <li data-icon="hexagon"><b>Hexagon</b></li>
+        <li data-icon="star"><b>Star</b></li>
+        <li data-icon="person"><b>Person</b></li>
+        <li data-icon="cylinder"><b>Cylinder</b></li>
+        <li><b>Queue</b></li>
+        <li data-icon="grid"><b>Grid</b></li>
+        <li data-icon="chart.xyaxis.line"><b>Axes</b></li>
+      </ul>
+    </article>
+
+    <article class="group" aria-labelledby="g-icons">
+      <div class="group-head"><h2 id="g-icons">Diagram icons</h2><p>For sketching how a system fits together. They live with the shapes in the tool library.</p></div>
+      <ul class="toollist plain">
+        <li><b>Database</b></li><li><b>Server</b></li><li><b>Messaging</b></li><li><b>Web</b></li><li><b>Mobile phone</b></li><li><b>Desktop</b></li><li><b>Laptop</b></li>
+        <li><b>Document</b></li><li><b>Configuration</b></li><li><b>Load balancer</b></li><li><b>API gateway</b></li><li><b>Envelope</b></li><li><b>Cart</b></li><li><b>Bell</b></li>
+      </ul>
+    </article>
+
+    <article class="group" aria-labelledby="g-focus">
+      <div class="group-head"><h2 id="g-focus">Focus</h2><p>Ways to make people look at the right place. Screen zoom and Share region ask for screen access.</p></div>
+      <ul class="toollist">
+        <li data-icon="light.beacon.max"><b>Spotlight</b></li>
+        <li data-icon="cursorarrow.rays"><b>Cursor halo</b></li>
+        <li data-icon="plus.magnifyingglass"><b>Pointer lens</b></li>
+        <li data-icon="arrow.up.left.and.arrow.down.right"><b>Screen zoom</b><kbd><span class="on-mac">⌃1</span><span class="on-win">Ctrl+1</span></kbd></li>
+        <li data-icon="rectangle.on.rectangle"><b>Share region</b></li>
+      </ul>
+    </article>
+
+    <article class="group" aria-labelledby="g-effects">
+      <div class="group-head"><h2 id="g-effects">Effects</h2><p>They cover a region live. They are not secure redaction: details can stay readable, and the cover goes when Annotator does. Take real secrets off the screen first.</p></div>
+      <ul class="toollist">
+        <li data-icon="aqi.medium"><b>Blur</b></li>
+        <li data-icon="square.grid.3x3.fill"><b>Pixelate</b></li>
+        <li data-icon="tornado"><b>Distort</b></li>
+        <li data-icon="camera.filters"><b>Censor (solid)</b></li>
+      </ul>
+    </article>
+
+    <article class="group" aria-labelledby="g-extras">
+      <div class="group-head"><h2 id="g-extras">Extras</h2><p>My shapes holds your own saved drawings and text, ready to use again.</p></div>
+      <ul class="toollist">
+        <li data-icon="photo.on.rectangle"><b>Paste image</b></li>
+        <li data-icon="ruler"><b>Pixel ruler</b></li>
+        <li data-icon="1.circle"><b>Numbered counter</b><kbd>N</kbd></li>
+        <li><b>My shapes</b></li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="catalog-end">
+    <h2>They are all in the download.</h2>
+    <div class="hero-actions">
+      <a class="btn btn-solid" href="./#install">Get Annotator</a>
+      <a class="btn btn-line" href="./#try">Try a few in the browser</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <a class="wordmark" href="./" aria-label="Annotator, home">annotator<i>.</i></a>
+  <nav class="foot-links" aria-label="More">
+    <a href="https://github.com/dorlugasigal/annotator">GitHub</a>
+    <a href="./">Home</a>
+    <a href="/docs/">Help</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/support/">Report a problem</a>
+    <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
+  </nav>
+  <p class="foot-line">Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+</footer>
+</body>
+</html>
