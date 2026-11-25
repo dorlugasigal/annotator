@@ -101,6 +101,8 @@ Color popover, arrowhead choices and zoom controls.
 | --- | --- | --- |
 | `arrowhead-end`<br>193 x 319 pt<br>Arrowhead choices for the end. | <img src="pickers/arrowhead-end-light.png" width="200"> | <img src="pickers/arrowhead-end-dark.png" width="200"> |
 | `arrowhead-start`<br>193 x 319 pt<br>Arrowhead choices for the start. | <img src="pickers/arrowhead-start-light.png" width="200"> | <img src="pickers/arrowhead-start-dark.png" width="200"> |
+| `choices-font`<br>52 x 134 pt<br>Font's menu: System, Mono and Handwriting. | <img src="pickers/choices-font-light.png" width="104"> | <img src="pickers/choices-font-dark.png" width="104"> |
+| `choices-pattern`<br>52 x 134 pt<br>Pattern's menu (Menu in Your properties): every choice drawn as it looks, the current one outlined. | <img src="pickers/choices-pattern-light.png" width="104"> | <img src="pickers/choices-pattern-dark.png" width="104"> |
 | `color-fill`<br>284 x 511 pt<br>Fill color popover. | <img src="pickers/color-fill-light.png" width="420"> | <img src="pickers/color-fill-dark.png" width="420"> |
 | `color-gradient`<br>284 x 405 pt<br>Stroke with the spectrum gradient preset. | <img src="pickers/color-gradient-light.png" width="420"> | <img src="pickers/color-gradient-dark.png" width="420"> |
 | `color-laser`<br>284 x 455 pt<br>Laser pointer color: solid colors only, without the Gradient and Solid choice. | <img src="pickers/color-laser-light.png" width="420"> | <img src="pickers/color-laser-dark.png" width="420"> |

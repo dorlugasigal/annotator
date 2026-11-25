@@ -1,0 +1,75 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      8,
+      36,
+      36
+     ],
+     "help": "System",
+     "label": "System",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      49,
+      36,
+      36
+     ],
+     "help": "Mono",
+     "label": "Mono",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      90,
+      36,
+      36
+     ],
+     "help": "Handwriting",
+     "label": "Handwriting",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    8,
+    8,
+    36,
+    118
+   ],
+   "label": "Font",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "light",
+ "background": "popover",
+ "image": "pickers/choices-font-light.png",
+ "kind": "view",
+ "notes": "Font's menu: System, Mono and Handwriting.",
+ "pixels": [
+  104,
+  268
+ ],
+ "scale": 2,
+ "size": [
+  52,
+  134
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "choices-font",
+ "surface": "pickers"
+}

@@ -434,7 +434,7 @@ enum InspectorChoiceFace: View {
 }
 
 /// ChoiceMenu's column: every choice drawn as it looks, named for VoiceOver and in its tooltip.
-private struct ChoicePalette: View {
+struct ChoicePalette: View {
     let name: String
     let values: [(label: String, sample: InspectorChoiceFace)]
     let selected: Int
