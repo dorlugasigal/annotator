@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Annotator. Draw on your screen as you explain.</title>
+  <meta name="description" content="Annotator is a free, open source app for Mac and Windows. Draw over any app while you explain. No account.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="/public/app/app-icon.png">
+  <!-- For checking both themes: ?theme=light or ?theme=dark overrides the system setting. -->
+  <script>
+    (function () {
+      var theme = new URLSearchParams(location.search).get("theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+  <link rel="stylesheet" href="/concepts/shared/ink.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <a class="skip" href="#details">Skip to details</a>
+
+  <div class="screen" id="screen">
+    <header class="top">
+      <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
+      <nav aria-label="Main">
+        <a href="/docs/">Help</a>
+        <a class="nav-github" href="https://github.com/dorlugasigal/annotator">GitHub</a>
+        <a class="nav-coffee" href="https://buymeacoffee.com/dorlugasigal" aria-label="Buy me a coffee">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6h8.5v3.8A3.2 3.2 0 0 1 7.8 13H5.7a3.2 3.2 0 0 1-3.2-3.2z"/><path d="M11 7.1h1a1.8 1.8 0 0 1 0 3.6h-1.1"/><path d="M5.3 2v1.8M8.2 2v1.8"/></svg>
+          <span>Buy me a coffee</span>
+        </a>
+        <a class="nav-download" href="#install">Download</a>
+      </nav>
+    </header>
+
+    <main class="pitch">
+      <h1>Draw on your <span class="ring-word">screen<span id="ring-target" aria-hidden="true"></span></span> <br>as you explain.</h1>
+      <p class="lede">Annotator draws over any app on your Mac or PC: <br>circle a number, point with an arrow, blur what is private.</p>
+      <p class="get">
+        <a class="button" id="get-primary" href="/downloads/">Download for Mac</a>
+        <a class="other" id="get-other" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Also for Windows</a>
+      </p>
+      <p class="free">Free. No account.</p>
+    </main>
+
+    <div class="hint">
+      <p class="hint-use"><span class="hint-pick">Pick a tool and draw anywhere on this screen.</span> <span class="hint-demo">This is a small web demo of the app.</span></p>
+      <button type="button" class="hint-back" id="back"><kbd>Esc</kbd><span>Back to the page</span></button>
+    </div>
+  </div>
+
+  <section class="details" id="details" tabindex="-1" aria-labelledby="details-title">
+    <div class="wrap">
+      <h2 class="visually-hidden" id="details-title">Details</h2>
+
+      <dl class="facts">
+        <div>
+          <dt>Keys</dt>
+          <dd><span class="keys" id="draw-keys" role="img" aria-label="Control-Shift-2"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>2</kbd></span> to draw. <kbd>Esc</kbd> to go back to your app. Your drawings stay.</dd>
+        </div>
+        <div>
+          <dt>Privacy</dt>
+          <dd>Your drawings and your screen stay on your computer.</dd>
+        </div>
+        <div>
+          <dt>Price</dt>
+          <dd>All tools are free, and the source is open under Apache 2.0.</dd>
+        </div>
+      </dl>
+
+      <figure class="recording">
+        <div class="frame">
+          <video id="clip" muted loop playsinline preload="none" poster="/public/demo/stage-arrow.jpg"
+            aria-label="Annotator on a Mac. A circle is drawn around a number on a dashboard, then an arrow points from it to a dip in the chart."></video>
+        </div>
+        <figcaption>
+          <span>A recording of the real app, with sample content.</span>
+          <button type="button" class="chip" id="clip-toggle">Play</button>
+        </figcaption>
+      </figure>
+
+      <div class="also">
+        <div>
+          <h2>Also in the app</h2>
+          <p>More than 40 tools in all.</p>
+        </div>
+        <ul>
+          <li>Smart Draw</li>
+          <li>Numbered counter</li>
+          <li>Spotlight</li>
+          <li>Cursor halo</li>
+          <li>Screen zoom</li>
+          <li>Pointer lens</li>
+          <li>Pixelate</li>
+          <li>Distort</li>
+          <li>Pixel ruler</li>
+          <li>Diagram icons</li>
+          <li>Paste image</li>
+          <li>My shapes</li>
+          <li>Whiteboard</li>
+          <li>Blackboard</li>
+          <li>Break timer</li>
+          <li>Share region</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing" aria-labelledby="install-title">
+    <div class="wrap">
+      <div class="coffee">
+        <p>Annotator is free. If it helps, buy me a coffee.</p>
+        <a class="button button-quiet" href="https://buymeacoffee.com/dorlugasigal">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6h8.5v3.8A3.2 3.2 0 0 1 7.8 13H5.7a3.2 3.2 0 0 1-3.2-3.2z"/><path d="M11 7.1h1a1.8 1.8 0 0 1 0 3.6h-1.1"/><path d="M5.3 2v1.8M8.2 2v1.8"/></svg>
+          Buy me a coffee
+        </a>
+      </div>
+
+      <div class="install" id="install">
+        <h2 id="install-title">Install</h2>
+        <div class="install-body">
+          <div class="tabs" role="tablist" aria-label="Your computer">
+            <button type="button" role="tab" id="tab-mac" aria-controls="panel-mac" aria-selected="true">Mac</button>
+            <button type="button" role="tab" id="tab-windows" aria-controls="panel-windows" aria-selected="false">Windows</button>
+          </div>
+
+          <div class="panel" role="tabpanel" id="panel-mac" aria-labelledby="tab-mac">
+            <p>macOS 14 or later, Apple Silicon and Intel. Runs from the menu bar.</p>
+            <a class="button" href="/downloads/">Download for Mac</a>
+            <p class="command-label">Or with Homebrew</p>
+            <div class="command">
+              <code>brew install --cask dorlugasigal/<wbr>annotator/<wbr>annotator</code>
+              <button type="button" class="chip" data-copy aria-label="Copy the Homebrew command">Copy</button>
+            </div>
+          </div>
+
+          <div class="panel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
+            <p>Windows 11, version 22H2 or later, x64 and ARM64. Runs from the system tray.</p>
+            <a class="button" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it from Microsoft Store</a>
+            <p class="command-label">Or with winget</p>
+            <div class="command">
+              <code>winget install --id 9NMZ345ZJ6JK --source msstore</code>
+              <button type="button" class="chip" data-copy aria-label="Copy the winget command">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      <nav aria-label="More">
+        <a href="/docs/">Help</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/support/">Report a problem</a>
+        <a href="https://github.com/dorlugasigal/annotator">Source code</a>
+        <a href="https://github.com/dorlugasigal/annotator/releases">Release notes</a>
+        <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
+      </nav>
+      <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+    </div>
+  </footer>
+
+  <p class="visually-hidden" id="status" role="status"></p>
+</body>
+</html>

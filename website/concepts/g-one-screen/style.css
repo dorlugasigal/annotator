@@ -1,0 +1,193 @@
+/* Concept G, "One screen". One family (the system's), one accent (the app's default stroke color). */
+:root {
+  --bg: #f5f5f7; --raised: #fff; --tab: #fff; --text: #1d1d1f; --muted: #5f5f66;
+  --line: #0000001a; --line-strong: #00000029; --well: #0000000f;
+  --accent: #f04538; --on-accent: #1c0705;
+  --backdrop: radial-gradient(ellipse 85% 75% at 50% 40%, #fff 0%, #f5f5f7 60%, #ececf0 100%);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151517; --raised: #202023; --tab: #ffffff26; --text: #f2f2f4; --muted: #a2a2a9;
+    --line: #ffffff1a; --line-strong: #ffffff2e; --well: #ffffff14;
+    --backdrop: radial-gradient(ellipse 85% 75% at 50% 40%, #1d1d20 0%, #151517 60%, #111113 100%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151517; --raised: #202023; --tab: #ffffff26; --text: #f2f2f4; --muted: #a2a2a9;
+  --line: #ffffff1a; --line-strong: #ffffff2e; --well: #ffffff14;
+  --backdrop: radial-gradient(ellipse 85% 75% at 50% 40%, #1d1d20 0%, #151517 60%, #111113 100%);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--text); background: var(--bg);
+  font: 400 1.0625rem/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+h1, h2, p, ul, dl, dd, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 65rem; margin-inline: auto; padding-inline: 1.75rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 1000; padding: .5rem .875rem; border-radius: 8px; color: var(--bg); background: var(--text); font-size: .875rem; text-decoration: none; }
+.skip:focus { top: 1rem; }
+
+/* Buttons */
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem; height: 3rem; padding-inline: 1.375rem;
+  border-radius: 12px; color: var(--on-accent); background: var(--accent);
+  font-weight: 600; font-size: 1rem; line-height: 1; text-decoration: none; white-space: nowrap;
+  transition: filter .15s ease, scale .15s ease, background-color .15s ease;
+}
+.button:hover { filter: brightness(1.07); }
+.button:active { scale: .98; }
+.button:focus-visible { border-radius: 12px; }
+.button-quiet { color: var(--text); background: none; box-shadow: inset 0 0 0 1px var(--line-strong); }
+.button-quiet:hover { filter: none; background: var(--well); }
+.chip {
+  flex: none; height: 1.875rem; padding: 0 .75rem; border: 0; border-radius: 8px; cursor: pointer;
+  color: var(--text); background: none; box-shadow: inset 0 0 0 1px var(--line-strong);
+  font-weight: 500; font-size: .875rem; line-height: 1; transition: background-color .15s ease;
+}
+.chip:hover { background: var(--well); }
+.chip:active { scale: .97; }
+kbd {
+  display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .375rem; margin-inline: 1px; vertical-align: .1em;
+  border-radius: 6px; color: var(--text); background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-strong), 0 1px 0 var(--line-strong);
+  font: 500 .75rem/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+/* The screen: the first view, and the surface the visitor draws on. Its rows are the header, free space, the pitch,
+   free space that always keeps room for the toolbar's properties row, and the room the toolbar and its hint take. */
+.screen {
+  --tb: 72px; --props-room: 73px; --hint: 1.3125rem; --dock: calc(var(--tb) + 22px + var(--hint) + 2.25rem);
+  position: relative; isolation: isolate; display: grid;
+  grid-template-rows: auto minmax(1.5rem, 1fr) auto minmax(var(--props-room), 1fr) var(--dock);
+  min-height: min(100vh, 900px); min-height: min(100svh, 900px);
+  background: var(--backdrop); border-bottom: 1px solid var(--line);
+}
+.top { grid-row: 1; display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 4rem; padding-inline: 1.75rem; }
+.wordmark { font-weight: 600; font-size: 1.125rem; letter-spacing: -.015em; text-decoration: none; }
+.wordmark span { color: var(--accent); }
+.top nav { display: flex; align-items: center; gap: 1.625rem; font-size: .875rem; }
+.top nav a { display: inline-flex; align-items: center; gap: .375rem; color: var(--muted); text-decoration: none; transition: color .15s ease; }
+.top nav a:hover, .top nav .nav-download { color: var(--text); }
+.top nav .nav-download { font-weight: 500; }
+
+.pitch { grid-row: 3; justify-self: center; width: 100%; max-width: 46rem; padding-inline: 1.5rem; text-align: center; }
+h1 { font-weight: 600; font-size: clamp(2.5rem, 5.2vw, 3.5rem); line-height: 1.07; letter-spacing: -.022em; }
+.ring-word { position: relative; display: inline-block; }
+/* What the ring is drawn around: the word's own letters, which have no ascenders or descenders. */
+#ring-target { position: absolute; inset: .14em -.27em -.07em -.17em; pointer-events: none; }
+.lede { max-width: 36rem; margin: 1.25rem auto 0; color: var(--muted); font-size: 1.1875rem; line-height: 1.45; text-wrap: balance; }
+.get { display: flex; align-items: center; justify-content: center; gap: 1.25rem; margin-top: 2rem; }
+/* Above the drawing layer, so the download works while the visitor is drawing too. */
+.get .button, .hint-back { position: relative; z-index: 61; }
+.other { color: var(--muted); font-size: .9375rem; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: .25em; transition: color .15s ease; }
+.other:hover { color: var(--text); }
+.free { margin-top: 1.125rem; color: var(--muted); font-size: .875rem; }
+
+.hint { position: absolute; inset-inline: 0; bottom: calc(22px + var(--tb-h, var(--tb)) + .875rem); display: flex; justify-content: center; padding-inline: 1.5rem; pointer-events: none; }
+.hint-use { color: var(--muted); font-size: .875rem; line-height: 1.3125rem; text-align: center; text-wrap: balance; }
+.screen.is-collapsed .hint-pick { display: none; }
+.hint-back { display: none; align-items: center; gap: .5rem; height: 2.125rem; margin-bottom: -.375rem; padding: 0 .875rem 0 .375rem; border: 0; border-radius: 10px; cursor: pointer; pointer-events: auto;
+  background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-strong); font-size: .875rem; }
+.ink-drawing .hint-use { display: none; }
+.ink-drawing .hint-back { display: inline-flex; }
+
+/* Details */
+.details { padding-block: 5.5rem 6rem; }
+.details:focus { outline: none; }
+.facts, .also, .install { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 3rem; }
+.facts dt { margin-bottom: .5rem; color: var(--muted); font-size: .875rem; }
+.facts dd { max-width: 19rem; text-wrap: pretty; }
+.facts kbd:first-child { margin-left: 0; }
+.keys { white-space: nowrap; }
+
+.recording { margin-top: 4.5rem; }
+.frame { aspect-ratio: 1728 / 1080; overflow: hidden; border-radius: 14px; background: var(--well); box-shadow: 0 0 0 1px var(--line); }
+.frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.recording figcaption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .875rem; color: var(--muted); font-size: .875rem; }
+
+.also { margin-top: 4.5rem; }
+h2 { font-weight: 600; font-size: 1.0625rem; line-height: 1.5; }
+.also p { color: var(--muted); }
+.also ul { grid-column: 2 / 4; columns: 2; column-gap: 3rem; margin-top: -.25rem; line-height: 2; }
+
+/* Coffee and install */
+.coffee { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding-block: 2.5rem; border-block: 1px solid var(--line); font-size: 1.1875rem; line-height: 1.45; }
+.install { padding-block: 5.5rem 6rem; }
+.install h2 { line-height: 2.25rem; }
+.install-body { grid-column: 2 / 4; }
+.tabs { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--well); }
+.tabs button { height: 1.875rem; padding: 0 1rem; border: 0; border-radius: 7px; cursor: pointer; color: var(--muted); background: none; font-weight: 500; font-size: .875rem; line-height: 1; transition: color .15s ease; }
+.tabs button:hover { color: var(--text); }
+.tabs button[aria-selected="true"] { color: var(--text); background: var(--tab); box-shadow: 0 0 0 1px var(--line), 0 1px 2px #0000001a; }
+.tabs button:focus-visible { border-radius: 7px; outline-offset: 2px; }
+.panel[hidden] { display: none; }
+.panel > p:first-child { margin-block: 1.5rem 1.25rem; }
+.command-label { margin-block: 2rem .5rem; color: var(--muted); font-size: .875rem; }
+.command { display: flex; align-items: center; gap: .75rem; padding: .5625rem .5625rem .5625rem 1rem; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line-strong); }
+.command code { flex: 1; min-width: 0; font: .875rem/1.5 ui-monospace, "SF Mono", SFMono-Regular, Menlo, "Cascadia Mono", Consolas, monospace; overflow-wrap: anywhere; }
+
+.foot { padding-block: 2rem 3rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .875rem; }
+.foot nav { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-bottom: 1rem; }
+.foot a { text-decoration: none; transition: color .15s ease; }
+.foot a:hover { color: var(--text); }
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+
+/* The toolbar's own smaller sizes: one compact row below 985 px, two rows on a phone. */
+@media (max-width: 984px) { .screen { --tb: 52px; --props-room: 60px; } }
+@media (max-width: 760px) {
+  .top { padding-inline: 1.25rem; }
+  .top nav { gap: 1.125rem; }
+  .top nav .nav-github, .nav-coffee span { display: none; }
+  .wrap { padding-inline: 1.25rem; }
+  .facts, .also, .install { grid-template-columns: 1fr; row-gap: 1.75rem; }
+  .facts dd { max-width: 26rem; }
+  .also ul, .install-body { grid-column: auto; }
+  .also ul { margin-top: 0; }
+  .install h2 { line-height: 1.5; }
+  .details, .install { padding-block: 4rem; }
+  .recording, .also { margin-top: 3.5rem; }
+}
+@media (max-width: 640px) {
+  .lede br { display: none; }
+  .frame { aspect-ratio: 1080 / 1350; }
+  .coffee { flex-direction: column; align-items: flex-start; gap: 1.125rem; }
+}
+@media (max-width: 575px) {
+  .screen { --tb: 84px; --props-room: 44px; }
+  .top { height: 3.5rem; }
+  h1 { font-size: clamp(1.75rem, 8.7vw, 2.125rem); }
+  .pitch { padding-inline: 1.25rem; }
+  .lede { font-size: 1.0625rem; line-height: 1.5; }
+  .get { flex-direction: column; gap: 1rem; margin-top: 1.75rem; }
+  .get .button { width: 100%; max-width: 20rem; }
+  /* One line above the toolbar: what this is while it is one button, what to do once it is open. */
+  .hint { padding-inline: 1rem; }
+  .hint-pick, .screen.is-open .hint-demo { display: none; }
+  .screen.is-open .hint-pick { display: inline; }
+  .hint-back kbd { display: none; }
+  .hint-back { padding-inline: .875rem; }
+  .also ul { column-gap: 1.25rem; }
+  .command code { font-size: .8125rem; }
+}
+@media (max-width: 349px) { .screen { --hint: 2.625rem; } }
+/* A short window: the room for the properties row moves into the bottom row, so the screen needs less height. */
+@media (max-height: 700px) {
+  .screen { grid-template-rows: auto minmax(1rem, 1fr) auto minmax(1rem, 1fr) calc(var(--dock) + var(--props-room) - 1rem); }
+  .top { height: 3.5rem; }
+  .lede { margin-top: 1rem; }
+  .get { margin-top: 1.5rem; }
+  .free { margin-top: .875rem; }
+}
+@media (max-height: 700px) and (min-width: 576px) { h1 { font-size: clamp(2.5rem, 5.2vw, 3rem); } }
