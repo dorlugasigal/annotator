@@ -85,7 +85,9 @@ takes their screen captures with Windows.Graphics.Capture); the color popover
 (it stays open after a choice, as on the Mac, and closes with Done or Escape),
 tooltips, Use apps and Resume drawing; the text editor (the Text tool opens it
 at a click; typing, Backspace and Ctrl+Z, the focused edit field for UI
-Automation, the caret's blink and Escape committing); a rectangle's label
+Automation, the caret's blink and Escape committing); handwriting text (the
+Font button steps to Handwriting, and typed text is drawn as wide as Caveat's
+letters); a rectangle's label
 (the Text tool edits it; in the stroke color popover Match outline is
 unavailable while the label follows the stroke, a palette color gives the
 label its own paint, and Match outline makes it follow the stroke again;

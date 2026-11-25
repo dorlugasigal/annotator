@@ -19,7 +19,8 @@
     the keyboard back to the canvas while drawing goes on, and Escape there releases input (Use apps);
   - text: the Text tool opens the editor at a click; typing (Unicode input, whatever the keyboard layout), Backspace and
     Ctrl+Z edit the text, UI Automation reads it as the focused edit field, its caret blinks at Windows' rate, and
-    Escape commits it while drawing goes on;
+    Escape commits it while drawing goes on; the Font button steps to Handwriting, and text typed in it is drawn, and
+    committed, as wide as Caveat's letters, not Segoe UI's;
   - Tools (WIN-UI-05): Ctrl+L on the canvas opens the Tools window with the keyboard on the chosen section, and Right
     chooses the next one; My shapes saves the selected shape under a typed name and inserts a copy, which hides the
     window; the toolbar's Tool library button opens it again; Edit, Rename... and Delete... rename and delete the saved
@@ -1131,6 +1132,41 @@ try {
     Check 'text-escape-commits' (WaitFor { $null -eq (Editor) }) "edit field after Escape: $(if (Editor) { 'still open' } else { 'gone' })"
     Check 'text-escape-keeps-drawing' ((([LiveInput]::ExStyle($overlay)) -band 0x20) -eq 0) ('canvas ex-style 0x{0:X}' -f [LiveInput]::ExStyle($overlay))
 
+    # Handwriting (Caveat, the font both apps ship): the Font button steps to Handwriting, and text typed in it is drawn on
+    # the canvas with Caveat's letters, which are narrower than Segoe UI's ("why the dip?" at 28 points: about 119 points
+    # of Caveat, 157 of Segoe UI). Escape commits it; the result checks its frame. The Text tool keeps Handwriting, since
+    # a Font click now would also restyle the committed text, which stays selected. The pixels stay in memory.
+    function FontButton() {
+        ([Windows.Automation.AutomationElement]::FromHandle($toolbar)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+            [Windows.Automation.AndCondition]::new(
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, 'Font'),
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::Button)))
+    }
+    function ClickFont() {
+        $font = FontButton
+        if ($null -eq $font) { return 'no Font button' }
+        $c = Center $font
+        $result = [LiveInput]::Click($c[0], $c[1], $toolbar)
+        Start-Sleep -Milliseconds 250
+        return $result
+    }
+    for ($click = 0; $click -lt 3 -and (ValueOf (FontButton)) -ne 'Handwriting'; $click++) { Note "click Font: $(ClickFont)" }
+    Check 'handwriting-font-chosen' ((ValueOf (FontButton)) -eq 'Handwriting') "Font '$(ValueOf (FontButton))'"
+    $spot = Canvas 620 130
+    $inkBox = @([int]($spot[0] - 20 * $scale), [int]($spot[1] - 40 * $scale), [int](260 * $scale), [int](100 * $scale))
+    $blank = [LiveInput]::Capture($inkBox[0], $inkBox[1], $inkBox[2], $inkBox[3])
+    Note "click the canvas: $([LiveInput]::Click($spot[0], $spot[1], $overlay))"
+    Check 'handwriting-editor-opens' (WaitFor { $null -ne (Editor) }) "edit field: $(if ($e = Editor) { "'$($e.Current.Name)'" } else { 'none' })"
+    [void](WaitFor { (Foreground) -eq $overlay })
+    Note "type 'why the dip?': $([LiveInput]::Type('why the dip?', $appPid))"
+    Check 'handwriting-typed' (WaitFor { (EditorValue) -eq 'why the dip?' }) "value '$(EditorValue)'"
+    Start-Sleep -Milliseconds 300
+    $ink = [LiveInput]::ChangedColumns($blank, [LiveInput]::Capture($inkBox[0], $inkBox[1], $inkBox[2], $inkBox[3]), $inkBox[2], $inkBox[3], 0.02)
+    $inkWidth = if ($ink) { ([int]$ink.Split('-')[1] - [int]$ink.Split('-')[0] + 1) / $scale } else { 0 }
+    Check 'handwriting-ink' ($inkWidth -ge 105 -and $inkWidth -le 145) ("ink {0:F1} points wide (columns '{1}' of {2})" -f $inkWidth, $ink, $inkBox[2])
+    Note "Escape: $([LiveInput]::Tap(0x1B, $appPid))"
+    Check 'handwriting-escape-commits' (WaitFor { $null -eq (Editor) }) "edit field after Escape: $(if (Editor) { 'still open' } else { 'gone' })"
+
     # Match outline (spec 001, Mac matchLabelToStroke): the Text tool edits a rectangle's label; while the stroke color popover
     # is open, Match outline shows and is unavailable while the label follows the rectangle's stroke; a palette color stops
     # it following, and Match outline makes it follow again with the stroke's paint on the toolbar. Escape closes the popover
@@ -2043,8 +2079,11 @@ if (Test-Path $resultPath) {
     function OnEighth([double]$degrees) { $rest = [Math]::Abs($degrees / 45 - [Math]::Round($degrees / 45)); $rest -lt 0.0005 }
     $shape = $elements | Where-Object { $_.tool -eq 'rectangle' } | Select-Object -First 1
     Check 'first-shape-kept' ($null -ne $shape) "first rectangle: $($shape.frame -join ', ')"
-    $typed = $elements | Where-Object { $_.tool -eq 'text' } | Select-Object -Last 1
-    Check 'text-committed' ($null -ne $typed -and $typed.text -eq 'Hi there') "text: '$($typed.text)' at $($typed.frame -join ', ')"
+    $typed = $elements | Where-Object { $_.tool -eq 'text' -and $_.text -eq 'Hi there' } | Select-Object -Last 1
+    Check 'text-committed' ($null -ne $typed) "texts: $(($elements | Where-Object { $_.tool -eq 'text' } | ForEach-Object { "'$($_.text)' at $($_.frame -join ', ')" }) -join '; ')"
+    # The handwriting text kept Caveat's width (Segoe UI's is about 157 points).
+    $handwritten = $elements | Where-Object { $_.tool -eq 'text' -and $_.text -eq 'why the dip?' } | Select-Object -Last 1
+    Check 'handwriting-committed' ($null -ne $handwritten -and $handwritten.frame[2] -ge 105 -and $handwritten.frame[2] -le 145) "text: '$($handwritten.text)' at $($handwritten.frame -join ', ')"
     # Match outline left the label following its rectangle's stroke (Mac matchLabelToStroke).
     $labeled = $elements | Where-Object { $_.label -eq 'API' } | Select-Object -Last 1
     Check 'label-follows-outline' ($null -ne $labeled -and $labeled.labelFollowsStroke) "label: $(if ($labeled) { "'$($labeled.label)' on a $($labeled.tool), follows the stroke: $($labeled.labelFollowsStroke)" } else { 'none' })"
