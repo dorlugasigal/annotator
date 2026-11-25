@@ -80,7 +80,8 @@ final class ToolbarCustomizationTests: XCTestCase {
         }
         let button = try XCTUnwrap(node, "No \(label) button", file: file, line: line)
         XCTAssertTrue(button.accessibilityPerformPress(), file: file, line: line)
-        try await Task.sleep(for: .milliseconds(150))
+        // A Step button's new face slides in (Motion.snappy); let it finish before the next look at the tree.
+        try await Task.sleep(for: .milliseconds(450))
     }
 
     /// Opens the column of a property's one button, checks it draws every choice, then chooses `item`, which closes it.
@@ -238,6 +239,35 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertFalse(nodes(host).contains { $0.accessibilityLabel() == "Font size 28" }, "Text size is just the slider")
     }
 
+    /// Step is the button from before the menu: each click goes to the next choice.
+    func testChoicesCanStepThroughTheirChoices() async throws {
+        let (model, cleanup) = try makeModel("step")
+        defer { cleanup() }
+        model.setPropertiesShown(true)
+        model.beginDrawing()
+        model.tool = .rectangle
+        model.applyStyle { $0 = .defaults(for: .rectangle) }
+        model.setPropertyChoiceStyle(.pattern, .step)
+        model.setPropertyChoiceStyle(.roughness, .step)
+        XCTAssertEqual(model.preferences.steppedPropertyChoices, ["pattern", "roughness"])
+        let (panel, host) = try await show(model)
+        defer { close(panel) }
+        for expected in [StrokePattern.dashed, .dotted, .solid] {
+            try await press("Pattern", in: host)
+            XCTAssertEqual(model.style.pattern, expected)
+        }
+        for expected in [2.0, 6, 0] {
+            try await press("Roughness", in: host)
+            XCTAssertEqual(model.style.roughness, expected)
+        }
+        let pattern = try XCTUnwrap(nodes(host).first { $0.accessibilityLabel() == "Pattern" })
+        XCTAssertEqual(pattern.accessibilityHelp(), "Changes to dashed")
+        model.setPropertyChoiceStyle(.pattern, .menu)
+        try await settle(host)
+        XCTAssertEqual(try XCTUnwrap(nodes(host).first { $0.accessibilityLabel() == "Pattern" }).accessibilityHelp(),
+                       "Pattern: Solid. Click to see all choices.")
+    }
+
     /// Each property with a few choices can show all of them side by side instead of one button.
     func testPropertiesCanShowAllTheirChoices() async throws {
         let (model, cleanup) = try makeModel("all-choices")
@@ -308,6 +338,12 @@ final class ToolbarCustomizationTests: XCTestCase {
             let one = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-\(choice.rawValue)-one" })
             XCTAssertEqual(one.accessibilityValue() as? String, "Selected", "\(choice) starts as one button")
         }
+        XCTAssertNil(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-edges-step" },
+                     "An on and off property has no Step")
+        let step = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-font-step" })
+        XCTAssertTrue(step.accessibilityPerformPress())
+        try await Task.sleep(for: .milliseconds(80))
+        XCTAssertEqual(model.propertyChoiceStyle(.font), .step)
         let all = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-roughness-all" })
         XCTAssertTrue(all.accessibilityPerformPress())
         try await Task.sleep(for: .milliseconds(80))
@@ -318,7 +354,9 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertTrue(reset.accessibilityPerformPress())
         try await Task.sleep(for: .milliseconds(80))
         XCTAssertFalse(model.showsAllChoices(.roughness))
+        XCTAssertEqual(model.propertyChoiceStyle(.font), .menu, "Use menus everywhere resets Step too")
         model.setShowsAllChoices(.pattern, true)
+        model.setPropertyChoiceStyle(.roughness, .step)
         try await Task.sleep(for: .milliseconds(150))
         try save(host, name: "settings-properties", dark: false)
         model.resetPropertyChoices()

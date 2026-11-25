@@ -83,6 +83,34 @@ public class ToolbarControlTests
     }
 
     [Fact]
+    public void PropertiesCanStepThroughTheirChoicesInsteadOfAMenu()
+    {
+        var preferences = new WorkspacePreferences();
+        Assert.All(PropertyChoice.AllCases, choice => Assert.Equal(PropertyChoiceStyle.Menu, preferences.ChoiceStyle(choice)));
+        preferences.SetChoiceStyle(PropertyChoice.Font, PropertyChoiceStyle.Step);
+        preferences.SetChoiceStyle(PropertyChoice.Pattern, PropertyChoiceStyle.Step);
+        preferences.SetChoiceStyle(PropertyChoice.Edges, PropertyChoiceStyle.Step);
+        // An on and off property has no step.
+        Assert.Equal(["pattern", "font"], preferences.SteppedPropertyChoices!.Value.ToArray());
+        Assert.Equal(PropertyChoiceStyle.Menu, preferences.ChoiceStyle(PropertyChoice.Edges));
+        Assert.Equal(preferences, WorkspacePreferences.Read(preferences.Data()));
+        preferences.SetChoiceStyle(PropertyChoice.Pattern, PropertyChoiceStyle.All);
+        Assert.Equal(PropertyChoiceStyle.All, preferences.ChoiceStyle(PropertyChoice.Pattern));
+        Assert.Equal(["font"], preferences.SteppedPropertyChoices!.Value.ToArray());
+        Assert.Equal(["pattern"], preferences.ExpandedPropertyChoices!.Value.ToArray());
+        preferences.SetChoiceStyle(PropertyChoice.Font, PropertyChoiceStyle.Menu);
+        Assert.Null(preferences.SteppedPropertyChoices);
+        Assert.Equal([PropertyChoiceStyle.Menu, PropertyChoiceStyle.All], PropertyChoice.Pressure.Styles.ToArray());
+        Assert.Equal([PropertyChoiceStyle.Menu, PropertyChoiceStyle.Step, PropertyChoiceStyle.All], PropertyChoice.Roughness.Styles.ToArray());
+
+        string json = Encoding.UTF8.GetString(new WorkspacePreferences().Data());
+        string future = json.Insert(1, "\"steppedPropertyChoices\":[\"font\",\"sparkle\",\"font\"],");
+        Assert.Equal(["font"], WorkspacePreferences.Read(Encoding.UTF8.GetBytes(future)).SteppedPropertyChoices!.Value.ToArray());
+        var invalid = new WorkspacePreferences { SteppedPropertyChoices = ["edges"] };
+        Assert.Throws<CanvasError>(() => invalid.Data());
+    }
+
+    [Fact]
     public void SpotlightAndZoomMenusAreToolbarItemsWithoutKeys()
     {
         Assert.Equal([ShortcutAction.Spotlight, ShortcutAction.CursorHalo, ShortcutAction.PointerLens, ShortcutAction.SmartDraw,

@@ -234,6 +234,10 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
     /// means every property is one button.</summary>
     public ValueList<string>? ExpandedPropertyChoices;
 
+    /// <summary>Properties whose one button steps to the next choice on each click instead of opening a menu of them
+    /// (<see cref="PropertyChoice"/> raw values). <see cref="ExpandedPropertyChoices"/> wins for a property in both.</summary>
+    public ValueList<string>? SteppedPropertyChoices;
+
     /// <summary>
     /// Seconds the laser pointer's trail stays before it fades, from <see cref="LaserTrail.MinimumLifetime"/> to
     /// <see cref="LaserTrail.MaximumLifetime"/>. <c>null</c> means <see cref="LaserTrail.DefaultLifetime"/>.
@@ -507,7 +511,8 @@ public partial struct WorkspacePreferences : IEquatable<WorkspacePreferences>
         && ShareToolStyles == other.ShareToolStyles && ToolbarItems == other.ToolbarItems
         && BreakTimer == other.BreakTimer && BreakShortcut == other.BreakShortcut
         && HiddenToolbarControls == other.HiddenToolbarControls && ToolbarCollapseDelay == other.ToolbarCollapseDelay
-        && ExpandedPropertyChoices == other.ExpandedPropertyChoices && Glass == other.Glass && ZoomMap == other.ZoomMap
+        && ExpandedPropertyChoices == other.ExpandedPropertyChoices
+        && SteppedPropertyChoices == other.SteppedPropertyChoices && Glass == other.Glass && ZoomMap == other.ZoomMap
         && ZoomFollowsPointer == other.ZoomFollowsPointer;
 
     public override readonly bool Equals(object? obj) => obj is WorkspacePreferences other && Equals(other);

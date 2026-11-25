@@ -331,6 +331,9 @@ public sealed class WorkspaceSnapshot
     /// <summary>Mac showsAllChoices(_:): whether a property shows all its choices instead of one button.</summary>
     public bool ShowsAllChoices(PropertyChoice choice) => Preferences.ShowsAllChoices(choice);
 
+    /// <summary>Mac propertyChoiceStyle(_:): a menu, a button that steps through the choices, or all of them.</summary>
+    public PropertyChoiceStyle ChoiceStyle(PropertyChoice choice) => Preferences.ChoiceStyle(choice);
+
     /// <summary>The editing target's board (Mac board), or the board the first display gets.</summary>
     public Board Board { get; internal init; }
 

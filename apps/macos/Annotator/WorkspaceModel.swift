@@ -1230,10 +1230,25 @@ final class WorkspaceModel: ObservableObject {
         } catch { report(error) }
     }
 
+    /// How a property with a few choices shows: a menu (the default), a button that steps through them, or all of them.
+    func propertyChoiceStyle(_ choice: PropertyChoice) -> PropertyChoiceStyle { preferences.propertyChoiceStyle(choice) }
+
+    func setPropertyChoiceStyle(_ choice: PropertyChoice, _ style: PropertyChoiceStyle) {
+        if let owner = globalSettingsOwner { owner.setPropertyChoiceStyle(choice, style); return }
+        do {
+            var updated = preferences
+            updated.setPropertyChoiceStyle(choice, style)
+            try updated.validate()
+            preferences = updated
+            persistPreferences()
+        } catch { report(error) }
+    }
+
     func resetPropertyChoices() {
         if let owner = globalSettingsOwner { owner.resetPropertyChoices(); return }
-        guard preferences.expandedPropertyChoices != nil else { return }
+        guard preferences.expandedPropertyChoices != nil || preferences.steppedPropertyChoices != nil else { return }
         preferences.expandedPropertyChoices = nil
+        preferences.steppedPropertyChoices = nil
         persistPreferences()
     }
 

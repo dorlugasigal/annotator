@@ -105,7 +105,8 @@ struct ContextualInspector: View {
                                     model.applyStyle { $0.fillPattern = value }
                                 }
                             } else {
-                                ChoiceMenu(name: "Fill style", values: values, selection: model.style.fillPattern) { value in
+                                ChoiceButton(style: model.propertyChoiceStyle(.fillStyle), model: model, name: "Fill style",
+                                             values: values, selection: model.style.fillPattern) { value in
                                     model.applyStyle { $0.fillPattern = value }
                                 }
                             }
@@ -227,7 +228,8 @@ struct ContextualInspector: View {
             if model.showsAllChoices(.pattern) {
                 SampleOptions(values: values, selection: model.style.pattern) { value in model.applyStyle { $0.pattern = value } }
             } else {
-                ChoiceMenu(name: "Pattern", values: values, selection: model.style.pattern) { value in
+                ChoiceButton(style: model.propertyChoiceStyle(.pattern), model: model, name: "Pattern", values: values,
+                             selection: model.style.pattern) { value in
                     model.applyStyle { $0.pattern = value }
                 }
             }
@@ -240,7 +242,8 @@ struct ContextualInspector: View {
             if model.showsAllChoices(.roughness) {
                 SampleOptions(values: values, selection: model.style.roughness) { value in model.applyStyle { $0.roughness = value } }
             } else {
-                ChoiceMenu(name: "Roughness", values: values, selection: model.style.roughness) { value in
+                ChoiceButton(style: model.propertyChoiceStyle(.roughness), model: model, name: "Roughness", values: values,
+                             selection: model.style.roughness) { value in
                     model.applyStyle { $0.roughness = value }
                 }
             }
@@ -256,7 +259,8 @@ struct ContextualInspector: View {
                         fontChoice("Mono", name: "monospace", design: .monospaced)
                     }
                 } else {
-                    ChoiceMenu(
+                    ChoiceButton(
+                        style: model.propertyChoiceStyle(.font), model: model,
                         name: "Font",
                         choices: [("system", "System", .text("Aa", .default)), ("monospace", "Mono", .text("Aa", .monospaced))],
                         selection: model.style.fontName == "monospace" ? "monospace" : "system"
@@ -283,7 +287,8 @@ struct ContextualInspector: View {
                         }
                     }
                 } else {
-                    ChoiceMenu(
+                    ChoiceButton(
+                        style: model.propertyChoiceStyle(.alignment), model: model,
                         name: "Alignment",
                         choices: AnnotationCore.TextAlignment.allCases.map { alignment in
                             (alignment, alignment.rawValue.capitalized, .symbol(Self.alignmentSymbol(alignment)))

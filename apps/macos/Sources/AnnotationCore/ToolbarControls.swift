@@ -73,8 +73,19 @@ public enum ToolbarHold {
     public static func isStill(dx: Double, dy: Double) -> Bool { (dx * dx + dy * dy).squareRoot() <= slop }
 }
 
-/// Properties with a few choices. Each shows as one button, which is the default, or as all its choices side by side. The
-/// one button opens a menu of the choices, or switches an on and off property such as Rounded corners.
+/// How a property with a few choices shows on the properties row.
+public enum PropertyChoiceStyle: String, CaseIterable, Sendable {
+    /// One button: it opens a menu of the choices, or switches an on and off property. The default.
+    case menu
+    /// One button that goes to the next choice on each click. Not for on and off properties.
+    case step
+    /// All the choices side by side.
+    case all
+}
+
+/// Properties with a few choices. Each shows as one button that opens a menu of them, which is the default, one button
+/// that steps through them, or all its choices side by side. An on and off property such as Rounded corners is one
+/// button that switches it, or both choices side by side.
 public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
     case pattern, roughness, fillStyle, edges, arrowType, pressure, font, alignment
 
@@ -110,6 +121,9 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
 
     /// Whether its one button switches the property on and off instead of opening a menu of the choices.
     public var isOnOff: Bool { self == .edges || self == .arrowType || self == .pressure }
+
+    /// The ways the property can show: an on and off property has no menu to step through.
+    public var styles: [PropertyChoiceStyle] { isOnOff ? [.menu, .all] : [.menu, .step, .all] }
 }
 
 extension WorkspacePreferences {
@@ -141,6 +155,21 @@ extension WorkspacePreferences {
         expandedPropertyChoices = ordered.isEmpty ? nil : ordered
     }
 
+    /// How a property shows: all its choices, a button that steps through them, or a menu (the default).
+    public func propertyChoiceStyle(_ choice: PropertyChoice) -> PropertyChoiceStyle {
+        if showsAllChoices(choice) { return .all }
+        return !choice.isOnOff && (steppedPropertyChoices ?? []).contains(choice.rawValue) ? .step : .menu
+    }
+
+    /// Sets how a property shows. Step falls back to the menu for an on and off property.
+    public mutating func setPropertyChoiceStyle(_ choice: PropertyChoice, _ style: PropertyChoiceStyle) {
+        setShowsAllChoices(choice, style == .all)
+        var stepped = Set(steppedPropertyChoices ?? [])
+        if style == .step && !choice.isOnOff { stepped.insert(choice.rawValue) } else { stepped.remove(choice.rawValue) }
+        let ordered = PropertyChoice.allCases.map(\.rawValue).filter(stepped.contains)
+        steppedPropertyChoices = ordered.isEmpty ? nil : ordered
+    }
+
     func validateToolbarControls() throws {
         if let hiddenToolbarControls {
             guard hiddenToolbarControls.count <= ToolbarControl.allCases.count,
@@ -161,6 +190,13 @@ extension WorkspacePreferences {
                 throw CanvasError.invalidDocument("Properties that show all their choices must be known properties, each listed once.")
             }
         }
+        if let steppedPropertyChoices {
+            guard Set(steppedPropertyChoices).count == steppedPropertyChoices.count,
+                  steppedPropertyChoices.allSatisfy({ PropertyChoice(rawValue: $0)?.isOnOff == false }) else {
+                throw CanvasError.invalidDocument(
+                    "Properties that step through their choices must be known properties with a menu, each listed once.")
+            }
+        }
     }
 
     /// Buttons and properties from a newer version are dropped, so a profile with them still opens.
@@ -174,6 +210,11 @@ extension WorkspacePreferences {
             var seen = Set<String>()
             let known = expanded.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
             expandedPropertyChoices = known.isEmpty ? nil : known
+        }
+        if let stepped = steppedPropertyChoices {
+            var seen = Set<String>()
+            let known = stepped.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
+            steppedPropertyChoices = known.isEmpty ? nil : known
         }
     }
 }

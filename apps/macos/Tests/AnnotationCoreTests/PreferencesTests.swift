@@ -137,6 +137,28 @@ func legacyDrawingCursorPreferencesStillRoundTrip(_ style: ToolCursorStyle) thro
     #expect(throws: CanvasError.self) { try preferences.data() }
 }
 
+@Test func propertiesCanStepThroughTheirChoicesInsteadOfAMenu() throws {
+    var preferences = WorkspacePreferences()
+    #expect(PropertyChoice.allCases.allSatisfy { preferences.propertyChoiceStyle($0) == .menu }, "The menu is the default.")
+    preferences.setPropertyChoiceStyle(.font, .step)
+    preferences.setPropertyChoiceStyle(.pattern, .step)
+    preferences.setPropertyChoiceStyle(.edges, .step)
+    #expect(preferences.steppedPropertyChoices == ["pattern", "font"], "An on and off property has no step.")
+    #expect(preferences.propertyChoiceStyle(.edges) == .menu)
+    #expect(try WorkspacePreferences.read(preferences.data()) == preferences)
+    preferences.setPropertyChoiceStyle(.pattern, .all)
+    #expect(preferences.propertyChoiceStyle(.pattern) == .all)
+    #expect(preferences.steppedPropertyChoices == ["font"] && preferences.expandedPropertyChoices == ["pattern"])
+    preferences.setPropertyChoiceStyle(.font, .menu)
+    #expect(preferences.steppedPropertyChoices == nil)
+    #expect(PropertyChoice.pressure.styles == [.menu, .all] && PropertyChoice.roughness.styles == [.menu, .step, .all])
+    var object = try #require(JSONSerialization.jsonObject(with: WorkspacePreferences().data()) as? [String: Any])
+    object["steppedPropertyChoices"] = ["font", "sparkle", "font"]
+    #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).steppedPropertyChoices == ["font"])
+    preferences.steppedPropertyChoices = ["edges"]
+    #expect(throws: CanvasError.self) { try preferences.data() }
+}
+
 @Test func laserFadeIsSavedWithinItsRange() throws {
     var preferences = WorkspacePreferences()
     #expect(preferences.laserFade == nil, "A new profile uses the default Fade.")

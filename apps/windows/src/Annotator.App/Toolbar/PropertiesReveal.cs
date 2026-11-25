@@ -50,3 +50,21 @@ internal static class PropertiesReveal
         element.StartAnimation(rise);
     }
 }
+
+/// <summary>
+/// Mac CycleOptions' face change: the new choice comes in from the trailing edge of the 36-point button while it fades in,
+/// on the snappy spring (Motion.snappy); with reduced motion it only fades (Motion.reduced).
+/// </summary>
+internal static class CycleSlide
+{
+    public static void Start(UIElement element)
+    {
+        bool reduced = ToolbarMotion.ReducesMotion();
+        Annotator.Workspace.Motion.MotionSamples progress = Annotator.Workspace.Motion.ToolbarControlMotion.Selection(reduced);
+        ToolbarMotion.Scalar(element, "Opacity", progress, value => (float)Math.Clamp(value, 0, 1));
+        if (!reduced)
+        {
+            ToolbarMotion.Vector(element, "Translation", progress, value => new Vector3((float)(36 * (1 - value)), 0, 0));
+        }
+    }
+}

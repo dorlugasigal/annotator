@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 import AnnotationCore
 import PresentationRendering
@@ -237,29 +238,114 @@ struct InspectorControlButton<Content: View>: View {
     }
 }
 
-/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice with a small chevron,
-/// and a click opens a column of every choice, each drawn as it looks. The current one has the accent outline; choosing
-/// one closes the column.
-struct ChoiceMenu<Value: Equatable>: View {
+/// One button for a property with a few choices, such as Solid, Dashed and Dotted: a menu of them (`ChoiceMenu`), or a
+/// button that goes to the next one on each click (`CycleOptions`), as Settings > Toolbar > Your properties chooses.
+struct ChoiceButton<Value: Equatable>: View {
+    let style: PropertyChoiceStyle
+    var model: WorkspaceModel?
     let name: String
-    let values: [(value: Value, label: String, sample: ChoiceSample)]
+    let values: [(value: Value, label: String, sample: InspectorChoiceFace)]
     let selection: Value
     let update: (Value) -> Void
-    @State private var open = false
 
-    typealias ChoiceSample = InspectorChoiceFace
-
-    init(name: String, values: [(Value, String, InspectorSample)], selection: Value, update: @escaping (Value) -> Void) {
-        self.init(name: name, choices: values.map { ($0.0, $0.1, ChoiceSample.sample($0.2)) },
+    init(style: PropertyChoiceStyle, model: WorkspaceModel? = nil, name: String, values: [(Value, String, InspectorSample)],
+         selection: Value, update: @escaping (Value) -> Void) {
+        self.init(style: style, model: model, name: name, choices: values.map { ($0.0, $0.1, .sample($0.2)) },
                   selection: selection, update: update)
     }
 
-    init(name: String, choices: [(Value, String, ChoiceSample)], selection: Value, update: @escaping (Value) -> Void) {
+    init(style: PropertyChoiceStyle, model: WorkspaceModel? = nil, name: String,
+         choices: [(Value, String, InspectorChoiceFace)], selection: Value, update: @escaping (Value) -> Void) {
+        self.style = style
+        self.model = model
         self.name = name
         self.values = choices.map { (value: $0.0, label: $0.1, sample: $0.2) }
         self.selection = selection
         self.update = update
     }
+
+    var body: some View {
+        if style == .step {
+            CycleOptions(name: name, values: values, selection: selection, update: update)
+        } else {
+            ChoiceMenu(model: model, name: name, values: values, selection: selection, update: update)
+        }
+    }
+}
+
+/// The steps between a property's choices: the next one after `index`, or the one before, wrapping around.
+private func step(_ index: Int, by offset: Int, in count: Int) -> Int { ((index + offset) % count + count) % count }
+
+/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice and moves to the next
+/// one on each click. The dots show where you are; the context menu and VoiceOver's adjust actions reach every choice.
+struct CycleOptions<Value: Equatable>: View {
+    let name: String
+    let values: [(value: Value, label: String, sample: InspectorChoiceFace)]
+    let selection: Value
+    let update: (Value) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var index: Int { values.firstIndex { $0.value == selection } ?? 0 }
+    private var next: Int { step(index, by: 1, in: values.count) }
+
+    var body: some View {
+        let current = values[index]
+        InspectorControlButton(name: name, help: "\(name): \(current.label). Click for \(values[next].label.lowercased()).",
+                               action: { choose(next) }) {
+            ZStack {
+                current.sample
+                    .id(index)
+                    .transition(reduceMotion ? .opacity : .asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)))
+                HStack(spacing: 2.5) {
+                    ForEach(values.indices, id: \.self) { position in
+                        Circle().fill(position == index ? Color.accentColor : Color.primary.opacity(0.22))
+                            .frame(width: 3.5, height: 3.5)
+                    }
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 3)
+                .accessibilityHidden(true)
+            }
+            .clipped()
+        }
+        .animation(Motion.resolve(Motion.snappy, reduceMotion: reduceMotion), value: index)
+        .accessibilityValue(current.label)
+        .accessibilityHint("Changes to \(values[next].label.lowercased())")
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: choose(next)
+            case .decrement: choose(step(index, by: -1, in: values.count))
+            @unknown default: break
+            }
+        }
+        .contextMenu {
+            ForEach(values.indices, id: \.self) { position in
+                Button { choose(position) } label: {
+                    if position == index { Label(values[position].label, systemImage: "checkmark") }
+                    else { Text(values[position].label) }
+                }
+            }
+        }
+    }
+
+    private func choose(_ position: Int) {
+        guard values.indices.contains(position), position != index else { return }
+        update(values[position].value)
+    }
+}
+
+/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice with a small chevron,
+/// and a click opens a column of every choice, each drawn as it looks. The current one has the accent outline; choosing
+/// one closes the column, as do hiding Annotator and drawing. VoiceOver's adjust actions step through the choices.
+struct ChoiceMenu<Value: Equatable>: View {
+    var model: WorkspaceModel?
+    let name: String
+    let values: [(value: Value, label: String, sample: InspectorChoiceFace)]
+    let selection: Value
+    let update: (Value) -> Void
+    @State private var open = false
 
     private var index: Int { values.firstIndex { $0.value == selection } ?? 0 }
 
@@ -281,13 +367,28 @@ struct ChoiceMenu<Value: Equatable>: View {
         }
         .accessibilityValue(current.label)
         .accessibilityHint(help)
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: choose(step(index, by: 1, in: values.count))
+            case .decrement: choose(step(index, by: -1, in: values.count))
+            @unknown default: break
+            }
+        }
+        .onReceive(model?.$workspaceHidden.eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()) { hidden in
+            if hidden { open = false }
+        }
+        .onReceive(model?.canvasInteraction.eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()) { open = false }
         .popover(isPresented: $open, arrowEdge: .bottom) {
             ChoicePalette(name: name, values: values.map { ($0.label, $0.sample) }, selected: index) { position in
                 open = false
-                guard values.indices.contains(position), position != index else { return }
-                update(values[position].value)
+                choose(position)
             }
         }
+    }
+
+    private func choose(_ position: Int) {
+        guard values.indices.contains(position), position != index else { return }
+        update(values[position].value)
     }
 }
 

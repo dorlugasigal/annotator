@@ -145,6 +145,13 @@ public sealed class PropertiesPanelTests
     public void ChoicesAreSingleButtonsThatOpenAMenu()
     {
         Assert.Equal(["Solid", "Dashed", "Dotted"], InspectorPlan.PatternChoices.Select(choice => choice.Name));
+        // Step goes to the next choice on each click.
+        Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.PatternChoices, StrokePattern.Solid));
+        Assert.Equal(0, InspectorPlan.NextChoice(InspectorPlan.PatternChoices, StrokePattern.Dotted));
+        // An unknown value shows as the first choice.
+        Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.RoughnessChoices, 1.5));
+        Assert.Equal("Pattern: Solid. Click for dashed.", InspectorPlan.CycleHelp("Pattern", "Solid", "Dashed"));
+        Assert.Equal("Changes to dashed", InspectorPlan.CycleHint("Dashed"));
         Assert.Equal(["System", "Mono"], InspectorPlan.FontChoices.Select(choice => choice.Name));
         Assert.Equal(["Left", "Center", "Right"], InspectorPlan.AlignmentChoices.Select(choice => choice.Name));
         Assert.Equal(["Solid", "Hatch", "Crosshatch"], InspectorPlan.FillStyleChoices.Select(choice => choice.Name));

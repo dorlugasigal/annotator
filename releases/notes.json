@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "unreleased": {
     "Changed": [
-      "Click Pattern, Roughness, Fill style, Font or Alignment to see every choice drawn as it looks, then click the one you want. Before, each click moved to the next choice. Rounded corners, Curved arrow and Ink pressure are still on and off buttons."
+      "You can choose how Pattern, Roughness, Fill style, Font and Alignment work in Settings > Toolbar > Your properties. Menu, the new default, shows every choice drawn as it looks when you click the button. Step goes to the next choice with each click, as before. All choices puts them side by side."
     ]
   },
   "releases": [

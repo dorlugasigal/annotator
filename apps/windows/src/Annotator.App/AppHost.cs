@@ -82,6 +82,7 @@ internal sealed partial class AppHost
     private TrayFlyout? _flyout;
     private ColorPopover? _colorPicker;
     private ArrowHeadPalette? _arrowHeads;
+    private ChoicePalette? _choices;
     private ToolsWindow? _tools;
     private SettingsWindow? _settings;
     private readonly LaunchAtSignIn _launch;
@@ -213,6 +214,7 @@ internal sealed partial class AppHost
             new PointInt32(check.Area.Left + (int)Math.Round(12 * checkScale), check.Area.Top + (int)Math.Round(12 * checkScale))))
         {
             ArrowHeads = OpenArrowHeads,
+            Choices = OpenChoices,
             ToolLibrary = () => OpenToolLibrary(null),
             Settings = () => OpenSettings(SettingsTab.General),
             HoldsOpen = () => _tutorial is { IsVisible: true } || _canvases.ConstructingArrow || ToolsUnderPointer(),
@@ -472,7 +474,8 @@ internal sealed partial class AppHost
         _model.SuspendPresentation(cancelPendingRequests);
     }
 
-    private bool InputBlocked => _flyout is not null || _colorPicker is not null || _arrowHeads is not null || _files.DialogOpen;
+    private bool InputBlocked => _flyout is not null || _colorPicker is not null || _arrowHeads is not null || _choices is not null
+        || _files.DialogOpen;
 
     private void OnPublished(WorkspaceSnapshot snapshot)
     {
@@ -717,6 +720,7 @@ internal sealed partial class AppHost
         _flyout?.Dismiss(restoreFocus: false);
         _colorPicker?.Dismiss(restoreFocus: false);
         _arrowHeads?.Dismiss(restoreFocus: false);
+        _choices?.Dismiss(restoreFocus: false);
     }
 
     /// <summary>
@@ -904,6 +908,25 @@ internal sealed partial class AppHost
             }
         };
         _arrowHeads = palette;
+        PostFrame();
+        palette.Open(anchor, PopoverPlacement.BelowOrAbove);
+    }
+
+    /// <summary>A property's menu of choices (Mac ChoiceMenu), below the button that opened it.</summary>
+    private void OpenChoices(ChoicesRequest request, RectInt32 anchor, Action closed)
+    {
+        CloseTransientWindows();
+        var palette = new ChoicePalette(_registry, request);
+        palette.Dismissed += () =>
+        {
+            closed();
+            if (_choices == palette)
+            {
+                _choices = null;
+                PostFrame();
+            }
+        };
+        _choices = palette;
         PostFrame();
         palette.Open(anchor, PopoverPlacement.BelowOrAbove);
     }
