@@ -93,6 +93,8 @@ internal sealed partial class AppHost
     private readonly Sharing.RegionSharingController _sharingWindows;
     private readonly Breaks.BreakTimerHost _breaks;
     private long? _flyoutClosedByIcon;
+    /// <summary>When and where a press on a property's menu button closed its open menu (Mac open.toggle()).</summary>
+    private (long At, RectInt32 Button)? _choicesClosedByButton;
     private bool _checkReady;
     private bool _quitting;
 
@@ -912,13 +914,34 @@ internal sealed partial class AppHost
         palette.Open(anchor, PopoverPlacement.BelowOrAbove);
     }
 
-    /// <summary>A property's menu of choices (Mac ChoiceMenu), below the button that opened it.</summary>
+    /// <summary>
+    /// A property's menu of choices (Mac ChoiceMenu), below the button that opened it. As on the Mac, a click on the button
+    /// of the open menu closes it: the press takes activation from the menu, which closes, so the keyboard goes back to the
+    /// window that had it before the menu opened, and the release does not open the menu again.
+    /// </summary>
     private void OpenChoices(ChoicesRequest request, RectInt32 anchor, Action closed)
     {
+        if (_choicesClosedByButton is { } press && Environment.TickCount64 - press.At < IconClickMilliseconds && SameRect(press.Button, anchor))
+        {
+            _choicesClosedByButton = null;
+            closed();
+            return;
+        }
+        _choicesClosedByButton = null;
         CloseTransientWindows();
+        HWND before = PInvoke.GetForegroundWindow();
         var palette = new ChoicePalette(_registry, request);
         palette.Dismissed += () =>
         {
+            if (palette.ClosedByDeactivation && WindowChrome.TryCursor() is { } cursor && cursor.X >= anchor.X && cursor.X < anchor.X + anchor.Width
+                && cursor.Y >= anchor.Y && cursor.Y < anchor.Y + anchor.Height)
+            {
+                _choicesClosedByButton = (Environment.TickCount64, anchor);
+                if (!before.IsNull && PInvoke.IsWindow(before))
+                {
+                    PInvoke.SetForegroundWindow(before);
+                }
+            }
             closed();
             if (_choices == palette)
             {
@@ -930,6 +953,9 @@ internal sealed partial class AppHost
         PostFrame();
         palette.Open(anchor, PopoverPlacement.BelowOrAbove);
     }
+
+    private static bool SameRect(RectInt32 first, RectInt32 second) =>
+        first.X == second.X && first.Y == second.Y && first.Width == second.Width && first.Height == second.Height;
 
     private void Perform(TrayAction action)
     {

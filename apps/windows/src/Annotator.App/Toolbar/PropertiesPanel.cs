@@ -439,7 +439,8 @@ internal sealed class PropertiesPanel
         }
         button.Click += (_, _) =>
         {
-            // A second click closes the open choices (Mac open.toggle()); closing them resets the flag.
+            // A second click closes the open choices (Mac open.toggle()); closing them resets the flag. Its press usually
+            // closes them first, by taking activation from them, and AppHost.OpenChoices then does not open them again.
             bool wasOpen = open;
             _host.Interacted();
             if (wasOpen)
