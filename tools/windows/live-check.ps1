@@ -54,6 +54,9 @@
     Zoom menus back; Show / hide records
     Ctrl+Alt+Shift+9 (held by the check's own registrar until it quits) and recording Draw then refuses it through the
     recording gate; the canvas uses the new key. The check never presses a default global shortcut;
+  - property menus: Your properties sets Pattern to Menu; Pen's Pattern button then opens a column of Solid, Dashed and
+    Dotted with the keyboard on the current one, Down and Enter choose Dashed and close it, a second click on the button
+    closes the column, and Escape closes it without a change;
   - on-screen tip (spec 009): right after Resume drawing wakes it, the canvas reads the tip as static text
     ('Drawing  ·  Escape: use apps') with its Turn off tips button, and an ink key leaves it as it was (no status line, as
     on the Mac);
@@ -1508,6 +1511,28 @@ try {
         Check 'global-shortcut-clash-refused' (WaitFor { (Toast) -like '*already does Show / hide*' -and (KeyValue 'Draw shortcut') -like 'Waiting*' }) "Draw '$(KeyValue 'Draw shortcut')'; toast '$(Toast)'"
         Note "Escape: $([LiveInput]::Tap(0x1B, $appPid))"
         Check 'global-shortcut-escape-stops' (WaitFor { (KeyValue 'Draw shortcut') -eq 'Ctrl + Shift + 2' }) "Draw '$(KeyValue 'Draw shortcut')'"
+
+        # Your properties (Mac PropertyChoicesEditor): Pattern opens a menu of its choices, for the toolbar steps below.
+        function ClickInView([string]$id) {
+            $scroller = ([Windows.Automation.AutomationElement]::FromHandle($page)).FindFirst([Windows.Automation.TreeScope]::Descendants,
+                ([Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::IsScrollPatternAvailableProperty, $true)))
+            foreach ($percent in (0..20 | ForEach-Object { $_ * 5 })) {
+                ScrollPage $percent
+                $element = ById $page $id
+                if ((Placed $element) -and $null -ne $scroller) {
+                    $c = Center $element
+                    $view = $scroller.Current.BoundingRectangle
+                    if ($c[1] -gt $view.Top + 20 -and $c[1] -lt $view.Bottom - 20 -and [LiveInput]::TopLevelAt($c[0], $c[1]) -eq $page) {
+                        $result = [LiveInput]::Click($c[0], $c[1], $page)
+                        Start-Sleep -Milliseconds 300
+                        return $result
+                    }
+                }
+            }
+            return "not in view: $id"
+        }
+        Note "click Pattern: menu: $(ClickInView 'property-choice-pattern-menu')"
+        Check 'property-choice-menu-chosen' (WaitFor { (ValueOf (ById $page 'property-choice-pattern-menu')) -eq 'Selected' -and (ValueOf (ById $page 'property-choice-pattern-one')) -ne 'Selected' }) "Pattern: menu '$(ValueOf (ById $page 'property-choice-pattern-menu'))'; one button '$(ValueOf (ById $page 'property-choice-pattern-one'))'"
     }
     # Alt+F4 hides Settings, and the toolbar's gear opens it again on General.
     if ($null -ne $settings) {
@@ -1532,6 +1557,52 @@ try {
     [void](WaitFor { (Foreground) -eq $overlay })
     Note "J on the canvas: $([LiveInput]::Tap(0x4A, $appPid))"
     Check 'canvas-uses-new-key' (WaitFor { IsOn 'Pen' }) "Pen on: $(IsOn 'Pen'); foreground $([LiveInput]::Describe((Foreground)))"
+
+    # A property's menu (Mac ChoiceMenu), chosen in Your properties above: Pen's Pattern button opens a column of Solid,
+    # Dashed and Dotted with the keyboard on the current one, and Down and Enter choose Dashed and close it. A second click
+    # on the button closes the column, Escape closes it without a change, and Up and Enter go back to Solid; each time the
+    # canvas gets the keyboard back.
+    function PatternButton() { Typed 'Pattern' ([Windows.Automation.ControlType]::Button) $toolbar }
+    function PatternChoices() { [LiveInput]::Windows($appPid) | Where-Object { [LiveInput]::Title($_) -eq 'Pattern' } | Select-Object -First 1 }
+    function ClickPattern() {
+        $button = PatternButton
+        if ($null -eq $button) { return 'no Pattern button' }
+        $c = Center $button
+        $result = [LiveInput]::Click($c[0], $c[1], $toolbar)
+        Start-Sleep -Milliseconds 250
+        return $result
+    }
+    function ChoicesActive() { $null -ne ($script:choices = PatternChoices) -and (Foreground) -eq $script:choices }
+    $patternHelp = if ($null -ne ($button = PatternButton)) { $button.Current.HelpText } else { 'no Pattern button' }
+    Check 'property-menu-button' ($patternHelp -eq 'Pattern: Solid. Click to see all choices.') "help '$patternHelp'"
+    $choices = $null
+    Note "click Pattern: $(ClickPattern)"
+    $opened = WaitFor { ChoicesActive }
+    $names = if ($null -ne $choices) { @('Solid', 'Dashed', 'Dotted' | Where-Object { $null -ne (Typed $_ ([Windows.Automation.ControlType]::Button) $choices) }) } else { @() }
+    Check 'property-menu-opens' ($opened -and $names.Count -eq 3) "column $(Show $choices) with '$($names -join ', ')'; foreground $([LiveInput]::Describe((Foreground)))"
+    if ($opened) {
+        Check 'property-menu-focus' (WaitFor { (Focused) -eq 'Solid' }) "focused '$(Focused)'"
+        Note "Down: $([LiveInput]::Tap(0x28, $appPid))"
+        [void](WaitFor { (Focused) -eq 'Dashed' })
+        Note "Enter on '$(Focused)': $([LiveInput]::Tap(0x0D, $appPid))"
+    }
+    Check 'property-menu-chooses' (WaitFor { $null -eq (PatternChoices) -and (ValueOf (PatternButton)) -eq 'Dashed' -and (Foreground) -eq $overlay }) "column $(Show (PatternChoices)); Pattern '$(ValueOf (PatternButton))'; foreground $([LiveInput]::Describe((Foreground)))"
+    Note "click Pattern: $(ClickPattern)"
+    [void](WaitFor { ChoicesActive })
+    Note "click Pattern again: $(ClickPattern)"
+    Check 'property-menu-second-click-closes' (WaitFor { $null -eq (PatternChoices) -and (Foreground) -eq $overlay }) "column $(Show (PatternChoices)); foreground $([LiveInput]::Describe((Foreground)))"
+    Note "click Pattern: $(ClickPattern)"
+    if (WaitFor { ChoicesActive }) { Note "Escape in the column: $([LiveInput]::Tap(0x1B, $appPid))" }
+    Check 'property-menu-escape' (WaitFor { $null -eq (PatternChoices) -and (ValueOf (PatternButton)) -eq 'Dashed' -and (Foreground) -eq $overlay }) "column $(Show (PatternChoices)); Pattern '$(ValueOf (PatternButton))'; foreground $([LiveInput]::Describe((Foreground)))"
+    Note "click Pattern: $(ClickPattern)"
+    if (WaitFor { ChoicesActive }) {
+        [void](WaitFor { (Focused) -eq 'Dashed' })
+        Note "Up: $([LiveInput]::Tap(0x26, $appPid))"
+        [void](WaitFor { (Focused) -eq 'Solid' })
+        Note "Enter on '$(Focused)': $([LiveInput]::Tap(0x0D, $appPid))"
+    }
+    Check 'property-menu-back-to-solid' (WaitFor { $null -eq (PatternChoices) -and (ValueOf (PatternButton)) -eq 'Solid' -and (Foreground) -eq $overlay }) "column $(Show (PatternChoices)); Pattern '$(ValueOf (PatternButton))'; foreground $([LiveInput]::Describe((Foreground)))"
+    [void](WaitFor { (Foreground) -eq $overlay })
 
     # Boards, PNG export, Insert image and the error window (WIN-SYS-04, spec 005): Ctrl+S saves the board with the Save
     # dialog, the Tools window's File menu exports the PNG, Ctrl+O reports a broken board in the error window and keeps the
