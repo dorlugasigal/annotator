@@ -238,6 +238,31 @@ struct InspectorControlButton<Content: View>: View {
     }
 }
 
+/// The text tool's fonts, in the order the Font property shows them. The raw value is the saved font name.
+enum TextFontChoice: String, CaseIterable {
+    case system, monospace, handwriting
+
+    /// "System", "Mono" or "Handwriting".
+    var title: String { PropertyChoice.font.choices[Self.allCases.firstIndex(of: self) ?? 0] }
+
+    /// The choice a saved font name shows as; an unknown name draws in the system font.
+    static func current(_ fontName: String) -> TextFontChoice { TextFontChoice(rawValue: fontName) ?? .system }
+
+    /// The font of the choice's "Aa" sample. Caveat's letters are small for their size, so its sample is larger and bold.
+    func sample(size: CGFloat) -> Font {
+        switch self {
+        case .system: return .system(size: size)
+        case .monospace: return .system(size: size, design: .monospaced)
+        case .handwriting:
+            var style = Style()
+            style.fontName = rawValue
+            style.fontSize = size + 6
+            style.bold = true
+            return Font(NativeTextFont.resolve(style) as CTFont)
+        }
+    }
+}
+
 /// One button for a property with a few choices, such as Solid, Dashed and Dotted: a button that goes to the next one on
 /// each click (`CycleOptions`, the default), or a menu of them (`ChoiceMenu`), as Settings > Toolbar > Your properties
 /// chooses.
@@ -397,13 +422,13 @@ struct ChoiceMenu<Value: Equatable>: View {
 enum InspectorChoiceFace: View {
     case sample(InspectorSample)
     case symbol(String)
-    case text(String, Font.Design)
+    case text(String, Font)
 
     var body: some View {
         switch self {
         case .sample(let sample): InspectorSampleView(sample: sample).allowsHitTesting(false)
         case .symbol(let name): Image(systemName: name).font(.system(size: 15))
-        case .text(let text, let design): Text(text).font(.system(size: 16, design: design))
+        case .text(let text, let font): Text(text).font(font)
         }
     }
 }

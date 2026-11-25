@@ -3,6 +3,18 @@
   "policy": "Original implementation and explicitly approved permissive dependencies only.",
   "components": [
     {
+      "name": "Caveat handwriting font",
+      "origin": "https://github.com/googlefonts/caveat",
+      "revision": "fc2a58c4d2ec864d8a2ab7e434f427b01dbe89e5",
+      "file": "fonts/variable/Caveat[wght].ttf",
+      "sha256": "0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988",
+      "license": "OFL-1.1",
+      "disposition": "bundled-unmodified-runtime-asset",
+      "approval": "Owner, 2026-11-25 (docs/parity.md, Recorded owner decisions)",
+      "notice": "apps/macos/Sources/PresentationRendering/Fonts/Caveat-OFL.txt",
+      "reason": "The Text tool's Handwriting font on both platforms, the font of the website demo's labels. The unchanged upstream variable font, stored as apps/macos/Sources/PresentationRendering/Fonts/Caveat.ttf; the Windows projects link the same file and its license into the app's Fonts folder. The license has no Reserved Font Name."
+    },
+    {
       "name": "Unicode Character Database tables (Windows edition)",
       "origin": "https://www.unicode.org/Public/16.0.0/ucd/ (via Python 3.14 unicodedata)",
       "version": "16.0.0",

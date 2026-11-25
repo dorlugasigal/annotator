@@ -71,7 +71,7 @@ public class ToolbarControlTests
         preferences.SetShowsAllChoices(PropertyChoice.Pattern, shown: false);
         preferences.SetShowsAllChoices(PropertyChoice.Font, shown: false);
         Assert.Null(preferences.ExpandedPropertyChoices);
-        Assert.Equal([3, 3, 3, 2, 2, 2, 2, 3], PropertyChoice.AllCases.Select(choice => choice.ChoiceCount).ToArray());
+        Assert.Equal([3, 3, 3, 2, 2, 2, 3, 3], PropertyChoice.AllCases.Select(choice => choice.ChoiceCount).ToArray());
 
         string json = Encoding.UTF8.GetString(new WorkspacePreferences().Data());
         string future = json.Insert(1, "\"expandedPropertyChoices\":[\"roughness\",\"sparkle\",\"roughness\"],");

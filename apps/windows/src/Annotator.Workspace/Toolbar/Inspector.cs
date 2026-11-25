@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Annotator.Core;
+using Annotator.Core.Geometry;
 
 namespace Annotator.Workspace.Toolbar;
 
@@ -68,8 +69,8 @@ public enum InspectorItem
     /// <summary>The counter's, ruler's or laser pointer's hint (<see cref="InspectorPlan.Caption"/>).</summary>
     Caption,
 
-    /// <summary>One button that steps through, or opens a menu of, System and Mono (<see cref="InspectorPlan.FontChoices"/>), or the two
-    /// side by side.</summary>
+    /// <summary>One button that steps through, or opens a menu of, System, Mono and Handwriting
+    /// (<see cref="InspectorPlan.FontChoices"/>), or the three side by side.</summary>
     Font,
 
     /// <summary>"Size": just the slider, with its value beside it ("28 pt").</summary>
@@ -263,8 +264,17 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
     public static ImmutableArray<(FillPattern Value, string Name)> FillStyleChoices { get; } =
         [.. FillPattern.AllCases.Select(pattern => (pattern, Capitalized(pattern.RawValue)))];
 
-    /// <summary>The font choices: System and Mono, by their saved font names.</summary>
-    public static ImmutableArray<(string Value, string Name)> FontChoices { get; } = [("system", "System"), ("monospace", "Mono")];
+    /// <summary>The font choices: System, Mono and Handwriting, by their saved font names.</summary>
+    public static ImmutableArray<(string Value, string Name)> FontChoices { get; } =
+        [("system", "System"), ("monospace", "Mono"), (HandwritingFont.Name, "Handwriting")];
+
+    /// <summary>The font choice a saved font name shows as: an unknown name draws in the system font, so it shows System.</summary>
+    public static string FontChoice(string fontName) => TextFont.DesignFor(fontName) switch
+    {
+        FontDesign.Monospace => "monospace",
+        FontDesign.Handwriting => HandwritingFont.Name,
+        _ => "system",
+    };
 
     /// <summary>The alignment choices: Left, Center and Right.</summary>
     public static ImmutableArray<(TextAlignment Value, string Name)> AlignmentChoices { get; } =

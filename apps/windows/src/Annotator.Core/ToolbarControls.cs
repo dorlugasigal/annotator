@@ -154,7 +154,7 @@ public static class PropertyChoiceExtensions
             PropertyChoice.Edges => ["Sharp corners", "Rounded corners"],
             PropertyChoice.ArrowType => ["Straight arrow", "Curved arrow"],
             PropertyChoice.Pressure => ["Constant pressure", "Ink pressure"],
-            PropertyChoice.Font => ["System", "Mono"],
+            PropertyChoice.Font => ["System", "Mono", "Handwriting"],
             PropertyChoice.Alignment => ["Left", "Center", "Right"],
             _ => throw new ArgumentOutOfRangeException(nameof(choice)),
         };

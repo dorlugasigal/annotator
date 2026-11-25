@@ -9,7 +9,7 @@ public readonly record struct Size(double Width, double Height)
     public override int GetHashCode() => HashCode.Combine(Width, Height);
 }
 
-/// <summary>The font family rule (D-4: system fonts on each platform).</summary>
+/// <summary>The font family rule (D-4: system fonts on each platform, and one bundled handwriting font on both).</summary>
 public enum FontDesign : byte
 {
     /// <summary>The platform's interface font (SF Pro on the Mac).</summary>
@@ -17,6 +17,38 @@ public enum FontDesign : byte
 
     /// <summary>The platform's monospaced interface font (SF Mono on the Mac).</summary>
     Monospace,
+
+    /// <summary>Caveat, the handwriting font both apps ship (<see cref="HandwritingFont"/>).</summary>
+    Handwriting,
+}
+
+/// <summary>
+/// The Handwriting font: Caveat's variable font, the same file the Mac bundles
+/// (<c>apps/macos/Sources/PresentationRendering/Fonts/Caveat.ttf</c>, SIL Open Font License 1.1). Regular text uses its
+/// Regular (weight 400) and Bold text weight 600, as on the Mac.
+/// </summary>
+public static class HandwritingFont
+{
+    /// <summary>The saved font name (<see cref="Style.FontName"/>).</summary>
+    public const string Name = "handwriting";
+
+    /// <summary>The font's family name.</summary>
+    public const string Family = "Caveat";
+
+    /// <summary>The font file, relative to the app's folder.</summary>
+    public static string RelativePath { get; } = Path.Combine("Fonts", "Caveat.ttf");
+
+    /// <summary>The font's license, relative to the app's folder.</summary>
+    public static string LicenseRelativePath { get; } = Path.Combine("Fonts", "Caveat-OFL.txt");
+
+    /// <summary>
+    /// How far Caveat's letters reach past the sides of the box they are measured in, in ems: the font leans. The largest
+    /// of all its glyphs at weights 400 to 700 (Mac <c>NativeTextFont.inkOverhang</c>).
+    /// </summary>
+    public const double InkOverhangPerEm = 0.35;
+
+    /// <summary>How far Caveat's letters reach above and below their line box, in ems.</summary>
+    public const double InkRisePerEm = 0.02;
 }
 
 /// <summary>Font weights the Mac uses for annotation text, as OpenType weight classes.</summary>
@@ -29,11 +61,38 @@ public enum FontWeight : short
 /// <summary>Swift <c>NativeTextFont.resolve(_:scale:)</c> without AppKit: design, weight and size in points.</summary>
 public readonly record struct TextFont(FontDesign Design, FontWeight Weight, double Size)
 {
-    /// <summary>Bold text uses the semibold weight; the font name "monospace" selects the monospaced design.</summary>
+    /// <summary>
+    /// Bold text uses the semibold weight; the font name "monospace" selects the monospaced design and "handwriting"
+    /// the handwriting font. Any other name is the system font.
+    /// </summary>
     public static TextFont Resolve(in Style style, double scale = 1) => new(
-        string.Equals(style.FontName, "monospace", StringComparison.Ordinal) ? FontDesign.Monospace : FontDesign.System,
+        DesignFor(style.FontName),
         style.Bold ? FontWeight.Semibold : FontWeight.Regular,
         style.FontSize * scale);
+
+    /// <summary>The design a saved font name draws in.</summary>
+    public static FontDesign DesignFor(string? fontName) => fontName switch
+    {
+        "monospace" => FontDesign.Monospace,
+        HandwritingFont.Name => FontDesign.Handwriting,
+        _ => FontDesign.System,
+    };
+
+    /// <summary>
+    /// Swift <c>NativeTextFont.inkOverhang</c>: how far the font's letters can reach outside the box they are measured in.
+    /// The system fonts stay inside it; the handwriting font leans. Text frames keep their measured size; what paints or
+    /// redraws text adds this.
+    /// </summary>
+    public Geometry.Size InkOverhang => Design == FontDesign.Handwriting
+        ? new Geometry.Size(HandwritingFont.InkOverhangPerEm * Size, HandwritingFont.InkRisePerEm * Size)
+        : new Geometry.Size(0, 0);
+
+    /// <summary>Swift <c>NativeTextFont.inkFrame</c>: the area a text element's letters can paint, its frame grown by <see cref="InkOverhang"/>.</summary>
+    public static Rect InkFrame(in Element text)
+    {
+        var overhang = Resolve(text.Style).InkOverhang;
+        return RectMath.Outset(text.Frame, overhang.Width, overhang.Height);
+    }
 
     public bool Equals(TextFont other) => Design == other.Design && Weight == other.Weight && Size == other.Size;
 

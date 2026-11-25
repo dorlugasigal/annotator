@@ -16,7 +16,7 @@ let package = Package(
     targets: [
         .target(name: "AnnotationCore"),
         .target(name: "MotionCore", dependencies: ["AnnotationCore"]),
-        .target(name: "PresentationRendering", dependencies: ["AnnotationCore"]),
+        .target(name: "PresentationRendering", dependencies: ["AnnotationCore"], resources: [.copy("Fonts")]),
         .target(name: "NativePlatform", dependencies: ["AnnotationCore"]),
         .executableTarget(name: "AnnotatorDiagnostics",
                           dependencies: ["AnnotationCore", "NativePlatform", "PresentationRendering"],

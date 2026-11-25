@@ -152,7 +152,12 @@ public sealed class PropertiesPanelTests
         Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.RoughnessChoices, 1.5));
         Assert.Equal("Pattern: Solid. Click for dashed.", InspectorPlan.CycleHelp("Pattern", "Solid", "Dashed"));
         Assert.Equal("Changes to dashed", InspectorPlan.CycleHint("Dashed"));
-        Assert.Equal(["System", "Mono"], InspectorPlan.FontChoices.Select(choice => choice.Name));
+        Assert.Equal(["System", "Mono", "Handwriting"], InspectorPlan.FontChoices.Select(choice => choice.Name));
+        Assert.Equal(["system", "monospace", "handwriting"], InspectorPlan.FontChoices.Select(choice => choice.Value));
+        Assert.Equal(0, InspectorPlan.NextChoice(InspectorPlan.FontChoices, "handwriting"));
+        // A font name from another app draws in the system font, so the button shows System.
+        Assert.Equal(["system", "monospace", "handwriting", "system"],
+                     new[] { "system", "monospace", "handwriting", "Helvetica" }.Select(InspectorPlan.FontChoice));
         Assert.Equal(["Left", "Center", "Right"], InspectorPlan.AlignmentChoices.Select(choice => choice.Name));
         Assert.Equal(["Solid", "Hatch", "Crosshatch"], InspectorPlan.FillStyleChoices.Select(choice => choice.Name));
         // Mac ChoiceMenu.help, its tooltip and the hint screen readers read.

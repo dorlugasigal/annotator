@@ -287,7 +287,8 @@ final class ToolbarCustomizationTests: XCTestCase {
              { $0.curved }),
             (.pressure, .pen, { $0.pressure = true }, "Ink pressure", ["Constant pressure", "Ink pressure"],
              "Constant pressure", { !$0.pressure }),
-            (.font, .text, { _ in }, "Font", ["System font", "Mono font"], "Mono font", { $0.fontName == "monospace" }),
+            (.font, .text, { _ in }, "Font", ["System font", "Mono font", "Handwriting font"], "Handwriting font",
+             { $0.fontName == "handwriting" }),
             (.alignment, .text, { _ in }, "Alignment", ["Align left", "Align center", "Align right"], "Align right",
              { $0.alignment == .right })
         ]

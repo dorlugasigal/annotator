@@ -312,16 +312,16 @@ internal sealed class PropertiesPanel
                 if (_plan.ShowsAllChoices(PropertyChoice.Font))
                 {
                     var fonts = new MacStack { Orientation = Orientation.Horizontal, Spacing = 5 };
-                    fonts.Children.Add(Left(FontChoice("System", "system", SystemFont)));
-                    fonts.Children.Add(Left(FontChoice("Mono", "monospace", MonoFont)));
+                    foreach ((string value, string name) in InspectorPlan.FontChoices)
+                    {
+                        fonts.Children.Add(Left(FontChoice(name, value)));
+                    }
                     return Block("Font", fonts);
                 }
                 return Block("Font", OneButton(PropertyChoice.Font, "Font",
-                    [
-                        ("system", "System", () => Glyph("Aa", 16, SystemFont)),
-                        ("monospace", "Mono", () => Glyph("Aa", 16, MonoFont)),
-                    ],
-                    style => string.Equals(style.FontName, "monospace", StringComparison.Ordinal) ? "monospace" : "system",
+                    [.. InspectorPlan.FontChoices.Select(choice =>
+                        (choice.Value, choice.Name, (Func<UIElement>)(() => FontSample(choice.Value, 16))))],
+                    style => InspectorPlan.FontChoice(style.FontName),
                     name => _model.ApplyStyle((ref CoreStyle style) => style.FontName = name)));
             case InspectorItem.TextSize:
                 return Block("Size", SliderOnly(StyleParameter.TextSize));
@@ -361,6 +361,30 @@ internal sealed class PropertiesPanel
 
     private static readonly FontFamily SystemFont = new("Segoe UI");
     private static readonly FontFamily MonoFont = new("Cascadia Mono, Consolas, Courier New");
+
+    /// <summary>The bundled handwriting font for XAML text: the file next to the app (HandwritingFont.RelativePath) and its family.</summary>
+    internal const string HandwritingFontSource = "ms-appx:///Fonts/Caveat.ttf#Caveat";
+
+    private static readonly FontFamily HandwritingFamily = new(HandwritingFontSource);
+
+    /// <summary>
+    /// A font choice's "Aa" sample (Mac TextFontChoice.sample). Caveat's letters are small for their size, so its sample is
+    /// 6 points larger and bold.
+    /// </summary>
+    private static TextBlock FontSample(string fontName, double size)
+    {
+        switch (TextFont.DesignFor(fontName))
+        {
+            case FontDesign.Monospace:
+                return Glyph("Aa", size, MonoFont);
+            case FontDesign.Handwriting:
+                TextBlock sample = Glyph("Aa", size + 6, HandwritingFamily);
+                sample.FontWeight = FontWeights.SemiBold;
+                return sample;
+            default:
+                return Glyph("Aa", size, SystemFont);
+        }
+    }
 
     private static string AlignmentSymbol(CoreTextAlignment alignment) => alignment switch
     {
@@ -827,9 +851,9 @@ internal sealed class PropertiesPanel
         return glyph;
     }
 
-    private FrameworkElement FontChoice(string title, string name, FontFamily family)
+    private FrameworkElement FontChoice(string title, string name)
     {
-        (ParityButton button, Action<bool> select) = Choice($"{title} font", Glyph("Aa", 17, family));
+        (ParityButton button, Action<bool> select) = Choice($"{title} font", FontSample(name, 17));
         button.Click += (_, _) => Apply((ref CoreStyle style) => style.FontName = name);
         _updates.Add(state => select(string.Equals(state.Style.FontName, name, StringComparison.Ordinal)));
         return button;

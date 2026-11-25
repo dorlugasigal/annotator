@@ -219,14 +219,14 @@ public sealed class SceneBuilder
         {
             return entry.Bounds;
         }
-        var bounds = element.Frame;
+        var bounds = element.Tool == Tool.Text ? TextFont.InkFrame(element) : element.Frame;
         if (UsesPath(element.Tool))
         {
             bounds = RectMath.Union(bounds, Path(element).Bounds);
         }
         if (ShapeLabelLayout.TextElement(element, measurer) is { } label)
         {
-            bounds = bounds.Union(label.Frame);
+            bounds = bounds.Union(TextFont.InkFrame(label));
         }
         if (element.Tool == Tool.Counter)
         {
@@ -462,8 +462,9 @@ public sealed class SceneBuilder
         if ((flags & ListFlags.HideLabel) == 0 && element.Label is { HasVisibleText: true } label
             && (labelText ??= ShapeLabelLayout.TextElement(element, measurer)) is { } text)
         {
+            var labelFont = TextFont.Resolve(text.Style);
             DrawText(text, label.FollowsStroke == true ? element.Frame : null,
-                     MacTextMetrics.CenteredFirstBaseline(text.Frame, text.Text, TextFont.Resolve(text.Style).Size));
+                     MacTextMetrics.CenteredFirstBaseline(text.Frame, text.Text, labelFont.Size, labelFont.Design));
         }
         if (rotated)
         {
@@ -823,12 +824,12 @@ public sealed class SceneBuilder
     {
         var style = text.Style;
         var color = style.Color with { Alpha = style.Color.Alpha * style.Opacity };
-        var paint = BeginPaint(style.StrokeGradient, paintBounds ?? text.Frame, 1, RectMath.Outset(text.Frame, 2, 2), color, 1);
+        var paint = BeginPaint(style.StrokeGradient, paintBounds ?? text.Frame, 1, RectMath.Outset(TextFont.InkFrame(text), 2, 2), color, 1);
         if (paint is not null)
         {
             var font = TextFont.Resolve(style);
             writer.Add(DisplayItem.DrawText(new TextRun(text.Text, text.Frame, font, style.Alignment, paint,
-                                                        baseline ?? MacTextMetrics.FirstBaseline(text.Frame, font.Size))));
+                                                        baseline ?? MacTextMetrics.FirstBaseline(text.Frame, font.Size, font.Design))));
         }
         EndPaint(paint);
     }
