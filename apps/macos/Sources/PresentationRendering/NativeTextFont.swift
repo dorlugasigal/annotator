@@ -31,6 +31,19 @@ public enum NativeTextFont {
         return CTFontCreateWithFontDescriptor(descriptor, size, nil) as NSFont
     }
 
+    /// How far a style's letters can reach outside the box they are measured in. The system fonts stay inside it. Caveat
+    /// leans, so its ink reaches up to 0.35 em past the sides and 0.02 em above and below (the largest of all its glyphs
+    /// at weights 400 to 700). Text frames keep their measured size; what paints or redraws text adds this.
+    public static func inkOverhang(_ style: Style) -> CGSize {
+        style.fontName == "handwriting" ? CGSize(width: 0.35 * style.fontSize, height: 0.02 * style.fontSize) : .zero
+    }
+
+    /// The area a text element's letters can paint: its frame grown by `inkOverhang`.
+    public static func inkFrame(_ element: Element) -> CGRect {
+        let overhang = inkOverhang(element.style)
+        return element.frame.cgRect.insetBy(dx: -overhang.width, dy: -overhang.height)
+    }
+
     public static func contentSize(_ text: String, font: NSFont) -> CGSize {
         let measured = ((text.isEmpty ? " " : text) as NSString).boundingRect(
             with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),

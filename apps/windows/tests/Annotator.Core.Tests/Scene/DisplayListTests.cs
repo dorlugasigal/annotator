@@ -356,6 +356,37 @@ public class DisplayListTests
     }
 
     [Fact]
+    public void HandwritingTextPaintsAndRedrawsPastItsFrame()
+    {
+        // Caveat leans: its ink reaches 0.35 em past the sides of the frame and 0.02 em above and below (Mac NativeTextFont.inkOverhang).
+        var builder = Builder();
+        var text = new Element(Tool.Text, new Rect(20, 30, 200, 40), text: "why the dip?");
+        text.Style.FontSize = 40;
+        text.Style.SetGradient(new ColorGradient([new RGBA(1, 0, 0), new RGBA(0, 0, 1)]), fill: false);
+        Assert.Equal(new Rect(20 - 2, 30 - 2, 200 + 4, 40 + 4), Assert.Single(Draw(text), item => item.Op == DisplayOp.PushClip).Rect);
+        Assert.Equal(new Rect(20 - 9.5, 30 - 9.5, 200 + 19, 40 + 19), builder.DrawingBounds(text));
+
+        text.Style.FontName = "handwriting";
+        Assert.Equal(new Geometry.Size(14, 0.8), TextFont.Resolve(text.Style).InkOverhang);
+        var clip = Assert.Single(Draw(text), item => item.Op == DisplayOp.PushClip).Rect;
+        Assert.Equal(20 - 14 - 2, clip.X, 9);
+        Assert.Equal(30 - 0.8 - 2, clip.Y, 9);
+        Assert.Equal(200 + 2 * (14 + 2), clip.Width, 9);
+        Assert.Equal(40 + 2 * (0.8 + 2), clip.Height, 9);
+        var bounds = builder.DrawingBounds(text);
+        Assert.Equal(20 - 14 - 9.5, bounds.X, 9);
+        Assert.Equal(200 + 2 * (14 + 9.5), bounds.Width, 9);
+        Assert.Equal(40 + 2 * (0.8 + 9.5), bounds.Height, 9);
+
+        // A shape's label follows its font too.
+        var style = new ShapeLabel("x").Style;
+        style.FontName = "handwriting";
+        var shape = new Element(Tool.Rectangle, new Rect(0, 0, 40, 40)) { Label = new ShapeLabel("why the dip?", style) };
+        var label = ShapeLabelLayout.TextElement(shape, new FakeTextMeasurer())!.Value;
+        Assert.Equal(label.Frame.X - 0.35 * style.FontSize - 9.5, builder.DrawingBounds(shape).X, 9);
+    }
+
+    [Fact]
     public void ListsAreReadOnlySnapshotsSafeToCompare()
     {
         var shape = new Element(Tool.Diamond, new Rect(0, 0, 30, 30));

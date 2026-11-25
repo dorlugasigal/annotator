@@ -190,7 +190,10 @@ platform that departs from the specifications, unless an ADR changes them.
   (`apps/macos/Sources/PresentationRendering/Fonts/Caveat.ttf`) and draw
   regular text in its Regular (weight 400) and Bold text in weight 600 on its
   weight axis, so its letters and line metrics (ascender 0.96 em, descender
-  0.3 em) are the same on both platforms.
+  0.3 em) are the same on both platforms. Caveat leans past the box its text
+  is measured in, so wherever text is clipped or redrawn by its frame (a
+  gradient color, fades, redraw areas), both apps allow handwriting 0.35 em
+  more at the sides and 0.02 em above and below. Frames don't change.
 - **WIN-REND-04**: Colors are sRGB with premultiplied alpha. On HDR or
   wide-color displays the overlay renders as SDR content, like other SDR apps.
 - **WIN-REND-05**: Rendering tolerance against the Mac reference images, at

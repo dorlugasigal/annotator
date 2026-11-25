@@ -40,6 +40,15 @@ public static class HandwritingFont
 
     /// <summary>The font's license, relative to the app's folder.</summary>
     public static string LicenseRelativePath { get; } = Path.Combine("Fonts", "Caveat-OFL.txt");
+
+    /// <summary>
+    /// How far Caveat's letters reach past the sides of the box they are measured in, in ems: the font leans. The largest
+    /// of all its glyphs at weights 400 to 700 (Mac <c>NativeTextFont.inkOverhang</c>).
+    /// </summary>
+    public const double InkOverhangPerEm = 0.35;
+
+    /// <summary>How far Caveat's letters reach above and below their line box, in ems.</summary>
+    public const double InkRisePerEm = 0.02;
 }
 
 /// <summary>Font weights the Mac uses for annotation text, as OpenType weight classes.</summary>
@@ -68,6 +77,22 @@ public readonly record struct TextFont(FontDesign Design, FontWeight Weight, dou
         HandwritingFont.Name => FontDesign.Handwriting,
         _ => FontDesign.System,
     };
+
+    /// <summary>
+    /// Swift <c>NativeTextFont.inkOverhang</c>: how far the font's letters can reach outside the box they are measured in.
+    /// The system fonts stay inside it; the handwriting font leans. Text frames keep their measured size; what paints or
+    /// redraws text adds this.
+    /// </summary>
+    public Geometry.Size InkOverhang => Design == FontDesign.Handwriting
+        ? new Geometry.Size(HandwritingFont.InkOverhangPerEm * Size, HandwritingFont.InkRisePerEm * Size)
+        : new Geometry.Size(0, 0);
+
+    /// <summary>Swift <c>NativeTextFont.inkFrame</c>: the area a text element's letters can paint, its frame grown by <see cref="InkOverhang"/>.</summary>
+    public static Rect InkFrame(in Element text)
+    {
+        var overhang = Resolve(text.Style).InkOverhang;
+        return RectMath.Outset(text.Frame, overhang.Width, overhang.Height);
+    }
 
     public bool Equals(TextFont other) => Design == other.Design && Weight == other.Weight && Size == other.Size;
 
