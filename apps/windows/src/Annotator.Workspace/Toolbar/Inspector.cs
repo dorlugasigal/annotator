@@ -39,15 +39,15 @@ public enum InspectorItem
     /// <summary>The opacity slider and field with its caption.</summary>
     Opacity,
 
-    /// <summary>One button that steps through Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>), or the
+    /// <summary>One button that steps through, or opens a menu of, Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>), or the
     /// three side by side (<see cref="InspectorPlan.ShowsAllChoices"/>).</summary>
     Pattern,
 
-    /// <summary>One button that steps through Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>), or the
+    /// <summary>One button that steps through, or opens a menu of, Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>), or the
     /// three side by side.</summary>
     Roughness,
 
-    /// <summary>"Fill style": one button that steps through the fill patterns, or all of them side by side; only while a
+    /// <summary>"Fill style": one button that steps through, or opens a menu of, the fill patterns, or all of them side by side; only while a
     /// visible fill is set.</summary>
     FillStyle,
 
@@ -69,8 +69,8 @@ public enum InspectorItem
     /// <summary>The counter's, ruler's or laser pointer's hint (<see cref="InspectorPlan.Caption"/>).</summary>
     Caption,
 
-    /// <summary>One button that steps through System, Mono and Handwriting (<see cref="InspectorPlan.FontChoices"/>), or
-    /// the three side by side.</summary>
+    /// <summary>One button that steps through, or opens a menu of, System, Mono and Handwriting
+    /// (<see cref="InspectorPlan.FontChoices"/>), or the three side by side.</summary>
     Font,
 
     /// <summary>"Size": just the slider, with its value beside it ("28 pt").</summary>
@@ -78,7 +78,7 @@ public enum InspectorItem
 
     Weight,
 
-    /// <summary>One button that steps through Left, Center and Right, or the three side by side.</summary>
+    /// <summary>One button that steps through, or opens a menu of, Left, Center and Right, or the three side by side.</summary>
     Alignment,
 
     /// <summary>
@@ -117,11 +117,17 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
     /// <summary>Properties that show all their choices side by side instead of one button (Mac showsAllChoices).</summary>
     public ImmutableArray<PropertyChoice> AllChoices { get; init; } = [];
 
+    /// <summary>Properties whose button opens a menu of their choices instead of stepping through them (Mac Menu).</summary>
+    public ImmutableArray<PropertyChoice> MenuChoices { get; init; } = [];
+
     /// <summary>A key that changes exactly when the controls change, for rebuilding them.</summary>
-    public string Key => $"{Tool}|{Context is not null}|{Body}|{string.Join(',', Items)}|{Arrow}|{string.Join(',', AllChoices)}";
+    public string Key => $"{Tool}|{Context is not null}|{Body}|{string.Join(',', Items)}|{Arrow}|{string.Join(',', AllChoices)}|{string.Join(',', MenuChoices)}";
 
     /// <summary>Whether <paramref name="choice"/> shows all its choices side by side.</summary>
     public bool ShowsAllChoices(PropertyChoice choice) => AllChoices.Contains(choice);
+
+    /// <summary>Whether a property's button opens a menu of its choices instead of going to the next one on each click.</summary>
+    public bool OpensMenu(PropertyChoice choice) => MenuChoices.Contains(choice);
 
     /// <summary>The arrow type block's title: "Curved" for the switch, "Arrow type" for both choices.</summary>
     public string ArrowTypeTitle => ShowsAllChoices(PropertyChoice.ArrowType) ? "Arrow type" : "Curved";
@@ -229,6 +235,7 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
         return new InspectorPlan(tool, context, body, items.ToImmutable(), tool == Tool.Arrow, caption)
         {
             AllChoices = [.. PropertyChoice.AllCases.Where(snapshot.ShowsAllChoices)],
+            MenuChoices = [.. PropertyChoice.AllCases.Where(choice => snapshot.ChoiceStyle(choice) == PropertyChoiceStyle.Menu)],
         };
     }
 
@@ -274,8 +281,8 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
         [.. TextAlignment.AllCases.Select(alignment => (alignment, Capitalized(alignment.RawValue)))];
 
     /// <summary>
-    /// Mac CycleOptions: the choice after <paramref name="current"/>, wrapping to the first. A value that isn't one of the
-    /// choices counts as the first, as the button shows it.
+    /// Mac CycleOptions (One button): the choice after <paramref name="current"/>, wrapping to the first. A value that isn't one
+    /// of the choices counts as the first, as the button shows it.
     /// </summary>
     public static int NextChoice<T>(ImmutableArray<(T Value, string Name)> choices, T current)
     {
@@ -288,6 +295,9 @@ public sealed record InspectorPlan(Tool Tool, string? Context, InspectorBody Bod
 
     /// <summary>Mac CycleOptions' accessibilityHint, which screen readers read instead of the tooltip: "Changes to dashed".</summary>
     public static string CycleHint(string next) => $"Changes to {next.ToLowerInvariant()}";
+
+    /// <summary>Mac ChoiceMenu.help, its tooltip and accessibilityHint: "Pattern: Solid. Click to see all choices."</summary>
+    public static string ChoiceMenuHelp(string name, string current) => $"{name}: {current}. Click to see all choices.";
 
     /// <summary>The corner radius the Rounded corners switch sets.</summary>
     public const double RoundedCornerRadius = 14;

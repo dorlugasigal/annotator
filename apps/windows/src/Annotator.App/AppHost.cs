@@ -82,6 +82,7 @@ internal sealed partial class AppHost
     private TrayFlyout? _flyout;
     private ColorPopover? _colorPicker;
     private ArrowHeadPalette? _arrowHeads;
+    private ChoicePalette? _choices;
     private ToolsWindow? _tools;
     private SettingsWindow? _settings;
     private readonly LaunchAtSignIn _launch;
@@ -92,6 +93,8 @@ internal sealed partial class AppHost
     private readonly Sharing.RegionSharingController _sharingWindows;
     private readonly Breaks.BreakTimerHost _breaks;
     private long? _flyoutClosedByIcon;
+    /// <summary>When and where a press on a property's menu button closed its open menu (Mac open.toggle()).</summary>
+    private (long At, RectInt32 Button)? _choicesClosedByButton;
     private bool _checkReady;
     private bool _quitting;
 
@@ -213,6 +216,7 @@ internal sealed partial class AppHost
             new PointInt32(check.Area.Left + (int)Math.Round(12 * checkScale), check.Area.Top + (int)Math.Round(12 * checkScale))))
         {
             ArrowHeads = OpenArrowHeads,
+            Choices = OpenChoices,
             ToolLibrary = () => OpenToolLibrary(null),
             Settings = () => OpenSettings(SettingsTab.General),
             HoldsOpen = () => _tutorial is { IsVisible: true } || _canvases.ConstructingArrow || ToolsUnderPointer(),
@@ -472,7 +476,8 @@ internal sealed partial class AppHost
         _model.SuspendPresentation(cancelPendingRequests);
     }
 
-    private bool InputBlocked => _flyout is not null || _colorPicker is not null || _arrowHeads is not null || _files.DialogOpen;
+    private bool InputBlocked => _flyout is not null || _colorPicker is not null || _arrowHeads is not null || _choices is not null
+        || _files.DialogOpen;
 
     private void OnPublished(WorkspaceSnapshot snapshot)
     {
@@ -717,6 +722,7 @@ internal sealed partial class AppHost
         _flyout?.Dismiss(restoreFocus: false);
         _colorPicker?.Dismiss(restoreFocus: false);
         _arrowHeads?.Dismiss(restoreFocus: false);
+        _choices?.Dismiss(restoreFocus: false);
     }
 
     /// <summary>
@@ -907,6 +913,49 @@ internal sealed partial class AppHost
         PostFrame();
         palette.Open(anchor, PopoverPlacement.BelowOrAbove);
     }
+
+    /// <summary>
+    /// A property's menu of choices (Mac ChoiceMenu), below the button that opened it. As on the Mac, a click on the button
+    /// of the open menu closes it: the press takes activation from the menu, which closes, so the keyboard goes back to the
+    /// window that had it before the menu opened, and the release does not open the menu again.
+    /// </summary>
+    private void OpenChoices(ChoicesRequest request, RectInt32 anchor, Action closed)
+    {
+        if (_choicesClosedByButton is { } press && Environment.TickCount64 - press.At < IconClickMilliseconds && SameRect(press.Button, anchor))
+        {
+            _choicesClosedByButton = null;
+            closed();
+            return;
+        }
+        _choicesClosedByButton = null;
+        CloseTransientWindows();
+        HWND before = PInvoke.GetForegroundWindow();
+        var palette = new ChoicePalette(_registry, request);
+        palette.Dismissed += () =>
+        {
+            if (palette.ClosedByDeactivation && WindowChrome.TryCursor() is { } cursor && cursor.X >= anchor.X && cursor.X < anchor.X + anchor.Width
+                && cursor.Y >= anchor.Y && cursor.Y < anchor.Y + anchor.Height)
+            {
+                _choicesClosedByButton = (Environment.TickCount64, anchor);
+                if (!before.IsNull && PInvoke.IsWindow(before))
+                {
+                    PInvoke.SetForegroundWindow(before);
+                }
+            }
+            closed();
+            if (_choices == palette)
+            {
+                _choices = null;
+                PostFrame();
+            }
+        };
+        _choices = palette;
+        PostFrame();
+        palette.Open(anchor, PopoverPlacement.BelowOrAbove);
+    }
+
+    private static bool SameRect(RectInt32 first, RectInt32 second) =>
+        first.X == second.X && first.Y == second.Y && first.Width == second.Width && first.Height == second.Height;
 
     private void Perform(TrayAction action)
     {

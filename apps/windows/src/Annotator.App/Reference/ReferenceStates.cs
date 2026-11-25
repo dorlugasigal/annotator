@@ -24,6 +24,9 @@ internal enum ReferenceSurface
     /// <summary>The arrowhead choices for the start or end of an arrow (Mac ArrowHeadPalette).</summary>
     ArrowHeads,
 
+    /// <summary>A property's menu of choices, open (Mac ChoicePalette): Pattern's or Font's.</summary>
+    Choices,
+
     /// <summary>The color popover (Mac InspectorColorPalette) for the stroke or the fill.</summary>
     Picker,
 
@@ -148,6 +151,9 @@ internal sealed record ReferenceScenario(ReferenceSurface Surface)
 
     /// <summary>Which paint the color popover edits, for <see cref="ReferenceSurface.Picker"/>.</summary>
     public ColorPickerRequest? Picker { get; init; }
+
+    /// <summary>The property whose menu shows, for <see cref="ReferenceSurface.Choices"/>.</summary>
+    public PropertyChoice Choice { get; init; }
 
     /// <summary>The section the Tools window shows, for <see cref="ReferenceSurface.ToolsWindow"/>.</summary>
     public ToolLibrarySection Section { get; init; }
@@ -470,6 +476,13 @@ internal static partial class ReferenceStates
                     model.ShowToolbar();
                     model.Choose(Tool.Arrow);
                 },
+            },
+            // UXReferenceCaptureTests' open property menus: Pattern's (Solid, Dashed, Dotted) and Font's (System, Mono,
+            // Handwriting), each with the first choice current.
+            "choices-pattern" or "choices-font" => new ReferenceScenario(ReferenceSurface.Choices)
+            {
+                Choice = state == "choices-pattern" ? PropertyChoice.Pattern : PropertyChoice.Font,
+                Setup = model => model.ShowToolbar(),
             },
             "zoom-compact" or "zoom-full" => new ReferenceScenario(ReferenceSurface.ZoomControls)
             {

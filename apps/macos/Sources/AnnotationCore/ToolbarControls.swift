@@ -73,8 +73,19 @@ public enum ToolbarHold {
     public static func isStill(dx: Double, dy: Double) -> Bool { (dx * dx + dy * dy).squareRoot() <= slop }
 }
 
-/// Properties with a few choices. Each shows as one button that steps through its choices, which is the default, or as all
-/// its choices side by side.
+/// How a property with a few choices shows on the properties row.
+public enum PropertyChoiceStyle: String, CaseIterable, Sendable {
+    /// One button that goes to the next choice on each click, or switches an on and off property. The default.
+    case oneButton
+    /// One button that opens a menu of the choices. Not for on and off properties.
+    case menu
+    /// All the choices side by side.
+    case all
+}
+
+/// Properties with a few choices. Each shows as one button that steps through them, which is the default, one button
+/// that opens a menu of them, or all its choices side by side. An on and off property such as Rounded corners is one
+/// button that switches it, or both choices side by side.
 public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
     case pattern, roughness, fillStyle, edges, arrowType, pressure, font, alignment
 
@@ -91,7 +102,7 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// The property's choices, in order. One button starts at the first and steps through them.
+    /// The property's choices, in order. One button shows the first as its default.
     public var choices: [String] {
         switch self {
         case .pattern: ["Solid", "Dashed", "Dotted"]
@@ -107,6 +118,12 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
 
     /// How many choices the property has.
     public var choiceCount: Int { choices.count }
+
+    /// Whether its one button switches the property on and off instead of opening a menu of the choices.
+    public var isOnOff: Bool { self == .edges || self == .arrowType || self == .pressure }
+
+    /// The ways the property can show: an on and off property has no menu.
+    public var styles: [PropertyChoiceStyle] { isOnOff ? [.oneButton, .all] : [.oneButton, .menu, .all] }
 }
 
 extension WorkspacePreferences {
@@ -138,6 +155,21 @@ extension WorkspacePreferences {
         expandedPropertyChoices = ordered.isEmpty ? nil : ordered
     }
 
+    /// How a property shows: all its choices, a menu of them, or one button that steps through them (the default).
+    public func propertyChoiceStyle(_ choice: PropertyChoice) -> PropertyChoiceStyle {
+        if showsAllChoices(choice) { return .all }
+        return !choice.isOnOff && (menuPropertyChoices ?? []).contains(choice.rawValue) ? .menu : .oneButton
+    }
+
+    /// Sets how a property shows. Menu falls back to one button for an on and off property.
+    public mutating func setPropertyChoiceStyle(_ choice: PropertyChoice, _ style: PropertyChoiceStyle) {
+        setShowsAllChoices(choice, style == .all)
+        var menus = Set(menuPropertyChoices ?? [])
+        if style == .menu && !choice.isOnOff { menus.insert(choice.rawValue) } else { menus.remove(choice.rawValue) }
+        let ordered = PropertyChoice.allCases.map(\.rawValue).filter(menus.contains)
+        menuPropertyChoices = ordered.isEmpty ? nil : ordered
+    }
+
     func validateToolbarControls() throws {
         if let hiddenToolbarControls {
             guard hiddenToolbarControls.count <= ToolbarControl.allCases.count,
@@ -158,6 +190,13 @@ extension WorkspacePreferences {
                 throw CanvasError.invalidDocument("Properties that show all their choices must be known properties, each listed once.")
             }
         }
+        if let menuPropertyChoices {
+            guard Set(menuPropertyChoices).count == menuPropertyChoices.count,
+                  menuPropertyChoices.allSatisfy({ PropertyChoice(rawValue: $0)?.isOnOff == false }) else {
+                throw CanvasError.invalidDocument(
+                    "Properties that open a menu must be known properties with more than on and off, each listed once.")
+            }
+        }
     }
 
     /// Buttons and properties from a newer version are dropped, so a profile with them still opens.
@@ -171,6 +210,11 @@ extension WorkspacePreferences {
             var seen = Set<String>()
             let known = expanded.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
             expandedPropertyChoices = known.isEmpty ? nil : known
+        }
+        if let menus = menuPropertyChoices {
+            var seen = Set<String>()
+            let known = menus.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
+            menuPropertyChoices = known.isEmpty ? nil : known
         }
     }
 }

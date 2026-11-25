@@ -142,14 +142,16 @@ public sealed class PropertiesPanelTests
     }
 
     [Fact]
-    public void ChoicesAreSingleButtonsThatStepToTheNextOne()
+    public void ChoicesAreSingleButtonsThatOpenAMenu()
     {
         Assert.Equal(["Solid", "Dashed", "Dotted"], InspectorPlan.PatternChoices.Select(choice => choice.Name));
+        // Step goes to the next choice on each click.
         Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.PatternChoices, StrokePattern.Solid));
         Assert.Equal(0, InspectorPlan.NextChoice(InspectorPlan.PatternChoices, StrokePattern.Dotted));
-        Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.RoughnessChoices, 0.0));
         // An unknown value shows as the first choice.
         Assert.Equal(1, InspectorPlan.NextChoice(InspectorPlan.RoughnessChoices, 1.5));
+        Assert.Equal("Pattern: Solid. Click for dashed.", InspectorPlan.CycleHelp("Pattern", "Solid", "Dashed"));
+        Assert.Equal("Changes to dashed", InspectorPlan.CycleHint("Dashed"));
         Assert.Equal(["System", "Mono", "Handwriting"], InspectorPlan.FontChoices.Select(choice => choice.Name));
         Assert.Equal(["system", "monospace", "handwriting"], InspectorPlan.FontChoices.Select(choice => choice.Value));
         Assert.Equal(0, InspectorPlan.NextChoice(InspectorPlan.FontChoices, "handwriting"));
@@ -158,9 +160,11 @@ public sealed class PropertiesPanelTests
                      new[] { "system", "monospace", "handwriting", "Helvetica" }.Select(InspectorPlan.FontChoice));
         Assert.Equal(["Left", "Center", "Right"], InspectorPlan.AlignmentChoices.Select(choice => choice.Name));
         Assert.Equal(["Solid", "Hatch", "Crosshatch"], InspectorPlan.FillStyleChoices.Select(choice => choice.Name));
-        Assert.Equal("Pattern: Solid. Click for dashed.", InspectorPlan.CycleHelp("Pattern", "Solid", "Dashed"));
-        // Mac CycleOptions' accessibilityHint, which screen readers read.
-        Assert.Equal("Changes to dashed", InspectorPlan.CycleHint("Dashed"));
+        // Mac ChoiceMenu.help, its tooltip and the hint screen readers read.
+        Assert.Equal("Pattern: Solid. Click to see all choices.", InspectorPlan.ChoiceMenuHelp("Pattern", "Solid"));
+        // Edges, Arrow type and Pressure stay on and off buttons; the others open a menu.
+        Assert.Equal([PropertyChoice.Edges, PropertyChoice.ArrowType, PropertyChoice.Pressure],
+            PropertyChoice.AllCases.Where(choice => choice.IsOnOff));
         Assert.Equal("Blurred details can still be readable. Remove private info before you share.", InspectorPlan.CoverCaption);
     }
 

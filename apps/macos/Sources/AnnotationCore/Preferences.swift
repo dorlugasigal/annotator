@@ -103,6 +103,9 @@ public struct WorkspacePreferences: Codable, Equatable, Sendable {
     public var toolbarCollapseDelay: Double?
     /// Properties that show all their choices side by side instead of one button (`PropertyChoice` raw values).
     public var expandedPropertyChoices: [String]?
+    /// Properties whose button opens a menu of their choices instead of going to the next one on each click
+    /// (`PropertyChoice` raw values). `expandedPropertyChoices` wins for a property in both.
+    public var menuPropertyChoices: [String]?
     /// Seconds the laser pointer's trail stays before it fades, within `LaserTrail.lifetimeRange`. `nil` means
     /// `LaserTrail.defaultLifetime`.
     public var laserFade: Double?

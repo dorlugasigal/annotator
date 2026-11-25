@@ -117,8 +117,8 @@ public sealed partial class WorkspaceModel
     }
 
     /// <summary>
-    /// Mac setShowsAllChoices: a property with a few choices shows all of them side by side, or one button that steps
-    /// through them (Settings > Toolbar > Your properties).
+    /// Mac setShowsAllChoices: a property with a few choices shows all of them side by side, or one button (Settings >
+    /// Toolbar > Your properties).
     /// </summary>
     public void SetShowsAllChoices(PropertyChoice choice, bool shown)
     {
@@ -138,15 +138,38 @@ public sealed partial class WorkspaceModel
         PersistPreferences();
     }
 
+    /// <summary>
+    /// Mac setPropertyChoiceStyle: a property with a few choices shows as one button that steps through them (the
+    /// default), a menu of them, or all of them side by side (Settings > Toolbar > Your properties).
+    /// </summary>
+    public void SetPropertyChoiceStyle(PropertyChoice choice, PropertyChoiceStyle style)
+    {
+        using ChangeScope scope = Change();
+        WorkspacePreferences updated = _preferences;
+        updated.SetChoiceStyle(choice, style);
+        try
+        {
+            updated.Validate();
+        }
+        catch (Exception error) when (IsReportable(error))
+        {
+            Report(error);
+            return;
+        }
+        _preferences = updated;
+        PersistPreferences();
+    }
+
     /// <summary>Mac resetPropertyChoices: "Use one button everywhere".</summary>
     public void ResetPropertyChoices()
     {
         using ChangeScope scope = Change();
-        if (_preferences.ExpandedPropertyChoices is null)
+        if (_preferences.ExpandedPropertyChoices is null && _preferences.MenuPropertyChoices is null)
         {
             return;
         }
         _preferences.ExpandedPropertyChoices = null;
+        _preferences.MenuPropertyChoices = null;
         PersistPreferences();
     }
 

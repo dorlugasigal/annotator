@@ -41,6 +41,9 @@ internal interface IPropertiesHost
     /// <summary>Opens the arrowhead choices for the start or end below <paramref name="anchor"/>; <paramref name="closed"/> runs when they close.</summary>
     void OpenArrowHeads(bool start, FrameworkElement anchor, Action closed);
 
+    /// <summary>Opens a property's menu of choices below <paramref name="anchor"/>; <paramref name="closed"/> runs when it closes.</summary>
+    void OpenChoices(ChoicesRequest request, FrameworkElement anchor, Action closed);
+
     /// <summary>A value field needs the keyboard: the window becomes active while the person types.</summary>
     void BeginTyping(TextBox field);
 
@@ -51,7 +54,7 @@ internal interface IPropertiesHost
 /// The full properties panel, a port of ContextualInspector.swift with NativeInspectorComponents.swift: the "Editing …"
 /// line for a selection and the current tool's property blocks on one row that never wraps (the toolbar grows sideways to
 /// fit it), or in one column beside a vertical toolbar (<c>compact</c>), with the arrow controls at the end. Properties
-/// with a few choices are one button that steps through them, or all their choices side by side (Settings > Toolbar >
+/// with a few choices are one button that steps through them or opens a column of them, or all their choices side by side (Settings > Toolbar >
 /// Your properties). Every control applies to the tool's style and to the selection through the workspace model;
 /// slider drags and field edits are one Undo step each. The whole panel is unavailable while every selected object is
 /// locked.
@@ -315,7 +318,7 @@ internal sealed class PropertiesPanel
                     }
                     return Block("Font", fonts);
                 }
-                return Block("Font", Cycle("Font",
+                return Block("Font", OneButton(PropertyChoice.Font, "Font",
                     [.. InspectorPlan.FontChoices.Select(choice =>
                         (choice.Value, choice.Name, (Func<UIElement>)(() => FontSample(choice.Value, 16))))],
                     style => InspectorPlan.FontChoice(style.FontName),
@@ -347,7 +350,7 @@ internal sealed class PropertiesPanel
                     }
                     return Block("Alignment", alignments);
                 }
-                return Block("Alignment", Cycle("Alignment",
+                return Block("Alignment", OneButton(PropertyChoice.Alignment, "Alignment",
                     [.. InspectorPlan.AlignmentChoices.Select(choice =>
                         (choice.Value, choice.Name, (Func<UIElement>)(() => Symbol(AlignmentSymbol(choice.Value), 15))))],
                     style => style.Alignment, alignment => _model.ApplyStyle((ref CoreStyle style) => style.Alignment = alignment)));
@@ -399,7 +402,7 @@ internal sealed class PropertiesPanel
 
     /// <summary>
     /// A property with a few choices (Mac showsAllChoices): all of them side by side (SampleOptions), or one button that
-    /// steps through them (CycleOptions).
+    /// steps through them or opens a menu of them (ChoiceButton).
     /// </summary>
     private FrameworkElement Choices<T>(PropertyChoice choice, string name, IEnumerable<(T Value, string Name, InspectorSample Sample)> values,
                                         Func<CoreStyle, T> current, Action<T> choose)
@@ -408,7 +411,114 @@ internal sealed class PropertiesPanel
         {
             return Options(values, current, choose);
         }
-        return Cycle(name, [.. values.Select(value => (value.Value, value.Name, (Func<UIElement>)(() => Sample(value.Sample))))], current, choose);
+        return OneButton(choice, name, [.. values.Select(value => (value.Value, value.Name, (Func<UIElement>)(() => Sample(value.Sample))))],
+            current, choose);
+    }
+
+    /// <summary>
+    /// Port of ChoiceButton: one button for a property with a few choices, a button that goes to the next one on each click
+    /// (<see cref="Cycle"/>, the default) or, when Settings > Toolbar > Your properties says Menu, a menu of them
+    /// (<see cref="ChoiceMenu"/>).
+    /// </summary>
+    private FrameworkElement OneButton<T>(PropertyChoice choice, string name, IReadOnlyList<(T Value, string Label, Func<UIElement> Face)> values,
+                                          Func<CoreStyle, T> current, Action<T> choose) =>
+        _plan.OpensMenu(choice) ? ChoiceMenu(name, values, current, choose) : Cycle(name, values, current, choose);
+
+    /// <summary>
+    /// Port of ChoiceMenu: one 36-point button for a few choices, such as Solid, Dashed and Dotted. It shows the current
+    /// choice with a small chevron, and a click opens a column of every choice drawn as it looks (<see cref="ChoicePalette"/>),
+    /// the current one with the accent outline; choosing one closes it. Up and Down on the button go to the next or the
+    /// previous choice (Mac accessibilityAdjustableAction). UI Automation reads the current choice as its value.
+    /// </summary>
+    private FrameworkElement ChoiceMenu<T>(string name, IReadOnlyList<(T Value, string Label, Func<UIElement> Face)> values,
+                                           Func<CoreStyle, T> current, Action<T> choose)
+    {
+        var face = new ContentControl
+        {
+            IsTabStop = false,
+            IsHitTestVisible = false,
+            Width = 36,
+            Height = 36,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+        };
+        FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 6, 6, 8, "AnnotatorGlyphSecondary");
+        chevron.HorizontalAlignment = HorizontalAlignment.Center;
+        chevron.VerticalAlignment = VerticalAlignment.Bottom;
+        chevron.Margin = new Thickness(0, 0, 0, 2.5);
+        chevron.IsHitTestVisible = false;
+        AutomationProperties.SetAccessibilityView(chevron, AccessibilityView.Raw);
+        var content = new Grid();
+        content.Children.Add(face);
+        content.Children.Add(chevron);
+        (ParityButton button, Action<bool> select) = Choice(name, content, choice: false);
+        int index = 0;
+        bool open = false;
+        void Choose(int position)
+        {
+            if (position != index)
+            {
+                choose(values[position].Value);
+            }
+        }
+        button.Click += (_, _) =>
+        {
+            // A second click closes the open choices (Mac open.toggle()); closing them resets the flag. Its press usually
+            // closes them first, by taking activation from them, and AppHost.OpenChoices then does not open them again.
+            bool wasOpen = open;
+            _host.Interacted();
+            if (wasOpen)
+            {
+                return;
+            }
+            open = true;
+            select(true);
+            var choices = values.Select(value => (value.Label, value.Face)).ToList();
+            _host.OpenChoices(new ChoicesRequest(name, choices, index, Choose), button, () =>
+            {
+                open = false;
+                select(false);
+            });
+        };
+        button.KeyDown += (_, args) =>
+        {
+            int step = args.Key switch
+            {
+                Windows.System.VirtualKey.Up => 1,
+                Windows.System.VirtualKey.Down => values.Count - 1,
+                _ => 0,
+            };
+            if (step == 0)
+            {
+                return;
+            }
+            args.Handled = true;
+            _host.Interacted();
+            Choose((index + step) % values.Count);
+        };
+        int shown = -1;
+        _updates.Add(state =>
+        {
+            T now = current(state.Style);
+            index = 0;
+            for (int position = 0; position < values.Count; position++)
+            {
+                if (EqualityComparer<T>.Default.Equals(values[position].Value, now))
+                {
+                    index = position;
+                    break;
+                }
+            }
+            if (shown == index)
+            {
+                return;
+            }
+            shown = index;
+            face.Content = values[index].Face();
+            button.AccessibleValue = values[index].Label;
+            ToolbarParts.Help(button, InspectorPlan.ChoiceMenuHelp(name, values[index].Label));
+        });
+        return button;
     }
 
     /// <summary>
@@ -713,6 +823,22 @@ internal sealed class PropertiesPanel
     /// <summary>A sample's picture for previews outside the toolbar (Settings > Toolbar > Your properties).</summary>
     internal static Canvas SamplePicture(InspectorSample sample, Brush ink) =>
         SampleArt.Draw(sample.Draw(new RGBA(0, 0, 0), s_previewSamples), ink);
+
+    /// <summary>
+    /// A property's menu of choices with nothing to apply, the current choice first: the UX reference's pickers/choices-*
+    /// states (Mac UXReferenceCaptureTests' open ChoicePalette for Pattern and Font).
+    /// </summary>
+    internal static ChoicesRequest ReferenceChoices(PropertyChoice choice, Brush ink) => choice switch
+    {
+        PropertyChoice.Pattern => new ChoicesRequest("Pattern",
+            [.. InspectorPlan.PatternChoices.Select(value =>
+                (value.Name, (Func<UIElement>)(() => SamplePicture(InspectorSample.ForPattern(value.Value), ink))))],
+            0, static _ => { }),
+        PropertyChoice.Font => new ChoicesRequest("Font",
+            [.. InspectorPlan.FontChoices.Select(value => (value.Name, (Func<UIElement>)(() => FontSample(value.Value, 16))))],
+            0, static _ => { }),
+        _ => throw new ArgumentOutOfRangeException(nameof(choice), choice, "The UX reference has a menu for Pattern and Font only."),
+    };
 
     private static TextBlock Glyph(string text, double size, FontFamily? family = null)
     {

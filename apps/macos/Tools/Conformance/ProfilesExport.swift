@@ -118,6 +118,15 @@ enum ProfilesExport {
         try add("property-choices-future", "Properties from a newer version and repeats are dropped when reading.") {
             $0.expandedPropertyChoices = ["roughness", "sparkle", "roughness", "alignment"]
         }
+        try add("menu-property-choices-future", "Menu properties from a newer version and repeats are dropped when reading.") {
+            $0.menuPropertyChoices = ["font", "sparkle", "font", "pattern"]
+        }
+        try add("menu-property-choices-only-future", "Only unknown menu properties: the list goes away.") {
+            $0.menuPropertyChoices = ["sparkle"]
+        }
+        try add("menu-property-choices-on-off", "An on and off property can't open a menu.") {
+            $0.menuPropertyChoices = ["edges"]
+        }
         try add("menu-key", "A key for the Zoom menu, which opens with a click.") { $0.commandShortcuts = ["j": "action.zoomMenu"] }
         try add("collapse-delay-1", "The shortest toolbar shrink delay.") { $0.toolbarCollapseDelay = 1 }
         try add("collapse-delay-600", "The longest toolbar shrink delay.") { $0.toolbarCollapseDelay = 600 }
@@ -197,6 +206,7 @@ enum ProfilesExport {
                                     "action.zoomMenu"]
         preferences.hiddenToolbarControls = ["redo", "settings", "hide"]
         preferences.expandedPropertyChoices = ["pattern", "font"]
+        preferences.menuPropertyChoices = ["roughness"]
         preferences.toolbarCollapseDelay = 5
         var pen = Style.defaults(for: .pen)
         pen.width = 5; pen.color = .blue

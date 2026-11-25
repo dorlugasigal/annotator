@@ -60,6 +60,8 @@ internal sealed class PropertiesReferenceWindow : PopoverWindow, IPropertiesHost
 
     public void OpenArrowHeads(bool start, FrameworkElement anchor, Action closed) => closed();
 
+    public void OpenChoices(ChoicesRequest request, FrameworkElement anchor, Action closed) => closed();
+
     public void BeginTyping(TextBox field) => field.Focus(FocusState.Pointer);
 
     public void EndTyping()

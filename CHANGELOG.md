@@ -7,6 +7,7 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 ### Added
 
 - Text has a third font: Handwriting, next to System and Mono. Choose it under Font in the text properties, and turn on Bold for a heavier pen.
+- You can now choose a menu for Pattern, Roughness, Fill style, Font and Alignment in Settings > Toolbar > Your properties. Click the button to see every choice drawn as it looks, then click the one you want. One button, which goes to the next choice with each click, is still the default.
 
 ## 0.5.0 - 2026-11-24
 

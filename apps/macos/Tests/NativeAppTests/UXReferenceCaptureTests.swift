@@ -323,6 +323,15 @@ final class UXReferenceCaptureTests: XCTestCase {
                                        state: "arrowhead-\(start ? "start" : "end")", dark: dark, background: .popover,
                                        notes: "Arrowhead choices for the \(start ? "start" : "end").", spec: spec)
             }
+            try await pickers.view(ChoicePalette(name: "Pattern", values: StrokePattern.allCases.map {
+                ($0.rawValue.capitalized, InspectorChoiceFace.sample(.pattern($0)))
+            }, selected: 0, choose: { _ in }), state: "choices-pattern", dark: dark, background: .popover,
+                                   notes: "Pattern's menu (Menu in Your properties): every choice drawn as it looks, the current one outlined.",
+                                   spec: spec)
+            try await pickers.view(ChoicePalette(name: "Font", values: TextFontChoice.allCases.map {
+                ($0.title, InspectorChoiceFace.text("Aa", $0.sample(size: 16)))
+            }, selected: 0, choose: { _ in }), state: "choices-font", dark: dark, background: .popover,
+                                   notes: "Font's menu: System, Mono and Handwriting.", spec: spec)
             try await pickers.view(LiveZoomControls(model: model, compact: true).padding(12), state: "zoom-compact", dark: dark,
                                    background: .window, notes: "Compact zoom controls from the toolbar.", spec: spec + ["009"])
             try await pickers.view(LiveZoomControls(model: model, compact: false).padding(12), state: "zoom-full", dark: dark,
