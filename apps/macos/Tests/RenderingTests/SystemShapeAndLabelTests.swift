@@ -45,3 +45,25 @@ import AnnotationCore
         #expect(labeled != plain)
     }
 }
+
+@Test @MainActor func handwritingTextDrawsInTheBundledFont() throws {
+    var style = Style()
+    style.fontName = "handwriting"
+    style.fontSize = 100
+    let regular = NativeTextFont.resolve(style)
+    #expect(regular.familyName == "Caveat")
+    #expect(regular.fontName == "Caveat-Regular")
+    style.bold = true
+    let bold = NativeTextFont.resolve(style, scale: 2)
+    let weight = (CTFontCopyVariation(bold) as? [NSNumber: NSNumber])?[NSNumber(value: 0x7767_6874)]
+    #expect(bold.familyName == "Caveat" && bold.pointSize == 200 && weight == 600)
+
+    var text = Element(tool: .text, frame: Rect(x: 20, y: 20, width: 300, height: 130), text: "why the dip?")
+    var pictures: Set<Data> = []
+    for name in ["system", "monospace", "handwriting"] {
+        text.style.fontName = name
+        pictures.insert(try PNGExporter.data(elements: [text], size: CGSize(width: 360, height: 170)))
+        #expect(try DrawingFile.read(DrawingFile(document: CanvasDocument(elements: [text])).data()).elements == [text])
+    }
+    #expect(pictures.count == 3)
+}

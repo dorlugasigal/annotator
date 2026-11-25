@@ -448,7 +448,8 @@ public class GeometryTests
     /// <summary>
     /// <c>geometry/text.jsonl</c> records TextKit's measurements with macOS fonts, so the Windows measurer is not
     /// compared. These checks feed the Mac's own line metrics and widths through the Windows rules: the font choice
-    /// (semibold for bold, the monospaced design for "monospace"), the content size (measured size rounded up plus 2,
+    /// (semibold for bold, the monospaced design for "monospace", Caveat for "handwriting"), the content size (measured
+    /// size rounded up plus 2,
     /// at least 32 wide and one line high, empty text measured as a space, a trailing line feed adding a line), the
     /// label frame centered on its owner and the owner grown to fit its label. TextKit's height for n lines is
     /// n × (round(ascender) + round(−descender) + round(leading)), counting the empty line after a trailing line feed;
@@ -470,7 +471,12 @@ public class GeometryTests
             var font = TextFont.Resolve(style);
             var postScriptName = record["fontPostScriptName"]!.GetValue<string>();
             Assert.Equal(postScriptName.Contains("Monospaced", StringComparison.Ordinal), font.Design == FontDesign.Monospace);
-            Assert.Equal(postScriptName.Contains("Demi", StringComparison.Ordinal), font.Weight == FontWeight.Semibold);
+            Assert.Equal(postScriptName.StartsWith(HandwritingFont.Family, StringComparison.Ordinal), font.Design == FontDesign.Handwriting);
+            // Core Text names Caveat's weight 600 by its axis value in 16.16 fixed point: 600 × 65536 = 0x2580000.
+            var semibold = font.Design == FontDesign.Handwriting
+                ? postScriptName.EndsWith("_wght2580000", StringComparison.Ordinal)
+                : postScriptName.Contains("Demi", StringComparison.Ordinal);
+            Assert.Equal(semibold, font.Weight == FontWeight.Semibold);
             Assert.Equal(style.FontSize, font.Size);
             var size = TextLayout.ContentSize(textNode.GetValue<string>(), font, MacTextModel.For(record, Shapes.Size(record["contentSize"])));
             Same(caseName, record, new JsonObject { ["contentSize"] = Shapes.Json(size) });
@@ -499,10 +505,11 @@ public class GeometryTests
         if (record["text"] is { } textNode)
         {
             var size = record["fontSize"]!.GetValue<double>();
-            Assert.Equal(record["ascender"]!.GetValue<double>(), MacTextMetrics.Ascender(size), 12);
-            Assert.Equal(-record["descender"]!.GetValue<double>(), MacTextMetrics.Descender(size), 12);
+            var design = TextFont.DesignFor(record["fontName"]!.GetValue<string>());
+            Assert.Equal(record["ascender"]!.GetValue<double>(), MacTextMetrics.Ascender(size, design), 12);
+            Assert.Equal(-record["descender"]!.GetValue<double>(), MacTextMetrics.Descender(size, design), 12);
             Assert.Equal(0, record["leading"]!.GetValue<double>());
-            Assert.Equal(Shapes.Size(record["contentSize"]).Height, MacTextMetrics.ContentHeight(textNode.GetValue<string>(), size));
+            Assert.Equal(Shapes.Size(record["contentSize"]).Height, MacTextMetrics.ContentHeight(textNode.GetValue<string>(), size, design));
             return;
         }
         var label = ElementOf(record, "owner").Label!;

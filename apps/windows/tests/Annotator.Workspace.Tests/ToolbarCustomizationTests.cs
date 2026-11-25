@@ -67,7 +67,7 @@ public sealed class ToolbarCustomizationTests
         Assert.Equal("Arrow type", all.ArrowTypeTitle);
         Assert.NotEqual(one.Key, all.Key);
         Assert.Equal(["Straight arrow", "Curved arrow"], InspectorPlan.ChoiceNames(PropertyChoice.ArrowType).ToArray());
-        Assert.Equal(["System font", "Mono font"], InspectorPlan.ChoiceNames(PropertyChoice.Font).ToArray());
+        Assert.Equal(["System font", "Mono font", "Handwriting font"], InspectorPlan.ChoiceNames(PropertyChoice.Font).ToArray());
         Assert.Equal(["Align left", "Align center", "Align right"], InspectorPlan.ChoiceNames(PropertyChoice.Alignment).ToArray());
         model.ResetPropertyChoices();
         Assert.Null(model.Snapshot.Preferences.ExpandedPropertyChoices);

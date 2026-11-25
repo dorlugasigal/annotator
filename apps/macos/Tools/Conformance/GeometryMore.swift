@@ -267,7 +267,8 @@ extension GeometryExport {
         var records: [J] = []
         let strings = ["", "A", "Hello, board", "Two\nlines", "Ends with a line break\n", "שלום", "👩🏽‍💻 ✓", String(repeating: "W", count: 40)]
         for text in strings {
-            for (size, bold, name) in [(28.0, false, "system"), (13, false, "system"), (64, true, "system"), (20, false, "monospace")] {
+            for (size, bold, name) in [(28.0, false, "system"), (13, false, "system"), (64, true, "system"), (20, false, "monospace"),
+                                       (28, false, "handwriting"), (40, true, "handwriting")] {
                 var style = Style()
                 style.fontSize = size; style.bold = bold; style.fontName = name
                 let font = NativeTextFont.resolve(style)

@@ -462,8 +462,9 @@ public sealed class SceneBuilder
         if ((flags & ListFlags.HideLabel) == 0 && element.Label is { HasVisibleText: true } label
             && (labelText ??= ShapeLabelLayout.TextElement(element, measurer)) is { } text)
         {
+            var labelFont = TextFont.Resolve(text.Style);
             DrawText(text, label.FollowsStroke == true ? element.Frame : null,
-                     MacTextMetrics.CenteredFirstBaseline(text.Frame, text.Text, TextFont.Resolve(text.Style).Size));
+                     MacTextMetrics.CenteredFirstBaseline(text.Frame, text.Text, labelFont.Size, labelFont.Design));
         }
         if (rotated)
         {
@@ -828,7 +829,7 @@ public sealed class SceneBuilder
         {
             var font = TextFont.Resolve(style);
             writer.Add(DisplayItem.DrawText(new TextRun(text.Text, text.Frame, font, style.Alignment, paint,
-                                                        baseline ?? MacTextMetrics.FirstBaseline(text.Frame, font.Size))));
+                                                        baseline ?? MacTextMetrics.FirstBaseline(text.Frame, font.Size, font.Design))));
         }
         EndPaint(paint);
     }

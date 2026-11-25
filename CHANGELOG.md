@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Added
+
+- Text has a third font: Handwriting, next to System and Mono. Choose it under Font in the text properties, and turn on Bold for a heavier pen.
+
 ## 0.5.0 - 2026-11-24
 
 ### Added

@@ -215,7 +215,7 @@ internal sealed class PropertyChoicesEditor
         };
         Func<int, UIElement> face = choice switch
         {
-            PropertyChoice.Font => index => Text("Aa", index == 0 ? "Segoe UI" : "Cascadia Mono, Consolas, Courier New", all ? 17 : 16),
+            PropertyChoice.Font => index => FontSample(InspectorPlan.FontChoices[index].Value, all ? 17 : 16),
             PropertyChoice.Alignment => index => Symbol(AlignmentSymbol(CoreTextAlignment.AllCases[index]), all ? 16 : 15),
             _ => index => PropertiesPanel.SamplePicture(samples[index], _ink),
         };
@@ -261,7 +261,15 @@ internal sealed class PropertyChoicesEditor
         return button;
     }
 
-    private static UIElement Text(string text, string family, double size)
+    /// <summary>A font choice's "Aa" sample, as the properties row draws it: Caveat's is 6 points larger and bold.</summary>
+    private static UIElement FontSample(string fontName, double size) => Annotator.Core.Geometry.TextFont.DesignFor(fontName) switch
+    {
+        Annotator.Core.Geometry.FontDesign.Monospace => Text("Aa", "Cascadia Mono, Consolas, Courier New", size),
+        Annotator.Core.Geometry.FontDesign.Handwriting => Text("Aa", PropertiesPanel.HandwritingFontSource, size + 6, bold: true),
+        _ => Text("Aa", "Segoe UI", size),
+    };
+
+    private static UIElement Text(string text, string family, double size, bool bold = false)
     {
         var block = new TextBlock
         {
@@ -272,6 +280,10 @@ internal sealed class PropertyChoicesEditor
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
         };
+        if (bold)
+        {
+            block.FontWeight = FontWeights.SemiBold;
+        }
         return block;
     }
 
