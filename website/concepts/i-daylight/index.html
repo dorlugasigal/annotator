@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Annotator: show people exactly what you mean</title>
-  <meta name="description" content="Annotator draws on top of your screen while you present. Ring a number, point at it, blur what is private. Free for Mac and Windows.">
+  <meta name="description" content="Annotator lets you draw right on top of your screen while you share it. It's free, for Mac and Windows.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0e0e10">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -41,7 +41,7 @@
       <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
       <nav aria-label="Site">
         <a class="nav-text" href="#do">What you can do</a>
-        <a class="nav-text" href="#try">Try it</a>
+        <a class="nav-try" href="#try" data-try><i aria-hidden="true"></i>Try it</a>
         <a class="nav-text" href="/docs/">Help</a>
         <a class="nav-text" href="https://github.com/dorlugasigal/annotator">GitHub</a>
         <button class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark theme">
@@ -58,7 +58,7 @@
           <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path class="sip" d="M7 2.2c-.9 1 .9 1.7 0 2.8M11 2.2c-.9 1 .9 1.7 0 2.8"/><path d="M3.5 7.5h11V12a4.5 4.5 0 0 1-4.5 4.5H8A4.5 4.5 0 0 1 3.5 12zM14.5 9h1a2.25 2.25 0 0 1 0 4.5h-1.2"/></svg>
           <span>Buy me a coffee</span>
         </a>
-        <a class="btn btn-solid btn-small" href="#install">Download</a>
+        <a class="btn btn-solid btn-small nav-download" href="#install" aria-label="Download"><span>Download</span><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4M3 14h10"/></svg></a>
       </nav>
     </div>
   </header>
@@ -69,60 +69,100 @@
       <div class="wrap hero-top">
         <h1 id="hero-title" data-rise>Show people <span class="mark-word"><b>exactly</b><svg viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 11C52 4 96 14 148 8s98-5 148 1"/></svg></span> what you mean.</h1>
         <div class="hero-side">
-          <p class="lede">Annotator draws on top of your screen while you present, so you can ring a number, point at it or hide what's private. It's free for Mac and Windows.</p>
+          <p class="lede">Annotator lets you draw right on top of your screen while you share it. Circle the number, point at the button, blur the email you'd rather not show.</p>
           <p class="get" data-for="mac">
             <a class="btn btn-accent" href="/downloads/">Download for Mac <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
-            <span class="get-more"><a class="quiet" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a> <small>Free. No account.</small></span>
+            <a class="btn btn-line" href="#try" data-try>Try it here</a>
+            <span class="get-more"><a class="quiet" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a> <small>It's free, for Mac and Windows.</small></span>
           </p>
           <p class="get" data-for="windows">
             <a class="btn btn-accent" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
-            <span class="get-more"><a class="quiet" href="/downloads/">Download for Mac</a> <small>Free. No account.</small></span>
+            <a class="btn btn-line" href="#try" data-try>Try it here</a>
+            <span class="get-more"><a class="quiet" href="/downloads/">Download for Mac</a> <small>It's free, for Mac and Windows.</small></span>
           </p>
         </div>
       </div>
+      <p class="wrap try-line"><span>Or try it first. The screen below is a working demo, so go ahead and draw on it.</span><svg viewBox="0 0 44 40" width="38" height="34" aria-hidden="true"><path d="M5 5c16-3 30 5 28 26M24 23l9 9 7-11"/></svg></p>
 
-      <figure class="stage" id="try" aria-label="A web demo of Annotator: three sample windows with the app's toolbar. A pointer rings a number, draws an arrow to it, writes a note, highlights a line and blurs an email address.">
+      <figure class="stage" id="try" aria-label="A working demo of Annotator. Draw on the three sample apps, or switch to Use apps and click around in them.">
         <div class="stage-scene">
           <i class="stage-shadow" aria-hidden="true"></i>
-          <div class="stage-plane" id="desk">
+          <div class="stage-plane" id="desk" data-mode="use">
             <i class="desk-panel" aria-hidden="true"></i>
-            <div class="desk-windows" aria-hidden="true">
-              <div class="win win-slide">
-                <div class="win-bar"><i></i><i></i><i></i><span>Monday review</span></div>
+            <i class="stage-pulse" aria-hidden="true"></i>
+            <div class="desk-windows" id="apps">
+              <section class="win win-slide" data-win aria-label="Sample slides">
+                <div class="win-bar" data-drag tabindex="0" aria-label="Move the slides window. Use the arrow keys."><i></i><i></i><i></i><span>Monday review</span></div>
                 <div class="slide">
-                  <p class="slide-kicker">Week 47</p>
-                  <p class="slide-title">Three things from last week</p>
-                  <ul>
-                    <li><span>Visitors are up 4%</span></li>
-                    <li><span id="t-line">Sign-ups fell after the new form</span></li>
-                    <li><span>Orders held steady</span></li>
-                  </ul>
-                </div>
-              </div>
-              <div class="win win-chart">
-                <div class="win-bar"><i></i><i></i><i></i><span>Sign-ups</span></div>
-                <div class="chart">
-                  <p class="chart-label">This week</p>
-                  <p class="chart-kpi"><span class="num" id="t-number">318</span></p>
-                  <p class="chart-delta">21% fewer than last week</p>
-                  <div class="bars">
-                    <span style="--v: 62"><i></i>M</span><span style="--v: 58"><i></i>T</span><span style="--v: 64"><i></i>W</span><span style="--v: 55"><i></i>T</span><span style="--v: 41" class="low"><i></i>F</span><span style="--v: 22" class="low"><i></i>S</span><span style="--v: 16" class="low"><i></i>S</span>
+                  <p class="slide-kicker">Week 47 <span data-slide-count>1 of 3</span></p>
+                  <div class="slides">
+                    <div class="slide-page is-on">
+                      <p class="slide-title">Three things from last week</p>
+                      <ul>
+                        <li><span>Visitors are up 4%</span></li>
+                        <li><span id="t-line">Sign-ups fell after the new form</span></li>
+                        <li><span>Orders held steady</span></li>
+                      </ul>
+                    </div>
+                    <div class="slide-page">
+                      <p class="slide-title">Why sign-ups fell</p>
+                      <ul>
+                        <li><span>The form has two more fields</span></li>
+                        <li><span>Most people stop at the phone number</span></li>
+                        <li><span>Phones are hit hardest</span></li>
+                      </ul>
+                    </div>
+                    <div class="slide-page">
+                      <p class="slide-title">What we do next</p>
+                      <ul>
+                        <li><span>Make the phone number optional</span></li>
+                        <li><span>Test the short form for a week</span></li>
+                        <li><span>Look again next Monday</span></li>
+                      </ul>
+                    </div>
                   </div>
+                  <p class="slide-nav">
+                    <button type="button" data-slide-go="-1" aria-label="Previous slide"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3.5L5.500 8l4.500 4.500"/></svg></button>
+                    <button type="button" data-slide-go="1" aria-label="Next slide"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3.5L10.500 8 6 12.500"/></svg></button>
+                  </p>
                 </div>
-              </div>
-              <div class="win win-mail">
-                <div class="win-bar"><i></i><i></i><i></i><span>Message</span></div>
+              </section>
+              <section class="win win-chart" data-win aria-label="Sample chart">
+                <div class="win-bar" data-drag tabindex="0" aria-label="Move the chart window. Use the arrow keys."><i></i><i></i><i></i><span>Sign-ups</span></div>
+                <div class="chart">
+                  <p class="weeks" role="group" aria-label="Week">
+                    <button type="button" data-week="last" aria-pressed="false">Last week</button>
+                    <button type="button" data-week="this" aria-pressed="true">This week</button>
+                  </p>
+                  <p class="chart-kpi"><span class="num" id="t-number">318</span></p>
+                  <p class="chart-delta" data-delta>21% fewer than last week</p>
+                  <div class="bars" data-bars></div>
+                </div>
+              </section>
+              <section class="win win-mail" data-win aria-label="Sample message">
+                <div class="win-bar" data-drag tabindex="0" aria-label="Move the message window. Use the arrow keys."><i></i><i></i><i></i><span>Message</span></div>
                 <div class="mail">
-                  <p class="mail-from"><b class="avatar">M</b><span><strong>Maya Chen</strong><em id="t-email">maya.chen@example.com</em></span></p>
-                  <p class="mail-body">Can you walk us through the sign-up number on Monday?</p>
+                  <p class="mail-from"><b class="avatar" aria-hidden="true">M</b><span><strong>Maya Chen</strong><em id="t-email">maya.chen@example.com</em></span></p>
+                  <ul class="thread" data-thread>
+                    <li class="them">Can you walk us through the sign-up number on Monday?</li>
+                  </ul>
+                  <form class="reply" data-reply>
+                    <input type="text" name="reply" placeholder="Write a reply" aria-label="Reply to Maya" autocomplete="off" maxlength="60" enterkeyhint="send">
+                    <button type="submit" aria-label="Send"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9.500M8.500 4l4 4-4 4"/></svg></button>
+                  </form>
                 </div>
-              </div>
+              </section>
             </div>
+            <p class="mode-chip" id="mode-chip"><i aria-hidden="true"></i><b data-when="use">Using apps</b><b data-when="draw">Drawing</b></p>
+            <button type="button" class="your-turn" id="your-turn" data-try hidden>
+              <svg viewBox="0 0 22 26" width="15" height="18" aria-hidden="true"><path d="M2 1.5V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>
+              <b>Your turn</b>
+            </button>
             <div class="dock" id="dock"></div>
           </div>
         </div>
         <figcaption class="wrap">
-          <span id="stage-note">This is a web demo of the app. Pick a tool and draw on it.</span>
+          <span class="stage-words"><span id="stage-note">Draw marks it up. Use apps lets you click around underneath. Your drawings stay put.</span> <small>This is a web demo with a few of the tools. The real app does this over anything on your screen.</small></span>
           <span class="stage-controls">
             <button type="button" class="chip" id="stage-done" hidden>Done drawing</button>
             <button type="button" class="chip" id="stage-replay"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg><b>Replay</b></button>
@@ -140,7 +180,7 @@
             <ol class="do-tabs" aria-label="Go to">
               <li><button type="button" data-go="0"><i></i><span>Circle and point</span></button></li>
               <li><button type="button" data-go="1"><i></i><span>Box it and label it</span></button></li>
-              <li><button type="button" data-go="2"><i></i><span>Hide what is private</span></button></li>
+              <li><button type="button" data-go="2"><i></i><span>Hide what's private</span></button></li>
               <li><button type="button" data-go="3"><i></i><span>Guide the eye</span></button></li>
               <li><button type="button" data-go="4"><i></i><span>Number the steps</span></button></li>
               <li><button type="button" data-go="5"><i></i><span>Sketch a system</span></button></li>
@@ -148,20 +188,34 @@
           </div>
           <div class="wrap do-deck">
             <article class="card" style="--span: 7">
-              <div class="frame"><video muted loop playsinline preload="none" data-clip="stage-arrow" aria-label="A recording: a ring is drawn around a number and an arrow bends from it to a dip in a chart."></video><button type="button" class="ctl" data-ctl="video" aria-label="Pause this recording"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-play" d="M5.5 3.5l7 4.5-7 4.5z"/></svg></button></div>
+              <div class="frame frame-shot"><div class="shot shot-report" data-scene="point" aria-hidden="true">
+                <div class="mini">
+                  <p class="mini-kpis"><span><em>Sign-ups</em><b>12,480</b></span><span><em>Activation</em><b data-t="kpi">41%</b></span><span><em>Revenue</em><b>$38.2k</b></span></p>
+                  <div class="mini-chart">
+                    <svg viewBox="0 0 300 90" preserveAspectRatio="none"><path class="mini-fill" d="M0 38C40 18 72 20 104 34s46 50 66 48 44-52 130-66V90H0z"/><path class="mini-line" d="M0 38C40 18 72 20 104 34s46 50 66 48 44-52 130-66"/></svg>
+                    <i class="mini-dip" data-t="dip"></i>
+                  </div>
+                </div>
+              </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
               <div class="card-text">
                 <h3>Circle and point</h3>
-                <p>Ring the number you mean, then draw an arrow to where it matters.</p>
-                <p class="keys-hint"><kbd>4</kbd> Ellipse <kbd>5</kbd> Arrow</p>
+                <p>Ring the number, then draw an arrow to the reason.</p>
               </div>
             </article>
 
             <article class="card" style="--span: 5">
-              <div class="frame frame-dark"><video muted loop playsinline preload="none" data-clip="stage-smart" aria-label="A recording: a rough box drawn around a button becomes neat, then an arrow and a typed note are added."></video><button type="button" class="ctl" data-ctl="video" aria-label="Pause this recording"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-play" d="M5.5 3.5l7 4.5-7 4.5z"/></svg></button></div>
+              <div class="frame frame-shot"><div class="shot shot-form" data-scene="box" aria-hidden="true">
+                <div class="pay">
+                  <p class="pay-title">Checkout</p>
+                  <p class="pay-field"><span>Card number</span></p>
+                  <p class="pay-field"><span>Name on card</span></p>
+                  <p class="pay-go"><b class="fake-btn" data-t="btn">Pay now</b></p>
+                </div>
+                <i class="pay-note" data-t="note"></i>
+              </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
               <div class="card-text">
                 <h3>Box it and label it</h3>
-                <p>Box the part that should change, then type your note beside it.</p>
-                <p class="keys-hint"><kbd>7</kbd> Pen <kbd>8</kbd> Text</p>
+                <p>Sketch a rough box and Smart Draw tidies it up. Type a note next to it.</p>
               </div>
             </article>
 
@@ -177,17 +231,21 @@
                 </div>
               </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
               <div class="card-text">
-                <h3>Hide what is private</h3>
-                <p>Blur an email or a card number while you share. It is not secure redaction, so take real secrets off the screen first.</p>
+                <h3>Hide what's private</h3>
+                <p>Blur an email while you share. It's a cover, not real redaction, so close the truly secret stuff first.</p>
               </div>
             </article>
 
             <article class="card" style="--span: 7">
-              <div class="frame"><video muted loop playsinline preload="none" data-clip="stage-spotlight" aria-label="A recording: the screen dims around the pointer while it moves over a board of pictures."></video><button type="button" class="ctl" data-ctl="video" aria-label="Pause this recording"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-play" d="M5.5 3.5l7 4.5-7 4.5z"/></svg></button></div>
+              <div class="frame frame-shot"><div class="shot shot-tiles" data-scene="spotlight" aria-hidden="true">
+                <div class="tiles">
+                  <p><em>North</em><b>128</b></p><p data-t="s1"><em>South</em><b>96</b></p><p><em>East</em><b>143</b></p>
+                  <p data-t="s3"><em>West</em><b>87</b></p><p><em>Online</em><b>310</b></p><p data-t="s2"><em>Returns</em><b>12</b></p>
+                </div>
+              </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
               <div class="card-text">
                 <h3>Guide the eye</h3>
-                <p>Spotlight dims everything around your pointer. Zoom in on small text, or point with a laser trail that fades on its own.</p>
-                <p class="keys-hint"><kbd>L</kbd> Laser pointer <kbd><span data-for="mac">Control</span><span data-for="windows">Ctrl</span></kbd><kbd>1</kbd> Zoom</p>
+                <p>Spotlight dims everything but your pointer. There's a laser pointer and zoom too.</p>
               </div>
             </article>
 
@@ -202,8 +260,7 @@
               </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
               <div class="card-text">
                 <h3>Number the steps</h3>
-                <p>Click once for each step and the numbers count up for you.</p>
-                <p class="keys-hint"><kbd>N</kbd> Numbered counter</p>
+                <p>Click, click, click. The numbers count up on their own.</p>
               </div>
             </article>
 
@@ -213,8 +270,7 @@
               </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
               <div class="card-text">
                 <h3>Sketch a system</h3>
-                <p>Draw boxes and arrows, or pick ready-made icons for databases, servers and more.</p>
-                <p class="keys-hint"><kbd><span data-for="mac">Command</span><span data-for="windows">Ctrl</span></kbd><kbd>L</kbd> Tool library</p>
+                <p>Boxes, arrows, and ready-made icons for servers and databases.</p>
               </div>
             </article>
           </div>
@@ -227,13 +283,13 @@
       <div class="panel">
         <svg class="deco deco-a" viewBox="0 0 120 60" aria-hidden="true"><path d="M6 40C30 8 52 52 74 26s30-8 40 6"/></svg>
         <div class="keys-copy">
-          <h2 id="keys-title" data-rise>The two keys</h2>
-          <p>Try them here. They switch the demo at the top of this page.</p>
-          <p class="mode-line">The demo is in <span class="mode-pill"><i></i><b data-mode-word>Apps</b></span> mode.</p>
+          <h2 id="keys-title" data-rise>Two keys to remember</h2>
+          <p>Go on, press them. They work on this page.</p>
+          <p class="mode-line"><i aria-hidden="true"></i><span data-when="draw">Right now you're drawing.</span><span data-when="use">Right now you're using the app.</span></p>
         </div>
         <div class="keys-rows">
           <div class="keys-row" data-row="draw">
-            <button type="button" class="keyset" data-set="draw" aria-label="Control Shift 2: draw on the demo">
+            <button type="button" class="keyset" data-set="draw" aria-label="Control Shift 2, to draw">
               <span class="key key-wide" data-key="Control"><b><span data-for="mac">Control</span><span data-for="windows">Ctrl</span></b></span>
               <span class="key key-wide" data-key="Shift"><b>Shift</b></span>
               <span class="key" data-key="Digit2"><b>2</b></span>
@@ -241,116 +297,76 @@
             <p>to draw.</p>
           </div>
           <div class="keys-row" data-row="use">
-            <button type="button" class="keyset" data-set="use" aria-label="Escape: go back to your app">
+            <button type="button" class="keyset" data-set="use" aria-label="Escape, to get back to your app">
               <span class="key key-wide" data-key="Escape"><b>Esc</b></span>
             </button>
-            <p>to go back to your app. Your drawings stay.</p>
+            <p>to get back to your app. Your drawings stay where they are.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 4. The real app -->
-    <section class="reel wrap" aria-labelledby="reel-title">
-      <div class="reel-head">
-        <h2 id="reel-title" data-rise>The real app, in 30 seconds</h2>
-      </div>
-      <figure>
-        <div class="reel-scene" data-enter>
-          <i class="reel-shadow" aria-hidden="true"></i>
-          <div class="reel-screen">
-            <video id="reel" src="/public/demo/annotator-reel.mp4" poster="reel-poster.jpg" muted loop playsinline controls preload="none" aria-label="Annotator being used over sample content: marks are drawn, bent, highlighted, spotlit and blurred."></video>
-          </div>
-        </div>
-        <figcaption>
-          <span>A recording of the real app on a Mac, with sample content.</span>
-          <span class="video-controls" hidden>
-            <button type="button" class="chip" id="reel-play"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-play" d="M5.5 3.5l7 4.5-7 4.5z"/></svg><b>Play</b></button>
-            <button type="button" class="chip" id="reel-sound"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2.5 6.2h2.3L8 3.5v9L4.8 9.8H2.5z"/><path class="i-on" d="M10.5 6a3 3 0 0 1 0 4M12.3 4.2a5.5 5.5 0 0 1 0 7.6"/><path class="i-off" d="M10.8 6.2l3 3.6M13.8 6.2l-3 3.6"/></svg><b>Sound on</b></button>
-          </span>
-        </figcaption>
-      </figure>
-    </section>
-
-    <!-- 5. Also in the app -->
+    <!-- 4. There's more in the app -->
     <section class="also wrap" aria-labelledby="also-title">
-      <h2 id="also-title" data-rise>Also in the app</h2>
-      <ul class="also-grid depth">
+      <h2 id="also-title" data-rise>There's more in the app</h2>
+      <ul class="also-grid">
         <li class="also-item" data-tilt>
           <div class="ill" aria-hidden="true">
-            <svg viewBox="0 0 240 150"><path class="sd-rough" pathLength="1" d="M63 47c22-6 76-6 114-3 5 20 4 46-1 65-38 5-80 4-113 0-5-20-4-42 0-62z"/><rect class="sd-neat" x="60" y="42" width="120" height="68" rx="10"/><path class="sd-spark" d="M196 22l3.4 9.6 9.6 3.4-9.6 3.4-3.4 9.6-3.4-9.6-9.6-3.4 9.6-3.4z"/></svg>
+            <div class="bt-screen"><span class="bt-time" data-timer>10:00</span><span class="bt-bar"><i></i></span></div>
           </div>
-          <h3>Smart Draw</h3>
-          <p>Draw a rough box, loop or arrow with the pen and it turns into a neat one.</p>
+          <h3>Break timer</h3>
+          <p>A big countdown for the coffee break.</p>
         </li>
         <li class="also-item" data-tilt>
           <div class="ill" aria-hidden="true">
             <svg viewBox="0 0 240 150"><rect class="ill-screen" x="22" y="26" width="136" height="98" rx="10"/><path class="ill-lines" d="M38 46h60M38 60h36M38 104h52"/><rect class="sr-fill" x="46" y="68" width="68" height="26" rx="4"/><rect class="sr-region" x="40" y="62" width="80" height="38" rx="5"/><g class="sr-window"><rect class="ill-screen" x="126" y="54" width="96" height="68" rx="9"/><path class="ill-lines" d="M136 66h6M146 66h6"/><rect class="sr-fill" x="140" y="80" width="68" height="26" rx="4"/></g></svg>
           </div>
           <h3>Share region</h3>
-          <p>Put one part of your screen in its own window, so a meeting app can share only that.</p>
-        </li>
-        <li class="also-item" data-tilt>
-          <div class="ill" aria-hidden="true">
-            <div class="bt-screen"><span class="bt-title">Coffee break</span><span class="bt-time" data-timer>10:00</span><span class="bt-bar"><i></i></span></div>
-          </div>
-          <h3>Break timer</h3>
-          <p>A full-screen countdown for the pause, from 1 to 180 minutes.</p>
+          <p>Share just one part of a wide screen.</p>
         </li>
         <li class="also-item" data-tilt>
           <div class="ill" aria-hidden="true">
             <svg viewBox="0 0 240 150"><rect class="ill-screen" x="40" y="24" width="160" height="102" rx="10"/><path class="ill-lines wb-lines" d="M58 46h70M58 62h44M58 102h84"/><rect class="wb-board wb-white" x="41" y="25" width="158" height="100" rx="9"/><rect class="wb-board wb-black" x="41" y="25" width="158" height="100" rx="9"/><path class="wb-mark" d="M96 76c2-14 44-16 48-2s-42 20-48 2zM150 92l22 14M172 106l-9-1M172 106l-3-9"/></svg>
           </div>
           <h3>Whiteboard and blackboard</h3>
-          <p>Swap the desktop for a clean board when you need room to think.</p>
+          <p>A clean board when you need room.</p>
         </li>
         <li class="also-item" data-tilt>
           <div class="ill" aria-hidden="true">
-            <svg viewBox="0 0 240 150"><rect class="ill-screen" x="20" y="30" width="56" height="90" rx="10"/><path class="ss-star" d="M48 44l4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.1-8.2-4.3-8.2 4.3 1.6-9.1-6.7-6.5 9.2-1.3z"/><path class="ill-lines" d="M34 86h28M34 100h18"/><path class="ss-star ss-copy ss-1" d="M112 40l4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.1-8.2-4.3-8.2 4.3 1.6-9.1-6.7-6.5 9.2-1.3z"/><path class="ss-star ss-copy ss-2" d="M176 62l4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.1-8.2-4.3-8.2 4.3 1.6-9.1-6.7-6.5 9.2-1.3z"/><path class="ss-star ss-copy ss-3" d="M128 92l4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.1-8.2-4.3-8.2 4.3 1.6-9.1-6.7-6.5 9.2-1.3z"/></svg>
+            <div class="tb-mini" data-shrink><i></i><i class="tb-move"></i><i></i><i></i><i></i><b></b></div>
+            <div class="tb-pill"><i></i><b></b></div>
           </div>
-          <h3>Saved shapes</h3>
-          <p>Save a drawing or a piece of text to My shapes and drop it in again later.</p>
-        </li>
-        <li class="also-item" data-tilt>
-          <div class="ill" aria-hidden="true">
-            <div class="tb-mini"><i></i><i class="tb-move"></i><i class="tb-a"></i><i class="tb-b"></i><i></i><b></b></div>
-            <div class="tb-one"><i></i><b></b></div>
-          </div>
-          <h3>A toolbar that is yours</h3>
-          <p>Drag tools in or out, stand it upright, or shrink it to one button.</p>
+          <h3>A toolbar that's yours</h3>
+          <p>Add tools, remove tools, or shrink it to one button.</p>
         </li>
       </ul>
     </section>
 
-    <!-- 6. Good to know -->
+    <!-- 5. Good to know -->
     <section class="know wrap" aria-labelledby="know-title">
       <h2 id="know-title" data-rise>Good to know</h2>
       <dl class="know-grid depth">
         <div>
-          <dt>Will people on my call see it?</dt>
-          <dd>They will if you share your whole screen. If you share one app or window, the drawings may be left out, so ask someone what they see. Share region is made for that case.</dd>
+          <dt>Will people on my call see my drawings?</dt>
+          <dd>Yes, if you share your whole screen. If you share a single window they might not, so ask someone what they see.</dd>
         </div>
         <div>
           <dt>Does it record my screen?</dt>
-          <dd>It doesn't. Annotator is not a recorder, and your drawings, your screen and what you type stay on your computer. Drawing needs no permissions; zoom and live effects ask for screen access.</dd>
+          <dd>No. Your drawings, your screen and what you type stay on your computer.</dd>
         </div>
         <div>
           <dt>Is it really free?</dt>
-          <dd>All tools are free. No account. No paid tiers. The code is open source under Apache 2.0.</dd>
-        </div>
-        <div>
-          <dt>Is it the same on Mac and Windows?</dt>
-          <dd>Both are native apps, built as one product so they match. Annotator is still before version 1.0, so expect a few rough edges.</dd>
+          <dd>Yes. All tools are free and the code is open source. If you like it, there's a coffee button.</dd>
         </div>
       </dl>
     </section>
 
-    <!-- 7. Coffee -->
+    <!-- 6. Coffee -->
     <section class="coffee wrap" aria-labelledby="coffee-title" data-through>
       <div class="panel" data-tilt>
         <div class="coffee-copy">
-          <h2 id="coffee-title" data-rise>It's free. Coffee is welcome.</h2>
-          <p>If Annotator saved your demo, buy me a coffee. It keeps the work going. Coffee is optional and unlocks nothing.</p>
+          <h2 id="coffee-title" data-rise>Free, but I won't say no to a coffee.</h2>
+          <p>If Annotator saved your demo, you can buy me one. It's optional and it doesn't unlock anything.</p>
           <a class="btn btn-solid btn-coffee" href="https://buymeacoffee.com/dorlugasigal">
             <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3.5 7.5h11V12a4.5 4.5 0 0 1-4.5 4.5H8A4.5 4.5 0 0 1 3.5 12zM14.5 9h1a2.25 2.25 0 0 1 0 4.5h-1.2M7 2.2c-.9 1 .9 1.7 0 2.8M11 2.2c-.9 1 .9 1.7 0 2.8"/></svg>
             Buy me a coffee
@@ -372,35 +388,39 @@
       </div>
     </section>
 
-    <!-- 8. Install -->
+    <!-- 7. Install -->
     <section class="install wrap" id="install" aria-labelledby="install-title">
-      <h2 id="install-title" data-rise>Install</h2>
+      <h2 id="install-title" data-rise>Get Annotator</h2>
       <div class="platforms depth">
         <div class="platform" data-os="mac" data-tilt>
           <h3>Mac</h3>
-          <p class="req">macOS 14 or later, Apple Silicon and Intel. Runs from the menu bar.</p>
+          <p class="req">macOS 14 or later, on Apple Silicon or Intel. It lives in your menu bar.</p>
           <a class="btn btn-accent" href="/downloads/">Download for Mac</a>
           <div class="command">
-            <p>Or with Homebrew</p>
+            <p data-label="Or use Homebrew:">Or use Homebrew:</p>
             <button type="button" class="chip" data-copy aria-label="Copy the Homebrew command">Copy</button>
             <code>brew install --cask dorlugasigal/annotator/annotator</code>
           </div>
         </div>
         <div class="platform" data-os="windows" data-tilt>
           <h3>Windows</h3>
-          <p class="req">Windows 11, version 22H2 or later, x64 and ARM64. Runs from the system tray.</p>
-          <a class="btn btn-accent" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it from the Microsoft Store</a>
+          <p class="req">Windows 11, version 22H2 or later. It lives in the system tray, near the clock.</p>
+          <a class="btn btn-accent" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
           <div class="command">
-            <p>Or with winget</p>
+            <p data-label="Or use winget:">Or use winget:</p>
             <button type="button" class="chip" data-copy aria-label="Copy the winget command">Copy</button>
             <code>winget install --id 9NMZ345ZJ6JK --source msstore</code>
           </div>
         </div>
       </div>
+      <div class="install-notes">
+        <p>Not sure yet? <a href="#try" data-try>Try the demo at the top of this page.</a></p>
+        <p>It isn't at version 1.0 yet, so you might hit a rough edge. <a href="/support/">Tell me</a> if you do.</p>
+      </div>
     </section>
   </main>
 
-  <!-- 9. Footer -->
+  <!-- 8. Footer -->
   <footer class="site-footer">
     <div class="wrap">
       <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
@@ -411,7 +431,7 @@
         <a href="https://github.com/dorlugasigal/annotator">GitHub</a>
         <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
       </nav>
-      <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+      <p><span class="made">Made by Dor.</span> Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
     </div>
   </footer>
 

@@ -73,8 +73,10 @@ html[data-theme="light"] {
 
   /* The motion system: three durations, one curve to arrive, one to move between states, one spring for presses. */
   --t-1: 240ms; --t-2: 480ms; --t-3: 900ms; --stagger: 70ms;
-  --ease-out: cubic-bezier(.16, 1, .3, 1);
-  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  /* The page eases with the app's own curves (Motion.swift: enter, standard, exit); main.js sets them from the shared port. */
+  --ease-out: cubic-bezier(.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(.3, 0, .2, 1);
+  --ease-leave: cubic-bezier(.45, 0, .55, .4);
   --spring: cubic-bezier(.34, 1.56, .64, 1);
   /* Depth: how far a plane leans back before it lands, and how far it sits away. Phones get less of both. */
   --lean: 9deg; --far: -50px; --rise: 26px;
@@ -149,6 +151,12 @@ h3 { font-size: 23px; line-height: 1.18; font-weight: 640; letter-spacing: -.015
 .nav-coffee { display: inline-flex; align-items: center; gap: 7px; color: var(--accent-text); }
 .nav-coffee svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform var(--t-2) var(--spring); }
 .nav-coffee:hover svg { transform: rotate(-10deg) translateY(-1px); }
+/* "Try it" is the one link that stands out: a pill with a small dot in the accent that breathes. */
+.nav-try { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px 0 12px; border-radius: 999px; background: var(--wash-strong); box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--text); font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color var(--t-1) ease, box-shadow var(--t-1) ease, transform var(--t-2) var(--spring); }
+.nav-try i { width: 8px; height: 8px; border-radius: 50%; background: var(--ocean); }
+.nav-try:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent); }
+.nav-try:active { transform: scale(.96); transition-duration: 90ms; }
+.nav-try:focus-visible { border-radius: 999px; }
 
 /* The theme switch: a coin with a moon on one side and a sun on the other. It turns over to change the theme. */
 .theme-switch { position: relative; flex: none; display: grid; place-items: center; width: 44px; height: 44px; margin: 0 -7px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; perspective: 240px; -webkit-tap-highlight-color: transparent; }
@@ -171,10 +179,14 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .inked svg { position: absolute; left: -1%; bottom: -.1em; width: 102%; height: .2em; overflow: visible; pointer-events: none; }
 .inked path { stroke-width: .075em; }
 .lede { max-width: 34em; font-size: 19px; line-height: 1.5; color: var(--muted); }
-.get { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 24px; }
+.get { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; margin-top: 24px; }
+.button.try { padding: 0 20px; }
+.button.try svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .quiet { font-size: 16px; color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 38%, transparent); text-decoration-thickness: 1px; text-underline-offset: .25em; transition: text-decoration-color var(--t-1) ease; }
 .quiet:hover { text-decoration-color: var(--accent); }
-.get small { font-size: 15px; color: var(--faint); }
+.hero-small { margin-top: 14px; font-size: 15px; color: var(--faint); }
+/* The line that leads into the stage. */
+.try-line { font: 600 clamp(19px, 2vw, 23px)/1.35 var(--display); letter-spacing: -.01em; color: var(--text); text-wrap: balance; }
 
 /* The stage: a desk, a sample window on it, and above them the planes the app adds: ink, then the toolbar. */
 .stage { --tilt: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; margin-top: 40px; }
@@ -195,6 +207,26 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
 /* The loop's marks leave together before the next round. */
 .ink-mark.is-leaving { opacity: 0 !important; transition: opacity var(--t-2) ease; }
+/* While the scripted demo plays, the ink lets presses through: a press on the stage hands it to the visitor. */
+.stage.is-demo .board > .ink-layer { pointer-events: none; touch-action: auto; }
+/* Two tags sit on the stage's top edge: the cue on the left, the mode on the right. */
+.turn, .mode-chip { position: absolute; top: -17px; z-index: 110; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 0; padding: 0 14px 0 12px; border-radius: 999px; font: 600 14.5px/1 var(--sans); white-space: nowrap; }
+.turn { left: 20px; border: 0; background: var(--ocean-button); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--glint), 0 10px 24px -10px color-mix(in srgb, var(--ocean-2) 80%, transparent); cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--t-1) ease, visibility 0s linear var(--t-1); }
+.turn.is-on { opacity: 1; visibility: visible; transition-delay: 0s; }
+.turn svg { flex: none; fill: currentColor; }
+.turn:focus-visible { border-radius: 999px; }
+.mode-chip { right: 20px; background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong), var(--coin-shadow); transition: background-color var(--t-1) ease, color var(--t-1) ease, box-shadow var(--t-1) ease; }
+.mode-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-1) ease, box-shadow var(--t-1) ease; }
+.mode-chip[data-mode="draw"] { color: var(--on); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on) 60%, transparent), var(--coin-shadow); }
+.mode-chip[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
+/* The demo's pointer: main.js writes where it is (--x, --y) and which plane it is on (--z: 0 the window, 1 the toolbar). */
+.stage-pointer { --x: 0px; --y: 0px; --z: 0; position: absolute; left: 0; top: 0; z-index: 120; margin: -2px 0 0 -3px; opacity: 0; pointer-events: none; filter: drop-shadow(0 3px 5px var(--floor)); transform: translate3d(var(--x), var(--y), 0); transition: opacity .3s ease; }
+.stage-pointer.is-on { opacity: 1; }
+.stage-pointer svg { display: block; transform-origin: 3px 2px; transition: transform 140ms var(--ease-out); }
+.stage-pointer.is-down svg { transform: scale(.84); }
+.stage-pointer path { fill: var(--pointer-fill); stroke: var(--pointer-line); stroke-width: 1.5; stroke-linejoin: round; }
+/* The ring of the app's pointer when it clicks. main.js plays the app's own pulse on it. */
+.stage-pointer i { position: absolute; left: -15px; top: -16px; width: 36px; height: 36px; border: 3px solid var(--accent); border-radius: 50%; opacity: 0; }
 
 /* The sample app: a small report, in the colors an app would have in this theme. */
 .window, .mini { position: relative; overflow: hidden; border-radius: 12px; background: var(--win-bg); color: var(--win-text); box-shadow: var(--win-shadow); }
@@ -203,8 +235,16 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .window-bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12.5px; font-weight: 500; color: var(--win-muted); }
 .report { display: grid; gap: 18px; padding: 16px 16px 18px; }
 .report-head { display: grid; gap: 4px; font-size: 13.5px; line-height: 1.35; color: var(--win-muted); }
-.week { display: flex; align-items: baseline; gap: 10px; }
-.week strong { font: 680 20px/1.1 var(--display); letter-spacing: -.02em; color: var(--win-text); }
+/* The week and its two steps. They are real buttons: in Use apps they change the report. */
+.week { display: flex; align-items: center; gap: 8px; }
+.week p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; }
+.week strong { font: 680 20px/1.1 var(--display); letter-spacing: -.02em; color: var(--win-text); white-space: nowrap; }
+.week-step { flex: none; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid color-mix(in srgb, var(--win-text) 18%, transparent); border-radius: 9px; background: var(--win-field); color: var(--win-text); cursor: pointer; transition: background-color var(--t-1) ease, transform 140ms var(--ease-out), opacity var(--t-1) ease; }
+.week-step svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.week-step:hover:not(:disabled) { background: color-mix(in srgb, var(--win-text) 9%, var(--win-field)); }
+.week-step:is(:active, .is-pressed):not(:disabled) { transform: scale(.88); background: color-mix(in srgb, var(--win-text) 16%, var(--win-field)); }
+.week-step:disabled { opacity: .35; cursor: default; }
+.week-step:focus-visible { outline-offset: 2px; border-radius: 9px; }
 .sent span { margin-left: 3px; color: var(--win-text); }
 .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .metrics dt, .chart > p { font-size: 12.5px; line-height: 1.3; color: var(--win-muted); }
@@ -214,17 +254,35 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .delta.up { color: var(--win-muted); background: color-mix(in srgb, var(--win-text) 8%, transparent); }
 .delta.down { color: var(--win-down); background: color-mix(in srgb, var(--win-down) 15%, transparent); }
 .notes { display: none; }
-.plot { position: relative; margin-top: 8px; aspect-ratio: 420 / 160; }
+.plot { position: relative; margin-top: 8px; aspect-ratio: 420 / 160; container-type: size; }
 .plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .plot .grid { fill: none; stroke: var(--win-line); stroke-width: 1; }
 .plot .area { fill: color-mix(in srgb, var(--win-accent) 15%, transparent); }
 .plot .line { fill: none; stroke: var(--win-accent); stroke-width: 3; stroke-linecap: round; }
 .plot .last { fill: none; stroke: color-mix(in srgb, var(--win-text) 28%, transparent); stroke-width: 1.5; stroke-dasharray: 4 5; }
-.plot .dot { fill: var(--win-bg); stroke: var(--win-accent); stroke-width: 3; }
 .plot .days { fill: var(--win-muted); font: 400 10px var(--mono); text-anchor: middle; }
-.dip { position: absolute; left: 50%; top: 65%; width: 0; height: 0; }
+.dip { position: absolute; width: 0; height: 0; }
+/* A point for each day. Pointing at one, or moving to it with the keyboard, shows its number. */
+.points { position: absolute; inset: 0; }
+.pt { --x: 50; --y: 50; position: absolute; left: calc(var(--x) * 1%); top: 0; width: 26px; height: 26px; margin: -13px 0 0 -13px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; transform: translateY(calc(var(--y) * 1cqh)); }
+.pt::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--win-bg); box-shadow: 0 0 0 2.5px var(--win-accent); transition: transform var(--t-1) var(--ease-out); }
+.pt:is(:hover, :focus-visible, .is-shown)::before { transform: scale(1.35); }
+.pt:focus-visible { outline-offset: 0; border-radius: 50%; }
+.tip { position: absolute; left: 50%; bottom: calc(100% + 2px); padding: 5px 9px; border-radius: 8px; background: var(--win-text); color: var(--win-bg); font: 500 11.5px/1 var(--mono); white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, 4px); transition: opacity var(--t-1) ease, transform var(--t-1) var(--ease-out); }
+.pt:is(:hover, :focus-visible, .is-shown) .tip { opacity: 1; transform: translate(-50%, 0); }
+.pt:first-child .tip { left: 0; transform: translate(-6px, 4px); }
+.pt:first-child:is(:hover, :focus-visible, .is-shown) .tip { transform: translate(-6px, 0); }
+.pt:last-child .tip { left: auto; right: 0; transform: translate(6px, 4px); }
+.pt:last-child:is(:hover, :focus-visible, .is-shown) .tip { transform: translate(6px, 0); }
+/* Once the page is up, a new week eases in: the line bends and the points travel. */
+.report.is-live .plot path { transition: d var(--t-2) var(--ease-in-out); }
+.report.is-live .pt { transition: transform var(--t-2) var(--ease-in-out); }
 
-.stage figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-top: 16px; font-size: 15px; line-height: 1.45; color: var(--faint); }
+.stage figcaption { display: grid; gap: 14px 32px; margin-top: 22px; }
+.stage-words { display: grid; gap: 6px; }
+.stage-line { font-size: 18px; line-height: 1.4; color: var(--text); }
+.stage-note { max-width: 44em; font-size: 15px; line-height: 1.45; color: var(--faint); }
+.stage-controls { display: flex; flex-wrap: wrap; gap: 8px; order: -1; min-height: 36px; }
 
 /* Cards: one surface up from the page, with a hairline. Dark gets a light along the top edge, light a soft shadow. */
 .tile-inner, .extra, .answer, .platform, .coffee-panel { border: 1px solid var(--line); background-color: var(--surface-1); box-shadow: var(--card-shadow); }
@@ -241,14 +299,17 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .deck-space { min-width: 0; }
 .tile { grid-column: span 12; min-width: 0; display: flex; }
 .tile-inner { position: relative; flex: 1; display: flex; flex-direction: column; min-width: 0; border-radius: 26px; }
-.tile-media { position: relative; flex: 1 1 auto; margin: 10px 10px 0; overflow: hidden; border-radius: 17px; background: var(--media-bg); aspect-ratio: 16 / 10; }
-.tile-media video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+/* The picture on a card is a live scene. It keeps its shape, and grows if what is in it needs more room. */
+.tile-media { position: relative; flex: 1 1 auto; margin: 10px 10px 0; overflow: clip; border-radius: 17px; background: var(--media-bg); aspect-ratio: 16 / 10; }
 .tile-text { padding: 20px 24px 26px; }
 .tile-text p { margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--muted); }
-.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; box-shadow: inset 0 0 0 1px var(--line); }
-.scene-private { background: radial-gradient(90% 110% at 100% 0%, var(--glow-violet), transparent 62%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
-.scene-steps { background: radial-gradient(90% 110% at 0% 100%, var(--glow-teal), transparent 62%), linear-gradient(200deg, var(--desk-a), var(--desk-b)); }
-.scene .ink-layer { --ink-layer-z: 5; }
+.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; box-shadow: inset 0 0 0 1px var(--line); background: radial-gradient(90% 110% at 100% 0%, var(--glow-blue), transparent 62%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
+.scene-private, .scene-spot { background: radial-gradient(90% 110% at 100% 0%, var(--glow-violet), transparent 62%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
+.scene-steps, .scene-point { background: radial-gradient(90% 110% at 0% 100%, var(--glow-teal), transparent 62%), linear-gradient(200deg, var(--desk-a), var(--desk-b)); }
+.scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 4.6cqi, 27px)/1.1 "Caveat", "Bradley Hand", cursive; }
+/* Smart Draw has just made a rough box neat: the neat one lands with a small push. */
+.ink-mark.is-snapped { transform-box: fill-box; transform-origin: center; animation: snap var(--t-1) var(--ease-out); }
+@keyframes snap { from { transform: scale(1.05); opacity: .4; } }
 /* A small sample window, sized from the card it sits in. */
 .mini { width: min(27em, 100%); font-size: clamp(10.5px, 3.4cqi, 18.5px); line-height: 1.3; }
 .mini .window-bar { height: 2.5em; }
@@ -264,24 +325,32 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .field { display: block; padding: .6em .8em; border: 1px solid color-mix(in srgb, var(--win-text) 20%, transparent); border-radius: 8px; background: var(--win-field); font-weight: 500; }
 .field.select { background: var(--win-field) linear-gradient(45deg, transparent 50%, var(--win-muted) 50%) no-repeat right 1em top 55% / 5px 5px; }
 .mini-button { justify-self: start; padding: .65em 1em; border-radius: 8px; background: var(--win-accent); color: var(--win-bg); font-weight: 600; }
-@media (min-width: 820px) {
-  .tile:nth-child(4n + 1), .tile:nth-child(4n) { grid-column: span 7; }
-  .tile:nth-child(4n + 2), .tile:nth-child(4n + 3) { grid-column: span 5; }
-  .tile:nth-child(n + 5) { grid-column: span 6; }
-  html:not(.motion) .tile:nth-child(3) { order: 4; }
-  html:not(.motion) .tile:nth-child(n + 4) { order: 5; }
-  html:not(.motion) .scene { aspect-ratio: auto; min-height: 260px; }
-}
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; padding: 1.1em 1.3em .5em; }
+.stats p { display: grid; gap: .5em; justify-items: start; }
+.stats span { font-size: .88em; color: var(--win-muted); }
+.stats b { font: 680 1.7em/1 var(--display); letter-spacing: -.03em; }
+.bars { display: flex; align-items: flex-end; gap: .55em; height: 5.4em; padding: 0 1.3em 1.2em; }
+.bars i { flex: 1; height: calc(var(--v) * 100%); border-radius: 3px 3px 0 0; background: color-mix(in srgb, var(--win-accent) 34%, transparent); }
+.bars [data-peak] { background: var(--win-accent); }
+.code { display: grid; justify-items: start; padding: 1em 1.3em 1.2em; font: 500 .9em/1.6 var(--mono); white-space: pre; }
+.code span { display: block; }
+.code [data-box] { margin-block: .5em; }
+/* The system sketch has no window: three empty places on the desk that the ink turns into a diagram. */
+.nodes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11%; width: 86%; }
+.nodes i { aspect-ratio: 1.4; }
+@media (min-width: 720px) { .tile { grid-column: span 6; } }
+@media (min-width: 1100px) { .tile { grid-column: span 4; } }
 
 /* Two keys */
-.keys-section { display: grid; gap: 40px; align-items: center; }
-.stay { margin-top: 18px; font: 600 22px/1.3 var(--display); letter-spacing: -.01em; color: var(--accent-text); }
-.mode-note { margin-top: 10px; max-width: 26em; font-size: 17px; color: var(--muted); }
-.mode-pill { display: inline-flex; align-items: center; gap: 7px; margin-inline: 2px; padding: 3px 11px 3px 9px; border-radius: 999px; background: var(--wash-strong); color: var(--text); font-size: 15px; font-weight: 600; vertical-align: 1px; transition: background-color var(--t-2) ease; }
-.mode-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-2) ease, box-shadow var(--t-2) ease; }
-.mode-pill b { font-weight: inherit; }
-.mode-pill[data-mode="draw"] { background: color-mix(in srgb, var(--on) 18%, transparent); }
-.mode-pill[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
+.keys-section { display: grid; gap: 36px; }
+.keys-copy { display: grid; gap: 10px; justify-items: start; }
+.stay { font: 600 22px/1.3 var(--display); letter-spacing: -.01em; color: var(--accent-text); }
+.press { max-width: 26em; font-size: 17px; color: var(--muted); }
+/* The line that says which mode the stage is in right now. */
+.mode-line { display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; padding: 7px 15px 7px 12px; border-radius: 999px; background: var(--wash-strong); font-size: 16px; font-weight: 600; transition: background-color var(--t-2) ease, color var(--t-2) ease; }
+.mode-line i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-2) ease, box-shadow var(--t-2) ease; }
+.mode-line[data-mode="draw"] { background: color-mix(in srgb, var(--on) 16%, transparent); color: var(--on); }
+.mode-line[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
 .keys { display: grid; gap: 30px; justify-items: start; }
 .combo { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .combo:focus-visible { outline-offset: 10px; border-radius: 20px; }
@@ -294,24 +363,13 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .key.is-down .key-top { transform: translateY(4px); box-shadow: inset 0 1px 0 var(--key-hi), inset 0 0 0 1px var(--line), 0 1px 0 var(--key-edge), 0 3px 6px -3px var(--key-cast); transition-duration: 90ms; transition-timing-function: ease-out; }
 .combo-label { font: 600 22px/1.2 var(--display); letter-spacing: -.01em; }
 
-/* The real app */
-.reel-head { display: grid; gap: 12px; }
-.reel-head p, .also-head p { max-width: 30em; color: var(--muted); }
-.reel-space { position: relative; margin-top: 32px; }
-.reel-space::before { content: ""; position: absolute; inset: 6% -3% -6%; z-index: -1; background: radial-gradient(46% 60% at 22% 42%, var(--glow-teal), transparent 70%), radial-gradient(50% 60% at 74% 60%, var(--glow-violet), transparent 70%); pointer-events: none; }
-.reel-frame { overflow: hidden; aspect-ratio: 4 / 5; border-radius: 22px; background: var(--media-bg); box-shadow: 0 0 0 1px var(--line-strong), var(--plane-shadow); }
-.reel-frame video { display: block; width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-.reel-frame video:focus-visible { outline-offset: -5px; border-radius: 22px; }
-.video-controls { display: flex; gap: 8px; margin-top: 16px; }
-#reel-play { min-width: 74px; justify-content: center; }
-
-/* Also in the app */
-.also-head { display: grid; gap: 12px; }
+/* There's more in the app: four cards, each a picture that moves and one line. */
 .extras { display: grid; gap: 14px; margin-top: 36px; }
-.extra { position: relative; display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 18px; align-items: center; padding: 14px; border-radius: 22px; }
-.extra h3 { font-size: 20px; }
-.extra p { margin-top: 6px; font-size: 16px; line-height: 1.45; color: var(--muted); }
-.il { display: block; width: 100%; height: auto; overflow: visible; border-radius: 14px; background: var(--il-bg); }
+.extra { position: relative; display: grid; gap: 16px; align-content: start; padding: 12px 12px 22px; border-radius: 24px; }
+.extra > div:last-child { padding-inline: 12px; }
+.extra h3 { font-size: 22px; }
+.extra p { margin-top: 6px; font-size: 17px; line-height: 1.45; color: var(--muted); }
+.il { display: block; width: 100%; aspect-ratio: 2 / 1; overflow: visible; border-radius: 15px; background: var(--il-bg); }
 .il-panel { fill: var(--surface-2); stroke: var(--line-strong); }
 .il-faint { fill: none; stroke: color-mix(in srgb, var(--text) 20%, transparent); stroke-width: 3; stroke-linecap: round; }
 .il-region { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 1.8; stroke-dasharray: 5 4; }
@@ -328,23 +386,16 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .il-black { fill: var(--board-black); }
 .il-frame { fill: none; stroke: var(--line-strong); }
 .il-ink { fill: none; stroke: var(--ink-coral); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
-.il-star { fill: color-mix(in srgb, var(--ink-coral) 18%, transparent); stroke: var(--ink-coral); stroke-width: 1.8; stroke-linejoin: round; }
-.il-bar { fill: var(--il-bar); stroke: var(--line-strong); }
-.il-tool { fill: color-mix(in srgb, var(--text) 32%, transparent); }
-.il-moved { fill: var(--accent); transform: translateX(40px); }
-.il-shift { transform: translateX(-20px); }
-.il-brand { fill: var(--text); }
-.il-go { fill: color-mix(in srgb, var(--on) 55%, transparent); }
-.il-halo { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 3; }
-.il-click { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }
-.il-arrow { fill: var(--pointer-fill); stroke: var(--pointer-line); stroke-width: 1.5; stroke-linejoin: round; }
-.il-stamp, .il-pill, .il-pop, .il-black, .il-click, .il-pointer, .il-glow { transform-box: fill-box; transform-origin: center; }
+.il-pop, .il-black, .il-glow { transform-box: fill-box; transform-origin: center; }
+/* The last picture is the page's real toolbar, made small by main.js. It is a picture: nothing in it can be pressed. */
+.il-toolbar { display: grid; place-items: center; overflow: clip; pointer-events: none; -webkit-user-select: none; user-select: none; }
+.mini-bar-fit { display: grid; place-items: center; }
+.mini-bar-fit .ink-toolbar { grid-area: 1 / 1; position: relative; left: auto; bottom: auto; translate: none; max-width: none; animation: none; }
 
 /* Good to know */
 .answer-grid { display: grid; gap: 14px; margin-top: 36px; }
 .answer { padding: 24px 24px 26px; border-radius: 22px; }
 .answer p { margin-top: 10px; font-size: 17px; color: var(--muted); }
-.answer b { font-weight: 600; color: var(--accent-text); }
 
 /* Coffee */
 .coffee-panel { position: relative; display: grid; gap: 8px 40px; justify-items: start; padding: 28px 24px 34px; border-radius: 30px; background-image: radial-gradient(70% 120% at 0% 0%, var(--glow-teal), transparent 62%), radial-gradient(60% 110% at 100% 100%, var(--glow-violet), transparent 62%); }
@@ -372,6 +423,9 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .command button { min-width: 66px; height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--wash-strong); color: var(--text); font: 500 14px/1 var(--sans); cursor: pointer; transition: background-color var(--t-1) ease, transform var(--t-2) var(--spring); }
 .command button:hover { background: color-mix(in srgb, var(--text) 15%, transparent); }
 .command button:active { transform: scale(.94); transition-duration: 90ms; }
+.install-more { display: grid; gap: 8px; margin-top: 30px; font-size: 17px; color: var(--muted); }
+.install-more a { color: var(--text); text-decoration-color: color-mix(in srgb, var(--accent) 70%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: .22em; transition: text-decoration-color var(--t-1) ease; }
+.install-more a:hover { text-decoration-color: var(--accent); }
 
 /* Footer */
 .site-footer { margin-top: var(--space); padding-block: 36px 56px; border-top: 1px solid var(--line); }
@@ -380,35 +434,44 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .site-footer nav a { color: var(--muted); text-decoration: none; transition: color var(--t-1) ease; }
 .site-footer nav a:hover { color: var(--text); }
 .site-footer p { font-size: 15px; color: var(--faint); }
+.site-footer .sign-off { font: 600 19px/1.3 var(--display); color: var(--text); }
+.site-footer .sign-off + p { margin-top: -10px; }
 
 @media (max-width: 899px) {
   .nav-link { display: none; }
-  .site-header nav { gap: 18px; }
+  .site-header nav { gap: 16px; }
 }
 @media (max-width: 519px) {
+  .wordmark { font-size: 21px; }
   .nav-coffee span { display: none; }
-  .nav-coffee { padding: 8px; margin: -8px; }
-  .nav-coffee svg { width: 22px; height: 22px; }
-  .site-header nav { gap: 14px; }
+  .nav-coffee { padding: 6px; margin: -6px; }
+  .nav-coffee svg { width: 21px; height: 21px; }
+  .site-header nav { gap: 10px; font-size: 14.5px; }
+  .nav-try { height: 32px; padding: 0 11px 0 9px; gap: 6px; }
+  .site-header .button.small { height: 34px; padding: 0 12px; font-size: 14.5px; }
   .deck-steps button { width: 24px; }
+  .turn { left: 12px; }
+  .mode-chip { right: 12px; }
 }
 @media (min-width: 600px) {
-  .hero { padding-top: 52px; }
-  .stage { margin-top: 48px; }
-  .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 56px; --inset: clamp(24px, 4vw, 64px); --inset-top: 40px; --dock-inset: 14px; }
+  .hero { padding-top: 40px; }
+  .stage { margin-top: 44px; }
+  .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 56px; --inset: clamp(24px, 4vw, 64px); --inset-top: 44px; --dock-inset: 14px; }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .report { gap: 22px; padding: 22px 26px 26px; }
-  .report-head { grid-template-columns: 1fr auto; align-items: baseline; }
+  .report-head { grid-template-columns: 1fr auto; align-items: center; }
   .num { font-size: 32px; }
   .plate { --key: 72px; gap: 12px; padding: 18px; }
   .key-top { font-size: 17px; }
-  .reel-frame { aspect-ratio: 16 / 9; }
-  .extras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-  .answer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .extras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .platform { padding: 32px 32px 30px; }
   .coffee-panel { grid-template-columns: auto minmax(0, 1fr); align-items: center; padding: 40px 48px; }
   .cup { width: 200px; height: 200px; margin: 0; }
+}
+@media (min-width: 820px) {
+  .stage figcaption { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+  .stage-controls { justify-content: flex-end; order: 0; }
 }
 @media (min-width: 900px) {
   .report { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); column-gap: 56px; row-gap: 22px; padding: 24px 34px 30px; }
@@ -418,24 +481,24 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
   .notes li { position: relative; padding-left: 16px; }
   .notes li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: var(--win-accent); }
   .num { font-size: 38px; }
-  .keys-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); gap: 56px; }
+  .keys-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); grid-template-areas: "title keys" "copy keys"; column-gap: 56px; row-gap: 22px; }
+  .keys-section h2 { grid-area: title; align-self: end; }
+  .keys { grid-area: keys; align-self: center; }
+  .keys-copy { grid-area: copy; align-self: start; }
   .plate { --key: 84px; gap: 14px; padding: 20px; border-radius: 26px; }
   .key-top { border-radius: 15px; font-size: 19px; }
   .combo-label { font-size: 26px; }
-  .extras { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .extra { grid-template-columns: 1fr; gap: 16px; align-items: start; padding: 14px 14px 22px; }
-  .extra > div { padding-inline: 10px; }
-  .reel-head, .also-head { grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 12px 48px; }
-  .reel-head p, .also-head p { justify-self: end; padding-bottom: 6px; text-align: right; }
+  .answer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 }
 @media (min-width: 1064px) {
-  .screen { --tb-h: 145px; --tb-bottom: 22px; --tb-gap: 64px; --inset-top: 48px; }
+  .screen { --tb-h: 145px; --tb-bottom: 22px; --tb-gap: 64px; --inset-top: 52px; }
 }
 @media (min-width: 1200px) {
   /* On a wide screen the stage is a little wider than the text above it. */
   .stage { --stage-w: min(1360px, 100vw - 2 * var(--gutter)); width: var(--stage-w); margin-inline: calc((100% - var(--stage-w)) / 2); }
-  .hero-copy { grid-template-columns: minmax(0, 1fr) 352px; align-items: end; gap: 56px; }
+  .hero-copy { grid-template-columns: minmax(0, 1fr) 348px; align-items: end; gap: 30px 44px; }
   .hero-side { padding-bottom: 8px; }
+  .try-line { grid-column: 1 / -1; }
 }
 
 /* Changing the theme --------------------------------------------------------------------------------
@@ -478,6 +541,7 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .motion .is-in > .inked svg { clip-path: inset(-50% -2% -50% -2%); }
 .motion .site-header { animation: drop var(--t-2) var(--ease-out) backwards; }
 .motion .hero-side { animation: rise var(--t-3) var(--ease-out) 380ms backwards; }
+.motion .try-line { animation: rise var(--t-3) var(--ease-out) 520ms backwards; }
 .motion .stage-space { animation: rise-far var(--t-3) var(--ease-out) 300ms backwards; }
 .motion .stage figcaption { animation: rise var(--t-3) var(--ease-out) 900ms backwards; }
 @keyframes drop { from { opacity: 0; transform: translateY(-14px); } }
@@ -517,7 +581,7 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .motion .tile-text { min-height: 9.2em; }
 @media (min-width: 600px) {
   .motion .what { --peek: 76px; --deck-shift: calc(var(--card-w) * .7); --deck-angle: -40deg; --deck-depth: -260px; }
-  .motion .tile-text { min-height: 7.4em; }
+  .motion .tile-text { min-height: 6.2em; }
 }
 @media (min-width: 1100px) { .motion .what { --peek: 110px; --deck-shift: calc(var(--card-w) * .66); --deck-angle: -44deg; --deck-depth: -300px; } }
 
@@ -547,11 +611,6 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .motion .key.is-down .key-top { box-shadow: inset 0 1px 0 var(--key-hi), inset 0 0 0 1px var(--line); transform: translateZ(calc(var(--h) * .2)); }
 .motion .key.is-down .key-side { transform: translateY(7px) rotateX(90deg) scaleY(.2); transition-duration: 90ms; transition-timing-function: ease-out; }
 
-/* The recording swings from an angle to flat as it comes up the screen (--e, 0 to 1). */
-.motion .reel-space { perspective: 1600px; }
-.motion .reel-frame { transform-origin: 50% 100%; transform: rotateX(calc((1 - var(--e, 1)) * 22deg)) rotateY(calc((1 - var(--e, 1)) * -9deg)) scale(calc(.86 + var(--e, 1) * .14)); will-change: transform; }
-.motion .reel-space::before { transform: translate3d(0, calc((.5 - var(--p, .5)) * 90px), 0); }
-
 /* Small pictures that play once when they arrive, and again under the pointer. */
 .motion .extra.is-playing .il-pop { animation: pop-out var(--t-3) var(--ease-out) 200ms backwards; }
 .motion .extra.is-playing .il-region { animation: fade-in var(--t-2) ease backwards; }
@@ -561,15 +620,6 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .motion .extra.is-playing .il-glow.a { animation: drift 2.8s var(--ease-in-out) backwards; }
 .motion .extra.is-playing .il-black { transform-origin: 100% 50%; animation: wipe var(--t-3) var(--ease-in-out) backwards; }
 .motion .extra.is-playing .il-ink { stroke-dasharray: 1; animation: draw 1.1s var(--ease-in-out) 500ms backwards; }
-.motion .extra.is-playing .il-stamp { animation: stamp var(--t-2) var(--spring) backwards; }
-.motion .extra.is-playing .il-stamp.s1 { animation-delay: 250ms; }
-.motion .extra.is-playing .il-stamp.s2 { animation-delay: 550ms; }
-.motion .extra.is-playing .il-stamp.s3 { animation-delay: 850ms; }
-.motion .extra.is-playing .il-moved { animation: move-tool var(--t-3) var(--ease-in-out) 200ms backwards; }
-.motion .extra.is-playing .il-shift { animation: shift-tool var(--t-3) var(--ease-in-out) 200ms backwards; }
-.motion .extra.is-playing .il-pill { animation: stamp var(--t-2) var(--spring) 1.1s backwards; }
-.motion .extra.is-playing .il-pointer { animation: glide var(--t-3) var(--ease-out) backwards; }
-.motion .extra.is-playing .il-click { animation: click 700ms var(--ease-out) 1s; }
 @keyframes pop-out { from { opacity: 0; transform: translate(-28px, -18px) scale(.8); } }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes shown { from, to { opacity: 1; } }
@@ -577,11 +627,15 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 @keyframes drift { from { transform: translate(30px, -22px); } }
 @keyframes wipe { from { transform: scaleX(0); } }
 @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes stamp { from { opacity: 0; transform: scale(.3); } }
-@keyframes move-tool { from { transform: translateX(0); } }
-@keyframes shift-tool { from { transform: translateX(0); } }
-@keyframes glide { from { transform: translate(-34px, 26px); } }
-@keyframes click { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(1.9); } }
+
+/* The stage's own small moves. The demo's pointer sits on the window's plane or the toolbar's while the stage
+   leans; the cue arrives with a push; "Try it here" sends one ring of light round the stage's edge. */
+.motion .stage-pointer { transform: translate3d(var(--x), calc(var(--y) + var(--lift) * (1 - var(--z)) * -6px), calc(var(--lift) * var(--z) * 60px)); }
+.motion .turn.is-on svg { animation: nudge 2.4s var(--ease-in-out) 600ms infinite; }
+@keyframes nudge { 0%, 60%, 100% { transform: none; } 30% { transform: translate(-2px, -2px); } 42% { transform: translate(1px, 1px); } }
+.motion .stage.is-cued .desk { animation: cue 1.1s var(--ease-out); }
+@keyframes cue { 0% { box-shadow: var(--top-light), var(--plane-shadow), 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); } 100% { box-shadow: var(--top-light), var(--plane-shadow), 0 0 0 26px transparent; } }
+.motion .tip { transition-duration: var(--t-1); }
 
 /* Coffee: the cup floats a little against its panel, and the steam rises a few times when it comes into view. */
 .motion .cup { transform: translate3d(0, calc((.5 - var(--p, .5)) * 44px), 0) rotate(calc((var(--p, .5) - .5) * -10deg)); }

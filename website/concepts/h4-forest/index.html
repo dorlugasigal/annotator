@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Annotator: draw on your screen as you explain (Studio · Forest)</title>
+  <meta name="description" content="Annotator lets you draw right on top of your screen while you share it. It's free, for Mac and Windows.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0a0f0c">
+  <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
+  <link rel="preload" href="/concepts/shared/fonts/onest-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/concepts/shared/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/concepts/shared/ink.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Before the first paint: the visitor's platform, their theme (dark until they choose light) and whether motion
+    // is allowed, so the page never flashes the other one. For looking at the page: ?platform=windows|mac,
+    // ?theme=light|dark, ?motion=off, and ?fade for the theme change browsers without view transitions get.
+    (function () {
+      var root = document.documentElement, query = new URLSearchParams(location.search), saved = null;
+      var system = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+      root.dataset.platform = (query.get("platform") || (/win/i.test(system) ? "windows" : "mac")) === "windows" ? "windows" : "mac";
+      try { saved = localStorage.getItem("annotator.concept-h4.theme"); } catch (error) { /* storage is off */ }
+      root.dataset.theme = (query.get("theme") || saved) === "light" ? "light" : "dark";
+      root.classList.add("js");
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches && query.get("motion") !== "off") root.classList.add("motion");
+    })();
+  </script>
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <!-- The app's Forest gradient, for strokes. Its colors come from the stylesheet. -->
+  <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>
+    <linearGradient id="forest" x1=".05" y1=".29" x2=".95" y2=".71"><stop offset="0"/><stop offset=".5"/><stop offset="1"/></linearGradient>
+    <symbol id="brand" viewBox="14 12 44 42"><path d="M39 19c-17-10-32 17-19 26 6 4 13-1 17-9l-1 9h7l5-28h-8zm-4 7c-2 10-8 16-11 13-4-4 4-18 11-13z"/><circle class="brand-dot" cx="50" cy="47" r="4"/></symbol>
+  </defs></svg>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
+      <nav aria-label="Site">
+        <a class="nav-link" href="#what">What you can do</a>
+        <a class="nav-try" href="#stage" data-try><i aria-hidden="true"></i>Try it</a>
+        <a class="nav-link" href="/docs/">Help</a>
+        <a class="nav-link" href="https://github.com/dorlugasigal/annotator">GitHub</a>
+        <a class="nav-coffee" href="https://buymeacoffee.com/dorlugasigal" aria-label="Buy me a coffee">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 8h10v4.500A4.500 4.500 0 0 1 9.500 17h-1A4.500 4.500 0 0 1 4 12.500zM14 9.500h1.200a2.300 2.300 0 0 1 0 4.600H13.700M7 2.500c-.9 1 .9 2 0 3M11 2.500c-.9 1 .9 2 0 3"/></svg>
+          <span>Buy me a coffee</span>
+        </a>
+        <!-- The switch is the toolbar's Shrink in small: a bar with both themes for dark, one button for light. -->
+        <span class="ts-slot">
+          <button type="button" class="theme-switch" id="theme-switch" role="switch" aria-checked="false" aria-label="Light theme">
+            <span class="ts-face ts-bar" aria-hidden="true">
+              <svg class="ts-on" viewBox="0 0 24 24"><path d="M20 14.500A8.500 8.500 0 0 1 9.500 4a8.500 8.500 0 1 0 10.500 10.500z"/></svg>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.500V5M12 19v2.500M2.500 12H5M19 12h2.500M5.300 5.300l1.800 1.800M16.900 16.900l1.800 1.800M5.300 18.700l1.800-1.800M16.900 7.100l1.800-1.800"/></svg>
+            </span>
+            <span class="ts-face ts-one" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.500V5M12 19v2.500M2.500 12H5M19 12h2.500M5.300 5.300l1.800 1.800M16.900 16.900l1.800 1.800M5.300 18.700l1.800-1.800M16.900 7.100l1.800-1.800"/></svg>
+            </span>
+          </button>
+        </span>
+        <a class="button small nav-download" href="#install">Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title"><span class="line">Draw on your screen</span> <span class="line">as you <em>explain.</em></span></h1>
+        <p class="lede">Annotator lets you draw right on top of your screen while you share it. Circle the number, point at the button, blur the email you&rsquo;d rather not show.</p>
+        <div class="get">
+          <p class="get-row" data-for="mac">
+            <a class="button primary" href="/downloads/" data-arrow>Download for Mac</a>
+            <button type="button" class="button" data-try>Try it here</button>
+            <a class="quiet" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
+          </p>
+          <p class="get-row" data-for="windows">
+            <a class="button primary" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK" data-arrow>Get it for Windows</a>
+            <button type="button" class="button" data-try>Try it here</button>
+            <a class="quiet" href="/downloads/">Download for Mac</a>
+          </p>
+          <p class="free">It&rsquo;s free, for Mac and Windows.</p>
+        </div>
+        <p class="try-line">Or try it first. The screen below is a working demo, so go ahead and draw on it.</p>
+      </div>
+
+      <figure class="stage" id="stage">
+        <div class="stage-space">
+          <div class="screen" id="screen">
+            <div class="desk" aria-hidden="true"></div>
+            <div class="board" id="board">
+              <div class="hud">
+                <p class="mode-chip" id="mode-chip" data-mode="use" role="status"><i aria-hidden="true"></i><b>Using apps</b><span class="chip-keys" aria-hidden="true"></span></p>
+                <p class="turn" id="turn" hidden><svg viewBox="0 0 22 26" width="13" height="15" aria-hidden="true"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>Your turn</p>
+              </div>
+              <div class="windows" id="windows">
+                <section class="window win-report" id="win-report" aria-label="Weekly report, a sample app">
+                  <div class="window-bar" data-drag><i></i><i></i><i></i><span>Weekly report</span></div>
+                  <div class="report">
+                    <div class="report-head">
+                      <div class="weeknav">
+                        <button type="button" id="week-prev" aria-label="Previous week"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.500 5.500 8l4.500 4.500"/></svg></button>
+                        <strong id="week-name">Week 47</strong>
+                        <button type="button" id="week-next" aria-label="Next week" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.500 10.500 8 6 12.500"/></svg></button>
+                        <span id="week-dates">16 to 22 November</span>
+                      </div>
+                      <p class="sent">Sent to <span id="private">maya.cohen@example.com</span></p>
+                    </div>
+                    <dl class="metrics">
+                      <div><dt>Visitors</dt><dd><span class="num" id="m-visitors">12,480</span><span class="delta up" id="d-visitors">+4%</span></dd></div>
+                      <div><dt>Orders</dt><dd><span class="num" id="m-orders">96</span><span class="delta up" id="d-orders">+2%</span></dd></div>
+                      <div><dt>Sign-ups</dt><dd><span class="num" id="ring-target">318</span><span class="delta down" id="d-signups">&minus;21%</span></dd></div>
+                    </dl>
+                    <div class="chart">
+                      <p>Sign-ups per day</p>
+                      <div class="plot" id="plot">
+                        <svg viewBox="0 0 420 160" focusable="false" aria-hidden="true">
+                          <path class="grid" d="M12 28H408M12 66H408M12 104H408M12 136H408"/>
+                          <path class="area" id="chart-area" d=""/>
+                          <path class="last" id="chart-last" d=""/>
+                          <path class="line" id="chart-line" d=""/>
+                          <g class="days"><text x="24" y="154">M</text><text x="86" y="154">T</text><text x="148" y="154">W</text><text x="210" y="154">T</text><text x="272" y="154">F</text><text x="334" y="154">S</text><text x="396" y="154">S</text></g>
+                        </svg>
+                        <div class="points" id="points"></div>
+                        <i class="dip" id="dip"></i>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+                <section class="window win-chat" id="win-chat" aria-label="Team chat, a sample app">
+                  <div class="window-bar" data-drag><i></i><i></i><i></i><span>Team chat</span></div>
+                  <ol class="thread" id="thread">
+                    <li><b>Maya</b><span>Sign-ups dipped on Thursday.</span></li>
+                    <li><b>Ben</b><span>The new form shipped that day.</span></li>
+                  </ol>
+                  <form class="reply" id="reply" autocomplete="off">
+                    <input type="text" id="reply-text" aria-label="Write a reply" placeholder="Write a reply" maxlength="80">
+                    <button type="submit" id="reply-send">Send</button>
+                  </form>
+                </section>
+              </div>
+              <div class="stage-fx" id="stage-fx" aria-hidden="true"><svg class="fx-svg"></svg></div>
+            </div>
+            <div class="dock" id="dock"></div>
+            <div class="dock-fx" id="dock-fx" aria-hidden="true"></div>
+          </div>
+        </div>
+        <figcaption>
+          <div class="stage-words">
+            <p>Draw marks it up. Use apps lets you click around underneath. Your drawings stay put.</p>
+            <p class="note">This is a web demo with a few of the tools. The real app does this over anything on your screen.</p>
+          </div>
+          <div class="stage-controls">
+            <button type="button" class="chip-button" id="done" hidden>Done drawing</button>
+            <button type="button" class="chip-button" id="replay" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5 3.500v9M11 3.500v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.700-3.750M3 2.500v2.800h2.800"/></svg><span>Pause</span></button>
+          </div>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="what" id="what" aria-labelledby="what-title">
+      <div class="what-pin">
+        <div class="wrap what-wrap">
+          <header class="sec-head" data-morph>
+            <span class="sec-chrome" aria-hidden="true"><i></i></span>
+            <span class="sec-pill" aria-hidden="true"><svg><use href="#brand"/></svg><span><i></i>What you can do</span></span>
+            <div class="sec-full">
+              <h2 id="what-title">What you can <em>do</em></h2>
+              <div class="sec-aside">
+                <div class="steps" id="steps" role="group" aria-label="Pick an example" hidden></div>
+                <button type="button" class="icon-button" id="scenes-toggle" aria-label="Pause the examples" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5 3.500v9M11 3.500v9"/><path class="i-play" d="M5 3.200v9.600L12.500 8z"/></svg></button>
+              </div>
+            </div>
+          </header>
+          <ol class="items" id="items">
+            <li class="item" data-style="magic">
+              <div class="item-text">
+                <h3>Circle and point</h3>
+                <p>Ring the number, then draw an arrow to the reason.</p>
+              </div>
+              <div class="item-media scene" id="scene-point" aria-hidden="true">
+                <div class="mini wide">
+                  <div class="window-bar"><i></i><i></i><i></i><span>Weekly report</span></div>
+                  <div class="mini-report">
+                    <dl>
+                      <div><dt>Visitors</dt><dd>12,480</dd></div>
+                      <div><dt>Orders</dt><dd>96</dd></div>
+                      <div><dt>Sign-ups</dt><dd><span data-ring>318</span></dd></div>
+                    </dl>
+                    <div class="mini-plot">
+                      <svg viewBox="0 0 420 120" focusable="false"><path class="grid" d="M8 20H412M8 56H412M8 92H412"/><path class="line" d="M24 38C45 38 65 30 86 30S127 36 148 36 189 86 210 86 251 46 272 46 313 34 334 34 375 26 396 26"/></svg>
+                      <i data-dip></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="item" data-style="pop">
+              <div class="item-text">
+                <h3>Box it and label it</h3>
+                <p>Sketch a rough box and Smart Draw tidies it up. Type a note next to it.</p>
+              </div>
+              <div class="item-media scene" id="scene-smart" aria-hidden="true">
+                <div class="mini">
+                  <div class="window-bar"><i></i><i></i><i></i><span>Sign up</span></div>
+                  <div class="form">
+                    <p><span>Email</span><b class="field">maya@example.com</b></p>
+                    <p><span>Team name</span><b class="field" data-box>Launch crew</b></p>
+                    <p><b class="mini-button">Create account</b></p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="item" data-style="dissolve">
+              <div class="item-text">
+                <h3>Hide what&rsquo;s private</h3>
+                <p>Blur an email while you share. It&rsquo;s a cover, not real redaction, so close the truly secret stuff first.</p>
+              </div>
+              <div class="item-media scene" id="scene-private" aria-hidden="true">
+                <div class="mini">
+                  <div class="window-bar"><i></i><i></i><i></i><span>Account</span></div>
+                  <dl class="rows">
+                    <div><dt>Name</dt><dd>Maya Cohen</dd></div>
+                    <div><dt>Email</dt><dd><span data-blur>maya.cohen@example.com</span></dd></div>
+                    <div><dt>Plan</dt><dd>Team, 12 seats</dd></div>
+                    <div><dt>Recovery code</dt><dd><span data-blur>4821-7730-1195</span></dd></div>
+                  </dl>
+                </div>
+              </div>
+            </li>
+            <li class="item" data-style="focus">
+              <div class="item-text">
+                <h3>Guide the eye</h3>
+                <p>Spotlight dims everything but your pointer. There&rsquo;s a laser pointer and zoom too.</p>
+              </div>
+              <div class="item-media scene" id="scene-spot" aria-hidden="true">
+                <div class="mini wide">
+                  <div class="window-bar"><i></i><i></i><i></i><span>Release notes</span></div>
+                  <div class="notes-doc">
+                    <p><b data-spot>New sign-up form</b><span>One page instead of three.</span></p>
+                    <p><b>Faster search</b><span>Results show as you type.</span></p>
+                    <p><b data-spot>Dark mode</b><span>Follows your system setting.</span></p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="item" data-style="drop">
+              <div class="item-text">
+                <h3>Number the steps</h3>
+                <p>Click, click, click. The numbers count up on their own.</p>
+              </div>
+              <div class="item-media scene" id="scene-steps" aria-hidden="true">
+                <div class="mini">
+                  <div class="window-bar"><i></i><i></i><i></i><span>New project</span></div>
+                  <div class="form numbered">
+                    <p><span>Name</span><b class="field" data-step>Launch week</b></p>
+                    <p><span>Region</span><b class="field select" data-step>Europe</b></p>
+                    <p><b class="mini-button" data-step>Create project</b></p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="item" data-style="corners">
+              <div class="item-text">
+                <h3>Sketch a system</h3>
+                <p>Boxes, arrows, and ready-made icons for servers and databases.</p>
+              </div>
+              <div class="item-media scene" id="scene-system" aria-hidden="true">
+                <div class="system">
+                  <div class="mini phone" data-node="app">
+                    <div class="window-bar"><span>Checkout</span></div>
+                    <div class="cart"><p><span>Notebook</span><span>$12</span></p><p><span>Pens</span><span>$4</span></p><b class="mini-button">Pay $16</b></div>
+                  </div>
+                  <i data-node="api"></i>
+                  <i data-node="db"></i>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="keys-section wrap" aria-labelledby="keys-title">
+      <header class="sec-head" data-morph>
+        <span class="sec-chrome" aria-hidden="true"><i></i></span>
+        <span class="sec-pill" aria-hidden="true"><svg><use href="#brand"/></svg><span><i></i>Two keys to remember</span></span>
+        <div class="sec-full"><h2 id="keys-title">Two <em>keys</em> to remember</h2></div>
+      </header>
+      <div class="keys-body">
+        <div class="keys" id="keys">
+          <button type="button" class="combo" data-combo="draw" data-enter>
+            <span class="caps">
+              <kbd class="key" data-key="control"><span data-for="mac">Control</span><span data-for="windows">Ctrl</span></kbd>
+              <kbd class="key" data-key="shift">Shift</kbd>
+              <kbd class="key" data-key="2">2</kbd>
+            </span>
+            <span class="combo-label">to draw.</span>
+          </button>
+          <button type="button" class="combo" data-combo="use" data-enter style="--i: 1">
+            <span class="caps"><kbd class="key" data-key="esc">Esc</kbd></span>
+            <span class="combo-label">to get back to your app.</span>
+          </button>
+        </div>
+        <div class="keys-copy" data-enter style="--i: 2">
+          <p class="stay">Your drawings stay where they are.</p>
+          <p class="press">Go on, press them. They work on this page.</p>
+          <p class="mode-line" id="mode-line" data-mode="use" role="status"><i aria-hidden="true"></i><span>Right now you&rsquo;re using the app.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="more wrap" aria-labelledby="more-title">
+      <header class="sec-head" data-morph>
+        <span class="sec-chrome" aria-hidden="true"><i></i></span>
+        <span class="sec-pill" aria-hidden="true"><svg><use href="#brand"/></svg><span><i></i>There&rsquo;s more in the app</span></span>
+        <div class="sec-full"><h2 id="more-title">There&rsquo;s <em>more</em> in the app</h2></div>
+      </header>
+      <ul class="extras">
+        <li class="extra" data-enter="pop">
+          <div class="il il-timer" aria-hidden="true">
+            <svg viewBox="0 0 240 150" focusable="false">
+              <circle class="il-track" cx="120" cy="75" r="50"/>
+              <circle class="il-arc" cx="120" cy="75" r="50" pathLength="1" transform="rotate(-90 120 75)"/>
+              <text class="il-time t1" x="120" y="85" text-anchor="middle">10:00</text>
+              <text class="il-time t2" x="120" y="85" text-anchor="middle">9:59</text>
+              <text class="il-time t3" x="120" y="85" text-anchor="middle">9:58</text>
+            </svg>
+          </div>
+          <div class="extra-text"><h3>Break timer</h3><p>A big countdown for the coffee break.</p></div>
+        </li>
+        <li class="extra" data-enter="pop" style="--i: 1">
+          <div class="il il-region" aria-hidden="true">
+            <svg viewBox="0 0 240 150" focusable="false">
+              <rect class="il-panel" x="16" y="18" width="208" height="92" rx="8"/>
+              <path class="il-faint" d="M30 36h44M30 48h30M30 82h34M30 94h22M150 36h60M150 48h40"/>
+              <rect class="il-dash" x="84" y="52" width="72" height="44" rx="3"/>
+              <g class="il-pop">
+                <rect class="il-card" x="132" y="78" width="92" height="60" rx="7"/>
+                <path class="il-rule" d="M132 92h92"/>
+                <circle class="il-dot" cx="141" cy="85" r="2"/><circle class="il-dot" cx="148" cy="85" r="2"/>
+                <rect class="il-fill" x="142" y="100" width="72" height="30" rx="3"/>
+              </g>
+            </svg>
+          </div>
+          <div class="extra-text"><h3>Share region</h3><p>Share just one part of a wide screen.</p></div>
+        </li>
+        <li class="extra" data-enter="pop" style="--i: 2">
+          <div class="il il-boards" aria-hidden="true">
+            <svg viewBox="0 0 240 150" focusable="false">
+              <clipPath id="board-clip"><rect x="24" y="20" width="192" height="110" rx="10"/></clipPath>
+              <g clip-path="url(#board-clip)">
+                <rect class="il-white" x="24" y="20" width="192" height="110"/>
+                <rect class="il-black" x="120" y="20" width="96" height="110"/>
+              </g>
+              <rect class="il-frame" x="24" y="20" width="192" height="110" rx="10"/>
+              <path class="il-ink" pathLength="1" stroke="url(#forest)" d="M44 92c12-30 26-34 34-8s20 20 30-2 24-26 34-6 20 12 54-24"/>
+            </svg>
+          </div>
+          <div class="extra-text"><h3>Whiteboard and blackboard</h3><p>A clean board when you need room.</p></div>
+        </li>
+        <li class="extra wide" data-enter="pop" style="--i: 3">
+          <!-- A small copy of the toolbar that shrinks to its one button and grows back, with the app's timing. -->
+          <div class="il il-toolbar" id="mini-toolbar" aria-hidden="true">
+            <div class="mt">
+              <span class="mt-chrome"><i></i></span>
+              <span class="mt-face mt-bar">
+                <i class="mt-tool"><svg viewBox="0 0 16 16"><path d="M3 2.500v10l2.700-2.400 2 4 1.700-.8-2-3.900h3.600z"/></svg></i>
+                <i class="mt-tool"><svg viewBox="0 0 16 16"><rect x="2.500" y="3.500" width="11" height="9" rx="1.500"/></svg></i>
+                <i class="mt-tool"><svg viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="5.500" ry="4.500"/></svg></i>
+                <i class="mt-tool"><svg viewBox="0 0 16 16"><path d="M3 13 13 3M7.500 3H13v5.500"/></svg></i>
+                <i class="mt-tool is-on"><svg viewBox="0 0 16 16"><path d="M2.500 13.500 3.200 10.500 10.700 3a1.600 1.600 0 0 1 2.300 2.300L5.500 12.800z"/></svg></i>
+                <i class="mt-tool"><svg viewBox="0 0 16 16"><path d="M4 4h8M8 4v9"/></svg></i>
+                <i class="mt-tool"><svg viewBox="0 0 16 16"><path d="M3 12 9.500 3.500l3 2.300L6 14.300H3z"/></svg></i>
+                <i class="mt-sep"></i>
+                <i class="mt-mode"><b></b></i>
+              </span>
+              <span class="mt-face mt-one"><svg><use href="#brand"/></svg><i class="mt-status"><b></b>Apps</i></span>
+            </div>
+          </div>
+          <div class="extra-text"><h3>A toolbar that&rsquo;s yours</h3><p>Add tools, remove tools, or shrink it to one button.</p></div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="answers wrap" aria-labelledby="answers-title">
+      <header class="sec-head" data-morph>
+        <span class="sec-chrome" aria-hidden="true"><i></i></span>
+        <span class="sec-pill" aria-hidden="true"><svg><use href="#brand"/></svg><span><i></i>Good to know</span></span>
+        <div class="sec-full"><h2 id="answers-title">Good to <em>know</em></h2></div>
+      </header>
+      <div class="answer-grid">
+        <div class="answer" data-enter><h3>Will people on my call see my drawings?</h3><p>Yes, if you share your whole screen. If you share a single window they might not, so ask someone what they see.</p></div>
+        <div class="answer" data-enter style="--i: 1"><h3>Does it record my screen?</h3><p>No. Your drawings, your screen and what you type stay on your computer.</p></div>
+        <div class="answer" data-enter style="--i: 2"><h3>Is it really free?</h3><p>Yes. All tools are free and the code is open source. If you like it, there&rsquo;s a coffee button.</p></div>
+      </div>
+    </section>
+
+    <section class="coffee wrap" id="coffee" aria-labelledby="coffee-title">
+      <div class="coffee-panel sec-head" data-morph>
+        <span class="sec-chrome" aria-hidden="true"><i></i></span>
+        <span class="sec-pill" aria-hidden="true"><svg><use href="#brand"/></svg><span><i></i><svg class="pill-cup" viewBox="0 0 20 20"><path d="M4 8h10v4.500A4.500 4.500 0 0 1 9.500 17h-1A4.500 4.500 0 0 1 4 12.500zM14 9.500h1.200a2.300 2.300 0 0 1 0 4.600H13.700"/></svg></span></span>
+        <div class="sec-full coffee-full">
+          <div class="cup-stage" id="cup-stage" aria-hidden="true">
+            <svg class="cup" viewBox="0 0 200 200" focusable="false">
+              <g class="steam"><path d="M76 70c-9-11 9-19 0-31"/><path d="M100 64c-9-12 9-21 0-34"/><path d="M124 70c-9-11 9-19 0-31"/></g>
+              <path class="cup-fill" d="M50 88h100v30a44 44 0 0 1-44 44H94a44 44 0 0 1-44-44z"/>
+              <path class="cup-line" stroke="url(#forest)" d="M50 88h100v30a44 44 0 0 1-44 44H94a44 44 0 0 1-44-44zM150 98h9a19 19 0 0 1 0 38h-13M38 176c40 9 84 9 124 0"/>
+            </svg>
+          </div>
+          <div class="coffee-copy">
+            <h2 id="coffee-title">Free, but I won&rsquo;t say no to a <em>coffee.</em></h2>
+            <p>If Annotator saved your demo, you can buy me one. It&rsquo;s optional and it doesn&rsquo;t unlock anything.</p>
+            <a class="button primary" href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="install wrap" id="install" aria-labelledby="install-title">
+      <header class="sec-head" data-morph>
+        <span class="sec-chrome" aria-hidden="true"><i></i></span>
+        <span class="sec-pill" aria-hidden="true"><svg><use href="#brand"/></svg><span><i></i>Get Annotator</span></span>
+        <div class="sec-full">
+          <h2 id="install-title">Get <em>Annotator</em></h2>
+          <p class="sec-aside not-sure">Not sure yet? <a href="#stage" data-try>Try the demo at the top of this page.</a></p>
+        </div>
+      </header>
+      <div class="platforms">
+        <div class="platform" data-os="mac" data-enter="drop">
+          <h3>Mac</h3>
+          <p class="req">macOS 14 or later, on Apple Silicon or Intel. It lives in your menu bar.</p>
+          <a class="button" href="/downloads/" data-arrow>Download for Mac</a>
+          <div class="command">
+            <p>Or use Homebrew:</p>
+            <button type="button" data-copy aria-label="Copy the Homebrew command">Copy</button>
+            <code>brew install --cask dorlugasigal/annotator/annotator</code>
+          </div>
+        </div>
+        <div class="platform" data-os="windows" data-enter="drop" style="--i: 1">
+          <h3>Windows</h3>
+          <p class="req">Windows 11, version 22H2 or later. It lives in the system tray, near the clock.</p>
+          <a class="button" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK" data-arrow>Get it for Windows</a>
+          <div class="command">
+            <p>Or use winget:</p>
+            <button type="button" data-copy aria-label="Copy the winget command">Copy</button>
+            <code>winget install --id 9NMZ345ZJ6JK --source msstore</code>
+          </div>
+        </div>
+      </div>
+      <p class="rough" data-enter>It isn&rsquo;t at version 1.0 yet, so you might hit a rough edge. <a href="/support/">Tell me</a> if you do.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a>
+      <nav aria-label="More">
+        <a href="/docs/">Help</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/support/">Report a problem</a>
+        <a href="https://github.com/dorlugasigal/annotator">GitHub</a>
+        <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
+      </nav>
+      <p class="made">Made by Dor.</p>
+      <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+    </div>
+  </footer>
+
+  <p class="visually-hidden" role="status" id="status"></p>
+</body>
+</html>

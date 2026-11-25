@@ -1,18 +1,37 @@
 import { createInk } from "/concepts/shared/ink.js";
+// The app's own motion: its curves, its toolbar Shrink, its Magic flight and its Pop.
+import { css as curve, toolbarMorph, magicFlight, travelFade, visibilityDuration, poseKeyframes } from "/concepts/shared/app-motion.js";
 
 const root = document.documentElement;
 const motion = root.classList.contains("motion");
+// The page eases with the app's curves: "enter" for what arrives, "standard" for what moves between two states.
+root.style.setProperty("--ease-out", curve.enter);
+root.style.setProperty("--ease-in-out", curve.standard);
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const smooth = (t) => { const x = clamp(t, 0, 1); return x * x * (3 - 2 * x); };
 // A wait that ends early when its signal is aborted.
 const wait = (ms, signal) => new Promise((done) => {
-  if (signal?.aborted) { done(); return; }
+  if (signal?.aborted || ms <= 0) { done(); return; }
   const timer = setTimeout(done, ms);
   signal?.addEventListener("abort", () => { clearTimeout(timer); done(); }, { once: true });
 });
-const CORAL = "#F04538", BLUE = "#2B73E0", TEAL = "#00969E", YELLOW = "#F5E338", PURPLE = "#7D54B8";
+// Runs `step` with 0 to 1 over `ms`. Without motion, or once aborted, it goes straight to the end.
+function tween(ms, step, signal) {
+  if (!motion || ms <= 0) { step(1); return Promise.resolve(); }
+  return new Promise((done) => {
+    const start = performance.now();
+    const frame = (now) => {
+      const t = signal?.aborted ? 1 : clamp((now - start) / ms, 0, 1);
+      step(smooth(t));
+      if (t < 1) requestAnimationFrame(frame); else done();
+    };
+    requestAnimationFrame(frame);
+  });
+}
+const CORAL = "#F04538", BLUE = "#2B73E0", TEAL = "#00969E", PURPLE = "#7D54B8";
+const status = $("#status");
 
 // Where an element sits inside a drawing surface, from the layout and not from the screen. The engine measures
 // with getBoundingClientRect, which a tilted plane distorts; these stand-ins answer in the plane's own space, so
@@ -26,9 +45,9 @@ function localBox(el, surface) {
   }
   return { x, y, w: el.offsetWidth, h: el.offsetHeight };
 }
-const standIn = (el, ink, surface) => ({
+const standIn = (ink, box) => ({
   getBoundingClientRect() {
-    const o = ink.layer.getBoundingClientRect(), b = localBox(el, surface);
+    const o = ink.layer.getBoundingClientRect(), b = box();
     return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h };
   },
 });
@@ -59,7 +78,7 @@ addEventListener("scroll", request, { passive: true });
 addEventListener("resize", request);
 
 // 1. The stage -------------------------------------------------------------------------------------
-const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene");
+const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $("#apps");
 // The toolbar is the engine's own, as someone who uses it has set it up (its "customized" preset): a gradient as the
 // color, curved arrows, the roughest line. It rests on the Arrow tool so its properties row shows that. The engine
 // itself starts the row closed on a phone, which keeps the bar compact there.
@@ -143,7 +162,7 @@ ink.fit();
 // The lean. Fully leaning at the top of the page, flat once the stage has come up the screen. As soon as the visitor
 // draws, it goes flat and stays flat: a pointer on a tilted plane would not draw where it points.
 let userFlat = !motion;
-const tilt = channel(() => {
+channel(() => {
   if (userFlat) return 0;
   const top = scene.getBoundingClientRect().top + scrollY;
   return 1 - smooth(scrollY / clamp(top - innerHeight * 0.1, 200, innerHeight * 0.7));
@@ -153,41 +172,168 @@ const tilt = channel(() => {
   desk.classList.toggle("is-flat", v === 0);
 });
 
-const numberEl = $("#t-number"), lineEl = $("#t-line"), emailEl = $("#t-email");
-const on = (el) => standIn(el, ink, desk);
-const number = on(numberEl), line = on(lineEl), email = on(emailEl);
-// A blur region softens what is behind it, which a browser cannot do across planes in 3D. While the stage leans,
-// the address under a blur region is softened itself; flat, the region does it (see .is-covered in style.css).
-function markCovered() {
-  const e = localBox(emailEl, desk);
-  emailEl.classList.toggle("is-covered", ink.marks().some((m) => {
-    if (m.type !== "blur") return false;
-    const b = ink.box(m);
-    return b.x <= e.x + 2 && b.y <= e.y + 2 && b.x + b.w >= e.x + e.w - 2 && b.y + b.h >= e.y + e.h - 2;
-  }));
+// The sample apps ----------------------------------------------------------------------------------
+// Three small apps with made-up data. Nothing leaves the page. In Use apps they answer the visitor; in Draw they
+// are inert and the pointer is the tool. Drawings never follow what the apps do: that is how the real app behaves.
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const WEEKS = {
+  this: { total: 318, note: "21% fewer than last week", days: [62, 58, 64, 55, 41, 22, 16] },
+  last: { total: 402, note: "3% more than the week before", days: [66, 61, 68, 63, 59, 45, 40] },
+};
+const numberEl = $("#t-number"), lineEl = $("#t-line"), deltaEl = $("[data-delta]"), barsEl = $("[data-bars]");
+for (const day of DAYS) {
+  const bar = document.createElement("button");
+  bar.type = "button";
+  bar.className = "bar";
+  bar.innerHTML = `<b class="tip" aria-hidden="true"></b><i></i><span aria-hidden="true">${day[0]}</span>`;
+  barsEl.append(bar);
 }
-ink.on("change", markCovered).on("clear", markCovered);
-function demoSteps() {
-  const small = desk.clientWidth < 600, px = small ? 12 : 17, py = small ? 8 : 11, size = small ? 3 : 3.5;
+const weekButtons = $$("[data-week]");
+function showWeek(name) {
+  const week = WEEKS[name];
+  numberEl.textContent = week.total;
+  deltaEl.textContent = week.note;
+  weekButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.week === name)));
+  $$(".bar", barsEl).forEach((bar, i) => {
+    bar.style.setProperty("--v", week.days[i]);
+    bar.classList.toggle("low", week.days[i] < 50);
+    bar.setAttribute("aria-label", `${DAYS[i]}: ${week.days[i]} sign-ups`);
+    $(".tip", bar).textContent = week.days[i];
+  });
+}
+weekButtons.forEach((button) => button.addEventListener("click", () => { used(); showWeek(button.dataset.week); }));
+
+const pages = $$(".slide-page"), slideCount = $("[data-slide-count]"), slideButtons = $$("[data-slide-go]");
+let slide = 0;
+function showSlide(index) {
+  slide = clamp(index, 0, pages.length - 1);
+  pages.forEach((page, i) => page.classList.toggle("is-on", i === slide));
+  slideCount.textContent = `${slide + 1} of ${pages.length}`;
+  slideButtons.forEach((button) => { button.disabled = slide + Number(button.dataset.slideGo) < 0 || slide + Number(button.dataset.slideGo) >= pages.length; });
+}
+slideButtons.forEach((button) => button.addEventListener("click", () => { used(); showSlide(slide + Number(button.dataset.slideGo)); }));
+
+const thread = $("[data-thread]"), reply = $("[data-reply]"), replyInput = reply.elements.reply;
+function send(text) {
+  const words = text.trim();
+  if (!words) return;
+  const bubble = document.createElement("li");
+  bubble.className = "me";
+  bubble.textContent = words;
+  thread.append(bubble);
+  // The thread keeps the first message and the last few replies.
+  while (thread.children.length > 5) thread.children[1].remove();
+  thread.scrollTop = thread.scrollHeight;
+}
+reply.addEventListener("submit", (e) => { e.preventDefault(); used(); send(replyInput.value); replyInput.value = ""; });
+
+// Windows move by their title bars, with the pointer or the arrow keys, and stay on the stage above the toolbar.
+const windows = $$("[data-win]"), offsets = new WeakMap();
+let front = 1;
+function moveWindow(win, dx, dy) {
+  const base = localBox(win, desk), edge = 6, style = getComputedStyle(desk);
+  const floor = desk.clientHeight - parseFloat(style.getPropertyValue("--tb-h")) - parseFloat(style.getPropertyValue("--tb-bottom")) - edge;
+  const x = clamp(dx, edge - base.x, Math.max(edge - base.x, desk.clientWidth - edge - base.w - base.x));
+  const y = clamp(dy, edge - base.y, Math.max(edge - base.y, floor - base.h - base.y));
+  offsets.set(win, [x, y]);
+  win.style.setProperty("--dx", `${x}px`);
+  win.style.setProperty("--dy", `${y}px`);
+}
+for (const win of windows) {
+  const bar = $("[data-drag]", win);
+  let grab = null;
+  bar.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    const [x, y] = offsets.get(win) || [0, 0];
+    grab = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: x, dy: y };
+    bar.setPointerCapture(e.pointerId);
+    win.style.zIndex = ++front;
+    win.classList.add("is-moving");
+    if (e.isTrusted) takeOver(false);
+    used();
+  });
+  bar.addEventListener("pointermove", (e) => { if (grab?.id === e.pointerId) moveWindow(win, grab.dx + e.clientX - grab.x, grab.dy + e.clientY - grab.y); });
+  const drop = (e) => { if (grab?.id === e.pointerId) { grab = null; win.classList.remove("is-moving"); } };
+  bar.addEventListener("pointerup", drop);
+  bar.addEventListener("pointercancel", drop);
+  bar.addEventListener("keydown", (e) => {
+    const step = { ArrowLeft: [-16, 0], ArrowRight: [16, 0], ArrowUp: [0, -16], ArrowDown: [0, 16] }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    used();
+    const [x, y] = offsets.get(win) || [0, 0];
+    win.style.zIndex = ++front;
+    moveWindow(win, x + step[0], y + step[1]);
+  });
+}
+addEventListener("resize", () => windows.forEach((win) => { const [x, y] = offsets.get(win) || [0, 0]; if (x || y) moveWindow(win, x, y); }));
+function resetApps() {
+  showWeek("this");
+  showSlide(0);
+  $$(".me", thread).forEach((bubble) => bubble.remove());
+  replyInput.value = "";
+  windows.forEach((win) => { offsets.delete(win); win.style.removeProperty("--dx"); win.style.removeProperty("--dy"); win.style.zIndex = ""; });
+}
+// Marks the script drew follow their targets when the page reflows, until an app is used: from then on they stay
+// where they are on the screen, whatever changes under them.
+function used() { for (const mark of ink.marks()) mark.anchor = null; }
+// A click on the stage while the script plays is the visitor taking over: the script stops and the apps are theirs.
+// (A click, not a press, so a finger that scrolls the page over the stage changes nothing.)
+desk.addEventListener("click", (e) => {
+  if (!e.isTrusted || !run || ink.toolbar.contains(e.target)) return;
+  takeOver(false);
+  if (ink.state.mode !== "draw") return;
+  // The script was showing Draw, so the apps did not hear this click: switch to Use apps and pass it on.
+  ink.setMode("use");
+  const control = document.elementFromPoint(e.clientX, e.clientY)?.closest("button, input");
+  if (!control || !apps.contains(control)) return;
+  control.focus({ preventScroll: true });
+  if (control.matches("button")) control.click();
+}, true);
+apps.addEventListener("keydown", (e) => { if (e.isTrusted && e.key !== "Tab") takeOver(false); }, true);
+showWeek("this");
+showSlide(0);
+
+// Where things are on the stage's own plane: an element in a window (with the window's move), or a toolbar button.
+function planeBox(el) {
+  const bar = ink.toolbar;
+  if (bar.contains(el)) {
+    let x = 0, y = 0, node = el;
+    while (node && node !== bar) { x += node.offsetLeft; y += node.offsetTop; node = node.offsetParent; }
+    // The toolbar is centred with a translate, which the layout's offsets leave out.
+    const left = bar.offsetLeft - (bar.classList.contains("is-placed") ? 0 : bar.offsetWidth / 2);
+    return { x: left + x, y: bar.offsetTop + y, w: el.offsetWidth, h: el.offsetHeight };
+  }
+  const box = localBox(el, desk), win = el.closest("[data-win]"), [dx, dy] = (win && offsets.get(win)) || [0, 0];
+  return { x: box.x + dx, y: box.y + dy, w: box.w, h: box.h };
+}
+const number = standIn(ink, () => planeBox(numberEl));
+
+// The scripted demo ----------------------------------------------------------------------------------
+// The ring and the arrow name no color: they take the gradient selected in the toolbar. Both are drawn at the
+// toolbar's strongest roughness, and the arrow bows well clear of a straight line.
+function markSizes() {
+  const small = desk.clientWidth < 600;
+  return { small, px: small ? 12 : 17, py: small ? 8 : 11, size: small ? 3 : 3.5 };
+}
+function drawSteps() {
+  const { px, py, size } = markSizes();
   // The arrow runs from the line on the slide to the number: sideways when the windows sit side by side, down when
   // they are stacked.
   const ends = () => {
-    const l = localBox(lineEl, desk), n = localBox(numberEl, desk);
+    const l = planeBox(lineEl), n = planeBox(numberEl);
     return n.x > l.x + l.w
       ? [[l.x + l.w + 10, l.y + l.h * 0.3], [n.x - px - 9, n.y + n.h * 0.42]]
       : [[l.x + l.w - 4, l.y + l.h + 9], [n.x + n.w * 0.8, n.y - py - 14]];
   };
-  // The ring and the arrow name no color: they take the one selected in the toolbar. Both are drawn at the
-  // toolbar's strongest roughness, and the arrow bows well clear of a straight line.
   return [
     { tool: "ellipse", around: number, padX: px, padY: py, size, rough: 6, duration: 820, pause: 240 },
-    { tool: "arrow", from: () => ends()[0], to: () => ends()[1], bend: 0.42, size, rough: 6, duration: 760, pause: 220 },
-    { tool: "text", at: { el: number, at: "right", dx: px + 12, dy: small ? -15 : -18 }, text: "why the dip?", color: BLUE, pause: 320 },
-    { tool: "highlight", over: line, color: YELLOW, duration: 620, pause: 320 },
-    { tool: "blur", over: email, pad: 5, amount: 12, duration: 660 },
-    { run: markCovered },
-    { wait: 160 },
+    { tool: "arrow", from: () => ends()[0], to: () => ends()[1], bend: 0.42, size, rough: 6, duration: 760, pause: 260 },
   ];
+}
+function labelSteps() {
+  const { small, px } = markSizes();
+  return [{ tool: "text", at: { el: number, at: "right", dx: px + 12, dy: small ? -15 : -18 }, text: "why the dip?", pause: 200 }];
 }
 
 // The tool the visitor chose. A script that shows its tools in the toolbar puts back the tool it started with when
@@ -196,17 +342,53 @@ let chosen = null;
 ink.on("tool", (tool) => { chosen = tool; });
 const keepChoice = () => { if (chosen && ink.state.tool !== chosen) ink.setTool(chosen, ink.state.mode !== "draw"); };
 
-const replay = $("#stage-replay"), done = $("#stage-done"), note = $("#stage-note");
-let run = null, deskSeen = false, seenWaiters = [];
+const replay = $("#stage-replay"), done = $("#stage-done"), yourTurn = $("#your-turn");
+const modeButton = $('[data-action="mode"]', ink.toolbar), pill = $(".ink-pill", ink.toolbar);
+let run = null, chartSeen = false, seenWaiters = [], turnTaken = false;
+// True once the visitor has done something on the stage. Until then, while the script plays, every change of mode
+// is the script's own.
+let acted = false;
+const scripted = () => Boolean(run) && !acted;
+// The engine's own Shrink, show and hide and pointer click, in the app's motion. An engine without them changes
+// state at once, and the page fades the drawings itself.
+const appMotion = typeof ink.shrink === "function";
 const setRunning = (running) => {
   replay.dataset.state = running ? "playing" : "";
   $("b", replay).textContent = running ? "Pause" : "Replay";
+  // While the script plays, Draw is shown but the stage takes no presses: a swipe over it still scrolls the page.
+  desk.classList.toggle("is-scripted", running);
 };
 const whenSeen = (signal) => new Promise((go) => {
-  if (deskSeen || signal.aborted) { go(); return; }
+  if (chartSeen || signal.aborted) { go(); return; }
   seenWaiters.push(go);
   signal.addEventListener("abort", go, { once: true });
 });
+// "Your turn" shows once the first round is drawn and whenever the script is idle, until the visitor draws. It
+// arrives with the app's Pop.
+function offerTurn() {
+  if (turnTaken || !yourTurn.hidden) return;
+  yourTurn.hidden = false;
+  if (!motion) return;
+  const pop = poseKeyframes("pop", { appearing: true, annotation: false });
+  yourTurn.animate(pop, { duration: pop.duration, easing: pop.easing });
+}
+function takeTurn() { turnTaken = true; yourTurn.hidden = true; }
+ink.on("mark", takeTurn);
+
+// Hide and show in the app's Magic style: each drawing flies off on a swoop and the toolbar goes in a puff of
+// sparks, then they come back.
+async function appHide(hidden, signal) {
+  if (appMotion) { await ink.setHidden(hidden, { style: "magic" }); return; }
+  if (hidden) {
+    desk.classList.add("is-wiping");
+    await wait(320, signal);
+    ink.setHidden(true);
+  } else {
+    ink.setHidden(false);
+    desk.classList.remove("is-wiping");
+    await wait(320, signal);
+  }
+}
 async function wipe(signal) {
   if (!ink.marks().length) return;
   desk.classList.add("is-wiping");
@@ -214,141 +396,288 @@ async function wipe(signal) {
   if (!signal?.aborted) ink.clear();
   desk.classList.remove("is-wiping");
 }
+// The pointer goes to something on the stage and presses it.
+async function press(el, action, signal, pause = 520) {
+  if (signal.aborted) return;
+  const box = planeBox(el);
+  await ink.moveGhost([box.x + box.w / 2, box.y + box.h * 0.55]);
+  await wait(140, signal);
+  if (signal.aborted) return;
+  el.classList.add("is-pressed");
+  ink.clickGhost?.();
+  action();
+  await wait(170, signal);
+  el.classList.remove("is-pressed");
+  await wait(pause, signal);
+}
+// One round tells the product's story: draw, use the apps while the drawings stay, draw again.
+async function round(signal) {
+  const perform = (steps) => (signal.aborted ? null : ink.perform(steps, { cursor: true, showTool: true, signal }));
+  resetApps();
+  if (ink.state.hidden) await ink.setHidden(false);
+  if (ink.collapsed) await ink.setCollapsed(false);
+  if (signal.aborted) return;
+  ink.setMode("draw");
+  await wait(500, signal);
+  await perform(drawSteps());
+
+  // Use apps: the toolbar's own button, then the bar shrinks to one button as it does in the app.
+  await press(modeButton, () => modeButton.click(), signal, 380);
+  if (signal.aborted) return;
+  await (appMotion ? ink.shrink() : ink.setCollapsed(true));
+  await wait(520, signal);
+  if (signal.aborted) return;
+  used();
+  await press($('[data-week="last"]'), () => showWeek("last"), signal, 900);
+  await press($('[data-week="this"]'), () => showWeek("this"), signal, 500);
+  if (signal.aborted) return;
+  const field = planeBox(replyInput);
+  await ink.moveGhost([field.x + 22, field.y + field.h * 0.55]);
+  ink.clickGhost?.();
+  for (const letter of "On it.") {
+    if (signal.aborted) return;
+    replyInput.value += letter;
+    await wait(70, signal);
+  }
+  await press($("button", reply), () => { send(replyInput.value); replyInput.value = ""; }, signal, 500);
+  if (signal.aborted) return;
+  if (desk.clientWidth >= 600) {
+    // A window moves and the drawings do not: they belong to the screen, not to the window.
+    const win = $(".win-mail"), bar = planeBox($("[data-drag]", win)), from = [bar.x + bar.w * 0.5, bar.y + bar.h / 2];
+    await ink.moveGhost(from);
+    ink.clickGhost?.();
+    win.classList.add("is-moving");
+    await tween(620, (t) => { moveWindow(win, -34 * t, 26 * t); ink.placeGhost([from[0] - 34 * t, from[1] + 26 * t]); }, signal);
+    win.classList.remove("is-moving");
+    await wait(480, signal);
+  }
+
+  // Back to Draw: a press on the one button brings the toolbar back, as in the app.
+  await press(pill, () => pill.click(), signal, 520);
+  await perform(labelSteps());
+  ink.hideGhost();
+  keepChoice();
+  if (signal.aborted) return;
+  offerTurn();
+  await wait(2400, signal);
+  if (signal.aborted) return;
+
+  // Hide and show, as Control-2 does in the app: the drawings come back as they were.
+  await appHide(true, signal);
+  await wait(700, signal);
+  await appHide(false, signal);
+  await wait(1100, signal);
+  if (signal.aborted) return;
+  await wipe(signal);
+  await wait(500, signal);
+}
 async function loop(signal) {
   while (!signal.aborted) {
     await whenSeen(signal);
-    await wait(700, signal);
-    if (signal.aborted) break;
-    await ink.perform(demoSteps(), { cursor: true, showTool: true, signal });
-    ink.hideGhost();
-    keepChoice();
-    ink.reflow();
-    await wait(3400, signal);
-    if (signal.aborted) break;
-    await wipe(signal);
     await wait(500, signal);
+    if (signal.aborted) break;
+    await round(signal);
   }
 }
 function start() {
   if (run) return;
   const abort = new AbortController();
-  const finished = loop(abort.signal).finally(() => { ink.hideGhost(); keepChoice(); if (run?.abort === abort) { run = null; setRunning(false); } });
-  run = { abort, finished };
+  run = { abort, finished: null };
   setRunning(true);
+  run.finished = loop(abort.signal).finally(async () => {
+    ink.hideGhost();
+    keepChoice();
+    // A script that was cut short while the drawings were away brings them back.
+    if (ink.state.hidden) await ink.setHidden(false, { animate: false });
+    if (run?.abort !== abort) return;
+    run = null;
+    setRunning(false);
+    desk.classList.remove("is-wiping");
+    done.hidden = ink.state.mode !== "draw";
+    offerTurn();
+  });
 }
 async function stop() {
   if (!run) return;
   const { abort, finished } = run;
   abort.abort();
-  setRunning(false);
+  // The stage takes presses again at once, so the visitor's first stroke is not lost while the script winds down.
+  desk.classList.remove("is-scripted");
   await finished;
+}
+// The whole demo as a still picture, for visitors who asked for less motion.
+async function still() {
+  await ink.perform([...drawSteps(), ...labelSteps()], { cursor: false });
+  ink.reflow();
+  offerTurn();
 }
 async function restart() {
   await stop();
+  if (ink.state.hidden) await ink.setHidden(false);
+  if (ink.collapsed) await ink.setCollapsed(false);
   ink.setMode("use");
   if (ink.state.tool !== "arrow") ink.setTool("arrow", true);
   chosen = null;
+  acted = false;
   userFlat = !motion;
   request();
   await wipe();
-  if (motion) start();
-  else { await ink.perform(demoSteps(), { cursor: false }); ink.reflow(); }
+  resetApps();
+  if (motion) start(); else still();
 }
-replay.addEventListener("click", () => { if (run) stop(); else restart(); });
+replay.addEventListener("click", () => { if (run) { acted = true; stop(); } else restart(); });
 done.addEventListener("click", () => ink.setMode("use"));
 
-// The loop stops for good when the visitor takes over: a press on the toolbar, or draw mode by any route.
-const takeOver = () => { stop(); if (!userFlat) { userFlat = true; request(); } };
-ink.toolbar.addEventListener("pointerdown", takeOver, true);
+// The script stops for good when the visitor takes over: a press on the toolbar or in an app, draw mode by any
+// route, or one of the two keys. Drawing also brings the stage flat.
+function takeOver(flat = true) {
+  acted = true;
+  stop();
+  if (flat && !userFlat) { userFlat = true; request(); }
+}
+ink.toolbar.addEventListener("pointerdown", (e) => { if (e.isTrusted) takeOver(); }, true);
+// The two keys, pressed while the script plays: the script stops and the key does what it says, whatever the
+// script was showing. (This runs before the engine hears the key.)
+addEventListener("keydown", (e) => {
+  if (!e.isTrusted || !scripted()) return;
+  const draws = e.ctrlKey && e.shiftKey && e.code === "Digit2";
+  if (!draws && e.key !== "Escape") return;
+  takeOver(draws);
+  if (draws && ink.state.mode === "draw") ink.setMode("use");
+}, true);
+ink.on("shortcut", () => { if (!scripted()) takeOver(); });
+const MODE_WORDS = { use: "Using apps.", draw: "Drawing." };
 ink.on("mode", (mode) => {
+  desk.dataset.mode = mode;
+  apps.inert = mode === "draw";
+  setKeysMode(mode);
+  if (scripted()) return;
   if (mode === "draw") takeOver();
   done.hidden = mode !== "draw";
-  note.textContent = mode === "draw"
-    ? "You are drawing on the demo. Press Esc to use the page again."
-    : "This is a web demo of the app. Pick a tool and draw on it.";
-  setKeysMode(mode);
+  status.textContent = MODE_WORDS[mode];
 });
 addEventListener("resize", () => setTimeout(() => ink.reflow(), 260));
 
+// The script waits until the chart, where it draws first, is on screen.
 new IntersectionObserver(([entry]) => {
-  deskSeen = entry.isIntersecting && entry.intersectionRatio >= 0.3;
-  if (deskSeen) seenWaiters.splice(0).forEach((go) => go());
-  // Drawing ends when the stage is out of view, so keys and touches go back to the page.
-  if (!entry.isIntersecting) ink.setMode("use");
-}, { threshold: [0, 0.3] }).observe(scene);
+  chartSeen = entry.isIntersecting;
+  if (chartSeen) seenWaiters.splice(0).forEach((go) => go());
+}, { threshold: 0.6 }).observe($(".win-chart"));
+// Drawing ends when the stage is out of view, so keys and touches go back to the page.
+new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) ink.setMode("use"); }).observe(scene);
 
 const fontsReady = Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).catch(() => {});
 fontsReady.then(async () => {
-  if (motion) { await wait(1500); start(); }
-  else { await ink.perform(demoSteps(), { cursor: false }); ink.reflow(); }
+  if (motion) { await wait(1500); if (!acted) start(); } else still();
 });
 
+// "Try it here", from anywhere on the page: the stage comes into view with a clean screen, the Pen and Draw on.
+async function tryHere() {
+  takeTurn();
+  acted = true;
+  userFlat = true;
+  request();
+  // The page answers at once: the stage comes into view and its edge lights up while the script winds down.
+  const room = innerHeight - parseFloat(getComputedStyle(root).getPropertyValue("--header-h"));
+  scene.scrollIntoView({ block: scene.offsetHeight < room - 24 ? "center" : "start", behavior: motion ? "smooth" : "auto" });
+  desk.classList.remove("is-cued");
+  void desk.offsetWidth;
+  desk.classList.add("is-cued");
+  await stop();
+  if (ink.state.hidden) await ink.setHidden(false, { animate: false });
+  if (ink.collapsed) await ink.setCollapsed(false);
+  await wipe();
+  ink.setTool("pen");
+  $('[data-tool="pen"]', ink.toolbar)?.focus({ preventScroll: true });
+  status.textContent = "Your turn. Draw on the screen.";
+}
+for (const link of $$("[data-try]")) link.addEventListener("click", (e) => { e.preventDefault(); tryHere(); });
+$(".stage-pulse").addEventListener("animationend", () => desk.classList.remove("is-cued"));
+
 // 2. What you can do -------------------------------------------------------------------------------
+// Each card has a small sample screen and a scene the engine draws on it. Marks that name no color take the
+// engine's selected gradient, as on the stage.
 const measure = document.createElement("canvas").getContext("2d");
+const textSize = (shot) => Math.round(clamp(shot.clientWidth * 0.06, 19, 38));
 const SCENES = {
-  blur: (t) => [
+  async point({ layer, t }) {
+    await layer.perform([
+      { tool: "ellipse", around: t("kpi"), padX: 13, padY: 8, size: 3, rough: 6, duration: 760, pause: 260 },
+      { tool: "arrow", from: { el: t("kpi"), at: "bottom", dx: -6, dy: 12 }, to: { el: t("dip"), at: "top left", dx: -4, dy: -5 }, bend: 0.34, size: 3, rough: 6, duration: 720 },
+    ], { cursor: motion });
+  },
+  // Smart Draw: a rough box is drawn, then it becomes a neat one.
+  async box({ layer, t, box }) {
+    const frame = { tool: "rect", around: t("btn"), pad: 9, size: 3 };
+    const [rough] = await layer.perform([{ ...frame, rough: 6, duration: 820 }], { cursor: motion });
+    await wait(motion ? 300 : 0);
+    layer.remove(rough.id);
+    await layer.perform([{ ...frame, rough: 0, round: true, duration: 0 }], { cursor: false });
+    await wait(motion ? 260 : 0);
+    const size = textSize(box.shot), words = "make it bigger";
+    measure.font = `600 ${size}px "Caveat"`;
+    const note = () => { const b = box("note"); return [b.x + b.w / 2 - measure.measureText(words).width / 2 - 4, b.y]; };
+    await layer.perform([
+      { tool: "text", at: note, text: words, speed: 46, pause: 160 },
+      { tool: "arrow", from: () => { const b = box("note"); return [b.x + b.w / 2, b.y + size * 1.25]; }, to: { el: t("btn"), at: "right", dx: 20 }, bend: -0.3, size: 3, duration: 480 },
+    ], { cursor: motion });
+  },
+  blur: ({ layer, t }) => layer.perform([
     { tool: "blur", over: t("email"), pad: 5, amount: 13, duration: 700, pause: 380 },
     { tool: "blur", over: t("card"), pad: 5, amount: 13, duration: 700 },
-  ],
-  steps: (t) => ["p1", "p2", "p3"].map((pin, i) => ({ tool: "counter", at: { el: t(pin) }, n: i + 1, color: BLUE, pause: 360 })),
-  system: (t, shot) => {
+  ], { cursor: motion }),
+  // Spotlight: the screen dims around the pointer as it goes from one tile to the next.
+  async spotlight({ layer, box }) {
+    const centre = (name) => { const b = box(name); return [b.x + b.w / 2, b.y + b.h / 2]; };
+    const put = (p) => { layer.layer.style.setProperty("--px", `${p[0]}px`); layer.layer.style.setProperty("--py", `${p[1]}px`); layer.placeGhost(p); };
+    layer.setStyle("spotlight", { radius: clamp(box.shot.clientWidth * 0.13, 40, 96) });
+    let at = centre("s1");
+    put(at);
+    layer.layer.classList.add("has-pointer");
+    layer.setSpotlight(true);
+    await wait(motion ? 700 : 0);
+    for (const name of ["s2", "s3"]) {
+      const from = at, to = centre(name);
+      await tween(760, (k) => put([from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k]));
+      at = to;
+      await wait(motion ? 620 : 0);
+    }
+  },
+  steps: ({ layer, t }) => layer.perform(["p1", "p2", "p3"].map((pin, i) => ({ tool: "counter", at: { el: t(pin) }, n: i + 1, color: BLUE, pause: 360 })), { cursor: motion }),
+  system({ layer, t, box }) {
     // A label sits in the middle of its shape, whatever size the hand-written text is at this width.
     const label = (pin, text, color) => ({ tool: "text", text, color, speed: 50, pause: 120, at: () => {
-      const b = localBox($(`[data-t="${pin}"]`, shot), shot), size = textSize(shot);
+      const b = box(pin), size = textSize(box.shot);
       measure.font = `600 ${size}px "Caveat"`;
       return [b.x + b.w / 2 - measure.measureText(text).width / 2 - 4, b.y + b.h / 2 - size * 0.56];
     } });
     const link = (a, b) => ({ tool: "arrow", from: { el: t(a), at: "right", dx: 7 }, to: { el: t(b), at: "left", dx: -9 }, bend: 0, color: PURPLE, size: 3, duration: 380, pause: 100 });
-    return [
+    return layer.perform([
       { tool: "rect", around: t("n1"), pad: 0, color: BLUE, size: 3, duration: 520 }, label("n1", "app", BLUE), link("n1", "n2"),
       { tool: "rect", around: t("n2"), pad: 0, color: TEAL, size: 3, duration: 520 }, label("n2", "API", TEAL), link("n2", "n3"),
       { tool: "ellipse", around: t("n3"), pad: 0, color: CORAL, size: 3, duration: 620 }, label("n3", "data", CORAL),
-    ];
+    ], { cursor: motion });
   },
 };
-const textSize = (shot) => Math.round(clamp(shot.clientWidth * 0.06, 21, 38));
-// A card's live visual: a recording that plays while it is shown, or a small scene drawn by the pointer.
-function clip(card, video) {
-  const button = $(".ctl", card);
-  let wanted = motion, shown = false;
-  const sync = () => {
-    const playing = !video.paused;
-    button.dataset.state = playing ? "playing" : "";
-    button.setAttribute("aria-label", playing ? "Pause this recording" : "Play this recording");
-  };
-  const source = () => {
-    const name = `${video.dataset.clip}${matchMedia("(max-width: 599px)").matches ? "-phone" : ""}`;
-    if (video.dataset.loaded === name) return;
-    video.dataset.loaded = name;
-    video.poster = `/public/demo/${name}.jpg`;
-    video.src = `/public/demo/${name}.mp4`;
-  };
-  source();
-  addEventListener("resize", source);
-  for (const name of ["play", "pause"]) video.addEventListener(name, sync);
-  button.addEventListener("click", () => { wanted = video.paused; if (wanted) video.play().catch(() => {}); else video.pause(); });
-  sync();
-  return {
-    show() { if (shown) return; shown = true; if (wanted) video.play().catch(() => {}); },
-    hide() { shown = false; video.pause(); },
-  };
-}
 function sketch(card, shot) {
   const layer = createInk({ surface: shot, interactive: false });
-  const steps = SCENES[shot.dataset.scene]((name) => standIn($(`[data-t="${name}"]`, shot), layer, shot), shot);
+  const box = (name) => localBox($(`[data-t="${name}"]`, shot), shot);
+  box.shot = shot;
+  const context = { layer, box, t: (name) => standIn(layer, () => box(name)) };
   const fit = () => layer.layer.style.setProperty("--ink-text", `600 ${textSize(shot)}px/1.1 "Caveat", "Bradley Hand", cursive`);
+  const empty = () => { layer.setSpotlight(false); layer.hideGhost(); layer.clear(); };
   let busy = false, shown = false;
   async function play() {
     if (busy) return;
     busy = true;
-    layer.clear();
+    empty();
     shot.classList.remove("is-leaving");
     fit();
     await fontsReady;
     await wait(motion ? 260 : 0);
-    await layer.perform(steps, { cursor: motion });
-    await wait(500);
-    layer.hideGhost();
+    await SCENES[shot.dataset.scene](context);
+    await wait(motion ? 500 : 0);
+    if (!layer.state.spotlight) layer.hideGhost();
     layer.reflow();
     busy = false;
     if (!shown && motion) leave();
@@ -357,7 +686,7 @@ function sketch(card, shot) {
   async function leave() {
     shot.classList.add("is-leaving");
     await wait(280);
-    if (!shown && !busy) layer.clear();
+    if (!shown && !busy) empty();
   }
   addEventListener("resize", () => { fit(); setTimeout(() => layer.reflow(), 260); });
   $(".ctl", card).addEventListener("click", play);
@@ -365,19 +694,16 @@ function sketch(card, shot) {
   return { show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; if (motion && !busy) leave(); } };
 }
 const cards = $$(".do-deck .card");
-const visuals = cards.map((card) => {
-  const video = $("video", card);
-  return video ? clip(card, video) : sketch(card, $(".shot", card));
-});
+const visuals = cards.map((card) => sketch(card, $(".shot", card)));
 
 if (motion) {
   // The pinned deck. Progress through the track turns into one number, 0 for the first card to 5 for the last; each
   // card rests flat for a while around its own number, and eases between.
   const track = $(".do-track"), tabs = $$(".do-tabs button"), rest = 0.2;
-  let front = -1, deckSeen = false;
+  let facing = -1, deckSeen = false;
   const face = (index) => {
-    if (index === front) return;
-    front = index;
+    if (index === facing) return;
+    facing = index;
     cards.forEach((card, i) => { card.inert = i !== index; (i === index ? visuals[i].show : visuals[i].hide)(); });
     tabs.forEach((tab, i) => tab.setAttribute("aria-current", String(i === index)));
   };
@@ -405,16 +731,13 @@ if (motion) {
     scrollTo({ top: r.top + scrollY + (r.height - innerHeight) * (i / (cards.length - 1)) + 1, behavior: "smooth" });
   }));
 } else {
-  // Without motion the cards are a plain grid. Recordings wait for their play buttons; scenes show their last frame.
+  // Without motion the cards are a plain grid, and each scene shows its last frame.
   visuals.forEach((visual) => visual.show());
 }
 
 // 3. The two keys ----------------------------------------------------------------------------------
-const keysSection = $("#keys"), modeWord = $("[data-mode-word]");
-function setKeysMode(mode) {
-  keysSection.dataset.mode = mode;
-  modeWord.textContent = mode === "draw" ? "Draw" : "Apps";
-}
+const keysSection = $("#keys");
+function setKeysMode(mode) { keysSection.dataset.mode = mode; }
 const caps = $$(".key");
 if (motion) for (const cap of caps) {
   // Each cap is a stack of slices, so it has sides from any angle; a press squeezes the stack.
@@ -433,42 +756,14 @@ addEventListener("keyup", (e) => {
 });
 addEventListener("blur", () => caps.forEach((cap) => cap.classList.remove("is-down")));
 for (const set of $$(".keyset")) set.addEventListener("click", async () => {
-  const keys = $$(".key", set);
+  const keys = $$(".key", set), fromScript = scripted();
   for (const key of keys) { key.classList.add("is-down"); await wait(motion ? 70 : 0); }
-  if (set.dataset.set === "draw") ink.setMode(ink.state.mode === "draw" ? "use" : "draw"); else ink.setMode("use");
+  takeOver();
+  // Like the real keys: Control-Shift-2 turns drawing on, or off again; Esc always goes back to the apps.
+  ink.setMode(set.dataset.set === "draw" && (fromScript || ink.state.mode !== "draw") ? "draw" : "use");
   await wait(160);
   keys.forEach((key) => key.classList.remove("is-down"));
 });
-
-// 4. The recording ---------------------------------------------------------------------------------
-const reel = $("#reel"), play = $("#reel-play"), sound = $("#reel-sound");
-if (matchMedia("(max-width: 599px)").matches) {
-  reel.poster = "reel-poster-phone.jpg";
-  reel.src = "/public/demo/annotator-reel-phone.mp4";
-}
-reel.controls = false;
-// The recording opens with a title card; the page starts it, and starts it again, where the app comes on screen.
-const REEL_START = 1.8;
-reel.loop = false;
-reel.addEventListener("loadedmetadata", () => { if (reel.currentTime < REEL_START) reel.currentTime = REEL_START; });
-reel.addEventListener("ended", () => { reel.currentTime = REEL_START; if (reelWanted) reel.play().catch(() => {}); });
-$(".video-controls").hidden = false;
-let reelWanted = motion;
-const reelLabels = () => {
-  play.dataset.state = reel.paused ? "" : "playing";
-  $("b", play).textContent = reel.paused ? "Play" : "Pause";
-  sound.dataset.sound = reel.muted ? "" : "on";
-  $("b", sound).textContent = reel.muted ? "Sound on" : "Sound off";
-};
-const reelToggle = () => { reelWanted = reel.paused; if (reelWanted) reel.play().catch(() => {}); else reel.pause(); };
-play.addEventListener("click", reelToggle);
-reel.addEventListener("click", reelToggle);
-sound.addEventListener("click", () => { reel.muted = !reel.muted; });
-for (const name of ["play", "pause", "volumechange"]) reel.addEventListener(name, reelLabels);
-reelLabels();
-new IntersectionObserver(([entry]) => {
-  if (entry.isIntersecting && reelWanted) reel.play().catch(() => {}); else if (!entry.isIntersecting) reel.pause();
-}, { threshold: 0.55 }).observe($(".reel-scene"));
 
 if (motion) {
   // How far an element has come up the screen: 0 as its top edge enters at the bottom, 1 once it is centred.
@@ -482,8 +777,6 @@ if (motion) {
     return clamp((innerHeight / 2 - (r.top + r.height / 2)) / (innerHeight / 2 + r.height / 2), -1, 1);
   };
   const write = (el, name) => (v) => el.style.setProperty(name, v.toFixed(4));
-  const reelScene = $(".reel-scene");
-  channel(entering(reelScene), write(reelScene, "--enter"));
   channel(entering(keysSection), write(keysSection, "--enter"));
   for (const el of $$("[data-through]")) channel(through(el), write(el, "--through"));
 }
@@ -514,9 +807,78 @@ $$("[data-rise], .depth").forEach((el) => arrive.observe(el));
 
 // Loops run only while they are on screen.
 const live = new IntersectionObserver((entries) => {
-  for (const entry of entries) entry.target.classList.toggle("is-live", entry.isIntersecting);
+  for (const entry of entries) {
+    entry.target.classList.toggle("is-live", entry.isIntersecting);
+    if (entry.isIntersecting && entry.target === miniStage) cycleMini();
+  }
 }, { threshold: 0.3 });
+
+// "A toolbar that's yours": a tool is taken off and put back with the app's Pop, then the bar shrinks to its one
+// button and grows back with the toolbar's own morph: its two speeds, its curve, and its two faces that cross over.
+const mini = $("[data-shrink]"), miniStage = mini.closest(".ill"), miniFace = $(".tb-pill", miniStage), miniTool = $(".tb-move", mini);
+function morphMini(collapsing) {
+  const steps = 24, gap = (mini.offsetWidth - miniFace.offsetWidth) / 2, list = (make) => Array.from({ length: steps + 1 }, (_, i) => make(i / steps));
+  const timing = { duration: (collapsing ? toolbarMorph.collapseDuration : toolbarMorph.expandDuration) * 1000, fill: "forwards" };
+  const closed = (t) => (collapsing ? toolbarMorph.shape(t) : 1 - toolbarMorph.shape(t));
+  const open = parseFloat(getComputedStyle(mini).borderRadius) || 13, round = (parseFloat(getComputedStyle(miniFace).borderRadius) || 20) - open;
+  const leaving = list((t) => ({ opacity: toolbarMorph.outgoingOpacity(t) })), arriving = list((t) => ({ opacity: toolbarMorph.incomingOpacity(t) }));
+  mini.animate(list((t) => ({
+    clipPath: `inset(-3px ${(gap * closed(t)).toFixed(2)}px round ${(open + round * closed(t)).toFixed(2)}px)`,
+    opacity: collapsing ? toolbarMorph.outgoingOpacity(t) : toolbarMorph.incomingOpacity(t),
+  })), timing);
+  return miniFace.animate(collapsing ? arriving : leaving, timing).finished;
+}
+let miniCycling = false;
+async function cycleMini() {
+  if (!motion || miniCycling) return;
+  miniCycling = true;
+  while (miniStage.classList.contains("is-live")) {
+    await wait(1000);
+    const off = poseKeyframes("pop", { appearing: false }), on = poseKeyframes("pop", { appearing: true });
+    await miniTool.animate(off, { duration: off.duration, easing: off.easing, fill: "forwards" }).finished;
+    await wait(800);
+    await miniTool.animate(on, { duration: on.duration, easing: on.easing, fill: "forwards" }).finished;
+    await wait(1300);
+    await morphMini(true);
+    await wait(1500);
+    await morphMini(false);
+    await wait(900);
+  }
+  miniCycling = false;
+}
 $$(".ill, .coffee").forEach((el) => live.observe(el));
+
+if (motion) {
+  // The tiles under "There's more in the app" arrive the way drawings do when the app shows them in its Magic
+  // style: each on its own swooping flight, one after another.
+  const grid = $(".also-grid"), tiles = $$(".also-item", grid);
+  grid.classList.add("awaits");
+  new IntersectionObserver(([entry], observer) => {
+    if (!entry.isIntersecting) return;
+    observer.disconnect();
+    const duration = visibilityDuration("magic", true) * 1000, fade = travelFade(true, true), box = grid.getBoundingClientRect();
+    tiles.forEach((tile, i) => {
+      const r = tile.getBoundingClientRect();
+      // Each starts a little below and nearer the middle of the row, and smaller; the flight does the rest.
+      const flight = magicFlight([(box.left + box.width / 2 - (r.left + r.width / 2)) * 0.3, 90, 0.74], [0, 0, 1], `tile ${i}`);
+      const timing = { duration, delay: i * 65, easing: flight.easing, fill: "backwards" };
+      tile.animate(flight, timing);
+      tile.animate(fade, timing);
+    });
+    grid.classList.remove("awaits");
+  }, { rootMargin: "0px 0px -12% 0px", threshold: 0.2 }).observe(grid);
+
+  // The cup arrives with the app's Pop.
+  const cup = $(".cup");
+  cup.classList.add("awaits");
+  new IntersectionObserver(([entry], observer) => {
+    if (!entry.isIntersecting) return;
+    observer.disconnect();
+    const pop = poseKeyframes("pop", { appearing: true });
+    cup.animate(pop, { duration: pop.duration, easing: pop.easing, fill: "backwards" });
+    cup.classList.remove("awaits");
+  }, { threshold: 0.6 }).observe(cup);
+}
 
 // The break timer counts down a few seconds, then starts again.
 const timer = $("[data-timer]");
@@ -545,8 +907,10 @@ if (motion && matchMedia("(hover: hover) and (pointer: fine)").matches) for (con
 
 // Install ------------------------------------------------------------------------------------------
 // Copy a command. Where the clipboard is not allowed, the command is selected so it can be copied by hand.
-const status = $("#status");
+const COPIED = "Copied. Paste it into Terminal and press Enter.";
 for (const button of $$("[data-copy]")) {
+  const label = $("p", button.closest(".command"));
+  let timer = 0;
   button.addEventListener("click", async () => {
     const code = $("code", button.closest(".command"));
     let copied = true;
@@ -558,9 +922,10 @@ for (const button of $$("[data-copy]")) {
       getSelection().addRange(range);
       copied = document.execCommand("copy");
     }
-    button.textContent = copied ? "Copied" : "Selected";
-    status.textContent = copied ? "Command copied." : "Command selected. Copy it with your keyboard.";
-    setTimeout(() => { button.textContent = "Copy"; status.textContent = ""; }, 2000);
+    if (copied) label.textContent = COPIED;
+    status.textContent = copied ? COPIED : "Selected. Copy it with your keyboard.";
+    clearTimeout(timer);
+    timer = setTimeout(() => { label.textContent = label.dataset.label; status.textContent = ""; }, 4000);
   });
 }
 // The visitor's platform comes first in the page's order too, not only on screen.

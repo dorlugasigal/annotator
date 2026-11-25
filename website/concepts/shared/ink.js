@@ -10,7 +10,7 @@
 // createInk(options) -> { layer, toolbar, state, styles, on, setMode, setTool, setColor, setCollapsed, select, undo, redo,
 //   clear, perform, hideGhost, moveGhost, placeGhost, reflow, render, rectOf, box, add, remove, marks, setBoard,
 //   setProperties, setAppearance, setHidden, setEnabled, setSpotlight, setHalo, setStyle, setGradient, more, fit, collapsed, enabled,
-//   toolbarRect }
+//   toolbarRect, shrink, expand, setVisibility, visibility, hidden, clickGhost }
 // Options: surface, tool, color, palette, size, tools, collapsed, pillLabel, useLabel, toolbarParent, smart,
 //   appearance ("dark" | "light" | "auto"), glass (true), toolbarPosition ("fixed" | "absolute"), interactive (true),
 //   enabled (true), properties (whether the properties row starts open; open from 600 px wide, and remembered),
@@ -18,7 +18,13 @@
 //   preset ("customized" | "factory": a toolbar someone has set up, or the app as installed), gradient (which of
 //   the app's gradients is the stroke color at the start: "sunset", "lagoon", "ember", "spectrum", "dusk", "citrus",
 //   "ocean", "orchid", "aurora", "cherry", "forest", "copper", "neon", "tropic" or "steel"), toolbarItems and
-//   hiddenControls (the app's own names for the bar's arrangement, to override the preset's).
+//   hiddenControls (the app's own names for the bar's arrangement, to override the preset's),
+//   visibility (how Hide drawings and tools moves: the app's "slide" by default, or "magic", "corners", "pop", "drop",
+//   "focus", "fade", "none"), shrinkAfter (seconds with the pointer away before the toolbar shrinks to its one button,
+//   the app's Shrink setting; never by default), toolbarMargin (room kept on each side of the toolbar, 8).
+// Motion is the app's (app-motion.js): setCollapsed, shrink, expand and setHidden(hidden, { style, pill, animate })
+//   return promises. perform(steps, { cursor, showTool, anchored, local, resting, signal }) also takes the steps
+//   { mode }, { tool } or { pick }, { click }, { drag }, { type }, { hide } and { shrink } (see `story` below).
 // Events: mark, edit, mode, tool, change, clear, smart, shortcut, collapse, board, properties, hide, enabled,
 //   spotlight, halo, style, status, layout, and more (feature, event): event.preventDefault() keeps the page where it is.
 // A mark is the app's element ({ id, tool, frame, points, text, style, rotation, ... }) and also answers to the names
@@ -29,6 +35,8 @@ import { symbol, mark as brandMark, patternSample, roughnessSample, edgesSample,
 import { P, R, Tool, INK, Paint, GRADIENT_PRESETS, defaultStyle, makeElement, contains, segmentDistance, Stacking, DragConstraint, selectionGeometry, translate, resize, anchorLocations, anchorPoint, symbolFrame, CanvasDocument, LaserTrail, Motion } from "./annotation-core.js";
 import { recognize as recognizeStroke, previewInput } from "./recognition.js";
 import { drawOps, svgMarkup, laserOps, turn, snapOutline, align, resample } from "./scene.js";
+import { css as CURVE, DURATIONS, toolbarMorph, DEFAULT_VISIBILITY, resolveVisibility, workspaceTiming, distanceOrder, gatheredPose, cornerRoute, usesPose, pose as visibilityPose,
+  poseKeyframes, poseProgress, fadeKeyframes, travelFade, travelKeyframes, seedFor, returnSeed, magicFlight, magicTrail, toolbarPoof, absorbPulse, clickPulse } from "./app-motion.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -362,6 +370,9 @@ export function createInk(options = {}) {
   surface.append(layer, plane);
 
   const emit = (name, ...details) => (listeners[name] || []).forEach((fn) => fn(...details));
+  // True while a real key press or click of the visitor's is being handled: what a script does is never theirs.
+  let byVisitor = false;
+  const visitorActs = (event) => { if (event.isTrusted) { byVisitor = true; queueMicrotask(() => { byVisitor = false; }); } };
   const origin = () => layer.getBoundingClientRect();
   const point = (e) => { const o = origin(); return [e.clientX - o.left, e.clientY - o.top]; };
 
@@ -820,6 +831,11 @@ export function createInk(options = {}) {
     state.mode = mode;
     layer.dataset.mode = mode;
     document.documentElement.classList.toggle("ink-drawing", mode === "draw");
+    // While you draw, the app's overlay has the keys and the app under it gets none. When the visitor starts drawing,
+    // a field of the page that was being typed in lets go, so the number and letter keys choose tools instead of
+    // typing. A page's script never takes the keys from anyone.
+    const typing = document.activeElement;
+    if (mode === "draw" && byVisitor && typing && typing !== document.body && surface.contains(typing) && !layer.contains(typing) && !toolbar.contains(typing)) typing.blur();
     if (mode === "draw" && state.hidden) setHidden(false);
     syncStyle();
     overlay();
@@ -878,15 +894,6 @@ export function createInk(options = {}) {
     try { localStorage.setItem(STORE, shown ? "1" : "0"); } catch { /* storage is off */ }
     refreshToolbar();
     emit("properties", shown);
-  }
-  // Hide drawings and tools: the marks go and the toolbar shrinks to its one button, as in the app.
-  function setHidden(hidden) {
-    if (state.hidden === hidden) return;
-    state.hidden = hidden;
-    layer.classList.toggle("is-hidden", hidden);
-    plane.classList.toggle("is-hidden", hidden);
-    if (hidden) { clearLaser(); setCollapsed(true); } else if (toolbar.classList.contains("is-collapsed")) setCollapsed(false);
-    emit("hide", hidden);
   }
 
   // Text (DrawingCanvas.startText, installTextEditor and commitTextIfNeeded) ------------------------
@@ -1444,6 +1451,7 @@ export function createInk(options = {}) {
   const NUDGE = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
   if (interactive) document.addEventListener("keydown", (e) => {
     if (!enabled) return;
+    visitorActs(e);
     if (e.ctrlKey && e.shiftKey && e.code === "Digit2") { e.preventDefault(); setMode(state.mode === "draw" ? "use" : "draw"); emit("shortcut", "draw"); return; }
     if (e.key === "Escape" && pop) { e.preventDefault(); closePop(true); return; }
     if (state.mode !== "draw") return;
@@ -1948,11 +1956,13 @@ export function createInk(options = {}) {
     if (left - room < rail.scrollLeft) rail.scrollLeft = left - room;
     else if (left + b.offsetWidth + room > rail.scrollLeft + rail.clientWidth) rail.scrollLeft = left + b.offsetWidth + room - rail.clientWidth;
   }
-  let fitted = "";
-  function fit() {
+  let fitted = "", sideMargin = Number.isFinite(options.toolbarMargin) ? Math.max(0, options.toolbarMargin) : 8;
+  // fit({ margin }) keeps at least that much room on each side of the toolbar inside the window or its parent, from then on.
+  function fit({ margin } = {}) {
+    if (Number.isFinite(margin)) sideMargin = Math.max(0, margin);
     const fixed = getComputedStyle(toolbar).position === "fixed", host = fixed ? document.documentElement : toolbar.offsetParent;
     if (!host) return;
-    const available = host.clientWidth - 16;
+    const available = host.clientWidth - sideMargin * 2;
     const natural = (minimal) => railWidth(minimal) + (minimal ? 307 : 383) - hiddenRoom(minimal);
     const minimal = natural(false) > available, rows = minimal && natural(true) > available && available < 560 ? 2 : 1;
     const next = `${minimal}|${rows}|${available}`;
@@ -2029,22 +2039,292 @@ export function createInk(options = {}) {
     if (!on) { setMode("use"); closePop(); layer.classList.remove("has-pointer"); }
     enabled = Boolean(on);
     toolbar.hidden = !enabled;
+    if (!enabled) { hideRun?.finish(); morphRun?.finish(); }
     refreshToolbar();
     emit("enabled", enabled);
   }
-  function setCollapsed(collapsed) {
-    toolbar.classList.toggle("is-collapsed", collapsed);
-    closePop();
-    if (collapsed) setMode("use"); else if (state.hidden) setHidden(false);
-    refreshToolbar();
-    emit("collapse", collapsed);
+  // Shrinking to one button and back ------------------------------------------------------------------
+  // AnnotatorApp.beginToolbarMorph and runToolbarMorph, with MotionCore's ToolbarMorph: the background's frame and
+  // corner radius go from one form to the other on the standard curve while both faces stay where they are, pinned to
+  // the same point, and cross-fade. A toolbar that was dragged shrinks into its middle; one that sits where the page
+  // put it keeps the edge the page docks it to. Reduce Motion changes the frame at once and keeps the cross-fade.
+  const chrome = h("div", { class: "ink-chrome", "aria-hidden": "true" });
+  toolbar.prepend(chrome);
+  let collapsed = toolbar.classList.contains("is-collapsed"), morphRun = null, shrunk = null;
+  const barShown = () => interactive && enabled && toolbar.isConnected && toolbar.getClientRects().length > 0 && !toolbar.classList.contains("is-away");
+  // Puts the toolbar in its other form at once. Gives where it was, and for a dragged toolbar where it rests now and
+  // where its full frame is.
+  function reface(collapsing) {
+    const area = dragArea(), was = toolbar.getBoundingClientRect();
+    collapsed = collapsing;
+    toolbar.classList.toggle("is-collapsed", collapsing);
+    if (!collapsing) refreshToolbar();
+    let rest = null, full = null;
+    if (toolbar.classList.contains("is-placed") && was.width) {
+      const from = { x: was.left - area.left, y: was.top - area.top, width: was.width, height: was.height }, size = { width: toolbar.offsetWidth, height: toolbar.offsetHeight };
+      let frame = toolbarMorph.pinned(size, from, "center");
+      // Opening the one button where it shrank goes back to the exact frame it shrank from.
+      if (!collapsing && shrunk && Math.abs(shrunk.button.x - from.x) < 1 && Math.abs(shrunk.button.y - from.y) < 1 && shrunk.full.width === size.width && shrunk.full.height === size.height) frame = { ...shrunk.full };
+      if (!collapsing) { frame.x = clamp(frame.x, 6, Math.max(6, area.width - size.width - 6)); frame.y = clamp(frame.y, 6, Math.max(6, area.height - size.height - 6)); }
+      shrunk = collapsing ? { full: from, button: frame } : null;
+      rest = frame;
+      full = collapsing ? from : frame;
+      toolbar.style.left = `${rest.x}px`;
+      toolbar.style.top = `${rest.y}px`;
+    }
+    emit("collapse", collapsing);
+    return { was, rest, full };
   }
+  function reshape(collapsing, animate = true) {
+    morphRun?.finish();
+    closePop();
+    const moves = animate && barShown() && !state.hidden;
+    const { was, rest, full } = reface(collapsing);
+    if (!moves) { refreshToolbar(); return Promise.resolve(); }
+    const now = toolbar.getBoundingClientRect();
+    // Both faces are needed while it changes, so the toolbar keeps its full layout until the end.
+    const place = (at) => { if (at) { toolbar.style.left = `${at.x}px`; toolbar.style.top = `${at.y}px`; } };
+    if (collapsing) { toolbar.classList.remove("is-collapsed"); place(full); }
+    const look = getComputedStyle(toolbar), radius = parseFloat(look.borderTopLeftRadius) || 15;
+    Object.assign(chrome.style, { background: look.background, boxShadow: look.boxShadow, backdropFilter: look.backdropFilter, webkitBackdropFilter: look.backdropFilter });
+    const box = collapsing ? was : now, small = collapsing ? now : was, round = Math.min(small.width, small.height) / 2;
+    const button = { x: small.left - box.left, y: small.top - box.top, width: small.width, height: small.height }, whole = { x: 0, y: 0, width: box.width, height: box.height };
+    const [start, end] = collapsing ? [whole, button] : [button, whole], [fromRadius, toRadius] = collapsing ? [radius, round] : [round, radius];
+    toolbar.classList.add("is-morphing");
+    Object.assign(pill.style, { left: `${button.x}px`, top: `${button.y}px`, width: `${button.width}px` });
+    const face = [main, second, strip, rule, props, statusLine].filter((el) => el.getClientRects().length);
+    const rects = new Map([...face, pill].map((el) => { const r = el.getBoundingClientRect(); return [el, { x: r.left - box.left, y: r.top - box.top, width: r.width, height: r.height }]; }));
+    const [outgoing, incoming] = collapsing ? [face, [pill]] : [[pill], face];
+    const reduced = reduceMotion(), duration = (reduced ? DURATIONS.reduced : collapsing ? toolbarMorph.collapseDuration : toolbarMorph.expandDuration) * 1000;
+    const draw = (time) => {
+      const frame = reduced ? end : toolbarMorph.frame(start, end, time), corner = fromRadius + (toRadius - fromRadius) * toolbarMorph.shape(time);
+      Object.assign(chrome.style, { left: `${frame.x}px`, top: `${frame.y}px`, width: `${frame.width}px`, height: `${frame.height}px`, borderRadius: `${corner}px` });
+      const show = (el, opacity) => {
+        const r = rects.get(el);
+        el.style.opacity = opacity;
+        el.style.clipPath = `inset(${f(frame.y - r.y)}px ${f(r.x + r.width - frame.x - frame.width)}px ${f(r.y + r.height - frame.y - frame.height)}px ${f(frame.x - r.x)}px round ${f(corner)}px)`;
+      };
+      outgoing.forEach((el) => show(el, toolbarMorph.outgoingOpacity(time)));
+      incoming.forEach((el) => show(el, toolbarMorph.incomingOpacity(time)));
+    };
+    return new Promise((done) => {
+      const began = performance.now();
+      let frameId = 0;
+      const finish = () => {
+        cancelAnimationFrame(frameId);
+        morphRun = null;
+        toolbar.classList.remove("is-morphing");
+        for (const el of [...face, pill]) { el.style.opacity = ""; el.style.clipPath = ""; }
+        Object.assign(pill.style, { left: "", top: "", width: "" });
+        chrome.removeAttribute("style");
+        toolbar.classList.toggle("is-collapsed", collapsing);
+        place(rest);
+        refreshToolbar();
+        done();
+      };
+      const tick = (time) => {
+        const t = clamp((time - began) / duration, 0, 1);
+        draw(t);
+        if (t >= 1) finish(); else frameId = requestAnimationFrame(tick);
+      };
+      morphRun = { finish };
+      draw(0);
+      frameId = requestAnimationFrame(tick);
+    });
+  }
+  // The page's own switch: collapsed, the page gets the clicks again. Returns a promise for the end of the change.
+  function setCollapsed(next, { animate = true } = {}) {
+    next = Boolean(next);
+    if (!next && state.hidden) return setHidden(false);
+    if (collapsed === next) return Promise.resolve();
+    if (next) setMode("use");
+    return reshape(next, animate);
+  }
+  // The app's Shrink: the toolbar becomes its one button and keeps drawing or using apps as it was.
+  const shrink = () => (collapsed || state.hidden ? Promise.resolve() : reshape(true));
+  const expand = () => setCollapsed(false);
+  // Settings > Toolbar > Shrink (ToolbarCollapseController): with `shrinkAfter` seconds the toolbar shrinks once the
+  // pointer has been off it that long and opens as soon as the pointer is on it. A popover, a drag, typing or an
+  // arrow being placed keeps it open.
+  let shrinkTimer = 0, lastPointer = null;
+  const shrinkDelay = Number(options.shrinkAfter) > 0 ? Number(options.shrinkAfter) : 0;
+  // AnnotatorApp.toolbarMustStayOpen asks where the pointer is, not what the toolbar last heard of it.
+  const pointerOnBar = () => { const r = toolbar.getBoundingClientRect(); return Boolean(lastPointer) && lastPointer[0] >= r.left && lastPointer[0] <= r.right && lastPointer[1] >= r.top && lastPointer[1] <= r.bottom; };
+  function restartShrink() {
+    clearTimeout(shrinkTimer);
+    if (!shrinkDelay || collapsed) return;
+    shrinkTimer = setTimeout(() => {
+      if (pointerOnBar() || pop || moving || morphRun || hideRun || hasActiveEdit() || !barShown()) restartShrink(); else shrink();
+    }, shrinkDelay * 1000);
+  }
+  if (shrinkDelay && interactive) {
+    addEventListener("pointermove", (e) => { lastPointer = e.pointerType === "touch" ? null : [e.clientX, e.clientY]; }, { passive: true });
+    toolbar.addEventListener("pointerenter", (e) => { if (collapsed && !state.hidden && e.pointerType !== "touch") expand().then(restartShrink); });
+    toolbar.addEventListener("pointerleave", restartShrink);
+    restartShrink();
+  }
+
+  // Show and hide (WorkspaceVisibilityAnimator, WorkspaceMotionTiming and WorkspaceLayerMotion) ------------------
+  // Each drawing and the toolbar move in the style chosen in the app's settings; Slide is the app's own start.
+  // Drawings leave nearest first and come back in the opposite order. The page keeps the toolbar's one button as the
+  // way back (the app has its menu bar icon); `pill: false` hides that too, for a script that shows everything again.
+  let visibility = resolveVisibility(options.visibility || DEFAULT_VISIBILITY), hideRun = null;
+  const trails = svgEl("g", { class: "ink-trails" });
+  svg.insertBefore(trails, marksG);
+  function setHidden(hidden, { style = visibility, pill: keepsPill = true, animate = true } = {}) {
+    hidden = Boolean(hidden);
+    hideRun?.finish();
+    morphRun?.finish();
+    if (state.hidden === hidden) return Promise.resolve();
+    const appearing = !hidden;
+    if (hidden) { setMode("use"); clearLaser(); }
+    state.hidden = hidden;
+    overlay();
+    if (appearing) {
+      layer.classList.remove("is-hidden");
+      plane.classList.remove("is-hidden");
+      toolbar.classList.remove("is-away");
+      if (collapsed) reface(false);
+    }
+    emit("hide", hidden);
+    const marks = doc.elements.filter((m) => els.has(m.id)), bar = barShown();
+    let kind = !animate ? "none" : reduceMotion() ? "fade" : resolveVisibility(style);
+    // WorkspaceVisibilityAnimator.shouldAnimate: a crowded board shows and hides at once.
+    if (kind !== "none" && marks.length > 64) { kind = "none"; status("This board has more than 64 shapes. It will show and hide without animation."); setTimeout(() => { if (!linear) status(""); }, 2400); }
+    // The app falls back to a fade when its Dissolve particles cannot start; a web page cannot read its own pixels.
+    if (kind === "dissolve") kind = "fade";
+    const settle = () => {
+      layer.classList.toggle("is-hidden", hidden);
+      plane.classList.toggle("is-hidden", hidden);
+      toolbar.classList.remove("is-busy");
+      if (hidden) {
+        if (!collapsed) reface(true);
+        toolbar.classList.toggle("is-away", !keepsPill);
+        if (keepsPill && bar && kind !== "none") toolbar.animate([{ opacity: 0 }, { opacity: 1 }], { duration: DURATIONS.fadeIn * 1000, easing: CURVE.easeOut });
+      }
+      refreshToolbar();
+      restartShrink();
+    };
+    if (kind === "none" || (!bar && !marks.length)) { settle(); return Promise.resolve(); }
+
+    const o = origin(), barRect = bar ? toolbar.getBoundingClientRect() : null, timing = workspaceTiming(kind, appearing, marks.length);
+    // ToolbarSlideMotion.annotationTarget: the toolbar's middle, or a corner when there is no toolbar to go to.
+    const target = barRect ? [barRect.left + barRect.width / 2 - o.left, barRect.top + barRect.height / 2 - o.top] : [24, 24];
+    // Corners sends each drawing to the nearest corner of what is on screen of the layer.
+    const view = { x: Math.max(0, -o.left), y: Math.max(0, -o.top), width: 0, height: 0 };
+    view.width = Math.max(1, Math.min(o.width, innerWidth - o.left) - view.x);
+    view.height = Math.max(1, Math.min(o.height, innerHeight - o.top) - view.y);
+    const anims = [], temps = [], wraps = [];
+    const run = (el, keyframes, delay, seconds, easing = keyframes.easing || "linear") => anims.push(el.animate(keyframes, { duration: seconds * 1000, delay: delay * 1000, easing, fill: "both" }));
+    const flights = marks.map((m) => {
+      const b = box(m), rect = { x: b.x, y: b.y, width: b.w, height: b.h }, center = [b.x + b.w / 2, b.y + b.h / 2];
+      const route = kind === "corners" ? cornerRoute(m.id, center, view) : null;
+      return { m, rect, center, route, target: route ? route.point : target };
+    });
+    const rank = new Map(distanceOrder(flights.map(({ m, center, target: to }) => ({ id: m.id, center, target: to }))).map((id, index) => [id, index]));
+    layer.classList.add("is-flying");
+    plane.classList.add("is-flying");
+    for (const { m, rect, center, route, target: to } of flights) {
+      const delay = timing.drawingDelay(rank.get(m.id)), gone = gatheredPose(rect, to), still = { x: 0, y: 0, scale: 1 }, [from, until] = appearing ? [gone, still] : [still, gone];
+      let keys, fade = null;
+      if (kind === "magic") {
+        // MagicFlight: the way back uses another seed, so a drawing does not retrace its way out.
+        const seed = appearing ? returnSeed(seedFor(m.id)) : seedFor(m.id), light = magicTrail((keys = magicFlight(from, until, seed)).points.map((p) => [p[0] + center[0], p[1] + center[1]]), seed), g = svgEl("g");
+        fade = travelFade(appearing, true);
+        trails.append(g);
+        temps.push(g);
+        for (const stroke of light.strokes) {
+          const path = g.appendChild(svgEl("path", { class: "ink-trail", d: light.path, pathLength: 1, stroke: stroke.color, "stroke-width": stroke.width }));
+          run(path, light.dash, delay, timing.duration);
+          run(path, light.fade(stroke.peak), delay, timing.duration);
+        }
+        for (const spark of light.sparks) {
+          const dot = g.appendChild(svgEl("circle", { class: "ink-spark", r: spark.size / 2, fill: spark.color }));
+          run(dot, spark.keyframes, delay, timing.duration);
+          run(dot, light.fade(spark.peak), delay, timing.duration);
+        }
+      } else if (kind === "slide" || kind === "corners") {
+        keys = travelKeyframes(kind, from, until, { appearing, bendSign: route ? (appearing ? -route.bendSign : route.bendSign) : 1 });
+        fade = travelFade(appearing);
+      } else keys = usesPose(kind) ? poseKeyframes(kind, { appearing, annotation: true, seed: seedFor(m.id) }) : fadeKeyframes(appearing, timing.duration);
+      for (const node of [els.get(m.id), inks.get(m.id)]) {
+        if (!node) continue;
+        let moved = node, own = 1;
+        if (node instanceof SVGElement) {
+          // A wrapper keeps the flight apart from the mark's own turn and opacity.
+          moved = svgEl("g");
+          moved.style.transformOrigin = `${center[0]}px ${center[1]}px`;
+          node.replaceWith(moved);
+          moved.append(node);
+          wraps.push(moved);
+        } else own = node.style.opacity === "" ? 1 : Number(node.style.opacity);
+        const dim = (list) => (own === 1 ? list : Object.assign(list.map((k) => ({ ...k, opacity: Number(k.opacity) * own })), { easing: list.easing }));
+        run(moved, fade || own === 1 ? keys : dim(keys), delay, timing.duration);
+        if (fade) run(moved, dim(fade), delay, timing.duration);
+      }
+    }
+    if (bar) {
+      const delay = timing.toolbarDelay, seconds = timing.toolbarDuration;
+      toolbar.classList.add("is-busy");
+      if (kind === "magic") {
+        // MagicToolbarEffect: the toolbar shrinks to a point of light that bursts into twelve sparks.
+        const poof = toolbarPoof(appearing), holder = h("div", { class: "ink-poof", "aria-hidden": "true" }), area = dragArea();
+        if (inParent) holder.dataset.position = "absolute";
+        holder.style.left = `${barRect.left + barRect.width / 2 - area.left}px`;
+        holder.style.top = `${barRect.top + barRect.height / 2 - area.top}px`;
+        toolbar.after(holder);
+        temps.push(holder);
+        run(toolbar, poof.image, delay, seconds);
+        const dot = (size, background, keyframes) => {
+          const el = holder.appendChild(h("i"));
+          Object.assign(el.style, { width: `${size}px`, height: `${size}px`, margin: `${-size / 2}px 0 0 ${-size / 2}px`, background });
+          run(el, keyframes, delay, seconds);
+        };
+        dot(poof.glow.size, poof.glow.background, poof.glow.keyframes);
+        for (const spark of poof.sparks) dot(spark.size, spark.color, spark.keyframes);
+      } else if (kind === "slide" || kind === "corners") {
+        // The toolbar's picture shrinks into its own middle, and swells a little as each gathered drawing lands in it.
+        const small = Math.min(0.12, 24 / Math.max(1, barRect.width, barRect.height));
+        const keys = travelKeyframes("slide", [0, 0, appearing ? small : 1], [0, 0, appearing ? 1 : small], { appearing });
+        run(toolbar, keys.map(({ offset, scale }) => ({ offset, scale })), delay, seconds, keys.easing);
+        run(toolbar, travelFade(appearing), delay, seconds);
+        const pulse = kind === "slide" && !appearing && marks.length ? absorbPulse(flights.map(({ m }) => timing.drawingDelay(rank.get(m.id)) + timing.duration)) : null;
+        if (pulse) anims.push(toolbar.animate(pulse.map((k) => ({ offset: k.offset, transform: `scale(${k.scale})` })), { duration: pulse.duration, delay: pulse.delay, fill: "both" }));
+      } else if (usesPose(kind)) {
+        // VisibilityPose for the toolbar: smaller moves than a drawing's, and no tilt.
+        const keys = [];
+        for (let step = 0; step <= 30; step++) {
+          const gone = poseProgress(kind, step / 30, appearing), at = visibilityPose(kind, appearing ? 1 - gone : gone, { appearing, annotation: false, seed: 0 });
+          keys.push({ offset: step / 30, scale: at.scale, opacity: at.opacity, transform: `translateY(${f(at.y / at.scale)}px)`, ...(kind === "focus" ? { filter: `blur(${f(at.blur)}px)` } : {}) });
+        }
+        run(toolbar, keys, delay, seconds);
+      } else run(toolbar, fadeKeyframes(appearing, seconds), delay, seconds);
+    }
+    return new Promise((done) => {
+      let timer = 0;
+      const finish = () => {
+        clearTimeout(timer);
+        hideRun = null;
+        anims.forEach((a) => a.cancel());
+        temps.forEach((node) => node.remove());
+        for (const g of wraps) { if (g.firstChild) g.replaceWith(g.firstChild); else g.remove(); }
+        layer.classList.remove("is-flying");
+        plane.classList.remove("is-flying");
+        settle();
+        done();
+      };
+      hideRun = { finish };
+      timer = setTimeout(finish, timing.totalDuration * 1000);
+    });
+  }
+  function setVisibility(style) { visibility = resolveVisibility(style); }
   toolbar.addEventListener("click", (e) => {
     if (toolbar.dataset.dragged) return;
+    visitorActs(e);
     const b = e.target.closest("button");
     if (!b || pop?.contains(b)) return;
     const name = b.dataset.action;
-    if (b === pill) { setCollapsed(false); setMode("draw"); }
+    if (b === pill) { setCollapsed(false); setMode("draw"); restartShrink(); }
     else if (b.dataset.more) more(b.dataset.more, b);
     // WorkspaceModel.performShortcutAction: Smart draw turns shape recognition for the pen on or off.
     else if (b.dataset.item === "action.smartDraw") { state.smart = !state.smart; status(state.smart ? "Smart draw is on." : "Smart draw is off."); setTimeout(() => { if (!linear) status(""); }, 1600); refreshToolbar(); }
@@ -2086,65 +2366,352 @@ export function createInk(options = {}) {
   if (interactive) { addEventListener("pointerup", drop); addEventListener("pointercancel", drop); }
 
   // Scripted marks -------------------------------------------------------------------------------
-  function rectOf(target) {
+  // Where a target is on the layer. `local` measures it in the surface's own layout instead of on the screen, so
+  // a mark lands on its target while the surface sits in a plane that is turned in 3D.
+  function rectOf(target, local = false) {
     const el = typeof target === "string" ? document.querySelector(target) : target;
+    if (local && el instanceof HTMLElement && surface.contains(el) && el !== surface) {
+      let x = 0, y = 0;
+      for (let node = el; node && node !== surface;) {
+        const parent = node.offsetParent;
+        x += node.offsetLeft; y += node.offsetTop;
+        if (!parent || parent === surface) break;
+        if (!surface.contains(parent)) { x -= surface.offsetLeft + surface.clientLeft; y -= surface.offsetTop + surface.clientTop; break; }
+        x += parent.clientLeft; y += parent.clientTop;
+        node = parent;
+      }
+      // Scrolled boxes on the way up move what is in them.
+      for (let up = el.parentElement; up && up !== surface; up = up.parentElement) { x -= up.scrollLeft; y -= up.scrollTop; }
+      return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+    }
     const r = el.getBoundingClientRect(), o = origin();
     return { x: r.left - o.left, y: r.top - o.top, w: r.width, h: r.height };
   }
-  function resolve(spec) {
+  function resolve(spec, local) {
     if (Array.isArray(spec)) return spec;
     if (typeof spec === "function") return spec();
-    const r = rectOf(spec.el), at = spec.at || "center";
+    const r = rectOf(spec.el, local), at = spec.at || "center";
     const x = at.includes("left") ? r.x : at.includes("right") ? r.x + r.w : r.x + r.w / 2;
     const y = at.includes("top") ? r.y : at.includes("bottom") ? r.y + r.h : r.y + r.h / 2;
     return [x + (spec.dx || 0), y + (spec.dy || 0)];
   }
   function geometry(step) {
-    const pad = step.pad ?? 12;
+    const pad = step.pad ?? 12, local = Boolean(step.local);
     if (BOXED.includes(step.tool) || step.tool === "pixelate") {
-      const r = rectOf(step.around || step.over), px = step.padX ?? pad, py = step.padY ?? pad;
+      const r = rectOf(step.around || step.over, local), px = step.padX ?? pad, py = step.padY ?? pad;
       return { x: r.x - px, y: r.y - py, w: r.w + px * 2, h: r.h + py * 2 };
     }
     if (step.tool === "arrow" || step.tool === "line") {
-      const a = resolve(step.from), b = resolve(step.to), bend = step.bend ?? (step.tool === "line" ? 0 : 0.18), dx = b[0] - a[0], dy = b[1] - a[1];
+      const a = resolve(step.from, local), b = resolve(step.to, local), bend = step.bend ?? (step.tool === "line" ? 0 : 0.18), dx = b[0] - a[0], dy = b[1] - a[1];
       return { x1: a[0], y1: a[1], x2: b[0], y2: b[1], cx: a[0] + dx / 2 + dy * bend, cy: a[1] + dy / 2 - dx * bend };
     }
     if (step.tool === "highlight") {
-      const r = rectOf(step.over), y = r.y + r.h * (step.line ?? 0.56);
+      const r = rectOf(step.over, local), y = r.y + r.h * (step.line ?? 0.56);
       return { points: [[r.x - 4, y], [r.x + r.w + 4, y]], size: step.size ?? r.h / 4.4 };
     }
     if (step.tool === "underline") {
-      const r = rectOf(step.under), y = r.y + r.h + (step.dy ?? 4), n = Math.max(4, Math.round(r.w / 26)), points = [];
+      const r = rectOf(step.under, local), y = r.y + r.h + (step.dy ?? 4), n = Math.max(4, Math.round(r.w / 26)), points = [];
       for (let i = 0; i <= n; i++) points.push([r.x + (r.w * i) / n, y + (i % 2 ? -3.5 : 3.5) * (step.wave ?? 1)]);
       return { points };
     }
-    const p = resolve(step.at);
+    const p = resolve(step.at, local);
     return { x: p[0], y: p[1] };
   }
+  const placeGhost = (p) => {
+    ghost.style.transform = `translate(${f(p[0])}px, ${f(p[1])}px)`;
+    ring.style.translate = `${f(p[0])}px ${f(p[1])}px`;
+    ghost.dataset.x = p[0]; ghost.dataset.y = p[1];
+  };
   async function moveGhost(to, duration = 520) {
     if (!ghost.classList.contains("is-on")) {
-      const from = [to[0] + 90, to[1] + 70];
-      ghost.style.transform = `translate(${from[0]}px, ${from[1]}px)`;
-      ghost.dataset.x = from[0]; ghost.dataset.y = from[1];
+      placeGhost([to[0] + 90, to[1] + 70]);
       ghost.classList.add("is-on");
     }
     const from = [Number(ghost.dataset.x), Number(ghost.dataset.y)];
     await tween(clamp(dist(from, to) * 1.6, 180, duration), (t) => {
-      const k = ease(t), x = from[0] + (to[0] - from[0]) * k, y = from[1] + (to[1] - from[1]) * k;
-      ghost.style.transform = `translate(${f(x)}px, ${f(y)}px)`;
-      ghost.dataset.x = x; ghost.dataset.y = y;
+      const k = ease(t);
+      placeGhost([from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k]);
     });
   }
-  const placeGhost = (p) => { ghost.style.transform = `translate(${f(p[0])}px, ${f(p[1])}px)`; ghost.dataset.x = p[0]; ghost.dataset.y = p[1]; };
+  // The scripted pointer is drawn on the layer. To reach the toolbar, or a part of the page outside the layer, it
+  // moves to a sheet over the whole window and keeps its place on the screen.
+  const ring = h("div", { class: "ink-click", "aria-hidden": "true" }), reach = h("div", { class: "ink-reach", "aria-hidden": "true" });
+  layer.append(ring);
+  // A point of the layer's own layout, as it is on the screen, and back. A probe on the layer answers the first, so a
+  // layer inside a plane that is turned in 3D comes out right; the way back is solved from it.
+  const probe = h("i", { style: "position: absolute; width: 0; height: 0; pointer-events: none;", "aria-hidden": "true" });
+  function toScreen(q) {
+    if (probe.parentNode !== layer) layer.append(probe);
+    probe.style.left = `${q[0]}px`;
+    probe.style.top = `${q[1]}px`;
+    const r = probe.getBoundingClientRect();
+    return [r.left, r.top];
+  }
+  function toLayer(p) {
+    const o = origin();
+    let q = [p[0] - o.left, p[1] - o.top];
+    for (let i = 0; i < 5; i++) {
+      const s = toScreen(q), off = [p[0] - s[0], p[1] - s[1]];
+      if (Math.hypot(off[0], off[1]) < 0.05) break;
+      const sx = toScreen([q[0] + 1, q[1]]), sy = toScreen([q[0], q[1] + 1]), a = sx[0] - s[0], b = sy[0] - s[0], c = sx[1] - s[1], d = sy[1] - s[1], det = a * d - b * c;
+      if (Math.abs(det) < 1e-6) break;
+      q = [q[0] + (off[0] * d - off[1] * b) / det, q[1] + (off[1] * a - off[0] * c) / det];
+    }
+    return q;
+  }
+  function ghostSpace(space) {
+    if ((space === "screen") === (ghost.parentNode === reach)) return;
+    const at = [Number(ghost.dataset.x) || 0, Number(ghost.dataset.y) || 0], next = space === "screen" ? toScreen(at) : toLayer(at);
+    if (space === "screen") { if (!reach.isConnected) document.body.append(reach); reach.append(ring, ghost); } else layer.append(ring, ghost);
+    if (ghost.classList.contains("is-on")) placeGhost(next);
+  }
+  // Moves the pointer to an element, wherever it is: its middle, or `at` from its top left corner. Gives that point
+  // on the screen, and on the layer when the pointer is there. With `local` the element is measured in the surface's
+  // own layout, like a scripted mark, so the pointer lands on it in a plane that is turned in 3D.
+  async function reachFor(el, cursor = true, { at = null, local = false } = {}) {
+    const mine = el instanceof Element && surface.contains(el) && !toolbar.contains(el);
+    if (local && mine) {
+      const r = rectOf(el, true), q = at ? [r.x + at[0], r.y + at[1]] : [r.x + r.w / 2, r.y + r.h / 2];
+      if (cursor) { ghostSpace("layer"); await moveGhost(q); }
+      return { screen: toScreen(q), layer: q };
+    }
+    const r = el.getBoundingClientRect(), p = at ? [r.left + at[0], r.top + at[1]] : [r.left + r.width / 2, r.top + r.height / 2], o = origin();
+    const inside = mine && p[0] >= o.left && p[0] <= o.right && p[1] >= o.top && p[1] <= o.bottom, q = inside ? [p[0] - o.left, p[1] - o.top] : null;
+    if (cursor) { ghostSpace(inside ? "layer" : "screen"); await moveGhost(q || p); }
+    return { screen: p, layer: q };
+  }
+  // The pointer's click (CursorHighlightRenderer.pulseScale): the app's ring, 36 points wide, swells by 18% and
+  // settles in 0.45 s. In the app the ring is always there while the pointer halo is on; here it is there for the
+  // click only, and then goes with the app's short fade-out.
+  function clickGhost() {
+    if (reduceMotion() || !ghost.classList.contains("is-on")) return Promise.resolve();
+    const pulse = clickPulse(), gone = DURATIONS.fadeOut * 1000, total = pulse.duration + gone;
+    ring.animate(pulse, { duration: pulse.duration });
+    return ring.animate([{ opacity: 1 }, { opacity: 1, offset: pulse.duration / total, easing: CURVE.easeIn }, { opacity: 0 }], { duration: total }).finished.catch(() => {});
+  }
+  // Shows one of the toolbar's own buttons being pressed.
+  async function press(control, cursor = true) {
+    if (!control || !barShown() || !control.getClientRects().length) return;
+    await reachFor(control, cursor);
+    control.classList.add("is-pressed");
+    if (cursor) clickGhost();
+    await sleep(130);
+    control.classList.remove("is-pressed");
+  }
+
+  // Using the page as a person would (perform's click, drag and type steps). The events are real DOM events on the
+  // element under the pointer, in the order a mouse makes them; the page's own handlers and the browser's default
+  // actions for a click run. Hover and press cannot be faked for CSS, so the element also gets `data-ink-hover` and
+  // `data-ink-active` for a page that wants to style them like :hover and :active.
+  const GHOST_POINTER = 9001;
+  let hovered = null;
+  const find = (target) => (typeof target === "string" ? document.querySelector(target) : target);
+  function fire(el, type, p, more = {}) {
+    const init = { bubbles: !/enter$|leave$/.test(type), cancelable: !/enter$|leave$/.test(type), composed: true, view: window, clientX: p[0], clientY: p[1], screenX: p[0] + (window.screenX || 0), screenY: p[1] + (window.screenY || 0), button: 0, buttons: 0, detail: /click|down|up/.test(type) ? 1 : 0, ...more };
+    const event = type.startsWith("pointer") ? new PointerEvent(type, { pointerId: GHOST_POINTER, pointerType: "mouse", isPrimary: true, width: 1, height: 1, ...init }) : new MouseEvent(type, init);
+    return el.dispatchEvent(event);
+  }
+  function hover(el, p) {
+    if (hovered === el) { if (el) { fire(el, "pointermove", p); fire(el, "mousemove", p); } return; }
+    if (hovered?.isConnected) {
+      hovered.removeAttribute("data-ink-hover");
+      for (const type of ["pointerout", "pointerleave", "mouseout", "mouseleave"]) fire(hovered, type, p, { relatedTarget: el });
+    }
+    const before = hovered;
+    hovered = el;
+    if (!el) return;
+    el.setAttribute("data-ink-hover", "");
+    for (const type of ["pointerover", "pointerenter", "mouseover", "mouseenter", "pointermove", "mousemove"]) fire(el, type, p, { relatedTarget: before });
+  }
+  // What is under the pointer: the element a real pointer would hit, if it belongs to the target.
+  function hitOf(el, p) {
+    const hit = document.elementFromPoint(p[0], p[1]);
+    return hit && (el.contains(hit) || hit === el) ? hit : el;
+  }
+  // A script never takes the keys from the visitor: whatever is done inside `quiet` leaves the focus where it was,
+  // also when the page's own handler moves it. `focus: true` on a step presses like a person and lets focus follow.
+  function quiet(focus, run) {
+    if (focus) return run();
+    const had = document.activeElement, result = run(), now = document.activeElement;
+    if (now !== had) { if (had && had !== document.body && had.isConnected) had.focus({ preventScroll: true }); else now?.blur?.(); }
+    return result;
+  }
+  function pressDown(el, p, focus = false) {
+    el.setAttribute("data-ink-active", "");
+    fire(el, "pointerdown", p, { buttons: 1 });
+    if (!fire(el, "mousedown", p, { buttons: 1 }) || !focus) return;
+    // A real press gives the keys to what was pressed, or takes them from what had them.
+    const focusable = el.closest('input, textarea, select, button, a[href], [tabindex], [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]');
+    if (focusable && !focusable.disabled) focusable.focus({ preventScroll: true });
+    else if (document.activeElement && document.activeElement !== document.body && !toolbar.contains(document.activeElement)) document.activeElement.blur();
+  }
+  function pressUp(el, p) {
+    el.removeAttribute("data-ink-active");
+    fire(el, "pointerup", p);
+    fire(el, "mouseup", p);
+  }
+  // A page that keeps the pointer for a drag asks the browser to capture it. The scripted pointer is not one the
+  // browser knows, so for the length of a drag the capture is kept here and the moves go to whoever asked.
+  async function captured(run) {
+    const proto = Element.prototype, { setPointerCapture, releasePointerCapture, hasPointerCapture } = proto;
+    let holder = null;
+    proto.setPointerCapture = function (id) { if (id === GHOST_POINTER) holder = this; else setPointerCapture.call(this, id); };
+    proto.releasePointerCapture = function (id) { if (id === GHOST_POINTER) { if (holder === this) holder = null; } else releasePointerCapture.call(this, id); };
+    proto.hasPointerCapture = function (id) { return id === GHOST_POINTER ? holder === this : hasPointerCapture.call(this, id); };
+    try { await run(() => holder); } finally { Object.assign(proto, { setPointerCapture, releasePointerCapture, hasPointerCapture }); }
+  }
+  // Types one character into a field as a key press would: keydown, beforeinput, the change itself, input, keyup.
+  function typeKey(el, char) {
+    const enter = char === "\n", back = char === "\b", key = enter ? "Enter" : back ? "Backspace" : char;
+    const code = enter ? "Enter" : back ? "Backspace" : /^[a-z]$/i.test(char) ? `Key${char.toUpperCase()}` : /^\d$/.test(char) ? `Digit${char}` : char === " " ? "Space" : "";
+    const keys = { key, code, bubbles: true, cancelable: true, composed: true, view: window };
+    const field = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
+    if (el.dispatchEvent(new KeyboardEvent("keydown", keys))) {
+      const inputType = back ? "deleteContentBackward" : enter ? "insertLineBreak" : "insertText", data = back || enter ? null : char;
+      if (enter && el instanceof HTMLInputElement) el.form?.requestSubmit?.();
+      else if (el.isContentEditable) {
+        // The browser's own editing needs the caret in the element; without the keys, the text is changed directly.
+        if (!(el.contains(document.activeElement) && document.execCommand(back ? "delete" : enter ? "insertLineBreak" : "insertText", false, data))) {
+          if (back) el.textContent = el.textContent.slice(0, -1); else el.append(enter ? "\n" : data || "");
+          el.dispatchEvent(new InputEvent("input", { inputType, data, bubbles: true, composed: true }));
+        }
+      } else if (field && el.dispatchEvent(new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true, composed: true }))) {
+        const insert = enter ? "\n" : back ? "" : char;
+        try {
+          // A field that does not have the keys is written at its end.
+          const mine = document.activeElement === el, length = el.value.length, start = mine ? el.selectionStart ?? length : length, end = mine ? el.selectionEnd ?? start : length;
+          el.setRangeText(insert, back && start === end ? Math.max(0, start - 1) : start, end, "end");
+        } catch {
+          // Fields such as email and number have no text range; the value is set the way the browser sets it.
+          const set = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value")?.set;
+          set?.call(el, back ? el.value.slice(0, -1) : el.value + insert);
+        }
+        el.dispatchEvent(new InputEvent("input", { inputType, data, bubbles: true, composed: true }));
+      }
+    }
+    el.dispatchEvent(new KeyboardEvent("keyup", keys));
+  }
   // The toolbar button that stands for a tool: its own, Effects for blur, the Tool library for the rest.
   const barButton = (tool) => rail.querySelector(`[data-tool="${barIdentity(tool)}"]`) || effectsButton || libraryButton;
   const showTool = (tool) => { state.tool = tool; layer.dataset.tool = tool; syncStyle(); refreshToolbar(); };
-  async function perform(steps, { cursor = true, showTool: shows = false, anchored = true, signal } = {}) {
+  // Steps that are not marks: the story a page tells with the scripted pointer.
+  //   { mode: "draw" | "use", via: "key" }   presses the toolbar's Draw button, or sends the key
+  //   { tool: "arrow" } or { pick: "arrow" } picks a tool in the toolbar (and starts drawing, as the app does)
+  //   { click: target }                      moves to an element of the page and clicks it; goes to Use apps first
+  //   { drag: { el, by: [dx, dy] } }         presses it, moves and lets go (also `to: target`, `from: [x, y]`, `duration`)
+  //   { type: { el, text, speed } }          presses a field and writes into it, one character at a time ("\n" is Return, "\b" deletes)
+  //   { hide: true | false, style, pill }    Hide drawings and tools, and back, in one of the app's styles
+  //   { shrink: true | false }               the toolbar shrinks to its one button, and opens again
+  // click, drag and type leave the keyboard focus with the visitor; `focus: true` lets it follow the press. With
+  // `local: true` (on the step or on perform) the pointer's place comes from the surface's own layout.
+  const MARK_KEYS = ["around", "over", "under", "from", "to", "at", "text", "n"];
+  async function useApps(cursor) {
+    if (state.mode === "use") return;
+    await press(modeButton, cursor);
+    setMode("use");
+    await sleep(160);
+  }
+  async function story(step, cursor) {
+    if (step.mode) {
+      if (step.mode === state.mode) return true;
+      if (step.via === "key") emit("shortcut", step.mode, { key: step.mode === "draw" ? RESUME_KEY : "Esc", scripted: true });
+      else await press(collapsed ? pill : modeButton, cursor);
+      if (step.mode === "draw" && collapsed) await setCollapsed(false);
+      setMode(step.mode);
+      return true;
+    }
+    const picked = step.pick || (step.tool && !MARK_KEYS.some((key) => step[key] !== undefined) ? step.tool : null);
+    if (picked) {
+      if (!TOOLS[picked]) return true;
+      if (collapsed) await setCollapsed(false);
+      await press(barButton(picked), cursor);
+      setTool(picked);
+      return picked;
+    }
+    if (step.click) {
+      const el = find(step.click);
+      if (!el) return true;
+      await useApps(cursor);
+      const p = (await reachFor(el, cursor, { local: step.local })).screen, hit = hitOf(el, p), focus = Boolean(step.focus);
+      quiet(focus, () => { hover(hit, p); pressDown(hit, p, focus); });
+      if (cursor) clickGhost();
+      await sleep(step.hold ?? 110);
+      quiet(focus, () => { pressUp(hit, p); fire(hit, "click", p); });
+      return true;
+    }
+    if (step.drag) {
+      const spec = step.drag, el = find(spec.el), focus = Boolean(spec.focus ?? step.focus);
+      if (!el) return true;
+      await useApps(cursor);
+      const start = await reachFor(el, cursor, { local: Boolean(spec.local ?? step.local), at: spec.from }), hit = hitOf(el, start.screen), flat = Boolean(spec.local ?? step.local) && start.layer;
+      let by = spec.by || [0, 0];
+      if (spec.to) {
+        const goal = find(spec.to), r = flat ? rectOf(goal, true) : goal.getBoundingClientRect();
+        by = flat ? [r.x + r.w / 2 - start.layer[0], r.y + r.h / 2 - start.layer[1]] : [r.left + r.width / 2 - start.screen[0], r.top + r.height / 2 - start.screen[1]];
+      }
+      // With `local` the path lies on the layer: `by` is in the surface's own pixels, and the page hears where each
+      // point of it is on the screen.
+      const at = (k) => (flat ? toScreen([start.layer[0] + by[0] * k, start.layer[1] + by[1] * k]) : [start.screen[0] + by[0] * k, start.screen[1] + by[1] * k]);
+      const pointer = cursor ? [Number(ghost.dataset.x), Number(ghost.dataset.y)] : null;
+      quiet(focus, () => hover(hit, start.screen));
+      await captured(async (holder) => {
+        quiet(focus, () => pressDown(hit, start.screen, focus));
+        if (cursor) clickGhost();
+        await sleep(90);
+        const move = (k) => {
+          const p = at(k), target = holder() || hit;
+          quiet(focus, () => { fire(target, "pointermove", p, { buttons: 1 }); fire(target, "mousemove", p, { buttons: 1 }); });
+          if (pointer) placeGhost([pointer[0] + by[0] * k, pointer[1] + by[1] * k]);
+        };
+        if (reduceMotion()) move(1); else await tween(spec.duration ?? clamp(Math.hypot(by[0], by[1]) * 3, 320, 1100), (t) => move(ease(t)));
+        quiet(focus, () => pressUp(holder() || hit, at(1)));
+      });
+      return true;
+    }
+    if (step.type) {
+      const spec = step.type, el = find(spec.el), focus = Boolean(spec.focus ?? step.focus);
+      if (!el) return true;
+      await useApps(cursor);
+      // The pointer goes to the field and presses it. The keys stay with the visitor unless the step says `focus: true`:
+      // the text is written into the field and the page hears `input` for each character.
+      if (focus ? document.activeElement !== el : cursor) {
+        const p = (await reachFor(el, cursor, { local: Boolean(spec.local ?? step.local) })).screen, hit = hitOf(el, p);
+        quiet(focus, () => { hover(hit, p); pressDown(hit, p, focus); });
+        if (cursor) clickGhost();
+        await sleep(90);
+        quiet(focus, () => { pressUp(hit, p); fire(hit, "click", p); });
+        if (focus && document.activeElement !== el) el.focus?.({ preventScroll: true });
+      }
+      for (const char of String(spec.text ?? "")) { quiet(focus, () => typeKey(el, char)); await sleep(spec.speed ?? 60); }
+      return true;
+    }
+    if (step.hide !== undefined) {
+      if (Boolean(step.hide) === state.hidden) return true;
+      if (step.hide) await press(shows("hide") ? hideButton : null, cursor);
+      else if (!toolbar.classList.contains("is-away")) await press(pill, cursor);
+      if (cursor && step.hide) hideGhost();
+      await setHidden(Boolean(step.hide), { style: step.style, pill: step.pill });
+      return true;
+    }
+    if (step.shrink !== undefined) {
+      // The app shrinks once the pointer has left the toolbar, and opens when the pointer comes back to it.
+      if (!step.shrink && collapsed && !state.hidden) await reachFor(pill, cursor && barShown());
+      await (step.shrink ? shrink() : expand());
+      return true;
+    }
+    return false;
+  }
+  async function perform(steps, { cursor = true, showTool: shows = false, anchored = true, local = false, resting, signal } = {}) {
     const made = [], toolBefore = state.tool;
-    for (const step of steps) {
+    let picked = null;
+    for (const given of steps) {
       if (signal?.aborted) break;
+      const step = local && given.local === undefined && !given.wait && !given.run ? { ...given, local: true } : given;
       if (step.wait) { await sleep(step.wait); continue; }
       if (step.run) { await step.run(); continue; }
+      const acted = await story(step, cursor);
+      if (acted) { if (typeof acted === "string") picked = acted; if (step.pause) await sleep(step.pause); continue; }
+      if (ghost.parentNode === reach) ghostSpace("layer");
       const tool = step.tool === "underline" ? "pen" : step.tool, shown = tool === "pixelate" ? "blur" : tool;
       if (shows && TOOLS[shown] && !hasActiveEdit()) { showTool(shown); barButton(tool).classList.add("is-demo"); }
       const g = geometry(step);
@@ -2190,12 +2757,20 @@ export function createInk(options = {}) {
       if (step.pause) await sleep(step.pause);
     }
     // The toolbar goes back to the tool the visitor had before the script showed its own.
-    if (shows && state.tool !== toolBefore && TOOLS[toolBefore] && !hasActiveEdit()) showTool(toolBefore);
+    // The toolbar goes back to the tool the visitor had before the script showed its own: or to the one the script
+    // picked itself, or to `resting` when the page names one.
+    const home = resting ?? picked ?? toolBefore;
+    if ((shows || resting) && state.tool !== home && TOOLS[home] && !hasActiveEdit()) showTool(home);
     refreshToolbar();
     emit("change", doc.elements);
     return made;
   }
-  function hideGhost() { ghost.classList.remove("is-on"); }
+  function hideGhost() {
+    ghost.classList.remove("is-on");
+    hover(null, [Number(ghost.dataset.x) || 0, Number(ghost.dataset.y) || 0]);
+    // Once it has faded, a pointer that went to the toolbar is put back on the layer, where pages look for it.
+    if (ghost.parentNode === reach) setTimeout(() => { if (!ghost.classList.contains("is-on")) ghostSpace("layer"); }, 320);
+  }
   // Scripted marks follow their targets when the page reflows, until someone moves them.
   function reflow() {
     for (const m of doc.elements) {
@@ -2222,8 +2797,13 @@ export function createInk(options = {}) {
     on(name, fn) { (listeners[name] ||= []).push(fn); return this; },
     setMode, setTool, setColor, setCollapsed, select, undo, redo, clear, perform, hideGhost, moveGhost, reflow, rectOf, box,
     setBoard, setProperties, setAppearance, setHidden, setEnabled, more, fit,
+    // The app's motion: shrink() and expand() are its Shrink; setHidden(hidden, { style }) shows and hides in one of
+    // its styles ("slide", "magic", "corners", "pop", "drop", "focus", "fade", "none"); each returns a promise.
+    shrink, expand, setVisibility, clickGhost,
+    get visibility() { return visibility; },
+    get hidden() { return state.hidden; },
     get enabled() { return enabled; },
-    get collapsed() { return toolbar.classList.contains("is-collapsed"); },
+    get collapsed() { return collapsed; },
     toolbarRect: () => toolbar.getBoundingClientRect(),
     // Draws a mark again after its geometry or style was changed from outside.
     render(mark) {

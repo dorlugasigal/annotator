@@ -21,7 +21,10 @@
     .card:hover .shot img { transform: scale(1.04); }
     .body { padding: 26px 28px 30px; }
     .tag { color: #ffb58c; font: 500 13px/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
-    h2 { margin: 12px 0 8px; font-size: 38px; line-height: 1; letter-spacing: -.04em; font-weight: 750; }
+    .family { margin-bottom: 72px; }
+    .family-title { margin: 0 0 6px; font-size: clamp(28px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -.035em; font-weight: 750; }
+    .family-note { margin: 0 0 28px; color: #b1b7c6; }
+    .card h2 { margin: 12px 0 8px; font-size: 38px; line-height: 1; letter-spacing: -.04em; font-weight: 750; }
     .card p { margin: 0 0 16px; color: #b1b7c6; }
     .card .story { margin-bottom: 8px; color: #f2f3f7; font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
     ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 16px; }
@@ -32,29 +35,105 @@
   </style>
 </head>
 <body>
-  <h1>Nine directions for <span>getannotator.app</span></h1>
+  <h1>Fifteen designs for <span>getannotator.app</span></h1>
   <p class="intro">Each one is a working homepage with its own story, written from the same checked facts, and a web demo of the app. Open them, scroll, and draw. They run from this computer only.</p>
-  <main class="grid">
+  <main>
+  <section class="family">
+    <h2 class="family-title">Daylight and its variations</h2>
+    <p class="family-note">The same content in four looks. Each has a dark and a light theme.</p>
+    <div class="grid">
     <a class="card" href="i-daylight/">
       <div class="shot"><img src="shots/i.jpg" alt="" loading="lazy"></div>
       <div class="body">
         <span class="tag">Concept I · motion, warm colors</span>
         <h2>Daylight</h2>
         <p class="story">Show people exactly what you mean.</p>
-        <p>Warm near-black or a warm white, with the app’s Sunset gradient. Three sample windows get annotated in a loop on a stage that tilts in 3D, and you can take over.</p>
+        <p>Warm near-black or a warm white, with the app’s Sunset gradient. Three working sample apps on a stage that tilts in 3D: draw on them, then switch to Use apps and click through them.</p>
         <ul><li>Dark and light, with a sun-to-moon switch and a circular reveal</li><li>A pinned 3D deck of what you can do</li><li>The toolbar starts customized, with a gradient selected</li></ul>
       </div>
     </a>
+    <a class="card" href="i2-orchid/">
+      <div class="shot"><img src="shots/i2.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Daylight · variation</span>
+        <h2>Daylight · Orchid</h2>
+        <p class="story">Soft, airy, springy.</p>
+        <p>Soft ink or milky white with out-of-focus orbs of the Orchid gradient. Windows float and lean toward your pointer; the tools are dealt from a fan.</p>
+        <ul><li>Pink to violet to blue accent</li><li>A squashy switch and a soft blob theme change</li><li>Gabarito and Figtree</li></ul>
+      </div>
+    </a>
+    <a class="card" href="i3-tropic/">
+      <div class="shot"><img src="shots/i3.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Daylight · variation</span>
+        <h2>Daylight · Tropic</h2>
+        <p class="story">Editorial and type-led.</p>
+        <p>Aubergine-black or cream paper, a magazine grid and a serif with real italics, with the Tropic gradient. The tools turn like pages of a book.</p>
+        <ul><li>Orange to pink to violet accent</li><li>Windows dealt onto the desk on load</li><li>Theme change like window blinds</li></ul>
+      </div>
+    </a>
+    <a class="card" href="i4-neon/">
+      <div class="shot"><img src="shots/i4.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Daylight · variation</span>
+        <h2>Daylight · Neon</h2>
+        <p class="story">Monochrome bento, electric accent.</p>
+        <p>Strict black or white, built from tiles on a grid, with thin edges of the Neon gradient. The hero straightens from an isometric tilt; tiles flip up and expand.</p>
+        <ul><li>Pink to blue to teal accent</li><li>A flipping tile switch, pixel-block theme change</li><li>Syne and Onest</li></ul>
+      </div>
+    </a>
+    </div>
+  </section>
+  <section class="family">
+    <h2 class="family-title">Studio and its variations</h2>
+    <p class="family-note">The same content in four looks. Each has a dark and a light theme.</p>
+    <div class="grid">
     <a class="card" href="h-studio/">
       <div class="shot"><img src="shots/h.jpg" alt="" loading="lazy"></div>
       <div class="body">
         <span class="tag">Concept H · motion, cool colors</span>
         <h2>Studio</h2>
         <p class="story">Draw on your screen as you explain.</p>
-        <p>Deep blue-black or a cool white, with the app’s Ocean gradient. The hero screen tilts in 3D as you scroll and plays a short demo you can take over.</p>
+        <p>Deep blue-black or a cool white, with the app’s Ocean gradient. A working weekly report on a screen that tilts in 3D: draw on it, then switch to Use apps and click through it.</p>
         <ul><li>Dark and light, with a coin-flip switch and a diagonal wipe</li><li>A 3D deck of what you can do</li><li>The toolbar starts customized, with a gradient selected</li></ul>
       </div>
     </a>
+    <a class="card" href="h2-aurora/">
+      <div class="shot"><img src="shots/h2.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Studio · variation</span>
+        <h2>Studio · Aurora</h2>
+        <p class="story">Light in motion.</p>
+        <p>Graphite and soft grey-white, lit by slow fields of the Aurora gradient. The hero turns to face you; the tools sit on a 3D carousel.</p>
+        <ul><li>Green to blue to violet accent</li><li>Horizon-dial theme switch, curtain of light</li><li>Schibsted Grotesk and Figtree</li></ul>
+      </div>
+    </a>
+    <a class="card" href="h3-blueprint/">
+      <div class="shot"><img src="shots/h3.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Studio · variation</span>
+        <h2>Studio · Blueprint</h2>
+        <p class="story">Drawn with precision.</p>
+        <p>Drafting navy or drafting paper, fine grids and line art in the Lagoon gradient. The hero resolves from a line drawing into the real screen.</p>
+        <ul><li>Lines draw themselves as you scroll</li><li>Sheets that lift away like pages on a clipboard</li><li>Theme change in a wave of flipping tiles</li></ul>
+      </div>
+    </a>
+    <a class="card" href="h4-forest/">
+      <div class="shot"><img src="shots/h4.jpg" alt="" loading="lazy"></div>
+      <div class="body">
+        <span class="tag">Studio · variation</span>
+        <h2>Studio · Forest</h2>
+        <p class="story">Moves like the app.</p>
+        <p>Deep green-black or a fresh off-white with the Forest gradient. The page's own motion is the app's: drawings fly in on the Magic swoop, headers grow from one button like the toolbar's Shrink.</p>
+        <ul><li>All-green accent</li><li>Each section arrives in one of the app's show styles</li><li>Theme change with the app's Dissolve</li></ul>
+      </div>
+    </a>
+    </div>
+  </section>
+  <section class="family">
+    <h2 class="family-title">Earlier directions</h2>
+    <p class="family-note">Kept for comparison: two quiet takes and five louder ones.</p>
+    <div class="grid">
     <a class="card" href="f-plain/">
       <div class="shot"><img src="shots/f.jpg" alt="" loading="lazy"></div>
       <div class="body">
@@ -125,6 +204,8 @@
         <ul><li>Pull a sheet across a busy table: wiggle or ring</li><li>“What never happens to your screen”</li><li>A second page lists every tool</li></ul>
       </div>
     </a>
+    </div>
+  </section>
   </main>
   <p class="foot">The first two are the newest. In every design the toolbar is a copy of the real one, and only the tools that behave like the app are live; the rest say “Want to see more? Try it on your machine”. The clips are recordings of the real Mac app.</p>
 </body>

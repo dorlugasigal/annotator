@@ -1,0 +1,641 @@
+@font-face { font-family: "Onest"; src: url("/concepts/shared/fonts/onest-normal.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Instrument Serif"; src: url("/concepts/shared/fonts/instrument-serif-italic.woff2") format("woff2"); font-style: italic; font-weight: 400; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("/concepts/shared/fonts/geist-mono-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Caveat"; src: url("/concepts/shared/fonts/caveat-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+
+/* Color ---------------------------------------------------------------------------------------------
+   Every color on the page is one of these. The first block is the same in both themes: the app's Forest gradient
+   (ColorGradient.swift: three colors at 25 degrees, which is 115deg in CSS) and the colors of things that are
+   objects rather than page: a whiteboard, a pointer. */
+:root {
+  --forest-1: #128c54; --forest-2: #40b34d; --forest-3: #9ecc2e;
+  --forest: linear-gradient(115deg, var(--forest-1), var(--forest-2), var(--forest-3));
+  /* Under text the gradient starts past its darkest green, where dark text reads (5.8:1 or better across a button). */
+  --forest-button: linear-gradient(115deg, #2ea350, var(--forest-2) 45%, var(--forest-3));
+  --on-accent: #06120b;
+  --board-white: #f7f8f5; --board-black: #151815;
+}
+:root, html[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0a0f0c; --surface-1: #111813; --surface-2: #18211b; --surface-3: #212c24;
+  --text: #f1f0e8; --muted: #a3ab9f; --faint: #838c80;
+  --line: #f1f0e817; --line-strong: #f1f0e830;
+  --control: #f1f0e80a; --control-hover: #f1f0e814;
+  --accent: #40b34d; --accent-text: #8fd46b; --on: #5fcf6a;
+  /* Strokes and words the page draws in the gradient itself. */
+  --ink-1: var(--forest-1); --ink-2: var(--forest-2); --ink-3: var(--forest-3);
+  --desk: #0d130f; --dot: #f1f0e815;
+  --win-bg: #131a15; --win-bar: #19221c; --win-text: #eceee6; --win-muted: #98a294; --win-line: #f1f0e817;
+  --win-accent: #b9c5b1; --win-field: #0e1410; --win-down: #ff9280; --win-edge: #f1f0e826;
+  --code-bg: #0c120e; --code-text: #dfe5d8;
+  --key: #1a231d; --key-edge: #040705;
+  --bar: #1b1e1c; --bar-edge: #ffffff1f; --bar-ink: #ffffffd0; --bar-on: #ffffff1c;
+  --spark: #9ecc2e; --spark-core: #f4ffe4; --spark-gold: #ffc24d; --click: #c8ee58;
+  --floor: #000000b3;
+  --ink-highlight-blend: screen;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --page: #f6f8f3; --surface-1: #ffffff; --surface-2: #eaefe6; --surface-3: #dde5d8;
+  --text: #0c1710; --muted: #4c5a50; --faint: #5d6b60;
+  --line: #0c17101f; --line-strong: #0c17103d;
+  --control: #ffffff; --control-hover: #f0f4ec;
+  --accent: #128c54; --accent-text: #0b6b3f; --on: #128c54;
+  /* On a light page the lime end is too pale to carry a line or a word, so the page's own strokes run deeper. */
+  --ink-1: #0b6e41; --ink-2: #248f43; --ink-3: #5f8f10;
+  --desk: #edf1e8; --dot: #0c17101c;
+  --win-bg: #ffffff; --win-bar: #f2f5ef; --win-text: #0c1710; --win-muted: #59665c; --win-line: #0c17101c;
+  --win-accent: #56665a; --win-field: #ffffff; --win-down: #b3261a; --win-edge: #0c171030;
+  --code-bg: #eef2ea; --code-text: #0c1710;
+  --key: #ffffff; --key-edge: #b9c4b3;
+  --bar: #ffffff; --bar-edge: #0c171033; --bar-ink: #0c1710d0; --bar-on: #0c171016;
+  --spark: #128c54; --spark-core: #40b34d; --spark-gold: #b87a00; --click: #128c54;
+  --floor: #0c171040;
+  --ink-highlight-blend: multiply;
+}
+
+:root {
+  --display: "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: var(--display);
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --gutter: 16px; --space: 88px; --header-h: 58px; --radius: 14px;
+
+  /* The motion system is the app's own (MotionCore.swift): four curves, the toolbar's durations, the step between
+     drawings in a show, and its "snappy" spring for small state changes. */
+  --enter: cubic-bezier(.2, 0, 0, 1);
+  --exit: cubic-bezier(.45, 0, .55, .4);
+  --standard: cubic-bezier(.3, 0, .2, 1);
+  --fade: cubic-bezier(.2, 0, .4, 1);
+  --t-fade-in: 160ms; --t-fade-out: 120ms; --t-resize: 220ms; --t-collapse: 300ms; --t-expand: 340ms; --t-show: 360ms; --t-hide: 280ms;
+  --step: 65ms;
+  --snappy: var(--standard); --t-snappy: 391ms;
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root { --snappy: linear(0, .054, .176, .322, .466, .595, .704, .791, .858, .907, .943, .968, .984, .994, 1, 1.003, 1.005, 1.005, 1.005, 1.004, 1.003, 1.003, 1.002, 1.001, 1); }
+}
+@media (min-width: 600px) { :root { --gutter: 24px; --space: 112px; --header-h: 64px; --radius: 16px; } }
+@media (min-width: 1100px) { :root { --space: 136px; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 16px); overflow-x: clip; background: var(--page); }
+body { margin: 0; overflow-x: clip; background: var(--page); color: var(--text); font: 400 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+p, figcaption { text-wrap: pretty; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:where(a, button, input):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+::selection { background: color-mix(in srgb, var(--accent) 34%, transparent); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+:root[data-platform="windows"] [data-for="mac"], :root:not([data-platform="windows"]) [data-for="windows"] { display: none; }
+[hidden] { display: none !important; }
+.defs { position: absolute; }
+#forest stop:nth-child(1) { stop-color: var(--ink-1); }
+#forest stop:nth-child(2) { stop-color: var(--ink-2); }
+#forest stop:nth-child(3) { stop-color: var(--ink-3); }
+.brand-dot { fill: var(--accent); }
+
+.wrap { width: min(1200px, 100% - 2 * var(--gutter)); margin-inline: auto; }
+main > section + section { margin-top: var(--space); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; }
+h2 { font-size: clamp(27px, 3.3vw, 38px); line-height: 1.08; font-weight: 740; letter-spacing: -.032em; }
+h3 { font-size: 20px; line-height: 1.2; font-weight: 680; letter-spacing: -.018em; }
+/* The one word a heading leans on is set in the serif italic, in the accent. */
+h1 em, h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.14em; letter-spacing: -.012em; line-height: .9; color: var(--accent-text); }
+
+/* Buttons */
+.button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 6px 20px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--control); color: var(--text); font: 620 16px/1.2 var(--sans); letter-spacing: -.005em; text-decoration: none; text-align: center; cursor: pointer; transition: translate var(--t-snappy) var(--snappy), scale var(--t-snappy) var(--snappy), background-color var(--t-fade-in) var(--fade), border-color var(--t-fade-in) var(--fade), filter var(--t-fade-in) var(--fade); }
+.button:hover { background: var(--control-hover); border-color: color-mix(in srgb, var(--text) 34%, transparent); translate: 0 -1px; }
+.button:active { translate: 0 1px; scale: .985; transition-duration: var(--t-fade-out); }
+.button:focus-visible { border-radius: 12px; }
+.button.small { min-height: 36px; padding: 4px 14px; border-radius: 10px; font-size: 14.5px; }
+.button.primary, :root:not([data-platform="windows"]) .platform[data-os="mac"] .button, :root[data-platform="windows"] .platform[data-os="windows"] .button { border-color: transparent; background: var(--forest-button); color: var(--on-accent); }
+.button.primary:hover, :root:not([data-platform="windows"]) .platform[data-os="mac"] .button:hover, :root[data-platform="windows"] .platform[data-os="windows"] .button:hover { background: var(--forest-button); border-color: transparent; filter: brightness(1.06) saturate(1.05); }
+/* The arrow on a download button: main.js flies it in on a small Magic flight. */
+.arrow { position: relative; flex: none; display: grid; width: 16px; height: 16px; }
+.arrow svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.arrow .fx-svg { inset: 0; }
+.chip-button, .icon-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 34px; padding: 0 13px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--control); color: var(--text); font: 560 14px/1 var(--sans); white-space: nowrap; cursor: pointer; transition: background-color var(--t-fade-in) var(--fade), border-color var(--t-fade-in) var(--fade), scale var(--t-snappy) var(--snappy); }
+.icon-button { width: 34px; padding: 0; }
+:is(.chip-button, .icon-button):hover { background: var(--control-hover); border-color: color-mix(in srgb, var(--text) 34%, transparent); }
+:is(.chip-button, .icon-button):active { scale: .96; transition-duration: var(--t-fade-out); }
+:is(.chip-button, .icon-button):focus-visible { border-radius: 10px; }
+:is(.chip-button, .icon-button) svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.i-play { fill: currentColor; stroke-width: 1; }
+:is(.chip-button, .icon-button):not(.is-off) :is(.i-replay, .i-play), :is(.chip-button, .icon-button).is-off .i-pause { display: none; }
+
+/* Header */
+.site-header { position: sticky; top: 0; z-index: 50; background: var(--page); border-bottom: 1px solid transparent; transition: border-color var(--t-fade-in) var(--fade); }
+.site-header.is-stuck { border-bottom-color: var(--line); }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: var(--header-h); }
+.wordmark { font: 760 22px/1 var(--display); letter-spacing: -.045em; text-decoration: none; }
+.wordmark span { color: var(--accent); }
+.site-header nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
+.site-header nav > * { white-space: nowrap; flex: none; }
+.nav-link, .nav-coffee { color: var(--muted); text-decoration: none; transition: color var(--t-fade-in) var(--fade); }
+.nav-link:hover, .nav-coffee:hover { color: var(--text); }
+.nav-link { background: linear-gradient(var(--accent), var(--accent)) 0 100% / 0 1.5px no-repeat; padding-block: 4px; transition: color var(--t-fade-in) var(--fade), background-size var(--t-resize) var(--standard); }
+.nav-link:is(:hover, :focus-visible) { background-size: 100% 1.5px; }
+/* "Try it" is the link the header leans on: the toolbar's own Draw pill, in small. */
+.nav-try { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px 0 10px; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent-text); font-weight: 620; text-decoration: none; transition: background-color var(--t-fade-in) var(--fade), border-color var(--t-fade-in) var(--fade), scale var(--t-snappy) var(--snappy); }
+.nav-try:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); }
+.nav-try:active { scale: .96; }
+.nav-try:focus-visible { border-radius: 10px; }
+.nav-try i { width: 7px; height: 7px; border-radius: 50%; background: var(--on); }
+.nav-coffee { display: inline-flex; align-items: center; gap: 7px; }
+.nav-coffee svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The theme switch is the toolbar's Shrink in small. Dark is the bar, with both themes on it; light is the one
+   button. It keeps its right edge, as a toolbar pinned on that side does. */
+.ts-slot { position: relative; width: 70px; height: 36px; }
+.theme-switch { position: absolute; right: 0; top: 0; width: 70px; height: 36px; padding: 0; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface-1); color: var(--text); overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+html[data-theme="light"] .theme-switch { width: 36px; }
+.theme-switch:focus-visible { outline-offset: 2px; border-radius: 12px; }
+.ts-face { position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: flex-end; gap: 2px; padding: 0 3px; }
+.ts-face svg { box-sizing: content-box; width: 16px; height: 16px; padding: 6px; border-radius: 8px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--faint); }
+.ts-face .ts-on { background: var(--control-hover); color: var(--text); }
+.ts-one svg { color: var(--accent-text); }
+html[data-theme="light"] .ts-bar, html[data-theme="dark"] .ts-one { opacity: 0; }
+
+/* Hero */
+.hero { padding-top: 28px; }
+.hero-copy { display: grid; gap: 18px; }
+h1 { font-size: clamp(38px, 4.400vw, 62px); line-height: 1; font-weight: 760; letter-spacing: -.042em; text-wrap: wrap; }
+h1 .line { display: block; }
+.lede { max-width: 33em; font-size: 18px; line-height: 1.5; color: var(--muted); }
+.get { display: grid; gap: 12px; margin-top: 6px; }
+.get-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.quiet { margin-left: 8px; font-size: 15.5px; color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 40%, transparent); text-decoration-thickness: 1px; text-underline-offset: .25em; transition: text-decoration-color var(--t-fade-in) var(--fade); }
+.quiet:hover { text-decoration-color: var(--accent); }
+.free { font-size: 14.500px; color: var(--faint); }
+.try-line { position: relative; max-width: 30em; padding-left: 26px; font-size: 16px; line-height: 1.45; color: var(--text); }
+/* A small arrow that points at the stage. */
+.try-line::before { content: ""; position: absolute; left: 4px; top: .28em; width: 9px; height: 9px; border: solid var(--accent-text); border-width: 0 2px 2px 0; rotate: 45deg; }
+
+/* The stage: a desk with a fine dotted texture, the sample apps on it, and above them the planes the app adds:
+   ink, then the toolbar. The toolbar is docked at the top, so it is in the first screen with the apps under it. */
+.stage { --tilt: 0; --yaw: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; margin-top: 28px; }
+.stage::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -26px; height: 70px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, var(--floor), transparent); opacity: calc(var(--lift) * .8); pointer-events: none; }
+/* main.js writes the toolbar's tallest height to --tb-h, so opening its properties row moves nothing on the page. */
+.screen { --tb-h: 84px; --tb-top: 10px; --hud-h: 28px; --gap: 12px; --inset: 10px; position: relative; }
+.board { position: relative; padding: var(--inset); }
+.js .board { padding-top: calc(var(--tb-top) + var(--tb-h) + var(--gap) + var(--hud-h) + var(--gap)); }
+.desk { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); transition: border-color var(--t-resize) var(--standard); }
+.ink-drawing .desk { border-color: color-mix(in srgb, var(--accent) 80%, transparent); }
+.dock, .dock-fx { position: absolute; inset: 0 var(--dock-inset, 2px); z-index: 100; pointer-events: none; }
+.dock-fx { inset: 0; z-index: 101; }
+.dock > .ink-toolbar { pointer-events: auto; }
+.dock > .ink-toolbar:not(.is-placed) { top: var(--tb-top); bottom: auto; }
+.screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
+/* While the page's own script is "drawing" on a touch screen, a finger on the stage still scrolls the page. */
+.stage.is-scripted .ink-layer { pointer-events: none; }
+.stage-fx { position: absolute; inset: 0; z-index: 61; pointer-events: none; }
+.fx-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+
+/* What the stage says about itself: the mode it is in, and that it is the visitor's turn. */
+.hud { position: absolute; left: var(--inset); right: var(--inset); top: calc(var(--tb-top) + var(--tb-h) + var(--gap)); z-index: 1; display: flex; align-items: center; gap: 8px; height: var(--hud-h); pointer-events: none; }
+html:not(.js) .hud { display: none; }
+.mode-chip, .turn { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 9px; border-radius: 9px; font: 620 13px/1 var(--sans); white-space: nowrap; }
+.mode-chip { border: 1px solid var(--line-strong); background: var(--surface-1); color: var(--text); transition: color var(--t-resize) var(--standard), border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
+.mode-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-resize) var(--standard); }
+.mode-chip b { font-weight: inherit; }
+.mode-chip[data-mode="draw"] { border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 16%, var(--surface-1)); color: var(--accent-text); }
+.mode-chip[data-mode="draw"] i { background: var(--on); }
+.chip-keys { display: inline-flex; gap: 3px; margin-left: 2px; }
+.chip-keys kbd.is-down { translate: 0 1px; background: color-mix(in srgb, var(--accent) 30%, var(--key)); color: var(--text); }
+.chip-keys kbd { display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--key); color: var(--muted); font: 500 10.500px/1 var(--mono); }
+.turn { gap: 6px; background: var(--forest-button); color: var(--on-accent); }
+.turn svg { fill: var(--on-accent); }
+
+/* The sample apps, in the colors an app would have in this theme. */
+.windows { position: relative; display: grid; gap: 20px; align-items: start; }
+.window, .mini { position: relative; border-radius: 12px; background: var(--win-bg); color: var(--win-text); box-shadow: 0 0 0 1px var(--win-edge); }
+.window { container-type: inline-size; min-width: 0; }
+.window.is-moving { box-shadow: 0 0 0 1px var(--win-edge), 0 18px 40px -18px var(--floor); }
+.window.is-returning { transition: translate var(--t-resize) var(--standard); }
+.win-chat { display: none; }
+.window-bar { position: relative; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-bottom: 1px solid var(--win-line); border-radius: 12px 12px 0 0; background: var(--win-bar); }
+.window-bar i { width: 9px; height: 9px; border-radius: 50%; background: color-mix(in srgb, var(--win-text) 18%, transparent); }
+.window-bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12.500px; font-weight: 560; color: var(--win-muted); }
+.report { display: grid; gap: 16px; padding: 14px 14px 16px; }
+.report-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; font-size: 13px; line-height: 1.35; color: var(--win-muted); }
+.weeknav { display: flex; align-items: center; gap: 6px; }
+.weeknav strong { min-width: 4.6em; font: 700 17px/1.1 var(--display); letter-spacing: -.02em; color: var(--win-text); text-align: center; }
+.weeknav button { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--win-edge); border-radius: 8px; background: var(--win-field); color: var(--win-text); cursor: pointer; transition: background-color var(--t-fade-in) var(--fade), scale var(--t-snappy) var(--snappy); }
+.weeknav button:hover:not(:disabled) { background: color-mix(in srgb, var(--win-text) 9%, var(--win-field)); }
+.weeknav button:active:not(:disabled) { scale: .92; }
+.weeknav button:disabled { opacity: .35; cursor: default; }
+.weeknav svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.weeknav span { margin-left: 6px; }
+.sent span { color: var(--win-text); }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.metrics dt, .chart > p { font-size: 12.500px; line-height: 1.3; color: var(--win-muted); }
+.metrics dd { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 10px; }
+.num { font: 720 clamp(22px, 7.4cqi, 34px)/1 var(--display); letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.delta { padding: 3px 7px; border-radius: 7px; font: 500 11px/1 var(--mono); }
+.delta.up { color: var(--win-muted); background: color-mix(in srgb, var(--win-text) 8%, transparent); }
+.delta.down { color: var(--win-down); background: color-mix(in srgb, var(--win-down) 15%, transparent); }
+.is-changed :is(.num, .delta, .plot svg, #week-dates) { animation: blink var(--t-resize) var(--fade); }
+@keyframes blink { from { opacity: .25; } }
+.plot { position: relative; margin-top: 8px; aspect-ratio: 420 / 160; }
+.plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.plot .grid, .mini-plot .grid { fill: none; stroke: var(--win-line); stroke-width: 1; }
+.plot .area { fill: color-mix(in srgb, var(--win-accent) 13%, transparent); }
+.plot .line, .mini-plot .line { fill: none; stroke: var(--win-accent); stroke-width: 2.5; stroke-linecap: round; }
+.plot .last { fill: none; stroke: color-mix(in srgb, var(--win-text) 28%, transparent); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.plot .days { fill: var(--win-muted); font: 400 10px var(--mono); text-anchor: middle; }
+.points { position: absolute; inset: 0; }
+.point { position: absolute; display: grid; place-items: center; width: 24px; height: 24px; margin: -12px 0 0 -12px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.point i { width: 9px; height: 9px; border-radius: 50%; border: 2.5px solid var(--win-accent); background: var(--win-bg); transition: scale var(--t-snappy) var(--snappy); }
+.point.is-low i { border-color: var(--win-down); }
+.point:is(:hover, :focus-visible) i { scale: 1.35; }
+.point span { position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 4px; padding: 4px 7px; border-radius: 7px; background: var(--win-text); color: var(--win-bg); font: 500 11px/1 var(--mono); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity var(--t-fade-out) var(--fade), translate var(--t-fade-in) var(--enter); }
+.point:is(:hover, :focus-visible) span { opacity: 1; translate: -50% 0; }
+.dip { position: absolute; width: 0; height: 0; }
+.thread { display: grid; align-content: start; gap: 10px; max-height: 168px; padding: 14px 14px 6px; overflow-y: auto; font-size: 13px; line-height: 1.35; }
+.thread li { display: grid; justify-items: start; gap: 3px; }
+.thread b { font-size: 11.500px; font-weight: 560; color: var(--win-muted); }
+.thread span { padding: 7px 10px; border-radius: 10px 10px 10px 3px; background: color-mix(in srgb, var(--win-text) 8%, transparent); }
+.thread .mine { justify-items: end; }
+.thread .mine span { border-radius: 10px 10px 3px 10px; background: color-mix(in srgb, var(--accent) 24%, transparent); }
+.reply { display: flex; gap: 6px; padding: 10px 12px 12px; }
+.reply input { flex: 1; min-width: 0; height: 32px; padding: 0 10px; border: 1px solid var(--win-edge); border-radius: 8px; background: var(--win-field); color: var(--win-text); font: 400 13px/1 var(--sans); }
+.reply input::placeholder { color: var(--win-muted); opacity: 1; }
+.reply button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--win-text); color: var(--win-bg); font: 620 13px/1 var(--sans); cursor: pointer; transition: scale var(--t-snappy) var(--snappy); }
+.reply button:active { scale: .94; }
+@container (min-width: 640px) {
+  .report { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px 36px; padding: 18px 24px 22px; }
+  .report-head { grid-column: 1 / -1; padding-bottom: 14px; border-bottom: 1px solid var(--win-line); }
+  .metrics { align-self: center; gap: 14px; }
+  .num { font-size: clamp(22px, 3.700cqi, 30px); }
+  .plot { margin-top: 6px; }
+}
+
+.stage figcaption { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; margin-top: 16px; }
+.stage-words { display: grid; gap: 4px; max-width: 44em; font-size: 15.500px; line-height: 1.45; color: var(--muted); }
+.stage-words .note { font-size: 14.500px; color: var(--faint); }
+.stage-controls { display: flex; gap: 8px; }
+
+/* Section headers. Each one is a bar, like the toolbar. With motion it starts as the toolbar's one button and
+   grows into the bar (see Motion). The frame is two clipped layers: the edge, and the surface one pixel inside it. */
+.sec-head { position: relative; isolation: isolate; }
+.sec-chrome { position: absolute; inset: 0; z-index: -1; background: var(--line-strong); clip-path: inset(0 round var(--radius)); }
+.sec-chrome i { position: absolute; inset: 0; background: var(--surface-1); clip-path: inset(1px round calc(var(--radius) - 1px)); }
+.sec-pill { position: absolute; left: 0; top: 0; display: none; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 13px; white-space: nowrap; opacity: 0; pointer-events: none; }
+.sec-pill > svg { width: 21px; height: 20px; fill: var(--text); }
+.sec-pill > span { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border-radius: 14px; background: color-mix(in srgb, var(--text) 8%, transparent); font: 620 12px/1 var(--sans); }
+.sec-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--on); }
+.pill-cup { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.sec-full { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; padding: 16px 16px 17px; }
+.sec-aside { display: flex; align-items: center; gap: 12px; }
+
+/* What you can do. Without motion it is a list of six cards; with motion it becomes the pinned sequence (see Motion). */
+.items { display: grid; gap: 16px; margin-top: 20px; }
+.item { display: flex; flex-direction: column-reverse; min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
+.item-text { padding: 18px 20px 22px; }
+.item-text p { margin-top: 6px; max-width: 26em; color: var(--muted); }
+.item-meta { display: flex; align-items: center; gap: 8px; margin: 0 0 14px !important; font: 500 12.500px/1 var(--mono); color: var(--faint); }
+.style-chip { padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 7px; color: var(--accent-text); }
+/* A stage in small: the same dotted desk, with one sample window on it. */
+.scene { position: relative; display: grid; place-items: center; min-height: 220px; padding: 18px; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; border-bottom: 1px solid var(--line); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); container-type: inline-size; overflow: hidden; }
+.scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 4.4cqi, 30px)/1.1 "Caveat", "Bradley Hand", cursive; }
+.mini { width: min(25em, 100%); font-size: clamp(10.500px, 3.2cqi, 21px); line-height: 1.3; }
+.mini.wide { width: min(31em, 100%); }
+.mini .window-bar { height: 2.4em; }
+.mini .window-bar span { font-size: .88em; }
+.rows { padding: .3em 1.2em .6em; }
+.rows > div { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .72em 0; border-bottom: 1px solid var(--win-line); }
+.rows > div:last-child { border-bottom: 0; }
+.rows dt { color: var(--win-muted); }
+.rows dd { font-weight: 560; }
+.form { display: grid; gap: .7em; padding: 1em 1.3em 1.2em; }
+.form.numbered { padding-left: max(3.4em, 46px); }
+.form p { display: grid; gap: .35em; }
+.form span { font-size: .88em; color: var(--win-muted); }
+.field { display: block; padding: .6em .8em; border: 1px solid var(--win-edge); border-radius: 8px; background: var(--win-field); font-weight: 560; }
+.field.select { background: var(--win-field) linear-gradient(45deg, transparent 50%, var(--win-muted) 50%) no-repeat right 1em top 55% / 5px 5px; }
+.mini-button { justify-self: start; padding: .65em 1em; border-radius: 8px; background: var(--win-text); color: var(--win-bg); font-weight: 620; }
+.mini-report { display: grid; gap: 1em; padding: 1em 1.3em 1.1em; }
+.mini-report dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; }
+.mini-report dt { font-size: .82em; color: var(--win-muted); }
+.mini-report dd { margin-top: .5em; font: 720 1.7em/1 var(--display); letter-spacing: -.03em; }
+.mini-report dd span { display: inline-block; }
+.mini-plot { position: relative; aspect-ratio: 420 / 120; }
+.mini-plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.mini-plot i { position: absolute; left: 50%; top: 71.700%; width: 0; height: 0; }
+.notes-doc { display: grid; gap: .2em; padding: .7em 1.3em 1em; }
+.notes-doc p { display: grid; gap: .15em; padding: .6em 0; border-bottom: 1px solid var(--win-line); }
+.notes-doc p:last-child { border-bottom: 0; }
+.notes-doc b { justify-self: start; font-weight: 620; }
+.notes-doc span { font-size: .9em; color: var(--win-muted); }
+.system { position: relative; display: grid; grid-template-columns: 30% 1fr 1fr; align-items: center; width: min(34em, 100%); font-size: clamp(10.500px, 3.2cqi, 21px); line-height: 1.3; }
+.mini.phone { width: 100%; border-radius: 1.1em; }
+.mini.phone .window-bar { justify-content: center; border-radius: 1.1em 1.1em 0 0; }
+.cart { display: grid; gap: .5em; padding: .8em .9em 1em; }
+.cart p { display: flex; justify-content: space-between; gap: .5em; font-size: .9em; }
+.cart .mini-button { justify-self: stretch; margin-top: .3em; text-align: center; font-size: .9em; }
+/* Where the script draws the server and the database. */
+.system > i { justify-self: center; width: 46%; aspect-ratio: 1 / 1.05; }
+
+/* Two keys */
+.keys-body { display: grid; gap: 24px; margin-top: 20px; }
+.keys { display: grid; gap: 12px; }
+.combo { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); color: inherit; text-align: left; cursor: pointer; transition: border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
+.combo:hover { border-color: var(--line-strong); }
+.combo:focus-visible { border-radius: var(--radius); }
+.combo[data-combo="draw"].is-on { border-color: color-mix(in srgb, var(--accent) 75%, transparent); background: color-mix(in srgb, var(--accent) 9%, var(--surface-1)); }
+.caps { display: flex; gap: 6px; }
+/* A keycap: flat, with one hard edge under it. Pressed, it goes down onto the edge; let go, it comes back with the app's Pop. */
+.key { display: grid; place-items: center; min-width: 46px; height: 46px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--key); box-shadow: 0 3px 0 var(--key-edge); color: var(--text); font: 500 14px/1 var(--mono); transition: translate var(--t-fade-out) var(--standard), box-shadow var(--t-fade-out) var(--standard); }
+.key.is-down { translate: 0 3px; box-shadow: 0 0 0 var(--key-edge); }
+.combo-label { font: 660 19px/1.2 var(--display); letter-spacing: -.015em; }
+.keys-copy { display: grid; align-content: center; justify-items: start; gap: 10px; }
+.stay { font: 680 clamp(21px, 2.4vw, 27px)/1.2 var(--display); letter-spacing: -.022em; }
+.press { color: var(--muted); }
+.mode-line { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 7px 12px 7px 10px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 14.500px; font-weight: 560; transition: color var(--t-resize) var(--standard), border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
+.mode-line i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-resize) var(--standard); }
+.mode-line[data-mode="draw"] { border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent-text); }
+.mode-line[data-mode="draw"] i { background: var(--on); }
+
+/* There's more in the app */
+.extras { display: grid; gap: 16px; margin-top: 20px; }
+.extra { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
+.extra-text { padding: 16px 20px 20px; }
+.extra-text p { margin-top: 5px; font-size: 16px; line-height: 1.45; color: var(--muted); }
+.il { position: relative; display: grid; place-items: center; border-bottom: 1px solid var(--line); border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); overflow: hidden; }
+.il svg { display: block; width: 100%; height: auto; }
+.il-track { fill: none; stroke: var(--line-strong); stroke-width: 6; }
+.il-arc { fill: none; stroke: url(#forest); stroke-width: 6; stroke-linecap: round; stroke-dasharray: .94 1; }
+.il-time { fill: var(--text); font: 600 27px var(--mono); letter-spacing: -.03em; }
+.il-time:is(.t1, .t2) { opacity: 0; }
+.il-panel { fill: var(--surface-1); stroke: var(--line-strong); }
+.il-faint { fill: none; stroke: color-mix(in srgb, var(--text) 20%, transparent); stroke-width: 3; stroke-linecap: round; }
+.il-dash { fill: color-mix(in srgb, var(--accent) 13%, transparent); stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.il-card { fill: var(--surface-2); stroke: var(--accent); stroke-width: 1.6; }
+.il-rule { stroke: var(--line-strong); }
+.il-dot { fill: var(--faint); }
+.il-fill { fill: color-mix(in srgb, var(--accent) 26%, transparent); }
+.il-white { fill: var(--board-white); }
+.il-black { fill: var(--board-black); }
+.il-frame { fill: none; stroke: var(--line-strong); }
+.il-ink { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.il-pop, .il-black { transform-box: fill-box; transform-origin: center; }
+/* The small toolbar. Its frame is two clipped layers, like the section headers', so it can change shape without layout. */
+.il-toolbar { min-height: 150px; padding: 24px 16px; }
+.mt { --one: 106px; position: relative; isolation: isolate; width: min(100%, 356px); height: 46px; color: var(--bar-ink); }
+.mt-chrome { position: absolute; inset: 0; z-index: -1; background: var(--bar-edge); clip-path: inset(0 round 14px); }
+.mt-chrome i { position: absolute; inset: 0; background: var(--bar); clip-path: inset(1px round 13px); }
+.mt-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+.mt-tool { flex: 0 1 30px; display: grid; place-items: center; min-width: 0; height: 30px; border-radius: 8px; }
+.mt-tool.is-on { background: var(--bar-on); }
+.mt svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.mt-sep { flex: none; width: 1px; height: 20px; margin: 0 5px; background: var(--bar-edge); }
+.mt-mode { flex: none; display: grid; place-items: center; width: 42px; height: 30px; border-radius: 8px; background: var(--bar-on); }
+.mt-mode b, .mt-status b { width: 6px; height: 6px; border-radius: 50%; background: #8e8e93; }
+.mt-one { gap: 8px; opacity: 0; }
+.mt-one > svg { width: 20px; height: 19px; fill: currentColor; stroke: none; }
+.mt-one .brand-dot { fill: #e9583f; }
+.mt.is-one .mt-chrome { clip-path: inset(1px calc(50% - 53px) round 14px); }
+.mt.is-one .mt-chrome i { clip-path: inset(2px calc(50% - 52px) round 13px); }
+.mt.is-one .mt-bar { opacity: 0; }
+.mt.is-one .mt-one { opacity: 1; }
+.mt-status { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 9px; border-radius: 13px; background: var(--bar-on); font: 600 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-style: normal; }
+
+/* Good to know: three answers in one ruled panel. */
+.answer-grid { display: grid; margin-top: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
+.answer { padding: 22px 20px 24px; }
+.answer + .answer { border-top: 1px solid var(--line); }
+.answer p { margin-top: 8px; color: var(--muted); }
+
+/* Coffee */
+.coffee-full { display: grid; gap: 8px 44px; justify-items: start; padding: 26px 20px 30px; }
+.cup-stage { position: relative; width: 132px; height: 132px; margin: -6px 0 0 -8px; }
+.cup { width: 100%; height: 100%; overflow: visible; }
+.cup path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cup-line { stroke-width: 3.500; }
+.cup .cup-fill { fill: color-mix(in srgb, var(--accent) 13%, transparent); stroke: none; }
+.steam path { stroke: var(--muted); stroke-width: 3; opacity: .55; }
+.cup-stage .fx-burst { z-index: 1; }
+.coffee-copy { display: grid; gap: 12px; justify-items: start; }
+.coffee-copy h2 { max-width: 16em; }
+.coffee-copy p { max-width: 30em; color: var(--muted); }
+.coffee-copy .button { margin-top: 8px; }
+
+/* Install */
+.not-sure { font-size: 15.500px; color: var(--muted); }
+.not-sure a { color: var(--accent-text); text-decoration-thickness: 1px; text-underline-offset: .22em; }
+.platforms { display: grid; gap: 16px; margin-top: 20px; }
+.platform { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 22px 20px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
+:root[data-platform="windows"] .platform[data-os="windows"] { order: -1; }
+.platform h3 { font-size: 25px; letter-spacing: -.025em; }
+.req { margin-top: 6px; max-width: 27em; font-size: 16px; color: var(--muted); }
+.platform .button { margin-top: 20px; max-width: 100%; }
+.command { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; row-gap: 8px; align-self: stretch; margin-top: 24px; }
+.command p { font-size: 14.500px; color: var(--faint); }
+.command code { grid-column: 1 / -1; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--code-bg); color: var(--code-text); font: 400 13px/1.5 var(--mono); overflow-wrap: anywhere; }
+.command button { min-width: 62px; height: 30px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--control); font: 560 13.500px/1 var(--sans); cursor: pointer; transition: background-color var(--t-fade-in) var(--fade), scale var(--t-snappy) var(--snappy); }
+.command button:hover { background: var(--control-hover); }
+.command button:active { scale: .94; transition-duration: var(--t-fade-out); }
+.rough { margin-top: 20px; font-size: 15.500px; color: var(--muted); }
+.rough a { color: var(--text); text-decoration-thickness: 1px; text-underline-offset: .22em; }
+
+/* Footer */
+.site-footer { margin-top: var(--space); padding-block: 32px 52px; border-top: 1px solid var(--line); }
+.site-footer .wrap { display: grid; gap: 14px; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 15px; }
+.site-footer nav a { color: var(--muted); text-decoration: none; transition: color var(--t-fade-in) var(--fade); }
+.site-footer nav a:hover { color: var(--text); }
+.site-footer p { font-size: 14.500px; color: var(--faint); }
+.site-footer .made { margin-top: 6px; color: var(--muted); }
+
+/* What the app's moves leave on the page for a moment: light trails, sparks, a glow, particles, a click. */
+.fx-trail { fill: none; stroke: var(--spark); stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.fx-trail.is-core { stroke: var(--spark-core); }
+.fx-spark { fill: var(--spark-core); opacity: 0; }
+.fx-spark.is-gold { fill: var(--spark-gold); }
+.fx-glow, .fx-dot { position: absolute; border-radius: 50%; opacity: 0; pointer-events: none; }
+.fx-glow { background: radial-gradient(circle closest-side, var(--spark-core) 0, color-mix(in srgb, var(--spark) 80%, transparent) 22%, transparent 100%); }
+.fx-dot { background: var(--spark); }
+.fx-dot.is-core { background: var(--spark-core); }
+.fx-burst { position: absolute; z-index: 4; pointer-events: none; }
+
+@media (max-width: 999px) {
+  .nav-link { display: none; }
+  .site-header nav { gap: 16px; }
+}
+@media (max-width: 519px) {
+  .nav-coffee span, .nav-download { display: none; }
+  .nav-coffee { padding: 8px; margin: -8px; }
+  .nav-coffee svg { width: 21px; height: 21px; }
+  .site-header nav { gap: 14px; }
+  .get-row .button { flex: 1 1 auto; }
+  .quiet { flex-basis: 100%; margin: 4px 0 0; }
+}
+@media (min-width: 600px) {
+  .hero { padding-top: 26px; }
+  .stage { margin-top: 28px; }
+  .screen { --tb-h: 112px; --tb-top: 14px; --gap: 12px; --inset: clamp(20px, 3.2vw, 44px); --dock-inset: 14px; }
+  .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
+  .sec-full { padding: 18px 24px 19px; }
+  .items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .keys-body { gap: 28px; }
+  .key { min-width: 54px; height: 54px; padding: 0 15px; border-radius: 12px; font-size: 15.500px; }
+  .combo { padding: 20px 22px; gap: 14px 22px; }
+  .combo-label { font-size: 22px; }
+  .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .platform { padding: 28px 28px 26px; }
+  .coffee-full { grid-template-columns: auto minmax(0, 1fr); align-items: center; padding: 36px 40px 38px; }
+  .cup-stage { width: 172px; height: 172px; margin: 0; }
+}
+@media (min-width: 760px) {
+  .extras { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .extra.wide { grid-column: 1 / -1; flex-direction: row; align-items: stretch; }
+  .extra.wide .il { flex: 1.7; border-bottom: 0; border-right: 1px solid var(--line); border-radius: calc(var(--radius) - 1px) 0 0 calc(var(--radius) - 1px); }
+  .extra.wide .extra-text { flex: 1; align-self: center; padding: 24px 28px; }
+  .answer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .answer { padding: 26px 26px 28px; }
+  .answer + .answer { border-top: 0; border-left: 1px solid var(--line); }
+}
+@media (min-width: 900px) {
+  .keys-body { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; }
+  .items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1000px) {
+  /* The headline and the buttons on the left; what it is and "try it" on the right, each level with its neighbor. */
+  .hero-copy { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "title lede" "get try"; gap: 20px 56px; align-items: end; }
+  .hero-copy h1 { grid-area: title; }
+  .lede { grid-area: lede; padding-bottom: 6px; }
+  .get { grid-area: get; margin-top: 0; }
+  .try-line { grid-area: try; align-self: start; padding-top: 12px; border-top: 1px solid var(--line); }
+  .try-line::before { top: calc(12px + .28em); }
+  .windows { grid-template-columns: minmax(0, 1fr) clamp(240px, 27%, 300px); gap: 24px; }
+  .win-chat { display: block; margin-top: 30px; }
+  [data-drag] { cursor: grab; touch-action: none; }
+  .is-moving [data-drag] { cursor: grabbing; }
+}
+@media (min-width: 1064px) {
+  .screen { --tb-h: 145px; }
+}
+@media (min-width: 1280px) {
+  /* On a wide screen the stage is a little wider than the text above it. */
+  .stage { --stage-w: min(1320px, 100vw - 2 * var(--gutter)); width: var(--stage-w); margin-inline: calc((100% - var(--stage-w)) / 2); }
+}
+
+/* Changing the theme --------------------------------------------------------------------------------
+   The app's Dissolve, on the whole page. The old theme is a picture on top of the new one; it fades away behind a
+   soft edge that sweeps from the switch's corner to the far one, and where the edge passes, main.js throws the old
+   theme's colors off as particles (ParticleBurstView's motion) on a canvas above both. About 650 ms, as in the app. */
+::view-transition { pointer-events: none; }
+::view-transition-group(root) { animation: none; }
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; z-index: 0; }
+/* The mask is three times the page. Its edge is 6% of that, so 18% of the page: the soft band of the app's sweep. */
+::view-transition-old(root) {
+  mix-blend-mode: normal; z-index: 1; animation: dissolve-sweep 650ms cubic-bezier(.42, 0, .58, 1) both;
+  -webkit-mask: linear-gradient(to bottom left, transparent 0 60%, black 66%) 0% 100% / 300% 300% no-repeat;
+  mask: linear-gradient(to bottom left, transparent 0 60%, black 66%) 0% 100% / 300% 300% no-repeat;
+}
+@keyframes dissolve-sweep { from { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; } to { -webkit-mask-position: 100% 0%; mask-position: 100% 0%; } }
+/* The switch and the particles are left out of both pictures, so they are seen moving the whole way through. */
+.ts-slot { view-transition-name: theme-switch; }
+.dissolve { position: fixed; inset: 0; z-index: 2000; pointer-events: none; view-transition-name: dissolve; }
+.dissolve .fx-burst { z-index: 0; }
+::view-transition-group(theme-switch), ::view-transition-group(dissolve) { animation: none; }
+::view-transition-old(theme-switch), ::view-transition-old(dissolve) { display: none; }
+::view-transition-new(theme-switch), ::view-transition-new(dissolve) { animation: none; }
+/* While the theme's colors are swapped nothing eases, so the new picture is the new theme at once. */
+.theme-switching *, .theme-switching *::before, .theme-switching *::after { transition: none !important; }
+/* Without view transitions the colors cross-fade under the particles instead. */
+.theme-fading *, .theme-fading *::before, .theme-fading *::after, .theme-fading body { transition: background-color 320ms var(--fade), color 320ms var(--fade), border-color 320ms var(--fade), fill 320ms var(--fade), stroke 320ms var(--fade), box-shadow 320ms var(--fade) !important; }
+
+/* Motion ------------------------------------------------------------------------------------------
+   Everything below only applies when motion is allowed (the script in the page's head adds .motion). Without it
+   the page above is the final state: a flat stage, a list instead of the sequence, nothing waiting to arrive. */
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* The page arrives: the headline's lines and what follows rise on the app's enter curve, one step apart. The
+   stage's own arrival, the app's Magic show, is main.js's. */
+.motion .site-header { animation: fade-in var(--t-show) var(--fade) backwards; }
+.motion :is(h1 .line, .lede, .get, .try-line) { animation: rise 620ms var(--enter) backwards; animation-delay: calc(var(--n, 0) * var(--step) + 60ms); }
+.motion h1 .line:nth-child(2) { --n: 1; }
+.motion .lede { --n: 2; }
+.motion .get { --n: 3; }
+.motion .try-line { --n: 4; }
+.motion .stage-space { animation: fade-in 420ms var(--fade) 140ms backwards; }
+.motion .stage figcaption { animation: rise 620ms var(--enter) 700ms backwards; }
+.motion .stage:not(.is-ready) .dock { opacity: 0; }
+@keyframes rise { from { opacity: 0; translate: 0 16px; } }
+@keyframes fade-in { from { opacity: 0; } }
+/* Things that arrive when they are scrolled to wait unseen; main.js brings each in with one of the app's shows. */
+.motion [data-enter]:not(.is-in) { opacity: 0; }
+
+/* "Try it" was pressed: the stage's edge pulses twice, so it is plain where to draw. */
+.desk::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--accent); border-radius: calc(var(--radius) + 4px); opacity: 0; pointer-events: none; }
+.motion .stage.is-cued .desk::after { animation: cue 760ms var(--enter) 2; }
+@keyframes cue { from { opacity: .95; scale: 1; } to { opacity: 0; scale: 1.014 1.03; } }
+
+/* The hero stage in space. main.js writes --tilt and --yaw (degrees), --lift (0 to 1) and --scale from the scroll
+   position. It leans back and a little to one side, with the ink above the apps and the toolbar above the ink;
+   flat, they are one surface again. */
+.motion .stage-space { perspective: 1900px; perspective-origin: 50% 0%; }
+.motion .screen { transform-style: preserve-3d; transform-origin: 50% 100%; transform: rotateX(calc(var(--tilt) * 1deg)) rotateY(calc(var(--yaw) * 1deg)) scale(var(--scale)); }
+.motion .stage.is-live .screen { will-change: transform; }
+.motion .desk { transform: translateZ(calc(var(--lift) * -34px)); }
+.motion .dock, .motion .dock-fx { transform: translateZ(calc(var(--lift) * 70px)); }
+/* The ink shares the apps' sheet, so it is moved the way a plane a little above them would look from here. */
+.motion .board :is(.ink-svg, .ink-over, .ink-ghost) { translate: 0 calc(var(--lift) * -4px); }
+/* A sheet inside a 3D scene needs a place of its own in it, or Blur has nothing to look through. */
+.motion .board, .motion .scene { transform: translateZ(0); }
+.motion .turn svg { animation: nudge 1.6s var(--standard) infinite; }
+@keyframes nudge { 50% { translate: 2px 2px; } }
+
+/* Section headers start as the toolbar's one button. main.js measures the button (--cr and --cb are what is cut
+   from the right and the bottom) and grows it into the bar with the Shrink's timing when it is scrolled to. */
+.motion .sec-pill { display: inline-flex; }
+.motion .sec-head.is-shut .sec-chrome { clip-path: inset(0 var(--cr, 0px) var(--cb, 0px) 0 round var(--radius)); }
+.motion .sec-head.is-shut .sec-chrome i { clip-path: inset(1px calc(var(--cr, 0px) + 1px) calc(var(--cb, 0px) + 1px) 1px round calc(var(--radius) - 1px)); }
+.motion .sec-head.is-shut .sec-full { opacity: 0; }
+.motion .sec-head.is-shut .sec-pill { opacity: 1; }
+
+/* What you can do, pinned. The section is five steps taller than the screen. Its content stays put, and each step
+   swaps the example: the old one leaves with its show style's hide, the new one arrives with its own show. */
+.motion .what { --pin-step: 78vh; height: calc(100svh + 5 * var(--pin-step)); margin-top: calc(var(--space) - var(--header-h)); }
+.motion .what-pin { position: sticky; top: 0; height: 100svh; padding: calc(var(--header-h) + 14px) 0 22px; overflow: clip; }
+.motion .what-wrap { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 18px; height: 100%; }
+.motion .items { position: relative; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); gap: 0; margin: 0; min-height: 0; }
+.motion .item { grid-area: 1 / 1; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 18px; min-height: 0; border: 0; background: none; visibility: hidden; }
+.motion .item.is-live { visibility: visible; }
+.motion .item-media { order: -1; min-height: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); }
+.motion .item-text { padding: 0 4px 4px; }
+.motion .item-text h3 { font-size: clamp(23px, 2.7vw, 34px); line-height: 1.1; font-weight: 720; letter-spacing: -.03em; }
+.motion .item-text p { margin-top: 8px; font-size: clamp(16.500px, 1.5vw, 19px); line-height: 1.45; }
+.steps { display: flex; align-items: center; }
+.steps button { position: relative; width: 26px; height: 34px; padding: 0; border: 0; background: none; cursor: pointer; }
+.steps button::before { content: ""; position: absolute; left: 4px; right: 4px; top: 15px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--text) 20%, transparent); transition: background-color var(--t-resize) var(--standard); }
+.steps button:hover::before { background: color-mix(in srgb, var(--text) 42%, transparent); }
+.steps button[aria-current]::before { background: var(--accent); }
+.what-fx { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+@media (min-width: 900px) {
+  .motion .item { grid-template: minmax(0, 1fr) / minmax(0, 4fr) minmax(0, 8fr); gap: 48px; align-items: center; }
+  .motion .item-media { order: 0; align-self: stretch; max-height: 620px; margin-block: auto; height: 100%; }
+  .motion .item-text { padding: 0 0 0 24px; }
+}
+@media (max-width: 599px) { .steps button { width: 22px; } }
+
+/* A keycap comes back up with the app's Pop (main.js); its plate does not lean, the page stays flat here. */
+.motion .combo[data-combo="draw"].is-on .key { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* The small pictures play once when they arrive, and again under the pointer. The ones that pop or change shape
+   are main.js's; these only draw. */
+.motion .extra.is-playing .il-time.t1 { animation: shown .9s steps(1, end); }
+.motion .extra.is-playing .il-time.t2 { animation: shown .9s steps(1, end) .9s; }
+.motion .extra.is-playing .il-time.t3 { animation: unseen 1.8s steps(1, end); }
+.motion .extra.is-playing .il-arc { animation: countdown 1.8s linear backwards; }
+.motion .extra.is-playing .il-dash { animation: fade-in var(--t-show) var(--fade) backwards; }
+.motion .extra.is-playing .il-black { transform-origin: 100% 50%; animation: wipe 620ms var(--standard) 200ms backwards; }
+.motion .extra.is-playing .il-ink { stroke-dasharray: 1; animation: draw 900ms var(--standard) 700ms backwards; }
+@keyframes shown { from, to { opacity: 1; } }
+@keyframes unseen { from, to { opacity: 0; } }
+@keyframes countdown { from { stroke-dasharray: 1 1; } }
+@keyframes wipe { from { transform: scaleX(0); } }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
