@@ -371,8 +371,13 @@ h1 { font-size: clamp(41px, 6.5vw, 82px); line-height: .98; font-weight: 720; le
 .site-footer p { font-size: 15px; color: var(--muted); }
 
 /* Wider screens ------------------------------------------------------------------------------- */
+.site-header nav > * { white-space: nowrap; flex: none; }
+@media (max-width: 979px) {
+  .nav-text { display: none; }
+  .site-header nav { gap: 10px; }
+}
 @media (max-width: 759px) {
-  .nav-text, .nav-coffee span { display: none; }
+  .nav-coffee span { display: none; }
   .nav-coffee { width: 38px; padding: 0; justify-content: center; }
   .site-header nav { gap: 6px; }
   .site-header .btn-small { padding: 0 14px; }
