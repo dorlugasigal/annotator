@@ -97,8 +97,8 @@ public static class ToolbarHold
 }
 
 /// <summary>
-/// Swift `PropertyChoice`: properties with a few choices. Each shows as one button that opens a menu of them, which is
-/// the default, one button that steps through them, or all its choices side by side. An on and off property such as
+/// Swift `PropertyChoice`: properties with a few choices. Each shows as one button that steps through them, which is the
+/// default, one button that opens a menu of them, or all its choices side by side. An on and off property such as
 /// Rounded corners is one button that switches it, or both choices side by side.
 /// </summary>
 public enum PropertyChoice { Pattern, Roughness, FillStyle, Edges, ArrowType, Pressure, Font, Alignment }
@@ -106,11 +106,10 @@ public enum PropertyChoice { Pattern, Roughness, FillStyle, Edges, ArrowType, Pr
 /// <summary>Swift `PropertyChoiceStyle`: how a property with a few choices shows on the properties row.</summary>
 public enum PropertyChoiceStyle
 {
-    /// <summary>One button that goes to the next choice on each click, or switches an on and off property, which has no
-    /// menu.</summary>
+    /// <summary>One button that goes to the next choice on each click, or switches an on and off property. The default.</summary>
     OneButton,
 
-    /// <summary>One button that opens a menu of the choices. The default, except for on and off properties.</summary>
+    /// <summary>One button that opens a menu of the choices. Not for on and off properties.</summary>
     Menu,
 
     /// <summary>All the choices side by side.</summary>
@@ -168,7 +167,7 @@ public static class PropertyChoiceExtensions
         /// <summary>The ways the property can show: an on and off property has no menu.</summary>
         public ValueList<PropertyChoiceStyle> Styles => choice.IsOnOff
             ? [PropertyChoiceStyle.OneButton, PropertyChoiceStyle.All]
-            : [PropertyChoiceStyle.Menu, PropertyChoiceStyle.OneButton, PropertyChoiceStyle.All];
+            : [PropertyChoiceStyle.OneButton, PropertyChoiceStyle.Menu, PropertyChoiceStyle.All];
     }
 }
 
@@ -233,40 +232,39 @@ public partial struct WorkspacePreferences
         ExpandedPropertyChoices = ordered.Count == 0 ? null : ordered.ToValueList();
     }
 
-    /// <summary>How a property shows: all its choices, one button that steps through them, or a menu of them (the default).
-    /// An on and off property has no menu, so its default is one button.</summary>
+    /// <summary>How a property shows: all its choices, a menu of them, or one button that steps through them (the default).</summary>
     public readonly PropertyChoiceStyle ChoiceStyle(PropertyChoice choice)
     {
         if (ShowsAllChoices(choice))
         {
             return PropertyChoiceStyle.All;
         }
-        return choice.IsOnOff || (SteppedPropertyChoices is { } stepped && stepped.AsSpan().Contains(choice.RawValue))
-            ? PropertyChoiceStyle.OneButton : PropertyChoiceStyle.Menu;
+        return !choice.IsOnOff && MenuPropertyChoices is { } menus && menus.AsSpan().Contains(choice.RawValue)
+            ? PropertyChoiceStyle.Menu : PropertyChoiceStyle.OneButton;
     }
 
     /// <summary>Sets how a property shows. Menu falls back to one button for an on and off property.</summary>
     public void SetChoiceStyle(PropertyChoice choice, PropertyChoiceStyle style)
     {
         SetShowsAllChoices(choice, style == PropertyChoiceStyle.All);
-        var stepped = new HashSet<string>(SteppedPropertyChoices?.AsSpan().ToArray() ?? [], StringComparer.Ordinal);
-        if (style == PropertyChoiceStyle.OneButton && !choice.IsOnOff)
+        var menus = new HashSet<string>(MenuPropertyChoices?.AsSpan().ToArray() ?? [], StringComparer.Ordinal);
+        if (style == PropertyChoiceStyle.Menu && !choice.IsOnOff)
         {
-            stepped.Add(choice.RawValue);
+            menus.Add(choice.RawValue);
         }
         else
         {
-            stepped.Remove(choice.RawValue);
+            menus.Remove(choice.RawValue);
         }
         var ordered = new List<string>();
         foreach (var candidate in PropertyChoice.AllCases)
         {
-            if (stepped.Contains(candidate.RawValue))
+            if (menus.Contains(candidate.RawValue))
             {
                 ordered.Add(candidate.RawValue);
             }
         }
-        SteppedPropertyChoices = ordered.Count == 0 ? null : ordered.ToValueList();
+        MenuPropertyChoices = ordered.Count == 0 ? null : ordered.ToValueList();
     }
 
     internal readonly void ValidateToolbarControls()
@@ -308,15 +306,15 @@ public partial struct WorkspacePreferences
                     "Properties that show all their choices must be known properties, each listed once.");
             }
         }
-        if (SteppedPropertyChoices is { } steppedChoices)
+        if (MenuPropertyChoices is { } menuChoices)
         {
             var unique = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var item in steppedChoices)
+            foreach (var item in menuChoices)
             {
                 if (PropertyChoice.FromRawValue(item) is not { IsOnOff: false } || !unique.Add(item))
                 {
                     throw CanvasError.InvalidDocument(
-                        "Properties that step through their choices must be known properties with a menu, each listed once.");
+                        "Properties that open a menu must be known properties with more than on and off, each listed once.");
                 }
             }
         }
@@ -333,10 +331,9 @@ public partial struct WorkspacePreferences
         {
             ExpandedPropertyChoices = Known(expanded, item => PropertyChoice.FromRawValue(item) is not null);
         }
-        if (SteppedPropertyChoices is { } stepped)
+        if (MenuPropertyChoices is { } menus)
         {
-            // On and off properties are one button anyway, so they are dropped too and the settings still load.
-            SteppedPropertyChoices = Known(stepped, item => PropertyChoice.FromRawValue(item) is { IsOnOff: false });
+            MenuPropertyChoices = Known(menus, item => PropertyChoice.FromRawValue(item) is not null);
         }
     }
 

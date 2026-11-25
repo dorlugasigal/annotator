@@ -75,16 +75,16 @@ public enum ToolbarHold {
 
 /// How a property with a few choices shows on the properties row.
 public enum PropertyChoiceStyle: String, CaseIterable, Sendable {
-    /// One button that goes to the next choice on each click, or switches an on and off property, which has no menu.
+    /// One button that goes to the next choice on each click, or switches an on and off property. The default.
     case oneButton
-    /// One button that opens a menu of the choices. The default, except for on and off properties.
+    /// One button that opens a menu of the choices. Not for on and off properties.
     case menu
     /// All the choices side by side.
     case all
 }
 
-/// Properties with a few choices. Each shows as one button that opens a menu of them, which is the default, one button
-/// that steps through them, or all its choices side by side. An on and off property such as Rounded corners is one
+/// Properties with a few choices. Each shows as one button that steps through them, which is the default, one button
+/// that opens a menu of them, or all its choices side by side. An on and off property such as Rounded corners is one
 /// button that switches it, or both choices side by side.
 public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
     case pattern, roughness, fillStyle, edges, arrowType, pressure, font, alignment
@@ -123,7 +123,7 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
     public var isOnOff: Bool { self == .edges || self == .arrowType || self == .pressure }
 
     /// The ways the property can show: an on and off property has no menu.
-    public var styles: [PropertyChoiceStyle] { isOnOff ? [.oneButton, .all] : [.menu, .oneButton, .all] }
+    public var styles: [PropertyChoiceStyle] { isOnOff ? [.oneButton, .all] : [.oneButton, .menu, .all] }
 }
 
 extension WorkspacePreferences {
@@ -155,20 +155,19 @@ extension WorkspacePreferences {
         expandedPropertyChoices = ordered.isEmpty ? nil : ordered
     }
 
-    /// How a property shows: all its choices, one button that steps through them, or a menu of them (the default). An on
-    /// and off property has no menu, so its default is one button.
+    /// How a property shows: all its choices, a menu of them, or one button that steps through them (the default).
     public func propertyChoiceStyle(_ choice: PropertyChoice) -> PropertyChoiceStyle {
         if showsAllChoices(choice) { return .all }
-        return choice.isOnOff || (steppedPropertyChoices ?? []).contains(choice.rawValue) ? .oneButton : .menu
+        return !choice.isOnOff && (menuPropertyChoices ?? []).contains(choice.rawValue) ? .menu : .oneButton
     }
 
     /// Sets how a property shows. Menu falls back to one button for an on and off property.
     public mutating func setPropertyChoiceStyle(_ choice: PropertyChoice, _ style: PropertyChoiceStyle) {
         setShowsAllChoices(choice, style == .all)
-        var stepped = Set(steppedPropertyChoices ?? [])
-        if style == .oneButton && !choice.isOnOff { stepped.insert(choice.rawValue) } else { stepped.remove(choice.rawValue) }
-        let ordered = PropertyChoice.allCases.map(\.rawValue).filter(stepped.contains)
-        steppedPropertyChoices = ordered.isEmpty ? nil : ordered
+        var menus = Set(menuPropertyChoices ?? [])
+        if style == .menu && !choice.isOnOff { menus.insert(choice.rawValue) } else { menus.remove(choice.rawValue) }
+        let ordered = PropertyChoice.allCases.map(\.rawValue).filter(menus.contains)
+        menuPropertyChoices = ordered.isEmpty ? nil : ordered
     }
 
     func validateToolbarControls() throws {
@@ -191,17 +190,16 @@ extension WorkspacePreferences {
                 throw CanvasError.invalidDocument("Properties that show all their choices must be known properties, each listed once.")
             }
         }
-        if let steppedPropertyChoices {
-            guard Set(steppedPropertyChoices).count == steppedPropertyChoices.count,
-                  steppedPropertyChoices.allSatisfy({ PropertyChoice(rawValue: $0)?.isOnOff == false }) else {
+        if let menuPropertyChoices {
+            guard Set(menuPropertyChoices).count == menuPropertyChoices.count,
+                  menuPropertyChoices.allSatisfy({ PropertyChoice(rawValue: $0)?.isOnOff == false }) else {
                 throw CanvasError.invalidDocument(
-                    "Properties that step through their choices must be known properties with a menu, each listed once.")
+                    "Properties that open a menu must be known properties with more than on and off, each listed once.")
             }
         }
     }
 
-    /// Buttons and properties from a newer version are dropped, so a profile with them still opens. So are on and off
-    /// properties in the stepped list, which are one button anyway.
+    /// Buttons and properties from a newer version are dropped, so a profile with them still opens.
     mutating func normalizeToolbarControls() {
         if let hidden = hiddenToolbarControls {
             var seen = Set<String>()
@@ -213,10 +211,10 @@ extension WorkspacePreferences {
             let known = expanded.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
             expandedPropertyChoices = known.isEmpty ? nil : known
         }
-        if let stepped = steppedPropertyChoices {
+        if let menus = menuPropertyChoices {
             var seen = Set<String>()
-            let known = stepped.filter { PropertyChoice(rawValue: $0)?.isOnOff == false && seen.insert($0).inserted }
-            steppedPropertyChoices = known.isEmpty ? nil : known
+            let known = menus.filter { PropertyChoice(rawValue: $0) != nil && seen.insert($0).inserted }
+            menuPropertyChoices = known.isEmpty ? nil : known
         }
     }
 }

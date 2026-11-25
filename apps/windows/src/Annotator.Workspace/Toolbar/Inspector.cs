@@ -38,15 +38,15 @@ public enum InspectorItem
     /// <summary>The opacity slider and field with its caption.</summary>
     Opacity,
 
-    /// <summary>One button that opens a menu of, or steps through, Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>), or the
+    /// <summary>One button that steps through, or opens a menu of, Solid, Dashed and Dotted (<see cref="InspectorPlan.PatternChoices"/>), or the
     /// three side by side (<see cref="InspectorPlan.ShowsAllChoices"/>).</summary>
     Pattern,
 
-    /// <summary>One button that opens a menu of, or steps through, Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>), or the
+    /// <summary>One button that steps through, or opens a menu of, Clean, Sketchy and Wild (<see cref="InspectorPlan.RoughnessChoices"/>), or the
     /// three side by side.</summary>
     Roughness,
 
-    /// <summary>"Fill style": one button that opens a menu of, or steps through, the fill patterns, or all of them side by side; only while a
+    /// <summary>"Fill style": one button that steps through, or opens a menu of, the fill patterns, or all of them side by side; only while a
     /// visible fill is set.</summary>
     FillStyle,
 
@@ -68,7 +68,7 @@ public enum InspectorItem
     /// <summary>The counter's, ruler's or laser pointer's hint (<see cref="InspectorPlan.Caption"/>).</summary>
     Caption,
 
-    /// <summary>One button that opens a menu of, or steps through, System and Mono (<see cref="InspectorPlan.FontChoices"/>), or the two
+    /// <summary>One button that steps through, or opens a menu of, System and Mono (<see cref="InspectorPlan.FontChoices"/>), or the two
     /// side by side.</summary>
     Font,
 
@@ -77,7 +77,7 @@ public enum InspectorItem
 
     Weight,
 
-    /// <summary>One button that opens a menu of, or steps through, Left, Center and Right, or the three side by side.</summary>
+    /// <summary>One button that steps through, or opens a menu of, Left, Center and Right, or the three side by side.</summary>
     Alignment,
 
     /// <summary>

@@ -186,15 +186,16 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(host.fittingSize.width, base - 1)
     }
 
-    /// By default the button opens a column of every choice.
-    func testChoicesOpenAMenuByDefault() async throws {
+    /// Menu, turned on in Your properties: the button opens a column of every choice.
+    func testChoicesCanOpenAMenu() async throws {
         let (model, cleanup) = try makeModel("toggles")
         defer { cleanup() }
         model.setPropertiesShown(true)
         model.beginDrawing()
         model.tool = .rectangle
         model.applyStyle { $0 = .defaults(for: .rectangle) }
-        XCTAssertNil(model.preferences.steppedPropertyChoices)
+        for choice in [PropertyChoice.pattern, .roughness, .font, .alignment] { model.setPropertyChoiceStyle(choice, .menu) }
+        XCTAssertEqual(model.preferences.menuPropertyChoices, ["pattern", "roughness", "font", "alignment"])
         let (panel, host) = try await show(model)
         defer { close(panel) }
         XCTAssertEqual(model.style.pattern, .solid)
@@ -241,17 +242,15 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertFalse(nodes(host).contains { $0.accessibilityLabel() == "Font size 28" }, "Text size is just the slider")
     }
 
-    /// One button, chosen in Your properties: each click goes to the next choice, as before the menu.
-    func testChoicesCanBeSingleButtonsThatCycle() async throws {
+    /// By default each property is one button that goes to the next choice on each click, as before the menu.
+    func testChoicesAreSingleButtonsThatCycle() async throws {
         let (model, cleanup) = try makeModel("step")
         defer { cleanup() }
         model.setPropertiesShown(true)
         model.beginDrawing()
         model.tool = .rectangle
         model.applyStyle { $0 = .defaults(for: .rectangle) }
-        model.setPropertyChoiceStyle(.pattern, .oneButton)
-        model.setPropertyChoiceStyle(.roughness, .oneButton)
-        XCTAssertEqual(model.preferences.steppedPropertyChoices, ["pattern", "roughness"])
+        XCTAssertNil(model.preferences.menuPropertyChoices)
         let (panel, host) = try await show(model)
         defer { close(panel) }
         for expected in [StrokePattern.dashed, .dotted, .solid] {
@@ -332,22 +331,20 @@ final class ToolbarCustomizationTests: XCTestCase {
         for _ in 0..<30 where cards.count < PropertyChoice.allCases.count {
             try await Task.sleep(for: .milliseconds(100))
             cards = nodes(host).filter { ($0.accessibilityIdentifier() ?? "").hasPrefix("property-choice-") &&
-                !($0.accessibilityIdentifier() ?? "").hasSuffix("-one") && !($0.accessibilityIdentifier() ?? "").hasSuffix("-all") &&
-                !($0.accessibilityIdentifier() ?? "").hasSuffix("-menu") }
+                !($0.accessibilityIdentifier() ?? "").hasSuffix("-one") && !($0.accessibilityIdentifier() ?? "").hasSuffix("-all") }
         }
         XCTAssertEqual(Set(cards.compactMap { $0.accessibilityIdentifier() }),
                        Set(PropertyChoice.allCases.map { "property-choice-\($0.rawValue)" }))
         for choice in PropertyChoice.allCases {
-            let way = choice.isOnOff ? "one" : "menu"
-            let start = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-\(choice.rawValue)-\(way)" })
-            XCTAssertEqual(start.accessibilityValue() as? String, "Selected", "\(choice) starts as \(way)")
+            let one = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-\(choice.rawValue)-one" })
+            XCTAssertEqual(one.accessibilityValue() as? String, "Selected", "\(choice) starts as one button")
         }
         XCTAssertNil(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-edges-menu" },
                      "An on and off property has no Menu")
-        let one = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-font-one" })
-        XCTAssertTrue(one.accessibilityPerformPress())
+        let menu = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-font-menu" })
+        XCTAssertTrue(menu.accessibilityPerformPress())
         try await Task.sleep(for: .milliseconds(80))
-        XCTAssertEqual(model.propertyChoiceStyle(.font), .oneButton)
+        XCTAssertEqual(model.propertyChoiceStyle(.font), .menu)
         let all = try XCTUnwrap(nodes(host).first { $0.accessibilityIdentifier() == "property-choice-roughness-all" })
         XCTAssertTrue(all.accessibilityPerformPress())
         try await Task.sleep(for: .milliseconds(80))
@@ -358,9 +355,9 @@ final class ToolbarCustomizationTests: XCTestCase {
         XCTAssertTrue(reset.accessibilityPerformPress())
         try await Task.sleep(for: .milliseconds(80))
         XCTAssertFalse(model.showsAllChoices(.roughness))
-        XCTAssertEqual(model.propertyChoiceStyle(.font), .menu, "Use the defaults everywhere resets One button too")
+        XCTAssertEqual(model.propertyChoiceStyle(.font), .oneButton, "Use one button everywhere resets Menu too")
         model.setShowsAllChoices(.pattern, true)
-        model.setPropertyChoiceStyle(.roughness, .oneButton)
+        model.setPropertyChoiceStyle(.roughness, .menu)
         try await Task.sleep(for: .milliseconds(150))
         try save(host, name: "settings-properties", dark: false)
         model.resetPropertyChoices()
