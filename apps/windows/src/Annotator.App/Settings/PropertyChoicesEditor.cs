@@ -84,7 +84,14 @@ internal sealed class PropertyChoicesEditor
             ring.BorderThickness = new Thickness(selected ? 2 : 1);
             caption.FontWeight = selected ? FontWeights.SemiBold : FontWeights.Normal;
             caption.Style = AppResources.Style(selected ? "AnnotatorPrimaryText" : "AnnotatorSecondaryText");
-            check.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
+            Visibility shown = selected ? Visibility.Visible : Visibility.Collapsed;
+            if (check.Visibility != shown)
+            {
+                check.Visibility = shown;
+                // The caption row grows or shrinks with the check mark. Menu keeps its option's width when it's chosen, and
+                // then WinUI left the row's old measure: the check mark had no size and sat on the caption.
+                (VisualTreeHelper.GetParent(check) as UIElement)?.InvalidateMeasure();
+            }
             button.AccessibleSelected = selected;
             button.AccessibleValue = selected ? "Selected" : string.Empty;
             if (!SettingsText.Scaled)
