@@ -17,7 +17,7 @@ namespace Annotator.App.Settings;
 
 /// <summary>
 /// Port of the Mac PropertyChoicesEditor, "Your properties": each property with a few choices shows as one button that
-/// steps through them, one button that opens a menu of them, or all its choices side by side. Each way is drawn with the
+/// opens a menu of them, one button that steps through them, or all its choices side by side. Each way is drawn with the
 /// toolbar's own controls; click one to use it. The selected way has the accent ring and a check mark.
 /// </summary>
 internal sealed class PropertyChoicesEditor
@@ -45,12 +45,12 @@ internal sealed class PropertyChoicesEditor
         var titles = new MacStack { Orientation = Orientation.Vertical, Spacing = 3, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 200, 0) };
         titles.Children.Add(SettingsText.Static("Your properties", 15, "AnnotatorPrimaryText", FontWeights.SemiBold));
         titles.Children.Add(SettingsText.Static(
-            "One button saves room: click it to go to the next choice. Menu shows every choice when you click it. All choices puts them side by side, so each one is a click away.",
+            "Menu saves room: click it to see every choice. One button goes to the next choice with each click. All choices puts them side by side, so each one is a click away.",
             12, "AnnotatorSecondaryText"));
         header.Children.Add(titles);
         _reset = new HyperlinkButton
         {
-            Content = "Use one button everywhere",
+            Content = "Use the defaults everywhere",
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
             Padding = new Thickness(0),
@@ -76,7 +76,7 @@ internal sealed class PropertyChoicesEditor
     public void Apply(WorkspaceSnapshot snapshot)
     {
         WorkspacePreferences preferences = snapshot.Preferences;
-        _reset.IsEnabled = preferences.ExpandedPropertyChoices is not null || preferences.MenuPropertyChoices is not null;
+        _reset.IsEnabled = preferences.ExpandedPropertyChoices is not null || preferences.SteppedPropertyChoices is not null;
         foreach (((PropertyChoice choice, PropertyChoiceStyle style), (Border ring, TextBlock caption, FrameworkElement check, ParityButton button)) in _options)
         {
             bool selected = preferences.ChoiceStyle(choice) == style;
@@ -214,7 +214,7 @@ internal sealed class PropertyChoicesEditor
         return button;
     }
 
-    /// <summary>Mac PropertyChoicesEditor.title: "One button", "Menu" or "All choices".</summary>
+    /// <summary>Mac PropertyChoicesEditor.title: "Menu", "One button" or "All choices".</summary>
     private static string Title(PropertyChoiceStyle style) => style switch
     {
         PropertyChoiceStyle.All => "All choices",
@@ -222,7 +222,7 @@ internal sealed class PropertyChoicesEditor
         _ => "One button",
     };
 
-    /// <summary>Mac PropertyChoicesEditor.identifier: "one", "menu" or "all".</summary>
+    /// <summary>Mac PropertyChoicesEditor.identifier: "menu", "one" or "all".</summary>
     private static string Identifier(PropertyChoiceStyle style) => style switch
     {
         PropertyChoiceStyle.All => "all",

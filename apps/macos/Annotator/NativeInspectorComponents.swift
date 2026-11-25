@@ -238,9 +238,9 @@ struct InspectorControlButton<Content: View>: View {
     }
 }
 
-/// One button for a property with a few choices, such as Solid, Dashed and Dotted: a button that goes to the next one on
-/// each click (`CycleOptions`, the default), or a menu of them (`ChoiceMenu`), as Settings > Toolbar > Your properties
-/// chooses.
+/// One button for a property with a few choices, such as Solid, Dashed and Dotted: a menu of them (`ChoiceMenu`, the
+/// default), or a button that goes to the next one on each click (`CycleOptions`), as Settings > Toolbar > Your
+/// properties chooses.
 struct ChoiceButton<Value: Equatable>: View {
     let style: PropertyChoiceStyle
     var model: WorkspaceModel?

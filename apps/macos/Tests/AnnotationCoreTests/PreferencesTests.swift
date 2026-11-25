@@ -137,26 +137,27 @@ func legacyDrawingCursorPreferencesStillRoundTrip(_ style: ToolCursorStyle) thro
     #expect(throws: CanvasError.self) { try preferences.data() }
 }
 
-@Test func propertiesCanOpenAMenuInsteadOfSteppingThroughTheirChoices() throws {
+@Test func propertiesCanStepThroughTheirChoicesInsteadOfAMenu() throws {
     var preferences = WorkspacePreferences()
-    #expect(PropertyChoice.allCases.allSatisfy { preferences.propertyChoiceStyle($0) == .oneButton },
-            "The button that steps through the choices is the default.")
-    preferences.setPropertyChoiceStyle(.font, .menu)
-    preferences.setPropertyChoiceStyle(.pattern, .menu)
+    #expect(PropertyChoice.allCases.allSatisfy { preferences.propertyChoiceStyle($0) == ($0.isOnOff ? .oneButton : .menu) },
+            "The menu is the default; an on and off property is one button.")
+    preferences.setPropertyChoiceStyle(.font, .oneButton)
+    preferences.setPropertyChoiceStyle(.pattern, .oneButton)
     preferences.setPropertyChoiceStyle(.edges, .menu)
-    #expect(preferences.menuPropertyChoices == ["pattern", "font"], "An on and off property has no menu.")
+    #expect(preferences.steppedPropertyChoices == ["pattern", "font"], "An on and off property has no menu.")
     #expect(preferences.propertyChoiceStyle(.edges) == .oneButton)
     #expect(try WorkspacePreferences.read(preferences.data()) == preferences)
     preferences.setPropertyChoiceStyle(.pattern, .all)
     #expect(preferences.propertyChoiceStyle(.pattern) == .all)
-    #expect(preferences.menuPropertyChoices == ["font"] && preferences.expandedPropertyChoices == ["pattern"])
-    preferences.setPropertyChoiceStyle(.font, .oneButton)
-    #expect(preferences.menuPropertyChoices == nil)
-    #expect(PropertyChoice.pressure.styles == [.oneButton, .all] && PropertyChoice.roughness.styles == [.oneButton, .menu, .all])
+    #expect(preferences.steppedPropertyChoices == ["font"] && preferences.expandedPropertyChoices == ["pattern"])
+    preferences.setPropertyChoiceStyle(.font, .menu)
+    #expect(preferences.steppedPropertyChoices == nil)
+    #expect(PropertyChoice.pressure.styles == [.oneButton, .all] && PropertyChoice.roughness.styles == [.menu, .oneButton, .all])
     var object = try #require(JSONSerialization.jsonObject(with: WorkspacePreferences().data()) as? [String: Any])
-    object["menuPropertyChoices"] = ["font", "sparkle", "font"]
-    #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).menuPropertyChoices == ["font"])
-    preferences.menuPropertyChoices = ["edges"]
+    object["steppedPropertyChoices"] = ["font", "sparkle", "edges", "font"]
+    #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).steppedPropertyChoices == ["font"],
+            "Unknown, on and off and repeated properties are dropped when reading, so the settings still load.")
+    preferences.steppedPropertyChoices = ["edges"]
     #expect(throws: CanvasError.self) { try preferences.data() }
 }
 

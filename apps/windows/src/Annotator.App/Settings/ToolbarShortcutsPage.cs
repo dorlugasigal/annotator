@@ -460,7 +460,7 @@ internal sealed partial class ShortcutsPageBody : Grid
             .Append('|').Append(string.Join(',', (IEnumerable<string>?)preferences.HiddenToolbarControls ?? []))
             .Append('|').Append(preferences.ToolbarCollapseDelay)
             .Append('|').Append(string.Join(',', (IEnumerable<string>?)preferences.ExpandedPropertyChoices ?? []))
-            .Append('|').Append(string.Join(',', (IEnumerable<string>?)preferences.MenuPropertyChoices ?? []));
+            .Append('|').Append(string.Join(',', (IEnumerable<string>?)preferences.SteppedPropertyChoices ?? []));
         foreach (GlobalShortcutKind kind in GlobalShortcutKind.AllCases)
         {
             state.Append('|').Append(WindowsShortcuts.Label(kind.Value(preferences)))

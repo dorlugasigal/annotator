@@ -2,8 +2,8 @@ import SwiftUI
 import AnnotationCore
 import MotionCore
 
-/// "Your properties": each property with a few choices shows as one button that steps through them, one button that
-/// opens a menu of them, or as all its choices side by side. An on and off property is one button or both choices.
+/// "Your properties": each property with a few choices shows as one button that opens a menu of them, one button that
+/// steps through them, or as all its choices side by side. An on and off property is one button or both choices.
 /// Each way is drawn with the toolbar's own controls; click one to use it.
 struct PropertyChoicesEditor: View {
     @ObservedObject var model: WorkspaceModel
@@ -20,11 +20,11 @@ struct PropertyChoicesEditor: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
-                Button("Use one button everywhere") {
+                Button("Use the defaults everywhere") {
                     withAnimation(animation) { model.resetPropertyChoices() }
                 }
                 .buttonStyle(.link)
-                .disabled(model.preferences.expandedPropertyChoices == nil && model.preferences.menuPropertyChoices == nil)
+                .disabled(model.preferences.expandedPropertyChoices == nil && model.preferences.steppedPropertyChoices == nil)
                 .accessibilityIdentifier("reset-property-choices")
             }
             FlowLayout(spacing: 10, lineSpacing: 10) {
@@ -177,9 +177,9 @@ struct PropertyChoicesEditor: View {
         }
     }
 
-    static let intro = "One button saves room: click it to go to the next choice. Menu shows every choice when you click it. All choices puts them side by side, so each one is a click away."
+    static let intro = "Menu saves room: click it to see every choice. One button goes to the next choice with each click. All choices puts them side by side, so each one is a click away."
 
-    /// "One button", "Menu" or "All choices".
+    /// "Menu", "One button" or "All choices".
     static func title(_ style: PropertyChoiceStyle) -> String {
         switch style {
         case .oneButton: "One button"
@@ -188,7 +188,7 @@ struct PropertyChoicesEditor: View {
         }
     }
 
-    /// The end of an option's identifier: "one", "menu" or "all".
+    /// The end of an option's identifier: "menu", "one" or "all".
     static func identifier(_ style: PropertyChoiceStyle) -> String {
         switch style {
         case .oneButton: "one"
