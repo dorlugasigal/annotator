@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Changed
+
+- Pattern, Roughness, Fill style, Font and Alignment open a menu of their choices when you click them, so you can pick the one you want instead of clicking through each. Rounded corners, Curved arrow and Ink pressure are still on and off buttons.
+
 ## 0.5.0 - 2026-11-24
 
 ### Added

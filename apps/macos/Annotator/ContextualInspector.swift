@@ -105,7 +105,7 @@ struct ContextualInspector: View {
                                     model.applyStyle { $0.fillPattern = value }
                                 }
                             } else {
-                                CycleOptions(name: "Fill style", values: values, selection: model.style.fillPattern) { value in
+                                ChoiceMenu(name: "Fill style", values: values, selection: model.style.fillPattern) { value in
                                     model.applyStyle { $0.fillPattern = value }
                                 }
                             }
@@ -227,7 +227,7 @@ struct ContextualInspector: View {
             if model.showsAllChoices(.pattern) {
                 SampleOptions(values: values, selection: model.style.pattern) { value in model.applyStyle { $0.pattern = value } }
             } else {
-                CycleOptions(name: "Pattern", values: values, selection: model.style.pattern) { value in
+                ChoiceMenu(name: "Pattern", values: values, selection: model.style.pattern) { value in
                     model.applyStyle { $0.pattern = value }
                 }
             }
@@ -240,7 +240,7 @@ struct ContextualInspector: View {
             if model.showsAllChoices(.roughness) {
                 SampleOptions(values: values, selection: model.style.roughness) { value in model.applyStyle { $0.roughness = value } }
             } else {
-                CycleOptions(name: "Roughness", values: values, selection: model.style.roughness) { value in
+                ChoiceMenu(name: "Roughness", values: values, selection: model.style.roughness) { value in
                     model.applyStyle { $0.roughness = value }
                 }
             }
@@ -256,7 +256,7 @@ struct ContextualInspector: View {
                         fontChoice("Mono", name: "monospace", design: .monospaced)
                     }
                 } else {
-                    CycleOptions(
+                    ChoiceMenu(
                         name: "Font",
                         choices: [("system", "System", .text("Aa", .default)), ("monospace", "Mono", .text("Aa", .monospaced))],
                         selection: model.style.fontName == "monospace" ? "monospace" : "system"
@@ -283,7 +283,7 @@ struct ContextualInspector: View {
                         }
                     }
                 } else {
-                    CycleOptions(
+                    ChoiceMenu(
                         name: "Alignment",
                         choices: AnnotationCore.TextAlignment.allCases.map { alignment in
                             (alignment, alignment.rawValue.capitalized, .symbol(Self.alignmentSymbol(alignment)))

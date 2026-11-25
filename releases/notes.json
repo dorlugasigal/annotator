@@ -1,6 +1,10 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Changed": [
+      "Pattern, Roughness, Fill style, Font and Alignment open a menu of their choices when you click them, so you can pick the one you want instead of clicking through each. Rounded corners, Curved arrow and Ink pressure are still on and off buttons."
+    ]
+  },
   "releases": [
     {
       "version": "0.5.0",

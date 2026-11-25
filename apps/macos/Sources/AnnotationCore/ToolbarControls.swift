@@ -73,8 +73,8 @@ public enum ToolbarHold {
     public static func isStill(dx: Double, dy: Double) -> Bool { (dx * dx + dy * dy).squareRoot() <= slop }
 }
 
-/// Properties with a few choices. Each shows as one button that steps through its choices, which is the default, or as all
-/// its choices side by side.
+/// Properties with a few choices. Each shows as one button, which is the default, or as all its choices side by side. The
+/// one button opens a menu of the choices, or switches an on and off property such as Rounded corners.
 public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
     case pattern, roughness, fillStyle, edges, arrowType, pressure, font, alignment
 
@@ -91,7 +91,7 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// The property's choices, in order. One button starts at the first and steps through them.
+    /// The property's choices, in order. One button shows the first as its default.
     public var choices: [String] {
         switch self {
         case .pattern: ["Solid", "Dashed", "Dotted"]
@@ -107,6 +107,9 @@ public enum PropertyChoice: String, CaseIterable, Codable, Sendable {
 
     /// How many choices the property has.
     public var choiceCount: Int { choices.count }
+
+    /// Whether its one button switches the property on and off instead of opening a menu of the choices.
+    public var isOnOff: Bool { self == .edges || self == .arrowType || self == .pressure }
 }
 
 extension WorkspacePreferences {

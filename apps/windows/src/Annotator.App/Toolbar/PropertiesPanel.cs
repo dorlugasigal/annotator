@@ -13,7 +13,6 @@ using Microsoft.UI.Xaml.Automation.Provider;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
 using CoreStyle = Annotator.Core.Style;
 using CoreTextAlignment = Annotator.Core.TextAlignment;
 using Glyphs = Annotator.App.Icons.Glyphs;
@@ -51,7 +50,7 @@ internal interface IPropertiesHost
 /// The full properties panel, a port of ContextualInspector.swift with NativeInspectorComponents.swift: the "Editing …"
 /// line for a selection and the current tool's property blocks on one row that never wraps (the toolbar grows sideways to
 /// fit it), or in one column beside a vertical toolbar (<c>compact</c>), with the arrow controls at the end. Properties
-/// with a few choices are one button that steps through them, or all their choices side by side (Settings > Toolbar >
+/// with a few choices are one button that opens a menu of them, or all their choices side by side (Settings > Toolbar >
 /// Your properties). Every control applies to the tool's style and to the selection through the workspace model;
 /// slider drags and field edits are one Undo step each. The whole panel is unavailable while every selected object is
 /// locked.
@@ -313,7 +312,7 @@ internal sealed class PropertiesPanel
                     fonts.Children.Add(Left(FontChoice("Mono", "monospace", MonoFont)));
                     return Block("Font", fonts);
                 }
-                return Block("Font", Cycle("Font",
+                return Block("Font", ChoiceMenu("Font",
                     [
                         ("system", "System", () => Glyph("Aa", 16, SystemFont)),
                         ("monospace", "Mono", () => Glyph("Aa", 16, MonoFont)),
@@ -347,7 +346,7 @@ internal sealed class PropertiesPanel
                     }
                     return Block("Alignment", alignments);
                 }
-                return Block("Alignment", Cycle("Alignment",
+                return Block("Alignment", ChoiceMenu("Alignment",
                     [.. InspectorPlan.AlignmentChoices.Select(choice =>
                         (choice.Value, choice.Name, (Func<UIElement>)(() => Symbol(AlignmentSymbol(choice.Value), 15))))],
                     style => style.Alignment, alignment => _model.ApplyStyle((ref CoreStyle style) => style.Alignment = alignment)));
@@ -375,7 +374,7 @@ internal sealed class PropertiesPanel
 
     /// <summary>
     /// A property with a few choices (Mac showsAllChoices): all of them side by side (SampleOptions), or one button that
-    /// steps through them (CycleOptions).
+    /// opens a menu of them (ChoiceMenu).
     /// </summary>
     private FrameworkElement Choices<T>(PropertyChoice choice, string name, IEnumerable<(T Value, string Name, InspectorSample Sample)> values,
                                         Func<CoreStyle, T> current, Action<T> choose)
@@ -384,16 +383,16 @@ internal sealed class PropertiesPanel
         {
             return Options(values, current, choose);
         }
-        return Cycle(name, [.. values.Select(value => (value.Value, value.Name, (Func<UIElement>)(() => Sample(value.Sample))))], current, choose);
+        return ChoiceMenu(name, [.. values.Select(value => (value.Value, value.Name, (Func<UIElement>)(() => Sample(value.Sample))))], current, choose);
     }
 
     /// <summary>
-    /// Port of CycleOptions: one 36-point button for a few choices, such as Solid, Dashed and Dotted. It shows the current
-    /// choice with dots for where it is, and moves to the next choice on each click; its context menu reaches every
-    /// choice. UI Automation reads the current choice as its value.
+    /// Port of ChoiceMenu: one 36-point button for a few choices, such as Solid, Dashed and Dotted. It shows the current
+    /// choice with a small chevron, and a click opens a menu with every choice, the current one checked. UI Automation
+    /// reads it as a menu button whose value is the current choice.
     /// </summary>
-    private FrameworkElement Cycle<T>(string name, IReadOnlyList<(T Value, string Label, Func<UIElement> Face)> values,
-                                      Func<CoreStyle, T> current, Action<T> choose)
+    private FrameworkElement ChoiceMenu<T>(string name, IReadOnlyList<(T Value, string Label, Func<UIElement> Face)> values,
+                                           Func<CoreStyle, T> current, Action<T> choose)
     {
         var face = new ContentControl
         {
@@ -404,53 +403,17 @@ internal sealed class PropertiesPanel
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
         };
-        var dots = new MacStack
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 2.5,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(0, 0, 0, 3),
-            IsHitTestVisible = false,
-        };
-        AutomationProperties.SetAccessibilityView(dots, AccessibilityView.Raw);
-        var marks = new List<Ellipse>();
-        foreach ((T _, string _, Func<UIElement> _) in values)
-        {
-            var dot = new Ellipse { Width = 3.5, Height = 3.5 };
-            marks.Add(dot);
-            dots.Children.Add(dot);
-        }
+        FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 6, 6, 8, "AnnotatorGlyphSecondary");
+        chevron.HorizontalAlignment = HorizontalAlignment.Center;
+        chevron.VerticalAlignment = VerticalAlignment.Bottom;
+        chevron.Margin = new Thickness(0, 0, 0, 2.5);
+        chevron.IsHitTestVisible = false;
+        AutomationProperties.SetAccessibilityView(chevron, AccessibilityView.Raw);
         var content = new Grid();
         content.Children.Add(face);
-        content.Children.Add(dots);
+        content.Children.Add(chevron);
         (ParityButton button, Action<bool> _) = Choice(name, content, choice: false);
-        // The faces slide inside the button (Mac .clipped()).
-        content.Clip = new RectangleGeometry { Rect = new WinRect(0, 0, 36, 36) };
         int index = 0;
-        button.Click += (_, _) =>
-        {
-            _host.Interacted();
-            choose(values[(index + 1) % values.Count].Value);
-        };
-        // Mac accessibilityAdjustableAction: Up goes to the next choice and Down to the one before, for screen readers and
-        // the keyboard.
-        button.KeyDown += (_, args) =>
-        {
-            int step = args.Key switch
-            {
-                Windows.System.VirtualKey.Up => 1,
-                Windows.System.VirtualKey.Down => values.Count - 1,
-                _ => 0,
-            };
-            if (step == 0)
-            {
-                return;
-            }
-            args.Handled = true;
-            _host.Interacted();
-            choose(values[(index + step) % values.Count].Value);
-        };
         var menu = new MenuFlyout();
         var items = new List<ToggleMenuFlyoutItem>();
         for (int position = 0; position < values.Count; position++)
@@ -460,6 +423,7 @@ internal sealed class PropertiesPanel
             entry.Click += (_, _) =>
             {
                 _host.Interacted();
+                entry.IsChecked = target == index;
                 if (target != index)
                 {
                     choose(values[target].Value);
@@ -468,7 +432,8 @@ internal sealed class PropertiesPanel
             menu.Items.Add(entry);
             items.Add(entry);
         }
-        button.ContextFlyout = menu;
+        button.Flyout = menu;
+        button.Click += (_, _) => _host.Interacted();
         int shown = -1;
         _updates.Add(state =>
         {
@@ -490,21 +455,10 @@ internal sealed class PropertiesPanel
             {
                 return;
             }
-            bool changed = shown != -1;
             shown = index;
             face.Content = values[index].Face();
-            if (changed && face.Content is UIElement arrived)
-            {
-                CycleSlide.Start(arrived);
-            }
-            for (int position = 0; position < marks.Count; position++)
-            {
-                marks[position].Fill = position == index ? AppResources.Brush("AnnotatorAccentBrush")
-                    : AppResources.Brush("AnnotatorControlStrokeBrush");
-            }
-            string next = values[(index + 1) % values.Count].Label;
             button.AccessibleValue = values[index].Label;
-            ToolbarParts.Help(button, InspectorPlan.CycleHint(next), InspectorPlan.CycleHelp(name, values[index].Label, next));
+            ToolbarParts.Help(button, InspectorPlan.ChoiceMenuHelp(name, values[index].Label));
         });
         return button;
     }

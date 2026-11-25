@@ -2,7 +2,7 @@ import SwiftUI
 import AnnotationCore
 import MotionCore
 
-/// "Your properties": each property with a few choices shows as one button that steps through them, or as all its
+/// "Your properties": each property with a few choices shows as one button that opens a menu of them, or as all its
 /// choices side by side. Both ways are drawn with the toolbar's own controls; click one to use it.
 struct PropertyChoicesEditor: View {
     @ObservedObject var model: WorkspaceModel
@@ -14,7 +14,7 @@ struct PropertyChoicesEditor: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Your properties").font(.title3.weight(.semibold))
-                    Text("One button saves room: click it to go to the next choice. All choices puts them side by side, so each one is a click away.")
+                    Text(Self.intro)
                         .font(.callout).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -89,7 +89,7 @@ struct PropertyChoicesEditor: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(all ? "\(names), side by side." : "One button. Click it to go to the next choice: \(names).")
+        .help(all ? "\(names), side by side." : Self.oneButtonHelp(choice))
         .accessibilityLabel("\(choice.label): \(all ? "all choices" : "one button")")
         .accessibilityValue(selected ? "Selected" : "")
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
@@ -125,7 +125,7 @@ struct PropertyChoicesEditor: View {
                     }
                 }
             } else {
-                CycleOptions(name: "Font", choices: [("system", "System", .text("Aa", .default)),
+                ChoiceMenu(name: "Font", choices: [("system", "System", .text("Aa", .default)),
                                                      ("monospace", "Mono", .text("Aa", .monospaced))],
                              selection: "system") { _ in }
             }
@@ -139,7 +139,7 @@ struct PropertyChoicesEditor: View {
                     }
                 }
             } else {
-                CycleOptions(name: "Alignment", choices: AnnotationCore.TextAlignment.allCases.map {
+                ChoiceMenu(name: "Alignment", choices: AnnotationCore.TextAlignment.allCases.map {
                     ($0, $0.rawValue.capitalized, .symbol(ContextualInspector.alignmentSymbol($0)))
                 }, selection: .left) { _ in }
             }
@@ -151,7 +151,7 @@ struct PropertyChoicesEditor: View {
         if all {
             SampleOptions(values: values, selection: first) { _ in }
         } else {
-            CycleOptions(name: name, values: values, selection: first) { _ in }
+            ChoiceMenu(name: name, values: values, selection: first) { _ in }
         }
     }
 
@@ -175,6 +175,14 @@ struct PropertyChoicesEditor: View {
         case .font: "textformat"
         case .alignment: "text.alignleft"
         }
+    }
+
+    static let intro = "One button saves room: click it to see the choices, or to switch it on and off. All choices puts them side by side, so each one is a click away."
+
+    /// "One button. Click it to choose from Solid, Dashed and Dotted."
+    static func oneButtonHelp(_ choice: PropertyChoice) -> String {
+        let names = list(choice.choices)
+        return choice.isOnOff ? "One button. Click it to switch between \(names)." : "One button. Click it to choose from \(names)."
     }
 
     /// "Solid, Dashed and Dotted".

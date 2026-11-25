@@ -128,6 +128,8 @@ func legacyDrawingCursorPreferencesStillRoundTrip(_ style: ToolCursorStyle) thro
     preferences.setShowsAllChoices(.font, false)
     #expect(preferences.expandedPropertyChoices == nil)
     #expect(PropertyChoice.allCases.map(\.choiceCount) == [3, 3, 3, 2, 2, 2, 2, 3])
+    #expect(PropertyChoice.allCases.filter(\.isOnOff) == [.edges, .arrowType, .pressure],
+            "The others open a menu of their choices.")
     var object = try #require(JSONSerialization.jsonObject(with: WorkspacePreferences().data()) as? [String: Any])
     object["expandedPropertyChoices"] = ["roughness", "sparkle", "roughness"]
     #expect(try WorkspacePreferences.read(JSONSerialization.data(withJSONObject: object)).expandedPropertyChoices == ["roughness"])

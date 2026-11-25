@@ -237,27 +237,27 @@ struct InspectorControlButton<Content: View>: View {
     }
 }
 
-/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice and moves to the next
-/// one on each click. The dots show where you are; the context menu and VoiceOver's adjust actions reach every choice.
-struct CycleOptions<Value: Equatable>: View {
+/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice with a small chevron,
+/// and a click opens a menu with every choice, the current one checked.
+struct ChoiceMenu<Value: Equatable>: View {
     let name: String
-    let values: [(value: Value, label: String, sample: CycleSample)]
+    let values: [(value: Value, label: String, sample: ChoiceSample)]
     let selection: Value
     let update: (Value) -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var hover = false
 
-    enum CycleSample {
+    enum ChoiceSample {
         case sample(InspectorSample)
         case symbol(String)
         case text(String, Font.Design)
     }
 
     init(name: String, values: [(Value, String, InspectorSample)], selection: Value, update: @escaping (Value) -> Void) {
-        self.init(name: name, choices: values.map { ($0.0, $0.1, CycleSample.sample($0.2)) },
+        self.init(name: name, choices: values.map { ($0.0, $0.1, ChoiceSample.sample($0.2)) },
                   selection: selection, update: update)
     }
 
-    init(name: String, choices: [(Value, String, CycleSample)], selection: Value, update: @escaping (Value) -> Void) {
+    init(name: String, choices: [(Value, String, ChoiceSample)], selection: Value, update: @escaping (Value) -> Void) {
         self.name = name
         self.values = choices.map { (value: $0.0, label: $0.1, sample: $0.2) }
         self.selection = selection
@@ -265,51 +265,45 @@ struct CycleOptions<Value: Equatable>: View {
     }
 
     private var index: Int { values.firstIndex { $0.value == selection } ?? 0 }
-    private var next: Int { (index + 1) % values.count }
+
+    /// "Pattern: Solid. Click to see all choices."
+    static func help(name: String, current: String) -> String { "\(name): \(current). Click to see all choices." }
 
     var body: some View {
         let current = values[index]
-        InspectorControlButton(name: name, help: "\(name): \(current.label). Click for \(values[next].label.lowercased()).",
-                               action: { choose(next) }) {
+        let help = Self.help(name: name, current: current.label)
+        Menu { items } label: {
             ZStack {
                 face(current.sample)
-                    .id(index)
-                    .transition(reduceMotion ? .opacity : .asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)))
-                HStack(spacing: 2.5) {
-                    ForEach(values.indices, id: \.self) { position in
-                        Circle().fill(position == index ? Color.accentColor : Color.primary.opacity(0.22))
-                            .frame(width: 3.5, height: 3.5)
-                    }
-                }
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, 3)
-                .accessibilityHidden(true)
+                Image(systemName: "chevron.down").font(.system(size: 6, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 2.5)
             }
-            .clipped()
+            .frame(width: 36, height: 36)
+            .background(Color.primary.opacity(hover ? 0.055 : 0.02), in: RoundedRectangle(cornerRadius: 9))
+            .overlay { RoundedRectangle(cornerRadius: 9).strokeBorder(Color.primary.opacity(0.16), lineWidth: 1) }
+            .contentShape(RoundedRectangle(cornerRadius: 9))
         }
-        .animation(Motion.resolve(Motion.snappy, reduceMotion: reduceMotion), value: index)
+        // The button menu style draws the whole label; the borderless one keeps only its first image.
+        .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).fixedSize()
+        .onHover { hover = $0 }
+        .help(help)
+        // VoiceOver reads one menu button named after the property, as it reads the toolbar's menus.
+        .accessibilityRepresentation {
+            Menu(name) { items }.menuStyle(.borderlessButton)
+        }
         .accessibilityValue(current.label)
-        .accessibilityHint("Changes to \(values[next].label.lowercased())")
-        .accessibilityAdjustableAction { direction in
-            switch direction {
-            case .increment: choose(next)
-            case .decrement: choose((index + values.count - 1) % values.count)
-            @unknown default: break
-            }
-        }
-        .contextMenu {
-            ForEach(values.indices, id: \.self) { position in
-                Button { choose(position) } label: {
-                    if position == index { Label(values[position].label, systemImage: "checkmark") }
-                    else { Text(values[position].label) }
-                }
-            }
+        .accessibilityHint(help)
+    }
+
+    @ViewBuilder private var items: some View {
+        ForEach(values.indices, id: \.self) { position in
+            Toggle(values[position].label, isOn: Binding(get: { position == index }, set: { _ in choose(position) }))
         }
     }
 
-    @ViewBuilder private func face(_ sample: CycleSample) -> some View {
+    @ViewBuilder private func face(_ sample: ChoiceSample) -> some View {
         switch sample {
         case .sample(let sample): InspectorSampleView(sample: sample).allowsHitTesting(false)
         case .symbol(let name): Image(systemName: name).font(.system(size: 15))

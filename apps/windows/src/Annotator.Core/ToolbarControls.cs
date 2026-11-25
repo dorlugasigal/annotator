@@ -97,8 +97,9 @@ public static class ToolbarHold
 }
 
 /// <summary>
-/// Swift `PropertyChoice`: properties with a few choices. Each shows as one button that steps through its choices, which
-/// is the default, or as all its choices side by side.
+/// Swift `PropertyChoice`: properties with a few choices. Each shows as one button, which is the default, or as all its
+/// choices side by side. The one button opens a menu of the choices, or switches an on and off property such as Rounded
+/// corners.
 /// </summary>
 public enum PropertyChoice { Pattern, Roughness, FillStyle, Edges, ArrowType, Pressure, Font, Alignment }
 
@@ -131,7 +132,7 @@ public static class PropertyChoiceExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(choice)),
         };
 
-        /// <summary>The property's choices, in order. One button starts at the first and steps through them.</summary>
+        /// <summary>The property's choices, in order. One button shows the first as its default.</summary>
         public ValueList<string> Choices => choice switch
         {
             PropertyChoice.Pattern => ["Solid", "Dashed", "Dotted"],
@@ -146,6 +147,9 @@ public static class PropertyChoiceExtensions
         };
 
         public int ChoiceCount => choice.Choices.Count;
+
+        /// <summary>Whether its one button switches the property on and off instead of opening a menu of the choices.</summary>
+        public bool IsOnOff => choice is PropertyChoice.Edges or PropertyChoice.ArrowType or PropertyChoice.Pressure;
     }
 }
 

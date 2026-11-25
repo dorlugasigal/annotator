@@ -9,7 +9,6 @@ using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
 using CoreTextAlignment = Annotator.Core.TextAlignment;
 using Glyphs = Annotator.App.Icons.Glyphs;
 
@@ -17,7 +16,7 @@ namespace Annotator.App.Settings;
 
 /// <summary>
 /// Port of the Mac PropertyChoicesEditor, "Your properties": each property with a few choices shows as one button that
-/// steps through them, or as all its choices side by side. Both ways are drawn with the toolbar's own controls; click one
+/// opens a menu of them, or as all its choices side by side. Both ways are drawn with the toolbar's own controls; click one
 /// to use it. The selected way has the accent ring and a check mark.
 /// </summary>
 internal sealed class PropertyChoicesEditor
@@ -45,7 +44,7 @@ internal sealed class PropertyChoicesEditor
         var titles = new MacStack { Orientation = Orientation.Vertical, Spacing = 3, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 200, 0) };
         titles.Children.Add(SettingsText.Static("Your properties", 15, "AnnotatorPrimaryText", FontWeights.SemiBold));
         titles.Children.Add(SettingsText.Static(
-            "One button saves room: click it to go to the next choice. All choices puts them side by side, so each one is a click away.",
+            "One button saves room: click it to see the choices, or to switch it on and off. All choices puts them side by side, so each one is a click away.",
             12, "AnnotatorSecondaryText"));
         header.Children.Add(titles);
         _reset = new HyperlinkButton
@@ -190,7 +189,8 @@ internal sealed class PropertyChoicesEditor
             // The preview (44 and 12 points of padding), 6 points, and one 13-point caption line, as on the Mac.
             button.Height = OptionHeight;
         }
-        string help = all ? $"{names}, side by side." : $"One button. Click it to go to the next choice: {names}.";
+        string help = all ? $"{names}, side by side."
+            : choice.IsOnOff ? $"One button. Click it to switch between {names}." : $"One button. Click it to choose from {names}.";
         AutomationProperties.SetName(button, $"{choice.Label}: {(all ? "all choices" : "one button")}");
         AutomationProperties.SetAutomationId(button, $"property-choice-{choice.RawValue}-{(all ? "all" : "one")}");
         AutomationProperties.SetHelpText(button, help);
@@ -231,33 +231,21 @@ internal sealed class PropertyChoicesEditor
             }
             return row;
         }
-        if (choice is PropertyChoice.Edges or PropertyChoice.ArrowType or PropertyChoice.Pressure)
+        if (choice.IsOnOff)
         {
             // An on and off switch shows the feature's own sample (Mac InspectorToggle).
             (ParityButton toggle, Action<bool> _) = PropertiesPanel.Choice(choice.Choices[1], face(1));
             return toggle;
         }
-        var cycle = new Grid();
-        cycle.Children.Add(new Grid { Width = 36, Height = 36, Children = { face(0) } });
-        var dots = new MacStack
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 2.5,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(0, 0, 0, 3),
-        };
-        for (int index = 0; index < count; index++)
-        {
-            dots.Children.Add(new Ellipse
-            {
-                Width = 3.5,
-                Height = 3.5,
-                Fill = index == 0 ? AppResources.Brush("AnnotatorAccentBrush") : AppResources.Brush("AnnotatorControlStrokeBrush"),
-            });
-        }
-        cycle.Children.Add(dots);
-        (ParityButton button, Action<bool> _) = PropertiesPanel.Choice(choice.Label, cycle, choice: false);
+        // Mac ChoiceMenu: the first choice with a small chevron under it.
+        var menu = new Grid();
+        menu.Children.Add(new Grid { Width = 36, Height = 36, Children = { face(0) } });
+        FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 6, 6, 8, "AnnotatorGlyphSecondary");
+        chevron.HorizontalAlignment = HorizontalAlignment.Center;
+        chevron.VerticalAlignment = VerticalAlignment.Bottom;
+        chevron.Margin = new Thickness(0, 0, 0, 2.5);
+        menu.Children.Add(chevron);
+        (ParityButton button, Action<bool> _) = PropertiesPanel.Choice(choice.Label, menu, choice: false);
         return button;
     }
 
