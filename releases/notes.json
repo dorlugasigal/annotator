@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "unreleased": {
     "Changed": [
-      "Pattern, Roughness, Fill style, Font and Alignment open a menu of their choices when you click them, so you can pick the one you want instead of clicking through each. Rounded corners, Curved arrow and Ink pressure are still on and off buttons."
+      "Click Pattern, Roughness, Fill style, Font or Alignment to see every choice drawn as it looks, then click the one you want. Before, each click moved to the next choice. Rounded corners, Curved arrow and Ink pressure are still on and off buttons."
     ]
   },
   "releases": [

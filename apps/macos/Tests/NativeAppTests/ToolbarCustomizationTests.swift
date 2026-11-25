@@ -83,33 +83,25 @@ final class ToolbarCustomizationTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(150))
     }
 
-    /// Opens the menu of a property's one button, checks its items and which one is checked, then chooses `item`.
-    private func choose(_ item: String, from label: String, expecting items: [String], checked: String, in host: NSView,
+    /// Opens the column of a property's one button, checks it draws every choice, then chooses `item`, which closes it.
+    private func choose(_ item: String, from label: String, expecting items: [String], in host: NSView,
                         file: StaticString = #filePath, line: UInt = #line) async throws {
-        var node = nodes(host).first { $0.accessibilityRole() == .menuButton && $0.accessibilityLabel() == label }
-        for _ in 0..<75 where node == nil {
+        try await press(label, in: host, file: file, line: line)
+        func palette() -> [NativeAccessibilityNode] {
+            NSApp.windows.filter { $0.isVisible && $0.contentView !== host }
+                .flatMap { nodes($0.contentView ?? NSView()) }
+                .filter { $0.accessibilityRole() == .button && items.contains($0.accessibilityLabel() ?? "") }
+        }
+        var choices = palette()
+        for _ in 0..<75 where choices.count < items.count {
             try await Task.sleep(for: .milliseconds(20))
-            node = nodes(host).first { $0.accessibilityRole() == .menuButton && $0.accessibilityLabel() == label }
+            choices = palette()
         }
-        let button = try XCTUnwrap(node, "No \(label) menu button", file: file, line: line)
-        var titles: [String] = []
-        var on: [String] = []
-        // The menu tracks until it closes, so read and choose while it opens.
-        let observer = NotificationCenter.default.addObserver(forName: NSMenu.didBeginTrackingNotification, object: nil,
-                                                              queue: nil) { note in
-            guard let menu = note.object as? NSMenu else { return }
-            MainActor.assumeIsolated {
-                titles = menu.items.map(\.title)
-                on = menu.items.filter { $0.state == .on }.map(\.title)
-                if let index = menu.items.firstIndex(where: { $0.title == item }) { menu.performActionForItem(at: index) }
-                menu.cancelTracking()
-            }
-        }
-        defer { NotificationCenter.default.removeObserver(observer) }
-        XCTAssertTrue(button.accessibilityPerformPress(), file: file, line: line)
-        try await Task.sleep(for: .milliseconds(150))
-        XCTAssertEqual(titles, items, "\(label) lists every choice", file: file, line: line)
-        XCTAssertEqual(on, [checked], "\(label) checks the current choice", file: file, line: line)
+        XCTAssertEqual(choices.compactMap { $0.accessibilityLabel() }, items, "\(label) shows every choice", file: file, line: line)
+        let choice = try XCTUnwrap(choices.first { $0.accessibilityLabel() == item }, file: file, line: line)
+        XCTAssertTrue(choice.accessibilityPerformPress(), file: file, line: line)
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertTrue(palette().isEmpty, "Choosing closes \(label)'s choices", file: file, line: line)
     }
 
     private func save(_ host: NSView, name: String, dark: Bool) throws {
@@ -204,15 +196,15 @@ final class ToolbarCustomizationTests: XCTestCase {
         defer { close(panel) }
         XCTAssertEqual(model.style.pattern, .solid)
         let pattern = try XCTUnwrap(nodes(host).first { $0.accessibilityLabel() == "Pattern" })
-        XCTAssertEqual(pattern.accessibilityRole(), .menuButton)
+        XCTAssertEqual(pattern.accessibilityRole(), .button)
         XCTAssertEqual(pattern.accessibilityValue() as? String, "Solid")
         XCTAssertEqual(pattern.accessibilityHelp(), "Pattern: Solid. Click to see all choices.")
-        try await choose("Dotted", from: "Pattern", expecting: ["Solid", "Dashed", "Dotted"], checked: "Solid", in: host)
+        try await choose("Dotted", from: "Pattern", expecting: ["Solid", "Dashed", "Dotted"], in: host)
         XCTAssertEqual(model.style.pattern, .dotted)
-        try await choose("Solid", from: "Pattern", expecting: ["Solid", "Dashed", "Dotted"], checked: "Dotted", in: host)
+        try await choose("Solid", from: "Pattern", expecting: ["Solid", "Dashed", "Dotted"], in: host)
         XCTAssertEqual(model.style.pattern, .solid)
         XCTAssertEqual(model.style.roughness, 0)
-        try await choose("Wild", from: "Roughness", expecting: ["Clean", "Sketchy", "Wild"], checked: "Clean", in: host)
+        try await choose("Wild", from: "Roughness", expecting: ["Clean", "Sketchy", "Wild"], in: host)
         XCTAssertEqual(model.style.roughness, 6)
         let rounded = model.style.cornerRadius > 0
         try await press("Rounded corners", in: host)
@@ -238,10 +230,10 @@ final class ToolbarCustomizationTests: XCTestCase {
         model.tool = .text
         model.applyStyle { $0 = .defaults(for: .text) }
         try await settle(host)
-        try await choose("Mono", from: "Font", expecting: ["System", "Mono"], checked: "System", in: host)
+        try await choose("Mono", from: "Font", expecting: ["System", "Mono"], in: host)
         XCTAssertEqual(model.style.fontName, "monospace")
         XCTAssertEqual(model.style.alignment, .left)
-        try await choose("Right", from: "Alignment", expecting: ["Left", "Center", "Right"], checked: "Left", in: host)
+        try await choose("Right", from: "Alignment", expecting: ["Left", "Center", "Right"], in: host)
         XCTAssertEqual(model.style.alignment, .right)
         XCTAssertFalse(nodes(host).contains { $0.accessibilityLabel() == "Font size 28" }, "Text size is just the slider")
     }

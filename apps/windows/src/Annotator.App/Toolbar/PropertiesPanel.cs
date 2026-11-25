@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Automation.Provider;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using CoreStyle = Annotator.Core.Style;
@@ -50,7 +51,7 @@ internal interface IPropertiesHost
 /// The full properties panel, a port of ContextualInspector.swift with NativeInspectorComponents.swift: the "Editing …"
 /// line for a selection and the current tool's property blocks on one row that never wraps (the toolbar grows sideways to
 /// fit it), or in one column beside a vertical toolbar (<c>compact</c>), with the arrow controls at the end. Properties
-/// with a few choices are one button that opens a menu of them, or all their choices side by side (Settings > Toolbar >
+/// with a few choices are one button that opens a column of them, or all their choices side by side (Settings > Toolbar >
 /// Your properties). Every control applies to the tool's style and to the selection through the workspace model;
 /// slider drags and field edits are one Undo step each. The whole panel is unavailable while every selected object is
 /// locked.
@@ -388,8 +389,8 @@ internal sealed class PropertiesPanel
 
     /// <summary>
     /// Port of ChoiceMenu: one 36-point button for a few choices, such as Solid, Dashed and Dotted. It shows the current
-    /// choice with a small chevron, and a click opens a menu with every choice, the current one checked. UI Automation
-    /// reads it as a menu button whose value is the current choice.
+    /// choice with a small chevron, and a click opens a column of every choice drawn as it looks, the current one with the
+    /// accent outline; choosing one closes it. UI Automation reads the current choice as its value.
     /// </summary>
     private FrameworkElement ChoiceMenu<T>(string name, IReadOnlyList<(T Value, string Label, Func<UIElement> Face)> values,
                                            Func<CoreStyle, T> current, Action<T> choose)
@@ -414,25 +415,30 @@ internal sealed class PropertiesPanel
         content.Children.Add(chevron);
         (ParityButton button, Action<bool> _) = Choice(name, content, choice: false);
         int index = 0;
-        var menu = new MenuFlyout();
-        var items = new List<ToggleMenuFlyoutItem>();
+        // Mac ChoicePalette: a column of every choice drawn as it looks, 5 points apart with 8 points around it; the
+        // current one has the accent outline.
+        var column = new MacStack { Orientation = Orientation.Vertical, Spacing = 5, Margin = new Thickness(8) };
+        var palette = new Flyout { Content = column, Placement = FlyoutPlacementMode.Bottom };
+        var selects = new List<Action<bool>>();
         for (int position = 0; position < values.Count; position++)
         {
             int target = position;
-            var entry = new ToggleMenuFlyoutItem { Text = values[position].Label };
+            (ParityButton entry, Action<bool> select) = Choice(values[position].Label, values[position].Face());
             entry.Click += (_, _) =>
             {
                 _host.Interacted();
-                entry.IsChecked = target == index;
+                palette.Hide();
                 if (target != index)
                 {
                     choose(values[target].Value);
                 }
             };
-            menu.Items.Add(entry);
-            items.Add(entry);
+            selects.Add(select);
+            column.Children.Add(entry);
         }
-        button.Flyout = menu;
+        AutomationProperties.SetName(column, name);
+        palette.Opened += (_, _) => (column.Children[index] as Control)?.Focus(FocusState.Programmatic);
+        button.Flyout = palette;
         button.Click += (_, _) => _host.Interacted();
         int shown = -1;
         _updates.Add(state =>
@@ -447,9 +453,9 @@ internal sealed class PropertiesPanel
                     break;
                 }
             }
-            for (int position = 0; position < items.Count; position++)
+            for (int position = 0; position < selects.Count; position++)
             {
-                items[position].IsChecked = position == index;
+                selects[position](position == index);
             }
             if (shown == index)
             {

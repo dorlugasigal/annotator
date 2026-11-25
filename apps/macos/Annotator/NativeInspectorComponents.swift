@@ -238,19 +238,16 @@ struct InspectorControlButton<Content: View>: View {
 }
 
 /// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice with a small chevron,
-/// and a click opens a menu with every choice, the current one checked.
+/// and a click opens a column of every choice, each drawn as it looks. The current one has the accent outline; choosing
+/// one closes the column.
 struct ChoiceMenu<Value: Equatable>: View {
     let name: String
     let values: [(value: Value, label: String, sample: ChoiceSample)]
     let selection: Value
     let update: (Value) -> Void
-    @State private var hover = false
+    @State private var open = false
 
-    enum ChoiceSample {
-        case sample(InspectorSample)
-        case symbol(String)
-        case text(String, Font.Design)
-    }
+    typealias ChoiceSample = InspectorChoiceFace
 
     init(name: String, values: [(Value, String, InspectorSample)], selection: Value, update: @escaping (Value) -> Void) {
         self.init(name: name, choices: values.map { ($0.0, $0.1, ChoiceSample.sample($0.2)) },
@@ -272,48 +269,72 @@ struct ChoiceMenu<Value: Equatable>: View {
     var body: some View {
         let current = values[index]
         let help = Self.help(name: name, current: current.label)
-        Menu { items } label: {
+        InspectorControlButton(name: name, selected: open, help: help, action: { open.toggle() }) {
             ZStack {
-                face(current.sample)
+                current.sample
                 Image(systemName: "chevron.down").font(.system(size: 6, weight: .bold))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .padding(.bottom, 2.5)
+                    .accessibilityHidden(true)
             }
-            .frame(width: 36, height: 36)
-            .background(Color.primary.opacity(hover ? 0.055 : 0.02), in: RoundedRectangle(cornerRadius: 9))
-            .overlay { RoundedRectangle(cornerRadius: 9).strokeBorder(Color.primary.opacity(0.16), lineWidth: 1) }
-            .contentShape(RoundedRectangle(cornerRadius: 9))
-        }
-        // The button menu style draws the whole label; the borderless one keeps only its first image.
-        .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).fixedSize()
-        .onHover { hover = $0 }
-        .help(help)
-        // VoiceOver reads one menu button named after the property, as it reads the toolbar's menus.
-        .accessibilityRepresentation {
-            Menu(name) { items }.menuStyle(.borderlessButton)
         }
         .accessibilityValue(current.label)
         .accessibilityHint(help)
-    }
-
-    @ViewBuilder private var items: some View {
-        ForEach(values.indices, id: \.self) { position in
-            Toggle(values[position].label, isOn: Binding(get: { position == index }, set: { _ in choose(position) }))
+        .popover(isPresented: $open, arrowEdge: .bottom) {
+            ChoicePalette(name: name, values: values.map { ($0.label, $0.sample) }, selected: index) { position in
+                open = false
+                guard values.indices.contains(position), position != index else { return }
+                update(values[position].value)
+            }
         }
     }
+}
 
-    @ViewBuilder private func face(_ sample: ChoiceSample) -> some View {
-        switch sample {
+/// How a choice looks on its button: a drawn sample, a symbol or a few letters.
+enum InspectorChoiceFace: View {
+    case sample(InspectorSample)
+    case symbol(String)
+    case text(String, Font.Design)
+
+    var body: some View {
+        switch self {
         case .sample(let sample): InspectorSampleView(sample: sample).allowsHitTesting(false)
         case .symbol(let name): Image(systemName: name).font(.system(size: 15))
         case .text(let text, let design): Text(text).font(.system(size: 16, design: design))
         }
     }
+}
 
-    private func choose(_ position: Int) {
-        guard values.indices.contains(position), position != index else { return }
-        update(values[position].value)
+/// ChoiceMenu's column: every choice drawn as it looks, named for VoiceOver and in its tooltip.
+private struct ChoicePalette: View {
+    let name: String
+    let values: [(label: String, sample: InspectorChoiceFace)]
+    let selected: Int
+    let choose: (Int) -> Void
+    @FocusState private var focused: Int?
+
+    var body: some View {
+        VStack(spacing: 5) {
+            ForEach(values.indices, id: \.self) { position in
+                InspectorControlButton(name: values[position].label, selected: position == selected,
+                                       action: { choose(position) }) { values[position].sample }
+                .focused($focused, equals: position)
+            }
+        }
+        .padding(8)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(name)
+        .onAppear { focused = selected }
+        .onExitCommand { choose(selected) }
+        .onMoveCommand { direction in
+            let current = focused ?? selected
+            switch direction {
+            case .up: focused = (current + values.count - 1) % values.count
+            case .down: focused = (current + 1) % values.count
+            default: break
+            }
+        }
     }
 }
 
