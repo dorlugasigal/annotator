@@ -85,15 +85,15 @@
         <div class="stage-scene">
           <i class="stage-shadow" aria-hidden="true"></i>
           <div class="stage-plane" id="desk">
-            <i class="desk-panel" aria-hidden="true"></i>
-            <i class="desk-cue" aria-hidden="true"></i>
+            <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
+            <i class="desk-cue" data-stage-frame aria-hidden="true"></i>
             <div class="stage-tags">
-              <p class="mode-chip" id="mode-chip" data-mode="use">
+              <p class="mode-chip" id="mode-chip" data-mode="use" data-stage-corner="top left">
                 <i aria-hidden="true"></i><b data-chip-word>Using apps</b>
                 <span class="chip-keys" data-chip="use" aria-hidden="true"><kbd>Esc</kbd></span>
                 <span class="chip-keys" data-chip="draw" aria-hidden="true"><kbd><span data-for="mac">Control</span><span data-for="windows">Ctrl</span></kbd><kbd>Shift</kbd><kbd>2</kbd></span>
               </p>
-              <button type="button" class="your-turn" id="your-turn" data-try hidden>
+              <button type="button" class="your-turn" id="your-turn" data-stage-corner="top right" data-try hidden>
                 <svg viewBox="0 0 22 26" width="15" height="18" aria-hidden="true"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>
                 <span>Your turn</span>
               </button>
@@ -178,7 +178,7 @@
                 </section>
               </div>
             </div>
-            <div class="dock" id="dock"></div>
+            <div class="dock" id="dock" data-stage-frame></div>
           </div>
         </div>
         <figcaption class="wrap">

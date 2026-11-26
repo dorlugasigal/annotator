@@ -1,4 +1,5 @@
 import { createInk } from "/concepts/shared/ink.js";
+import { growingStage } from "/concepts/shared/stage.js";
 // The app's own motion: its curves, its durations and the keyframes of its moves.
 import { ease, toolbarMorph, poseKeyframes, magicFlight, travelFade, visibilityDuration, workspaceTiming, DURATIONS } from "/concepts/shared/app-motion.js";
 
@@ -100,19 +101,31 @@ const stage = $("#try"), desk = $("#desk"), dock = $("#dock"), scene = $(".stage
 // roughest line, and the app's Tropic gradient as the color, which is this page's accent. It rests on the Arrow tool
 // so its properties row shows that. The engine itself starts the row closed on a phone, which keeps the bar compact.
 const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", gradient: "tropic", moreHref: "#install" });
+// Once the visitor joins in (a press on the sheet or its toolbar, one of the app's keys, "Try it here"), the sheet's
+// frame opens up to fill the window, and scrolling brings it back. The sheet itself does not move: in index.html
+// the panel and the dock carry data-stage-frame. Joining in retires "Your turn", ends the script and lays the
+// sheet flat; the frame opens only once it is.
+const growth = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion });
+let joiningIn = false;
+growth.on("join", () => { joiningIn = true; retire(); takeOver(); joiningIn = false; });
+// The demo itself plays on the small sheet: an open frame closes first.
+const closing = [];
+growth.on("change", ({ state }) => { if (state === "small") closing.splice(0).forEach((go) => go()); });
+const closed = () => new Promise((go) => { if (growth.state === "small") go(); else { closing.push(go); growth.shrink(); } });
 
 // Where something on the desk is, in the desk's own space, however the desk leans and wherever a window was dragged
-// to. The lean is taken away for the moment of measuring; nothing is painted in between.
+// to. The lean is taken away for the moment of measuring; nothing is painted in between. The desk's own corner is
+// the origin: the drawing layer reaches past it while the frame is open.
 function planeBox(el) {
   const leaning = !desk.classList.contains("is-flat");
   if (leaning) desk.classList.add("is-flat");
-  const o = ink.layer.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const o = desk.getBoundingClientRect(), r = el.getBoundingClientRect();
   if (leaning) desk.classList.remove("is-flat");
   return { x: r.left - o.left, y: r.top - o.top, w: r.width, h: r.height };
 }
 const onDesk = (el) => ({
   getBoundingClientRect() {
-    const o = ink.layer.getBoundingClientRect(), b = planeBox(el);
+    const o = desk.getBoundingClientRect(), b = planeBox(el);
     return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h };
   },
 });
@@ -233,13 +246,14 @@ ink.fit();
 // stays flat: a pointer on a tilted plane would not draw where it points.
 let userFlat = !motion;
 channel(() => {
-  if (userFlat) return 0;
+  if (userFlat || growth.state !== "small") return 0;
   const top = scene.getBoundingClientRect().top + scrollY;
   return 1 - smooth(scrollY / clamp(top - innerHeight * 0.1, 200, innerHeight * 0.7));
 }, (v) => {
   desk.style.setProperty("--tilt", v.toFixed(4));
   desk.style.setProperty("--lift", (4 * v * (1 - v)).toFixed(4));
-  desk.classList.toggle("is-flat", v === 0);
+  // The last hundredth of the lean cannot be seen, and the frame waits for the desk to lie flat before it opens.
+  desk.classList.toggle("is-flat", v < 0.01);
 });
 
 // The three windows start as one neat pile in the middle of the desk and are dealt to their places, top one first.
@@ -417,12 +431,11 @@ showMode();
 done.addEventListener("click", () => ink.setMode("use"));
 
 // The invitation: "Your turn", with a small pointer drawing a squiggle. It comes after the first round and whenever
-// the demo is idle, with the app's Pop, and goes for good once the visitor has drawn something.
+// the demo is idle, with the app's Pop, and goes for good once the visitor has drawn something or joined in.
 const cue = $("#your-turn");
-let drawn = false, invited = false;
+let retired = false, invited = false;
 function invite(strong) {
-  if (drawn) return;
-  if (!invited) {
+  if (!retired && !invited) {
     invited = true;
     cue.hidden = false;
     if (motion) play(cue, poseKeyframes("pop", { appearing: true }));
@@ -434,15 +447,15 @@ function invite(strong) {
     desk.classList.add("is-cued");
   }
 }
-ink.on("mark", async () => {
-  if (drawn) return;
-  drawn = true;
-  desk.classList.remove("is-cued");
+async function retire() {
+  if (retired) return;
+  retired = true;
   if (!invited) return;
   if (motion) await play(cue, poseKeyframes("pop", { appearing: false }), { fill: "forwards" });
   cue.hidden = true;
   cue.getAnimations().forEach((animation) => animation.cancel());
-});
+}
+ink.on("mark", () => { desk.classList.remove("is-cued"); retire(); });
 
 // The scripted demo ---------------------------------------------------------------------------------
 // It tells the app's story with a pointer of its own: draw, switch to the apps and use them while the drawings stay
@@ -477,7 +490,7 @@ const click = () => { if (motion) ink.clickGhost?.(); };
 // What the scripted pointer can do to the stage: press something, type, drag a window. The pointer is placed in
 // the desk's own space, so it lands on its target while the desk leans, and it never takes the keyboard's focus:
 // a press is the element's own click, and typing fills the field without opening a phone's keyboard.
-async function clickOn(el, signal) {
+async function clickOn(el, signal, fire = true) {
   if (signal.aborted) return;
   await ink.moveGhost(centre(planeBox(el)));
   if (signal.aborted) return;
@@ -485,7 +498,7 @@ async function clickOn(el, signal) {
   el.classList.add("is-pressed");
   await wait(170, signal);
   el.classList.remove("is-pressed");
-  if (!signal.aborted) el.click();
+  if (fire && !signal.aborted) el.click();
   await wait(240, signal);
 }
 async function typeInto(input, text, signal) {
@@ -523,11 +536,12 @@ async function dragWindow(win, [dx, dy], signal) {
   win.classList.remove("is-held");
   used();
 }
-// The switch between Draw and Use apps is the toolbar's own button, pressed by the pointer.
+// The switch between Draw and Use apps is the toolbar's own button, pressed by the pointer. The press is shown and
+// the mode is set here: the button's own click would count as the visitor's, and open the frame for nobody.
 async function switchTo(mode, signal) {
   if (signal.aborted || ink.state.mode === mode) return;
   const button = ink.toolbar.querySelector('[data-action="mode"]');
-  if (button?.offsetParent && !ink.collapsed) await clickOn(button, signal);
+  if (button?.offsetParent && !ink.collapsed) await clickOn(button, signal, false);
   if (!signal.aborted && ink.state.mode !== mode) ink.setMode(mode);
   await wait(420, signal);
 }
@@ -664,6 +678,7 @@ function stop() {
 }
 async function restart() {
   await stop();
+  await closed();
   restore();
   ink.setMode("use");
   if (ink.collapsed) ink.setCollapsed(false);
@@ -688,6 +703,8 @@ function takeOver() {
   touched = true;
   stop();
   if (!userFlat) { userFlat = true; request(); }
+  // A press handed on from the middle of a theme change is not one the growing stage can see.
+  if (handing && !joiningIn) growth.join();
 }
 // A press is the visitor's when the browser says so, or when it was handed on from the middle of a theme change.
 const theirs = (e) => e.isTrusted || handing;
@@ -702,12 +719,13 @@ desk.addEventListener("click", (e) => {
   takeOver();
   invite(true);
 });
-// The keys that work the demo take it over too.
+// The keys that work the demo take it over too, before the engine hears them: the app's Control-Shift-2 (Draw) and
+// Control-2 (hide or show), and while the demo draws, Esc and the tools' letters.
 addEventListener("keydown", (e) => {
-  if (!theirs(e) || !run || !deskSeen) return;
-  const toggle = e.ctrlKey && e.shiftKey && e.code === "Digit2";
+  if (!theirs(e) || !run || !deskSeen || e.target.closest?.("input, textarea")) return;
+  const app = e.ctrlKey && !e.metaKey && !e.altKey && e.code === "Digit2";
   const drawing = ink.state.mode === "draw" && !e.ctrlKey && !e.metaKey && !e.altKey && (e.key === "Escape" || (e.key.length === 1 && e.key !== " "));
-  if (toggle || drawing) takeOver();
+  if (app || drawing) takeOver();
 }, true);
 addEventListener("resize", () => setTimeout(() => ink.reflow(), 260));
 
@@ -728,30 +746,13 @@ fontsReady.then(async () => {
   if (!touched) start();
 });
 
-// "Try it": from anywhere on the page, the stage comes into view with Draw on and the Pen in hand.
-const header = $(".site-header");
-function scrolled() {
-  return new Promise((done) => {
-    let last = scrollY, calm = 0;
-    const started = performance.now();
-    const check = () => {
-      calm = scrollY === last ? calm + 1 : 0;
-      last = scrollY;
-      if (calm > 6 || performance.now() - started > 2200) done(); else requestAnimationFrame(check);
-    };
-    requestAnimationFrame(check);
-  });
-}
+// "Try it": from anywhere on the page, the stage's frame opens with Draw on and the Pen in hand. The growing stage
+// brings the sheet into place itself, once it lies flat.
 async function tryIt(e) {
   e.preventDefault();
   touched = true;
   takeOver();
   await settled;
-  const r = scene.getBoundingClientRect(), top = header.offsetHeight + 14;
-  if (r.top < top - 20 || r.top > innerHeight * 0.45) {
-    scrollTo({ top: scrollY + r.top - top, behavior: motion ? "smooth" : "auto" });
-    await scrolled();
-  }
   if (ink.collapsed) ink.setCollapsed(false);
   ink.setTool("pen");
   invite(true);
@@ -984,7 +985,8 @@ for (const set of $$(".keyset")) set.addEventListener("click", async () => {
   takeOver();
   for (const key of keys) { key.classList.add("is-down"); await wait(motion ? 70 : 0); }
   if (ink.collapsed) ink.setCollapsed(false);
-  if (set.dataset.set === "draw") ink.setMode(ink.state.mode === "draw" ? "use" : "draw"); else ink.setMode("use");
+  // As the real keys do: Control-Shift-2 starts drawing and never stops it; Esc goes back to the apps.
+  ink.setMode(set.dataset.set === "draw" ? "draw" : "use");
   await wait(160);
   keys.forEach((key) => key.classList.remove("is-down"));
 });

@@ -194,14 +194,16 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .stage::after { content: ""; position: absolute; left: 5%; right: 5%; bottom: 14px; height: 120px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, var(--floor), transparent); opacity: calc(var(--lift) * .9); transform: translateY(calc(var(--lift) * 46px)) scaleX(calc(1 - var(--lift) * .06)); pointer-events: none; }
 /* The whole screen can be drawn on, so the sample window sits in it with room to spare: beside it for notes, and under
    it for the toolbar at its tallest (main.js writes that height to --tb-h). */
-.screen { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 48px; --inset: 10px; --inset-top: 18px; position: relative; }
+.screen { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 48px; --inset: 10px; --inset-top: 18px; --corner: 20px; position: relative; }
 /* The board is the sample window and the ink together, as one flat sheet: Blur needs what it covers on its own sheet. */
 .board { position: relative; padding: var(--inset-top) var(--inset) var(--inset); }
 .window { max-width: 1080px; margin-inline: auto; }
 .js .board { padding-bottom: calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap)); }
 .desk { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: 22px; background: radial-gradient(90% 120% at 0% 100%, var(--glow-teal), transparent 58%), radial-gradient(80% 110% at 100% 0%, var(--glow-violet), transparent 60%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); box-shadow: var(--top-light), var(--plane-shadow); transition: border-color var(--t-2) ease; }
 .ink-drawing .desk { border-color: color-mix(in srgb, var(--on) 65%, transparent); }
-.dock { position: absolute; inset: 0 var(--dock-inset, 2px); z-index: 100; pointer-events: none; }
+/* The toolbar's plane has the frame's box; the toolbar itself keeps a little room at the sides. */
+.dock-plane { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
+.dock { position: absolute; inset: 0 var(--dock-inset, 2px); }
 .dock > .ink-toolbar { pointer-events: auto; }
 .dock > .ink-toolbar:not(.is-placed) { bottom: var(--tb-bottom); }
 .screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
@@ -210,15 +212,31 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 /* While the scripted demo plays, the ink lets presses through: a press on the stage hands it to the visitor. */
 .stage.is-demo .board > .ink-layer { pointer-events: none; touch-action: auto; }
 /* Two tags sit on the stage's top edge: the cue on the left, the mode on the right. */
-.turn, .mode-chip { position: absolute; top: -17px; z-index: 110; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 0; padding: 0 14px 0 12px; border-radius: 999px; font: 600 14.5px/1 var(--sans); white-space: nowrap; }
-.turn { left: 20px; border: 0; background: var(--ocean-button); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--glint), 0 10px 24px -10px color-mix(in srgb, var(--ocean-2) 80%, transparent); cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--t-1) ease, visibility 0s linear var(--t-1); }
+.turn, .mode-chip { position: absolute; top: calc(-17px + var(--stage-grow, 0) * 31px); z-index: 110; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 0; padding: 0 14px 0 12px; border-radius: 999px; font: 600 14.5px/1 var(--sans); white-space: nowrap; }
+.turn { left: var(--corner); border: 0; background: var(--ocean-button); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--glint), 0 10px 24px -10px color-mix(in srgb, var(--ocean-2) 80%, transparent); cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--t-1) ease, visibility 0s linear var(--t-1); }
 .turn.is-on { opacity: 1; visibility: visible; transition-delay: 0s; }
 .turn svg { flex: none; fill: currentColor; }
 .turn:focus-visible { border-radius: 999px; }
-.mode-chip { right: 20px; background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong), var(--coin-shadow); transition: background-color var(--t-1) ease, color var(--t-1) ease, box-shadow var(--t-1) ease; }
+.mode-chip { right: calc(var(--corner) + min(1, var(--stage-grow, 0) * 6) * (58px - var(--corner))); background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong), var(--coin-shadow); transition: background-color var(--t-1) ease, color var(--t-1) ease, box-shadow var(--t-1) ease; }
 .mode-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-1) ease, box-shadow var(--t-1) ease; }
 .mode-chip[data-mode="draw"] { color: var(--on); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on) 60%, transparent), var(--coin-shadow); }
 .mode-chip[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
+   frame is the desk itself. Grown, the two tags move from its top edge to just inside it, and the button that makes
+   it small again takes the corner, with the mode beside it. */
+:root { --stage-scrim: var(--page); }
+.screen { --stage-radius: 22px; }
+.stage-shrink { --stage-shrink-top: 13px; --stage-shrink-right: 14px; background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong), var(--coin-shadow); opacity: calc((var(--stage-grow, 0) - .12) * 5); transition: background-color var(--t-1) ease; }
+.stage-shrink:hover { background: var(--surface-3); }
+.stage-shrink:focus-visible { border-radius: 50%; }
+/* The stage's glow sits behind it with a negative layer, which needs the stage to be a layer of its own. A grown
+   frame has to rise above the header, so that goes for as long, and the glow keeps its place by order instead. */
+.stage:has(.screen[data-stage]:not([data-stage="small"])) { isolation: auto; }
+.stage:has(.screen[data-stage]:not([data-stage="small"]))::before { z-index: auto; }
+.stage figcaption { position: relative; }
+/* An open frame is above the header and a small one under it, so the header fades out and in instead of cutting in. */
+.site-header { transition: border-color var(--t-2) ease, opacity var(--t-1) ease; }
+:root:has(.screen[data-stage]:not([data-stage="small"])) .site-header { opacity: 0; }
 /* The demo's pointer: main.js writes where it is (--x, --y) and which plane it is on (--z: 0 the window, 1 the toolbar). */
 .stage-pointer { --x: 0px; --y: 0px; --z: 0; position: absolute; left: 0; top: 0; z-index: 120; margin: -2px 0 0 -3px; opacity: 0; pointer-events: none; filter: drop-shadow(0 3px 5px var(--floor)); transform: translate3d(var(--x), var(--y), 0); transition: opacity .3s ease; }
 .stage-pointer.is-on { opacity: 1; }
@@ -450,8 +468,7 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
   .nav-try { height: 32px; padding: 0 11px 0 9px; gap: 6px; }
   .site-header .button.small { height: 34px; padding: 0 12px; font-size: 14.5px; }
   .deck-steps button { width: 24px; }
-  .turn { left: 12px; }
-  .mode-chip { right: 12px; }
+  .screen { --corner: 12px; }
 }
 @media (min-width: 600px) {
   .hero { padding-top: 40px; }
@@ -517,6 +534,8 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 @keyframes theme-wipe { from { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; } to { -webkit-mask-position: 100% 0%; mask-position: 100% 0%; } }
 /* The switch is left out of both pictures, so its coin is seen turning the whole way through. */
 .theme-switch { view-transition-name: theme-switch; }
+/* Under an open demo frame the switch stays part of the page, so it does not show through the frame during the wipe. */
+:root:has(.screen[data-stage]:not([data-stage="small"])) .theme-switch { view-transition-name: none; }
 ::view-transition-group(theme-switch) { animation: none; }
 ::view-transition-old(theme-switch) { display: none; }
 ::view-transition-new(theme-switch) { animation: none; }
@@ -555,10 +574,13 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 /* The hero stage in space. main.js writes --tilt (degrees), --lift (0 to 1) and --scale from the scroll position.
    Lifted, the ink sits above the window and the toolbar above the ink; flat, they are one surface again. */
 .motion .stage-space { perspective: 2000px; perspective-origin: 50% 30%; }
+/* Perspective keeps the scene in a layer of its own, under the header. The screen is flat while its frame is grown,
+   so the scene's depth goes and the frame can rise above the page. */
+.motion .stage-space:has(> [data-stage]:not([data-stage="small"])) { perspective: none; animation: none; }
 .motion .screen { transform-style: preserve-3d; transform-origin: 50% 62%; transform: rotateX(calc(var(--tilt) * 1deg)) scale(var(--scale)); }
 .motion .stage.is-live .screen { will-change: transform; }
 .motion .desk { transform: translateZ(calc(var(--lift) * -40px)); }
-.motion .dock { transform: translateZ(calc(var(--lift) * 56px)); }
+.motion .dock-plane { transform: translateZ(calc(var(--lift) * 56px)); }
 /* The ink shares the window's sheet, so it is moved the way a plane a little above the window would look from here. */
 .motion .board :is(.ink-svg, .ink-over, .ink-ghost) { translate: 0 calc(var(--lift) * -6px); }
 /* A sheet inside a 3D scene needs a place of its own in it, or Blur has nothing to look through. */

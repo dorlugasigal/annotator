@@ -2382,7 +2382,7 @@ export function createInk(options = {}) {
     else if (b.dataset.tool) setTool(b.dataset.tool);
     else if (b.dataset.stop) { if (b.dataset.stop === "white" || b.dataset.stop === "black") setBoard("desk"); else setLight(b.dataset.stop, false); }
     else if (name === "library" || name === "board" || name === "settings") more(name, b);
-    else if (name === "mode") { const mode = state.mode === "draw" ? "use" : "draw"; setMode(mode); emit("shortcut", mode); }
+    else if (name === "mode") { const mode = state.mode === "draw" ? "use" : "draw"; setMode(mode); emit("shortcut", mode, byVisitor ? {} : { scripted: true }); }
     else if (name === "undo") undo();
     else if (name === "redo") redo();
     else if (name === "clear") clear();

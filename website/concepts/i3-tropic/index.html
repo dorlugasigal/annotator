@@ -98,7 +98,7 @@
         <div class="stage-scene">
           <i class="stage-shadow" aria-hidden="true"></i>
           <div class="stage-plane" id="desk">
-            <i class="desk-panel" aria-hidden="true"></i>
+            <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
             <!-- Three small apps with made-up numbers. Nothing here leaves the page. -->
             <div class="desk-windows" id="apps">
               <section class="win win-slide" aria-label="Monday review, a sample slide deck">
@@ -173,12 +173,12 @@
               </section>
             </div>
             <!-- What floats over the apps: the mode and the demo's own control on the sheet's top edge, the invitation and the app's toolbar. -->
-            <div class="dock" id="dock">
+            <div class="dock" id="dock" data-stage-frame>
               <p class="mode-chip" id="mode-chip">
                 <span data-when="draw"><i aria-hidden="true"></i><b>Drawing</b><kbd>Esc</kbd></span>
                 <span data-when="use"><i aria-hidden="true"></i><b>Using apps</b><kbd data-for="mac">⌃⇧2</kbd><kbd data-for="windows">Ctrl+Shift+2</kbd></span>
               </p>
-              <button type="button" class="chip stage-replay" id="stage-replay"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg><b>Replay</b></button>
+              <button type="button" class="chip stage-replay" id="stage-replay" data-stage-ignore><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg><b>Replay</b></button>
               <p class="your-turn" id="your-turn" hidden>
                 <svg viewBox="0 0 96 44" aria-hidden="true"><path class="yt-line" pathLength="1" d="M5 30c9-16 20-23 28-17 9 7-9 21 2 25 10 4 15-22 27-21 8 1 6 13 18 12"/><path class="yt-pointer" d="M0 0v15.4l4.1-3.7 2.9 6.5 2.9-1.3-2.9-6.3h5.5z"/></svg>
                 <span>Your turn</span>

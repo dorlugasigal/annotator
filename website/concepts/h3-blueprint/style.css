@@ -234,13 +234,15 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .js .board { padding-bottom: calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap)); }
 .desk { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: 8px; background: linear-gradient(var(--desk-grid) 1px, transparent 1px) 0 0 / 48px 48px, linear-gradient(90deg, var(--desk-grid) 1px, transparent 1px) 0 0 / 48px 48px, linear-gradient(160deg, var(--desk-a), var(--desk-b)); box-shadow: var(--plane-shadow); transition: border-color var(--t-2) ease; }
 .ink-drawing .desk { border-color: color-mix(in srgb, var(--on) 70%, transparent); }
-.dock { position: absolute; inset: 0 var(--dock-inset, 2px); z-index: 100; pointer-events: none; }
+.dock { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
 .dock > .ink-toolbar { pointer-events: auto; }
 .dock > .ink-toolbar:not(.is-placed) { bottom: var(--tb-bottom); }
 .screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
 /* The loop's marks leave together before the next round. */
 .ink-mark.is-leaving { opacity: 0 !important; transition: opacity var(--t-2) ease; }
-.wire-desk, .wire-win, .gauge, .crosshair { display: none; }
+.wire-win, .gauge { display: none; }
+/* These two have the frame's box (shared/stage.js measures it), so where they are not used they are only unseen. */
+.wire-desk, .crosshair { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 
 /* The sample app: a small report, in the colors an app would have in this theme. */
 .window, .mini { position: relative; overflow: hidden; border-radius: 6px; background: var(--win-bg); color: var(--win-text); box-shadow: var(--win-shadow); }
@@ -312,8 +314,21 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .turn-edge { position: absolute; top: -1px; bottom: -1px; right: -1px; width: 1px; background: var(--accent-line); }
 .turn-line { fill: none; stroke: url(#lagoon); stroke-width: 1.6; stroke-linecap: round; }
 .turn-pen { fill: var(--text); offset-path: path("M2 11c4-8 7-8 9-2s5 6 8 0 6-6 9 1"); offset-rotate: 0deg; offset-distance: 100%; }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js).
+   The frame is the desk itself, with its hairline, its grid and its crop marks. As it opens, the chip comes in from
+   the frame's edge so it stays on the screen, and the button that makes it small again is one more framed square. */
+:root { --stage-scrim: var(--page); }
+.screen { --stage-radius: 8px; }
+.mode-chip { transform: translateY(calc(-50% + var(--stage-grow, 0) * (50% + 10px))); }
+.screen .stage-shrink { --stage-shrink-top: 10px; --stage-shrink-right: 12px; width: 36px; height: 36px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--page); color: var(--text); transition: border-color var(--t-1) ease, background-color var(--t-1) ease; }
+.screen .stage-shrink svg { stroke-width: 1.6; }
+.screen .stage-shrink:hover { border-color: var(--accent-line); background: color-mix(in srgb, var(--lagoon-2) 14%, var(--page)); }
+.screen .stage-shrink:focus-visible { border-radius: 4px; }
+/* The stage keeps its layers to itself while it is small. Grown, it has to rise above the header, so that goes. */
+.stage:has([data-stage]:not([data-stage="small"])) { isolation: auto; }
 /* When "Try it" is pressed, the stage's outline is drawn once more, in the gradient. */
-.invite { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; opacity: 0; pointer-events: none; }
+.invite { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.invite svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
 .invite rect { fill: none; stroke-width: 2; }
 .stage.is-invited .invite { opacity: 1; }
 @media (max-width: 519px) { .mode-chip { left: 8px; } .your-turn { right: 8px; } }
@@ -527,7 +542,7 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 @media (min-width: 600px) {
   .hero { padding-top: 46px; }
   .stage { margin-top: 56px; }
-  .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 56px; --inset: clamp(24px, 4vw, 64px); --inset-top: 40px; --dock-inset: 14px; }
+  .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 56px; --inset: clamp(24px, 4vw, 64px); --inset-top: 40px; }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .report { gap: 22px; padding: 22px 26px 26px; }
   .report-head { grid-template-columns: 1fr auto; align-items: baseline; }
@@ -589,6 +604,8 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; z-index: 1; clip-path: inset(0 0 100% 0); }
 /* The switch is left out of both pictures, so its knob is seen sliding the whole way through. */
 .theme-switch { view-transition-name: theme-switch; }
+/* Under a grown stage the switch is part of the page's picture like everything else, so it does not show through. */
+:root:has([data-stage]:not([data-stage="small"])) .theme-switch { view-transition-name: none; }
 ::view-transition-group(theme-switch) { animation: none; }
 ::view-transition-old(theme-switch) { display: none; }
 ::view-transition-new(theme-switch) { animation: none; }
@@ -644,6 +661,10 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .motion .stage-space { perspective: 1900px; perspective-origin: 50% 36%; }
 .motion .screen { transform-style: preserve-3d; transform-origin: 50% 50%; transform: rotateX(calc(var(--tilt) * var(--rx))) rotateY(calc(var(--tilt) * var(--ry))) rotateZ(calc(var(--tilt) * var(--rz))) scale(calc(1 - var(--tilt) * var(--shrink))); }
 .motion .stage.is-live .screen { will-change: transform; }
+/* Perspective keeps the stage in a layer of its own, under the header. The screen is flat while its frame is not
+   small, so the 3D goes and the frame can rise above the page. */
+.motion .stage-space:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
+.motion .screen[data-stage]:not([data-stage="small"]) { transform: none; transform-style: flat; will-change: auto; }
 .motion .desk, .motion .wire-desk { transform: translateZ(calc(var(--lift) * -44px)); }
 .motion .dock { transform: translateZ(calc(var(--lift) * 64px)); }
 /* The ink shares the window's sheet, so it is moved the way a plane a little above the window would look from here. */
@@ -656,7 +677,7 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .motion .desk, .motion .window { opacity: var(--real); }
 .motion .wire-desk, .motion .wire-win { display: block; opacity: calc(1 - var(--real)); }
 .motion .stage.is-live :is(.desk, .window, .wire-desk, .wire-win) { will-change: opacity; }
-.motion .wire-desk { position: absolute; inset: 0; }
+.motion .wire-desk { visibility: visible; }
 .motion .wire-desk::before { content: ""; position: absolute; inset: 0; border-radius: 8px; background: linear-gradient(var(--wire-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, var(--wire-grid) 1px, transparent 1px) 0 0 / 24px 24px; animation: fade-in 900ms ease 700ms backwards; }
 .wire-frame { position: absolute; left: .5px; top: .5px; width: calc(100% - 1px); height: calc(100% - 1px); overflow: visible; }
 .wire-frame rect { fill: none; stroke: var(--wire); stroke-width: 1.25; stroke-dasharray: 1; animation: draw 1200ms var(--ease-draw) 250ms backwards; }
@@ -699,7 +720,7 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 
 /* A crosshair follows the pointer over the stage. */
 @media (hover: hover) {
-  .motion .crosshair { display: block; position: absolute; inset: 0; z-index: 3; overflow: hidden; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity var(--t-1) ease; }
+  .motion .crosshair { visibility: visible; z-index: 3; overflow: hidden; border-radius: 8px; opacity: 0; pointer-events: none; transform: translateZ(1px); transition: opacity var(--t-1) ease; }
   /* Only while drawing: then the pointer is the tool. While the apps are in use it is an ordinary pointer. */
   .motion.ink-drawing .crosshair.is-on { opacity: 1; }
   .crosshair i { position: absolute; background: var(--draw-soft); }
@@ -755,7 +776,8 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 
 /* The stage's own notes. The invitation's line is drawn again and again by a small pen; the outline that answers
    "Try it" is drawn once and then lets go. */
-.motion .mode-chip, .motion .your-turn { transform: translateY(-50%) translateZ(2px); }
+.motion .your-turn { transform: translateY(-50%) translateZ(2px); }
+.motion .mode-chip { transform: translateY(calc(-50% + var(--stage-grow, 0) * (50% + 10px))) translateZ(2px); }
 .motion .your-turn { animation: fade-in var(--t-2) ease backwards; }
 .motion .turn-line { stroke-dasharray: 1; animation: turn-line 2800ms var(--ease-draw) infinite; }
 .motion .turn-pen { animation: turn-pen 2800ms var(--ease-draw) infinite; }

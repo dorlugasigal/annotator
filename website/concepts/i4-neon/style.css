@@ -200,6 +200,12 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 /* The stage: the largest tile. A desk of small working apps, the ink layer and the app's toolbar, each on its own plane. */
 .stage { margin-top: calc(var(--g) + 14px); }
 .stage-scene { position: relative; z-index: 1; }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
+   frame is the desk's own tile: same hairline, same corners, the page's color behind it. While it is not small the
+   scene gives up its own layer, so the frame can rise above the header. */
+:root { --stage-scrim: var(--page); }
+.stage-plane { --stage-radius: var(--rad); }
+.stage-scene:has(> [data-stage]:not([data-stage="small"])) { z-index: auto; }
 .stage-plane { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 120px; --inset: 12px; --tilt: 0; position: relative; isolation: isolate; padding: calc(var(--inset) + 10px) var(--inset) calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap)); }
 /* The desk is a tile marked with small crosses, so the room around the windows reads as room to draw. */
 .desk-panel { position: absolute; inset: 0; z-index: -1; border: 1px solid var(--rule); border-radius: var(--rad); background: var(--stage); }
@@ -221,7 +227,9 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .stage-plane.is-scripted > .ink-layer { pointer-events: none; touch-action: auto; cursor: auto; }
 
 /* On the stage's top edge sit two tabs: what the pointer does now, and the invitation to take over. */
-.desk-tabs { position: absolute; inset: -13px calc(var(--inset) + 4px) auto; z-index: 101; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26px; pointer-events: none; }
+/* As the frame grows the tabs slide from its edge to just inside it, so they stay whole where the frame meets the
+   edge of the window. */
+.desk-tabs { position: absolute; inset: calc(-13px + var(--stage-grow, 0) * 23px) calc(var(--inset) + 4px) auto; z-index: 101; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26px; pointer-events: none; }
 .mode-chip { position: relative; display: inline-flex; align-items: center; height: 26px; margin: 0; padding: 0 5px 0 10px; border: 1px solid var(--rule-2); border-radius: 9px; background: var(--card); font: 600 12.5px/1 var(--sans); white-space: nowrap; }
 .mode-chip .face { display: none; align-items: center; gap: 7px; }
 .mode-chip[data-mode="use"] .face[data-face="use"], .mode-chip[data-mode="draw"] .face[data-face="draw"] { display: inline-flex; }
@@ -246,6 +254,12 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   -webkit-mask-composite: xor; mask-composite: exclude; }
 .turn svg { fill: var(--neon-c); stroke: none; }
 .turn:focus-visible { border-radius: 9px; }
+/* The button that makes a grown demo small again: a small square tile in the frame's corner, where "Your turn" was. */
+.stage-plane > .stage-shrink { --stage-shrink-top: 7px; --stage-shrink-right: 14px; width: 32px; height: 32px; border: 1px solid var(--rule-2); border-radius: 9px; background: var(--card); color: var(--fg-2); transition: color var(--t-1) ease, border-color var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
+.stage-plane > .stage-shrink:hover { color: var(--fg); border-color: var(--fg-3); }
+.stage-plane > .stage-shrink:active { transform: scale(.92); }
+.stage-plane > .stage-shrink:focus-visible { border-radius: 9px; }
+.stage-plane > .stage-shrink svg { width: 14px; height: 14px; stroke-width: 1.8; }
 
 /* The sample windows are small working apps. In Use apps they answer; in Draw the ink layer lies over them. */
 .desk-windows { display: grid; gap: 12px; align-items: start; width: min(100%, 1040px); margin-inline: auto; }
@@ -294,7 +308,7 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .bars i { width: 100%; height: calc(100% - 17px); border-radius: 2px 2px 1px 1px; background: var(--fg-3); transform-origin: 50% 100%; transform: scaleY(calc(var(--v) / 64)); transition: transform var(--t-3) var(--ease-out), background var(--t-2) ease; }
 .bars .low i { background: var(--rule-2); }
 /* A message thread with a reply box. The thread scrolls inside its own box, so a new message moves nothing else. */
-.thread { display: flex; flex-direction: column; gap: 8px; height: 122px; padding: 12px 12px 10px; overflow-y: auto; overscroll-behavior: contain; font-size: 14px; line-height: 1.4; }
+.thread { display: flex; flex-direction: column; gap: 8px; height: 122px; padding: 12px 12px 10px; overflow-y: auto; font-size: 14px; line-height: 1.4; }
 .thread:focus-visible { outline-offset: -3px; }
 .bubble { align-self: flex-start; max-width: 94%; padding: 7px 11px 8px; border-radius: 11px 11px 11px 3px; background: var(--card-3); overflow-wrap: anywhere; }
 .bubble b { display: block; margin-bottom: 3px; font: 500 9.5px/1.2 var(--mono); letter-spacing: .02em; color: var(--fg-2); }
@@ -556,6 +570,8 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   .site-header .btn-small { padding: 0 14px; }
   /* On a phone the stage is taller than the screen, so the way out of drawing stays in reach. */
   #stage-done:not([hidden]) { position: fixed; left: 50%; bottom: 14px; z-index: 1200; translate: -50% 0; height: 44px; padding: 0 20px; border-color: transparent; background: var(--fg); color: var(--page); }
+  /* While the frame is grown the toolbar is at the bottom of the screen, with its own Draw button to leave drawing. */
+  :root:has(#desk[data-stage]:not([data-stage="small"])) #stage-done:not([hidden]) { visibility: hidden; }
 }
 @media (max-width: 599px) {
   .site-header .wrap { gap: 8px; }
@@ -569,6 +585,10 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   /* A phone's keyboard zooms the page when a field's text is under 16 px. */
   .reply input { font-size: 16px; }
   .foot-ctl { justify-content: flex-end; }
+  /* A phone's stage is taller than its screen, so the grown frame starts where the stage does. The windows start a
+     little lower, and the tabs and the button that slide inside have a row of their own. */
+  .stage-plane { padding-top: calc(var(--inset) + 28px); }
+  .stage-plane > .stage-shrink { --stage-shrink-top: 5px; --stage-shrink-right: 12px; }
 }
 @media (max-width: 379px) {
   .nav-try i { display: none; }
@@ -670,6 +690,7 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   .foot-nav { grid-column: span 9; }
 }
 @media (min-width: 1016px) {
+  .stage-plane > .stage-shrink { --stage-shrink-top: 10px; --stage-shrink-right: 16px; }
   .stage-plane { --tb-h: 145px; --tb-bottom: 14px; --tb-gap: 120px; --inset: 36px; }
   .slide-title { font-size: 25px; }
   .slide ul { font-size: 16px; gap: 9px; }
@@ -762,6 +783,8 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
    writes --tilt (1 in the pose, 0 flat) and takes the 3D away again once the plane is flat. In the pose the tile is
    a slab with a lit edge; the windows, the ink and the toolbar float above it, each on its own plane. */
 .motion .stage-scene { perspective: 2600px; perspective-origin: 50% 46%; }
+/* The desk is flat while its frame is not small, so the perspective goes too (it would keep the frame under the header). */
+.motion .stage-scene:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
 .motion .stage-plane:not(.is-flat) { isolation: auto; transform-style: preserve-3d; transform: translateY(calc(var(--tilt) * var(--iso-up) + var(--lift, 0) * var(--iso-dip))) rotateX(calc(var(--tilt) * var(--iso-x))) rotateZ(calc(var(--tilt) * var(--iso-z))) scale(calc(1 - var(--tilt) * (1 - var(--iso-s)) - var(--lift, 0) * .09)); will-change: transform; }
 .motion .stage-plane:not(.is-flat) > .desk-panel { z-index: auto; transform: translateZ(-1px); }
 .motion .stage-plane:not(.is-flat) > .slab { display: block; position: absolute; inset: 0; border-radius: var(--rad); background: var(--slab); transform: translateZ(calc(var(--k) * var(--tilt) * -3.5px - 1px)); pointer-events: none; }

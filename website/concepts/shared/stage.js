@@ -51,7 +51,8 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
     const style = document.createElement("style");
     style.dataset.growingStage = "";
     style.textContent = STYLE;
-    document.head.append(style);
+    // First in the head, so a page's own rules of the same weight (a restyled .stage-shrink) win.
+    document.head.prepend(style);
   }
   const scrim = document.body.appendChild(Object.assign(document.createElement("div"), { className: "stage-scrim" }));
   scrim.setAttribute("aria-hidden", "true");
@@ -176,6 +177,7 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
       }
       wants = false;
       anchor = window.scrollY;
+      away = 0;
       tint();
       emit("grow");
       startTween("scroll", toolbarMorph.expandDuration);
@@ -240,12 +242,40 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
   };
   addEventListener("pointerup", lift, true);
   addEventListener("pointercancel", lift, true);
-  ink?.on?.("shortcut", (name, how) => { if (!how?.scripted) join(); });
+  // Esc goes back to using apps: it is a way out, so it never opens the frame.
+  ink?.on?.("shortcut", (name, how) => { if (!how?.scripted && name !== "use") join(); });
   const controls = typeof tries === "string" ? [...document.querySelectorAll(tries)] : tries ? [...tries] : [];
   for (const control of controls) control.addEventListener("click", (e) => { if (e.isTrusted) join(); });
   button.addEventListener("click", () => shrink());
-  addEventListener("scroll", () => { lastScroll = performance.now(); if (anchor !== null || progress > 0) request(); }, { passive: true });
-  addEventListener("resize", () => { if (progress > 0) request(); });
+  // A window resize reflows the page, which moves the scroll position without the visitor scrolling (and before the
+  // resize event is heard). While that goes on the frame keeps the share it had after the visitor's last own scroll,
+  // and a fully grown stage is put back in place once the window rests.
+  let resizing = 0, held = 0, placing = 0, away = 0;
+  const hold = () => { anchor = window.scrollY - held; };
+  function replace() {
+    if (anchor === null || held !== 0 || pressed.size || tween) return;
+    const move = placement();
+    if (Math.abs(move) > 1) window.scrollBy({ top: move, behavior: "instant" });
+    anchor = window.scrollY;
+    away = 0;
+    request();
+  }
+  addEventListener("scroll", () => {
+    lastScroll = performance.now();
+    if (anchor !== null) { if (lastScroll < resizing) hold(); else away = window.scrollY - anchor; }
+    if (anchor !== null || progress > 0) request();
+  }, { passive: true });
+  addEventListener("resize", () => {
+    if (anchor !== null) {
+      const now = performance.now();
+      if (now > resizing) held = away;
+      resizing = now + 300;
+      hold();
+      clearTimeout(placing);
+      placing = setTimeout(replace, 340);
+    }
+    if (progress > 0) request();
+  });
   // A pointer that lifted outside the window is not pressed any more.
   addEventListener("blur", () => { pressed.clear(); joining.clear(); });
   // The keyboard leaving the stage for the page behind it makes the frame small, so the page is there to see.

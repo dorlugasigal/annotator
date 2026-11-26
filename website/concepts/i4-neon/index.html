@@ -90,10 +90,10 @@
         <div class="wrap stage-scene">
           <div class="stage-plane" id="desk">
             <i class="stage-shadow" aria-hidden="true"></i>
-            <i class="desk-panel" aria-hidden="true"></i>
+            <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
             <!-- On the stage's top edge: what the pointer does now, and the invitation. -->
             <div class="desk-tabs">
-              <p class="mode-chip" id="stage-mode" data-mode="use">
+              <p class="mode-chip" id="stage-mode" data-mode="use" data-stage-corner="top left">
                 <span class="face" data-face="use"><i aria-hidden="true"></i><b>Using apps</b><kbd data-cap="draw" aria-label="Control Shift 2 draws"><span data-for="mac">⌃⇧2</span><span data-for="windows">Ctrl+Shift+2</span></kbd></span>
                 <span class="face" data-face="draw"><i aria-hidden="true"></i><b>Drawing</b><kbd data-cap="use" aria-label="Esc goes back to the apps">Esc</kbd></span>
               </p>
@@ -165,7 +165,7 @@
                 </div>
               </section>
             </div>
-            <div class="dock" id="dock"></div>
+            <div class="dock" id="dock" data-stage-frame></div>
           </div>
         </div>
         <figcaption class="wrap bento stage-foot">

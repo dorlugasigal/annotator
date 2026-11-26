@@ -79,7 +79,7 @@
       <figure class="stage is-demo" id="stage">
         <div class="stage-space">
           <div class="screen" id="screen">
-            <div class="desk" aria-hidden="true"></div>
+            <div class="desk" data-stage-frame aria-hidden="true"></div>
             <div class="board" id="board">
               <div class="window app" id="report" role="group" aria-label="A sample weekly report. The numbers are made up.">
                 <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>Weekly report</span></div>
@@ -120,9 +120,9 @@
                 </div>
               </div>
             </div>
-            <div class="dock" id="dock"></div>
-            <button type="button" class="turn" id="turn" data-try hidden><svg viewBox="0 0 22 26" width="11" height="13" aria-hidden="true"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>Your turn</button>
-            <p class="mode-chip" id="mode-chip" data-mode="use"><i aria-hidden="true"></i><span id="mode-chip-name">Using apps</span></p>
+            <div class="dock-plane" data-stage-frame><div class="dock" id="dock"></div></div>
+            <button type="button" class="turn" id="turn" data-stage-corner="top left" data-try hidden><svg viewBox="0 0 22 26" width="11" height="13" aria-hidden="true"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>Your turn</button>
+            <p class="mode-chip" id="mode-chip" data-stage-corner="top right" data-mode="use"><i aria-hidden="true"></i><span id="mode-chip-name">Using apps</span></p>
             <span class="stage-pointer" id="stage-pointer" aria-hidden="true"><i></i><svg viewBox="0 0 22 26" width="22" height="26"><path d="M2 1.5V21l5.2-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg></span>
           </div>
         </div>

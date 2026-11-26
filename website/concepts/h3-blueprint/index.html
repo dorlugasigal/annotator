@@ -89,9 +89,9 @@
         <div class="stage-view" id="stage-view">
           <div class="stage-space">
             <div class="screen" id="screen">
-              <div class="desk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <div class="desk" data-stage-frame aria-hidden="true"><i></i><i></i><i></i><i></i></div>
               <!-- The same screen as a line drawing. With motion, the stage starts as this and becomes the real one. -->
-              <div class="wire-desk" aria-hidden="true">
+              <div class="wire-desk" data-stage-frame aria-hidden="true">
                 <svg class="wire-frame" focusable="false"><rect pathLength="1" width="100%" height="100%" rx="7"/></svg>
                 <span class="wire-dim across"></span>
                 <span class="wire-dim down"></span>
@@ -141,22 +141,22 @@
               <!-- How far the window floats above the desk, and the toolbar above the window, while the stage leans. -->
               <div class="gauge" id="gauge-window" aria-hidden="true"><i class="foot"></i><i class="post"></i><i class="post"></i></div>
               <div class="gauge" id="gauge-toolbar" aria-hidden="true"><i class="foot"></i><i class="post"></i><i class="post"></i></div>
-              <div class="dock" id="dock"></div>
-              <svg class="invite" aria-hidden="true" focusable="false"><rect pathLength="1" width="100%" height="100%" rx="8" stroke="url(#lagoon)"/></svg>
+              <div class="dock" id="dock" data-stage-frame></div>
+              <span class="invite" data-stage-frame aria-hidden="true"><svg focusable="false"><rect pathLength="1" width="100%" height="100%" rx="8" stroke="url(#lagoon)"/></svg></span>
+              <div class="crosshair" id="crosshair" data-stage-frame aria-hidden="true"><i></i><i></i></div>
               <!-- Which mode the stage is in, and the key that changes it. -->
-              <p class="mode-chip" id="mode-chip" data-mode="use" hidden>
+              <p class="mode-chip" id="mode-chip" data-mode="use" data-stage-corner="top left" hidden>
                 <i aria-hidden="true"></i><b id="mode-word">Using apps</b>
                 <kbd class="chip-key" data-when="use" aria-hidden="true"><span data-for="mac">&#x2303;&#x21E7;2</span><span data-for="windows">Ctrl+Shift+2</span></kbd>
                 <kbd class="chip-key" data-when="draw" aria-hidden="true">Esc</kbd>
               </p>
-              <button type="button" class="your-turn" id="your-turn" data-try hidden>
+              <button type="button" class="your-turn" id="your-turn" data-stage-corner="top right" data-try hidden>
                 <svg viewBox="0 0 34 16" width="34" height="16" aria-hidden="true"><path class="turn-line" pathLength="1" d="M2 11c4-8 7-8 9-2s5 6 8 0 6-6 9 1"/><path class="turn-pen" d="M0 0l-2.500 6.500L-.500 5.500l1.500 3.200 1.200-.600L.700 5l2.300-.200z"/></svg>
                 <span>Your turn</span>
                 <i class="turn-edge" aria-hidden="true"></i>
               </button>
             </div>
           </div>
-          <div class="crosshair" id="crosshair" aria-hidden="true"><i></i><i></i></div>
         </div>
         <figcaption>
           <div class="stage-notes">

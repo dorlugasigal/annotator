@@ -1,4 +1,5 @@
 import { createInk } from "/concepts/shared/ink.js";
+import { growingStage } from "/concepts/shared/stage.js";
 // The app's own motion: its click pulse, its Magic flight and its Pop, as keyframes for the page's own elements.
 import { clickPulse, magicFlight, travelFade, poseKeyframes, visibilityDuration } from "/concepts/shared/app-motion.js";
 
@@ -35,8 +36,9 @@ function localBox(el, surface) {
 }
 const standIn = (el, ink, surface) => ({
   getBoundingClientRect() {
-    const o = ink.layer.getBoundingClientRect(), b = localBox(el, surface);
-    return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h };
+    // The engine measures from the surface's corner: its layer's, less the room the layer has past the surface.
+    const o = ink.layer.getBoundingClientRect(), room = ink.room, b = localBox(el, surface);
+    return { left: o.left + (room?.left || 0) + b.x, top: o.top + (room?.top || 0) + b.y, width: b.w, height: b.h };
   },
 });
 
@@ -97,7 +99,14 @@ const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $(
 // The toolbar is the engine's own, as someone who uses it has set it up (its "customized" preset): a gradient as the
 // color (here the app's Orchid), curved arrows, the roughest line. It rests on the Arrow tool so its properties row
 // shows that. The engine itself starts the row closed on a phone, which keeps the bar compact there.
-const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, gradient: "orchid", tool: "arrow", moreHref: "#install" });
+// Hide and Show (the toolbar's button, Control-2) move in the app's Magic style.
+const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, gradient: "orchid", tool: "arrow", visibility: "magic", moreHref: "#install" });
+// Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the desk's
+// frame opens up to fill the window, and scrolling brings it back. The desk itself does not move: in index.html the
+// panel, the cue's ring and the dock carry data-stage-frame, and the two tags on the rim data-stage-corner.
+const stage = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion, isFlat: () => desk.classList.contains("is-flat") });
+// Joining in ends the script, lays the desk flat (the frame grows only once it is) and retires "Your turn".
+stage.on("join", () => { takeOver(); turnTaken = true; showTurn(); });
 
 // Theme --------------------------------------------------------------------------------------------
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
@@ -366,14 +375,16 @@ ink.on("tool", (tool) => { chosen = tool; });
 const keepChoice = () => { if (chosen && ink.state.tool !== chosen) ink.setTool(chosen, ink.state.mode !== "draw"); };
 
 const replay = $("#stage-replay"), done = $("#stage-done"), turn = $("#your-turn");
-let run = null, rounds = 0, drew = false, seenWaiters = [];
+let run = null, rounds = 0, turnTaken = false, seenWaiters = [];
+// What the script has done to the toolbar and the drawings that it has not undone yet: "shrunk", "hidden" or nothing.
+let scriptLeft = "";
 const setRunning = (running) => {
   replay.dataset.state = running ? "playing" : "";
   $("b", replay).textContent = running ? "Pause" : "Replay";
 };
-// "Your turn" shows once the demo has played through, and whenever it is not playing, until the visitor draws.
+// "Your turn" shows once the demo has played through, and whenever it is not playing, until the visitor joins in.
 function showTurn() {
-  const hide = drew || (Boolean(run) && rounds === 0);
+  const hide = turnTaken || (Boolean(run) && rounds === 0);
   if (turn.hidden === hide) return;
   turn.hidden = hide;
   if (!hide && motion) playMotion(turn, poseKeyframes("pop", { appearing: true, annotation: false }));
@@ -391,23 +402,30 @@ async function wipe(signal) {
   if (!scriptIds.size) return;
   desk.classList.add("is-wiping");
   await wait(340, signal);
-  clearScript();
+  // A visitor who joins in while the drawings fade keeps them.
+  if (!signal?.aborted) clearScript();
   desk.classList.remove("is-wiping");
 }
 // The app's Shrink: the toolbar becomes its one button, and grows back.
 async function shrinkAndGrow(signal) {
+  scriptLeft = "shrunk";
   await settled(() => ink.setCollapsed(true), 450, signal);
   await wait(900, signal);
+  if (signal.aborted) return;
   await settled(() => ink.setCollapsed(false), 450, signal);
+  scriptLeft = "";
 }
 // The app's Hide and Show (Control-2 in the app): the drawings and the toolbar go, then both come back, in one of
 // the styles the app offers. The first round is Magic; later rounds take the next style in turn.
 const SHOWS = ["magic", "pop", "drop", "focus"];
 async function hideAndShow(signal) {
   const style = SHOWS[(rounds - 1) % SHOWS.length];
+  scriptLeft = "hidden";
   await settled(() => ink.setHidden(true, { style, pill: false }), 800, signal);
   await wait(420, signal);
+  if (signal.aborted) return;
   await settled(() => ink.setHidden(false, { style }), 800, signal);
+  scriptLeft = "";
 }
 async function loop(signal) {
   while (!signal.aborted) {
@@ -443,22 +461,28 @@ function start() {
     ink.hideGhost();
     hand = null;
     keepChoice();
-    if (ink.state.hidden) byScript(() => ink.setHidden(false));
-    else if (ink.collapsed && !toolbarPressed) byScript(() => ink.setCollapsed(false));
+    // What the script hid or shrank comes back. What the visitor hid (Control-2, the Hide button) stays hidden.
+    if (scriptLeft === "hidden" && ink.state.hidden) byScript(() => ink.setHidden(false));
+    else if (scriptLeft === "shrunk" && ink.collapsed && !ink.state.hidden && !toolbarPressed) byScript(() => ink.setCollapsed(false));
+    scriptLeft = "";
     if (run?.abort === abort) { run = null; setRunning(false); showTurn(); }
   });
   run = { abort, finished };
   setRunning(true);
   showTurn();
 }
+// Stops the demo. A second call while it is still winding down waits for the same end.
+let winding = Promise.resolve();
 async function stop() {
-  if (!run) return;
-  const { abort, finished } = run;
-  run = null;
-  abort.abort();
-  setRunning(false);
-  showTurn();
-  await finished;
+  if (run) {
+    const { abort, finished } = run;
+    run = null;
+    winding = finished;
+    abort.abort();
+    setRunning(false);
+    showTurn();
+  }
+  await winding;
 }
 async function restart() {
   await stop();
@@ -505,7 +529,7 @@ ink.on("mode", (mode) => {
   if (own) { if (run || mode === "draw") takeOver(); scriptDrawing = false; }
   showMode(mode, own);
 });
-ink.on("mark", () => { drew = true; showTurn(); });
+ink.on("mark", () => { turnTaken = true; showTurn(); });
 // A press on the stage while the demo plays ends the demo. If the script was drawing, the press is not a stroke:
 // the desk may still be tilted, and the visitor has not chosen to draw.
 desk.addEventListener("pointerdown", (e) => {
@@ -539,8 +563,9 @@ fontsReady.then(async () => {
   else { for (const mark of await ink.perform(story(), { cursor: false })) scriptIds.add(mark.id); ink.reflow(); showTurn(); }
 });
 
-// Try it here. From anywhere on the page: the stage comes into view, the demo stops and its drawings go, Draw is
-// on with the Pen, and a ring of light goes round the stage once.
+// Try it here. From anywhere on the page: the demo stops and its drawings go, Draw is on with the Pen, and a ring
+// of light goes round the stage once. The growing stage hears the same click: it brings the stage into view and
+// opens its frame.
 let trying = false;
 async function tryIt(e) {
   e?.preventDefault();
@@ -550,9 +575,7 @@ async function tryIt(e) {
   clearScript();
   ink.setTool("pen");
   showMode("draw", true);
-  const r = scene.getBoundingClientRect(), top = r.top + scrollY, header = parseFloat(getComputedStyle(root).getPropertyValue("--header-h")) || 72;
-  // The whole stage with its line of words if it fits the window, else its top edge under the header.
-  scrollTo({ top: Math.max(0, Math.min(top - header - 26, top + r.height + 96 - innerHeight)), behavior: motion ? "smooth" : "auto" });
+  if (ink.state.hidden) await ink.setHidden(false, { animate: false });
   await Promise.race([whenSeen(), wait(1600)]);
   trying = false;
   ink.toolbar.querySelector('[data-tool="pen"]')?.focus({ preventScroll: true });
@@ -635,12 +658,13 @@ if (motion) {
   tasks.push((dt, now) => {
     const t = tiltNow, rect = sceneRect || scene.getBoundingClientRect();
     // Lean toward a pointer that is over or near the stage.
-    const near = t > 0 && pointer && pointer[0] > rect.left - 120 && pointer[0] < rect.right + 120 && pointer[1] > rect.top - 160 && pointer[1] < rect.bottom + 120;
+    const near = t > 0 && !userFlat && pointer && pointer[0] > rect.left - 120 && pointer[0] < rect.right + 120 && pointer[1] > rect.top - 160 && pointer[1] < rect.bottom + 120;
     let leaning = false;
     for (const f of floats) {
       const dx = near ? clamp((pointer[0] - rect.left - f.screen[0]) / 520, -1, 1) : 0, dy = near ? clamp((pointer[1] - rect.top - f.screen[1]) / 420, -1, 1) : 0;
-      // Once the desk is flat the windows come to rest quickly, so the plain 2D page is back before a first stroke ends.
-      [dx * 7 * depth * t, dy * 6 * depth * t, -dy * 4.5 * t, dx * 5.5 * t].forEach((to, i) => { f.lean[i].to = to; if (f.lean[i].step(t ? dt : dt * 3)) leaning = true; });
+      // Once the visitor has taken over the windows come to rest quickly, so the desk is flat and plain before a
+      // first stroke ends and before its frame grows.
+      [dx * 7 * depth * t, dy * 6 * depth * t, -dy * 4.5 * t, dx * 5.5 * t].forEach((to, i) => { f.lean[i].to = to; if (f.lean[i].step(t && !userFlat ? dt : dt * 3)) leaning = true; });
     }
     if (t === 0 && !leaning) { if (!flat) settle(); return false; }
     if (flat) { flat = false; desk.classList.remove("is-flat"); }
@@ -688,8 +712,9 @@ if (motion) {
     return true;
   });
   // A soft light on the desk follows the pointer.
+  const panel = $(".desk-panel", desk);
   scene.addEventListener("pointermove", (e) => {
-    const r = scene.getBoundingClientRect();
+    const r = panel.getBoundingClientRect();
     desk.style.setProperty("--px", `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
     desk.style.setProperty("--py", `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
   }, { passive: true });
@@ -875,7 +900,8 @@ addEventListener("blur", () => caps.forEach((cap) => cap.classList.remove("is-do
 for (const set of $$(".keyset")) set.addEventListener("click", async () => {
   const keys = $$(".key", set);
   for (const key of keys) { key.classList.add("is-down"); await wait(motion ? 70 : 0); }
-  if (set.dataset.set === "draw") ink.setMode(ink.state.mode === "draw" ? "use" : "draw"); else ink.setMode("use");
+  // As the keys themselves: Control-Shift-2 is Draw, and Esc is the way back.
+  ink.setMode(set.dataset.set === "draw" ? "draw" : "use");
   await wait(160);
   for (const key of keys) { key.classList.remove("is-down"); await wait(motion ? 50 : 0); }
 });

@@ -1,4 +1,5 @@
 import { createInk } from "/concepts/shared/ink.js";
+import { growingStage } from "/concepts/shared/stage.js";
 import { css as CURVE, toolbarMorph, poseKeyframes, clickPulse } from "/concepts/shared/app-motion.js";
 
 const root = document.documentElement;
@@ -53,9 +54,10 @@ function anchorsFor(ink, surface) {
   const rect = (element) => localBox(element, surface);
   return {
     rect,
-    // Stands in for an element where a step needs one ("around", "over").
+    // Stands in for an element where a step needs one ("around", "over"). The engine measures from the surface's
+    // corner, which stays put while a growing stage lets the ink layer reach past it.
     box: (element) => ({
-      getBoundingClientRect() { const o = ink.layer.getBoundingClientRect(), b = rect(element); return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h }; },
+      getBoundingClientRect() { const o = surface.getBoundingClientRect(), b = rect(element); return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h }; },
     }),
     point: (element, ax = .5, ay = .5, dx = 0, dy = 0) => () => { const b = rect(element); return [b.x + b.w * ax + dx, b.y + b.h * ay + dy]; },
   };
@@ -188,38 +190,53 @@ requestAnimationFrame(() => report.classList.add("is-live"));
 // Hero stage --------------------------------------------------------------------------------------
 const stage = $("#stage"), screen = $("#screen"), board = $("#board"), number = $("#ring-target"), plot = $("#plot"), dip = $("#dip"), secret = $("#private");
 // The toolbar keeps the state the engine gives it (its properties row included), so no colors or sizes are set here.
-// Its selected stroke color is the app's Ocean gradient, the same one the page uses as its accent.
-const ink = createInk({ surface: board, toolbarParent: $("#dock"), toolbarPosition: "absolute", appearance: root.dataset.theme === "light" ? "light" : "dark", gradient: "ocean", tool: "pen", moreHref: "#install" });
+// Its selected stroke color is the app's Ocean gradient, the same one the page uses as its accent. Hide drawings and
+// tools (the toolbar's button, or Control-2) moves in the app's Magic style, as the scripted demo's does.
+const ink = createInk({ surface: board, toolbarParent: $("#dock"), toolbarPosition: "absolute", appearance: root.dataset.theme === "light" ? "light" : "dark", gradient: "ocean", tool: "pen", visibility: "magic", moreHref: "#install" });
 const at = anchorsFor(ink, board);
 // Whether this engine shows, hides and shrinks things the way the app does (it then answers with a promise).
 const appMoves = Boolean(ink.setCollapsed(ink.collapsed)?.then);
+// Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the screen's
+// frame opens up to fill the window, and scrolling brings it back. The board does not move: in index.html the desk and
+// the toolbar's plane carry data-stage-frame and the two tags data-stage-corner. The frame grows only once the screen
+// lies flat (`lean` and `lift` are the two followers further down).
+let lean = null, lift = null;
+const growing = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => !lean || (lean.value === 0 && lift.value === 0) });
 // The screen keeps room under the window for the toolbar. It remembers the tallest the toolbar has been at this
-// size, so opening and closing the properties row moves nothing on the page.
+// size, so opening and closing the properties row moves nothing on the page. A grown frame has all the room it
+// needs, so the board keeps its size until the frame is small again.
 const tallest = {};
+function reserve() {
+  const key = tallest.now;
+  if (!key || growing.state !== "small" || (tallest.shown === key && tallest.room === tallest[key])) return;
+  tallest.shown = key;
+  tallest.room = tallest[key];
+  const room = tallest[key];
+  requestAnimationFrame(() => { screen.style.setProperty("--tb-h", `${room}px`); schedule(); });
+}
 ink.on("layout", ({ height, size, rows }) => {
   if (!height || ink.collapsed) return;
   const key = `${size}|${rows}`;
-  if (height <= (tallest[key] || 0) && tallest.shown === key) return;
   tallest[key] = Math.max(height, tallest[key] || 0);
-  tallest.shown = key;
-  const room = tallest[key];
-  requestAnimationFrame(() => { screen.style.setProperty("--tb-h", `${room}px`); schedule(); });
+  tallest.now = key;
+  reserve();
 });
+growing.on("change", ({ state }) => { if (state === "small") { reserve(); schedule(); } });
 ink.fit();
 
 // The stage leans back at the top of the page and comes flat as it is scrolled up. It is also flat whenever
 // the visitor is using it, because a flat plane is where the pointer and the ink agree.
 let engaged = false, lifted = !motion;
 if (motion) {
-  const lean = follow((k) => {
+  lean = follow((k) => {
     stage.style.setProperty("--tilt", (k * (innerWidth < 600 ? 13 : 19)).toFixed(3));
     stage.style.setProperty("--scale", (1 - k * .055).toFixed(4));
     stage.classList.toggle("is-live", k > 0);
   });
-  const lift = follow((k) => stage.style.setProperty("--lift", k.toFixed(4)), 150);
+  lift = follow((k) => stage.style.setProperty("--lift", k.toFixed(4)), 150);
   readers.push(({ y, h }) => {
     const top = stage.getBoundingClientRect().top + y, range = clamp(top - 90, 200, Math.max(200, h * .5));
-    const k = engaged ? 0 : 1 - smooth(clamp(y / range));
+    const k = engaged || growing.state !== "small" ? 0 : 1 - smooth(clamp(y / range));
     lean.target = k;
     lift.target = lifted ? k : 0;
   });
@@ -309,24 +326,24 @@ async function press(element) {
 // One round tells the app's idea: draw, then use the app underneath while the drawings stay, then draw again.
 // It runs while the stage is on screen and stops for good the moment the visitor does anything on the stage.
 const replay = $("#replay"), turn = $("#turn"), onStage = watcher(screen, .25);
-const demo = { run: 0, cut: 0, playing: false, rounds: 0, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null };
-let hasDrawn = false;
+const demo = { run: 0, cut: 0, playing: false, rounds: 0, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, hid: false };
+let hasDrawn = false, joined = false;
 function showControl() {
   replay.hidden = false;
   replay.classList.toggle("is-off", !demo.playing);
   replay.lastElementChild.textContent = demo.playing ? "Pause" : "Replay";
   showDone();
 }
-// "Your turn" shows once the demo has been through a round, or is not running, until the visitor has drawn.
+// "Your turn" shows once the demo has been through a round, or is not running, until the visitor has joined in.
 function showTurn() {
-  const on = !hasDrawn && (demo.rounds > 0 || !demo.playing);
+  const on = !hasDrawn && !joined && (demo.rounds > 0 || !demo.playing);
   if (on && turn.hidden) {
     turn.hidden = false;
     // It arrives the way things arrive in the app with the Pop style.
     if (motion) playKeys(turn, poseKeyframes("pop", { appearing: true, annotation: false }));
   }
   turn.classList.toggle("is-on", on);
-  if (hasDrawn) turn.hidden = true;
+  if (hasDrawn || joined) turn.hidden = true;
 }
 function forget() {
   for (const id of demo.ids) ink.remove(id);
@@ -339,14 +356,17 @@ async function hideAll() {
   await leave(ink, ink.marks().map((mark) => mark.id));
   scripted(() => ink.setHidden(true));
 }
-// Back to how the stage rests, at once: nothing leaving, nothing hidden, the toolbar open.
+// Back to how the stage rests, at once: nothing leaving, the toolbar open, and what the script hid back in place.
+// What the visitor hid (the toolbar's Hide button, or Control-2) stays hidden.
 function tidy() {
   pointerHide();
   ink.hideGhost();
   points.forEach((point) => point.classList.remove("is-shown"));
   $$(".is-leaving", ink.layer).forEach((mark) => mark.classList.remove("is-leaving"));
+  if (ink.state.hidden && !demo.hid) return;
   scripted(() => { if (ink.state.hidden) ink.setHidden(false, { animate: false }); if (ink.collapsed) ink.setCollapsed(false, { animate: false }); });
 }
+ink.on("hide", (hidden) => { demo.hid = hidden && byScript > 0; });
 function stopDemo() {
   if (!demo.playing) return;
   demo.playing = false;
@@ -461,17 +481,19 @@ if (window.IntersectionObserver) new IntersectionObserver(([entry]) => {
   engage(false);
 }).observe(screen);
 
-// Try it here: from anywhere on the page, the stage comes into view with the Pen ready.
+// Try it here: from anywhere on the page, the stage is the visitor's, flat and with the Pen ready. The growing stage
+// brings it into view and opens it up once the pointer has lifted.
 function tryIt() {
   stopDemo();
   showTurn();
   ink.setTool("pen");
   engage(true);
-  screen.scrollIntoView({ block: "center", behavior: motion ? "smooth" : "auto" });
   stage.classList.remove("is-cued");
   void stage.offsetWidth;
   stage.classList.add("is-cued");
 }
+// Joining in ends the script, retires "Your turn" and lays the screen flat: the frame grows only once it is.
+growing.on("join", () => { joined = true; stopDemo(); showTurn(); engage(true); });
 for (const control of $$("[data-try]")) control.addEventListener("click", (e) => { e.preventDefault(); tryIt(); });
 // While the demo plays, the ink lets presses through. A press on the sample app in Use apps uses the app; a
 // press anywhere else on the stage hands it over, ready to draw. A touch that scrolls the page is left alone.
@@ -824,7 +846,8 @@ for (const combo of $$(".combo")) {
     keys.forEach((key, i) => setTimeout(() => key.classList.add("is-down"), i * 45));
     setTimeout(() => keys.forEach((key) => key.classList.remove("is-down")), 190 + keys.length * 45);
     stopDemo();
-    if (combo.dataset.combo === "draw") ink.setMode(ink.state.mode === "draw" ? "use" : "draw"); else ink.setMode("use");
+    // As with the keys themselves: Control-Shift-2 only ever starts drawing, and Esc goes back to the app.
+    ink.setMode(combo.dataset.combo === "draw" ? "draw" : "use");
   });
 }
 showMode(ink.state.mode);

@@ -1,4 +1,5 @@
 import { createInk } from "/concepts/shared/ink.js";
+import { growingStage } from "/concepts/shared/stage.js";
 import { ease, DURATIONS, workspaceTiming, distanceOrder, poseKeyframes, pose, dissolve } from "/concepts/shared/app-motion.js";
 import * as fx from "./fx.js";
 import { createApps } from "./apps.js";
@@ -42,7 +43,8 @@ function anchorsFor(ink, surface) {
     rect,
     // Stands in for an element where a step needs one ("around", "over").
     box: (element) => ({
-      getBoundingClientRect() { const o = ink.layer.getBoundingClientRect(), b = rect(element); return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h }; },
+      // The engine measures from the surface's corner. While the stage is grown the layer reaches past it (ink.room).
+      getBoundingClientRect() { const o = ink.layer.getBoundingClientRect(), room = ink.room, b = rect(element); return { left: o.left + (room?.left || 0) + b.x, top: o.top + (room?.top || 0) + b.y, width: b.w, height: b.h }; },
     }),
     point: (element, ax = .5, ay = .5, dx = 0, dy = 0) => () => { const b = rect(element); return [b.x + b.w * ax + dx, b.y + b.h * ay + dy]; },
   };
@@ -87,21 +89,26 @@ readers.push(({ y }) => header.classList.toggle("is-stuck", y > 8));
 // Hero stage --------------------------------------------------------------------------------------
 const stage = $("#stage"), screen = $("#screen"), board = $("#board"), dock = $("#dock"), dockFx = $("#dock-fx"), stageFx = $("#stage-fx"), trails = $(".fx-svg", stageFx);
 const number = $("#ring-target"), plot = $("#plot"), dip = $("#dip"), secret = $("#private");
+// Room on each side of the toolbar inside the stage's frame.
+const barMargin = () => (innerWidth < 600 ? 10 : 22);
 // The toolbar keeps the state the engine gives it (its properties row included), so no colors or sizes are set here.
 // Its selected stroke color is the app's Forest gradient, the same one the page uses as its accent.
-const ink = createInk({ surface: board, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme === "light" ? "light" : "dark", gradient: "forest", tool: "pen", moreHref: "#install" });
+const ink = createInk({ surface: board, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme === "light" ? "light" : "dark", gradient: "forest", tool: "pen", moreHref: "#install", visibility: "magic", toolbarMargin: barMargin() });
+addEventListener("resize", () => ink.fit({ margin: barMargin() }));
 const at = anchorsFor(ink, board);
 // The screen keeps room above the apps for the toolbar. It remembers the tallest the toolbar has been at this
-// size, so opening and closing the properties row moves nothing on the page.
+// size, so opening and closing the properties row moves nothing on the page. While the stage is grown the room
+// is left as it is (the apps must not move); only what sits under the toolbar, the mode chip, follows it.
 const tallest = {};
 ink.on("layout", ({ height, size, rows }) => {
   if (!height || ink.collapsed) return;
-  const key = `${size}|${rows}`;
-  if (height <= (tallest[key] || 0) && tallest.shown === key) return;
+  const key = `${size}|${rows}`, small = (screen.dataset.stage || "small") === "small";
+  if (height <= (tallest[key] || 0) && tallest.shown === key && small === tallest.small) return;
   tallest[key] = Math.max(height, tallest[key] || 0);
   tallest.shown = key;
+  tallest.small = small;
   const room = tallest[key];
-  requestAnimationFrame(() => { screen.style.setProperty("--tb-h", `${room}px`); schedule(); });
+  requestAnimationFrame(() => { screen.style.setProperty("--tb-now", `${room}px`); if (small) screen.style.setProperty("--tb-h", `${room}px`); schedule(); });
 });
 ink.fit();
 
@@ -116,10 +123,11 @@ shiftOf = (node) => (node.classList?.contains("window") ? apps.shiftOf(node) : n
 
 // The stage leans back and a little to one side at the top of the page, and comes flat as it is scrolled up. It
 // is also flat whenever the visitor is using it, because a flat plane is where the pointer and the ink agree.
-let engaged = false, lifted = !motion;
+let engaged = false, lifted = !motion, tilt = 0;
 if (motion) {
   const lean = follow((k) => {
     const narrow = innerWidth < 600;
+    tilt = k;
     stage.style.setProperty("--tilt", (k * (narrow ? 9 : 13)).toFixed(3));
     stage.style.setProperty("--yaw", (k * (narrow ? 0 : -5)).toFixed(3));
     stage.style.setProperty("--scale", (1 - k * .035).toFixed(4));
@@ -134,6 +142,15 @@ if (motion) {
   });
 }
 const engage = (on) => { if (engaged !== on) { engaged = on; schedule(); } };
+
+// Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the stage's
+// frame opens up to fill the window, and scrolling brings it back (shared/stage.js). The apps do not move: in
+// index.html the desk and the dock carry data-stage-frame, and the mode chip's row data-stage-corner.
+const grow = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => tilt === 0 });
+// Joining in ends the script, retires "Your turn" and lays the stage flat (the frame grows only once it is).
+grow.on("join", () => { demo.joined = true; takeOver(); engage(true); showTurn(); });
+// Back at its own size, the toolbar's room is measured again.
+grow.on("change", ({ state }) => { if (state === "small") ink.fit(); });
 
 // Whether the stage is in front of the visitor. When it leaves, drawing ends (so keys and touches go back to the
 // page) and the toolbar shrinks to its one button; when it comes back the toolbar grows again.
@@ -237,7 +254,7 @@ function showChip(mode) {
 // hidden and shown in one of the app's styles, and it starts again. It stops for good when the visitor takes over.
 const STYLES = ["magic", "pop", "drop", "corners", "focus", "dissolve"];
 const STOP = Symbol("stop");
-const demo = { run: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, round: 0, mode: "use", moves: new Set(), arrived: !motion, drew: false };
+const demo = { run: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, round: 0, mode: "use", moves: new Set(), arrived: !motion, joined: false };
 function showControls() {
   replay.hidden = !motion;
   replay.classList.toggle("is-off", !demo.playing);
@@ -245,9 +262,9 @@ function showControls() {
   done.hidden = demo.playing || ink.state.mode !== "draw";
   showTurn();
 }
-// "Your turn" shows once the first round is over and whenever the loop is not running, until the visitor draws.
+// "Your turn" shows once the first round is over and whenever the loop is not running, until the visitor joins in.
 function showTurn() {
-  const show = !demo.drew && (demo.round > 0 || !demo.playing) && stage.classList.contains("is-ready");
+  const show = !demo.joined && (demo.round > 0 || !demo.playing) && stage.classList.contains("is-ready");
   if (show === !turn.hidden) return;
   turn.hidden = !show;
   if (show && motion) fx.play(turn, poseKeyframes("pop", { appearing: true, annotation: false }), { fill: "none" });
@@ -281,7 +298,7 @@ function stopDemo(pausing) {
   for (const g of demo.moves) g.cancel();
   demo.moves.clear();
   stage.classList.remove("is-scripted");
-  if (onStage.near) { shrunkByPage = false; setBar(false); }
+  if (onStage.near && !ink.hidden) { shrunkByPage = false; setBar(false); }
   quiet(() => { if (pausing) ink.setMode("use"); });
   lifted = true;
   showControls();
@@ -351,7 +368,7 @@ async function playDemo() {
         const from = await point(apps.chatBar, .3, .5);
         ink.clickGhost();
         apps.raise(apps.chat);
-        await tween(640, (t) => { const [x, y] = apps.moveTo(apps.chat, -44 * ease.standard(t), 22 * ease.standard(t)); ink.placeGhost([from[0] + x, from[1] + y]); });
+        await tween(640, (t) => { if (!live()) return; const [x, y] = apps.moveTo(apps.chat, -44 * ease.standard(t), 22 * ease.standard(t)); ink.placeGhost([from[0] + x, from[1] + y]); });
         await step(320);
         await point(apps.input, .3, .5);
         ink.clickGhost();
@@ -402,7 +419,7 @@ async function playDemo() {
 }
 
 ink.on("tool", (tool) => { demo.picked = tool; });
-ink.on("mark", () => { demo.drew = true; takeOver(); showTurn(); });
+ink.on("mark", () => { demo.joined = true; takeOver(); showTurn(); });
 // A scripted Esc is shown on the stage's own keys: they go down, and come back with a pop.
 ink.on("shortcut", (mode, info) => {
   if (!info?.scripted) { takeOver(); return; }
@@ -430,7 +447,8 @@ replay.addEventListener("click", () => {
 });
 done.addEventListener("click", () => ink.setMode("use"));
 
-// "Try it": from anywhere on the page, the stage comes into view, the loop stops, and the Pen is ready to draw.
+// "Try it": from anywhere on the page, the stage comes into view and grows (the shared piece does both), the loop
+// stops, and the Pen is ready to draw.
 function tryIt(event) {
   event?.preventDefault();
   takeOver();
@@ -440,19 +458,11 @@ function tryIt(event) {
     ink.setTool("pen");
     engage(true);
     ink.toolbar.querySelector('[data-tool="pen"]')?.focus({ preventScroll: true });
-    stage.classList.remove("is-cued");
-    void stage.offsetWidth;
-    stage.classList.add("is-cued");
   };
-  const b = stage.getBoundingClientRect(), headerHeight = header.offsetHeight, bottom = screen.getBoundingClientRect().bottom;
-  if (b.top < headerHeight || bottom > innerHeight - 8) scrollTo({ top: Math.max(0, scrollY + b.top - headerHeight - 16), behavior: motion ? "smooth" : "auto" });
   schedule();
   // The stage has to be in front before drawing starts, or the page would take the mode back.
   let tries = 0;
-  const whenThere = () => {
-    const top = stage.getBoundingClientRect().top;
-    if ((onStage.near && top > -40 && top < innerHeight * .6) || ++tries > 120) start(); else requestAnimationFrame(whenThere);
-  };
+  const whenThere = () => { if ((onStage.near && grow.state !== "small") || ++tries > 180) start(); else requestAnimationFrame(whenThere); };
   requestAnimationFrame(whenThere);
 }
 for (const element of $$("[data-try]")) element.addEventListener("click", tryIt);
@@ -870,7 +880,7 @@ for (const combo of $$(".combo")) {
     const keys = $$(".key", combo);
     keys.forEach((key, i) => setTimeout(() => press(key), i * 45));
     setTimeout(() => keys.forEach(lift), 190 + keys.length * 45);
-    if (combo.dataset.combo === "draw") ink.setMode(ink.state.mode === "draw" ? "use" : "draw"); else ink.setMode("use");
+    ink.setMode(combo.dataset.combo === "draw" ? "draw" : "use");
   });
 }
 

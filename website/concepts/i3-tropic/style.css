@@ -205,7 +205,9 @@ h1 { font-size: clamp(47px, 11.6vw, 84px); line-height: .95; font-weight: 520; l
 .stage-shadow { position: absolute; inset: 14% 4% -2%; border-radius: 40px; background: var(--shade); filter: blur(38px); opacity: .16; pointer-events: none; }
 .stage-plane { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 150px; --inset: 12px; --tilt: 0; --lift: 0; position: relative; isolation: isolate; padding: calc(var(--inset) + 12px) var(--inset) calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap)); }
 /* The desk is a sheet ruled into twelve columns, so the room around the windows reads as room to draw. */
-.desk-panel { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: var(--r-l); background: repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px calc(100% / 12)) 0 0 / calc(100% - 1px) 100%, var(--stage); box-shadow: inset 0 0 0 1px var(--line-strong); }
+/* The hairline columns keep the sheet's own measure and start at its left edge, so they stay where they are while
+   the frame opens around the sheet (shared/stage.js moves the panel's edges with --stage-left and --stage-right). */
+.desk-panel { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: var(--r-l); background: linear-gradient(to right, var(--line) 0 1px, transparent 1px) var(--stage-left, 0px) 0 / calc((100% - var(--stage-left, 0px) - var(--stage-right, 0px)) / 12) 100% repeat-x, var(--stage); box-shadow: inset 0 0 0 1px var(--line-strong); }
 /* The edge of the sheet, in the gradient: it lights up once when the stage is handed to the visitor. */
 .desk-panel::before { content: ""; position: absolute; inset: 0; padding: 2px; border-radius: inherit; background: var(--accent-grad); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: 0; pointer-events: none; }
 .stage-plane > .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
@@ -216,7 +218,7 @@ h1 { font-size: clamp(47px, 11.6vw, 84px); line-height: .95; font-weight: 520; l
 .dock > .ink-toolbar:not(.is-placed) { bottom: var(--tb-bottom); }
 
 /* The mode, on a tab that sits across the top edge of the sheet. In Draw it is inked. */
-.mode-chip { position: absolute; left: max(12px, var(--inset) - 8px); top: 0; translate: 0 -50%; }
+.mode-chip { position: absolute; left: max(12px, var(--inset) - 8px); top: 0; translate: 0 var(--tab-y); }
 .mode-chip > span { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 6px 0 10px; border: 1px solid var(--line-strong); border-radius: var(--r-s); background: var(--page); color: var(--text); font: 600 13px/1 var(--sans); white-space: nowrap; }
 .mode-chip b { font-weight: inherit; }
 .mode-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
@@ -320,8 +322,18 @@ h1 { font-size: clamp(47px, 11.6vw, 84px); line-height: .95; font-weight: 520; l
 #stage-done { margin-top: 4px; }
 #stage-done[hidden] { display: inline-flex; visibility: hidden; }
 /* Pause and Replay sit across the sheet's top edge, opposite the mode, so they are on the first screen. */
-.stage-replay { position: absolute; right: max(12px, var(--inset) - 8px); top: 0; translate: 0 -50%; min-width: 88px; height: 28px; background: var(--page); pointer-events: auto; }
+.stage-replay { position: absolute; right: calc(max(12px, var(--inset) - 8px) + 36px * var(--stage-grow, 0)); top: 0; translate: 0 var(--tab-y); min-width: 88px; height: 28px; background: var(--page); pointer-events: auto; }
 .stage-replay:hover { background: var(--surface-2); }
+/* The demo's frame opens up to fill the window once the visitor joins in, and scrolling closes it (shared/stage.js).
+   The frame is the sheet's own panel. The two tabs on its top edge come inside as it opens (--tab-in is how far
+   below the edge they end up), and the button that closes it again takes the corner, drawn as one more tab. */
+:root { --stage-scrim: var(--page); }
+.stage-plane { --stage-radius: var(--r-l); --tab-in: 12px; --tab-y: calc(-14px + (14px + var(--tab-in)) * var(--stage-grow, 0)); }
+.stage-plane > .stage-shrink { --stage-shrink-top: var(--tab-y); --stage-shrink-right: max(12px, var(--inset) - 8px); width: 28px; height: 28px; border: 1px solid var(--line-strong); border-radius: var(--r-s); background: var(--page); color: var(--text); opacity: var(--stage-grow, 0); transition: border-color var(--t-1) ease, background var(--t-1) ease; }
+.stage-plane > .stage-shrink::before { content: ""; position: absolute; inset: -9px; }
+.stage-plane > .stage-shrink:hover { border-color: var(--text); background: var(--surface-2); }
+.stage-plane > .stage-shrink:active { transform: translateY(1px); }
+.stage-plane > .stage-shrink svg { width: 14px; height: 14px; stroke-width: 1.5; }
 
 /* 2. What you can do -------------------------------------------------------------------------- */
 /* Without motion: a list of spreads, words beside their picture, a hairline between. */
@@ -516,6 +528,11 @@ h1 { font-size: clamp(47px, 11.6vw, 84px); line-height: .95; font-weight: 520; l
   #stage-done[hidden] { display: none; }
   /* On a phone the stage is taller than the screen, so the way out of drawing stays in reach. */
   #stage-done:not([hidden]) { position: fixed; left: 50%; bottom: 14px; z-index: 1200; translate: -50% 0; height: 44px; padding: 0 20px; border-color: transparent; background: var(--text); color: var(--page); box-shadow: 0 10px 24px -8px #00000066; }
+  /* While the frame is open the toolbar is at the bottom of the screen, with its own Draw button to leave drawing. */
+  :root:has(#desk[data-stage]:not([data-stage="small"])) #stage-done:not([hidden]) { visibility: hidden; }
+  /* On a phone the open frame's top edge is 8 px from the screen's, and the first window starts close under it:
+     the tabs stay across the edge, as high as the screen lets them. */
+  .stage-plane { --tab-in: -8px; }
 }
 @media (max-width: 599px) {
   /* The header keeps every way in on a phone: Download is its arrow there. */
@@ -678,6 +695,9 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
    writes --tilt (1 leaning, 0 flat) and --lift (0 at both ends, 1 half way), and takes the 3D away again once the
    plane is flat. A soft fold, a band of shade with light behind it, crosses the sheet as it turns. */
 .motion .stage-scene { perspective: 1900px; perspective-origin: 42% 24%; }
+/* Perspective keeps the scene in a layer of its own, under the header. The sheet is flat while its frame is open, so
+   the perspective goes and the frame can rise above the page. */
+.motion .stage-scene:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
 .motion .stage-shadow { opacity: calc(.16 + var(--tilt, 0) * .26); transform: translate(calc(var(--tilt, 0) * 30px), calc(var(--tilt, 0) * 46px)) scale(calc(1 - var(--tilt, 0) * .06)); }
 .motion .stage-plane:not(.is-flat) { isolation: auto; transform-style: preserve-3d; transform-origin: 32% 78%; transform: rotateX(calc(var(--tilt) * 7deg)) rotateY(calc(var(--tilt) * var(--tilt-deg))) scale(calc(1 - var(--tilt) * .02)); will-change: transform; }
 .motion .stage-plane:not(.is-flat) > .desk-panel { z-index: auto; transform: translateZ(-1px); }

@@ -538,17 +538,23 @@ done.addEventListener("click", () => ink.setMode("use"));
 // The script stops for good when the visitor takes over: a press on the toolbar or in an app, draw mode by any
 // route, or one of the two keys. Drawing also brings the stage flat.
 function takeOver(flat = true) {
+  // What the script put away when the visitor stepped in comes back, so they never join an empty stage or a
+  // toolbar shrunk to one button. What the visitor hides after that stays hidden.
+  const hid = scripted() && ink.state.hidden, small = scripted() && ink.collapsed;
   acted = true;
-  stop();
+  stop().then(() => {
+    if (hid && ink.state.hidden) ink.setHidden(false);
+    if (small && ink.collapsed) ink.setCollapsed(false);
+  });
   if (flat && !userFlat) { userFlat = true; request(); }
 }
 ink.toolbar.addEventListener("pointerdown", (e) => { if (e.isTrusted) takeOver(); }, true);
-// The two keys, pressed while the script plays: the script stops and the key does what it says, whatever the
+// The three keys, pressed while the script plays: the script stops and the key does what it says, whatever the
 // script was showing. (This runs before the engine hears the key.)
 addEventListener("keydown", (e) => {
   if (!e.isTrusted || !scripted()) return;
-  const draws = e.ctrlKey && e.shiftKey && e.code === "Digit2";
-  if (!draws && e.key !== "Escape") return;
+  const draws = e.ctrlKey && e.shiftKey && e.code === "Digit2", hides = e.ctrlKey && !e.shiftKey && e.code === "Digit2";
+  if (!draws && !hides && e.key !== "Escape") return;
   takeOver(draws);
   if (draws && ink.state.mode === "draw") ink.setMode("use");
 }, true);

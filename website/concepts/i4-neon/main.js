@@ -1,4 +1,5 @@
 import { createInk } from "/concepts/shared/ink.js";
+import { growingStage } from "/concepts/shared/stage.js";
 // The app's own motion: its curves, the toolbar's change to one button, the Pop style and the pointer's click.
 import { css as appCurve, ease as appEase, toolbarMorph, poseKeyframes, clickPulse, visibilityDuration } from "/concepts/shared/app-motion.js";
 
@@ -42,8 +43,9 @@ function localBox(el, surface) {
 }
 const standIn = (ink, box) => ({
   getBoundingClientRect() {
-    const o = ink.layer.getBoundingClientRect(), b = box();
-    return { left: o.left + b.x, top: o.top + b.y, width: b.w, height: b.h };
+    // The layer's corner is the surface's corner, except while a grown stage gives the layer room past it.
+    const o = ink.layer.getBoundingClientRect(), room = ink.room, b = box();
+    return { left: o.left + (room?.left || 0) + b.x, top: o.top + (room?.top || 0) + b.y, width: b.w, height: b.h };
   },
 });
 // Where an element sits on the page, whatever is tilting or flipping at the moment.
@@ -80,7 +82,14 @@ const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $(
 // The toolbar is the engine's own, as someone who uses it has set it up (its "customized" preset): curved arrows,
 // the roughest line, and the app's Neon gradient as the color. It rests on the Arrow tool so its properties row
 // shows that. The engine itself starts the row closed on a phone, which keeps the bar compact there.
-const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", gradient: "neon", moreHref: "#install" });
+// Hide drawings and tools, by the toolbar's button or Control-2, goes the app's Magic way.
+const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", gradient: "neon", visibility: "magic", moreHref: "#install" });
+// Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the desk's
+// frame opens up to fill the window, and scrolling brings it back. The desk itself does not move: in index.html the
+// panel and the dock carry data-stage-frame and the mode chip data-stage-corner.
+const stage = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion });
+// Joining in ends the script, lays the desk flat (the frame grows only once it is) and retires "Your turn".
+stage.on("join", () => { takeOver("join"); retire(); });
 // Whether this engine shows and hides drawings and the toolbar in the app's styles (it then answers with a promise).
 const appShows = ink.setHidden(false) instanceof Promise;
 
@@ -347,7 +356,7 @@ function syncMode() {
   desk.classList.toggle("is-cued", drawing);
 }
 // "Your turn" arrives and leaves with the app's Pop. It shows when the script is idle and after its first round,
-// and is gone for good once the visitor has drawn something.
+// and is gone for good once the visitor has joined in.
 let drew = false, invited = false;
 function invite(on) {
   on = on && !drew;
@@ -361,7 +370,8 @@ function invite(on) {
   const move = turn.animate(keys, { duration: keys.duration, easing: keys.easing, fill: "both" });
   move.finished.then(() => { move.cancel(); if (!invited) turn.hidden = true; }, () => {});
 }
-ink.on("mark", () => { drew = true; invite(false); });
+function retire() { drew = true; invite(false); }
+ink.on("mark", retire);
 
 // The story the stage tells on its own: in Draw, ring the number and point at it; in Use apps, click around while
 // the drawings stay put; back in Draw, add a note. Then the toolbar shrinks and grows, and everything is put away.
@@ -416,12 +426,15 @@ async function pressCap(name, signal) {
 }
 // Putting everything away between rounds: the app's hide and show, in one of its styles. An engine without them
 // fades the drawings out instead.
+let scriptHid = false, scriptShrank = false;
 async function putAway(style, between, signal) {
   if (appShows && motion) {
+    scriptHid = true;
     await ink.setHidden(true, { style, pill: false });
     // A visitor who took over meanwhile gets everything back as it was.
     if (!signal?.aborted) { between(); await wait(260, signal); }
-    await ink.setHidden(false, { style });
+    if (scriptHid) await ink.setHidden(false, { style });
+    scriptHid = false;
     return;
   }
   desk.classList.add("is-wiping");
@@ -481,9 +494,11 @@ async function round(signal) {
   await wait(1700, signal);
   if (!live()) return;
   // A calm moment: the toolbar shrinks to its one button and grows back, as it does in the app.
+  scriptShrank = true;
   await (ink.shrink ? ink.shrink() : ink.setCollapsed(true));
   await wait(900, signal);
-  await (ink.expand ? ink.expand() : ink.setCollapsed(false));
+  if (scriptShrank) await (ink.expand ? ink.expand() : ink.setCollapsed(false));
+  scriptShrank = false;
   await wait(900, signal);
   if (!live()) return;
   await putAway(rounds % 2 ? "magic" : "pop", tidy, signal);
@@ -506,11 +521,13 @@ const whenSeen = (signal) => new Promise((go) => {
   seenWaiters.push(go);
   signal.addEventListener("abort", go, { once: true });
 });
-// What a round leaves behind when it is cut short: the toolbar back, whole, and the script's mode off.
+// What a round leaves behind when it is cut short: the toolbar back, whole, and the script's mode off. Only what
+// the script itself hid or shrank comes back: a visitor who hid everything with Control-2 keeps it hidden.
 function settle() {
   ink.hideGhost();
-  if (ink.state.hidden) ink.setHidden(false, { animate: false });
-  if (ink.collapsed) ink.setCollapsed(false, { animate: false });
+  if (scriptHid && ink.state.hidden) ink.setHidden(false, { animate: false });
+  if (scriptShrank && ink.collapsed && !ink.state.hidden) ink.setCollapsed(false, { animate: false });
+  scriptHid = scriptShrank = false;
   $$(".is-down", chip).forEach((key) => key.classList.remove("is-down"));
   wins.forEach((win) => win.classList.remove("is-dragging"));
 }
@@ -591,8 +608,18 @@ ink.on("mode", (mode) => {
   setKeysMode(mode);
   syncMode();
 });
-// A key pressed while the script holds the mode: the visitor gets the mode they asked for.
-ink.on("shortcut", (name, info) => { if (!scripted || info?.scripted) return; takeOver("keys"); ink.setMode(name === "draw" ? "draw" : "use"); });
+// One of the app's keys pressed while the script holds the stage: the script stops and the key does what it says,
+// whatever the script was showing. (This runs before the engine hears the key. Esc in Use apps is the one key the
+// engine has nothing to do for, so it only stops the script.)
+addEventListener("keydown", (e) => {
+  if (!e.isTrusted || !scripted) return;
+  const two = e.ctrlKey && !e.metaKey && !e.altKey && e.code === "Digit2";
+  if (!two && e.key !== "Escape") return;
+  if (two && e.target.closest?.("input, textarea, select") && apps.contains(e.target)) return;
+  // What the script hid or shrank comes back first, so Control-2 hides it for the visitor and does not show it.
+  settle();
+  takeOver("keys");
+}, true);
 
 // "Try it": from anywhere on the page, the stage comes to the visitor, flat, in Draw with the Pen.
 async function tryIt(event) {
@@ -603,13 +630,11 @@ async function tryIt(event) {
   const top = pageBox(scene).y, bar = header.offsetHeight, room = innerHeight - bar, tall = scene.offsetHeight;
   scrollTo({ top: Math.max(0, tall + 72 < room ? top - bar - (room - tall) / 2 : top - bar - 34), behavior: motion ? "smooth" : "auto" });
   ink.setTool("pen");
-  lightEdge(desk);
-  invite(true);
   if (byKey) $('[data-tool="pen"]', ink.toolbar)?.focus({ preventScroll: true });
 }
 for (const el of $$("[data-try]")) el.addEventListener("click", tryIt);
-turn.addEventListener("click", tryIt);
-cover.addEventListener("click", tryIt);
+// "Your turn" by keyboard, and a press on the stage in its pose, are controls the growing stage cannot see.
+for (const el of [turn, cover]) el.addEventListener("click", (e) => { tryIt(e); stage.join(); });
 
 let stageWidth = innerWidth;
 addEventListener("resize", () => {
@@ -687,8 +712,7 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
   addEventListener("blur", leave);
 }
 
-// A light runs along a path, once: through the gaps of a section's grid as the section arrives, and round the
-// stage's edge when the visitor is handed the pen.
+// A light runs along a path, once: through the gaps of a section's grid as the section arrives.
 let lights = 0;
 function runLight(host, d, length, width) {
   if (!motion) return;
@@ -714,11 +738,6 @@ function gridLight(bento) {
   }
   const across = boxes.filter((b) => b.x < x && b.x + b.w > x).map((b) => b.y - h), y = across.length ? Math.min(...across) : H + h;
   runLight(bento, `M${-h} ${-h}H${x - r}Q${x} ${-h} ${x} ${r - h}V${y - r}Q${x} ${y} ${x + r} ${y}H${W + h}`, W + gap + y + h, W);
-}
-// Once round an element's own edge.
-function lightEdge(el) {
-  const W = el.clientWidth, H = el.clientHeight, r = parseFloat(getComputedStyle($(".desk-panel", el) || el).borderTopLeftRadius) || 20;
-  runLight(el, `M${r} 0H${W - r}Q${W} 0 ${W} ${r}V${H - r}Q${W} ${H} ${W - r} ${H}H${r}Q0 ${H} 0 ${H - r}V${r}Q0 0 ${r} 0`, 2 * (W + H), W);
 }
 if (motion) {
   const arrive = new IntersectionObserver((entries) => {
@@ -948,10 +967,11 @@ addEventListener("keyup", (e) => {
 });
 addEventListener("blur", () => caps.forEach((cap) => cap.classList.remove("is-down")));
 for (const set of $$(".keyset")) set.addEventListener("click", async () => {
-  const keys = $$(".key", set), draws = set.dataset.set === "draw", midScript = scripted;
+  const keys = $$(".key", set), draws = set.dataset.set === "draw";
   takeOver("keys");
   for (const key of keys) { key.classList.add("is-down"); await wait(motion ? 70 : 0); }
-  ink.setMode(!draws ? "use" : midScript || ink.state.mode !== "draw" ? "draw" : "use");
+  // As in the app: Control-Shift-2 only starts drawing, Esc only goes back.
+  ink.setMode(draws ? "draw" : "use");
   await wait(160);
   keys.forEach((key) => key.classList.remove("is-down"));
 });
@@ -965,6 +985,8 @@ const mini = createInk({ surface: miniHost, toolbarParent: miniHost, toolbarPosi
 themed.push(mini);
 // It hears the page's keys like any toolbar; it must not start drawing in its small tile.
 mini.on("mode", (mode) => { if (mode === "draw") mini.setMode("use"); });
+// Control-2 is for the demo at the top; this one stays.
+mini.on("shortcut", (name) => { if (name === "hide") mini.setHidden(false, { animate: false }); });
 let miniSize = [520, 76];
 const fitMini = () => {
   if (!miniTile.clientWidth) return;

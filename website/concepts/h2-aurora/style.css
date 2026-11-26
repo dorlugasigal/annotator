@@ -91,7 +91,7 @@ html[data-theme="light"] {
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + var(--header-top) + 22px); overflow-x: clip; background: var(--page); }
-body { margin: 0; overflow-x: clip; background: var(--page); color: var(--text); font: 400 18px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+body { margin: 0; overflow-x: clip; color: var(--text); font: 400 18px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
 h1, h2, h3, p, ul, dl, dd, figure { margin: 0; }
 ul { padding: 0; list-style: none; }
 p, figcaption { text-wrap: pretty; }
@@ -197,7 +197,7 @@ html[data-theme="light"] .dial { --turn: 180deg; }
 .dial-land::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1.5px; background: var(--aurora-across); }
 
 /* Hero */
-.hero { position: relative; isolation: isolate; }
+.hero { position: relative; }
 .aurora-sky { --grain-mask: linear-gradient(#000 40%, #0000 78%); left: 0; right: 0; top: calc(-1 * (var(--header-h) + 2 * var(--header-top))); height: min(860px, 104svh); z-index: -1; }
 .hero-copy { display: grid; justify-items: center; gap: 20px; padding-top: 40px; text-align: center; }
 h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; font-weight: 760; letter-spacing: -.045em; }
@@ -215,11 +215,11 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 
 /* The stage: a screen floating in the dark, a sample window on it, and above them the planes the app adds: ink,
    then the toolbar. */
-.stage { --tilt: 0; --yaw: 0; --ax: 0; --ay: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; width: min(1160px, 100% - 2 * var(--gutter)); margin: 22px auto 0; }
+.stage { --tilt: 0; --yaw: 0; --ax: 0; --ay: 0; --lift: 0; --scale: 1; position: relative; width: min(1160px, 100% - 2 * var(--gutter)); margin: 22px auto 0; }
 .stage-space { position: relative; }
 /* The whole screen can be drawn on, so the sample window sits in it with room to spare: beside it for notes, and under
    it for the toolbar at its tallest (main.js writes that height to --tb-h). */
-.screen { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 54px; --inset: 10px; --inset-top: 46px; position: relative; }
+.screen { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 54px; --inset: 10px; --inset-top: 46px; --dock-inset: 2px; --stage-radius: var(--r-panel); position: relative; }
 /* The board is the sample window and the ink together, as one flat sheet: Blur needs what it covers on its own sheet. */
 .board { position: relative; padding: var(--inset-top) var(--inset) var(--inset); }
 .window { max-width: 1080px; margin-inline: auto; }
@@ -230,14 +230,25 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 /* "Try it" was pressed: the stage's edge answers. */
 .stage.is-called .desk { animation: called 1500ms var(--ease-out) both; }
 @keyframes called { 0% { box-shadow: inset 0 1px 0 var(--hi), var(--plane-shadow), 0 0 0 0 var(--aurora-2), 0 0 0 0 var(--glow-3); } 22% { box-shadow: inset 0 1px 0 var(--hi), var(--plane-shadow), 0 0 0 3px var(--aurora-2), 0 0 70px 4px var(--glow-3); } 100% { box-shadow: inset 0 1px 0 var(--hi), var(--plane-shadow), 0 0 0 12px #0000, 0 0 90px 10px #0000; } }
-.dock { position: absolute; inset: 0 var(--dock-inset, 2px); z-index: 100; pointer-events: none; }
+.dock { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
+   frame is the screen's own desk: its light, hairline and corners open up around the sample window. The button that
+   makes it small again is a chip in the corner across from the mode. */
+:root { --stage-scrim: var(--page); }
+.screen .stage-shrink { --stage-shrink-top: 9px; --stage-shrink-right: 10px; width: 30px; height: 30px; border: 1px solid var(--line-strong); border-radius: var(--r-chip); background: var(--surface-1); color: var(--text); transition: border-color var(--t-1) ease, transform var(--t-2) var(--ease-press); }
+.screen .stage-shrink:hover { border-color: color-mix(in srgb, var(--text) 40%, transparent); }
+.screen .stage-shrink:active { transform: scale(.92); transition-duration: 80ms; }
+.screen .stage-shrink:focus-visible { border-radius: var(--r-chip); }
+.screen .stage-shrink svg { width: 15px; height: 15px; stroke-width: 1.8; }
+/* The switch is behind a grown frame, so it stays in the page's picture when the theme changes. */
+:root:has(.screen[data-stage]:not([data-stage="small"])) .theme-switch { view-transition-name: none; }
 .dock > .ink-toolbar { pointer-events: auto; }
 .dock > .ink-toolbar:not(.is-placed) { bottom: var(--tb-bottom); }
 .screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
 /* While the page's own script is drawing, a touch on the stage still scrolls the page. */
 @media (pointer: coarse) { .screen.is-scripted .ink-layer[data-mode="draw"] { pointer-events: none; touch-action: auto; } }
 /* The mode, on the stage: which one it is, and its key. In Draw the chip's edge and dot take the gradient. */
-.mode-chip { position: absolute; left: 10px; top: 9px; display: inline-flex; align-items: center; gap: 7px; height: 28px; margin: 0; padding: 0 5px 0 10px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box, linear-gradient(var(--surface-1), var(--surface-1)) border-box; color: var(--text); font: 600 13px/1 var(--sans); white-space: nowrap; }
+.mode-chip { position: absolute; left: calc(var(--dock-inset) + 8px); top: 9px; display: inline-flex; align-items: center; gap: 7px; height: 28px; margin: 0; padding: 0 5px 0 10px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box, linear-gradient(var(--surface-1), var(--surface-1)) border-box; color: var(--text); font: 600 13px/1 var(--sans); white-space: nowrap; }
 .mode-chip[data-mode="draw"] { background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, var(--aurora-across) border-box; }
 .mode-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
 .mode-chip[data-mode="draw"] i { background: var(--aurora); box-shadow: 0 0 8px 0 var(--aurora-2); }
@@ -522,7 +533,8 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
   .try-line { margin-top: 20px; font-size: 19px; }
   .stage { margin-top: 26px; }
   .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 60px; --inset: clamp(24px, 4vw, 64px); --inset-top: 48px; --dock-inset: 14px; }
-  .mode-chip { left: 8px; top: 10px; }
+  .mode-chip { top: 10px; }
+  .screen .stage-shrink { --stage-shrink-top: 10px; --stage-shrink-right: 22px; }
   .metrics { gap: 8px; margin-inline: -11px; }
   .metric { padding: 10px 11px 12px; }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
@@ -573,6 +585,7 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 @media (min-width: 1064px) {
   .screen { --tb-h: 145px; --tb-bottom: 22px; --tb-gap: 66px; --inset-top: 52px; }
   .mode-chip { top: 12px; }
+  .screen .stage-shrink { --stage-shrink-top: 11px; }
 }
 @media (min-width: 1200px) {
   /* On a wide screen the stage is wider than the text above it. */
@@ -594,7 +607,7 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
   mask: linear-gradient(180deg, #000 0 41.67%, #0000 58.33% 100%) 0% 100% / 100% 240% no-repeat;
 }
 @keyframes theme-fall { from { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; } to { -webkit-mask-position: 0% 0%; mask-position: 0% 0%; } }
-.curtain { position: fixed; left: 0; right: 0; top: 0; height: 44vh; z-index: 80; opacity: 0; background: var(--aurora-across); pointer-events: none; transform: translate3d(0, -100%, 0); -webkit-mask: linear-gradient(180deg, #0000, #000 62%, #0000); mask: linear-gradient(180deg, #0000, #000 62%, #0000); }
+.curtain { position: fixed; left: 0; right: 0; top: 0; height: 44vh; z-index: 1200; opacity: 0; background: var(--aurora-across); pointer-events: none; transform: translate3d(0, -100%, 0); -webkit-mask: linear-gradient(180deg, #0000, #000 62%, #0000); mask: linear-gradient(180deg, #0000, #000 62%, #0000); }
 /* The switch is left out of both pictures, so its wheel is seen turning the whole way through. */
 .theme-switch { view-transition-name: theme-switch; }
 ::view-transition-group(theme-switch) { animation: none; }
@@ -603,7 +616,7 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 /* While the theme's colors are swapped nothing eases, so the new picture is the new theme at once. */
 .theme-switching *:not(.dial, .dial *), .theme-switching *::before, .theme-switching *::after { transition: none !important; }
 /* Without view transitions the colors cross-fade instead. */
-.theme-fading *:not(.dial, .dial *), .theme-fading *::before, .theme-fading *::after, .theme-fading body { transition: background-color 320ms ease, color 320ms ease, border-color 320ms ease, fill 320ms ease, stroke 320ms ease, box-shadow 320ms ease !important; }
+.theme-fading, .theme-fading *:not(.dial, .dial *), .theme-fading *::before, .theme-fading *::after { transition: background-color 320ms ease, color 320ms ease, border-color 320ms ease, fill 320ms ease, stroke 320ms ease, box-shadow 320ms ease !important; }
 
 /* Motion ------------------------------------------------------------------------------------------
    Everything below only applies when motion is allowed (the script in the page's head adds .motion). Without it
@@ -651,6 +664,9 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
    (degrees), --ax and --ay (pixels along the arc it travels), --lift (0 to 1) and --scale from the scroll position.
    Lifted, the ink sits above the window and the toolbar above the ink; flat, they are one surface again. */
 .motion .stage-space { perspective: 1900px; perspective-origin: 50% 34%; }
+/* Perspective keeps the scene in a layer of its own, under the header. The screen is flat while its frame is grown,
+   so the perspective goes and the frame can rise above the page. */
+.motion .stage-space:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
 .motion .screen { transform-style: preserve-3d; transform-origin: 50% 56%; transform: translate3d(calc(var(--ax) * 1px), calc(var(--ay) * 1px), 0) rotateX(calc(var(--tilt) * 1deg)) rotateY(calc(var(--yaw) * 1deg)) scale(var(--scale)); }
 .motion .stage.is-live .screen { will-change: transform; }
 /* It bobs while it floats. The amount comes from --lift, so it is still by the time it is flat. */

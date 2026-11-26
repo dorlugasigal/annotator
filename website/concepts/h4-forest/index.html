@@ -88,9 +88,9 @@
       <figure class="stage" id="stage">
         <div class="stage-space">
           <div class="screen" id="screen">
-            <div class="desk" aria-hidden="true"></div>
+            <div class="desk" data-stage-frame aria-hidden="true"></div>
             <div class="board" id="board">
-              <div class="hud">
+              <div class="hud" data-stage-corner="top left">
                 <p class="mode-chip" id="mode-chip" data-mode="use" role="status"><i aria-hidden="true"></i><b>Using apps</b><span class="chip-keys" aria-hidden="true"></span></p>
                 <p class="turn" id="turn" hidden><svg viewBox="0 0 22 26" width="13" height="15" aria-hidden="true"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>Your turn</p>
               </div>
@@ -142,7 +142,7 @@
               </div>
               <div class="stage-fx" id="stage-fx" aria-hidden="true"><svg class="fx-svg"></svg></div>
             </div>
-            <div class="dock" id="dock"></div>
+            <div class="dock" id="dock" data-stage-frame></div>
             <div class="dock-fx" id="dock-fx" aria-hidden="true"></div>
           </div>
         </div>

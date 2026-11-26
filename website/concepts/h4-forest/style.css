@@ -183,8 +183,8 @@ h1 .line { display: block; }
 .js .board { padding-top: calc(var(--tb-top) + var(--tb-h) + var(--gap) + var(--hud-h) + var(--gap)); }
 .desk { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); transition: border-color var(--t-resize) var(--standard); }
 .ink-drawing .desk { border-color: color-mix(in srgb, var(--accent) 80%, transparent); }
-.dock, .dock-fx { position: absolute; inset: 0 var(--dock-inset, 2px); z-index: 100; pointer-events: none; }
-.dock-fx { inset: 0; z-index: 101; }
+.dock, .dock-fx { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
+.dock-fx { z-index: 101; }
 .dock > .ink-toolbar { pointer-events: auto; }
 .dock > .ink-toolbar:not(.is-placed) { top: var(--tb-top); bottom: auto; }
 .screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
@@ -193,8 +193,21 @@ h1 .line { display: block; }
 .stage-fx { position: absolute; inset: 0; z-index: 61; pointer-events: none; }
 .fx-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 
+/* The stage grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
+   frame is the desk itself. The button that makes it small again sits at the end of the mode chip's row, cut like
+   the chips. Grown, the stage has to rise above the header, so nothing around it may keep it in a layer of its own. */
+:root { --stage-scrim: var(--page); }
+.screen { --stage-radius: var(--radius); }
+.board > .stage-shrink { --stage-shrink-top: calc(var(--tb-top) + var(--tb-now, var(--tb-h)) + var(--gap) - 4px); --stage-shrink-right: var(--inset); border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface-1); color: var(--text); transition: background-color var(--t-fade-in) var(--fade), border-color var(--t-fade-in) var(--fade), scale var(--t-snappy) var(--snappy); }
+.board > .stage-shrink:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--text) 34%, transparent); }
+.board > .stage-shrink:active { scale: .94; transition-duration: var(--t-fade-out); }
+.board > .stage-shrink:focus-visible { border-radius: 10px; }
+.stage:has([data-stage]:not([data-stage="small"])) { isolation: auto; }
+/* The header's switch is drawn apart from the page during a theme change. Under a grown stage it must not be. */
+:root:has([data-stage]:not([data-stage="small"])) .ts-slot { view-transition-name: none; }
+
 /* What the stage says about itself: the mode it is in, and that it is the visitor's turn. */
-.hud { position: absolute; left: var(--inset); right: var(--inset); top: calc(var(--tb-top) + var(--tb-h) + var(--gap)); z-index: 1; display: flex; align-items: center; gap: 8px; height: var(--hud-h); pointer-events: none; }
+.hud { position: absolute; left: var(--inset); right: var(--inset); top: calc(var(--tb-top) + var(--tb-now, var(--tb-h)) + var(--gap)); z-index: 1; display: flex; align-items: center; gap: 8px; height: var(--hud-h); pointer-events: none; }
 html:not(.js) .hud { display: none; }
 .mode-chip, .turn { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 9px; border-radius: 9px; font: 620 13px/1 var(--sans); white-space: nowrap; }
 .mode-chip { border: 1px solid var(--line-strong); background: var(--surface-1); color: var(--text); transition: color var(--t-resize) var(--standard), border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
@@ -209,7 +222,7 @@ html:not(.js) .hud { display: none; }
 .turn svg { fill: var(--on-accent); }
 
 /* The sample apps, in the colors an app would have in this theme. */
-.windows { position: relative; display: grid; gap: 20px; align-items: start; }
+.windows { position: relative; isolation: isolate; display: grid; gap: 20px; align-items: start; }
 .window, .mini { position: relative; border-radius: 12px; background: var(--win-bg); color: var(--win-text); box-shadow: 0 0 0 1px var(--win-edge); }
 .window { container-type: inline-size; min-width: 0; }
 .window.is-moving { box-shadow: 0 0 0 1px var(--win-edge), 0 18px 40px -18px var(--floor); }
@@ -475,7 +488,7 @@ html:not(.js) .hud { display: none; }
 @media (min-width: 600px) {
   .hero { padding-top: 26px; }
   .stage { margin-top: 28px; }
-  .screen { --tb-h: 112px; --tb-top: 14px; --gap: 12px; --inset: clamp(20px, 3.2vw, 44px); --dock-inset: 14px; }
+  .screen { --tb-h: 112px; --tb-top: 14px; --gap: 12px; --inset: clamp(20px, 3.2vw, 44px); }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .sec-full { padding: 18px 24px 19px; }
   .items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -569,15 +582,14 @@ html:not(.js) .hud { display: none; }
 /* Things that arrive when they are scrolled to wait unseen; main.js brings each in with one of the app's shows. */
 .motion [data-enter]:not(.is-in) { opacity: 0; }
 
-/* "Try it" was pressed: the stage's edge pulses twice, so it is plain where to draw. */
-.desk::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--accent); border-radius: calc(var(--radius) + 4px); opacity: 0; pointer-events: none; }
-.motion .stage.is-cued .desk::after { animation: cue 760ms var(--enter) 2; }
-@keyframes cue { from { opacity: .95; scale: 1; } to { opacity: 0; scale: 1.014 1.03; } }
 
 /* The hero stage in space. main.js writes --tilt and --yaw (degrees), --lift (0 to 1) and --scale from the scroll
    position. It leans back and a little to one side, with the ink above the apps and the toolbar above the ink;
    flat, they are one surface again. */
 .motion .stage-space { perspective: 1900px; perspective-origin: 50% 0%; }
+/* The stage lies flat before its frame grows, so the 3D goes for as long as the frame is not small. */
+.motion .stage-space:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
+.motion .screen[data-stage]:not([data-stage="small"]) { transform: none; transform-style: flat; will-change: auto; }
 .motion .screen { transform-style: preserve-3d; transform-origin: 50% 100%; transform: rotateX(calc(var(--tilt) * 1deg)) rotateY(calc(var(--yaw) * 1deg)) scale(var(--scale)); }
 .motion .stage.is-live .screen { will-change: transform; }
 .motion .desk { transform: translateZ(calc(var(--lift) * -34px)); }

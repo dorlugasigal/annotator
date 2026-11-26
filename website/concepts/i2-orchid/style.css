@@ -192,8 +192,11 @@ html[data-theme="light"] .ts-star { opacity: 0; scale: .2; translate: 10px 0; }
 html[data-theme="light"] .ts-cloud { opacity: 1; scale: 1; translate: 0 0; }
 
 /* 1. Hero ------------------------------------------------------------------------------------- */
-.hero { position: relative; padding-top: 30px; isolation: isolate; }
-.orbs-hero { inset: -120px 0 auto; height: 1180px; overflow: clip; -webkit-mask-image: linear-gradient(#000 62%, #0000); mask-image: linear-gradient(#000 62%, #0000); }
+/* The hero is not a layer of its own, so the stage in it can rise above the header when it grows. Its lights are
+   the first positioned thing in it, and what must show over them is positioned after them. */
+.hero { position: relative; padding-top: 30px; }
+.hero-top, .stage figcaption { position: relative; }
+.orbs-hero { z-index: auto; inset: -120px 0 auto; height: 1180px; overflow: clip; -webkit-mask-image: linear-gradient(#000 62%, #0000); mask-image: linear-gradient(#000 62%, #0000); }
 .orbs-hero .orb-a { left: -14%; top: 4%; width: min(760px, 88vw); }
 .orbs-hero .orb-b { left: 34%; top: 30%; width: min(900px, 110vw); opacity: calc(var(--orb) * .8); }
 .orbs-hero .orb-c { right: -16%; top: -2%; width: min(780px, 90vw); }
@@ -220,7 +223,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 /* The desk is one smooth pebble with a light at its top edge and another that follows the pointer. */
 .desk-panel { position: absolute; inset: 0; z-index: -1; border-radius: var(--r-panel); background: radial-gradient(520px circle at var(--px, 50%) var(--py, 0%), var(--pointer-light), transparent 70%), var(--stage); box-shadow: var(--pebble); }
 /* On the rim of the stage: which mode the demo is in, and the invitation to take over. */
-.stage-tags { position: absolute; left: 20px; right: 20px; top: -18px; z-index: 110; display: flex; align-items: center; justify-content: space-between; gap: 10px; pointer-events: none; }
+.stage-tags { position: absolute; left: 20px; right: 20px; top: var(--rim); z-index: 110; display: flex; align-items: center; justify-content: space-between; gap: 10px; pointer-events: none; }
 .stage-tags > * { pointer-events: auto; }
 .mode-chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box; box-shadow: 0 12px 20px -14px var(--shade); font: 650 13.5px/1 var(--sans); white-space: nowrap; }
 .mode-chip > i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: scale var(--t-2) var(--jelly); }
@@ -238,8 +241,18 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .your-turn:focus-visible { border-radius: 999px; }
 .your-turn svg { flex: none; overflow: visible; fill: currentColor; stroke: none; }
 /* A ring of the gradient round the stage, for a moment, when the visitor asks to try it. */
-.desk-cue { position: absolute; inset: -4px; border-radius: calc(var(--r-panel) + 4px); padding: 4px; background: var(--accent-grad); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: 0; pointer-events: none; }
-.stage-plane.is-cued .desk-cue { opacity: 1; }
+.desk-cue { position: absolute; inset: 0; pointer-events: none; }
+.desk-cue::before { content: ""; position: absolute; inset: -4px; border-radius: calc(var(--r-panel) + 4px); padding: 4px; background: var(--accent-grad); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: 0; }
+.stage-plane.is-cued .desk-cue::before { opacity: 1; }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
+   frame is the desk's own pebble. The tags stay on its rim, a little further in once the rim is at the window's
+   edge, and the button that makes it small again sits on the rim where "Your turn" was. */
+:root { --stage-scrim: var(--page); }
+.stage-plane { --stage-radius: var(--r-panel); --rim-in: 6px; --rim: calc(-18px + var(--stage-grow, 0) * var(--rim-in)); }
+.stage-shrink { --stage-shrink-top: var(--rim); --stage-shrink-right: 20px; background: var(--surface-1); color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 12px 20px -14px var(--shade); transition: background var(--t-1) ease, transform var(--t-1) var(--app-standard); }
+.stage-shrink:hover { background: var(--surface-2); }
+.stage-shrink:active { transform: scale(.92); transition-duration: 90ms; }
+.stage-shrink:focus-visible { border-radius: 50%; }
 .stage-plane > .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
 .dock { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
 .dock > .ink-toolbar { pointer-events: auto; }
@@ -531,6 +544,10 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
   .site-header nav { gap: 4px; }
   .site-header .btn-small { padding: 0 15px; }
   .stage-tags { left: 12px; right: 12px; }
+  .stage-plane { --rim-in: 14px; }
+  .stage-shrink { --stage-shrink-right: 12px; }
+  /* While the frame is grown the toolbar is at the bottom of the screen, with its own Draw button to leave drawing. */
+  :root:has(#desk[data-stage]:not([data-stage="small"])) #stage-done:not([hidden]) { visibility: hidden; }
   .theme-switch { margin-left: 0; }
   .stage-words { flex: 1 1 100%; }
   .nav-try { padding: 0 14px 0 11px; }
@@ -696,6 +713,9 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
    stage is scrolled up the screen the desk comes flat and the windows settle onto their grid. main.js writes every
    transform here (the desk's, each window's, each window's shadow), and takes the 3D away again once it is flat. */
 .motion .stage-scene { perspective: 1700px; perspective-origin: 50% 30%; }
+/* Perspective keeps the scene in a layer of its own, under the header. The desk is flat while its frame is grown, so
+   the perspective goes and the frame can rise above the page. */
+.motion .stage-scene:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
 .motion .stage-shadow { opacity: calc(.16 + var(--tilt, 0) * .22); transform: translate3d(calc(var(--tilt, 0) * -30px), calc(var(--tilt, 0) * 46px), 0) scale(calc(1 - var(--tilt, 0) * .1)); }
 .motion .stage-plane:not(.is-flat) { isolation: auto; transform-style: preserve-3d; transform-origin: 50% 62%; will-change: transform; }
 .motion .stage-plane:not(.is-flat) > .desk-panel { z-index: auto; transform: translateZ(-1px); }
@@ -762,7 +782,7 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 /* The stage's tags and working parts. */
 .motion .your-turn svg { animation: turn-pointer 2.6s var(--app-standard) infinite; }
 @keyframes turn-pointer { 0%, 100% { transform: none; } 22% { transform: translate(3px, -3px); } 44% { transform: translate(-1px, -5px); } 66% { transform: translate(-3px, -1px); } 82% { transform: translate(1px, 1px) scale(.86); } }
-.motion .stage-plane.is-cued .desk-cue { animation: cue 1500ms var(--app-fade) both; }
+.motion .stage-plane.is-cued .desk-cue::before { animation: cue 1500ms var(--app-fade) both; }
 @keyframes cue { 0% { opacity: 0; transform: scale(.992); } 18%, 55% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.012); } }
 .motion .mode-chip.is-new > i { animation: chip-dot var(--t-2) var(--jelly); }
 @keyframes chip-dot { from { scale: .4; } }
