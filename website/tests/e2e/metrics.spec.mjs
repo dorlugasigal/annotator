@@ -1,5 +1,6 @@
 import {test, expect} from "@playwright/test";
 import {readFile} from "node:fs/promises";
+import {readFileSync} from "node:fs";
 import {siteConfig} from "../../site-config.mjs";
 
 const origin = "https://counts.example.test";
@@ -32,7 +33,7 @@ test("configured counts send one coarse event per tab and never break ordinary n
   await fixture(page, events);
   await page.goto(origin + base + "?private=query");
   await expect.poll(() => events.length).toBe(1);
-  await page.getByRole("link",{name:"Help",exact:true}).click();
+  await page.locator(".site-header").getByRole("link",{name:"Help",exact:true}).click();
   await expect(page).toHaveURL(origin + base + "docs/");
   await page.waitForTimeout(100);
   expect(events).toHaveLength(1);
@@ -49,7 +50,21 @@ test("Global Privacy Control suppresses all website counts", async ({page}) => {
   const events = [];
   await fixture(page, events);
   await page.goto(origin + base);
-  await page.getByRole("link",{name:"Help",exact:true}).click();
+  await page.locator(".site-header").getByRole("link",{name:"Help",exact:true}).click();
   expect(events).toEqual([]);
   expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
+});
+
+test("a Mac download click is counted once, as a stable download from the homepage", async ({page}) => {
+  const {release} = JSON.parse(readFileSync(process.env.DISTRIBUTION_METADATA_FILE ||
+    new URL("../../src/data/distribution.json", import.meta.url), "utf8"));
+  test.skip(!release, "Download clicks are counted only for a verified release's file.");
+  const events = [];
+  await fixture(page, events);
+  await page.route("https://github.com/**", route => route.fulfill({contentType:"text/html", body:"<h1>Download fixture</h1>"}));
+  await page.goto(origin + base);
+  await expect.poll(() => events.length).toBe(1);
+  await page.locator(".hero .download-mac").click();
+  await expect.poll(() => events.length).toBe(2);
+  expect(events[1]).toEqual({event:"download", session:events[0].session, route:"home", referrer:"direct", track:"stable"});
 });

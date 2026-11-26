@@ -226,7 +226,7 @@ html:not(.js) .theme-switch { display: none; }
 
 /* Reading pages (Help, Downloads, Support, Privacy, AI) ---------------------------------------- */
 .prose { width: min(760px, 100% - 2 * var(--gutter)); margin-inline: auto; padding-top: 44px; color: var(--text-soft); font-size: 18px; line-height: 1.65; }
-.prose > * + * { margin-top: 18px; }
+.prose > * + *, .prose :is(div, section, aside, details) > * + * { margin-top: 18px; }
 .eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--muted); font: 650 13px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; }
 .eyebrow::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-grad); }
 .prose h1 { margin-top: 14px; color: var(--text); font-size: clamp(42px, 7.4vw, 68px); line-height: 1.02; font-weight: 720; letter-spacing: -.038em; }
@@ -304,10 +304,11 @@ html:not(.motion) :is(.btn-accent, .btn-wipe)::after { display: none; }
 /* A reading page's first lines follow its title in. */
 .motion .prose > h1 ~ :nth-child(-n + 4) { animation: rise 560ms var(--ease-out) 200ms backwards; }
 
-/* Things that arrive with depth: they start a little back and leaning, and settle one after another. */
+/* Things that arrive with depth: they start a little back and leaning, and settle one after another. Only once the
+   script that brings them in is running (.arrivals), so they never wait for a script that failed to load. */
 .motion .depth { perspective: 1100px; }
-.motion .depth > * { opacity: 0; transform: translate3d(0, 34px, calc(-90px * var(--depth))) rotateX(calc(13deg * var(--depth))); transform-origin: 50% 100%; transition: transform var(--t-3) var(--ease-out), opacity var(--t-2) ease; transition-delay: calc(var(--i, 0) * var(--stagger)); }
-.motion .depth.is-in > * { opacity: 1; transform: none; }
+.motion.arrivals .depth > * { opacity: 0; transform: translate3d(0, 34px, calc(-90px * var(--depth))) rotateX(calc(13deg * var(--depth))); transform-origin: 50% 100%; transition: transform var(--t-3) var(--ease-out), opacity var(--t-2) ease; transition-delay: calc(var(--i, 0) * var(--stagger)); }
+.motion.arrivals .depth.is-in > * { opacity: 1; transform: none; }
 
 /* Panels that lean toward the pointer, with a soft light that follows it. Scripts write rotate, --mx and --my. */
 .motion [data-tilt] { transition: rotate var(--t-2) var(--ease-out); }

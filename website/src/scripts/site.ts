@@ -102,6 +102,7 @@ for (const heading of document.querySelectorAll<HTMLElement>("[data-rise]")) {
   }
 }
 for (const group of document.querySelectorAll<HTMLElement>(".depth")) [...group.children].forEach((child, i) => (child as HTMLElement).style.setProperty("--i", String(i)));
+root.classList.add("arrivals");
 const arrive = new IntersectionObserver((entries) => {
   for (const entry of entries) if (entry.isIntersecting) { entry.target.classList.add("is-in"); arrive.unobserve(entry.target); }
 }, { rootMargin: "0px 0px -10% 0px", threshold: 0.15 });

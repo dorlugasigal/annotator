@@ -17,14 +17,13 @@ export const storeId = JSON.parse(readFileSync(process.env.WINDOWS_LISTING_FILE 
   new URL("../../src/data/windows-listing.json", import.meta.url), "utf8")).storeId;
 
 /**
- * The homepage's default reading, as tests/e2e/visual-homepage.spec.mjs counts it: visible prose outside closed
- * disclosures, without control labels (buttons and tabs), tool-name chips, release labels (availability, version and
- * the Windows listing line), Terminal commands, screen-reader-only text and the install picture, which draws the steps
- * listed beside it.
+ * The homepage's default reading: visible prose, without the live demo (its sample apps' words), control labels
+ * (buttons, keycaps), Terminal commands, screen-reader-only text and the other system's words.
  */
 export const readingWords = page => page.locator("main").evaluate(root => {
   const clone = root.cloneNode(true);
-  clone.querySelectorAll("details:not([open]), [hidden], video, [data-take-toggle], [data-take-error], button, [role=tab], " +
-    ".tool-group ul, .hero-availability, .install-version, .windows-availability, pre, .install-scene, .screen-reader-only").forEach(element => element.remove());
+  const platform = document.documentElement.dataset.platform;
+  clone.querySelectorAll(`[hidden], figure.stage, button, .keys, code, .visually-hidden, [data-for]:not([data-for="${platform}"])`)
+    .forEach(element => element.remove());
   return clone.textContent.trim().split(/\s+/).length;
 });

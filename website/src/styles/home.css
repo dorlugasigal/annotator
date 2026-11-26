@@ -157,7 +157,7 @@ h1 { font-size: clamp(44px, 11.6vw, 84px); line-height: 1; font-weight: 720; let
 
 /* 4. Coffee ----------------------------------------------------------------------------------- */
 /* The cup waits off stage until scripts/home.js brings it in with the app's Pop. */
-.cup.awaits { opacity: 0; }
+.motion .cup.awaits { opacity: 0; }
 .coffee .panel { display: grid; gap: 8px; align-items: center; padding: 30px 22px 22px; }
 .coffee-copy p { max-width: 30em; margin-top: 14px; color: var(--muted); }
 .coffee-copy .bmc { margin-top: 24px; }
