@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annotator web demo: the growing stage</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="ink.css">
+<style>
+  :root { color-scheme: dark; --page: #12151c; --panel: #1b2030; --line: #ffffff1f; --stage-radius: 18px; --stage-scrim: var(--page); }
+  html { overflow-x: clip; }
+  body { margin: 0; font: 15px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; color: #e8ebf2; background: var(--page); }
+  header { position: sticky; top: 0; z-index: 1000; display: flex; gap: 16px; align-items: center; height: 52px; padding: 0 24px; background: #0b0e14; border-bottom: 1px solid var(--line); }
+  header a { color: inherit; }
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 20px 0; }
+  p { max-width: 70ch; color: #aab2c5; }
+  /* The stage. The surface is the small frame; the panel and the dock have the frame's box and grow with it. */
+  .surface { position: relative; margin: 20px 0; padding: 56px 24px 190px; }
+  .panel { z-index: -1; border-radius: var(--stage-radius); background: radial-gradient(#ffffff2e 1px, transparent 1.4px) 11px 11px / 22px 22px, var(--panel); box-shadow: inset 0 0 0 1px var(--line), 0 24px 44px -32px #000; }
+  .surface { isolation: isolate; }
+  .windows { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .window { padding: 14px 16px; border-radius: 12px; background: #262d44; box-shadow: 0 0 0 1px var(--line); }
+  .window b { display: block; font: 700 40px/1.1 ui-rounded, system-ui, sans-serif; color: #fff; }
+  .window b span { display: inline-block; }
+  .window input { width: 100%; box-sizing: border-box; margin-top: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; color: inherit; background: #12151c; }
+  .chip { position: absolute; left: 14px; top: 14px; z-index: 2; margin: 0; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; color: #e8ebf2; background: #2e3650; }
+  .dock { z-index: 100; pointer-events: none; }
+  .dock > .ink-toolbar { pointer-events: auto; bottom: 14px; }
+  .stage-shrink { background: #2e3650; color: #fff; }
+  #readout { position: fixed; left: 8px; bottom: 8px; z-index: 2000; margin: 0; padding: 6px 10px; border-radius: 8px; font: 12px/1.4 ui-monospace, Menlo, monospace; color: #9fe6b0; background: #000c; pointer-events: none; }
+  .filler { height: 1600px; }
+  button.try { padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; font: inherit; color: inherit; background: var(--panel); }
+</style>
+</head>
+<body>
+<header><strong>Growing stage</strong><a href="#below">A link in the header</a><button type="button" class="try" data-try>Try it here</button></header>
+<main>
+  <h1>The stage grows when you join in</h1>
+  <p>Press on the stage or its toolbar, press Control-Shift-2, Esc or Control-2, or use "Try it here". The frame opens up around the sample windows, which stay where they are. Scroll and it comes back with the scroll; the button in its corner does the same. Add <code>?motion=off</code> for no animation.</p>
+  <div class="surface" id="surface">
+    <i class="panel" data-stage-frame aria-hidden="true"></i>
+    <div class="windows">
+      <div class="window"><b><span id="number">318</span></b>sign-ups this week</div>
+      <div class="window"><b><span id="other">12,480</span></b>visitors<input id="reply" placeholder="Write a reply" aria-label="Reply" autocomplete="off"></div>
+      <div class="window"><b><span id="third">96</span></b>orders</div>
+    </div>
+    <p class="chip" id="chip" data-stage-corner="top left">Using apps</p>
+    <div class="dock" id="dock" data-stage-frame></div>
+  </div>
+  <p id="below">Below the stage. <button type="button" class="try" data-try>Try it here</button></p>
+  <div class="filler"></div>
+  <p>The end of the page.</p>
+</main>
+<pre id="readout"></pre>
+<script type="module">
+import { createInk } from "./ink.js";
+import { growingStage } from "./stage.js";
+
+const query = new URLSearchParams(location.search), surface = document.querySelector("#surface");
+const ink = (window.ink = createInk({ surface, toolbarParent: document.querySelector("#dock"), toolbarPosition: "absolute", properties: false }));
+const stage = (window.stage = growingStage({ ink, surface, tries: "[data-try]", ...(query.get("motion") === "off" ? { motion: () => false } : {}) }));
+const seen = (window.seen = { joins: 0, grows: 0, shrinks: 0, shortcuts: [], modes: [] });
+stage.on("join", () => seen.joins++).on("grow", () => seen.grows++).on("shrink", () => seen.shrinks++);
+ink.on("shortcut", (name, how) => seen.shortcuts.push(`${name}${how?.key ? "" : "?"}`));
+ink.on("mode", (mode) => { seen.modes.push(mode); document.querySelector("#chip").textContent = mode === "draw" ? "Drawing" : "Using apps"; });
+// A scripted mark, to check that it stays on its number while the frame changes.
+ink.perform([{ tool: "underline", under: "#other" }], { cursor: false });
+const readout = document.querySelector("#readout");
+const show = () => {
+  const r = surface.getBoundingClientRect(), css = getComputedStyle(surface);
+  readout.textContent = `${stage.state} ${stage.progress.toFixed(3)}  out ${["top", "right", "bottom", "left"].map((side) => Math.round(parseFloat(css.getPropertyValue(`--stage-${side}`)))).join(" ")}  surface ${Math.round(r.left)},${Math.round(r.top)}  sideways ${document.documentElement.scrollWidth > innerWidth ? "YES" : "no"}`;
+  requestAnimationFrame(show);
+};
+show();
+</script>
+</body>
+</html>

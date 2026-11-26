@@ -198,6 +198,12 @@ h1 { font-size: clamp(41px, 6.5vw, 82px); line-height: .98; font-weight: 720; le
 [data-mode="draw"] > .mode-chip i { background: var(--on-accent); }
 .your-turn { position: absolute; right: var(--inset); top: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 15px 0 12px; border: 0; border-radius: 999px; background: var(--text); color: var(--page); font: 650 14px/1 var(--sans); cursor: pointer; box-shadow: 0 12px 24px -14px var(--shade); transition: transform var(--t-1) var(--spring); }
 .your-turn[hidden] { display: none; }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
+   frame is the desk's own panel. The button that makes it small again sits where "Your turn" was. */
+:root { --stage-scrim: var(--page); }
+.stage-plane { --stage-radius: var(--r-panel); }
+.stage-shrink { --stage-shrink-top: 8px; --stage-shrink-right: var(--inset); background: var(--surface-3); color: var(--text); transition: background var(--t-1) ease; }
+.stage-shrink:hover { background: var(--line-strong); }
 .your-turn:hover { transform: translateY(-1px); }
 .your-turn:focus-visible { border-radius: 999px; outline-color: var(--accent); }
 .your-turn svg { flex: none; fill: currentColor; }
@@ -457,12 +463,15 @@ h1 { font-size: clamp(41px, 6.5vw, 82px); line-height: .98; font-weight: 720; le
   .weeks { display: flex; width: fit-content; margin-left: auto; }
   /* On a phone the stage is taller than the screen, so the way out of drawing stays in reach. */
   #stage-done:not([hidden]) { position: fixed; left: 50%; bottom: 14px; z-index: 1200; translate: -50% 0; height: 44px; padding: 0 20px; border-color: transparent; background: var(--text); color: var(--page); box-shadow: 0 10px 24px -8px var(--dip); }
+  /* While the frame is grown the toolbar is at the bottom of the screen, with its own Draw button to leave drawing. */
+  :root:has(#desk[data-stage]:not([data-stage="small"])) #stage-done:not([hidden]) { visibility: hidden; }
 }
 @media (min-width: 600px) {
   .hero { padding-top: 40px; }
   .stage-plane { --tb-h: 113px; --tb-bottom: 14px; --tb-gap: 104px; --inset: 30px; --band: 56px; }
   .mode-chip { top: 14px; }
   .your-turn { top: 10px; }
+  .stage-shrink { --stage-shrink-top: 10px; }
   .bars { height: 84px; }
   .stage-plane > .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .desk-windows { grid-template-columns: 1.15fr 1fr; gap: 16px; }
@@ -573,6 +582,9 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 /* The stage leans back and comes flat as it is scrolled up the screen. main.js writes --tilt (1 leaning, 0 flat)
    and --lift (0 at both ends, 1 half way), and takes the 3D away again once the plane is flat. */
 .motion .stage-scene { perspective: 1500px; perspective-origin: 50% 20%; }
+/* Perspective keeps the scene in a layer of its own, under the header. The desk is flat while its frame is grown, so
+   the perspective goes and the frame can rise above the page. */
+.motion .stage-scene:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
 .motion .stage-shadow { opacity: calc(.14 + var(--tilt, 0) * .3); transform: translateY(calc(var(--tilt, 0) * 54px)) scale(calc(1 - var(--tilt, 0) * .07)); }
 .motion .stage-plane:not(.is-flat) { isolation: auto; transform-style: preserve-3d; transform-origin: 50% 88%; transform: rotateX(calc(var(--tilt) * var(--tilt-deg))) scale(calc(1 - var(--tilt) * .045)); will-change: transform; }
 .motion .stage-plane:not(.is-flat) > .desk-panel { z-index: auto; transform: translateZ(-1px); }

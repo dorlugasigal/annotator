@@ -10,7 +10,11 @@
 // createInk(options) -> { layer, toolbar, state, styles, on, setMode, setTool, setColor, setCollapsed, select, undo, redo,
 //   clear, perform, hideGhost, moveGhost, placeGhost, reflow, render, rectOf, box, add, remove, marks, setBoard,
 //   setProperties, setAppearance, setHidden, setEnabled, setSpotlight, setHalo, setStyle, setGradient, more, fit, collapsed, enabled,
-//   toolbarRect, shrink, expand, setVisibility, visibility, hidden, clickGhost }
+//   toolbarRect, shrink, expand, setVisibility, visibility, hidden, clickGhost, setRoom, room, shiftToolbar }
+// Keys, as in the app: Control-Shift-2 is Draw (and shows everything first when it was hidden), Esc is Use apps
+//   (after finishing text or cancelling an unfinished drawing), Control-2 hides the drawings and the toolbar, and
+//   with everything hidden brings it back and starts drawing. Each emits `shortcut` ("draw", "use", "hide" or
+//   "show", { key }). Control-2 and Control-Shift-2 do nothing while someone types in a field of the page.
 // Options: surface, tool, color, palette, size, tools, collapsed, pillLabel, useLabel, toolbarParent, smart,
 //   appearance ("dark" | "light" | "auto"), glass (true), toolbarPosition ("fixed" | "absolute"), interactive (true),
 //   enabled (true), properties (whether the properties row starts open; open from 600 px wide, and remembered),
@@ -46,7 +50,7 @@ const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const sleep = (ms) => new Promise((done) => setTimeout(done, reduceMotion() ? 0 : ms));
 const isMac = /mac|iphone|ipad/i.test(navigator.userAgentData?.platform || navigator.platform || "");
-const LIBRARY_KEY = isMac ? "⌘L" : "Ctrl+L", RESUME_KEY = isMac ? "⌃⇧2" : "Ctrl+Shift+2";
+const LIBRARY_KEY = isMac ? "⌘L" : "Ctrl+L", RESUME_KEY = isMac ? "⌃⇧2" : "Ctrl+Shift+2", HIDE_KEY = isMac ? "⌃2" : "Ctrl+2";
 
 function svgEl(name, attrs = {}) {
   const el = document.createElementNS(NS, name);
@@ -375,7 +379,24 @@ export function createInk(options = {}) {
   // True while a real key press or click of the visitor's is being handled: what a script does is never theirs.
   let byVisitor = false;
   const visitorActs = (event) => { if (event.isTrusted) { byVisitor = true; queueMicrotask(() => { byVisitor = false; }); } };
-  const origin = () => layer.getBoundingClientRect();
+  // Where the surface's top left corner is on the screen: every drawing is measured from it. The layer covers the
+  // surface, and with room (setRoom) reaches past it or stops short of it; the corner stays where it is, so nothing
+  // that was drawn moves.
+  let room = null;
+  const origin = () => {
+    const r = layer.getBoundingClientRect();
+    return room ? { left: r.left + room.left, top: r.top + room.top, right: r.right - room.right, bottom: r.bottom - room.bottom, width: r.width - room.left - room.right, height: r.height - room.top - room.bottom } : r;
+  };
+  // How far the drawing layer reaches past its surface on each side, in pixels (negative stops short of the edge),
+  // and how round its corners are. A page's growing stage sets it (stage.js); null or all zero is the surface itself.
+  function setRoom(next) {
+    const sides = next && { top: Number(next.top) || 0, right: Number(next.right) || 0, bottom: Number(next.bottom) || 0, left: Number(next.left) || 0 };
+    room = sides && (sides.top || sides.right || sides.bottom || sides.left) ? sides : null;
+    for (const el of [layer, plane]) {
+      for (const side of ["top", "right", "bottom", "left"]) { if (room) el.style.setProperty(`--ink-room-${side}`, `${room[side]}px`); else el.style.removeProperty(`--ink-room-${side}`); }
+      if (room && next.radius) el.style.setProperty("--ink-room-radius", typeof next.radius === "number" ? `${next.radius}px` : next.radius); else el.style.removeProperty("--ink-room-radius");
+    }
+  }
   const point = (e) => { const o = origin(); return [e.clientX - o.left, e.clientY - o.top]; };
 
   // Marks ----------------------------------------------------------------------------------------
@@ -1288,7 +1309,7 @@ export function createInk(options = {}) {
   // Spotlight and Cursor halo, when a page's script turned them on, follow the pointer in both modes.
   if (interactive) addEventListener("pointermove", (e) => {
     if (!enabled || (!state.spotlight && !state.halo)) return;
-    const o = origin();
+    const o = layer.getBoundingClientRect();
     if (e.clientX < o.left || e.clientX > o.right || e.clientY < o.top || e.clientY > o.bottom) { layer.classList.remove("has-pointer"); return; }
     const p = point(e);
     layer.style.setProperty("--px", `${p[0]}px`);
@@ -1454,7 +1475,27 @@ export function createInk(options = {}) {
   if (interactive) document.addEventListener("keydown", (e) => {
     if (!enabled) return;
     visitorActs(e);
-    if (e.ctrlKey && e.shiftKey && e.code === "Digit2") { e.preventDefault(); setMode(state.mode === "draw" ? "use" : "draw"); emit("shortcut", "draw"); return; }
+    // The app's two keys that work everywhere (AnnotatorApp.activateTools and resumeDrawing). They are the app's
+    // global shortcuts; on a page they stay out of the way of someone typing in one of the page's own fields.
+    const pageField = e.target.closest?.('input, textarea, select, [contenteditable=""], [contenteditable=true], [contenteditable=plaintext-only]') && !toolbar.contains(e.target) && !layer.contains(e.target);
+    if (e.ctrlKey && !e.metaKey && !e.altKey && e.code === "Digit2") {
+      if (pageField) return;
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Control-Shift-2 is Draw: it starts drawing, and shows everything first when it was hidden. It never stops drawing.
+        if (state.mode !== "draw") setMode("draw");
+        emit("shortcut", "draw", { key: RESUME_KEY });
+      } else if (state.hidden) {
+        // Control-2 with everything hidden opens drawing: the drawings and the toolbar come back and Draw is on.
+        setMode("draw");
+        emit("shortcut", "show", { key: HIDE_KEY });
+      } else {
+        // Control-2 otherwise does what Hide drawings and tools does, in Draw and in Use apps.
+        setHidden(true);
+        emit("shortcut", "hide", { key: HIDE_KEY });
+      }
+      return;
+    }
     if (e.key === "Escape" && pop) { e.preventDefault(); closePop(true); return; }
     if (state.mode !== "draw") return;
     const command = e.metaKey || e.ctrlKey, key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
@@ -1463,10 +1504,16 @@ export function createInk(options = {}) {
       if (e.key === "Escape" || (e.key === "Enter" && command)) { e.preventDefault(); commitText(); }
       return;
     }
+    // Escape while drawing keeps its meaning wherever the keys are: cancel what is unfinished, else Use apps.
+    if (e.key === "Escape" && !toolbar.contains(e.target)) {
+      e.preventDefault();
+      if (hasActiveEdit()) { cancelGesture(); settle(); } else { setMode("use"); emit("shortcut", "use", { key: "Esc" }); }
+      return;
+    }
     if (e.target.closest?.("input, textarea, select, [contenteditable=true], [contenteditable=plaintext-only]")) return;
     if (e.key === "Escape") {
       e.preventDefault();
-      if (hasActiveEdit()) { cancelGesture(); settle(); } else { setMode("use"); emit("shortcut", "use"); }
+      if (hasActiveEdit()) { cancelGesture(); settle(); } else { setMode("use"); emit("shortcut", "use", { key: "Esc" }); }
       return;
     }
     if (command && key === "l" && !e.shiftKey && !e.altKey && hasLibrary) { e.preventDefault(); more("library", libraryButton); return; }
@@ -2213,9 +2260,9 @@ export function createInk(options = {}) {
     // ToolbarSlideMotion.annotationTarget: the toolbar's middle, or a corner when there is no toolbar to go to.
     const target = barRect ? [barRect.left + barRect.width / 2 - o.left, barRect.top + barRect.height / 2 - o.top] : [24, 24];
     // Corners sends each drawing to the nearest corner of what is on screen of the layer.
-    const view = { x: Math.max(0, -o.left), y: Math.max(0, -o.top), width: 0, height: 0 };
-    view.width = Math.max(1, Math.min(o.width, innerWidth - o.left) - view.x);
-    view.height = Math.max(1, Math.min(o.height, innerHeight - o.top) - view.y);
+    const full = layer.getBoundingClientRect(), view = { x: Math.max(full.left, 0) - o.left, y: Math.max(full.top, 0) - o.top, width: 0, height: 0 };
+    view.width = Math.max(1, Math.min(full.right, innerWidth) - Math.max(full.left, 0));
+    view.height = Math.max(1, Math.min(full.bottom, innerHeight) - Math.max(full.top, 0));
     const anims = [], temps = [], wraps = [];
     const run = (el, keyframes, delay, seconds, easing = keyframes.easing || "linear") => anims.push(el.animate(keyframes, { duration: seconds * 1000, delay: delay * 1000, easing, fill: "both" }));
     const flights = marks.map((m) => {
@@ -2444,8 +2491,8 @@ export function createInk(options = {}) {
   const probe = h("i", { style: "position: absolute; width: 0; height: 0; pointer-events: none;", "aria-hidden": "true" });
   function toScreen(q) {
     if (probe.parentNode !== layer) layer.append(probe);
-    probe.style.left = `${q[0]}px`;
-    probe.style.top = `${q[1]}px`;
+    probe.style.left = `calc(${q[0]}px + var(--ink-room-left, 0px))`;
+    probe.style.top = `calc(${q[1]}px + var(--ink-room-top, 0px))`;
     const r = probe.getBoundingClientRect();
     return [r.left, r.top];
   }
@@ -2801,7 +2848,15 @@ export function createInk(options = {}) {
     setBoard, setProperties, setAppearance, setHidden, setEnabled, more, fit,
     // The app's motion: shrink() and expand() are its Shrink; setHidden(hidden, { style }) shows and hides in one of
     // its styles ("slide", "magic", "corners", "pop", "drop", "focus", "fade", "none"); each returns a promise.
-    shrink, expand, setVisibility, clickGhost,
+    shrink, expand, setVisibility, clickGhost, setRoom,
+    get room() { return room && { ...room }; },
+    // Moves a toolbar the visitor dragged by this much, so it keeps its place on the screen when the corner of its
+    // parent moves (a growing stage). A toolbar that sits where the page put it is left alone.
+    shiftToolbar(dx, dy) {
+      if (!toolbar.classList.contains("is-placed")) return;
+      toolbar.style.left = `${(parseFloat(toolbar.style.left) || 0) + dx}px`;
+      toolbar.style.top = `${(parseFloat(toolbar.style.top) || 0) + dy}px`;
+    },
     get visibility() { return visibility; },
     get hidden() { return state.hidden; },
     get enabled() { return enabled; },

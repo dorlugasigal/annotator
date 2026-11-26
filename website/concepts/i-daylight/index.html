@@ -88,8 +88,8 @@
         <div class="stage-scene">
           <i class="stage-shadow" aria-hidden="true"></i>
           <div class="stage-plane" id="desk" data-mode="use">
-            <i class="desk-panel" aria-hidden="true"></i>
-            <i class="stage-pulse" aria-hidden="true"></i>
+            <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
+            <i class="stage-pulse" data-stage-frame aria-hidden="true"></i>
             <div class="desk-windows" id="apps">
               <section class="win win-slide" data-win aria-label="Sample slides">
                 <div class="win-bar" data-drag tabindex="0" aria-label="Move the slides window. Use the arrow keys."><i></i><i></i><i></i><span>Monday review</span></div>
@@ -153,12 +153,12 @@
                 </div>
               </section>
             </div>
-            <p class="mode-chip" id="mode-chip"><i aria-hidden="true"></i><b data-when="use">Using apps</b><b data-when="draw">Drawing</b></p>
-            <button type="button" class="your-turn" id="your-turn" data-try hidden>
+            <p class="mode-chip" id="mode-chip" data-stage-corner="top left"><i aria-hidden="true"></i><b data-when="use">Using apps</b><b data-when="draw">Drawing</b></p>
+            <button type="button" class="your-turn" id="your-turn" data-stage-corner="top right" data-try hidden>
               <svg viewBox="0 0 22 26" width="15" height="18" aria-hidden="true"><path d="M2 1.5V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>
               <b>Your turn</b>
             </button>
-            <div class="dock" id="dock"></div>
+            <div class="dock" id="dock" data-stage-frame></div>
           </div>
         </div>
         <figcaption class="wrap">

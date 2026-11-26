@@ -1,4 +1,5 @@
 import { createInk } from "/concepts/shared/ink.js";
+import { growingStage } from "/concepts/shared/stage.js";
 // The app's own motion: its curves, its toolbar Shrink, its Magic flight and its Pop.
 import { css as curve, toolbarMorph, magicFlight, travelFade, visibilityDuration, poseKeyframes } from "/concepts/shared/app-motion.js";
 
@@ -83,6 +84,12 @@ const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $(
 // color, curved arrows, the roughest line. It rests on the Arrow tool so its properties row shows that. The engine
 // itself starts the row closed on a phone, which keeps the bar compact there.
 const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", moreHref: "#install" });
+// Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the desk's
+// frame opens up to fill the window, and scrolling brings it back. The desk itself does not move: in index.html the
+// panel, the cue's ring and the dock carry data-stage-frame and the two corner pieces data-stage-corner.
+const stage = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion });
+// Joining in ends the script, lays the desk flat (the frame grows only once it is) and retires "Your turn".
+stage.on("join", () => { takeOver(); takeTurn(); });
 
 // Theme --------------------------------------------------------------------------------------------
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.

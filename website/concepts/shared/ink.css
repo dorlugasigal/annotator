@@ -1,6 +1,8 @@
 /* The drawing layer and the toolbar of the web demo. The toolbar copies the app's: sizes are the points in
    reference/ux-reference/macos/toolbar, colors the Mac's system colors (design-values.json). */
-.ink-layer { position: absolute; inset: 0; z-index: var(--ink-layer-z, 60); pointer-events: none; overflow: hidden; --ink-color: #f04538; --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
+/* The layer covers its surface. With room (ink.setRoom) it reaches past the surface on each side, or stops short of it,
+   while what is drawn keeps its place: the parts that hold drawings stay the surface's own box. */
+.ink-layer { position: absolute; inset: calc(var(--ink-room-top, 0px) * -1) calc(var(--ink-room-right, 0px) * -1) calc(var(--ink-room-bottom, 0px) * -1) calc(var(--ink-room-left, 0px) * -1); border-radius: var(--ink-room-radius, 0px); z-index: var(--ink-layer-z, 60); pointer-events: none; overflow: hidden; --ink-color: #f04538; --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
 /* Highlighter strokes sit on a plane of their own, just under the layer. The plane blends as one group with the page
    below it, which the layer cannot do: its z-index makes it a stacking context. */
 .ink-layer.ink-blend { z-index: calc(var(--ink-layer-z, 60) - 1); }
@@ -8,10 +10,11 @@
 .ink-layer[data-mode="draw"] { pointer-events: auto; touch-action: none; cursor: crosshair; -webkit-user-select: none; user-select: none; }
 .ink-layer.is-hidden > :not(.ink-ghost) { visibility: hidden; }
 .ink-board, .ink-under, .ink-over, .ink-ui, .ink-spot { position: absolute; inset: 0; pointer-events: none; }
+.ink-under, .ink-over, .ink-ui, .ink-spot { inset: var(--ink-room-top, 0px) var(--ink-room-right, 0px) var(--ink-room-bottom, 0px) var(--ink-room-left, 0px); }
 .ink-board { opacity: 0; transition: opacity .2s ease; }
 .ink-layer[data-board="white"] .ink-board { opacity: 1; background: #fff; }
 .ink-layer[data-board="black"] .ink-board { opacity: 1; background: #141414; }
-.ink-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ink-svg { position: absolute; inset: var(--ink-room-top, 0px) auto auto var(--ink-room-left, 0px); width: calc(100% - var(--ink-room-left, 0px) - var(--ink-room-right, 0px)); height: calc(100% - var(--ink-room-top, 0px) - var(--ink-room-bottom, 0px)); overflow: visible; pointer-events: none; }
 .ink-stroke { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .ink-highlight .ink-stroke { stroke-linecap: butt; opacity: .42; }
 .ink-mark { pointer-events: none; }
@@ -56,10 +59,10 @@
 
 .ink-spot { opacity: 0; transition: opacity .25s ease; background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), transparent 0 calc(var(--ink-spot-size, 130px) - 12px), #04070dcc calc(var(--ink-spot-size, 130px) + 20px)); }
 .ink-layer.has-spotlight.has-pointer .ink-spot { opacity: 1; }
-.ink-halo { position: absolute; left: var(--px, -99px); top: var(--py, -99px); width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; opacity: 0; pointer-events: none; border: 3px solid var(--ink-color); box-shadow: 0 0 22px var(--ink-color); }
+.ink-halo { position: absolute; left: calc(var(--px, -99px) + var(--ink-room-left, 0px)); top: calc(var(--py, -99px) + var(--ink-room-top, 0px)); width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; opacity: 0; pointer-events: none; border: 3px solid var(--ink-color); box-shadow: 0 0 22px var(--ink-color); }
 .ink-layer.has-halo.has-pointer .ink-halo { opacity: .95; }
 
-.ink-ghost { position: absolute; left: 0; top: 0; z-index: 3; margin: -2px 0 0 -3px; opacity: 0; transition: opacity .3s ease; pointer-events: none; filter: drop-shadow(0 3px 5px #0007); will-change: transform; }
+.ink-ghost { position: absolute; left: var(--ink-room-left, 0px); top: var(--ink-room-top, 0px); z-index: 3; margin: -2px 0 0 -3px; opacity: 0; transition: opacity .3s ease; pointer-events: none; filter: drop-shadow(0 3px 5px #0007); will-change: transform; }
 .ink-ghost.is-on { opacity: 1; }
 
 /* Toolbar ------------------------------------------------------------------------------------- */
@@ -124,7 +127,7 @@
 /* A sheet over the whole window for the scripted pointer when it leaves the layer for the toolbar or the page. */
 .ink-reach { position: fixed; inset: 0; z-index: 950; overflow: hidden; pointer-events: none; }
 /* The ring around the pointer when a scripted pointer clicks: the app's pointer halo, 36 points wide. */
-.ink-click { position: absolute; left: 0; top: 0; z-index: 3; box-sizing: border-box; width: 36px; height: 36px; margin: -18px 0 0 -18px; border: 3px solid rgb(255 209.1 0); border-radius: 50%; opacity: 0; pointer-events: none; }
+.ink-click { position: absolute; left: var(--ink-room-left, 0px); top: var(--ink-room-top, 0px); z-index: 3; box-sizing: border-box; width: 36px; height: 36px; margin: -18px 0 0 -18px; border: 3px solid rgb(255 209.1 0); border-radius: 50%; opacity: 0; pointer-events: none; }
 .ink-toolbar.is-placed { translate: none; bottom: auto; }
 .ink-toolbar.is-moving { cursor: grabbing; }
 .ink-toolbar *, .ink-toolbar *::before, .ink-toolbar *::after { box-sizing: border-box; }
