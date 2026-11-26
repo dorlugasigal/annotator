@@ -303,9 +303,6 @@ const labelAndBlur = () => [
   { tool: "text", text: LABEL, speed: 46, pause: 320, at: () => { const d = at.rect(dip); return [d.x - labelWidth() / 2, d.y + (small() ? 9 : 14)]; } },
   { tool: "blur", over: at.box(secret), padX: 6, padY: 3, duration: 650 },
 ];
-// Once the app under the drawings is used, the drawings stop following its layout: they stay where they are on
-// the screen, as they do in the real app.
-const unpin = () => { for (const mark of ink.marks()) if (mark.anchor) mark.anchor = null; };
 
 // Whose doing is it? While one of the visitor's own presses or keys is being handled, `acting` is true. A change
 // of mode, a hide or a shrink that arrives at any other time comes from the loop.
@@ -463,7 +460,18 @@ async function showStill() {
 // The visitor took the stage: the loop ends, and only the Replay button starts it again.
 const takeOver = (keepMode = false, keepHidden = false) => stopDemo(keepMode, keepHidden);
 // The app's keys, pressed for real: Control-Shift-2 draws, Esc goes back to the apps, Control-2 hides and shows.
-ink.on("shortcut", (name, how) => { if (!how?.scripted) takeOver(name === "draw" || name === "show", name === "hide" || name === "show"); });
+// Drawing that the loop had on becomes the visitor's own the moment they ask for it: the stage takes their strokes.
+function claimDraw() {
+  if (ink.state.mode !== "draw") return;
+  screen.classList.remove("is-scripted");
+  done.hidden = false;
+}
+ink.on("shortcut", (name, how) => {
+  if (how?.scripted) return;
+  const draws = name === "draw" || name === "show";
+  takeOver(draws, name === "hide" || name === "show");
+  if (draws) claimDraw();
+});
 ink.on("tool", (tool) => { if (acting) demo.picked = tool; });
 ink.on("mark", () => {
   demo.drew = true;
@@ -494,10 +502,11 @@ replay.addEventListener("click", () => {
   engage(false);
   playDemo();
 });
-// A press anywhere on the stage ends the loop. Using the sample app also lets go of the drawings: from then on they
-// stay where they are on the screen. The loop's own clicks are not the visitor's (they are not trusted events).
+// A press anywhere on the stage ends the loop. The loop's own drawings keep following their targets when the page
+// reflows, so a resized window leaves them where they belong. The loop's own clicks are not the visitor's (they are
+// not trusted events).
 board.addEventListener("pointerdown", (e) => { if (e.isTrusted) takeOver(); }, true);
-for (const name of ["pointerdown", "keydown"]) sample.addEventListener(name, (e) => { if (e.isTrusted) { takeOver(); unpin(); } }, true);
+for (const name of ["pointerdown", "keydown"]) sample.addEventListener(name, (e) => { if (e.isTrusted) takeOver(); }, true);
 sample.addEventListener("click", (e) => {
   const button = e.target.closest(".week-step");
   if (!button || button.disabled) return;
@@ -928,6 +937,7 @@ for (const combo of $$(".combo")) {
     setTimeout(() => keys.forEach((key) => key.classList.remove("is-down")), 190 + keys.length * 45);
     // What the real keys do: Control-Shift-2 only ever starts drawing, Esc goes back, and the stage joins in.
     ink.setMode(combo.dataset.combo === "draw" ? "draw" : "use");
+    if (combo.dataset.combo === "draw") claimDraw();
     growing.join();
   });
 }
