@@ -1,9 +1,12 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
 // The app's Share region and Break timer as small live scenes, for "What you can do".
-import { breakTimerScene, shareRegionScene } from "/concepts/shared/scenes.js";
-// The app's own motion: its curves and its Pop.
-import { css as curve, poseKeyframes } from "/concepts/shared/app-motion.js";
+import { zoomScene, shapesScene, breakTimerScene, shareRegionScene } from "/concepts/shared/scenes.js";
+// The app's own motion: its curves, its Pop and its Magic flight.
+import { css as curve, poseKeyframes, magicFlight } from "/concepts/shared/app-motion.js";
+import { Paint, R, translate, freshToken } from "/concepts/shared/annotation-core.js";
+// Temporary (accent picker): the owner's floating picker for the accent gradient.
+import { accentPicker } from "./accent-picker.js";
 
 const root = document.documentElement;
 const motion = root.classList.contains("motion");
@@ -15,10 +18,12 @@ const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)]
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const smooth = (t) => { const x = clamp(t, 0, 1); return x * x * (3 - 2 * x); };
 // A wait that ends early when its signal is aborted.
+// The script's signal lives as long as the loop, so each wait takes its listener off again when it ends.
 const wait = (ms, signal) => new Promise((done) => {
   if (signal?.aborted || ms <= 0) { done(); return; }
-  const timer = setTimeout(done, ms);
-  signal?.addEventListener("abort", () => { clearTimeout(timer); done(); }, { once: true });
+  const end = () => { clearTimeout(timer); signal?.removeEventListener("abort", end); done(); };
+  const timer = setTimeout(end, ms);
+  signal?.addEventListener("abort", end, { once: true });
 });
 // Runs `step` with 0 to 1 over `ms`. Without motion, or once aborted, it goes straight to the end.
 function tween(ms, step, signal) {
@@ -78,6 +83,8 @@ function frame(now) {
 function request() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
 addEventListener("scroll", request, { passive: true });
 addEventListener("resize", request);
+// A tab that comes back to the front catches up with wherever the page is.
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { lastFrame = 0; request(); } });
 
 // 1. The stage -------------------------------------------------------------------------------------
 const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $("#apps");
@@ -85,13 +92,43 @@ const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $(
 // Dusk gradient as the
 // color, curved arrows, the roughest line. It rests on the Arrow tool so its properties row shows that. The engine
 // itself starts the row closed on a phone, which keeps the bar compact there.
-const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", gradient: "dusk", moreHref: "#install" });
+// The page's accent is one of the app's gradients. It is Dusk; the temporary picker (at the end of this file) can
+// change it.
+let accent = "dusk";
+const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", gradient: accent, moreHref: "#install" });
 // Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the desk's
 // frame opens up to fill the window, and scrolling brings it back. The desk itself does not move: in index.html the
 // panel, the cue's ring and the dock carry data-stage-frame and the mode chip data-stage-corner.
 const stage = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion, invite: "Draw here" });
 // Joining in ends the script and lays the desk flat (the frame grows only once it is).
 stage.on("join", () => takeOver());
+
+// The headline's mark ------------------------------------------------------------------------------
+// The headline does what it says: the drawing engine marks "screen." once its words have landed, in the accent, the
+// way the app draws. Its own small layer takes no input and has no toolbar. The mark is fitted to the word's letters,
+// measured from the font rather than its line box, so it sits round them and never crosses them. ?mark=highlight
+// shows the other way it was tried: the Highlighter in one stroke through the word.
+const heroWord = $(".hero-word"), heroHost = $(".hero-ink");
+const heroInk = createInk({ surface: heroHost, interactive: false, appearance: root.dataset.theme, gradient: accent });
+const heroKind = new URLSearchParams(location.search).get("mark") === "highlight" ? "highlight" : "ellipse";
+let measure = null;
+function wordInk() {
+  const style = getComputedStyle(heroWord), size = parseFloat(style.fontSize), text = heroWord.textContent;
+  measure ||= document.createElement("canvas").getContext("2d");
+  measure.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+  if ("letterSpacing" in measure) measure.letterSpacing = style.letterSpacing;
+  const t = measure.measureText(text), line = parseFloat(style.lineHeight) || size;
+  const baseline = (line - (t.fontBoundingBoxAscent + t.fontBoundingBoxDescent)) / 2 + t.fontBoundingBoxAscent;
+  const x = heroWord.offsetLeft - heroHost.offsetLeft, y = heroWord.offsetTop - heroHost.offsetTop;
+  return { x: x - t.actualBoundingBoxLeft, y: y + baseline - t.actualBoundingBoxAscent, w: t.actualBoundingBoxLeft + t.actualBoundingBoxRight, h: t.actualBoundingBoxAscent + t.actualBoundingBoxDescent };
+}
+function heroSteps(duration) {
+  const letters = wordInk(), size = clamp(letters.h * 0.1, 3, 5.5);
+  if (heroKind === "highlight") return [{ tool: "highlight", over: standIn(heroInk, wordInk), line: 0.6, size: letters.h * 0.16, duration }];
+  // An ellipse a little wider than the word, and just tall enough that its corners stay inside with room to spare.
+  const px = letters.h * 0.5, a = letters.w / 2 + px, b = letters.h / 2 / Math.sqrt(Math.max(0.05, 1 - (letters.w / 2 / a) ** 2)) * 0.94;
+  return [{ tool: "ellipse", around: standIn(heroInk, wordInk), padX: px, padY: b - letters.h / 2, rough: 0, size, duration }];
+}
 
 // Theme --------------------------------------------------------------------------------------------
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
@@ -104,6 +141,7 @@ function showTheme(theme) {
   themeSwitch.setAttribute("aria-checked", String(theme === "dark"));
   themeColor.content = PAGE_COLOR[theme];
   ink.setAppearance(theme);
+  heroInk.setAppearance(theme);
   for (const scene of liveScenes) scene.setAppearance(theme);
 }
 let themeTurn = 0;
@@ -174,7 +212,7 @@ ink.fit();
 // The lean. Fully leaning at the top of the page, flat once the stage has come up the screen. As soon as the visitor
 // draws, it goes flat and stays flat: a pointer on a tilted plane would not draw where it points.
 let userFlat = !motion;
-channel(() => {
+const lean = channel(() => {
   if (userFlat) return 0;
   const top = scene.getBoundingClientRect().top + scrollY;
   return 1 - smooth(scrollY / clamp(top - innerHeight * 0.1, 200, innerHeight * 0.7));
@@ -185,45 +223,24 @@ channel(() => {
 });
 
 // The sample apps ----------------------------------------------------------------------------------
-// Three small apps with made-up data. Nothing leaves the page. In Use apps they answer the visitor; in Draw they
-// are inert and the pointer is the tool. Drawings never follow what the apps do: that is how the real app behaves.
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const WEEKS = {
-  this: { total: 318, note: "21% fewer than last week", days: [62, 58, 64, 55, 41, 22, 16] },
-  last: { total: 402, note: "3% more than the week before", days: [66, 61, 68, 63, 59, 45, 40] },
-};
-const numberEl = $("#t-number"), lineEl = $("#t-line"), deltaEl = $("[data-delta]"), barsEl = $("[data-bars]");
-for (const day of DAYS) {
-  const bar = document.createElement("button");
-  bar.type = "button";
-  bar.className = "bar";
-  bar.innerHTML = `<b class="tip" aria-hidden="true"></b><i></i><span aria-hidden="true">${day[0]}</span>`;
-  barsEl.append(bar);
+// Two small apps with made-up content: a settings window and a message. Nothing leaves the page. In Use apps they
+// answer the visitor; in Draw they are inert and the pointer is the tool. Drawings never follow what the apps do:
+// that is how the real app behaves.
+const switches = $$("[data-switch]"), save = $("[data-save]"), weekly = $('[data-switch="weekly"]'), askEl = $("#t-ask");
+function setSwitch(button, on) { button.setAttribute("aria-checked", String(on)); }
+function setSaved(saved) { save.dataset.saved = String(saved); }
+for (const button of switches) button.addEventListener("click", () => { used(); setSwitch(button, button.getAttribute("aria-checked") !== "true"); setSaved(false); });
+save.addEventListener("click", () => { used(); setSaved(true); });
+// The sidebar: General and Privacy are quiet placeholders.
+const panes = $$("[data-pane]"), paneTitle = $("[data-pane-title]"), paneRows = $("[data-pane-rows]"), paneBlank = $("[data-pane-blank]");
+function showPane(button) {
+  panes.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+  paneTitle.textContent = button.textContent;
+  const notifications = button.dataset.pane === "notifications";
+  paneRows.hidden = !notifications;
+  paneBlank.hidden = notifications;
 }
-const weekButtons = $$("[data-week]");
-function showWeek(name) {
-  const week = WEEKS[name];
-  numberEl.textContent = week.total;
-  deltaEl.textContent = week.note;
-  weekButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.week === name)));
-  $$(".bar", barsEl).forEach((bar, i) => {
-    bar.style.setProperty("--v", week.days[i]);
-    bar.classList.toggle("low", week.days[i] < 50);
-    bar.setAttribute("aria-label", `${DAYS[i]}: ${week.days[i]} sign-ups`);
-    $(".tip", bar).textContent = week.days[i];
-  });
-}
-weekButtons.forEach((button) => button.addEventListener("click", () => { used(); showWeek(button.dataset.week); }));
-
-const pages = $$(".slide-page"), slideCount = $("[data-slide-count]"), slideButtons = $$("[data-slide-go]");
-let slide = 0;
-function showSlide(index) {
-  slide = clamp(index, 0, pages.length - 1);
-  pages.forEach((page, i) => page.classList.toggle("is-on", i === slide));
-  slideCount.textContent = `${slide + 1} of ${pages.length}`;
-  slideButtons.forEach((button) => { button.disabled = slide + Number(button.dataset.slideGo) < 0 || slide + Number(button.dataset.slideGo) >= pages.length; });
-}
-slideButtons.forEach((button) => button.addEventListener("click", () => { used(); showSlide(slide + Number(button.dataset.slideGo)); }));
+panes.forEach((button) => button.addEventListener("click", () => { used(); showPane(button); }));
 
 const thread = $("[data-thread]"), reply = $("[data-reply]"), replyInput = reply.elements.reply;
 function send(text) {
@@ -283,31 +300,41 @@ const refit = () => windows.forEach((win) => { const [x, y] = offsets.get(win) |
 addEventListener("resize", refit);
 stage.on("change", refit);
 function resetApps() {
-  showWeek("this");
-  showSlide(0);
+  showPane($('[data-pane="notifications"]'));
+  switches.forEach((button) => setSwitch(button, button.dataset.first === "true"));
+  setSaved(false);
   $$(".me", thread).forEach((bubble) => bubble.remove());
   replyInput.value = "";
   windows.forEach((win) => { offsets.delete(win); win.style.removeProperty("--dx"); win.style.removeProperty("--dy"); win.style.zIndex = ""; });
 }
 // Marks the script drew follow their targets when the page reflows, until an app is used: from then on they stay
 // where they are on the screen, whatever changes under them.
-function used() { for (const mark of ink.marks()) mark.anchor = null; }
-// A click on the stage while the script plays is the visitor taking over: the script stops and the apps are theirs.
-// (A click, not a press, so a finger that scrolls the page over the stage changes nothing.)
+function used() { for (const mark of ink.marks()) mark.anchor = null; ties.clear(); }
+// Joining in starts drawing at once: the script stops, the stage lies flat, and the Pen is picked in Draw, with the
+// toolbar open, whatever the script was showing.
+function joinDrawing() {
+  takeOver();
+  ink.hideGhost();
+  if (ink.state.hidden) ink.setHidden(false, { animate: false });
+  if (ink.collapsed) ink.setCollapsed(false);
+  ink.setTool("pen");
+}
+// A mouse or pen press on the stage while the script plays is the visitor's first stroke: it goes to the drawing
+// layer as it is. (A window's title bar still moves the window.) A finger may be scrolling the page, so a touch
+// joins in on its click instead, without drawing.
+desk.addEventListener("pointerdown", (e) => {
+  if (!e.isTrusted || !scripted() || e.button !== 0 || e.pointerType === "touch") return;
+  if (ink.toolbar.contains(e.target) || e.target.closest?.("[data-drag], .stage-shrink")) return;
+  e.preventDefault();
+  joinDrawing();
+  ink.layer.dispatchEvent(new PointerEvent("pointerdown", e));
+}, true);
 desk.addEventListener("click", (e) => {
-  if (!e.isTrusted || !run || ink.toolbar.contains(e.target)) return;
-  takeOver(false);
-  if (ink.state.mode !== "draw") return;
-  // The script was showing Draw, so the apps did not hear this click: switch to Use apps and pass it on.
-  ink.setMode("use");
-  const control = document.elementFromPoint(e.clientX, e.clientY)?.closest("button, input");
-  if (!control || !apps.contains(control)) return;
-  control.focus({ preventScroll: true });
-  if (control.matches("button")) control.click();
+  if (!e.isTrusted || !run || ink.toolbar.contains(e.target) || e.target.closest?.("[data-drag], .stage-shrink")) return;
+  if (ink.state.mode !== "draw" || ink.state.tool !== "pen") joinDrawing(); else takeOver();
 }, true);
 apps.addEventListener("keydown", (e) => { if (e.isTrusted && e.key !== "Tab") takeOver(false); }, true);
-showWeek("this");
-showSlide(0);
+resetApps();
 
 // Where things are on the stage's own plane: an element in a window (with the window's move), or a toolbar button.
 function planeBox(el) {
@@ -322,48 +349,21 @@ function planeBox(el) {
   const box = localBox(el, desk), win = el.closest("[data-win]"), [dx, dy] = (win && offsets.get(win)) || [0, 0];
   return { x: box.x + dx, y: box.y + dy, w: box.w, h: box.h };
 }
-const number = standIn(ink, () => planeBox(numberEl));
-
-// The scripted demo ----------------------------------------------------------------------------------
-// The ring and the arrow name no color: they take the gradient selected in the toolbar. Both are drawn at the
-// toolbar's strongest roughness, and the arrow bows well clear of a straight line.
-function markSizes() {
-  const small = desk.clientWidth < 600;
-  return { small, px: small ? 12 : 17, py: small ? 8 : 11, size: small ? 3 : 3.5 };
-}
-function drawSteps() {
-  const { px, py, size } = markSizes();
-  // The arrow runs from the line on the slide to the number: sideways when the windows sit side by side, down when
-  // they are stacked.
-  const ends = () => {
-    const l = planeBox(lineEl), n = planeBox(numberEl);
-    return n.x > l.x + l.w
-      ? [[l.x + l.w + 10, l.y + l.h * 0.3], [n.x - px - 9, n.y + n.h * 0.42]]
-      : [[l.x + l.w - 4, l.y + l.h + 9], [n.x + n.w * 0.8, n.y - py - 14]];
-  };
-  return [
-    { tool: "ellipse", around: number, padX: px, padY: py, size, rough: 6, duration: 820, pause: 240 },
-    { tool: "arrow", from: () => ends()[0], to: () => ends()[1], bend: 0.42, size, rough: 6, duration: 760, pause: 260 },
-  ];
-}
-function labelSteps() {
-  const { small, px } = markSizes();
-  return [{ tool: "text", at: { el: number, at: "right", dx: px + 12, dy: small ? -15 : -18 }, text: "why the dip?", pause: 200 }];
-}
-
 // The tool the visitor chose. A script that shows its tools in the toolbar puts back the tool it started with when
 // it ends; if the visitor picked one meanwhile, theirs is put back instead.
 let chosen = null;
-ink.on("tool", (tool) => { chosen = tool; });
+ink.on("tool", (tool) => { if (!scripted()) chosen = tool; });
 const keepChoice = () => { if (chosen && ink.state.tool !== chosen) ink.setTool(chosen, ink.state.mode !== "draw"); };
 
 const replay = $("#stage-replay"), done = $("#stage-done");
 const modeButton = $('[data-action="mode"]', ink.toolbar), pill = $(".ink-pill", ink.toolbar);
-let run = null, chartSeen = false, seenWaiters = [];
+let run = null, appsOnScreen = false, seenWaiters = [];
+const appsSeen = () => appsOnScreen && !document.hidden;
 // True once the visitor has done something on the stage. Until then, while the script plays, every change of mode
 // is the script's own.
 let acted = false;
-const scripted = () => Boolean(run) && !acted;
+let building = false;
+const scripted = () => (Boolean(run) || building) && !acted;
 // The engine's own Shrink, show and hide and pointer click, in the app's motion. An engine without them changes
 // state at once, and the page fades the drawings itself.
 const appMotion = typeof ink.shrink === "function";
@@ -373,16 +373,21 @@ const setRunning = (running) => {
   // While the script plays, Draw is shown but the stage takes no presses: a swipe over it still scrolls the page.
   desk.classList.toggle("is-scripted", running);
 };
+// The script runs only while its stage can be seen: off screen, or with the tab in the background, it holds at the
+// next pause and goes on from there.
+document.addEventListener("visibilitychange", () => { if (appsSeen()) seenWaiters.splice(0).forEach((go) => go()); });
 const whenSeen = (signal) => new Promise((go) => {
-  if (chartSeen || signal.aborted) { go(); return; }
-  seenWaiters.push(go);
-  signal.addEventListener("abort", go, { once: true });
+  if (appsSeen() || signal.aborted) { go(); return; }
+  const end = () => { signal.removeEventListener("abort", end); seenWaiters.splice(seenWaiters.indexOf(end) >>> 0, 1); go(); };
+  seenWaiters.push(end);
+  signal.addEventListener("abort", end, { once: true });
 });
 
-// Hide and show in the app's Magic style: each drawing flies off on a swoop and the toolbar goes in a puff of
-// sparks, then they come back.
+// Hide and show as Control-2 does, in the app's own default style (Slide).
+let scriptHid = false;
 async function appHide(hidden, signal) {
-  if (appMotion) { await ink.setHidden(hidden, { style: "magic" }); return; }
+  scriptHid = hidden;
+  if (appMotion) { await ink.setHidden(hidden); return; }
   if (hidden) {
     desk.classList.add("is-wiping");
     await wait(320, signal);
@@ -400,81 +405,274 @@ async function wipe(signal) {
   if (!signal?.aborted) ink.clear();
   desk.classList.remove("is-wiping");
 }
-// The pointer goes to something on the stage and presses it.
-async function press(el, action, signal, pause = 520) {
+// A pause in the script, which also waits while the stage cannot be seen.
+async function hold(ms, signal) { await wait(ms, signal); await whenSeen(signal); }
+// The scripted demo ----------------------------------------------------------------------------------
+// One round is the call the page is about: Maya asks where to turn off the weekly emails, and you show her. Every
+// mark is made the way a person makes it in the app: the pointer presses the toolbar's own buttons and draws on the
+// stage with pointer events, and the engine does the rest (Smart Draw, the arrow placed point by point, the counter,
+// the laser and its trail). The marks take the gradient chosen in the toolbar.
+const toolButton = (tool) => $(`[data-tool="${tool}"]`, ink.toolbar);
+const box = (el) => planeBox(el);
+const middle = (b) => [b.x + b.w / 2, b.y + b.h / 2];
+
+// The scripted pointer on the drawing layer. Its places are in the stage's own layout, so it lands right on a tilted
+// plane too, and its events reach the engine as a mouse's would. It stops the moment the visitor takes over.
+const GHOST = 9002;
+let driving = false, ghostAt = [0, 0];
+function fireLayer(type, q, buttons = 0) {
+  if (!driving) return;
+  const o = ink.layer.getBoundingClientRect(), room = ink.room;
+  ink.layer.dispatchEvent(new PointerEvent(type, { pointerId: GHOST, pointerType: "mouse", isPrimary: true, cancelable: true, clientX: o.left + (room?.left || 0) + q[0], clientY: o.top + (room?.top || 0) + q[1], button: 0, buttons }));
+}
+// The engine keeps the pointer for a stroke; the scripted pointer is not one the browser knows, so for its own
+// strokes the layer's capture does nothing.
+async function held(run) {
+  const layer = ink.layer;
+  layer.setPointerCapture = () => {};
+  layer.releasePointerCapture = () => {};
+  try { return await run(); } finally { delete layer.setPointerCapture; delete layer.releasePointerCapture; }
+}
+let showPointer = true;
+// The app's click pulse (its pointer ring, 36 points wide, swelling by 18% and fading), left where the click was. The
+// engine's own ring travels with the pointer, which reads as a halo; this one stays put and is gone in half a second.
+function pulse(q) {
+  if (!motion) return;
+  const ring = document.createElement("i");
+  ring.className = "click-pulse";
+  ring.style.translate = `${q[0].toFixed(1)}px ${q[1].toFixed(1)}px`;
+  desk.append(ring);
+  ring.animate([{ opacity: 1, scale: 1 }, { opacity: 1, scale: 1.18, offset: 0.4 }, { opacity: 0, scale: 1.1 }], { duration: 520, easing: "ease-out" }).finished.then(() => ring.remove(), () => ring.remove());
+}
+const place = (p) => { ghostAt = p; if (showPointer) ink.placeGhost(p); };
+async function reach(q) { if (showPointer) await ink.moveGhost(q); ghostAt = q; }
+// The pointer glides to a place (or along a path) and the engine hears every step of the way.
+async function glide(to, signal, { ms, buttons = 0, path = null } = {}) {
+  const from = ghostAt, at = path || ((t) => [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t]);
+  // Without the pointer (the still picture), the same way is taken at once, in small steps.
+  if (!showPointer) { for (let k = 1; k <= 32; k++) { const p = at(k / 32); ghostAt = p; fireLayer("pointermove", p, buttons); } return; }
+  await tween(ms ?? clamp(Math.hypot(to[0] - from[0], to[1] - from[1]) * 1.5, 200, 620), (t) => { const p = at(t); place(p); fireLayer("pointermove", p, buttons); }, signal);
+}
+function click(q) {
+  fireLayer("pointerdown", q, 1);
+  fireLayer("pointerup", q, 0);
+  if (showPointer) pulse(ghostAt);
+}
+// A drag along a list of points, at an even speed.
+async function stroke(points, signal, ms) {
+  const lengths = [0];
+  for (let i = 1; i < points.length; i++) lengths.push(lengths[i - 1] + Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]));
+  const total = lengths[lengths.length - 1] || 1;
+  const along = (t) => {
+    const d = t * total;
+    let i = 1;
+    while (i < points.length - 1 && lengths[i] < d) i++;
+    const k = clamp((d - lengths[i - 1]) / (lengths[i] - lengths[i - 1] || 1), 0, 1);
+    return [points[i - 1][0] + (points[i][0] - points[i - 1][0]) * k, points[i - 1][1] + (points[i][1] - points[i - 1][1]) * k];
+  };
+  await reach(points[0]);
+  await held(async () => {
+    fireLayer("pointerdown", points[0], 1);
+    await glide(null, signal, { ms, buttons: 1, path: along });
+    fireLayer("pointerup", points[points.length - 1], 0);
+  });
+}
+// The pointer goes to a button (of the toolbar or an app) and presses it.
+async function press(el, action, signal, pause = 420) {
+  if (!el) return;
+  if (!showPointer) { action(); return; }
   if (signal.aborted) return;
-  const box = planeBox(el);
-  await ink.moveGhost([box.x + box.w / 2, box.y + box.h * 0.55]);
-  await wait(140, signal);
+  const b = box(el);
+  await reach([b.x + b.w / 2, b.y + b.h * 0.55]);
+  await hold(120, signal);
   if (signal.aborted) return;
   el.classList.add("is-pressed");
-  ink.clickGhost?.();
+  if (showPointer) pulse(ghostAt);
   action();
-  await wait(170, signal);
+  await hold(150, signal);
   el.classList.remove("is-pressed");
-  await wait(pause, signal);
+  await hold(pause, signal);
 }
-// One round tells the product's story: draw, use the apps while the drawings stay, draw again.
+const pick = (tool, signal, pause = 260) => (ink.state.tool === tool ? null : press(toolButton(tool), () => toolButton(tool).click(), signal, pause));
+
+// Marks the script made follow what they point at when the page reflows, until an app is used: from then on they
+// stay where they are on the screen, whatever changes under them. A mark is tied to one element, or (an arrow) its
+// first point to one and its last to another, with the points between following both in proportion.
+const ties = new Map();
+function tie(before, from, to = from) {
+  for (const m of ink.marks()) {
+    if (before.has(m.id)) continue;
+    ties.set(m.id, { from, to, a: box(from), b: box(to), frame: { ...m.frame }, points: m.points.map((p) => [...p]), between: from !== to });
+  }
+}
+const ids = () => new Set(ink.marks().map((m) => m.id));
+function refollow() {
+  for (const [id, t] of ties) {
+    const m = ink.marks().find((mark) => mark.id === id);
+    if (!m) { ties.delete(id); continue; }
+    const a = box(t.from), b = box(t.to), da = [a.x - t.a.x, a.y - t.a.y], db = [b.x - t.b.x, b.y - t.b.y];
+    if (t.between && m.points.length === t.points.length) {
+      const last = Math.max(1, t.points.length - 1);
+      m.points = t.points.map((p, i) => { const k = i / last; return [p[0] + da[0] * (1 - k) + db[0] * k, p[1] + da[1] * (1 - k) + db[1] * k]; });
+      m.frame = R.enclosing(m.points);
+      m.revision++;
+      m.geometryToken = freshToken();
+    } else translate(m, [t.frame.x + da[0] - m.frame.x, t.frame.y + da[1] - m.frame.y]);
+    ink.render(m);
+  }
+}
+let refollowTimer = 0;
+const refollowSoon = () => { clearTimeout(refollowTimer); refollowTimer = setTimeout(refollow, 140); };
+addEventListener("resize", refollowSoon);
+if (window.ResizeObserver) new ResizeObserver(refollowSoon).observe(apps);
+document.fonts?.ready.then(refollowSoon);
+
+// The arrow is set up before the script starts, as someone would have it in the toolbar: Clean, a thick line, a big
+// head, Curved on. The properties row shows these values; the script only picks tools and draws.
+const ARROW = { roughness: 0, width: 7, headScale: 1.5, curved: true };
+ink.setStyle("arrow", ARROW);
+// The ring is clean too: the Pen draws without roughness, so what Smart Draw makes of it is a smooth ellipse, and the
+// shape tools start at Clean as well.
+for (const tool of ["pen", "ellipse", "rect"]) ink.setStyle(tool, { roughness: 0 });
+
+// Where things go. The ring sits round the weekly email's switch; the arrow comes from Maya's question in a wide arc,
+// sideways when the windows sit side by side and up when they are stacked.
+function ringLoop() {
+  const t = box(weekly), [cx, cy] = middle(t), rx = t.w / 2 + 17, ry = t.h / 2 + 13, points = [];
+  // A quick, loose loop by hand, a little more than once round; Smart Draw makes it an ellipse.
+  for (let i = 0; i <= 30; i++) {
+    const a = -2.5 + (i / 30) * Math.PI * 2.16, wob = 1 + Math.sin(i * 1.7) * 0.06 + (i / 30) * 0.05;
+    points.push([cx + Math.cos(a) * rx * wob, cy + Math.sin(a) * ry * wob]);
+  }
+  return points;
+}
+// The arrow is a sweep with some character, placed point by point as in the app: five clicks along a smooth curve.
+// Side by side it leaves her question heading down and left, swings up through the gap between the windows, crests
+// above the ring and comes down onto it. Stacked, it rises from above her question in an S through the empty middle
+// of the rows and comes into the ring from the left.
+function arrowPoints() {
+  const t = box(weekly), q = box(askEl), side = q.x > t.x + t.w + 20;
+  const ringX = t.w / 2 + 17, ringY = t.h / 2 + 13, [cx, cy] = middle(t);
+  let s, e, c1, c2;
+  if (side) {
+    s = [q.x - 12, q.y + q.h * 0.5];
+    e = [cx + ringX * 0.7, cy - ringY * 0.75];
+    const dx = Math.abs(s[0] - e[0]), dy = Math.max(60, Math.abs(s[1] - e[1]));
+    c1 = [s[0] - dx * 0.5, s[1] + dy * 0.33];
+    c2 = [e[0] + dx * 0.8, Math.max(8, e[1] - dy)];
+  } else {
+    s = [q.x + q.w - 16, q.y - 10];
+    e = [t.x - 22, cy + 6];
+    const h = s[1] - e[1];
+    c1 = [Math.min(s[0] + 25, t.x - 26), s[1] - h * 0.4];
+    c2 = [e[0] - 90, e[1] + h * 0.35];
+  }
+  const on = (k) => [0, 1].map((i) => (1 - k) ** 3 * s[i] + 3 * (1 - k) ** 2 * k * c1[i] + 3 * (1 - k) * k * k * c2[i] + k ** 3 * e[i]);
+  return [0, 0.28, 0.52, 0.76, 1].map(on);
+}
+const counterOne = () => { const t = box(weekly); return [t.x - 20, t.y - 14]; };
+const counterTwo = () => { const s = box(save); return [s.x - 4, s.y - 10]; };
+function swirl(t) {
+  const s = box(save), [cx, cy] = middle(s), rx = s.w / 2 + 20, ry = s.h / 2 + 16, a = -0.6 + t * Math.PI * 2 * 1.7;
+  const k = 1 - 0.18 * t;
+  return [cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k];
+}
+function checkPoints() {
+  const s = box(save), x = s.x + s.w + 18, y = s.y + s.h * 0.5;
+  return [[x, y - 2], [x + 4, y + 3], [x + 9, y + 9], [x + 15, y + 1], [x + 22, y - 9], [x + 29, y - 17]];
+}
+
+// The marks that point Maya to the switch: a ring, the arrow from her question, and the two numbers.
+async function showTheWay(signal) {
+  let before = ids();
+  await pick("pen", signal);
+  await stroke(ringLoop(), signal, 900);
+  tie(before, weekly);
+  await hold(420, signal);
+
+  await pick("arrow", signal, 260);
+  before = ids();
+  const points = arrowPoints(), last = points.length - 1;
+  await reach(points[0]);
+  await held(async () => {
+    click(points[0]);
+    // Quick, sure moves between the clicks, and a beat before the last one; its second click finishes the arrow.
+    for (let i = 1; i <= last; i++) {
+      await hold(i === last ? 320 : 90, signal);
+      const p = points[i];
+      await glide(p, signal, { ms: clamp(Math.hypot(p[0] - ghostAt[0], p[1] - ghostAt[1]) * 1.6, 180, 340) });
+      click(p);
+    }
+    await hold(110, signal);
+    click(points[last]);
+  });
+  tie(before, askEl, weekly);
+  await hold(520, signal);
+
+  await pick("counter", signal);
+  for (const [at, el] of [[counterOne(), weekly], [counterTwo(), save]]) {
+    before = ids();
+    await reach(at);
+    await held(async () => click(at));
+    tie(before, el);
+    await hold(380, signal);
+  }
+}
+
+// The scripted round. Its timings add up to about 20 seconds.
 async function round(signal) {
-  const perform = (steps) => (signal.aborted ? null : ink.perform(steps, { cursor: true, showTool: true, signal }));
   resetApps();
   if (ink.state.hidden) await ink.setHidden(false);
   if (ink.collapsed) await ink.setCollapsed(false);
   if (signal.aborted) return;
   ink.setMode("draw");
-  await wait(500, signal);
-  await perform(drawSteps());
+  await hold(420, signal);
+  await showTheWay(signal);
 
-  // Use apps: the toolbar's own button, then the bar shrinks to one button as it does in the app.
-  await press(modeButton, () => modeButton.click(), signal, 380);
+  // The laser: a short swirl round Save changes, and the trail fades on its own.
+  await pick("laser", signal, 300);
+  const first = swirl(0);
+  await reach(first);
+  await held(async () => {
+    fireLayer("pointerdown", first, 1);
+    await glide(null, signal, { ms: 1500, buttons: 1, path: swirl });
+    fireLayer("pointerup", swirl(1), 0);
+  });
+  await hold(700, signal);
+  if (signal.aborted) return;
+
+  // Use apps: the toolbar's own button, then the bar shrinks to one button as it does in the app. Maya's setting is
+  // turned off and saved, and the drawings stay where they are.
+  await press(modeButton, () => modeButton.click(), signal, 320);
   if (signal.aborted) return;
   await (appMotion ? ink.shrink() : ink.setCollapsed(true));
-  await wait(520, signal);
+  await hold(360, signal);
+  await press(weekly, () => weekly.click(), signal, 520);
+  await press(save, () => save.click(), signal, 700);
   if (signal.aborted) return;
-  used();
-  await press($('[data-week="last"]'), () => showWeek("last"), signal, 900);
-  await press($('[data-week="this"]'), () => showWeek("this"), signal, 500);
-  if (signal.aborted) return;
-  const field = planeBox(replyInput);
-  await ink.moveGhost([field.x + 22, field.y + field.h * 0.55]);
-  ink.clickGhost?.();
-  for (const letter of "On it.") {
-    if (signal.aborted) return;
-    replyInput.value += letter;
-    await wait(70, signal);
-  }
-  await press($("button", reply), () => { send(replyInput.value); replyInput.value = ""; }, signal, 500);
-  if (signal.aborted) return;
-  if (desk.clientWidth >= 600) {
-    // A window moves and the drawings do not: they belong to the screen, not to the window.
-    const win = $(".win-mail"), bar = planeBox($("[data-drag]", win)), from = [bar.x + bar.w * 0.5, bar.y + bar.h / 2];
-    await ink.moveGhost(from);
-    ink.clickGhost?.();
-    win.classList.add("is-moving");
-    await tween(620, (t) => { moveWindow(win, -34 * t, 26 * t); ink.placeGhost([from[0] - 34 * t, from[1] + 26 * t]); }, signal);
-    win.classList.remove("is-moving");
-    await wait(480, signal);
-  }
 
-  // Back to Draw: a press on the one button brings the toolbar back, as in the app.
-  await press(pill, () => pill.click(), signal, 520);
-  await perform(labelSteps());
+  // Back to Draw for a moment: a press on the one button brings the toolbar back, and the pen ticks it off.
+  await press(pill, () => pill.click(), signal, 360);
+  await pick("pen", signal, 200);
+  await stroke(checkPoints(), signal, 420);
   ink.hideGhost();
-  keepChoice();
   if (signal.aborted) return;
-  await wait(2400, signal);
+  await hold(2600, signal);
   if (signal.aborted) return;
 
-  // Hide and show, as Control-2 does in the app: the drawings come back as they were.
+  // The drawings and the toolbar go the app's way (Hide drawings and tools), the apps go back to how they were, and
+  // the toolbar comes back for the next round.
   await appHide(true, signal);
-  await wait(700, signal);
-  await appHide(false, signal);
-  await wait(1100, signal);
+  await hold(500, signal);
   if (signal.aborted) return;
-  await wipe(signal);
-  await wait(500, signal);
+  ink.clear();
+  ties.clear();
+  resetApps();
+  await appHide(false, signal);
+  await hold(700, signal);
 }
 async function loop(signal) {
+  driving = true;
   while (!signal.aborted) {
     await whenSeen(signal);
     await wait(500, signal);
@@ -488,10 +686,12 @@ function start() {
   run = { abort, finished: null };
   setRunning(true);
   run.finished = loop(abort.signal).finally(async () => {
+    driving = false;
     ink.hideGhost();
     keepChoice();
-    // A script that was cut short while the drawings were away brings them back.
-    if (ink.state.hidden) await ink.setHidden(false, { animate: false });
+    // A script that was cut short while it had the drawings away brings them back (not when the visitor hid them).
+    if (ink.state.hidden && scriptHid) await ink.setHidden(false, { animate: false });
+    scriptHid = false;
     if (run?.abort !== abort) return;
     run = null;
     setRunning(false);
@@ -507,10 +707,20 @@ async function stop() {
   desk.classList.remove("is-scripted");
   await finished;
 }
-// The whole demo as a still picture, for visitors who asked for less motion.
+// The whole demo as a still picture, for visitors who asked for less motion: the same marks, made at once and
+// without the pointer.
 async function still() {
-  await ink.perform([...drawSteps(), ...labelSteps()], { cursor: false });
-  ink.reflow();
+  const signal = AbortSignal.abort();
+  building = true;
+  driving = true;
+  showPointer = false;
+  ink.setMode("draw");
+  await showTheWay(signal);
+  ink.setMode("use");
+  if (ink.state.tool !== "arrow") ink.setTool("arrow", true);
+  driving = false;
+  showPointer = true;
+  building = false;
 }
 async function restart() {
   await stop();
@@ -518,6 +728,9 @@ async function restart() {
   if (ink.collapsed) await ink.setCollapsed(false);
   ink.setMode("use");
   if (ink.state.tool !== "arrow") ink.setTool("arrow", true);
+  ink.setStyle("arrow", ARROW);
+  for (const tool of ["pen", "ellipse", "rect"]) ink.setStyle(tool, { roughness: 0 });
+  ties.clear();
   chosen = null;
   acted = false;
   userFlat = !motion;
@@ -536,22 +749,38 @@ function takeOver(flat = true) {
   // toolbar shrunk to one button. What the visitor hides after that stays hidden.
   const hid = scripted() && ink.state.hidden, small = scripted() && ink.collapsed;
   acted = true;
+  // A stroke or an arrow the scripted pointer had under way is let go, so the visitor's pointer never continues it.
+  if (driving) { driving = false; ink.setTool(ink.state.tool, true); }
   stop().then(() => {
     if (hid && ink.state.hidden) ink.setHidden(false);
-    if (small && ink.collapsed) ink.setCollapsed(false);
+    if (small && ink.collapsed && !ink.state.hidden) ink.setCollapsed(false);
   });
-  if (flat && !userFlat) { userFlat = true; request(); }
+  // Lying flat is immediate, so the first stroke lands where the pointer is.
+  if (flat && !userFlat) { userFlat = true; lean.value = null; request(); }
 }
 ink.toolbar.addEventListener("pointerdown", (e) => { if (e.isTrusted) takeOver(); }, true);
 // The three keys, pressed while the script plays: the script stops and the key does what it says, whatever the
 // script was showing. (This runs before the engine hears the key.)
 addEventListener("keydown", (e) => {
-  if (!e.isTrusted || !scripted()) return;
+  if (!e.isTrusted || !scripted() || e.target.closest?.("input, textarea")) return;
   const draws = e.ctrlKey && e.shiftKey && e.code === "Digit2", hides = e.ctrlKey && !e.shiftKey && e.code === "Digit2";
   if (!draws && !hides && e.key !== "Escape") return;
-  takeOver(draws);
-  if (draws && ink.state.mode === "draw") ink.setMode("use");
+  // Control-Shift-2 joins in with the Pen, as a press on the stage does; the engine then hears the key as usual.
+  if (draws) joinDrawing(); else takeOver(false);
 }, true);
+// Hide drawings and tools leaves nothing on the stage, as the app leaves nothing on the desktop: once the engine's
+// animation has played, the toolbar's one button goes too. Control-2 or Control-Shift-2 brings everything back, and
+// for a mouse there is one small button in the stage's corner.
+const showAll = $("#stage-show");
+ink.on("hide", async (hidden) => {
+  showAll.hidden = !hidden || scripted();
+  if (!hidden) { delete desk.dataset.hidden; return; }
+  await new Promise(requestAnimationFrame);
+  const playing = [...ink.toolbar.getAnimations(), ...ink.layer.getAnimations({ subtree: true })].filter((a) => a.effect?.getTiming().iterations !== Infinity);
+  await Promise.race([Promise.all(playing.map((a) => a.finished.catch(() => {}))), wait(1600)]);
+  if (ink.state.hidden) desk.dataset.hidden = "";
+});
+showAll.addEventListener("click", () => { takeOver(false); ink.setMode("draw"); });
 ink.on("shortcut", () => { if (!scripted()) takeOver(); });
 const MODE_WORDS = { use: "Using apps.", draw: "Drawing." };
 ink.on("mode", (mode) => {
@@ -564,35 +793,38 @@ ink.on("mode", (mode) => {
 });
 addEventListener("resize", () => setTimeout(() => ink.reflow(), 260));
 
-// The script waits until the chart, where it draws first, is on screen.
+// The script waits until the settings, where it draws first, are on screen.
 new IntersectionObserver(([entry]) => {
-  chartSeen = entry.isIntersecting;
-  if (chartSeen) seenWaiters.splice(0).forEach((go) => go());
-}, { threshold: 0.6 }).observe($(".win-chart"));
+  appsOnScreen = entry.isIntersecting;
+  if (appsSeen()) seenWaiters.splice(0).forEach((go) => go());
+}, { threshold: 0.6 }).observe($(".win-settings"));
 // Drawing ends when the stage is out of view, so keys and touches go back to the page.
 new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) ink.setMode("use"); }).observe(scene);
 
 const fontsReady = Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).catch(() => {});
+// The first screen, inside about 1.2 s: the headline's words rise (style.css), the engine draws its mark once they
+// have all but landed, and the stage settles under them.
+const pageStart = performance.now();
+Promise.all([document.fonts?.ready, document.fonts?.load('720 84px "Bricolage Grotesque"')]).catch(() => {}).then(async () => {
+  if (motion) await wait(440 - (performance.now() - pageStart));
+  await heroInk.perform(heroSteps(motion ? 520 : 0), { cursor: false });
+});
 fontsReady.then(async () => {
   if (motion) { await wait(1500); if (!acted) start(); } else still();
 });
 
 // "Try it here", from anywhere on the page: the stage comes into view with a clean screen, the Pen and Draw on.
 async function tryHere() {
-  acted = true;
-  userFlat = true;
-  request();
+  // The script's drawings go at once, and the Pen is ready before the stage has even scrolled into view.
+  ink.clear();
+  ties.clear();
+  joinDrawing();
   // The page answers at once: the stage comes into view and its edge lights up while the script winds down.
   const room = innerHeight - parseFloat(getComputedStyle(root).getPropertyValue("--header-h"));
   scene.scrollIntoView({ block: scene.offsetHeight < room - 24 ? "center" : "start", behavior: motion ? "smooth" : "auto" });
   desk.classList.remove("is-cued");
   void desk.offsetWidth;
   desk.classList.add("is-cued");
-  await stop();
-  if (ink.state.hidden) await ink.setHidden(false, { animate: false });
-  if (ink.collapsed) await ink.setCollapsed(false);
-  await wipe();
-  ink.setTool("pen");
   $('[data-tool="pen"]', ink.toolbar)?.focus({ preventScroll: true });
   status.textContent = "This screen is live. Draw on it.";
 }
@@ -601,28 +833,41 @@ $(".stage-pulse").addEventListener("animationend", () => desk.classList.remove("
 
 // 2. What you can do -------------------------------------------------------------------------------
 // Each card holds one of the shared engine's scenes, in the page's gradient and theme. A scene plays while its card
-// faces front, again and again with a short rest between runs, and starts over when the card comes back. A card
-// whose scene is not wired yet keeps its empty frame.
-const SHARED = { share: shareRegionScene, break: breakTimerScene };
+// faces front, again and again with a short rest between runs, and starts over when the card comes back.
+const SHARED = { zoom: zoomScene, shapes: shapesScene, share: shareRegionScene, break: breakTimerScene };
 function shared(shot) {
-  if (!SHARED[shot.dataset.scene]) return { show() {}, hide() {} };
-  const scene = SHARED[shot.dataset.scene](shot, { appearance: root.dataset.theme, gradient: "dusk" });
+  const make = () => SHARED[shot.dataset.scene](shot, { appearance: root.dataset.theme, gradient: accent });
+  let scene = make();
   liveScenes.push(scene);
   let turn = 0, shown = false;
   async function loop() {
-    const mine = ++turn;
+    const mine = ++turn, playing = scene;
     while (mine === turn) {
       // Without motion one run is enough: it ends on the finished picture.
-      if (!(await scene.play()) || !motion) return;
+      if (!(await playing.play()) || !motion) return;
       await wait(1600);
     }
   }
   return {
     show() { if (shown) return; shown = true; loop(); },
     hide() { if (!shown) return; shown = false; turn++; scene.reset(); },
+    // The accent changed: the scene takes the new gradient, or is made again where it cannot.
+    recolor() {
+      if (typeof scene.setGradient === "function") { scene.setGradient(accent); return; }
+      turn++;
+      scene.destroy();
+      liveScenes.splice(liveScenes.indexOf(scene), 1);
+      scene = make();
+      liveScenes.push(scene);
+      if (shown) loop();
+    },
   };
 }
 const cards = $$(".do-deck .card");
+// Goes to one of the cards: through the pinned deck with motion, or to it in the grid without.
+let goToCard = (i) => cards[i].scrollIntoView({ block: "center" });
+// The engine layers that draw the cards' underlines (with motion only).
+let underlineInks = [];
 const visuals = cards.map((card) => shared($(".shot", card)));
 
 if (motion) {
@@ -631,59 +876,78 @@ if (motion) {
   const track = $(".do-track"), tabList = $(".do-tabs"), tabs = $$("button", tabList), rest = 0.2;
   cards.forEach((card, i) => card.style.setProperty("--i", i));
 
-  // A change of card is choreographed in layers. The frame arrives with the scroll; once it has all but landed the
-  // card becomes "current" and its words follow in CSS: the title word by word, the line under it, then a drawn
-  // accent. A card that starts to leave gives them up in the reverse order, faster. Each layer is one transition on
-  // one class, so a fast scroll turns it round from wherever it is.
+  // A change of card is one short piece of motion (the timings are in style.css, under "A change of card"). The
+  // frame arrives with the scroll; once it has all but landed the card becomes "current": the camera pushes in, an
+  // ink stroke wipes the picture in, the title is written letter by letter, the line follows and an underline is
+  // drawn. A card that starts to leave gives it all back, faster. Every layer is one transition on that one class, so
+  // a fast scroll turns each round from wherever it is.
   for (const card of cards) {
-    const title = $("h3", card), words = title.textContent.trim().split(/\s+/);
-    title.textContent = "";
+    const title = $("h3", card), text = title.textContent.trim(), words = text.split(/\s+/);
+    // The letters are for the eye; a screen reader gets the title whole.
+    const written = document.createElement("span");
+    written.setAttribute("aria-hidden", "true");
+    title.setAttribute("aria-label", text);
+    let letters = 0;
     words.forEach((word, i) => {
-      // Each word rises inside its own mask.
-      const mask = document.createElement("span"), inner = document.createElement("span");
+      // Each letter rises inside its word's mask.
+      const mask = document.createElement("span");
       mask.className = "tw";
-      mask.style.setProperty("--w", i);
-      inner.textContent = word;
-      mask.append(inner);
-      title.append(mask, i < words.length - 1 ? " " : "");
+      for (const letter of word) {
+        const one = document.createElement("span");
+        one.textContent = letter;
+        one.style.setProperty("--l", letters++);
+        mask.append(one);
+      }
+      written.append(mask, i < words.length - 1 ? " " : "");
     });
-    const accent = document.createElement("i");
-    accent.className = "card-accent";
-    accent.setAttribute("aria-hidden", "true");
-    accent.append(document.createElement("b"));
-    title.after(accent);
+    title.replaceChildren(written);
+    // The ink wipe: a cover over the picture, with the stroke on its leading edge.
+    const wipe = document.createElement("i");
+    wipe.className = "wipe";
+    wipe.setAttribute("aria-hidden", "true");
+    wipe.append(document.createElement("b"));
+    $(".frame", card).append(wipe);
   }
-  // What carries over from one card to the next: the accent dot in the tabs hops to the new tab, and a soft light
-  // behind the deck glides to the side the new card's picture is on.
-  // (The marker is a <b>: the tabs' own dots are styled as "i" inside the list.)
-  const marker = document.createElement("b"), light = document.createElement("i");
+  // What carries over from one card to the next: the accent dot in the tabs flies to the new tab on the app's Magic
+  // flight (the swoop its drawings make when they are shown), and a soft light behind the deck glides to the side
+  // the new card's picture is on. The dot first appears with the app's Pop.
+  // (The marker and its dot are <b>s: the tabs' own dots are styled as "i" inside the list.)
+  const marker = document.createElement("b"), dot = document.createElement("b"), light = document.createElement("i");
   marker.className = "do-marker";
   marker.setAttribute("aria-hidden", "true");
+  marker.append(dot);
   tabList.append(marker);
   light.className = "do-light";
   light.setAttribute("aria-hidden", "true");
   $(".do-pin").prepend(light);
-  let hop = null, markerAt = -1;
-  const dotOf = (index) => {
-    const dot = $("i", tabs[index]).getBoundingClientRect(), list = tabList.getBoundingClientRect();
-    return [dot.left + dot.width / 2 - list.left, dot.top + dot.height / 2 - list.top];
+  let flight = null, markerAt = -1;
+  const middleIn = (el) => {
+    const r = el.getBoundingClientRect(), list = tabList.getBoundingClientRect();
+    return [r.left + r.width / 2 - list.left, r.top + r.height / 2 - list.top];
   };
   function moveMarker(index, animate = true) {
-    const [x, y] = dotOf(index), to = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
-    // One animation per change: a new hop starts from wherever the last one had got to.
-    const from = getComputedStyle(marker).translate;
-    hop?.cancel();
-    hop = null;
-    marker.style.translate = to;
+    // One animation per change: a new flight starts from wherever the dot had got to.
+    const [fromX, fromY] = middleIn(dot), [x, y] = middleIn($("i", tabs[index])), first = markerAt < 0;
+    flight?.cancel();
+    flight = null;
+    marker.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
     marker.classList.add("is-on");
-    if (!animate || markerAt < 0 || from === "none" || from === to) { markerAt = index; return; }
-    const [fx, fy] = from.split(" ").map(parseFloat), far = Math.abs(x - fx);
     markerAt = index;
-    hop = marker.animate([
-      { translate: from, scale: "1 1" },
-      { translate: `${((fx + x) / 2).toFixed(1)}px ${(Math.min(fy || y, y) - clamp(far * 0.16, 6, 16)).toFixed(1)}px`, scale: "1.5 0.8" },
-      { translate: to, scale: "1 1" },
-    ], { duration: clamp(260 + far * 0.9, 300, 480), easing: curve.standard });
+    if (!animate) return;
+    if (first) {
+      const pop = poseKeyframes("pop", { appearing: true, annotation: false });
+      flight = dot.animate(pop, { duration: pop.duration, easing: pop.easing });
+      return;
+    }
+    const dx = fromX - x, dy = fromY - y, far = Math.hypot(dx, dy);
+    if (far < 1) return;
+    // A long way goes on the Magic flight; between dots that sit side by side a small arc is enough.
+    const path = far > 60 ? magicFlight([dx, dy], [0, 0], `tab ${index}`) : [
+      { translate: `${dx.toFixed(1)}px ${dy.toFixed(1)}px`, scale: "1 1" },
+      { translate: `${(dx / 2).toFixed(1)}px ${(dy / 2 - 9).toFixed(1)}px`, scale: "1.45 0.8" },
+      { translate: "0px 0px", scale: "1 1" },
+    ];
+    flight = dot.animate(path, { duration: clamp(300 + far * 0.7, 320, 560), easing: path.easing || curve.standard });
   }
   let facing = -1, deckSeen = false, lastAt = 0;
   // The tabs, the marker and the light follow the nearest card.
@@ -697,6 +961,20 @@ if (motion) {
     // Wide cards put the picture left, then right, in turn; the light goes to that side.
     light.style.setProperty("--lx", index % 2 ? 1 : -1);
   };
+  // The title's underline is drawn by the engine, in the accent, a moment after the title is written; it goes when
+  // the card leaves. Each card has its own small layer with no toolbar and no input.
+  const underlines = cards.map((card) => {
+    const host = $(".card-text", card), title = $("h3 > span", card);
+    const pen = createInk({ surface: host, interactive: false, appearance: root.dataset.theme, gradient: accent });
+    const under = { getBoundingClientRect() { const r = title.getBoundingClientRect(), w = Math.min(r.width, Math.max(96, r.width * 0.55)); return { left: r.left, top: r.top, width: w, height: r.height }; } };
+    let timer = 0;
+    return {
+      pen,
+      draw() { clearTimeout(timer); timer = setTimeout(() => { pen.clear(); pen.perform([{ tool: "underline", under, dy: 8, wave: 0.7, size: 3, duration: 420 }], { cursor: false, anchored: false }); }, 420); },
+      lift() { clearTimeout(timer); pen.clear(); },
+    };
+  });
+  underlineInks = underlines.map((u) => u.pen);
   // A card is current from the moment its frame has all but landed until it starts to leave (two thresholds, so it
   // cannot flicker between them). Its scene starts only once the frame lies flat, and stops when the card leaves.
   const current = cards.map(() => false);
@@ -706,7 +984,7 @@ if (motion) {
       const x = at - i, whole = Math.floor(Math.abs(x)), part = Math.abs(x) - whole;
       const away = whole + smooth((part - rest) / (1 - 2 * rest));
       const now = deckSeen && away < (current[i] ? 0.1 : 0.06);
-      if (now !== current[i]) { current[i] = now; card.classList.toggle("is-current", now); }
+      if (now !== current[i]) { current[i] = now; card.classList.toggle("is-current", now); if (now) underlines[i].draw(); else underlines[i].lift(); }
       // The scene starts once the frame lies flat (within a hair), and stops when the card leaves.
       if (now && away < 0.03) visuals[i].show(); else if (!now) visuals[i].hide();
     });
@@ -733,14 +1011,46 @@ if (motion) {
   }, { threshold: 0.25 }).observe($(".do-deck"));
   addEventListener("resize", () => { if (facing >= 0) moveMarker(facing, false); });
   document.fonts?.ready.then(() => { if (facing >= 0) moveMarker(facing, false); });
-  tabs.forEach((tab, i) => tab.addEventListener("click", () => {
+  goToCard = (i) => {
     const r = track.getBoundingClientRect();
     scrollTo({ top: r.top + scrollY + (r.height - innerHeight) * (i / (cards.length - 1)) + 1, behavior: "smooth" });
-  }));
+  };
+  tabs.forEach((tab, i) => tab.addEventListener("click", () => goToCard(i)));
+  if (window.ResizeObserver) new ResizeObserver(request).observe(track);
+  // Scrolling decides where every card is, frame by frame. When it stops between two cards (about 150 ms after the
+  // last scroll), the deck finishes the move to the nearer one, or to the next one in the direction of travel, so a
+  // card is always left flat and whole with its words and scene.
+  let idle = 0, lastY = scrollY, heading = 0;
+  function settleDeck() {
+    const r = track.getBoundingClientRect(), span = r.height - innerHeight;
+    if (span <= 0 || r.top > 0 || r.bottom < innerHeight) return;
+    const at = clamp(-r.top / span, 0, 1) * (cards.length - 1), below = Math.floor(at), part = at - below;
+    if (part <= rest * 0.9 || part >= 1 - rest * 0.9) return;
+    const to = part < 0.5 ? (heading > 0 && part > 0.3 ? below + 1 : below) : (heading < 0 && part < 0.7 ? below : below + 1);
+    scrollTo({ top: r.top + scrollY + span * (to / (cards.length - 1)) + 1, behavior: "smooth" });
+  }
+  addEventListener("scroll", () => {
+    if (scrollY !== lastY) heading = Math.sign(scrollY - lastY);
+    lastY = scrollY;
+    clearTimeout(idle);
+    idle = setTimeout(settleDeck, 150);
+  }, { passive: true });
 } else {
   // Without motion the cards are a plain grid, and each scene shows its last frame.
   visuals.forEach((visual) => visual.show());
 }
+
+// The app's keys for two of the cards work here too, on a Mac, while the section is in view: Control-1 goes to Zoom
+// in and Control-3 to Take a break. (Command-L is the browser's, and on Windows Control-1 and Control-3 pick tabs.)
+let doInView = false;
+new IntersectionObserver(([entry]) => { doInView = entry.isIntersecting; }, { threshold: 0.3 }).observe($("#do"));
+addEventListener("keydown", (e) => {
+  if (root.dataset.platform !== "mac" || !doInView || !e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+  const card = { Digit1: 0, Digit3: 3 }[e.code];
+  if (card === undefined || e.target.closest?.('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return;
+  e.preventDefault();
+  goToCard(card);
+});
 
 if (motion) {
   // Where a section is on its way through: -1 just below the screen, 0 in the middle, 1 just above.
@@ -775,6 +1085,8 @@ const arrive = new IntersectionObserver((entries) => {
 }, { rootMargin: "0px 0px -10% 0px", threshold: 0.15 });
 $$("[data-rise], .depth").forEach((el) => arrive.observe(el));
 
+// The live dot by the stage rests while the hero is off screen.
+new IntersectionObserver(([entry]) => $(".hero").classList.toggle("is-away", !entry.isIntersecting)).observe($(".stage-title"));
 // The cup's steam runs only while it is on screen.
 const live = new IntersectionObserver((entries) => {
   for (const entry of entries) entry.target.classList.toggle("is-live", entry.isIntersecting);
@@ -835,4 +1147,26 @@ for (const button of $$("[data-copy]")) {
 if (root.dataset.platform === "windows") $(".platforms").prepend($('.platform[data-os="windows"]'));
 
 matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", () => location.reload());
+
+// Temporary (accent picker): the owner chooses the accent from the app's gradients. Styles follow the names it sets;
+// here the demo's ink, the marks already drawn in the accent, and the live scenes follow too.
+let accentInk = null;
+accentPicker({
+  pages: PAGE_COLOR,
+  change(preset) {
+    // Marks drawn in the accent so far take the new one; a mark in a gradient the visitor picked keeps it.
+    const before = accentInk || ink.state.gradient;
+    accent = preset.id;
+    accentInk = preset.gradient;
+    ink.setGradient(accent);
+    for (const mark of ink.marks()) {
+      if (!mark.style?.strokeGradient || (before && !Paint.same(mark.style.strokeGradient, before))) continue;
+      Paint.setGradient(mark.style, preset.gradient);
+      ink.render(mark);
+    }
+    for (const pen of [heroInk, ...underlineInks]) pen.setGradient(accent);
+    for (const pen of [heroInk, ...underlineInks]) for (const mark of pen.marks()) { Paint.setGradient(mark.style, preset.gradient); pen.render(mark); }
+    visuals.forEach((visual) => visual.recolor());
+  },
+});
 request();

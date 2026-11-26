@@ -8,7 +8,7 @@
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0e0e11">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
-       ?theme=light|dark, ?platform=windows|mac and ?motion=off are for looking at the page. -->
+       ?theme=light|dark, ?platform=windows|mac, ?motion=off and ?mark=highlight|ellipse are for looking at the page. -->
   <script>
     (function () {
       var root = document.documentElement, query = new URLSearchParams(location.search), theme = query.get("theme");
@@ -32,7 +32,7 @@
   <a class="skip" href="#main">Skip to content</a>
   <!-- The accent gradient, for the drawings and shapes that are filled or stroked with it. -->
   <svg class="defs" aria-hidden="true" focusable="false"><defs>
-    <linearGradient id="dusk" x1="0.05" y1="0.75" x2="0.95" y2="0.25"><stop offset="0" style="stop-color: var(--dusk-a)"/><stop offset=".52" style="stop-color: var(--dusk-b)"/><stop offset="1" style="stop-color: var(--dusk-c)"/></linearGradient>
+    <linearGradient id="accent-ink" x1="0.05" y1="0.75" x2="0.95" y2="0.25"><stop offset="0" style="stop-color: var(--dusk-a)"/><stop offset=".52" style="stop-color: var(--dusk-b)"/><stop offset="1" style="stop-color: var(--dusk-c)"/></linearGradient>
     <!-- Buy Me a Coffee's cup mark, from their own button: https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg
          (fetched 2026-11-26; their mark, used only to link to the Buy Me a Coffee page). The drink is white, as on
          their yellow button (https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png). -->
@@ -71,8 +71,9 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero-top">
         <div class="hero-words">
-          <!-- The headline does what it says: a ring is drawn around its last word. -->
-          <h1 id="hero-title" data-rise>Draw on your <span class="ring-word">screen.<svg viewBox="0 0 200 120" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M152 13C100 0 18 14 11 58c-6 40 49 55 93 53 46-2 87-19 85-55C187 22 128 4 66 20"/></svg></span></h1>
+          <!-- The headline does what it says: main.js has the drawing engine mark its last word, as the app would. -->
+          <h1 id="hero-title" data-rise>Draw on your <span class="hero-word">screen.</span></h1>
+          <div class="hero-ink" aria-hidden="true"></div>
           <p class="hero-line">Circle it, point at it, while you share your screen.</p>
         </div>
         <div class="hero-side">
@@ -91,70 +92,43 @@
       <!-- The only words that introduce the stage: the page's main invitation. -->
       <h2 class="wrap stage-title" id="try-title"><i aria-hidden="true"></i><span><span>This screen is live.</span> <span>Draw on it.</span></span><svg viewBox="0 0 44 40" width="38" height="34" aria-hidden="true"><path d="M5 5c16-3 30 5 28 26M24 23l9 9 7-11"/></svg></h2>
 
-      <figure class="stage" id="try" aria-label="A working demo of Annotator. Draw on the three sample apps, or switch to Use apps and click around in them.">
+      <figure class="stage" id="try" aria-label="A working demo of Annotator. Draw on the two sample apps, or switch to Use apps and click around in them.">
         <div class="stage-scene">
           <i class="stage-shadow" aria-hidden="true"></i>
           <div class="stage-plane" id="desk" data-mode="use">
             <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
             <i class="stage-pulse" data-stage-frame aria-hidden="true"></i>
             <div class="desk-windows" id="apps">
-              <section class="win win-slide" data-win aria-label="Sample slides">
-                <div class="win-bar" data-drag tabindex="0" aria-label="Move the slides window. Use the arrow keys."><i></i><i></i><i></i><span>Monday review</span></div>
-                <div class="slide">
-                  <p class="slide-kicker">Week 47 <span data-slide-count>1 of 3</span></p>
-                  <div class="slides">
-                    <div class="slide-page is-on">
-                      <p class="slide-title">Three things from last week</p>
-                      <ul>
-                        <li><span>Visitors are up 4%</span></li>
-                        <li><span id="t-line">Sign-ups fell after the new form</span></li>
-                        <li><span>Orders held steady</span></li>
-                      </ul>
-                    </div>
-                    <div class="slide-page">
-                      <p class="slide-title">Why sign-ups fell</p>
-                      <ul>
-                        <li><span>The form has two more fields</span></li>
-                        <li><span>Most people stop at the phone number</span></li>
-                        <li><span>Phones are hit hardest</span></li>
-                      </ul>
-                    </div>
-                    <div class="slide-page">
-                      <p class="slide-title">What we do next</p>
-                      <ul>
-                        <li><span>Make the phone number optional</span></li>
-                        <li><span>Test the short form for a week</span></li>
-                        <li><span>Look again next Monday</span></li>
-                      </ul>
-                    </div>
+              <section class="win win-settings" data-win aria-label="Sample settings">
+                <div class="win-bar" data-drag tabindex="0" aria-label="Move the settings window. Use the arrow keys."><i></i><i></i><i></i><span>Settings</span></div>
+                <div class="settings">
+                  <ul class="set-side">
+                    <li><button type="button" data-pane="general" aria-pressed="false">General</button></li>
+                    <li><button type="button" data-pane="notifications" aria-pressed="true">Notifications</button></li>
+                    <li><button type="button" data-pane="privacy" aria-pressed="false">Privacy</button></li>
+                  </ul>
+                  <div class="set-main">
+                    <p class="set-title" data-pane-title>Notifications</p>
+                    <ul class="set-rows" data-pane-rows>
+                      <li><span id="s-weekly">Weekly summary email</span><button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="s-weekly" data-switch="weekly" data-first="true"><i></i></button></li>
+                      <li><span id="s-replies">Comment replies</span><button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="s-replies" data-switch="replies" data-first="true"><i></i></button></li>
+                      <li><span id="s-news">Product news</span><button type="button" class="switch" role="switch" aria-checked="false" aria-labelledby="s-news" data-switch="news" data-first="false"><i></i></button></li>
+                    </ul>
+                    <!-- General and Privacy are quiet placeholders: the sample is about one setting. -->
+                    <div class="set-blank" data-pane-blank hidden aria-hidden="true"><i></i><i></i><i></i></div>
+                    <p class="set-foot"><button type="button" class="set-save" data-save><span data-when-saved="no">Save changes</span><span data-when-saved="yes">Saved</span></button></p>
                   </div>
-                  <p class="slide-nav">
-                    <button type="button" data-slide-go="-1" aria-label="Previous slide"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3.5L5.500 8l4.500 4.500"/></svg></button>
-                    <button type="button" data-slide-go="1" aria-label="Next slide"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3.5L10.500 8 6 12.500"/></svg></button>
-                  </p>
-                </div>
-              </section>
-              <section class="win win-chart" data-win aria-label="Sample chart">
-                <div class="win-bar" data-drag tabindex="0" aria-label="Move the chart window. Use the arrow keys."><i></i><i></i><i></i><span>Sign-ups</span></div>
-                <div class="chart">
-                  <p class="weeks" role="group" aria-label="Week">
-                    <button type="button" data-week="last" aria-pressed="false">Last week</button>
-                    <button type="button" data-week="this" aria-pressed="true">This week</button>
-                  </p>
-                  <p class="chart-kpi"><span class="num" id="t-number">318</span></p>
-                  <p class="chart-delta" data-delta>21% fewer than last week</p>
-                  <div class="bars" data-bars></div>
                 </div>
               </section>
               <section class="win win-mail" data-win aria-label="Sample message">
                 <div class="win-bar" data-drag tabindex="0" aria-label="Move the message window. Use the arrow keys."><i></i><i></i><i></i><span>Message</span></div>
                 <div class="mail">
-                  <p class="mail-from"><b class="avatar" aria-hidden="true">M</b><span><strong>Maya Chen</strong><em id="t-email">maya.chen@example.com</em></span></p>
+                  <p class="mail-from"><b class="avatar" aria-hidden="true">D</b><span><strong>Dor Lugasi-Gal</strong><em>dor@example.com</em></span></p>
                   <ul class="thread" data-thread>
-                    <li class="them">Can you walk us through the sign-up number on Monday?</li>
+                    <li class="them" id="t-ask">Where do I turn off the weekly emails?</li>
                   </ul>
                   <form class="reply" data-reply>
-                    <input type="text" name="reply" placeholder="Write a reply" aria-label="Reply to Maya" autocomplete="off" maxlength="60" enterkeyhint="send">
+                    <input type="text" name="reply" placeholder="Write a reply" aria-label="Reply to Dor" autocomplete="off" maxlength="60" enterkeyhint="send">
                     <button type="submit" aria-label="Send"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9.500M8.500 4l4 4-4 4"/></svg></button>
                   </form>
                 </div>
@@ -162,6 +136,7 @@
             </div>
             <p class="mode-chip" id="mode-chip" data-stage-corner="top left"><i aria-hidden="true"></i><b data-when="use">Using apps</b><b data-when="draw">Drawing</b></p>
             <div class="dock" id="dock" data-stage-frame></div>
+            <button type="button" class="stage-show" id="stage-show" data-stage-corner="bottom right" aria-label="Show drawings and tools" title="Show drawings and tools" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg></button>
           </div>
         </div>
         <figcaption class="wrap">
@@ -189,19 +164,19 @@
           </div>
           <div class="wrap do-deck">
             <!-- Four things the live stage cannot show. Every scene is the shared engine's (shared/scenes.js); main.js
-                 fills these frames and plays them. The first two are not wired yet, so their frames are empty. -->
+                 fills these frames and plays them. -->
             <article class="card">
               <div class="frame frame-shot"><div class="shot" data-scene="zoom" role="img" aria-label="Zoom in: the screen zooms in where the pointer is, with a small map in the corner."></div></div>
               <div class="card-text">
-                <h3>Zoom in</h3>
+                <div class="card-title"><h3>Zoom in</h3><span class="keys" data-for="mac" role="img" aria-label="Control 1"><kbd>⌃</kbd><kbd>1</kbd></span><span class="keys" data-for="windows" role="img" aria-label="Control 1"><kbd>Ctrl</kbd><kbd>1</kbd></span></div>
                 <p>Zoom in where your pointer is, so the small stuff is easy to read. A little map shows where you are.</p>
               </div>
             </article>
 
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="shapes" role="img" aria-label="Shapes and icons: shapes and icons for servers and databases are drawn on the screen."></div></div>
+              <div class="frame frame-shot"><div class="shot" data-scene="shapes" role="img" aria-label="Shapes and icons: a database and a server are picked from the tools window and joined with an arrow."></div></div>
               <div class="card-text">
-                <h3>Shapes and icons</h3>
+                <div class="card-title"><h3>Shapes and icons</h3><span class="keys" data-for="mac" role="img" aria-label="Command L"><kbd>⌘</kbd><kbd>L</kbd></span><span class="keys" data-for="windows" role="img" aria-label="Control L"><kbd>Ctrl</kbd><kbd>L</kbd></span></div>
                 <p>More than 40 tools, with shapes and icons for servers, databases and the rest.</p>
               </div>
             </article>
@@ -209,7 +184,7 @@
             <article class="card">
               <div class="frame frame-shot"><div class="shot" data-scene="share" role="img" aria-label="Share just one part: one area of a wide screen opens in its own window."></div></div>
               <div class="card-text">
-                <h3>Share just one part</h3>
+                <div class="card-title"><h3>Share just one part</h3></div>
                 <p>Put one area of a wide screen in its own window, then share that window.</p>
               </div>
             </article>
@@ -217,7 +192,7 @@
             <article class="card">
               <div class="frame frame-shot"><div class="shot" data-scene="break" role="img" aria-label="Take a break: a big countdown fills the screen."></div></div>
               <div class="card-text">
-                <h3>Take a break</h3>
+                <div class="card-title"><h3>Take a break</h3><span class="keys" data-for="mac" role="img" aria-label="Control 3"><kbd>⌃</kbd><kbd>3</kbd></span><span class="keys" data-for="windows" role="img" aria-label="Control 3"><kbd>Ctrl</kbd><kbd>3</kbd></span></div>
                 <p>A big countdown on the screen, so everyone knows when to come back.</p>
               </div>
             </article>
@@ -256,11 +231,12 @@
         <div class="cup" aria-hidden="true">
           <svg viewBox="0 0 240 220">
             <ellipse class="cup-shadow" cx="112" cy="198" rx="86" ry="10"/>
-            <g class="steam"><path d="M84 78c-10-12 10-20 0-34"/><path d="M112 72c-10-12 10-22 0-38"/><path d="M140 78c-10-12 10-20 0-34"/></g>
+            <g class="steam"><path d="M92 72c-9-10 9-18 0-30"/><path d="M114 66c-10-11 10-20 0-34"/><path d="M136 72c-9-10 9-18 0-30"/></g>
             <g class="cup-body">
-              <path class="cup-handle" d="M160 112h12a22 22 0 0 1 0 44h-16"/>
-              <path class="cup-mug" d="M56 96h112v40a46 46 0 0 1-46 46h-20a46 46 0 0 1-46-46z"/>
-              <circle class="cup-dot" cx="112" cy="138" r="9"/>
+              <path class="cup-handle" d="M162 112h10a22 22 0 0 1 0 44h-16"/>
+              <path class="cup-mug" d="M56 92v44a46 46 0 0 0 46 46h20a46 46 0 0 0 46-46V92"/>
+              <ellipse class="cup-rim" cx="112" cy="92" rx="56" ry="11"/>
+              <ellipse class="cup-coffee" cx="112" cy="94" rx="47" ry="7"/>
               <path class="cup-saucer" d="M40 190h144"/>
             </g>
             <path class="cup-ring" pathLength="1" d="M30 150c-6-70 60-126 120-108 62 18 76 100 30 142-44 40-140 34-150-34z"/>
