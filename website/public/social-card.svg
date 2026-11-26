@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="background" x2="1" y2="1">
-      <stop stop-color="#17243b"/><stop offset="1" stop-color="#0b101a"/>
+    <linearGradient id="aurora" x1="0.05" y1="0.75" x2="0.95" y2="0.25">
+      <stop offset="0" stop-color="#21b878"/><stop offset=".52" stop-color="#408cf2"/><stop offset="1" stop-color="#d154e0"/>
     </linearGradient>
-    <linearGradient id="ink" x2="1" y2=".3">
-      <stop stop-color="#84b9ff"/><stop offset=".5" stop-color="#72d6d0"/><stop offset="1" stop-color="#b3e5bb"/>
-    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#ffffff" stop-opacity=".07"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="1.1" fill="#ffffff" fill-opacity=".14"/></pattern>
   </defs>
-  <rect width="1200" height="630" fill="url(#background)"/>
-  <rect x="64" y="53" width="44" height="44" rx="9" fill="#ffb58c"/>
-  <text x="72" y="88" fill="#232026" font-family="Georgia, serif" font-style="italic" font-size="44">a.</text>
-  <text x="125" y="86" fill="#f1f4fc" font-family="sans-serif" font-weight="600" font-size="29">annotator</text>
-  <text x="64" y="241" fill="#f1f4fc" font-family="sans-serif" font-weight="600" font-size="91" letter-spacing="-5">Draw over</text>
-  <text x="64" y="341" fill="url(#ink)" font-family="sans-serif" font-weight="600" font-size="91" letter-spacing="-5">any app.</text>
-  <path d="M68 365 Q265 344 512 359" fill="none" stroke="#abc7ff" stroke-width="3" stroke-linecap="round"/>
-  <text x="68" y="440" fill="#c5d0e3" font-family="sans-serif" font-size="27">Keep the whole thing editable.</text>
-  <text x="68" y="552" fill="#ffb58c" font-family="sans-serif" font-size="23">Native Mac app  ·  All tools are free</text>
-  <path d="M723 392 C618 188 868 150 967 275 S1078 463 1051 197 M1022 235 L1051 197 L1080 235"
-        fill="none" stroke="url(#ink)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="723" cy="392" r="9" fill="#0b101a" stroke="#84b9ff" stroke-width="3"/>
+  <rect width="1200" height="630" fill="#0e0e11"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="40" y="40" width="1120" height="550" rx="32" fill="#17171b"/>
+  <rect x="40" y="40" width="1120" height="550" rx="32" fill="url(#dots)"/>
+  <rect x="40.5" y="40.5" width="1119" height="549" rx="31.5" fill="none" stroke="#ffffff" stroke-opacity=".08"/>
+  <text x="96" y="122" fill="#f2f1f4" font-family="Bricolage Grotesque, sans-serif" font-weight="750" font-size="40" letter-spacing="-1.6">annotator<tspan fill="#408cf2">.</tspan></text>
+  <text x="92" y="268" fill="#f2f1f4" font-family="Bricolage Grotesque, sans-serif" font-weight="720" font-size="118" letter-spacing="-4.7">Draw on your</text>
+  <text x="92" y="420" fill="#f2f1f4" font-family="Bricolage Grotesque, sans-serif" font-weight="720" font-size="118" letter-spacing="-4.7">screen.</text>
+  <path transform="translate(0 -28)" d="M150 360C246 336 460 340 528 370C574 396 552 470 462 488C362 506 170 500 104 468C50 440 70 394 160 370C236 350 352 344 440 352" fill="none" stroke="url(#aurora)" stroke-width="7" stroke-linecap="round"/>
+  <text x="96" y="536" fill="#f2f1f4" fill-opacity=".7" font-family="Instrument Sans, sans-serif" font-size="32">Circle it, point at it, while you share your screen.</text>
+  <path d="M1000 170C1040 250 900 310 640 384M664 354L636 386L678 396" fill="none" stroke="url(#aurora)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1008" cy="146" r="22" fill="#ffdd00"/>
+  <text x="1008" y="155" fill="#10141c" text-anchor="middle" font-family="Instrument Sans, sans-serif" font-weight="700" font-size="26">1</text>
 </svg>

@@ -180,6 +180,8 @@ h1 { font-size: clamp(44px, 11.6vw, 84px); line-height: 1; font-weight: 720; let
 .platform h3 { font-size: 28px; }
 .req { max-width: 26em; margin-top: 8px; font-size: 16px; color: var(--muted); }
 .platform .btn { margin-top: 20px; }
+/* Above the card's pointer light (data-tilt), so the light never washes out the button's words. */
+.platform .btn, .platform .command { z-index: 3; }
 /* The visitor's own platform gets the gradient button; the other one an outline. */
 /* On hover the outline fills with the gradient, wiping in from the left, and the words turn dark on it. */
 :is(:root:not([data-platform="windows"]) .platform[data-os="windows"], :root[data-platform="windows"] .platform[data-os="mac"]) .btn-accent { color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
