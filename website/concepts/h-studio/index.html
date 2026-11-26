@@ -61,9 +61,12 @@
   <main>
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <h1 id="hero-title" data-words>Draw on your screen as you <span class="inked">explain.<svg viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M4 11C58 3 118 15 176 8S262 5 296 10" stroke="url(#ocean)"/></svg></span></h1>
+        <div class="hero-main">
+          <!-- The headline's last word is ringed, as the app would do it. -->
+          <h1 id="hero-title" data-words>Just circle <span class="inked">it.<svg viewBox="0 0 120 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path pathLength="1" d="M40 17C72 5 113 24 114 57C115 90 84 105 54 103C24 101 6 83 8 55C10 30 32 12 64 12C76 12 86 15 95 20" stroke="url(#ocean)"/></svg></span></h1>
+          <p class="lede">Draw right on your screen while you share it.</p>
+        </div>
         <div class="hero-side">
-          <p class="lede">Annotator lets you draw right on top of your screen while you share it. Circle the number, point at the button, blur the email you&rsquo;d rather not show.</p>
           <div class="get">
             <a class="button primary" data-for="mac" href="/downloads/">Download for Mac</a>
             <a class="button primary" data-for="windows" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
@@ -73,10 +76,11 @@
           </div>
           <p class="hero-small">It&rsquo;s free, for Mac and Windows.</p>
         </div>
-        <p class="try-line">Or try it first. The screen below is a working demo, so go ahead and draw on it.</p>
       </div>
 
-      <figure class="stage is-demo" id="stage">
+      <!-- The only words that introduce the stage. -->
+      <h2 class="stage-title" id="stage-title"><i aria-hidden="true"></i>This screen is live. Draw on it.</h2>
+      <figure class="stage is-demo" id="stage" aria-labelledby="stage-title">
         <div class="stage-space">
           <div class="screen" id="screen">
             <div class="desk" data-stage-frame aria-hidden="true"></div>
@@ -121,16 +125,12 @@
               </div>
             </div>
             <div class="dock-plane" data-stage-frame><div class="dock" id="dock"></div></div>
-            <button type="button" class="turn" id="turn" data-stage-corner="top left" data-try hidden><svg viewBox="0 0 22 26" width="11" height="13" aria-hidden="true"><path d="M2 1.500V21l5.200-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg>Your turn</button>
             <p class="mode-chip" id="mode-chip" data-stage-corner="top right" data-mode="use"><i aria-hidden="true"></i><span id="mode-chip-name">Using apps</span></p>
             <span class="stage-pointer" id="stage-pointer" aria-hidden="true"><i></i><svg viewBox="0 0 22 26" width="22" height="26"><path d="M2 1.5V21l5.2-4.700 3.700 8.200 3.600-1.600-3.600-8h6.900z"/></svg></span>
           </div>
         </div>
         <figcaption>
-          <div class="stage-words">
-            <p class="stage-line">Draw marks it up. Use apps lets you click around underneath. Your drawings stay put.</p>
-            <p class="stage-note">This is a web demo with a few of the tools. The real app does this over anything on your screen.</p>
-          </div>
+          <p class="stage-note">It&rsquo;s a web demo with a few of the tools. The real app works over anything on your screen.</p>
           <div class="stage-controls">
             <button type="button" class="chip-button" id="done" hidden>Done drawing</button>
             <button type="button" class="chip-button" id="replay" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5 3.5v9M11 3.5v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.700-3.750M3 2.5v2.800h2.800"/></svg><span>Pause</span></button>
@@ -152,7 +152,7 @@
           <div class="deck" id="deck">
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media scene scene-point" id="scene-point" aria-hidden="true">
+                <div class="tile-media scene" id="scene-draw" aria-hidden="true">
                   <div class="mini">
                     <div class="window-bar"><i></i><i></i><i></i><span>Support</span></div>
                     <div class="stats">
@@ -164,174 +164,42 @@
                   </div>
                 </div>
                 <div class="tile-text">
-                  <h3>Circle and point</h3>
-                  <p>Ring the number, then draw an arrow to the reason.</p>
+                  <h3>Draw on anything</h3>
+                  <p>Circles, boxes, arrows and notes, right over whatever you&rsquo;re sharing.</p>
+                </div>
+              </div>
+            </article>
+            <!-- The next three pictures are live scenes from the shared engine. Each frame is theirs to fill. -->
+            <article class="tile">
+              <div class="tile-inner">
+                <div class="tile-media" aria-hidden="true"><div class="scene-slot" data-scene="share"></div></div>
+                <div class="tile-text">
+                  <h3>Share just one part</h3>
+                  <p>Put one area of a wide screen in its own window, then share that window.</p>
                 </div>
               </div>
             </article>
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media scene scene-smart" id="scene-smart" aria-hidden="true">
-                  <div class="mini">
-                    <div class="window-bar"><i></i><i></i><i></i><span>cart.js</span></div>
-                    <div class="code">
-                      <span>function total(items) {</span>
-                      <span>  let sum = 0</span>
-                      <span data-box>  for (const item of items)<br>    sum += item.price</span>
-                      <span>  return sum</span>
-                      <span>}</span>
-                    </div>
-                  </div>
-                </div>
+                <div class="tile-media" aria-hidden="true"><div class="scene-slot" data-scene="break"></div></div>
                 <div class="tile-text">
-                  <h3>Box it and label it</h3>
-                  <p>Sketch a rough box and Smart Draw tidies it up. Type a note next to it.</p>
+                  <h3>Take a break</h3>
+                  <p>A big countdown on the screen, so everyone knows when to come back.</p>
                 </div>
               </div>
             </article>
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media scene scene-private" id="scene-private" aria-hidden="true">
-                  <div class="mini">
-                    <div class="window-bar"><i></i><i></i><i></i><span>Account</span></div>
-                    <dl class="rows">
-                      <div><dt>Name</dt><dd>Maya Cohen</dd></div>
-                      <div><dt>Email</dt><dd><span data-blur>maya.cohen@example.com</span></dd></div>
-                      <div><dt>Plan</dt><dd>Team, 12 seats</dd></div>
-                      <div><dt>Recovery code</dt><dd><span data-blur>4821-7730-1195</span></dd></div>
-                    </dl>
-                  </div>
-                </div>
+                <div class="tile-media" aria-hidden="true"><div class="scene-slot" data-scene="toolbar"></div></div>
                 <div class="tile-text">
-                  <h3>Hide what&rsquo;s private</h3>
-                  <p>Blur an email while you share. It&rsquo;s a cover, not real redaction, so close the truly secret stuff first.</p>
-                </div>
-              </div>
-            </article>
-            <article class="tile">
-              <div class="tile-inner">
-                <div class="tile-media scene scene-spot" id="scene-spot" aria-hidden="true">
-                  <div class="mini">
-                    <div class="window-bar"><i></i><i></i><i></i><span>Settings</span></div>
-                    <dl class="rows">
-                      <div><dt>Notifications</dt><dd data-spot>On</dd></div>
-                      <div><dt>Two-step sign-in</dt><dd data-spot>Off</dd></div>
-                      <div><dt>Backups</dt><dd>Daily</dd></div>
-                      <div><dt>Language</dt><dd>English</dd></div>
-                    </dl>
-                  </div>
-                </div>
-                <div class="tile-text">
-                  <h3>Guide the eye</h3>
-                  <p>Spotlight dims everything but your pointer. There&rsquo;s a laser pointer and zoom too.</p>
-                </div>
-              </div>
-            </article>
-            <article class="tile">
-              <div class="tile-inner">
-                <div class="tile-media scene scene-steps" id="scene-steps" aria-hidden="true">
-                  <div class="mini">
-                    <div class="window-bar"><i></i><i></i><i></i><span>New project</span></div>
-                    <div class="form">
-                      <p><span>Name</span><b class="field" data-step>Launch week</b></p>
-                      <p><span>Region</span><b class="field select" data-step>Europe</b></p>
-                      <p><b class="mini-button" data-step>Create project</b></p>
-                    </div>
-                  </div>
-                </div>
-                <div class="tile-text">
-                  <h3>Number the steps</h3>
-                  <p>Click, click, click. The numbers count up on their own.</p>
-                </div>
-              </div>
-            </article>
-            <article class="tile">
-              <div class="tile-inner">
-                <div class="tile-media scene scene-system" id="scene-system" aria-hidden="true">
-                  <div class="nodes"><i data-node="rect" data-name="app"></i><i data-node="diamond" data-name="queue"></i><i data-node="ellipse" data-name="data"></i></div>
-                </div>
-                <div class="tile-text">
-                  <h3>Sketch a system</h3>
-                  <p>Boxes, arrows, and ready-made icons for servers and databases.</p>
+                  <h3>Make it yours</h3>
+                  <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it&rsquo;s in the way.</p>
                 </div>
               </div>
             </article>
           </div>
         </div>
       </div>
-    </section>
-
-    <section class="keys-section wrap" aria-labelledby="keys-title">
-      <h2 id="keys-title" data-words>Two keys to remember</h2>
-      <div class="keys" id="keys" data-scroll>
-        <button type="button" class="combo" data-combo="draw" data-enter style="--i: 0">
-          <span class="plate">
-            <kbd class="key wide" data-key="control"><span class="key-top"><span data-for="mac">control</span><span data-for="windows">Ctrl</span></span><i class="key-side"></i></kbd>
-            <kbd class="key wide" data-key="shift"><span class="key-top">shift</span><i class="key-side"></i></kbd>
-            <kbd class="key" data-key="2"><span class="key-top">2</span><i class="key-side"></i></kbd>
-          </span>
-          <span class="combo-label">to draw.</span>
-        </button>
-        <button type="button" class="combo" data-combo="use" data-enter style="--i: 1">
-          <span class="plate">
-            <kbd class="key" data-key="esc"><span class="key-top">esc</span><i class="key-side"></i></kbd>
-          </span>
-          <span class="combo-label">to get back to your app.</span>
-        </button>
-      </div>
-      <div class="keys-copy" data-enter style="--i: 2">
-        <p class="stay">Your drawings stay where they are.</p>
-        <p class="press">Go on, press them. They work on this page.</p>
-        <p class="mode-line" id="mode-line" data-mode="use"><i aria-hidden="true"></i><span>Right now you&rsquo;re using the app.</span></p>
-      </div>
-    </section>
-
-    <section class="also wrap" aria-labelledby="also-title">
-      <h2 id="also-title" data-words>There&rsquo;s more in the app</h2>
-      <ul class="extras">
-        <li class="extra" data-enter data-tilt style="--i: 0">
-          <svg class="il il-timer" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
-            <rect class="il-panel" x="12" y="8" width="136" height="88" rx="10"/>
-            <circle class="il-glow a" cx="52" cy="70" r="30"/><circle class="il-glow b" cx="112" cy="34" r="24"/>
-            <text class="il-small" x="80" y="38" text-anchor="middle">Coffee break</text>
-            <text class="il-time t1" x="80" y="72" text-anchor="middle">10:00</text>
-            <text class="il-time t2" x="80" y="72" text-anchor="middle">9:59</text>
-            <text class="il-time t3" x="80" y="72" text-anchor="middle">9:58</text>
-          </svg>
-          <div><h3>Break timer</h3><p>A big countdown for the coffee break.</p></div>
-        </li>
-        <li class="extra" data-enter data-tilt style="--i: 1">
-          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
-            <rect class="il-panel" x="6" y="8" width="112" height="76" rx="9"/>
-            <path class="il-faint" d="M18 24h40M18 34h28M18 60h26M18 70h20"/>
-            <rect class="il-region" x="56" y="28" width="50" height="36" rx="3"/>
-            <g class="il-pop">
-              <rect class="il-card" x="92" y="46" width="62" height="48" rx="7"/>
-              <path class="il-rule" d="M92 58h62"/>
-              <circle class="il-dot" cx="99.5" cy="52" r="1.800"/><circle class="il-dot" cx="105.500" cy="52" r="1.800"/>
-              <rect class="il-fill" x="99" y="64" width="48" height="23" rx="3"/>
-            </g>
-          </svg>
-          <div><h3>Share region</h3><p>Share just one part of a wide screen.</p></div>
-        </li>
-        <li class="extra" data-enter data-tilt style="--i: 2">
-          <svg class="il" viewBox="0 0 160 104" aria-hidden="true" focusable="false">
-            <clipPath id="board-clip"><rect x="12" y="10" width="136" height="84" rx="10"/></clipPath>
-            <g clip-path="url(#board-clip)">
-              <rect class="il-white" x="12" y="10" width="136" height="84"/>
-              <rect class="il-black" x="80" y="10" width="68" height="84"/>
-            </g>
-            <rect class="il-frame" x="12" y="10" width="136" height="84" rx="10"/>
-            <path class="il-ink" pathLength="1" d="M28 62c8-22 18-24 24-6s14 14 22-2 16-18 24-4 14 8 34-16"/>
-          </svg>
-          <div><h3>Whiteboard and blackboard</h3><p>A clean board when you need room.</p></div>
-        </li>
-        <li class="extra extra-bar" data-enter data-tilt style="--i: 3">
-          <!-- A small copy of the page's real toolbar, made by main.js. It shrinks to one button and grows back. -->
-          <div class="il il-toolbar" id="mini-bar" aria-hidden="true"><div class="mini-bar-fit" id="mini-bar-fit"></div></div>
-          <div><h3>A toolbar that&rsquo;s yours</h3><p>Add tools, remove tools, or shrink it to one button.</p></div>
-        </li>
-      </ul>
     </section>
 
     <section class="answers wrap" aria-labelledby="answers-title">
@@ -401,7 +269,7 @@
         <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
       </nav>
       <p class="sign-off">Made by Dor.</p>
-      <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+      <p>Open source under Apache 2.0, with no account and nothing to pay for. Coffee&rsquo;s optional.</p>
     </div>
   </footer>
 

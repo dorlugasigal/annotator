@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Annotator: show people exactly what you mean (Daylight · Neon)</title>
-  <meta name="description" content="Annotator lets you draw right on top of your screen while you share it. It's free, for Mac and Windows, and you can try it on this page.">
+  <title>Annotator: just circle it (Daylight · Neon)</title>
+  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0a0a0a">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -64,11 +64,9 @@
       <div class="wrap bento hero-bento">
         <div class="tile t-statement" data-flip>
           <i class="pip" aria-hidden="true"></i>
-          <h1 id="hero-title">Show people <span class="mark-word"><b>exactly</b><i class="sel" aria-hidden="true"><i></i><i></i><i></i><i></i></i></span> what you mean.</h1>
-        </div>
-        <div class="tile t-lede" data-flip>
-          <i class="pip" aria-hidden="true"></i>
-          <p class="lede">Annotator lets you draw right on top of your screen while you share it. Circle the number, point at the button, blur the email you'd rather not show.</p>
+          <!-- main.js rings the word with the demo's own pen, in the accent. -->
+          <h1 id="hero-title">Just <span class="ring-word">circle</span> it.</h1>
+          <p class="lede">Draw right on your screen while you share it.</p>
         </div>
         <div class="tile t-get" data-flip>
           <img class="app-icon" src="/public/app/app-icon.png" alt="" width="64" height="64">
@@ -83,7 +81,8 @@
             <span class="get-more"><a class="quiet" href="/downloads/">Download for Mac</a> <small>It's free, for Mac and Windows.</small></span>
           </p>
         </div>
-        <p class="tile t-try" data-flip><i aria-hidden="true"></i><span>Or try it first. The screen below is a working demo, so go ahead and draw on it.</span><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v10M3.5 8.5 8 13l4.5-4.5"/></svg></p>
+        <!-- The stage's heading, on the grid line right above it. -->
+        <h2 class="tile t-live" id="live-title" data-flip><i aria-hidden="true"></i><span><span>This screen is live.</span> <span>Draw on it.</span></span><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M8 2.5v10M3.5 8.5 8 13l4.5-4.5"/></svg></h2>
       </div>
 
       <figure class="stage" id="try" aria-label="A working demo of Annotator. Three small sample apps sit under the app's toolbar. On its own, a pointer rings a number and draws an arrow to it, then uses the apps while the drawings stay put.">
@@ -91,13 +90,12 @@
           <div class="stage-plane" id="desk">
             <i class="stage-shadow" aria-hidden="true"></i>
             <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
-            <!-- On the stage's top edge: what the pointer does now, and the invitation. -->
+            <!-- On the stage's top edge: what the pointer does now. -->
             <div class="desk-tabs">
               <p class="mode-chip" id="stage-mode" data-mode="use" data-stage-corner="top left">
-                <span class="face" data-face="use"><i aria-hidden="true"></i><b>Using apps</b><kbd data-cap="draw" aria-label="Control Shift 2 draws"><span data-for="mac">⌃⇧2</span><span data-for="windows">Ctrl+Shift+2</span></kbd></span>
-                <span class="face" data-face="draw"><i aria-hidden="true"></i><b>Drawing</b><kbd data-cap="use" aria-label="Esc goes back to the apps">Esc</kbd></span>
+                <span class="face" data-face="use"><i aria-hidden="true"></i><b>Using apps</b></span>
+                <span class="face" data-face="draw"><i aria-hidden="true"></i><b>Drawing</b></span>
               </p>
-              <button type="button" class="turn" id="stage-turn" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 2.5v9.6l2.7-2.3 1.9 4 1.8-.8-1.8-3.9h3.4z"/></svg>Your turn</button>
             </div>
             <div class="desk-windows" id="apps">
               <section class="win win-slide" aria-label="Monday review, a sample slide deck">
@@ -170,8 +168,7 @@
         </div>
         <figcaption class="wrap bento stage-foot">
           <div class="tile foot-words">
-            <p class="stage-line">Draw marks it up. Use apps lets you click around underneath. Your drawings stay put.</p>
-            <p class="stage-note">This is a web demo with a few of the tools. The real app does this over anything on your screen.</p>
+            <p class="stage-note">It's a web demo with a few of the tools. The real app works over anything on your screen.</p>
           </div>
           <div class="tile foot-ctl">
             <span class="stage-controls">
@@ -189,18 +186,10 @@
         <div class="tile t-head" data-area="head" data-flip>
           <i class="pip" aria-hidden="true"></i>
           <h2 id="do-title">What you can do</h2>
-          <ol class="do-index" aria-label="Show one bigger">
-            <li><button type="button" data-go="0"><i aria-hidden="true"></i><span>Circle and point</span></button></li>
-            <li><button type="button" data-go="1"><i aria-hidden="true"></i><span>Box it and label it</span></button></li>
-            <li><button type="button" data-go="2"><i aria-hidden="true"></i><span>Hide what's private</span></button></li>
-            <li><button type="button" data-go="3"><i aria-hidden="true"></i><span>Guide the eye</span></button></li>
-            <li><button type="button" data-go="4"><i aria-hidden="true"></i><span>Number the steps</span></button></li>
-            <li><button type="button" data-go="5"><i aria-hidden="true"></i><span>Sketch a system</span></button></li>
-          </ol>
         </div>
 
         <article class="tile card" data-area="t1" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-dash" data-scene="point" aria-hidden="true">
+          <div class="frame"><div class="shot shot-dash" data-scene="draw" aria-hidden="true">
             <div class="dash">
               <div class="dash-kpis">
                 <p><span>Visitors</span><b>12,480</b></p>
@@ -208,168 +197,49 @@
                 <p><span>Orders</span><b>96</b></p>
               </div>
               <div class="dash-chart">
-                <svg viewBox="0 0 300 90" preserveAspectRatio="none"><path class="dash-area" d="M0 34C40 22 72 26 110 36s62 44 92 42 56-44 98-54V90H0z"/><path class="dash-line" d="M0 34C40 22 72 26 110 36s62 44 92 42 56-44 98-54"/></svg>
-                <i class="dash-dip" data-t="dip"></i>
+                <svg viewBox="0 0 300 90" preserveAspectRatio="none"><path class="dash-area" d="M0 30C40 18 72 22 110 32s62 36 92 34 56-40 98-46V90H0z"/><path class="dash-line" d="M0 30C40 18 72 22 110 32s62 36 92 34 56-40 98-46"/></svg>
+                <i class="dash-dip"></i><i class="dash-box" data-t="box"></i><i class="dash-note" data-t="note"></i>
               </div>
             </div>
           </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play it again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
           <div class="card-text">
-            <h3>Circle and point</h3>
-            <p>Ring the number, then draw an arrow to the reason.</p>
+            <h3>Draw on anything</h3>
+            <p>Circles, boxes, arrows and notes, right over whatever you're sharing.</p>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Circle and point" aria-label="Show Circle and point bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
+          <button type="button" class="tile-open" aria-expanded="false" data-name="Draw on anything" aria-label="Show Draw on anything bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
 
+        <!-- The next three pictures are the shared live scenes; each frame keeps their shape, about 16:10. -->
         <article class="tile card" data-area="t2" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-form" data-scene="box" aria-hidden="true">
-            <div class="pay">
-              <p class="pay-title">Checkout</p>
-              <p class="pay-field"><span>Name on card</span><i></i></p>
-              <p class="pay-field"><span>Card number</span><i></i></p>
-              <p class="pay-go"><b class="fake-btn" data-t="btn">Pay now</b></p>
-            </div>
-            <i class="pay-note" data-t="note"></i>
-          </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play it again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
+          <div class="frame"><div class="shot" data-scene="share" aria-hidden="true"></div></div>
           <div class="card-text">
-            <h3>Box it and label it</h3>
-            <p>Sketch a rough box and Smart Draw tidies it up. Type a note next to it.</p>
+            <h3>Share just one part</h3>
+            <p>Put one area of a wide screen in its own window, then share that window.</p>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Box it and label it" aria-label="Show Box it and label it bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
+          <button type="button" class="tile-open" aria-expanded="false" data-name="Share just one part" aria-label="Show Share just one part bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
 
         <article class="tile card" data-area="t3" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-record" data-scene="blur" aria-hidden="true">
-            <div class="rec">
-              <p class="rec-head"><b class="avatar">D</b><span><strong>Dana Whitfield</strong><em>Customer</em></span></p>
-              <dl>
-                <div><dt>Email</dt><dd><span data-t="email">dana.w@example.com</span></dd></div>
-                <div><dt>Card</dt><dd><span data-t="card">4242 4242 4242 4242</span></dd></div>
-                <div><dt>Plan</dt><dd>Team, yearly</dd></div>
-              </dl>
-            </div>
-          </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play it again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
+          <div class="frame"><div class="shot" data-scene="break" aria-hidden="true"></div></div>
           <div class="card-text">
-            <h3>Hide what's private</h3>
-            <p>Blur an email while you share. It's a cover, not real redaction, so close the truly secret stuff first.</p>
+            <h3>Take a break</h3>
+            <p>A big countdown on the screen, so everyone knows when to come back.</p>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Hide what's private" aria-label="Show Hide what's private bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
+          <button type="button" class="tile-open" aria-expanded="false" data-name="Take a break" aria-label="Show Take a break bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
 
         <article class="tile card" data-area="t4" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-gallery" data-scene="spot" aria-hidden="true">
-            <div class="pics">
-              <p data-t="g1"><i class="pic pic-hills"></i><span>Hills</span></p>
-              <p data-t="g2"><i class="pic pic-sun"></i><span>Morning</span></p>
-              <p data-t="g3"><i class="pic pic-waves"></i><span>Coast</span></p>
-              <p data-t="g4"><i class="pic pic-trees"></i><span>Forest</span></p>
-              <p data-t="g5"><i class="pic pic-moon"></i><span>Night</span></p>
-              <p data-t="g6"><i class="pic pic-city"></i><span>Town</span></p>
-            </div>
-          </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play it again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
+          <div class="frame"><div class="shot" data-scene="toolbar" aria-hidden="true"></div></div>
           <div class="card-text">
-            <h3>Guide the eye</h3>
-            <p>Spotlight dims everything but your pointer. There's a laser pointer and zoom too.</p>
+            <h3>Make it yours</h3>
+            <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it's in the way.</p>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Guide the eye" aria-label="Show Guide the eye bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
-        </article>
-
-        <article class="tile card" data-area="t5" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-steps" data-scene="steps" aria-hidden="true">
-            <div class="dlg">
-              <p class="dlg-title">Export report</p>
-              <p class="dlg-row"><i data-t="p1"></i><span>Format</span><b>PDF</b></p>
-              <p class="dlg-row"><i data-t="p2"></i><span>Pages</span><b>All pages</b></p>
-              <p class="dlg-row dlg-go"><i data-t="p3"></i><b class="fake-btn">Export</b></p>
-            </div>
-          </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play it again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
-          <div class="card-text">
-            <h3>Number the steps</h3>
-            <p>Click, click, click. The numbers count up on their own.</p>
-          </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Number the steps" aria-label="Show Number the steps bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
-        </article>
-
-        <article class="tile card" data-area="t6" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-board" data-scene="system" aria-hidden="true">
-            <i class="node" data-t="n1"></i><i class="node" data-t="n2"></i><i class="node" data-t="n3"></i>
-          </div><button type="button" class="ctl" data-ctl="scene" aria-label="Play it again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
-          <div class="card-text">
-            <h3>Sketch a system</h3>
-            <p>Boxes, arrows, and ready-made icons for servers and databases.</p>
-          </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Sketch a system" aria-label="Show Sketch a system bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
+          <button type="button" class="tile-open" aria-expanded="false" data-name="Make it yours" aria-label="Show Make it yours bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
       </div>
     </section>
 
-    <!-- 3. Two keys -->
-    <section class="keys" id="keys" aria-labelledby="keys-title" data-mode="use">
-      <div class="wrap bento keys-bento" data-run>
-        <div class="tile t-head" data-area="head" data-flip>
-          <i class="pip" aria-hidden="true"></i>
-          <h2 id="keys-title">Two keys to remember</h2>
-        </div>
-        <div class="tile keys-row" data-row="draw" data-area="draw" data-flip>
-          <button type="button" class="keyset" data-set="draw" aria-label="Control Shift 2: draw on the demo">
-            <span class="key key-wide" data-key="Control"><b><span data-for="mac">Control</span><span data-for="windows">Ctrl</span></b></span>
-            <span class="key key-wide" data-key="Shift"><b>Shift</b></span>
-            <span class="key" data-key="Digit2"><b>2</b></span>
-          </button>
-          <p>to draw.</p>
-        </div>
-        <div class="tile keys-row" data-row="use" data-area="use" data-flip>
-          <button type="button" class="keyset" data-set="use" aria-label="Esc: get back to the apps">
-            <span class="key key-wide" data-key="Escape"><b>Esc</b></span>
-          </button>
-          <p>to get back to your app. Your drawings stay where they are.</p>
-        </div>
-        <div class="tile mode-tile" data-area="mode" data-flip>
-          <p class="press">Go on, press them. They work on this page.</p>
-          <p class="mode-line"><i aria-hidden="true"></i><span data-mode-line>Right now you're using the app.</span></p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. More in the app -->
-    <section class="also" aria-labelledby="also-title">
-      <div class="wrap bento also-bento" data-run>
-        <div class="tile t-head also-head" data-flip>
-          <i class="pip" aria-hidden="true"></i>
-          <h2 id="also-title">There's more in the app</h2>
-        </div>
-        <ul class="also-grid">
-          <li class="tile also-item" data-flip data-tilt>
-            <div class="ill" aria-hidden="true">
-              <div class="bt-screen"><span class="bt-time" data-timer>10:00</span><span class="bt-bar"><i></i></span></div>
-            </div>
-            <h3>Break timer</h3>
-            <p>A big countdown for the coffee break.</p>
-          </li>
-          <li class="tile also-item" data-flip data-tilt>
-            <div class="ill" aria-hidden="true">
-              <svg viewBox="0 0 240 150"><rect class="ill-screen" x="22" y="26" width="136" height="98" rx="8"/><path class="ill-lines" d="M38 46h60M38 60h36M38 104h52"/><rect class="sr-fill" x="46" y="68" width="68" height="26" rx="3"/><rect class="sr-region" x="40" y="62" width="80" height="38" rx="4"/><g class="sr-window"><rect class="ill-screen" x="126" y="54" width="96" height="68" rx="7"/><path class="ill-lines" d="M136 66h6M146 66h6"/><rect class="sr-fill" x="140" y="80" width="68" height="26" rx="3"/></g></svg>
-            </div>
-            <h3>Share region</h3>
-            <p>Share just one part of a wide screen.</p>
-          </li>
-          <li class="tile also-item" data-flip data-tilt>
-            <div class="ill" aria-hidden="true">
-              <svg viewBox="0 0 240 150"><rect class="ill-screen" x="40" y="24" width="160" height="102" rx="8"/><path class="ill-lines wb-lines" d="M58 46h70M58 62h44M58 102h84"/><rect class="wb-board wb-white" x="41" y="25" width="158" height="100" rx="7"/><rect class="wb-board wb-black" x="41" y="25" width="158" height="100" rx="7"/><path class="wb-mark" d="M96 76c2-14 44-16 48-2s-42 20-48 2zM150 92l22 14M172 106l-9-1M172 106l-3-9"/></svg>
-            </div>
-            <h3>Whiteboard and blackboard</h3>
-            <p>A clean board when you need room.</p>
-          </li>
-          <li class="tile also-item" data-flip data-tilt>
-            <!-- The app's own toolbar, small: it shrinks to one button and grows back, as in the app. -->
-            <div class="ill ill-bar" aria-hidden="true"><div class="bar-fit" id="mini-bar" inert></div></div>
-            <h3>A toolbar that's yours</h3>
-            <p>Add tools, remove tools, or shrink it to one button.</p>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 5. Good to know -->
+    <!-- 3. Good to know -->
     <section class="know" aria-labelledby="know-title">
       <div class="wrap bento know-bento" data-run>
         <div class="tile t-head" data-area="head" data-flip>
@@ -393,7 +263,7 @@
       </div>
     </section>
 
-    <!-- 6. Coffee -->
+    <!-- 4. Coffee -->
     <section class="coffee" aria-labelledby="coffee-title">
       <div class="wrap bento coffee-bento" data-run>
         <div class="tile coffee-copy" data-area="copy" data-flip>
@@ -421,7 +291,7 @@
       </div>
     </section>
 
-    <!-- 7. Install -->
+    <!-- 5. Install -->
     <section class="install" id="install" aria-labelledby="install-title">
       <div class="wrap bento install-bento" data-run>
         <div class="tile t-head install-head" data-flip>
@@ -460,7 +330,7 @@
     </section>
   </main>
 
-  <!-- 8. Footer -->
+  <!-- 6. Footer -->
   <footer class="site-footer">
     <div class="wrap bento footer-bento">
       <div class="tile foot-mark"><a class="wordmark" href="./" aria-label="Annotator">annotator<span aria-hidden="true">.</span></a></div>
@@ -471,7 +341,7 @@
         <a href="https://github.com/dorlugasigal/annotator">GitHub</a>
         <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
       </nav>
-      <p class="tile foot-line"><span>Made by Dor.</span><span>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</span></p>
+      <p class="tile foot-line"><span>Made by Dor.</span><span>Open source under Apache 2.0, with no account and nothing to pay for. Coffee's optional.</span></p>
     </div>
   </footer>
 

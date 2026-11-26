@@ -1,13 +1,12 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
-import { ease, DURATIONS, workspaceTiming, distanceOrder, poseKeyframes, pose, dissolve } from "/concepts/shared/app-motion.js";
+import { ease, DURATIONS, workspaceTiming, distanceOrder, poseKeyframes, dissolve } from "/concepts/shared/app-motion.js";
 import * as fx from "./fx.js";
 import { createApps } from "./apps.js";
 
 const root = document.documentElement;
 const motion = root.classList.contains("motion");
-const hovers = matchMedia("(hover: hover)").matches, coarse = matchMedia("(pointer: coarse)").matches;
-const windowsKeys = root.dataset.platform === "windows";
+const coarse = matchMedia("(pointer: coarse)").matches;
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
@@ -146,11 +145,11 @@ const engage = (on) => { if (engaged !== on) { engaged = on; schedule(); } };
 // Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the stage's
 // frame opens up to fill the window, and scrolling brings it back (shared/stage.js). The apps do not move: in
 // index.html the desk and the dock carry data-stage-frame, and the mode chip's row data-stage-corner.
-const grow = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => tilt === 0 });
+const grow = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", invite: "Draw here", motion: () => motion, isFlat: () => tilt === 0 });
 apps.setRoom(() => grow.room);
 grow.on("change", () => apps.refit());
-// Joining in ends the script, retires "Your turn" and lays the stage flat (the frame grows only once it is).
-grow.on("join", () => { demo.joined = true; takeOver(); engage(true); showTurn(); });
+// Joining in ends the script and lays the stage flat (the frame grows only once it is).
+grow.on("join", () => { takeOver(); engage(true); });
 // Back at its own size, the toolbar's room is measured again.
 grow.on("change", ({ state }) => { if (state === "small") ink.fit(); });
 
@@ -239,15 +238,10 @@ function heroSteps() {
 const instant = (steps) => steps.map((step) => ({ ...step, duration: 0, pause: 0, speed: 0 }));
 
 // The mode, where the stage says it ----------------------------------------------------------------
-const chip = $("#mode-chip"), chipKeys = $(".chip-keys", chip), turn = $("#turn"), done = $("#done"), replay = $("#replay");
-const KEYS = { draw: windowsKeys ? ["Ctrl", "Shift", "2"] : ["⌃", "⇧", "2"], use: ["Esc"] };
-// A keycap comes back up the way the app's Pop arrives: from a little small, past its size, and home.
-const popBack = Array.from({ length: 21 }, (_, i) => ({ scale: String(pose("pop", .5 * (1 - ease.enter(i / 20)), { annotation: false }).scale) }));
-const popKey = (key, delay = 0) => { if (motion) fx.play(key, popBack, { duration: 340, delay, fill: "none" }); };
+const chip = $("#mode-chip"), done = $("#done"), replay = $("#replay");
 function showChip(mode) {
   chip.dataset.mode = mode;
-  chip.firstElementChild.nextElementSibling.textContent = mode === "draw" ? "Drawing" : "Using apps";
-  chipKeys.replaceChildren(...KEYS[mode].map((label) => Object.assign(document.createElement("kbd"), { textContent: label })));
+  chip.lastElementChild.textContent = mode === "draw" ? "Drawing" : "Using apps";
 }
 
 // The loop ------------------------------------------------------------------------------------------
@@ -256,27 +250,18 @@ function showChip(mode) {
 // hidden and shown in one of the app's styles, and it starts again. It stops for good when the visitor takes over.
 const STYLES = ["magic", "pop", "drop", "corners", "focus", "dissolve"];
 const STOP = Symbol("stop");
-const demo = { run: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, round: 0, mode: "use", moves: new Set(), arrived: !motion, joined: false };
+const demo = { run: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, round: 0, mode: "use", moves: new Set(), arrived: !motion };
 function showControls() {
   replay.hidden = !motion;
   replay.classList.toggle("is-off", !demo.playing);
   replay.lastElementChild.textContent = demo.playing ? "Pause" : "Replay";
   done.hidden = demo.playing || ink.state.mode !== "draw";
-  showTurn();
-}
-// "Your turn" shows once the first round is over and whenever the loop is not running, until the visitor joins in.
-function showTurn() {
-  const show = !demo.joined && (demo.round > 0 || !demo.playing) && stage.classList.contains("is-ready");
-  if (show === !turn.hidden) return;
-  turn.hidden = !show;
-  if (show && motion) fx.play(turn, poseKeyframes("pop", { appearing: true, annotation: false }), { fill: "none" });
 }
 function forget() {
   for (const id of demo.ids) ink.remove(id);
   demo.ids.clear();
 }
-// The script changes the mode the way a person would: Esc on the keys for Use apps, the toolbar's own button for
-// Draw. `shown` false changes it at once.
+// The script changes the mode the way a person would, with the toolbar's own button. `shown` false changes it at once.
 async function scriptMode(mode, shown = motion) {
   demo.mode = mode;
   // On a touch screen a finger on the stage still scrolls the page while the script is the one drawing.
@@ -285,8 +270,9 @@ async function scriptMode(mode, shown = motion) {
   if (!shown || ink.collapsed) { quiet(() => ink.setMode(mode)); return; }
   scripted += 1;
   try {
-    await ink.perform([mode === "use" ? { mode, via: "key" } : { mode }], { cursor: mode === "draw" });
-    if (mode === "draw") ink.hideGhost();
+    await ink.perform([{ mode }], { cursor: true });
+    // The pointer left the stage's sheet to press the button. Put away, it is back on the sheet for what comes next.
+    ink.hideGhost();
   } finally { scripted -= 1; }
 }
 function stopDemo(pausing) {
@@ -341,7 +327,7 @@ async function playDemo() {
         await scriptMode("use", false);
         stage.classList.add("is-ready");
         (await ink.perform(instant(steps), { cursor: false })).forEach((mark) => demo.ids.add(mark.id));
-        demo.playing = false; demo.run += 1; showTurn();
+        demo.playing = false; demo.run += 1;
         break;
       }
       await scriptMode("draw", demo.arrived);
@@ -405,7 +391,6 @@ async function playDemo() {
       (await move(shown)).cancel();
       demo.moves.delete(shown);
       demo.round += 1;
-      showTurn();
       await step(1700);
 
       // Erased, as the app erases: a quick fade, a touch smaller.
@@ -421,19 +406,14 @@ async function playDemo() {
 }
 
 ink.on("tool", (tool) => { demo.picked = tool; });
-ink.on("mark", () => { demo.joined = true; takeOver(); showTurn(); });
-// A scripted Esc is shown on the stage's own keys: they go down, and come back with a pop.
-ink.on("shortcut", (mode, info) => {
-  if (!info?.scripted) { takeOver(); return; }
-  requestAnimationFrame(() => [...chipKeys.children].forEach((key) => { key.classList.add("is-down"); setTimeout(() => { key.classList.remove("is-down"); popKey(key); }, 220); }));
-});
+ink.on("mark", takeOver);
+ink.on("shortcut", (mode, info) => { if (!info?.scripted) takeOver(); });
 ink.on("mode", (mode) => {
   showChip(mode);
-  showKeysMode(mode);
   apps.setReachable(mode !== "draw");
   if (!scripted) {
     takeOver();
-    // Drawing chosen from further down the page (the two keys) leaves the stage alone until it is on screen.
+    // Drawing chosen from further down the page (the app's keys) leaves the stage alone until it is on screen.
     if (mode === "draw" ? onStage.near : !onStage.near) engage(mode === "draw");
   }
   showControls();
@@ -634,7 +614,7 @@ function createScene(surface, script) {
         clear();
         await script({ scene, a, go, perform, live: true });
         scene.hideGhost();
-        await go(2600);
+        await go(3400);
         const gone = fx.group();
         for (const mark of scene.marks()) { const el = markEl(scene, mark); if (el) gone.add(fx.play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "linear" })); }
         await gone.done();
@@ -687,90 +667,36 @@ function roughLoop({ x, y, w, h }) {
   });
   return points;
 }
-const sceneScripts = {
-  "scene-point": async ({ a, perform }) => {
-    const ring = $("#scene-point [data-ring]"), low = $("#scene-point [data-dip]");
-    await perform([{ wait: 350 },
-      { tool: "ellipse", around: a.box(ring), padX: 12, padY: 8, duration: 800, pause: 240 },
-      { tool: "arrow", from: a.point(ring, .2, 1, 0, 14), to: a.point(low, 0, 0, 12, -10), bend: -.2, duration: 760 }]);
-  },
-  "scene-smart": async ({ scene, a, go, perform, live }) => {
-    const field = $("#scene-smart [data-box]"), b = a.rect(field), frame = { x: b.x - 9, y: b.y - 8, w: b.w + 18, h: b.h + 16 };
-    await go(350);
-    // A rough box, as the pen leaves it. Then Smart Draw swaps it for the neat one (the app's snap: 0.22 s, the
-    // shape coming in from just past half way).
-    const sketch = await penStroke(scene, roughLoop(frame), { duration: 900, live });
-    await go(260);
-    const neat = scene.add({ type: "rect", ...frame, rough: 0, round: true, size: 3 });
-    if (live) {
-      const morph = fx.group(), time = { duration: DURATIONS.snapMorph * 1000 };
-      morph.add(fx.play(markEl(scene, sketch), [{ opacity: 1 }, { opacity: 0 }], { ...time, easing: "cubic-bezier(.2, 0, 0, 1)" }));
-      morph.add(fx.play(markEl(scene, neat), [{ opacity: 0 }, { opacity: 0, offset: .55 }, { opacity: 1 }], time));
-      await morph.done();
-      scene.remove(sketch.id);
-      morph.cancel();
-    } else scene.remove(sketch.id);
-    await go(420);
-    await perform([{ tool: "text", text: "shorter?", speed: 60, at: a.point(field, .56, 1, 0, 20) }]);
-  },
-  "scene-private": async ({ a, perform }) => {
-    await perform([{ wait: 350 }, ...$$("#scene-private [data-blur]").map((el) => ({ tool: "blur", over: a.box(el), padX: 6, padY: 3, duration: 600, pause: 320 }))]);
-  },
-  "scene-spot": async ({ scene, a, go, live }) => {
-    const surface = $("#scene-spot"), targets = $$("[data-spot]", surface).map((el) => a.point(el, .5, .5)());
-    const aim = (p) => { scene.layer.style.setProperty("--px", `${p[0]}px`); scene.layer.style.setProperty("--py", `${p[1]}px`); scene.placeGhost(p); };
-    scene.setStyle("spotlight", { radius: Math.round(clamp(Math.min(surface.clientWidth, surface.clientHeight) * .24, 48, 120)) });
-    aim(targets[0]);
-    scene.layer.classList.add("has-pointer");
-    scene.setSpotlight(true);
-    if (!live) { scene.hideGhost(); return; }
-    for (let i = 1; i <= 3; i++) {
-      await go(1100);
-      const from = targets[(i - 1) % targets.length], to = targets[i % targets.length];
-      await tween(760, (t) => { const k = ease.standard(t); aim([from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k]); });
-      await go();
-    }
-  },
-  "scene-steps": async ({ a, perform }) => {
-    await perform([{ wait: 350 }, ...$$("#scene-steps [data-step]").map((el) => ({ tool: "counter", at: a.point(el, 0, .5, -22), pause: 300 }))]);
-  },
-  "scene-system": async ({ scene, a, go, perform, live }) => {
-    const node = (name) => $(`#scene-system [data-node="${name}"]`), app = node("app"), server = a.rect(node("api")), store = a.rect(node("db"));
-    // Ready-made icons arrive whole, the way a stamp does: all their strokes pop in together.
-    const stamp = async (marks) => {
-      if (!live) return;
-      const g = fx.group();
-      for (const mark of marks) { const el = markEl(scene, mark); if (el) fx.posed(g, el, "pop", { appearing: true, id: `icon-${mark.id}` }); }
-      await g.done();
-      g.cancel();
-    };
-    const line = (points) => scene.add({ type: "pen", points, size: 3, rough: 0 });
-    const half = (cx, cy, rx, ry) => Array.from({ length: 13 }, (_, i) => [cx - rx * Math.cos((Math.PI * i) / 12), cy + ry * Math.sin((Math.PI * i) / 12)]);
-    await go(350);
-    await perform([{ tool: "arrow", from: a.point(app, 1, .5, 10, 0), to: () => [server.x - 10, server.y + server.h / 2], bend: .12, duration: 600, pause: 120 }]);
-    // A server: a box with two shelves.
-    const { x, y, w, h } = server;
-    await stamp([
-      scene.add({ type: "rect", x, y, w, h, rough: 0, round: true, size: 3 }),
-      line([[x, y + h / 3], [x + w, y + h / 3]]), line([[x, y + (h * 2) / 3], [x + w, y + (h * 2) / 3]]),
-      line([[x + w * .2, y + h / 6], [x + w * .34, y + h / 6]]), line([[x + w * .2, y + h / 2], [x + w * .34, y + h / 2]]), line([[x + w * .2, y + (h * 5) / 6], [x + w * .34, y + (h * 5) / 6]]),
-    ]);
-    await go(300);
-    await perform([{ tool: "arrow", from: () => [server.x + server.w + 10, server.y + server.h / 2], to: () => [store.x - 10, store.y + store.h / 2], bend: -.12, duration: 600, pause: 120 }]);
-    // A database: a drum.
-    const cx = store.x + store.w / 2, rx = store.w / 2, ry = store.h * .13, top = store.y + ry, bottom = store.y + store.h - ry;
-    await stamp([
-      scene.add({ type: "ellipse", x: store.x, y: store.y, w: store.w, h: ry * 2, rough: 0, size: 3 }),
-      line([[store.x, top], [store.x, bottom]]), line([[store.x + store.w, top], [store.x + store.w, bottom]]),
-      line(half(cx, bottom, rx, ry)), line(half(cx, (top + bottom) / 2, rx, ry)),
-    ]);
-  },
-};
-const scenes = new Map(items.map((item) => { const surface = $(".scene", item); return [item, createScene(surface, sceneScripts[surface.id])]; }));
+// "Draw on anything", on a small report: a ring around a number, a rough box that Smart Draw tidies, an arrow from
+// one to the other, and a note.
+async function drawScene({ scene, a, go, perform, live }) {
+  const surface = $("#scene-draw"), ring = $("[data-ring]", surface), plot = a.rect($(".mini-plot", surface)), low = a.rect($("[data-dip]", surface));
+  const frame = { x: low.x - plot.w * .13, y: low.y - plot.h * .4, w: plot.w * .26, h: plot.h * .6 };
+  await perform([{ wait: 350 }, { tool: "ellipse", around: a.box(ring), padX: 12, padY: 8, duration: 800, pause: 260 }]);
+  // The box as the pen leaves it. Then Smart Draw swaps it for the neat one (the app's snap: 0.22 s, the shape coming
+  // in from just past half way).
+  const sketch = await penStroke(scene, roughLoop(frame), { duration: 850, live });
+  await go(240);
+  const neat = scene.add({ type: "rect", ...frame, rough: 0, round: true, size: 3 });
+  if (live) {
+    const morph = fx.group(), time = { duration: DURATIONS.snapMorph * 1000 };
+    morph.add(fx.play(markEl(scene, sketch), [{ opacity: 1 }, { opacity: 0 }], { ...time, easing: "cubic-bezier(.2, 0, 0, 1)" }));
+    morph.add(fx.play(markEl(scene, neat), [{ opacity: 0 }, { opacity: 0, offset: .55 }, { opacity: 1 }], time));
+    await morph.done();
+    scene.remove(sketch.id);
+    morph.cancel();
+  } else scene.remove(sketch.id);
+  await go(320);
+  await perform([
+    { tool: "arrow", from: a.point(ring, .15, 1, 0, 12), to: () => [frame.x + frame.w * .72, frame.y - 9], bend: -.2, duration: 700, pause: 260 },
+    { tool: "text", text: "Thursday?", speed: 55, at: () => [frame.x + frame.w + 10, frame.y + frame.h * .5 - 10] },
+  ]);
+}
+const scenes = new Map([[$("#scene-draw").closest(".item"), createScene($("#scene-draw"), drawScene)]]);
 
 let scenesPaused = !motion;
 if (motion) {
-  // The sequence. The section is five steps taller than the screen; each step swaps the example. The old one leaves
+  // The sequence. The section is three steps taller than the screen; each step swaps the example. The old one leaves
   // with its show style's hide and the new one arrives with its show, at the app's speeds, however fast the scroll.
   const last = items.length - 1, wrap = $(".what-wrap", what);
   const host = wrap.appendChild(Object.assign(document.createElement("div"), { className: "what-fx" }));
@@ -785,10 +711,7 @@ if (motion) {
     button.setAttribute("aria-label", $("h3", item).textContent);
     button.addEventListener("click", () => goTo(i));
     stepsBar.append(button);
-    // The counter and the name of the show style this example arrives with.
-    const meta = Object.assign(document.createElement("p"), { className: "item-meta" });
-    meta.append(Object.assign(document.createElement("span"), { textContent: `${i + 1} / ${items.length}` }), Object.assign(document.createElement("span"), { className: "style-chip", textContent: item.dataset.style[0].toUpperCase() + item.dataset.style.slice(1) }));
-    $(".item-text", item).prepend(meta);
+    $(".item-text", item).prepend(Object.assign(document.createElement("p"), { className: "item-meta", textContent: `${i + 1} / ${items.length}` }));
     return button;
   });
   const metrics = () => { const top = what.getBoundingClientRect().top + scrollY; return { top, step: (what.offsetHeight - innerHeight) / last }; };
@@ -813,19 +736,19 @@ if (motion) {
   }
   let shown = -1, wanted = -1, busy = false, current = null;
   const playing = () => !scenesPaused && shown >= 0 && !busy;
-  const refresh = () => items.forEach((item, i) => scenes.get(item).set(playing() && i === shown));
+  const refresh = () => items.forEach((item, i) => scenes.get(item)?.set(playing() && i === shown));
   async function sync() {
     if (busy) return;
     busy = true;
     while (shown !== wanted) {
       if (shown >= 0) {
         const leaving = shown;
-        scenes.get(items[leaving]).set(false);
+        scenes.get(items[leaving])?.set(false);
         current = moveItem(leaving, false);
         await current.done();
         items[leaving].classList.remove("is-live");
         current.cancel();
-        scenes.get(items[leaving]).reset();
+        scenes.get(items[leaving])?.reset();
         shown = -1;
       }
       if (wanted >= 0) {
@@ -863,62 +786,10 @@ if (motion) {
   });
 }
 
-// Two keys ------------------------------------------------------------------------------------------
-const modeLine = $("#mode-line"), drawCombo = $('[data-combo="draw"]');
-const caps = Object.fromEntries($$("[data-key]").map((key) => [key.dataset.key, key]));
-const capFor = (e) => (e.key === "Control" ? caps.control : e.key === "Shift" ? caps.shift : e.code === "Digit2" ? caps[2] : e.key === "Escape" ? caps.esc : null);
-const press = (key) => key.classList.add("is-down");
-const lift = (key) => { if (!key.classList.contains("is-down")) return; key.classList.remove("is-down"); popKey(key); };
-addEventListener("keydown", (e) => { const key = capFor(e); if (key) press(key); });
-addEventListener("keyup", (e) => { const key = capFor(e); if (key) lift(key); });
-addEventListener("blur", () => Object.values(caps).forEach((key) => key.classList.remove("is-down")));
-function showKeysMode(mode) {
-  modeLine.dataset.mode = mode;
-  modeLine.lastElementChild.textContent = mode === "draw" ? "Right now you’re drawing." : "Right now you’re using the app.";
-  drawCombo.classList.toggle("is-on", mode === "draw");
-}
-for (const combo of $$(".combo")) {
-  combo.addEventListener("click", () => {
-    const keys = $$(".key", combo);
-    keys.forEach((key, i) => setTimeout(() => press(key), i * 45));
-    setTimeout(() => keys.forEach(lift), 190 + keys.length * 45);
-    ink.setMode(combo.dataset.combo === "draw" ? "draw" : "use");
-  });
-}
-
-// There's more in the app ----------------------------------------------------------------------------
-// The small toolbar shrinks to its one button and grows back, with the app's timing, while it is on screen.
-const mini = $("#mini-toolbar .mt");
-if (motion && mini && window.IntersectionObserver) {
-  const chrome = $(".mt-chrome", mini), bar = $(".mt-bar", mini), one = $(".mt-one", mini);
-  const BAR = ["inset(0px 0px round 14px)", "inset(1px 1px round 13px)"], ONE = ["inset(1px calc(50% - 53px) round 14px)", "inset(2px calc(50% - 52px) round 13px)"];
-  let on = false, looping = false;
-  const shrink = async (toOne) => {
-    const g = fx.group(), from = toOne ? BAR : ONE, to = toOne ? ONE : BAR;
-    fx.morph(g, { outgoing: toOne ? bar : one, incoming: toOne ? one : bar, expanding: !toOne, shape: [[chrome, { clipPath: from[0] }, { clipPath: to[0] }], [chrome.firstElementChild, { clipPath: from[1] }, { clipPath: to[1] }]] });
-    await g.done();
-    mini.classList.toggle("is-one", toOne);
-    g.cancel();
-  };
-  const loop = async () => {
-    if (looping) return;
-    looping = true;
-    while (on) { await wait(1500); if (!on) break; await shrink(true); await wait(1300); await shrink(false); }
-    looping = false;
-  };
-  new IntersectionObserver(([entry]) => { on = entry.isIntersecting; if (on) loop(); }, { threshold: .6 }).observe(mini);
-}
-
 // Arriving -------------------------------------------------------------------------------------------
-// Things arrive with the app's own shows, as calm as the toolbar's: a rise on the enter curve, Pop for the small
-// pictures' cards, Drop for the two places to get the app. Groups arrive a step apart (--i).
+// Things arrive with the app's own shows, as calm as the toolbar's: a rise on the enter curve, and Drop for the two
+// places to get the app. Groups arrive a step apart (--i).
 if (motion && window.IntersectionObserver) {
-  const restart = (element, name) => { element.classList.remove(name); void element.offsetWidth; element.classList.add(name); };
-  const playExtra = (extra) => {
-    restart(extra, "is-playing");
-    const window = $(".il-pop", extra);
-    if (window) { const g = fx.group(); fx.posed(g, window, "pop", { appearing: true, delay: .22 }); g.done().then(() => g.cancel()); }
-  };
   const arrive = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
@@ -927,12 +798,9 @@ if (motion && window.IntersectionObserver) {
       if (style === "rise") fx.rise(element, { delay });
       else fx.play(element, poseKeyframes(style, { appearing: true, annotation: false }), { delay: delay * 1000, fill: "backwards" });
       element.classList.add("is-in");
-      if (element.classList.contains("extra")) setTimeout(() => playExtra(element), delay * 1000 + 200);
     }
   }, { rootMargin: "0px 0px -8% 0px", threshold: .12 });
   $$("[data-enter]").forEach((element) => arrive.observe(element));
-  if (hovers) $$(".extra").forEach((extra) => extra.addEventListener("pointerenter", () => { if (extra.classList.contains("is-in")) playExtra(extra); }));
-
   // The steam over the cup dissolves, the app's way, and comes back.
   const cupStage = $("#cup-stage"), steam = $(".steam", cupStage);
   let steaming = false, cupSeen = false;
@@ -1008,7 +876,6 @@ if (root.dataset.platform === "windows") $(".platforms").prepend($('.platform[da
 
 // Start ---------------------------------------------------------------------------------------------
 showChip(ink.state.mode);
-showKeysMode(ink.state.mode);
 schedule();
 Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).catch(() => {}).then(async () => {
   if (motion) await wait(520);

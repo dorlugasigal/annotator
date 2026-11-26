@@ -12,7 +12,6 @@
   --lagoon: linear-gradient(115deg, var(--lagoon-1), var(--lagoon-2), var(--lagoon-3));
   /* Dark text reads on every part of the gradient (4.7:1 on its blue end, more elsewhere). */
   --on-accent: #04111f;
-  --ink-blue: #217af5;
 }
 :root, html[data-theme="dark"] {
   color-scheme: dark;
@@ -21,13 +20,13 @@
   --draw: #b4d0ffbf; --draw-soft: #b4d0ff66; --line: #9cc3ff24; --line-strong: #9cc3ff4d;
   --grid-1: #7fb0ff0a; --grid-2: #7fb0ff14; --glow: #217af51f;
   --accent-text: #56c8ee; --accent-line: #2fc4e6; --on: #0dd1a8;
-  --control: #9cc3ff0a; --control-hover: #9cc3ff17; --wash: #9cc3ff0d; --wash-strong: #9cc3ff1c;
+  --control: #9cc3ff0a; --control-hover: #9cc3ff17; --wash-strong: #9cc3ff1c;
   --wire: #a9cbff; --wire-soft: #a9cbff5c; --wire-grid: #a9cbff12;
   --sheet: #0c1727; --shade: #03070e; --plane-shadow: 0 40px 70px -44px #000000;
   --desk-a: #10203a; --desk-b: #0a1626; --desk-grid: #9cc3ff0d;
   --win-bg: #0c1728; --win-bar: #111f35; --win-text: #e6eefb; --win-muted: #8ea3c2; --win-line: #9cc3ff1f;
   --win-accent: #8fb4e8; --win-field: #101d31; --win-down: #ff8f85; --win-shadow: 0 0 0 1px #9cc3ff38, 0 22px 44px -22px #000000d9;
-  --media-bg: #050b15; --code-bg: #060d19; --code-text: #d6e3f7;
+  --code-bg: #060d19; --code-text: #d6e3f7;
   --ink-highlight-blend: screen;
 }
 html[data-theme="light"] {
@@ -37,13 +36,13 @@ html[data-theme="light"] {
   --draw: #1c50a8d9; --draw-soft: #1c50a873; --line: #1a4fa329; --line-strong: #1a4fa35c;
   --grid-1: #1a4fa30d; --grid-2: #1a4fa31a; --glow: #0dbae321;
   --accent-text: #0e5fd1; --accent-line: #1273e0; --on: #056f5c;
-  --control: #ffffff; --control-hover: #edf3fa; --wash: #1a4fa30d; --wash-strong: #1a4fa31a;
+  --control: #ffffff; --control-hover: #edf3fa; --wash-strong: #1a4fa31a;
   --wire: #1c50a8; --wire-soft: #1c50a866; --wire-grid: #1c50a814;
   --sheet: #ffffff; --shade: #b9c8db; --plane-shadow: 0 36px 60px -44px #0a14246b;
   --desk-a: #e2eaf5; --desk-b: #eef3f9; --desk-grid: #1a4fa30f;
   --win-bg: #ffffff; --win-bar: #eef3f9; --win-text: #0a1424; --win-muted: #56667e; --win-line: #1a4fa321;
   --win-accent: #3b5a8c; --win-field: #ffffff; --win-down: #c0281f; --win-shadow: 0 0 0 1px #1a4fa340, 0 22px 44px -26px #0a142466;
-  --media-bg: #0a1424; --code-bg: #e9eff6; --code-text: #0a1424;
+  --code-bg: #e9eff6; --code-text: #0a1424;
   --ink-highlight-blend: multiply;
 }
 
@@ -61,8 +60,6 @@ html[data-theme="light"] {
   --ease-out: cubic-bezier(.2, 0, 0, 1);
   --ease-snap: cubic-bezier(.2, 0, 0, 1);
   --ease-exit: cubic-bezier(.45, 0, .55, .4);
-  /* The app's toolbar takes 0.30 s to shrink to one button and 0.34 s to grow back. */
-  --t-shrink: 300ms; --t-grow: 340ms;
   /* How the hero's screen leans at the top of the page: back, turned a little, and rolled a touch. */
   --rx: 17deg; --ry: -8deg; --rz: 1.5deg; --shrink: .06;
 }
@@ -200,19 +197,20 @@ h3 { font-size: 23px; line-height: 1.16; font-weight: 680; font-stretch: 90%; le
 .theme-switch[aria-checked="true"] .i-moon { stroke-dashoffset: 1.1; opacity: 0; transition-delay: 0ms, 240ms; }
 .theme-switch[aria-checked="true"] .i-sun { stroke-dashoffset: 0; opacity: 1; transition-delay: 150ms, 150ms; }
 
-/* Hero */
-.hero { padding-top: 34px; }
+/* Hero: three words, one line under them, and the ways in. The headline is short, so it shares its row with the
+   buttons on a wide screen and the stage comes up into the first screen. */
+.hero { padding-top: 30px; }
 .hero-copy { display: grid; gap: 26px; }
-h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; font-stretch: 86%; letter-spacing: -.024em; }
-/* One word of the headline is measured: a dimension line under it, in the gradient. */
-.inked { position: relative; display: inline-block; }
-.inked svg { position: absolute; left: 0; bottom: -.15em; width: 100%; height: .12em; overflow: visible; pointer-events: none; }
-.inked path { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.hero-side { display: grid; gap: 24px; }
-.lede { max-width: 33em; font-size: 20px; line-height: 1.5; color: var(--muted); }
-/* The page's second message, with an arrow down to the stage it is about. */
-.try-line { display: flex; align-items: flex-start; gap: 12px; margin-top: 10px; font-size: 18px; line-height: 1.45; font-weight: 500; color: var(--text); }
-.try-line svg { flex: none; margin-top: 2px; fill: none; stroke: var(--accent-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.hero-words { display: grid; gap: 22px; }
+h1 { font-size: clamp(46px, 7.5vw + 20px, 100px); line-height: .96; font-weight: 720; font-stretch: 86%; letter-spacing: -.024em; }
+/* One word of the headline is circled, in the gradient, the way the app circles things. Four short ticks mark the
+   ring's quarters, as a compass leaves them. */
+.inked { position: relative; display: inline-block; margin-inline: .3em; }
+.inked svg { position: absolute; left: -.38em; top: -.13em; width: calc(100% + .76em); height: 1.24em; overflow: visible; pointer-events: none; }
+.inked path { fill: none; vector-effect: non-scaling-stroke; }
+.inked .ring { stroke-width: clamp(2.5px, .038em, 4px); stroke-linecap: round; }
+.inked .ring-ticks { stroke: var(--draw); stroke-width: 1px; }
+.lede { max-width: 33em; font-size: clamp(19px, 1.1vw + 14px, 23px); line-height: 1.4; color: var(--muted); text-wrap: balance; }
 .get { display: grid; gap: 14px; align-content: start; }
 .get-main, .get-more { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; }
 .get-more { gap: 6px 20px; }
@@ -222,8 +220,22 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .quiet:hover { text-decoration-color: var(--accent-line); }
 .get small { font-size: 15px; color: var(--faint); }
 
+/* The stage's heading is the page's main invitation, so it reads as one: a square light that is on, the words, and
+   a leader line that runs along to the stage's far corner and turns down into it. */
+.stage-title { display: flex; align-items: center; gap: 14px; margin-top: 40px; font-size: clamp(23px, 1.5vw + 17px, 34px); line-height: 1.12; font-weight: 700; font-stretch: 88%; letter-spacing: -.012em; }
+.stage-title .live { flex: none; width: 10px; height: 10px; background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 22%, transparent); }
+.stage-title .say { flex: 0 1 auto; min-width: 0; }
+.leader { flex: 1; min-width: 20px; height: 1px; margin-left: 6px; background: linear-gradient(90deg, var(--line-strong), var(--accent-line)); transform-origin: 0 50%; }
+.leader-end { flex: none; margin: 0 4px 0 -14px; overflow: visible; fill: none; stroke: var(--accent-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 599px) {
+  /* On a phone the words take the row; the arrow alone still points down at the stage. */
+  .stage-title { gap: 12px; margin-top: 34px; }
+  .leader, .leader-end .run { display: none; }
+  .leader-end { margin-left: auto; }
+}
+
 /* The stage: a desk, a sample window on it, and above them the planes the app adds: ink, then the toolbar. */
-.stage { --tilt: 0; --lift: 0; --real: 1; position: relative; isolation: isolate; margin-top: 44px; }
+.stage { --tilt: 0; --lift: 0; --real: 1; position: relative; isolation: isolate; margin-top: 26px; }
 .stage-view { position: relative; }
 /* The whole screen can be drawn on, so the sample window sits in it with room to spare: beside it for notes, and under
    it for the toolbar at its tallest (main.js writes that height to --tb-h). */
@@ -296,8 +308,8 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .pt:first-of-type:is(:hover, :focus-visible) .tip { transform: translate(-4px, 0); }
 .pt:last-of-type:is(:hover, :focus-visible) .tip { transform: translate(4px, 0); }
 
-/* On the stage's top edge: which mode it is in with the key that changes it, and the invitation to draw. */
-.mode-chip, .your-turn { position: absolute; top: 0; z-index: 101; display: inline-flex; align-items: center; height: 28px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--page); font: 600 13px/1 var(--sans); white-space: nowrap; transform: translateY(-50%); }
+/* On the stage's top edge: which mode it is in, with the key that changes it. */
+.mode-chip { position: absolute; top: 0; z-index: 101; display: inline-flex; align-items: center; height: 28px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--page); font: 600 13px/1 var(--sans); white-space: nowrap; transform: translateY(-50%); }
 .mode-chip { left: 12px; gap: 8px; padding: 0 6px 0 9px; color: var(--text); transition: border-color var(--t-2) ease; }
 .mode-chip i { width: 6px; height: 6px; background: var(--faint); transition: background-color var(--t-2) ease; }
 .mode-chip b { font-weight: inherit; transition: color var(--t-2) ease; }
@@ -307,18 +319,13 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .mode-chip[data-mode="use"] .chip-key[data-when="draw"], .mode-chip[data-mode="draw"] .chip-key[data-when="use"] { display: none; }
 .chip-key { padding: 3px 5px; border: 1px solid var(--draw-soft); border-radius: 3px; color: var(--muted); font: 500 10px/1 var(--mono); transition: transform var(--t-1) var(--ease-out), border-color var(--t-1) ease, background-color var(--t-1) ease, color var(--t-1) ease; }
 .chip-key.is-down { transform: translateY(1px); border-color: var(--accent-line); background: color-mix(in srgb, var(--lagoon-2) 26%, transparent); color: var(--text); }
-.your-turn { right: 12px; gap: 8px; padding: 0 10px 0 8px; border-color: var(--accent-line); color: var(--text); cursor: pointer; transition: background-color var(--t-1) ease; }
-.your-turn:hover { background: color-mix(in srgb, var(--lagoon-2) 18%, var(--page)); }
-.your-turn svg { flex: none; overflow: visible; }
-/* The tag's right edge, as a piece of its own, so it can travel while the tag grows out of a square. */
-.turn-edge { position: absolute; top: -1px; bottom: -1px; right: -1px; width: 1px; background: var(--accent-line); }
-.turn-line { fill: none; stroke: url(#lagoon); stroke-width: 1.6; stroke-linecap: round; }
-.turn-pen { fill: var(--text); offset-path: path("M2 11c4-8 7-8 9-2s5 6 8 0 6-6 9 1"); offset-rotate: 0deg; offset-distance: 100%; }
 /* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js).
    The frame is the desk itself, with its hairline, its grid and its crop marks. As it opens, the chip comes in from
    the frame's edge so it stays on the screen, and the button that makes it small again is one more framed square. */
-:root { --stage-scrim: var(--page); }
+:root { --stage-scrim: var(--page); --stage-invite-bg: var(--page); --stage-invite-fg: var(--text); }
 .screen { --stage-radius: 8px; }
+/* The module's pointer cue ("Draw here") is one more of this page's framed labels. */
+.stage-invite { padding: 7px 10px; border: 1px solid var(--accent-line); border-radius: 4px; box-shadow: none; }
 .mode-chip { transform: translateY(calc(-50% + var(--stage-grow, 0) * (50% + 10px))); }
 .screen .stage-shrink { --stage-shrink-top: 10px; --stage-shrink-right: 12px; width: 36px; height: 36px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--page); color: var(--text); transition: border-color var(--t-1) ease, background-color var(--t-1) ease; }
 .screen .stage-shrink svg { stroke-width: 1.6; }
@@ -327,19 +334,17 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 /* The stage keeps its layers to itself while it is small. Grown, it has to rise above the header, so that goes. */
 .stage:has([data-stage]:not([data-stage="small"])) { isolation: auto; }
 /* When "Try it" is pressed, the stage's outline is drawn once more, in the gradient. */
-.invite { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
-.invite svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
-.invite rect { fill: none; stroke-width: 2; }
-.stage.is-invited .invite { opacity: 1; }
-@media (max-width: 519px) { .mode-chip { left: 8px; } .your-turn { right: 8px; } }
+.try-outline { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.try-outline svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.try-outline rect { fill: none; stroke-width: 2; }
+.stage.is-outlined .try-outline { opacity: 1; }
+@media (max-width: 519px) { .mode-chip { left: 8px; } }
 
-.stage figcaption { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px 32px; margin-top: 24px; }
-.stage-controls { display: flex; flex-wrap: wrap; gap: 8px; }
-.stage-notes { display: grid; gap: 4px; }
-.stage-line { font-size: 17px; line-height: 1.4; font-weight: 500; color: var(--text); }
-.stage-fig { font-size: 14.5px; line-height: 1.45; color: var(--faint); }
+.stage figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 32px; margin-top: 22px; }
+.stage-controls { display: flex; flex-wrap: wrap; gap: 8px; min-height: 34px; }
+.stage-fig { max-width: 44em; font-size: 15px; line-height: 1.45; color: var(--faint); }
 
-/* What you can do. Without motion it is a grid of six sheets; with motion it becomes the flat file further down. */
+/* What you can do. Without motion it is a grid of four sheets; with motion it becomes the flat file further down. */
 .deck-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 32px; }
 .deck-tools { display: flex; align-items: center; gap: 18px; }
 .deck-index { display: flex; align-items: baseline; gap: 5px; font-size: 12px; line-height: 1.2; color: var(--faint); }
@@ -358,117 +363,29 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .deck-space { min-width: 0; }
 .tile { min-width: 0; display: flex; }
 .tile-inner { flex: 1; display: grid; align-content: start; min-width: 0; padding: var(--pad); background: var(--sheet); }
-.tile-media { position: relative; aspect-ratio: 16 / 10; border-radius: 3px; background: var(--media-bg); box-shadow: 0 0 0 1px var(--line-strong); --reg-out: calc(var(--pad) * -.5 - 6px); }
+/* Each sheet's picture is a small desk of its own, in a frame with registration marks. What is in the frame is a
+   live scene: this page's own (.scene) or one of the shared ones, which fill the empty .scene-slot. */
+.tile-media { position: relative; aspect-ratio: 16 / 10; border-radius: 3px; background: linear-gradient(var(--desk-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, var(--desk-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(160deg, var(--desk-a), var(--desk-b)); box-shadow: 0 0 0 1px var(--line-strong); --reg-out: calc(var(--pad) * -.5 - 6px); }
+.tile-media > :is(.scene, .scene-slot) { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: inherit; }
 .tile-text { position: relative; padding: 20px 4px 10px; }
 .tile-text p { margin-top: 8px; max-width: 30em; font-size: 17px; line-height: 1.5; color: var(--muted); }
-.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; overflow: hidden; background: linear-gradient(var(--desk-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, var(--desk-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
+.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
 .scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(17px, 4.600cqi, 36px)/1.1 "Caveat", "Bradley Hand", cursive; }
-.scene .reg { display: none; }
 @media (max-width: 599px) { .tile-media .reg { display: none; } }
 /* A small sample window, sized from the sheet it sits in. */
 .mini { width: min(27em, 100%); font-size: clamp(10.5px, 2.900cqi, 24px); line-height: 1.3; }
 .mini .window-bar { height: 2.5em; }
 .mini .window-bar span { font-size: .9em; }
-/* A dashboard with one number worth a ring, and a chart with one dip worth an arrow. */
-.dash { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.6em; align-items: center; padding: 1.2em 1.4em 1.4em; }
-.dash-stats { display: grid; gap: 1.1em; }
-.dash-stats dt { font-size: .82em; color: var(--win-muted); }
-.dash-stats dd { margin-top: .2em; font: 700 1.75em/1.1 var(--display); font-stretch: 88%; font-variant-numeric: tabular-nums; }
-.dash-plot { position: relative; aspect-ratio: 200 / 96; }
-.dash-plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.dash-plot .grid { fill: none; stroke: var(--win-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.dash-plot .line { fill: none; stroke: var(--win-accent); stroke-width: 2.5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-/* A checkout whose button is too small: something to box and to label. */
+/* A checkout with a price worth a ring and a button that is too small: something to box and to label. */
 .pay { padding: .5em 1.3em 1.5em; }
 .pay-row { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .75em 0; border-bottom: 1px solid var(--win-line); }
 .pay-row span { color: var(--win-muted); }
 .pay-row b { font-weight: 500; }
 .pay-act { padding-top: 1.5em; }
 .pay-act .mini-button { display: inline-block; padding: .4em .85em; font-size: .86em; }
-/* A list to move a spotlight over. */
-.lines { padding: .4em 1.2em .6em; }
-.lines li { display: flex; align-items: baseline; gap: 1em; padding: .72em 0; border-bottom: 1px solid var(--win-line); }
-.lines li:last-child { border-bottom: 0; }
-.lines b { min-width: 2.2em; font: 500 .8em/1 var(--mono); color: var(--win-muted); }
-/* Two ready-made icons as the tool library has them, drawn here as line art, with room between them for a box.
-   The engine draws the box, its note and the arrows. */
-.system { display: flex; align-items: center; justify-content: space-between; width: min(27em, 100%); padding: 0 .4em; font-size: clamp(10.5px, 3.200cqi, 27px); }
-.node { display: grid; justify-items: center; gap: .5em; color: var(--muted); font: 500 .8em/1 var(--sans); }
-.node.slot { width: 6.800em; height: 4.200em; margin-top: -1.400em; }.node .icon { display: block; }
-.node svg { display: block; width: 5.400em; height: 5.400em; overflow: visible; fill: var(--win-bg); stroke: var(--accent-line); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.rows { padding: .4em 1.2em .7em; }
-.rows > div { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .75em 0; border-bottom: 1px solid var(--win-line); }
-.rows > div:last-child { border-bottom: 0; }
-.rows dt { color: var(--win-muted); }
-.rows dd { font-weight: 500; }
-.form { display: grid; gap: .7em; padding: 1em 1.3em 1.2em max(3.4em, 46px); }
-.form p { display: grid; gap: .35em; }
-.form span { font-size: .88em; color: var(--win-muted); }
-.field { display: block; padding: .6em .8em; border: 1px solid color-mix(in srgb, var(--win-text) 22%, transparent); border-radius: 4px; background: var(--win-field); font-weight: 500; }
-.field.select { background: var(--win-field) linear-gradient(45deg, transparent 50%, var(--win-muted) 50%) no-repeat right 1em top 55% / 5px 5px; }
 .mini-button { justify-self: start; padding: .65em 1em; border-radius: 4px; background: var(--win-accent); color: var(--win-bg); font-weight: 600; }
 @media (min-width: 600px) { .deck { --pad: 18px; } }
 @media (min-width: 820px) { .deck { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; } }
-
-/* Two keys. Each key is drawn the way a keycap is drawn from the front: its base, and the top that travels. */
-.keys-section { display: grid; gap: 36px; align-items: center; }
-.press { margin-top: 18px; max-width: 24em; font-size: 19px; color: var(--muted); }
-/* What the stage is doing right now, in words, with the same square light as the stage's own chip. */
-.mode-note { display: flex; align-items: center; gap: 10px; margin-top: 14px; font: 620 21px/1.3 var(--display); font-stretch: 90%; color: var(--text); }
-.mode-note i { flex: none; width: 8px; height: 8px; background: var(--faint); transition: background-color var(--t-2) ease; }
-.mode-note[data-mode="draw"] { color: var(--on); }
-.mode-note[data-mode="draw"] i { background: var(--on); }
-.stay { font-size: 17px; color: var(--muted); }
-.keys { display: grid; gap: 30px; justify-items: start; padding: 26px 20px 28px; background: linear-gradient(var(--grid-1) 1px, transparent 1px) -1px -1px / 12px 12px, linear-gradient(90deg, var(--grid-1) 1px, transparent 1px) -1px -1px / 12px 12px; }
-.combo { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.combo:focus-visible { outline-offset: 8px; border-radius: 6px; }
-.plate { --key: 54px; position: relative; display: flex; gap: 10px; padding-bottom: 27px; }
-.combo[data-combo="use"] .plate { padding-bottom: 0; }
-.key { position: relative; display: block; padding-bottom: 7px; font: inherit; }
-.key::before { content: ""; position: absolute; inset: 7px 0 0; border: 1.5px solid var(--draw-soft); border-radius: 7px; transition: border-color var(--t-2) ease; }
-.key-top { position: relative; display: grid; place-items: center; min-width: var(--key); height: var(--key); padding: 0 12px; border: 1.5px solid var(--text); border-radius: 7px; background: var(--page); box-shadow: inset 0 0 0 4px var(--page), inset 0 0 0 5px var(--line); color: var(--text); font: 500 12px/1 var(--mono); letter-spacing: .02em; transition: transform var(--t-2) var(--ease-snap), border-color var(--t-1) ease, background-color var(--t-1) ease; }
-.key.wide .key-top { min-width: calc(var(--key) * 1.5); }
-.key.is-down .key-top { transform: translateY(6px); border-color: var(--accent-line); background: color-mix(in srgb, var(--lagoon-2) 16%, var(--page)); box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px var(--line); transition-duration: 70ms; transition-timing-function: ease-out; }
-.combo[data-combo="draw"].is-on .key-top { border-color: var(--on); }
-.combo[data-combo="draw"].is-on .key::before { border-color: color-mix(in srgb, var(--on) 60%, transparent); }
-/* A dimension line under the three keys: they are one thing, pressed together. */
-.combo-dim { position: absolute; left: 0; right: 0; bottom: 4px; height: 11px; border-inline: 1px solid var(--draw-soft); }
-.combo-dim::before { content: ""; position: absolute; left: 0; right: 0; top: 5px; height: 1px; background: var(--draw-soft); transform-origin: 0 50%; }
-.combo-label { font: 640 22px/1.2 var(--display); font-stretch: 90%; }
-
-.also-head { display: grid; gap: 12px; }
-
-/* More in the app: one sheet ruled into four, each with a line drawing. */
-.extras-wrap { margin-top: 38px; }
-.extras { display: grid; overflow: hidden; border-radius: var(--r); }
-.extra { position: relative; display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 20px; align-items: center; padding: 20px 16px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); transition: background-color var(--t-2) ease; }
-.extra h3 { font-size: 21px; }
-.extra p { margin-top: 6px; font-size: 16.5px; line-height: 1.45; color: var(--muted); }
-@media (hover: hover) { .extra:hover { background: var(--wash); } }
-/* Line art: one pen width, no fills. A shape that sits in front of another is filled with paper so it hides it. */
-.il { --il-stroke: 1.9; display: block; width: 100%; height: auto; overflow: visible; fill: none; stroke: var(--draw); stroke-width: var(--il-stroke); stroke-linejoin: round; }
-.il .faint { stroke: var(--draw-soft); }
-.il .accent { stroke: var(--accent-line); }
-.il .dash { stroke-dasharray: 4 3; }
-.il .mask { fill: var(--page); }
-.il text { stroke: none; }
-.il-time { fill: var(--text); font: 500 21px var(--mono); letter-spacing: -.02em; }
-.il-time:is(.t1, .t2) { opacity: 0; }
-.il-pop { transform-box: fill-box; transform-origin: center; }
-/* The app's Shrink, drawn: a toolbar outline that becomes one button and grows back. The outline is one element
-   whose size main.js animates with the app's own timing; its two faces cross over as the app's do. */
-.bar-demo { display: grid; place-items: center; aspect-ratio: 160 / 104; }
-.bar-shape { position: relative; display: block; width: 100%; height: 46px; }
-.edge { position: absolute; top: 0; bottom: 0; border: 1.5px solid var(--draw); }
-.edge:nth-child(1) { left: 0; width: 14px; border-right: 0; border-radius: 11px 0 0 11px; }
-.edge:nth-child(2) { left: 14px; right: 14px; border-inline: 0; }
-.edge:nth-child(3) { right: 0; width: 14px; border-left: 0; border-radius: 0 11px 11px 0; }
-.bar-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6%; }
-.bar-face i { flex: none; width: 9%; max-width: 16px; aspect-ratio: 1; border: 1.5px solid var(--draw-soft); border-radius: 3px; }
-.bar-face b { flex: none; width: 15%; max-width: 28px; height: 16px; border: 1.5px solid var(--accent-line); border-radius: 4px; }
-.bar-face.pill { gap: 9px; opacity: 0; }
-.bar-face.pill i { width: 15px; max-width: none; border-radius: 50%; border-color: var(--draw); }
-.bar-face.pill b { width: 28px; max-width: none; height: 14px; border-radius: 7px; }
 
 /* Good to know: a ruled list. The answer sits beside its question on wide screens. */
 .answer-grid { margin-top: 30px; }
@@ -540,25 +457,23 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
    the next thing on the page. */
 @media (max-width: 379px) { .site-header .button.small { display: none; } }
 @media (min-width: 600px) {
-  .hero { padding-top: 46px; }
-  .stage { margin-top: 56px; }
+  .hero { padding-top: 40px; }
+  .stage-title { margin-top: 40px; }
+  .stage { margin-top: 30px; }
   .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 56px; --inset: clamp(24px, 4vw, 64px); --inset-top: 40px; }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .report { gap: 22px; padding: 22px 26px 26px; }
   .report-head { grid-template-columns: 1fr auto; align-items: baseline; }
   .num { font-size: 33px; }
   .deck-steps { --gap: 30px; }
-  .keys { padding: 34px 32px 36px; }
-  .plate { --key: 64px; gap: 12px; }
-  .key-top { font-size: 13px; }
-  .extras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .extra { padding: 22px 20px; }
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .platform { padding: 32px 30px 30px; }
   .coffee-panel { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: center; padding: 36px 44px 40px; }
 }
 @media (min-width: 900px) {
-  .hero-side { grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 56px; }
+  /* The headline and its line on the left, the ways in on the right, sitting on the same bottom line. */
+  .hero-copy { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 56px; }
+  .hero-get { padding-bottom: 4px; }
   .report { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); column-gap: 56px; row-gap: 22px; padding: 24px 34px 30px; }
   .report-head { grid-column: 1 / -1; padding-bottom: 18px; border-bottom: 1px solid var(--win-line); }
   .report-left { display: grid; align-content: space-between; gap: 22px; }
@@ -566,13 +481,6 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
   .notes li { position: relative; padding-left: 16px; }
   .notes li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 5px; height: 5px; background: var(--win-accent); }
   .num { font-size: 40px; }
-  .keys-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); gap: 64px; }
-  .plate { --key: 74px; gap: 14px; }
-  .key-top { font-size: 14px; }
-  .combo-label { font-size: 26px; }
-  .extra { grid-template-columns: 1fr; gap: 22px; align-items: start; align-content: start; padding: 32px 30px 36px; }
-  .il { --il-stroke: 1.2; max-width: 250px; }
-  .bar-demo { max-width: 250px; }
   .answer { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 8px 48px; align-items: baseline; padding: 30px 0 34px; }
   .site-footer .wrap { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 56px; }
   .site-footer nav { justify-content: flex-end; }
@@ -580,11 +488,6 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
   .site-footer .terms { grid-column: 2; justify-self: end; padding-top: 18px; text-align: right; }
   .site-footer .wrap::after { content: ""; grid-area: 2 / 1 / 3 / -1; align-self: start; border-top: 1px dashed var(--line-strong); }
   .site-footer .sign, .site-footer .terms { grid-row: 2; }
-}
-@media (min-width: 1100px) {
-  /* Four in a row: one ruled strip. */
-  .extras { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .extra { padding: 30px 26px 36px; }
 }
 @media (min-width: 1064px) {
   .screen { --tb-h: 145px; --tb-bottom: 22px; --tb-gap: 64px; --inset-top: 48px; }
@@ -642,18 +545,29 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
 .motion .is-done > .word { overflow: visible; }
 .motion .word > span { display: inline-block; transform: translateY(125%); transition: transform var(--t-3) var(--ease-out) calc(var(--w) * 50ms); }
 .motion .is-in > .word > span { transform: none; }
-/* The dimension line under the headline's last word is drawn once the word has landed. */
-.motion .inked path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 800ms var(--ease-draw) 620ms; }
-.motion .is-in .inked path { stroke-dashoffset: 0; }
+/* The ring round the headline's word is drawn once the words have landed and their masks are gone (.is-done), so
+   none of it is cut. Its four ticks land last. The gap in the dash pattern is longer than the line, so a line that
+   is not drawn yet leaves no dot. */
+.motion .inked .ring { stroke-dasharray: 1 1.2; stroke-dashoffset: 1.1; transition: stroke-dashoffset 900ms var(--ease-draw) 60ms; }
+.motion .is-done .inked .ring { stroke-dashoffset: 0; }
+.motion .inked .ring-ticks { opacity: 0; transition: opacity var(--t-2) ease 860ms; }
+.motion .is-done .inked .ring-ticks { opacity: 1; }
 .motion .answer::after { transform: scaleX(0); transition: transform var(--t-3) var(--ease-draw) calc(var(--i, 0) * var(--stagger)); }
 .motion .answer.is-in::after { transform: none; }
-.motion .combo-dim::before { transform: scaleX(0); transition: transform var(--t-3) var(--ease-draw) 420ms; }
-.motion .is-in .combo-dim::before { transform: none; }
 .motion .site-header { animation: drop var(--t-2) var(--ease-out) backwards; }
-.motion .hero-side > * { animation: rise var(--t-3) var(--ease-out) 420ms backwards; }
-.motion .hero-side > .get { animation-delay: 500ms; }
-.motion .try-line { animation: rise var(--t-3) var(--ease-out) 700ms backwards; }
-.motion .try-line path { stroke-dasharray: 1; animation: draw 700ms var(--ease-draw) 1200ms backwards; }
+.motion .lede { animation: rise var(--t-3) var(--ease-out) 420ms backwards; }
+.motion .hero-get { animation: rise var(--t-3) var(--ease-out) 500ms backwards; }
+/* The invitation comes after the headline: its words, then the leader line out to the stage's corner and down. Its
+   light stays on, and blinks slowly. */
+.motion .stage-title .word > span { transition-delay: calc(var(--w) * 45ms + 560ms); }
+.motion .stage-title .live { animation: appear var(--t-2) ease 520ms backwards, live 2600ms ease-in-out 1600ms infinite; }
+.motion .leader { animation: rule 760ms var(--ease-draw) 1250ms backwards; }
+.motion .leader-end .run { animation: appear 60ms linear 1980ms backwards; }
+.motion .leader-end path:not(.run) { stroke-dasharray: 1 1.2; animation: leader-end 460ms var(--ease-draw) 2010ms backwards; }
+@keyframes live { 50% { opacity: .3; } }
+@keyframes rule { from { transform: scaleX(0); } }
+@keyframes leader-end { from { stroke-dashoffset: 1.1; } to { stroke-dashoffset: 0; } }
+@media (max-width: 599px) { .motion .leader-end path:not(.run) { animation-delay: 1300ms; } }
 .motion .stage figcaption { animation: rise var(--t-3) var(--ease-out) 1000ms backwards; }
 
 /* The hero stage in space. main.js writes --tilt (1 at the top of the page, 0 once flat), --lift (how far the
@@ -740,7 +654,7 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
   --sheet-w: min(100vw - 2 * var(--peek), 900px, max(250px, (var(--avail) - var(--text-h) - var(--cap) - 2 * var(--pad)) * 1.6 + 2 * var(--pad)));
   --media-w: calc(var(--sheet-w) - 2 * var(--pad));
   --media-h: calc(var(--media-w) * .625);
-  height: calc(100svh + 5 * var(--step)); margin-top: calc(var(--space) - var(--header-h) - 18px);
+  height: calc(100svh + 3 * var(--step)); margin-top: calc(var(--space) - var(--header-h) - 18px);
 }
 .motion .deck-pin { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 26px; padding: calc(var(--header-h) + 18px) 0 44px; }
 .motion .deck-space { position: relative; place-self: center; width: var(--sheet-w); opacity: var(--enter, 1); transform: translate3d(0, calc((1 - var(--enter, 1)) * 70px), 0); }
@@ -774,45 +688,22 @@ h1 { font-size: clamp(46px, 8.3vw, 104px); line-height: .93; font-weight: 720; f
   .motion .tile-text p { margin-top: 14px; font-size: 19px; }
 }
 
-/* The stage's own notes. The invitation's line is drawn again and again by a small pen; the outline that answers
-   "Try it" is drawn once and then lets go. */
-.motion .your-turn { transform: translateY(-50%) translateZ(2px); }
+/* The stage's own notes. Until the visitor joins in, the stage's crop marks take the accent and breathe slowly;
+   the outline that answers "Try it" is drawn once and then lets go. */
 .motion .mode-chip { transform: translateY(calc(-50% + var(--stage-grow, 0) * (50% + 10px))) translateZ(2px); }
-.motion .your-turn { animation: fade-in var(--t-2) ease backwards; }
-.motion .turn-line { stroke-dasharray: 1; animation: turn-line 2800ms var(--ease-draw) infinite; }
-.motion .turn-pen { animation: turn-pen 2800ms var(--ease-draw) infinite; }
-@keyframes turn-line { 0% { stroke-dashoffset: 1; } 55%, 86% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
-@keyframes turn-pen { 0% { offset-distance: 0%; } 55%, 100% { offset-distance: 100%; } }
-/* While the invitation is up, the stage's crop marks take the accent and breathe slowly. */
-.stage.has-turn .desk i::before, .stage.has-turn .desk i::after { background: var(--accent-line); }
-.motion .stage.has-turn .desk i { animation: breathe 2800ms ease-in-out infinite; }
+.stage.is-waiting .desk i::before, .stage.is-waiting .desk i::after { background: var(--accent-line); }
+.motion .stage.is-waiting .desk i { animation: breathe 2800ms ease-in-out infinite; }
 @keyframes breathe { 50% { opacity: .35; } }
-.motion .invite { transform: translateZ(1px); }
-.motion .invite rect { stroke-dasharray: 1; }
-.motion .stage.is-invited .invite { animation: invite 1500ms ease both; }
-.motion .stage.is-invited .invite rect { animation: draw 900ms var(--ease-draw) both; }
-@keyframes invite { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+.motion .try-outline { transform: translateZ(1px); }
+.motion .try-outline rect { stroke-dasharray: 1; }
+.motion .stage.is-outlined .try-outline { animation: outline-hold 1500ms ease both; }
+.motion .stage.is-outlined .try-outline rect { animation: draw 900ms var(--ease-draw) both; }
+@keyframes outline-hold { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
 /* The sample app: the chart's lines move to their new shape, and changed numbers are set down fresh. */
 .motion .plot path { transition: d var(--t-2) var(--ease-out); }
 .motion .pt { transition: top var(--t-2) var(--ease-out); }
 .motion .report.is-fresh [data-f] { animation: fresh var(--t-2) ease both; }
 @keyframes fresh { from { opacity: .2; } }
-/* The three shapes of the system sketch are set down one after another before the arrows join them. */
-.motion .node { opacity: 0; transform: scale(.7); transition: opacity var(--t-2) ease, transform var(--t-2) var(--ease-snap); }
-.motion .node.is-in { opacity: 1; transform: none; }
-
-/* Line drawings that are drawn when they arrive, and again under the pointer. --n is the order of a stroke. */
-.motion .extra .d { stroke-dasharray: 1; stroke-dashoffset: 1; }
-.motion .extra .f, .motion .extra .il text { opacity: 0; }
-.motion .extra.is-playing .d { animation: draw 640ms var(--ease-draw) calc(var(--n, 0) * 80ms + 160ms) both; }
-.motion .extra.is-playing .f { animation: appear var(--t-2) ease calc(var(--n, 0) * 80ms + 160ms) both; }
-.motion .extra.is-playing .il-time.t1 { animation: shown .9s steps(1, end) .5s; }
-.motion .extra.is-playing .il-time.t2 { animation: shown .9s steps(1, end) 1.4s; }
-.motion .extra.is-playing .il-time.t3 { opacity: 1; animation: unseen 2.3s steps(1, end); }
-.motion .extra.is-playing .il-pop { animation: pop-out var(--t-3) var(--ease-out) 560ms backwards; }
-@keyframes shown { from, to { opacity: 1; } }
-@keyframes unseen { from, to { opacity: 0; } }
-@keyframes pop-out { from { transform: translate(-22px, -10px) scale(.82); } }
 
 /* Coffee: the cup is drawn when it comes into view, then its steam, which is drawn again under the pointer. */
 .motion .cup .d { stroke-dasharray: 1; stroke-dashoffset: 1; }

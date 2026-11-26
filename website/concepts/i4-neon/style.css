@@ -19,10 +19,7 @@
   --neon-type: var(--neon); --on-neon: #0a0a0a;
   --glow: #5973ff73; --sheen: #ffffff0f; --scrim: #0a0a0ac7; --shade: #000000; --shade-a: .6;
   --stage: var(--card); --win: var(--card-2); --win-inset: #212121; --slab: #303030;
-  --key: #1c1c1c; --key-lip: #000000;
   --blend: screen;
-  /* A whiteboard is white and a blackboard is black in either theme. */
-  --board-white: #ffffff; --board-black: #141414;
 }
 html[data-theme="light"] {
   color-scheme: light;
@@ -33,7 +30,6 @@ html[data-theme="light"] {
   --neon-type: linear-gradient(115deg, #d81aa6, #4660f0 50%, #0a938b);
   --glow: #5973ff59; --sheen: #0000000a; --scrim: #fafafad1; --shade: #1a1a1a; --shade-a: .22;
   --stage: var(--card-2); --win: var(--card); --win-inset: #f7f7f7; --slab: #c4c4c4;
-  --key: #ffffff; --key-lip: #cdcdcd;
   --blend: multiply;
 }
 
@@ -80,12 +76,11 @@ main > section + section { margin-top: var(--space); }
 h1, h2, h3, dt { font-family: var(--display); text-wrap: balance; }
 h2 { font-size: clamp(28px, 3.1vw, 40px); line-height: 1.06; font-weight: 700; letter-spacing: -.03em; }
 h3, dt { font-size: 20px; line-height: 1.15; font-weight: 700; letter-spacing: -.02em; }
-kbd { display: inline-block; min-width: 24px; padding: 4px 6px 3px; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--card-2); color: var(--fg); font: 500 10.5px/1.3 var(--mono); text-align: center; }
 
 /* The bento ------------------------------------------------------------------------------------ */
 /* Sections are grids of tiles: one gap, one radius, a hairline, a flat fill. A tile has one job. */
 .bento { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--g); }
-.also-grid, .know-grid, .platforms { display: contents; }
+.know-grid, .platforms { display: contents; }
 .tile { position: relative; z-index: 0; grid-column: 1 / -1; min-width: 0; padding: var(--tp); border: 1px solid var(--rule); border-radius: var(--rad); background: var(--card); }
 /* The lit edge: the gradient as a 1 px ring. It follows the pointer (main.js writes --mx and --my), or lights all
    the way round on a tile that is active. */
@@ -152,7 +147,7 @@ kbd { display: inline-block; min-width: 24px; padding: 4px 6px 3px; border: 1px 
   -webkit-mask-composite: xor; mask-composite: exclude; }
 .nav-try:hover { transform: translateY(-1px); }
 .nav-try:focus-visible { border-radius: 12px; }
-.nav-try i, .t-try i { flex: none; width: 7px; height: 7px; border-radius: 2px; background: var(--neon-c); box-shadow: 0 0 8px 0 var(--neon-c); }
+.nav-try i, .t-live i { flex: none; width: 7px; height: 7px; border-radius: 2px; background: var(--neon-c); box-shadow: 0 0 8px 0 var(--neon-c); }
 .nav-coffee { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 11px; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); transition: border-color var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
 .nav-coffee:hover { border-color: var(--fg-3); transform: translateY(-1px); }
 .nav-coffee:focus-visible { border-radius: 12px; }
@@ -171,31 +166,29 @@ kbd { display: inline-block; min-width: 24px; padding: 4px 6px 3px; border: 1px 
 html[data-theme="light"] .ts-flip { transform: rotateY(180deg); }
 
 /* 1. Hero ------------------------------------------------------------------------------------- */
+/* Three tiles: the statement, the buttons, and the line that hands over to the stage. */
 .hero { padding-top: 6px; }
-.t-statement { display: flex; align-items: flex-end; min-height: 190px; padding-top: calc(var(--tp) + 16px); }
-h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; letter-spacing: -.04em; }
-/* The one word in the accent, held like a selected object in the app: a hairline box with four handles. */
-.mark-word { position: relative; display: inline-block; }
-.mark-word b { font-weight: inherit; background: var(--neon-type); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
-.sel { position: absolute; inset: .02em -.09em -.07em -.07em; border: 1.5px solid; border-image: var(--neon-type) 1; pointer-events: none; }
-.sel i { position: absolute; width: 7px; height: 7px; border: 1.5px solid var(--neon-a); background: var(--card); }
-.sel i:nth-child(1) { left: -4.5px; top: -4.5px; }
-.sel i:nth-child(2) { right: -4.5px; top: -4.5px; border-color: var(--neon-c); }
-.sel i:nth-child(3) { left: -4.5px; bottom: -4.5px; }
-.sel i:nth-child(4) { right: -4.5px; bottom: -4.5px; border-color: var(--neon-c); }
-.t-lede { display: flex; align-items: flex-end; padding-top: calc(var(--tp) + 14px); }
-.lede { max-width: 32em; font-size: 17.5px; line-height: 1.5; color: var(--fg-2); }
+.t-statement { display: flex; flex-direction: column; justify-content: flex-end; padding-top: calc(var(--tp) + 14px); }
+h1 { font-size: clamp(34px, 12vw, 60px); line-height: 1; font-weight: 700; letter-spacing: -.04em; white-space: nowrap; }
+/* The word that main.js rings with the pen. The ring is the headline's one touch of the accent. */
+.ring-word { display: inline-block; margin-inline: .04em; }
+.t-statement > .ink-layer { --ink-highlight-blend: var(--blend); }
+.lede { margin-top: 18px; font-size: 18px; line-height: 1.4; color: var(--fg-2); }
 .t-get { display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; }
-.t-get .app-icon { position: absolute; right: 16px; top: 16px; width: 40px; height: 40px; border-radius: 10px; }
-.get { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-right: 0; }
+.t-get .app-icon { display: none; position: absolute; right: 16px; top: 16px; width: 46px; height: 46px; border-radius: 11px; }
+.get { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.get .btn { flex: 1 1 auto; }
 .quiet { font-size: 15px; font-weight: 500; text-decoration-color: var(--rule-2); text-decoration-thickness: 1.5px; text-underline-offset: .28em; transition: text-decoration-color var(--t-1) ease; }
 .quiet:hover { text-decoration-color: var(--neon-c); }
 .get small { font-size: 14.5px; color: var(--fg-2); }
-.get-more { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; margin-top: 6px; }
-/* The invitation, on the grid line right above the stage. */
-.t-try { display: flex; align-items: center; gap: 12px; padding: 15px var(--tp); font-size: 16px; font-weight: 500; line-height: 1.4; }
-.t-try span { flex: 1 1 auto; min-width: 0; }
-.t-try svg { flex: none; fill: none; stroke: var(--fg-2); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.get-more { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; margin-top: 4px; }
+/* The stage's heading, on the grid line right above it: the page's main invitation. Its edge is always lit and its
+   light is on, like the edge of the stage while you draw. */
+.t-live { display: flex; align-items: center; gap: 14px; padding: 16px var(--tp); font-size: clamp(19px, 5.4vw, 24px); line-height: 1.15; font-weight: 700; letter-spacing: -.025em; text-wrap: wrap; }
+.t-live::before { opacity: 1; --lit: 4000px; }
+.t-live > span { flex: 1 1 auto; min-width: 0; }
+.t-live span span { display: inline-block; }
+.t-live svg { flex: none; fill: none; stroke: var(--fg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* The stage: the largest tile. A desk of small working apps, the ink layer and the app's toolbar, each on its own plane. */
 .stage { margin-top: calc(var(--g) + 14px); }
@@ -226,40 +219,35 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
    through to the apps and the page keeps scrolling under a finger. */
 .stage-plane.is-scripted > .ink-layer { pointer-events: none; touch-action: auto; cursor: auto; }
 
-/* On the stage's top edge sit two tabs: what the pointer does now, and the invitation to take over. */
-/* As the frame grows the tabs slide from its edge to just inside it, so they stay whole where the frame meets the
+/* On the stage's top edge sits a tab: what the pointer does now. */
+/* As the frame grows the tab slides from its edge to just inside it, so it stays whole where the frame meets the
    edge of the window. */
 .desk-tabs { position: absolute; inset: calc(-13px + var(--stage-grow, 0) * 23px) calc(var(--inset) + 4px) auto; z-index: 101; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26px; pointer-events: none; }
-.mode-chip { position: relative; display: inline-flex; align-items: center; height: 26px; margin: 0; padding: 0 5px 0 10px; border: 1px solid var(--rule-2); border-radius: 9px; background: var(--card); font: 600 12.5px/1 var(--sans); white-space: nowrap; }
+.mode-chip { position: relative; display: inline-flex; align-items: center; height: 26px; margin: 0; padding: 0 11px 0 10px; border: 1px solid var(--rule-2); border-radius: 9px; background: var(--card); font: 600 12.5px/1 var(--sans); white-space: nowrap; }
 .mode-chip .face { display: none; align-items: center; gap: 7px; }
 .mode-chip[data-mode="use"] .face[data-face="use"], .mode-chip[data-mode="draw"] .face[data-face="draw"] { display: inline-flex; }
 .mode-chip .face.is-leaving { display: inline-flex; position: absolute; left: 10px; top: 0; bottom: 0; }
 .mode-chip.is-morphing { contain: paint; }
 .mode-chip i { flex: none; width: 7px; height: 7px; border-radius: 2px; background: var(--fg-3); }
 .mode-chip b { font-weight: inherit; color: var(--fg); }
-.mode-chip kbd { min-width: 0; margin-left: 2px; padding: 3px 5px 2px; border-radius: 5px; font-size: 9.5px; transition: transform var(--t-1) var(--ease-snap), border-color var(--t-1) ease, box-shadow var(--t-1) ease; }
-.mode-chip kbd.is-down { transform: translateY(1px); border-color: var(--neon-c); box-shadow: 0 0 10px -1px var(--neon-c); transition-duration: 60ms; }
-/* Drawing: the chip takes the accent. */
+/* Drawing: the chip's edge and its light take the accent. */
 .mode-chip[data-mode="draw"] { border-color: transparent; }
 .mode-chip[data-mode="draw"]::before { content: ""; position: absolute; inset: -1px; padding: 1px; border-radius: inherit; background: var(--neon); pointer-events: none;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; }
 .mode-chip .face[data-face="draw"] i { background: var(--neon-c); box-shadow: 0 0 8px 0 var(--neon-c); }
-.mode-chip .face[data-face="draw"] b { background: var(--neon-type); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
-/* "Your turn": shown when the script is idle, gone for good once the visitor draws. */
-.turn { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 26px; margin-left: auto; padding: 0 11px 0 8px; border: 0; border-radius: 9px; background: var(--card); color: var(--fg); font: 600 12.5px/1 var(--sans); white-space: nowrap; cursor: pointer; pointer-events: auto; }
-.turn[hidden] { display: none; }
-.turn::before { content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; background: var(--neon); pointer-events: none;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; }
-.turn svg { fill: var(--neon-c); stroke: none; }
-.turn:focus-visible { border-radius: 9px; }
-/* The button that makes a grown demo small again: a small square tile in the frame's corner, where "Your turn" was. */
+/* The button that makes a grown demo small again: a small square tile in the frame's corner. */
 .stage-plane > .stage-shrink { --stage-shrink-top: 7px; --stage-shrink-right: 14px; width: 32px; height: 32px; border: 1px solid var(--rule-2); border-radius: 9px; background: var(--card); color: var(--fg-2); transition: color var(--t-1) ease, border-color var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
 .stage-plane > .stage-shrink:hover { color: var(--fg); border-color: var(--fg-3); }
 .stage-plane > .stage-shrink:active { transform: scale(.92); }
 .stage-plane > .stage-shrink:focus-visible { border-radius: 9px; }
 .stage-plane > .stage-shrink svg { width: 14px; height: 14px; stroke-width: 1.8; }
+/* "Draw here", the small label the growing stage moves with the pointer until the visitor joins in: a tile with
+   the accent as its edge. */
+body > .stage-invite { --stage-invite-bg: var(--card); --stage-invite-fg: var(--fg); padding: 8px 12px; border-radius: 10px; font: 600 13px/1 var(--sans); box-shadow: 0 10px 24px -14px var(--shade); }
+body > .stage-invite::before { content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; background: var(--neon); pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; }
 
 /* The sample windows are small working apps. In Use apps they answer; in Draw the ink layer lies over them. */
 .desk-windows { display: grid; gap: 12px; align-items: start; width: min(100%, 1040px); margin-inline: auto; }
@@ -318,14 +306,12 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .reply input::placeholder { color: var(--fg-3); opacity: 1; }
 .reply button { flex: none; height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--fg); color: var(--page); font: 600 13px/1 var(--sans); cursor: pointer; transition: transform var(--t-1) var(--ease-snap); }
 .reply button:active { transform: scale(.95); }
-.avatar { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--card-3); color: var(--fg); font: 700 14px/1 var(--display); }
 /* Where the script's pointer presses: a small ring that swells and settles, as the app's pointer does on a click. */
 .tap { position: absolute; z-index: 62; left: 0; top: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px; border: 2px solid var(--neon-c); border-radius: 50%; pointer-events: none; }
 
 .stage-foot { margin-top: var(--g); }
-.foot-words { padding-block: 18px; }
-.stage-line { max-width: 40em; font-size: 16.5px; font-weight: 500; line-height: 1.4; }
-.stage-note { max-width: 46em; margin-top: 5px; font-size: 14.5px; line-height: 1.45; color: var(--fg-2); }
+.foot-words { display: flex; align-items: center; padding-block: 14px; }
+.stage-note { max-width: 46em; font-size: 14.5px; line-height: 1.45; color: var(--fg-2); }
 /* Above the stage, so the way out of drawing can be pressed where it floats over the stage on a phone. */
 .foot-ctl { z-index: 2; display: flex; align-items: center; padding: 12px; }
 .stage-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
@@ -333,22 +319,14 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 #stage-replay { min-width: 96px; }
 
 /* 2. What you can do -------------------------------------------------------------------------- */
-/* A bento of six tiles and a tile that lists them. Named areas place them at each width (see the end of the file). */
+/* A bento of four tiles and a tile that names them. Named areas place them at each width (see the end of the file). */
 [data-area="head"] { grid-area: head; }
 [data-area="t1"] { grid-area: t1; }
 [data-area="t2"] { grid-area: t2; }
 [data-area="t3"] { grid-area: t3; }
 [data-area="t4"] { grid-area: t4; }
-[data-area="t5"] { grid-area: t5; }
-[data-area="t6"] { grid-area: t6; }
-.do-bento { grid-template-areas: "head" "t1" "t2" "t3" "t4" "t5" "t6"; grid-template-columns: minmax(0, 1fr); }
-/* The list of tiles: each line opens its tile, and lights its edge while the pointer is on the line. */
-.do-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 10px; margin: 0 -8px -8px; }
-.do-index button { display: flex; align-items: baseline; gap: 9px; width: 100%; min-height: 34px; padding: 8px; border: 0; border-radius: 8px; background: none; color: var(--fg-2); font: 500 14px/1.25 var(--sans); text-align: left; cursor: pointer; transition: background var(--t-1) ease, color var(--t-1) ease; }
-.do-index button:hover, .do-index button[aria-current="true"] { background: var(--card-2); color: var(--fg); }
-.do-index i { flex: none; width: 5px; height: 5px; border-radius: 1.5px; background: var(--rule-2); translate: 0 -2px; transition: background var(--t-1) ease, box-shadow var(--t-1) ease; }
-.do-index button:hover i, .do-index button[aria-current="true"] i { background: var(--neon-c); box-shadow: 0 0 7px 0 var(--neon-c); }
-.do-index span { min-width: 0; }
+.do-bento { grid-template-areas: "head" "t1" "t2" "t3" "t4"; grid-template-columns: minmax(0, 1fr); }
+.do-bento .t-head { justify-content: flex-end; }
 
 .card { display: flex; flex-direction: column; gap: 12px; padding: 12px; cursor: pointer; }
 .tile-open { position: absolute; top: 20px; right: 20px; z-index: 71; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--card); color: var(--fg-2); cursor: pointer; transition: color var(--t-1) ease, border-color var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
@@ -357,74 +335,34 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .tile-open[aria-expanded="true"] .i-open, .tile-open[aria-expanded="false"] .i-close { display: none; }
 .card-text { padding: 4px 8px 10px; }
 .card-text p { max-width: 30em; margin-top: 8px; font-size: 16px; line-height: 1.5; color: var(--fg-2); }
-/* A tile's picture is a small sample screen that the engine draws on, live. The frame is as tall as its screen
-   needs. Sizes inside are in em and follow the frame's width. */
-.frame { position: relative; flex: 1 1 auto; display: grid; min-width: 0; overflow: hidden; container-type: inline-size; border: 1px solid var(--rule); border-radius: calc(var(--rad) - 12px); background: var(--page); }
+/* A tile's picture is live. Its frame is 16:10 at the least (the spacer in ::before) and its picture fills it. */
+.frame { position: relative; flex: none; display: grid; min-width: 0; overflow: hidden; container-type: inline-size; border: 1px solid var(--rule); border-radius: calc(var(--rad) - 12px); background: var(--page); }
+.frame::before { content: ""; grid-area: 1 / 1; padding-top: 62.5%; pointer-events: none; }
+.frame > .shot { grid-area: 1 / 1; }
 .ctl { position: absolute; right: 8px; bottom: 8px; z-index: 70; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--card); color: var(--fg); cursor: pointer; opacity: .85; transition: opacity var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
 .ctl:hover, .ctl:focus-visible { opacity: 1; transform: scale(1.06); }
 
-.shot { position: relative; display: grid; place-items: center; min-width: 0; min-height: 15em; padding: 2.4em 1.2em; font-size: clamp(12px, 3.4cqw, 24px); line-height: 1.4; }
+.shot { position: relative; min-width: 0; }
+/* Draw on anything: a small dashboard with a dip in its chart, which the engine draws on. Sizes inside are in em
+   and follow the frame's width. */
+.shot-dash { display: grid; place-items: center; padding: 1.6em 1.2em; font-size: clamp(11px, 3.2cqw, 24px); line-height: 1.4; }
 .shot .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-2) var(--ease-fade); }
 .shot.is-leaving .ink-layer { opacity: 0; }
 .shot p { text-wrap: nowrap; }
-.rec, .dlg, .dash, .pay { border: 1px solid var(--rule-2); border-radius: .9em; background: var(--win); }
-/* Circle and point: a small dashboard with a dip in its chart. */
-.dash { width: min(100%, 23em); padding: .9em; }
+.dash { width: min(100%, 23em); padding: .9em; border: 1px solid var(--rule-2); border-radius: .9em; background: var(--win); }
 .dash-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55em; }
 .dash-kpis p { padding: .55em .7em .7em; border: 1px solid var(--rule); border-radius: .6em; background: var(--win-inset); }
 .dash-kpis p > span { display: block; font-size: .72em; color: var(--fg-2); }
 .dash-kpis b { display: block; margin-top: .3em; font: 700 1.2em/1 var(--display); letter-spacing: -.03em; }
 .dash-kpis b span { display: inline-block; }
-.dash-chart { position: relative; height: 6.4em; margin-top: 1.5em; border: 1px solid var(--rule); border-radius: .6em; background: var(--win-inset); overflow: hidden; }
+.dash-chart { position: relative; height: 6.8em; margin-top: 1.5em; border: 1px solid var(--rule); border-radius: .6em; background: var(--win-inset); overflow: hidden; }
 .dash-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .dash-area { fill: var(--rule); stroke: none; opacity: .6; }
 .dash-line { fill: none; stroke: var(--fg-2); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.dash-dip { position: absolute; left: 67.3%; top: 86.6%; width: .7em; height: .7em; margin: -.35em 0 0 -.35em; border: 2px solid var(--fg); border-radius: 50%; background: var(--win-inset); }
-/* Box it and label it: a checkout with a button that is too small. */
-.shot-form { grid-template-columns: auto auto; grid-template-rows: auto; place-content: center; align-items: end; }
-.pay { width: 12em; padding: 1em 1.1em 1.1em; }
-.pay-title { font: 700 1.1em/1.2 var(--display); letter-spacing: -.02em; }
-.pay-field { margin-top: .7em; font-size: .78em; color: var(--fg-2); }
-.pay-field i { display: block; height: 2.1em; margin-top: .3em; border: 1px solid var(--rule-2); border-radius: .5em; background: var(--win-inset); }
-.pay-go { display: flex; justify-content: flex-end; margin-top: 1.1em; }
-.pay-go .fake-btn { padding: .3em .8em; font-size: .78em; }
-.pay-note { width: 9.5em; height: 2.6em; }
-/* Hide what's private */
-.rec { width: min(100%, 22em); padding: 1.1em 1.3em; }
-.rec-head { display: flex; align-items: center; gap: .7em; font-size: 1.07em; line-height: 1.3; }
-.rec-head span { display: flex; flex-direction: column; }
-.rec-head em { font-style: normal; font-size: .87em; color: var(--fg-2); }
-.rec .avatar { width: 2.3em; height: 2.3em; font-size: 1em; }
-.rec dl { display: grid; gap: 0; margin-top: .85em; }
-.rec dl div { display: grid; grid-template-columns: 4.1em minmax(0, 1fr); align-items: center; padding: .65em 0; border-top: 1px solid var(--rule); }
-.rec dt { font: inherit; letter-spacing: 0; color: var(--fg-2); }
-.rec dd span { display: inline-block; font: 500 .8em/1.3 var(--mono); }
-/* Guide the eye: a board of pictures. The pictures are plain shapes, so the spotlight is the only event. */
-.pics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7em; width: min(100%, 22em); }
-.pics p { padding: .35em .35em .5em; border: 1px solid var(--rule-2); border-radius: .6em; background: var(--win); }
-.pics span { display: block; margin: .4em 0 0 .25em; font-size: .72em; color: var(--fg-2); }
-.pic { display: block; aspect-ratio: 4 / 3; border-radius: .35em; background-color: var(--card-3); }
-.pic-hills { background-image: radial-gradient(120% 90% at 20% 110%, var(--fg-3) 0 49%, transparent 50%), radial-gradient(110% 80% at 85% 115%, var(--rule-2) 0 49%, transparent 50%); }
-.pic-sun { background-image: radial-gradient(circle at 50% 62%, var(--fg-2) 0 22%, transparent 23%), linear-gradient(transparent 62%, var(--rule-2) 62%); }
-.pic-waves { background-image: repeating-linear-gradient(172deg, var(--rule-2) 0 .32em, transparent .32em .78em); }
-.pic-trees { background-image: conic-gradient(from 150deg at 32% 28%, var(--fg-3) 0 60deg, transparent 0), conic-gradient(from 150deg at 68% 40%, var(--rule-2) 0 60deg, transparent 0); }
-.pic-moon { background-image: radial-gradient(circle at 62% 38%, var(--card-3) 0 17%, transparent 18%), radial-gradient(circle at 54% 44%, var(--fg-2) 0 22%, transparent 23%); }
-.pic-city { background: linear-gradient(90deg, var(--fg-3) 0 22%, transparent 0 30%, var(--rule-2) 0 52%, transparent 0 60%, var(--fg-3) 0 78%, transparent 0) 0 100% / 100% 55% no-repeat var(--card-3); }
-/* Number the steps */
-.dlg { width: min(100%, 22em); padding: 1.1em 1.3em 1.3em 3.7em; }
-.dlg-title { font: 700 1.15em/1.2 var(--display); letter-spacing: -.02em; }
-.dlg-row { position: relative; display: flex; align-items: center; justify-content: space-between; gap: .85em; margin-top: .75em; }
-.dlg-row i { position: absolute; left: -1.75em; top: 50%; width: 0; height: 0; }
-.dlg-row span { color: var(--fg-2); }
-.dlg-row > b:not(.fake-btn) { min-width: 7.7em; padding: .42em .7em; border: 1px solid var(--rule-2); border-radius: .5em; font-weight: 500; }
-.dlg-go { justify-content: flex-end; margin-top: 1em; }
-.fake-btn { padding: .55em 1.3em; border-radius: .6em; background: var(--fg); color: var(--page); font-weight: 600; }
-/* Sketch a system: an empty board with room for three shapes. */
-.shot-board::before { content: ""; position: absolute; inset: 0; background: var(--rule-2); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 10v4M10 12h4' stroke='%23000'/%3E%3C/svg%3E") 0 0 / 24px 24px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 10v4M10 12h4' stroke='%23000'/%3E%3C/svg%3E") 0 0 / 24px 24px; }
-.node { position: absolute; top: calc(50% - 3.1em); width: 22%; height: 6.2em; }
-.node[data-t="n1"] { left: 7%; }
-.node[data-t="n2"] { left: 39%; }
-.node[data-t="n3"] { left: 71%; }
+.dash-dip { position: absolute; left: 66.1%; top: 73.4%; width: .7em; height: .7em; margin: -.35em 0 0 -.35em; border: 2px solid var(--fg); border-radius: 50%; background: var(--win-inset); }
+/* Where the box and the note go. */
+.dash-box { position: absolute; left: calc(66.1% - 1.8em); top: calc(73.4% - 1.4em); width: 3.6em; height: 2.8em; }
+.dash-note { position: absolute; left: 5%; top: 50%; width: 0; height: 0; }
 
 /* A tile opened in place: it lifts out of its slot and covers the bento, with its picture as large as it goes. The
    slot it came from stays as a dashed outline; the rest of the bento waits behind a veil. */
@@ -432,80 +370,21 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .do-bento.has-open::after { content: ""; position: absolute; inset: calc(var(--g) * -1); z-index: 5; background: var(--scrim); }
 .card.is-open { position: absolute; z-index: 6; grid-area: auto; inset: var(--open-top, 0px) 0 auto 0; gap: 14px; cursor: default; transform: none; }
 .card.is-open::after { display: none; }
-.card.is-open .frame { flex: none; }
-.card.is-open .shot { min-height: min(26em, 100svh - var(--header-h) - 220px); font-size: clamp(12px, 3.4cqw, 26px); }
+/* Opened, the picture is as large as the screen lets it be, and no wider than 2:1. */
+.card.is-open .frame::before { padding-top: clamp(50%, 100svh - var(--header-h) - 240px, 62.5%); }
+.card.is-open .shot-dash { font-size: clamp(11px, 3.2cqw, 26px); }
 .card.is-open .card-text { padding: 4px 8px 12px; }
 .card.is-open .card-text h3 { font-size: clamp(24px, 2.7vw, 34px); letter-spacing: -.03em; }
 .card.is-open .card-text p { font-size: 17.5px; }
 
-/* 3. Two keys --------------------------------------------------------------------------------- */
-[data-area="mode"] { grid-area: mode; }
-[data-area="draw"] { grid-area: draw; }
-[data-area="use"] { grid-area: use; }
-.keys-bento { grid-template-areas: "head" "draw" "use" "mode"; grid-template-columns: minmax(0, 1fr); }
-.keys-row { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 22px; }
-.keys-row p { max-width: 16em; font-size: 18px; font-weight: 500; line-height: 1.35; }
-.keyset { display: inline-flex; gap: 8px; padding: 2px 2px 8px; border: 0; background: none; cursor: pointer; }
-.keyset:focus-visible { border-radius: 18px; outline-offset: 5px; }
-/* A keycap is a small tile on a lip. Pressed, it sinks onto the lip and its edge lights. */
-.key { position: relative; display: grid; place-items: center; min-width: 58px; height: 58px; padding: 0 14px; border: 1px solid var(--rule-2); border-radius: 14px; background: var(--key); color: var(--fg); box-shadow: 0 5px 0 var(--key-lip); transition: transform var(--t-1) var(--ease-snap), box-shadow var(--t-1) var(--ease-snap); }
-.key-wide { min-width: 88px; }
-.key b { font: 500 12px/1 var(--mono); letter-spacing: .01em; }
-.key::before { content: ""; position: absolute; inset: -1px; padding: 1.5px; border-radius: inherit; background: var(--neon); opacity: 0; pointer-events: none; transition: opacity var(--t-2) ease;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; }
-.key.is-down { transform: translateY(4px); box-shadow: 0 1px 0 var(--key-lip), 0 0 22px -4px var(--glow); transition-duration: 60ms; }
-.key.is-down::before { opacity: 1; transition-duration: 60ms; }
-/* The keys of the mode the demo is in keep their edge lit. */
-.keys[data-mode="draw"] [data-set="draw"] .key::before, .keys[data-mode="use"] [data-set="use"] .key::before { opacity: 1; }
-.mode-tile { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
-.press { color: var(--fg-2); }
-.mode-line { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-.mode-line i { flex: none; width: 7px; height: 7px; border-radius: 2px; background: var(--fg-3); transition: background var(--t-2) ease, box-shadow var(--t-2) ease; }
-.keys[data-mode="draw"] .mode-line i { background: var(--neon-c); box-shadow: 0 0 10px 1px var(--neon-c); }
-
-/* 4. More in the app -------------------------------------------------------------------------- */
-.also-item { display: grid; grid-template-columns: 116px minmax(0, 1fr); column-gap: 14px; align-items: start; align-content: start; padding: 12px; }
-.also-item .ill { grid-row: span 2; }
-.also-item h3 { margin-top: 4px; font-size: 18px; }
-.also-item p { margin-top: 6px; padding-right: 4px; font-size: 15px; line-height: 1.45; color: var(--fg-2); }
-.ill { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 16 / 10; border: 1px solid var(--rule); border-radius: calc(var(--rad) - 12px); background: var(--page); }
-.ill svg { width: 100%; height: 100%; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ill-screen { fill: var(--card-2); stroke: var(--fg-3); stroke-width: 1.5; }
-.ill-lines { stroke: var(--rule-2); stroke-width: 4; }
-.ill :is(svg *, div, span, i, b) { animation-play-state: paused; }
-.ill.is-live :is(svg *, div, span, i, b) { animation-play-state: running; }
-/* Break timer: a neutral screen, big digits and a hairline of the accent running down. */
-.bt-screen { display: grid; justify-items: center; gap: 8px; width: 66%; padding: 14px 12px 15px; border: 1px solid var(--rule-2); border-radius: 10px; background: var(--card-2); color: var(--fg); }
-.bt-time { font: 600 clamp(20px, 9cqw, 34px)/1 var(--mono); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-.bt-bar { width: 78%; height: 2px; background: var(--rule-2); overflow: hidden; }
-.bt-bar i { display: block; height: 100%; background: var(--neon); transform-origin: 0 50%; transform: scaleX(.86); }
-/* Share region */
-.sr-region { stroke: var(--neon-b); stroke-width: 2; stroke-dasharray: 6 5; }
-.sr-fill { fill: var(--rule-2); }
-.sr-window { transform-box: fill-box; transform-origin: 0% 50%; }
-/* Whiteboard and blackboard */
-.wb-board { opacity: 0; }
-.wb-white { fill: var(--board-white); }
-.wb-black { fill: var(--board-black); opacity: 1; }
-.wb-mark { stroke: var(--neon-a); stroke-width: 3; }
-/* The app's own toolbar, small. main.js sizes it to the tile (--fit) and has it shrink to one button and back. */
-.ill-bar { container-type: inline-size; }
-.bar-fit { position: absolute; left: 50%; top: 50%; width: 640px; height: 100px; translate: -50% -50%; scale: var(--fit, .5); }
-.bar-fit > .ink-toolbar { bottom: 12px; }
-/* More than forty tools, without a word: a field of small squares, with a light passing over it. */
-.more-grid { display: grid; grid-template-columns: repeat(8, 9px); gap: 7px; margin-top: auto; }
-.more-grid i { width: 9px; height: 9px; border-radius: 2.5px; background: var(--rule-2); }
-.more-grid i:last-child { background: var(--neon-c); box-shadow: 0 0 8px 0 var(--neon-c); }
-
-/* 5. Good to know ----------------------------------------------------------------------------- */
+/* 3. Good to know ----------------------------------------------------------------------------- */
 [data-area="q1"] { grid-area: q1; }
 [data-area="q2"] { grid-area: q2; }
 [data-area="q3"] { grid-area: q3; }
 .know-bento { grid-template-areas: "head" "q1" "q2" "q3"; grid-template-columns: minmax(0, 1fr); }
 .know-grid dd { max-width: 34em; margin-top: 10px; font-size: 16px; line-height: 1.55; color: var(--fg-2); }
 
-/* 6. Coffee ----------------------------------------------------------------------------------- */
+/* 4. Coffee ----------------------------------------------------------------------------------- */
 [data-area="copy"] { grid-area: copy; }
 [data-area="cup"] { grid-area: cup; }
 .coffee-bento { grid-template-areas: "copy" "cup"; grid-template-columns: minmax(0, 1fr); }
@@ -526,7 +405,7 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .cup-level { stroke: var(--neon-c); stroke-width: 3; }
 .steam path { stroke: var(--fg-2); stroke-width: 2; }
 
-/* 7. Install ---------------------------------------------------------------------------------- */
+/* 5. Install ---------------------------------------------------------------------------------- */
 .install-head { flex-direction: row; align-items: center; justify-content: flex-start; gap: 18px; }
 .install-head .app-icon { display: block; width: 56px; height: 56px; border-radius: 13px; }
 .platform { display: flex; flex-direction: column; align-items: flex-start; }
@@ -548,7 +427,7 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 .install-more a { color: var(--fg); font-weight: 500; text-decoration-color: var(--rule-2); text-decoration-thickness: 1.5px; text-underline-offset: .28em; transition: text-decoration-color var(--t-1) ease; }
 .install-more a:hover { text-decoration-color: var(--neon-c); }
 
-/* 8. Footer ----------------------------------------------------------------------------------- */
+/* 6. Footer ----------------------------------------------------------------------------------- */
 .site-footer { margin-top: var(--space); padding-bottom: var(--g); }
 .site-footer .tile { padding: 18px 22px; }
 .foot-mark { display: flex; align-items: center; }
@@ -581,7 +460,10 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   .nav-coffee { width: 38px; }
   .site-header .btn-small { padding: 0 12px; }
   .theme-switch { width: 40px; }
-  .t-get { padding-top: calc(var(--tp) + 44px); }
+  .t-statement { padding-top: calc(var(--tp) + 10px); }
+  .lede { margin-top: 14px; font-size: 17px; }
+  .get .btn { padding: 0 16px; }
+  .get .btn-accent svg { display: none; }
   /* A phone's keyboard zooms the page when a field's text is under 16 px. */
   .reply input { font-size: 16px; }
   .foot-ctl { justify-content: flex-end; }
@@ -597,11 +479,11 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 /* Six columns. */
 @media (min-width: 600px) {
   .hero { padding-top: 10px; }
-  .t-statement { min-height: 0; padding-top: calc(var(--tp) + 26px); }
-  h1 { font-size: clamp(52px, 8.4vw, 72px); }
-  .t-lede, .t-get { grid-column: span 3; }
-  .t-get .app-icon { width: 46px; height: 46px; border-radius: 11px; }
-  .t-get { padding-top: calc(var(--tp) + 50px); }
+  .t-statement { padding-top: calc(var(--tp) + 22px); }
+  h1 { font-size: clamp(60px, 10vw, 96px); }
+  .lede { margin-top: 20px; font-size: 20px; }
+  .get .btn { flex: none; }
+  .t-live { padding-block: 18px; font-size: 24px; }
   .stage-plane { --tb-h: 113px; --tb-bottom: 14px; --tb-gap: 120px; --inset: 30px; }
   .win-bar { touch-action: none; }
   .bars { height: 84px; }
@@ -614,23 +496,12 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   .foot-words { grid-column: span 4; }
   .foot-ctl { grid-column: span 2; }
 
-  .do-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "head head head head head head" "t1 t1 t1 t1 t1 t1" "t2 t2 t2 t3 t3 t3" "t4 t4 t4 t5 t5 t5" "t6 t6 t6 t6 t6 t6"; }
-  .do-bento .t-head { flex-direction: row; align-items: flex-end; }
-  .do-index { flex: 0 1 400px; }
+  .do-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "head head head head head head" "t1 t1 t1 t1 t1 t1" "t2 t2 t2 t3 t3 t3" "t4 t4 t4 t4 t4 t4"; }
   .card { padding: 14px; gap: 14px; }
   .tile-open { top: 22px; right: 22px; }
-
-  .keys-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "head head head mode mode mode" "draw draw draw draw use use"; }
-  .keyset { gap: 10px; }
-  .key { min-width: 68px; height: 68px; border-radius: 16px; }
-  .key-wide { min-width: 108px; }
-  .key b { font-size: 13px; }
-
-  .also-head { flex-direction: row; align-items: flex-start; }
-  .also-head .more-grid { margin: 4px 18px 0 0; }
-  .also-item { grid-column: span 3; display: block; padding: 14px; }
-  .also-item h3 { margin-top: 16px; padding: 0 6px; font-size: 20px; }
-  .also-item p { padding: 0 6px 6px; font-size: 16px; line-height: 1.5; }
+  /* The widest tile is a strip: picture on the left, words on the right. */
+  .card[data-area="t4"]:not(.is-open) { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); column-gap: 16px; }
+  .card[data-area="t4"]:not(.is-open) .card-text { align-self: end; }
 
   .know-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "head head head head head head" "q1 q1 q1 q1 q1 q1" "q2 q2 q2 q3 q3 q3"; }
   .coffee-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "copy copy copy copy cup cup"; }
@@ -642,42 +513,31 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
 }
 /* Twelve columns. */
 @media (min-width: 1000px) {
-  .hero-bento { grid-template-rows: 1fr auto auto; }
-  .t-statement { grid-column: 1 / span 7; grid-row: 1 / span 2; }
-  .t-lede, .t-get { grid-column: 8 / -1; }
-  .t-get { padding-top: var(--tp); }
-  .t-statement { padding-top: calc(var(--tp) + 8px); }
-  h1 { max-width: 9.7em; font-size: clamp(60px, 6.9vw, 76px); }
+  /* One row: the statement, and the buttons beside it. */
+  .t-statement { grid-column: 1 / span 6; padding-top: calc(var(--tp) + 10px); }
+  .t-get { grid-column: 7 / -1; }
+  .t-get .app-icon { display: block; }
+  h1 { font-size: clamp(60px, 6.4vw, 76px); }
+  .t-live { font-size: 28px; }
   .desk-windows { grid-template-columns: 1.2fr 1.08fr .88fr; gap: 20px; }
   .win-chart { margin-top: 26px; }
   .win-mail { grid-column: auto; justify-self: stretch; width: auto; margin-top: 52px; }
   .foot-words { grid-column: span 9; }
   .foot-ctl { grid-column: span 3; }
 
-  .do-bento { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-areas:
+  /* One large tile, two small ones and a strip. The tile that names them takes what height is left beside the
+     large one. */
+  .do-bento { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 1fr auto auto; grid-template-areas:
     "head head head head t1 t1 t1 t1 t1 t1 t1 t1"
     "t2 t2 t2 t2 t1 t1 t1 t1 t1 t1 t1 t1"
-    "t3 t3 t3 t3 t4 t4 t4 t4 t5 t5 t5 t5"
-    "t6 t6 t6 t6 t6 t6 t6 t6 t6 t6 t6 t6"; }
-  .do-bento .t-head { flex-direction: column; align-items: stretch; }
-  .do-index { flex: none; grid-template-columns: minmax(0, 1fr); }
+    "t3 t3 t3 t3 t4 t4 t4 t4 t4 t4 t4 t4"; }
   .card[data-area="t1"]:not(.is-open) .card-text h3 { font-size: 26px; letter-spacing: -.03em; }
-  .card[data-area="t1"] .shot { font-size: clamp(12px, 3.4cqw, 30px); }
-  /* The widest tile is a strip: picture on the left, words on the right. */
-  .card[data-area="t6"]:not(.is-open) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); column-gap: 16px; }
-  .card[data-area="t6"]:not(.is-open) .card-text { align-self: end; }
+  .card[data-area="t1"] .shot-dash { font-size: clamp(11px, 3.2cqw, 30px); }
+  .card[data-area="t4"]:not(.is-open) { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
   .card.is-open { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 27%); column-gap: 22px; align-items: center; }
-  .card.is-open .shot { min-height: min(27em, 100svh - var(--header-h) - 120px); }
+  .card.is-open .frame::before { padding-top: clamp(50%, 100svh - var(--header-h) - 120px, 62.5%); }
   .card.is-open .card-text { padding: 0 12px 0 2px; }
 
-  .keys-bento { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-areas:
-    "head head head head draw draw draw draw draw use use use"
-    "mode mode mode mode draw draw draw draw draw use use use"; }
-  .keys-row { min-height: 250px; }
-
-  .also-head { grid-column: span 4; grid-row: span 2; flex-direction: column; }
-  .also-head .more-grid { margin: auto 0 0; }
-  .also-item { grid-column: span 4; }
   .know-bento { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-areas:
     "head head head head q1 q1 q1 q1 q1 q1 q1 q1"
     "q2 q2 q2 q2 q2 q2 q3 q3 q3 q3 q3 q3"; }
@@ -697,13 +557,12 @@ h1 { font-size: clamp(38px, 10.6vw, 52px); line-height: 1; font-weight: 700; let
   .num { font-size: 46px; }
 }
 @media (min-width: 1180px) {
+  .t-statement { grid-column: 1 / span 7; }
+  .t-get { grid-column: 8 / -1; }
+  h1 { font-size: clamp(76px, 6.6vw, 96px); }
   .stage-plane { --tb-gap: 88px; --inset: 40px; }
-  .key { min-width: 76px; height: 76px; border-radius: 18px; }
-  .key-wide { min-width: 122px; }
-  .key b { font-size: 14px; }
 }
 @media (min-width: 1200px) {
-  .do-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* The largest tile keeps its words in one band under the picture. */
   .card[data-area="t1"]:not(.is-open) .card-text { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 28px; align-items: baseline; padding-bottom: 8px; }
   .card[data-area="t1"]:not(.is-open) .card-text p { margin-top: 0; }
@@ -762,20 +621,18 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 .run.is-on path { animation: run-light var(--run-ms, 1400ms) var(--ease-in-out) both; }
 @keyframes run-light { 0% { stroke-dashoffset: var(--run-from); opacity: 1; } 92% { opacity: 1; } 100% { stroke-dashoffset: -1; opacity: 0; } }
 
-/* First screen: the tiles flip up, the word is selected, then the stage and its toolbar arrive. */
-.motion .sel { opacity: 0; transform: scale(1.12, 1.3); transition: opacity var(--t-2) ease 260ms, transform var(--t-3) var(--ease-snap) 260ms; }
-.motion .is-ready .sel { opacity: 1; transform: none; }
+/* First screen: the tiles flip up, then the stage and its toolbar arrive. */
 .motion .stage-scene { animation: stage-in 1000ms var(--ease-out) 360ms backwards; }
 .motion .stage-foot { animation: rise var(--t-3) var(--ease-out) 760ms backwards; }
 .motion .dock > .ink-toolbar { animation: toolbar-in var(--t-3) var(--ease-out) 900ms backwards; }
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
 @keyframes stage-in { from { opacity: 0; transform: translateY(48px); } }
 @keyframes toolbar-in { from { opacity: 0; transform: translateY(20px) scale(.96); } }
-/* The arrow that points at the stage nods; the pointer on "Your turn" makes a small stroke; the stage's edge breathes. */
-.motion .t-try svg { animation: nod 2.4s var(--ease-in-out) infinite; }
+/* The arrow that points at the stage nods, the heading's light pulses, and the stage's edge breathes. */
+.motion .t-live svg { animation: nod 2.4s var(--ease-in-out) infinite; }
 @keyframes nod { 0%, 60%, 100% { transform: none; } 30% { transform: translateY(3px); } }
-.motion .turn svg { animation: scribble 2.6s var(--ease-in-out) infinite; }
-@keyframes scribble { 0%, 55%, 100% { transform: none; } 15% { transform: translate(2px, -2px); } 30% { transform: translate(4px, 1px); } 42% { transform: translate(1px, 2px); } }
+.motion .t-live i { animation: live 2.4s var(--ease-in-out) infinite; }
+@keyframes live { 0%, 100% { box-shadow: 0 0 8px 0 var(--neon-c); } 50% { box-shadow: 0 0 14px 3px var(--neon-c); } }
 .motion .stage-plane.is-inviting > .desk-panel::after { animation: breathe 3.2s var(--ease-in-out) infinite; }
 @keyframes breathe { 0%, 100% { opacity: .25; } 50% { opacity: .75; } }
 
@@ -802,22 +659,6 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 /* In the pose the stage is one thing to press: it comes to you, flat, with the pen in your hand. */
 .stage-cover { position: absolute; inset: 0; z-index: 200; display: none; cursor: pointer; }
 .motion .stage-scene.is-posed > .stage-cover { display: block; }
-
-/* Small illustrations: each loops gently while it is on screen. */
-.motion .more-grid i { animation: more-wave 4.8s var(--ease-in-out) calc(var(--i) * 55ms) infinite; }
-.motion .also-head:not(.is-live) .more-grid i { animation-play-state: paused; }
-@keyframes more-wave { 0%, 14%, 100% { background: var(--rule-2); } 6% { background: var(--fg-2); } }
-.motion .more-grid i:last-child { animation: none; }
-.motion .sr-region { animation: sr-region 5.4s var(--ease-out) infinite; }
-.motion .sr-window { animation: sr-window 5.4s var(--ease-out) infinite; }
-@keyframes sr-region { 0%, 6% { opacity: 0; } 18%, 90% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes sr-window { 0%, 26% { opacity: 0; transform: translate(-70px, -4px) scale(.7); } 46%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-.motion .bt-bar i { animation: bt-bar 10s linear infinite; }
-@keyframes bt-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-.motion .wb-white { animation: wb-white 7.5s var(--ease-in-out) infinite; }
-.motion .wb-black { animation: wb-black 7.5s var(--ease-in-out) infinite; }
-@keyframes wb-white { 0%, 26% { opacity: 0; } 33%, 96% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes wb-black { 0%, 60% { opacity: 0; } 67%, 94% { opacity: 1; } 100% { opacity: 0; } }
 
 /* The cup: steam rises once it has brewed. */
 .motion .cup-tile:not(.is-brewed) .steam { opacity: 0; }

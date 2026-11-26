@@ -5,15 +5,13 @@
 
 /* Color ---------------------------------------------------------------------------------------------
    Every color on the page is one of these. The first block is the same in both themes: the app's Forest gradient
-   (ColorGradient.swift: three colors at 25 degrees, which is 115deg in CSS) and the colors of things that are
-   objects rather than page: a whiteboard, a pointer. */
+   (ColorGradient.swift: three colors at 25 degrees, which is 115deg in CSS). */
 :root {
   --forest-1: #128c54; --forest-2: #40b34d; --forest-3: #9ecc2e;
   --forest: linear-gradient(115deg, var(--forest-1), var(--forest-2), var(--forest-3));
   /* Under text the gradient starts past its darkest green, where dark text reads (5.8:1 or better across a button). */
   --forest-button: linear-gradient(115deg, #2ea350, var(--forest-2) 45%, var(--forest-3));
   --on-accent: #06120b;
-  --board-white: #f7f8f5; --board-black: #151815;
 }
 :root, html[data-theme="dark"] {
   color-scheme: dark;
@@ -28,9 +26,8 @@
   --win-bg: #131a15; --win-bar: #19221c; --win-text: #eceee6; --win-muted: #98a294; --win-line: #f1f0e817;
   --win-accent: #b9c5b1; --win-field: #0e1410; --win-down: #ff9280; --win-edge: #f1f0e826;
   --code-bg: #0c120e; --code-text: #dfe5d8;
-  --key: #1a231d; --key-edge: #040705;
-  --bar: #1b1e1c; --bar-edge: #ffffff1f; --bar-ink: #ffffffd0; --bar-on: #ffffff1c;
-  --spark: #9ecc2e; --spark-core: #f4ffe4; --spark-gold: #ffc24d; --click: #c8ee58;
+  --bar: #1b1e1c;
+  --spark: #9ecc2e; --spark-core: #f4ffe4; --spark-gold: #ffc24d;
   --floor: #000000b3;
   --ink-highlight-blend: screen;
 }
@@ -47,9 +44,8 @@ html[data-theme="light"] {
   --win-bg: #ffffff; --win-bar: #f2f5ef; --win-text: #0c1710; --win-muted: #59665c; --win-line: #0c17101c;
   --win-accent: #56665a; --win-field: #ffffff; --win-down: #b3261a; --win-edge: #0c171030;
   --code-bg: #eef2ea; --code-text: #0c1710;
-  --key: #ffffff; --key-edge: #b9c4b3;
-  --bar: #ffffff; --bar-edge: #0c171033; --bar-ink: #0c1710d0; --bar-on: #0c171016;
-  --spark: #128c54; --spark-core: #40b34d; --spark-gold: #b87a00; --click: #128c54;
+  --bar: #ffffff;
+  --spark: #128c54; --spark-core: #40b34d; --spark-gold: #b87a00;
   --floor: #0c171040;
   --ink-highlight-blend: multiply;
 }
@@ -160,22 +156,25 @@ html[data-theme="light"] .ts-bar, html[data-theme="dark"] .ts-one { opacity: 0; 
 
 /* Hero */
 .hero { padding-top: 28px; }
-.hero-copy { display: grid; gap: 18px; }
-h1 { font-size: clamp(38px, 4.400vw, 62px); line-height: 1; font-weight: 760; letter-spacing: -.042em; text-wrap: wrap; }
-h1 .line { display: block; }
-.lede { max-width: 33em; font-size: 18px; line-height: 1.5; color: var(--muted); }
-.get { display: grid; gap: 12px; margin-top: 6px; }
+.hero-copy { display: grid; gap: 22px; }
+.hero-words { display: grid; gap: 8px; }
+h1 { font-size: clamp(50px, 5.600vw, 78px); line-height: .94; font-weight: 760; letter-spacing: -.046em; }
+.lede { font-size: clamp(18px, 1.650vw, 22px); line-height: 1.4; color: var(--muted); }
+.get { display: grid; gap: 12px; }
 .get-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
-.quiet { margin-left: 8px; font-size: 15.5px; color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 40%, transparent); text-decoration-thickness: 1px; text-underline-offset: .25em; transition: text-decoration-color var(--t-fade-in) var(--fade); }
+.get-foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; font-size: 14.500px; }
+.quiet { font-size: 15px; color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 40%, transparent); text-decoration-thickness: 1px; text-underline-offset: .25em; transition: text-decoration-color var(--t-fade-in) var(--fade); }
 .quiet:hover { text-decoration-color: var(--accent); }
-.free { font-size: 14.500px; color: var(--faint); }
-.try-line { position: relative; max-width: 30em; padding-left: 26px; font-size: 16px; line-height: 1.45; color: var(--text); }
-/* A small arrow that points at the stage. */
-.try-line::before { content: ""; position: absolute; left: 4px; top: .28em; width: 9px; height: 9px; border: solid var(--accent-text); border-width: 0 2px 2px 0; rotate: 45deg; }
+.free { color: var(--faint); }
+
+/* The page's main invitation, right above the stage: a dot that says "live", and the words. */
+.stage-title { display: flex; align-items: center; gap: 12px; margin-top: 30px; font-size: clamp(22px, 2.300vw, 31px); line-height: 1.15; font-weight: 700; letter-spacing: -.03em; text-wrap: wrap; }
+.stage-title i { position: relative; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--on); }
+.stage-title i::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--on); border-radius: 50%; opacity: 0; }
 
 /* The stage: a desk with a fine dotted texture, the sample apps on it, and above them the planes the app adds:
    ink, then the toolbar. The toolbar is docked at the top, so it is in the first screen with the apps under it. */
-.stage { --tilt: 0; --yaw: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; margin-top: 28px; }
+.stage { --tilt: 0; --yaw: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; margin-top: 14px; }
 .stage::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -26px; height: 70px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, var(--floor), transparent); opacity: calc(var(--lift) * .8); pointer-events: none; }
 /* main.js writes the toolbar's tallest height to --tb-h, so opening its properties row moves nothing on the page. */
 .screen { --tb-h: 84px; --tb-top: 10px; --hud-h: 28px; --gap: 12px; --inset: 10px; position: relative; }
@@ -206,20 +205,15 @@ h1 .line { display: block; }
 /* The header's switch is drawn apart from the page during a theme change. Under a grown stage it must not be. */
 :root:has([data-stage]:not([data-stage="small"])) .ts-slot { view-transition-name: none; }
 
-/* What the stage says about itself: the mode it is in, and that it is the visitor's turn. */
+/* What the stage says about itself: the mode it is in. */
 .hud { position: absolute; left: var(--inset); right: var(--inset); top: calc(var(--tb-top) + var(--tb-now, var(--tb-h)) + var(--gap)); z-index: 1; display: flex; align-items: center; gap: 8px; height: var(--hud-h); pointer-events: none; }
 html:not(.js) .hud { display: none; }
-.mode-chip, .turn { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 9px; border-radius: 9px; font: 620 13px/1 var(--sans); white-space: nowrap; }
+.mode-chip { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 9px; border-radius: 9px; font: 620 13px/1 var(--sans); white-space: nowrap; }
 .mode-chip { border: 1px solid var(--line-strong); background: var(--surface-1); color: var(--text); transition: color var(--t-resize) var(--standard), border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
 .mode-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-resize) var(--standard); }
 .mode-chip b { font-weight: inherit; }
 .mode-chip[data-mode="draw"] { border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 16%, var(--surface-1)); color: var(--accent-text); }
 .mode-chip[data-mode="draw"] i { background: var(--on); }
-.chip-keys { display: inline-flex; gap: 3px; margin-left: 2px; }
-.chip-keys kbd.is-down { translate: 0 1px; background: color-mix(in srgb, var(--accent) 30%, var(--key)); color: var(--text); }
-.chip-keys kbd { display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--key); color: var(--muted); font: 500 10.500px/1 var(--mono); }
-.turn { gap: 6px; background: var(--forest-button); color: var(--on-accent); }
-.turn svg { fill: var(--on-accent); }
 
 /* The sample apps, in the colors an app would have in this theme. */
 .windows { position: relative; isolation: isolate; display: grid; gap: 20px; align-items: start; }
@@ -286,8 +280,7 @@ html:not(.js) .hud { display: none; }
 }
 
 .stage figcaption { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; margin-top: 16px; }
-.stage-words { display: grid; gap: 4px; max-width: 44em; font-size: 15.500px; line-height: 1.45; color: var(--muted); }
-.stage-words .note { font-size: 14.500px; color: var(--faint); }
+.stage figcaption .note { max-width: 44em; font-size: 14.500px; line-height: 1.45; color: var(--faint); }
 .stage-controls { display: flex; gap: 8px; }
 
 /* Section headers. Each one is a bar, like the toolbar. With motion it starts as the toolbar's one button and
@@ -303,32 +296,21 @@ html:not(.js) .hud { display: none; }
 .sec-full { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; padding: 16px 16px 17px; }
 .sec-aside { display: flex; align-items: center; gap: 12px; }
 
-/* What you can do. Without motion it is a list of six cards; with motion it becomes the pinned sequence (see Motion). */
+/* What you can do. Without motion it is a list of four cards; with motion it becomes the pinned sequence (see Motion). */
 .items { display: grid; gap: 16px; margin-top: 20px; }
 .item { display: flex; flex-direction: column-reverse; min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
 .item-text { padding: 18px 20px 22px; }
 .item-text p { margin-top: 6px; max-width: 26em; color: var(--muted); }
-.item-meta { display: flex; align-items: center; gap: 8px; margin: 0 0 14px !important; font: 500 12.500px/1 var(--mono); color: var(--faint); }
-.style-chip { padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 7px; color: var(--accent-text); }
-/* A stage in small: the same dotted desk, with one sample window on it. */
-.scene { position: relative; display: grid; place-items: center; min-height: 220px; padding: 18px; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; border-bottom: 1px solid var(--line); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); container-type: inline-size; overflow: hidden; }
+.item-meta { margin: 0 0 14px !important; font: 500 12.500px/1 var(--mono); color: var(--faint); }
+/* A stage in small: the same dotted desk, with one sample window on it, or one of the shared engine's scenes. It is
+   a size container, so what is in it can be sized from both its width and its height. */
+.scene { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; padding: 12px; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; border-bottom: 1px solid var(--line); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); container-type: size; overflow: hidden; }
+/* Where a shared scene goes: the largest 16:10 box that fits in the frame. */
+.scene-slot { position: relative; width: min(100cqw, 100cqh * 1.6); aspect-ratio: 16 / 10; }
 .scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 4.4cqi, 30px)/1.1 "Caveat", "Bradley Hand", cursive; }
-.mini { width: min(25em, 100%); font-size: clamp(10.500px, 3.2cqi, 21px); line-height: 1.3; }
-.mini.wide { width: min(31em, 100%); }
+.mini { width: min(31em, 100%); font-size: clamp(9px, min(3.2cqi, 5.400cqb), 21px); line-height: 1.3; }
 .mini .window-bar { height: 2.4em; }
 .mini .window-bar span { font-size: .88em; }
-.rows { padding: .3em 1.2em .6em; }
-.rows > div { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .72em 0; border-bottom: 1px solid var(--win-line); }
-.rows > div:last-child { border-bottom: 0; }
-.rows dt { color: var(--win-muted); }
-.rows dd { font-weight: 560; }
-.form { display: grid; gap: .7em; padding: 1em 1.3em 1.2em; }
-.form.numbered { padding-left: max(3.4em, 46px); }
-.form p { display: grid; gap: .35em; }
-.form span { font-size: .88em; color: var(--win-muted); }
-.field { display: block; padding: .6em .8em; border: 1px solid var(--win-edge); border-radius: 8px; background: var(--win-field); font-weight: 560; }
-.field.select { background: var(--win-field) linear-gradient(45deg, transparent 50%, var(--win-muted) 50%) no-repeat right 1em top 55% / 5px 5px; }
-.mini-button { justify-self: start; padding: .65em 1em; border-radius: 8px; background: var(--win-text); color: var(--win-bg); font-weight: 620; }
 .mini-report { display: grid; gap: 1em; padding: 1em 1.3em 1.1em; }
 .mini-report dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; }
 .mini-report dt { font-size: .82em; color: var(--win-muted); }
@@ -337,84 +319,6 @@ html:not(.js) .hud { display: none; }
 .mini-plot { position: relative; aspect-ratio: 420 / 120; }
 .mini-plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .mini-plot i { position: absolute; left: 50%; top: 71.700%; width: 0; height: 0; }
-.notes-doc { display: grid; gap: .2em; padding: .7em 1.3em 1em; }
-.notes-doc p { display: grid; gap: .15em; padding: .6em 0; border-bottom: 1px solid var(--win-line); }
-.notes-doc p:last-child { border-bottom: 0; }
-.notes-doc b { justify-self: start; font-weight: 620; }
-.notes-doc span { font-size: .9em; color: var(--win-muted); }
-.system { position: relative; display: grid; grid-template-columns: 30% 1fr 1fr; align-items: center; width: min(34em, 100%); font-size: clamp(10.500px, 3.2cqi, 21px); line-height: 1.3; }
-.mini.phone { width: 100%; border-radius: 1.1em; }
-.mini.phone .window-bar { justify-content: center; border-radius: 1.1em 1.1em 0 0; }
-.cart { display: grid; gap: .5em; padding: .8em .9em 1em; }
-.cart p { display: flex; justify-content: space-between; gap: .5em; font-size: .9em; }
-.cart .mini-button { justify-self: stretch; margin-top: .3em; text-align: center; font-size: .9em; }
-/* Where the script draws the server and the database. */
-.system > i { justify-self: center; width: 46%; aspect-ratio: 1 / 1.05; }
-
-/* Two keys */
-.keys-body { display: grid; gap: 24px; margin-top: 20px; }
-.keys { display: grid; gap: 12px; }
-.combo { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); color: inherit; text-align: left; cursor: pointer; transition: border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
-.combo:hover { border-color: var(--line-strong); }
-.combo:focus-visible { border-radius: var(--radius); }
-.combo[data-combo="draw"].is-on { border-color: color-mix(in srgb, var(--accent) 75%, transparent); background: color-mix(in srgb, var(--accent) 9%, var(--surface-1)); }
-.caps { display: flex; gap: 6px; }
-/* A keycap: flat, with one hard edge under it. Pressed, it goes down onto the edge; let go, it comes back with the app's Pop. */
-.key { display: grid; place-items: center; min-width: 46px; height: 46px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--key); box-shadow: 0 3px 0 var(--key-edge); color: var(--text); font: 500 14px/1 var(--mono); transition: translate var(--t-fade-out) var(--standard), box-shadow var(--t-fade-out) var(--standard); }
-.key.is-down { translate: 0 3px; box-shadow: 0 0 0 var(--key-edge); }
-.combo-label { font: 660 19px/1.2 var(--display); letter-spacing: -.015em; }
-.keys-copy { display: grid; align-content: center; justify-items: start; gap: 10px; }
-.stay { font: 680 clamp(21px, 2.4vw, 27px)/1.2 var(--display); letter-spacing: -.022em; }
-.press { color: var(--muted); }
-.mode-line { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 7px 12px 7px 10px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 14.500px; font-weight: 560; transition: color var(--t-resize) var(--standard), border-color var(--t-resize) var(--standard), background-color var(--t-resize) var(--standard); }
-.mode-line i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-resize) var(--standard); }
-.mode-line[data-mode="draw"] { border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent-text); }
-.mode-line[data-mode="draw"] i { background: var(--on); }
-
-/* There's more in the app */
-.extras { display: grid; gap: 16px; margin-top: 20px; }
-.extra { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
-.extra-text { padding: 16px 20px 20px; }
-.extra-text p { margin-top: 5px; font-size: 16px; line-height: 1.45; color: var(--muted); }
-.il { position: relative; display: grid; place-items: center; border-bottom: 1px solid var(--line); border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); overflow: hidden; }
-.il svg { display: block; width: 100%; height: auto; }
-.il-track { fill: none; stroke: var(--line-strong); stroke-width: 6; }
-.il-arc { fill: none; stroke: url(#forest); stroke-width: 6; stroke-linecap: round; stroke-dasharray: .94 1; }
-.il-time { fill: var(--text); font: 600 27px var(--mono); letter-spacing: -.03em; }
-.il-time:is(.t1, .t2) { opacity: 0; }
-.il-panel { fill: var(--surface-1); stroke: var(--line-strong); }
-.il-faint { fill: none; stroke: color-mix(in srgb, var(--text) 20%, transparent); stroke-width: 3; stroke-linecap: round; }
-.il-dash { fill: color-mix(in srgb, var(--accent) 13%, transparent); stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; }
-.il-card { fill: var(--surface-2); stroke: var(--accent); stroke-width: 1.6; }
-.il-rule { stroke: var(--line-strong); }
-.il-dot { fill: var(--faint); }
-.il-fill { fill: color-mix(in srgb, var(--accent) 26%, transparent); }
-.il-white { fill: var(--board-white); }
-.il-black { fill: var(--board-black); }
-.il-frame { fill: none; stroke: var(--line-strong); }
-.il-ink { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-.il-pop, .il-black { transform-box: fill-box; transform-origin: center; }
-/* The small toolbar. Its frame is two clipped layers, like the section headers', so it can change shape without layout. */
-.il-toolbar { min-height: 150px; padding: 24px 16px; }
-.mt { --one: 106px; position: relative; isolation: isolate; width: min(100%, 356px); height: 46px; color: var(--bar-ink); }
-.mt-chrome { position: absolute; inset: 0; z-index: -1; background: var(--bar-edge); clip-path: inset(0 round 14px); }
-.mt-chrome i { position: absolute; inset: 0; background: var(--bar); clip-path: inset(1px round 13px); }
-.mt-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
-.mt-tool { flex: 0 1 30px; display: grid; place-items: center; min-width: 0; height: 30px; border-radius: 8px; }
-.mt-tool.is-on { background: var(--bar-on); }
-.mt svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-.mt-sep { flex: none; width: 1px; height: 20px; margin: 0 5px; background: var(--bar-edge); }
-.mt-mode { flex: none; display: grid; place-items: center; width: 42px; height: 30px; border-radius: 8px; background: var(--bar-on); }
-.mt-mode b, .mt-status b { width: 6px; height: 6px; border-radius: 50%; background: #8e8e93; }
-.mt-one { gap: 8px; opacity: 0; }
-.mt-one > svg { width: 20px; height: 19px; fill: currentColor; stroke: none; }
-.mt-one .brand-dot { fill: #e9583f; }
-.mt.is-one .mt-chrome { clip-path: inset(1px calc(50% - 53px) round 14px); }
-.mt.is-one .mt-chrome i { clip-path: inset(2px calc(50% - 52px) round 13px); }
-.mt.is-one .mt-bar { opacity: 0; }
-.mt.is-one .mt-one { opacity: 1; }
-.mt-status { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 9px; border-radius: 13px; background: var(--bar-on); font: 600 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-style: normal; }
-
 /* Good to know: three answers in one ruled panel. */
 .answer-grid { display: grid; margin-top: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-1); }
 .answer { padding: 22px 20px 24px; }
@@ -483,45 +387,33 @@ html:not(.js) .hud { display: none; }
   .nav-coffee svg { width: 21px; height: 21px; }
   .site-header nav { gap: 14px; }
   .get-row .button { flex: 1 1 auto; }
-  .quiet { flex-basis: 100%; margin: 4px 0 0; }
+  .get-foot { gap: 4px 14px; font-size: 14px; }
+  .quiet { font-size: 14.500px; }
 }
 @media (min-width: 600px) {
-  .hero { padding-top: 26px; }
-  .stage { margin-top: 28px; }
+  .hero { padding-top: 14px; }
+  .stage-title { margin-top: 28px; }
+  .stage { margin-top: 12px; }
   .screen { --tb-h: 112px; --tb-top: 14px; --gap: 12px; --inset: clamp(20px, 3.2vw, 44px); }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .sec-full { padding: 18px 24px 19px; }
   .items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .keys-body { gap: 28px; }
-  .key { min-width: 54px; height: 54px; padding: 0 15px; border-radius: 12px; font-size: 15.500px; }
-  .combo { padding: 20px 22px; gap: 14px 22px; }
-  .combo-label { font-size: 22px; }
+  .scene { aspect-ratio: 16 / 10; padding: 18px; }
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .platform { padding: 28px 28px 26px; }
   .coffee-full { grid-template-columns: auto minmax(0, 1fr); align-items: center; padding: 36px 40px 38px; }
   .cup-stage { width: 172px; height: 172px; margin: 0; }
 }
 @media (min-width: 760px) {
-  .extras { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .extra.wide { grid-column: 1 / -1; flex-direction: row; align-items: stretch; }
-  .extra.wide .il { flex: 1.7; border-bottom: 0; border-right: 1px solid var(--line); border-radius: calc(var(--radius) - 1px) 0 0 calc(var(--radius) - 1px); }
-  .extra.wide .extra-text { flex: 1; align-self: center; padding: 24px 28px; }
   .answer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .answer { padding: 26px 26px 28px; }
   .answer + .answer { border-top: 0; border-left: 1px solid var(--line); }
 }
-@media (min-width: 900px) {
-  .keys-body { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; }
-  .items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
 @media (min-width: 1000px) {
-  /* The headline and the buttons on the left; what it is and "try it" on the right, each level with its neighbor. */
-  .hero-copy { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "title lede" "get try"; gap: 20px 56px; align-items: end; }
-  .hero-copy h1 { grid-area: title; }
-  .lede { grid-area: lede; padding-bottom: 6px; }
-  .get { grid-area: get; margin-top: 0; }
-  .try-line { grid-area: try; align-self: start; padding-top: 12px; border-top: 1px solid var(--line); }
-  .try-line::before { top: calc(12px + .28em); }
+  /* The words on the left, what to do about them on the right, both resting on one line. */
+  .hero-copy { grid-template-columns: minmax(0, 1fr) auto; gap: 24px 56px; align-items: end; }
+  .get { justify-items: end; padding-bottom: 8px; }
+  .get-row, .get-foot { justify-content: flex-end; }
   .windows { grid-template-columns: minmax(0, 1fr) clamp(240px, 27%, 300px); gap: 24px; }
   .win-chat { display: block; margin-top: 30px; }
   [data-drag] { cursor: grab; touch-action: none; }
@@ -566,14 +458,16 @@ html:not(.js) .hud { display: none; }
    the page above is the final state: a flat stage, a list instead of the sequence, nothing waiting to arrive. */
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
-/* The page arrives: the headline's lines and what follows rise on the app's enter curve, one step apart. The
-   stage's own arrival, the app's Magic show, is main.js's. */
+/* The page arrives: the headline and what follows rise on the app's enter curve, one step apart. The stage's own
+   arrival, the app's Magic show, is main.js's. */
 .motion .site-header { animation: fade-in var(--t-show) var(--fade) backwards; }
-.motion :is(h1 .line, .lede, .get, .try-line) { animation: rise 620ms var(--enter) backwards; animation-delay: calc(var(--n, 0) * var(--step) + 60ms); }
-.motion h1 .line:nth-child(2) { --n: 1; }
-.motion .lede { --n: 2; }
-.motion .get { --n: 3; }
-.motion .try-line { --n: 4; }
+.motion :is(h1, .lede, .get, .stage-title) { animation: rise 620ms var(--enter) backwards; animation-delay: calc(var(--n, 0) * var(--step) + 60ms); }
+.motion .lede { --n: 1; }
+.motion .get { --n: 2; }
+.motion .stage-title { --n: 4; }
+/* The dot beside the stage's heading sends out a ring, slowly: this screen is live. */
+.motion .stage-title i::after { animation: live 2.600s var(--standard) 1.200s infinite; }
+@keyframes live { from { opacity: .75; scale: .55; } 65%, to { opacity: 0; scale: 1.7; } }
 .motion .stage-space { animation: fade-in 420ms var(--fade) 140ms backwards; }
 .motion .stage figcaption { animation: rise 620ms var(--enter) 700ms backwards; }
 .motion .stage:not(.is-ready) .dock { opacity: 0; }
@@ -598,8 +492,6 @@ html:not(.js) .hud { display: none; }
 .motion .board :is(.ink-svg, .ink-over, .ink-ghost) { translate: 0 calc(var(--lift) * -4px); }
 /* A sheet inside a 3D scene needs a place of its own in it, or Blur has nothing to look through. */
 .motion .board, .motion .scene { transform: translateZ(0); }
-.motion .turn svg { animation: nudge 1.6s var(--standard) infinite; }
-@keyframes nudge { 50% { translate: 2px 2px; } }
 
 /* Section headers start as the toolbar's one button. main.js measures the button (--cr and --cb are what is cut
    from the right and the bottom) and grows it into the bar with the Shrink's timing when it is scrolled to. */
@@ -609,15 +501,17 @@ html:not(.js) .hud { display: none; }
 .motion .sec-head.is-shut .sec-full { opacity: 0; }
 .motion .sec-head.is-shut .sec-pill { opacity: 1; }
 
-/* What you can do, pinned. The section is five steps taller than the screen. Its content stays put, and each step
+/* What you can do, pinned. The section is three steps taller than the screen. Its content stays put, and each step
    swaps the example: the old one leaves with its show style's hide, the new one arrives with its own show. */
-.motion .what { --pin-step: 78vh; height: calc(100svh + 5 * var(--pin-step)); margin-top: calc(var(--space) - var(--header-h)); }
+.motion .what { --pin-step: 78vh; height: calc(100svh + 3 * var(--pin-step)); margin-top: calc(var(--space) - var(--header-h)); }
 .motion .what-pin { position: sticky; top: 0; height: 100svh; padding: calc(var(--header-h) + 14px) 0 22px; overflow: clip; }
 .motion .what-wrap { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 18px; height: 100%; }
-.motion .items { position: relative; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); gap: 0; margin: 0; min-height: 0; }
-.motion .item { grid-area: 1 / 1; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 18px; min-height: 0; border: 0; background: none; visibility: hidden; }
+.motion .items { position: relative; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); gap: 0; margin: 0; min-height: 0; container-type: size; }
+.motion .item { grid-area: 1 / 1; display: grid; align-content: center; gap: 18px; min-height: 0; border: 0; background: none; visibility: hidden; }
 .motion .item.is-live { visibility: visible; }
-.motion .item-media { order: -1; min-height: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); }
+/* The picture keeps its shape (4:3 on a phone, 16:10 from there) and is as wide as the room above the words allows. */
+.motion .item-media { order: -1; width: min(100%, (100cqh - 210px) * 1.333); border: 1px solid var(--line-strong); border-radius: var(--radius); }
+@media (min-width: 600px) { .motion .item-media { width: min(100%, (100cqh - 190px) * 1.6); } }
 .motion .item-text { padding: 0 4px 4px; }
 .motion .item-text h3 { font-size: clamp(23px, 2.7vw, 34px); line-height: 1.1; font-weight: 720; letter-spacing: -.03em; }
 .motion .item-text p { margin-top: 8px; font-size: clamp(16.500px, 1.5vw, 19px); line-height: 1.45; }
@@ -629,25 +523,7 @@ html:not(.js) .hud { display: none; }
 .what-fx { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
 @media (min-width: 900px) {
   .motion .item { grid-template: minmax(0, 1fr) / minmax(0, 4fr) minmax(0, 8fr); gap: 48px; align-items: center; }
-  .motion .item-media { order: 0; align-self: stretch; max-height: 620px; margin-block: auto; height: 100%; }
+  .motion .item-media { order: 0; justify-self: end; width: min(100%, 100cqh * 1.6); }
   .motion .item-text { padding: 0 0 0 24px; }
 }
 @media (max-width: 599px) { .steps button { width: 22px; } }
-
-/* A keycap comes back up with the app's Pop (main.js); its plate does not lean, the page stays flat here. */
-.motion .combo[data-combo="draw"].is-on .key { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
-
-/* The small pictures play once when they arrive, and again under the pointer. The ones that pop or change shape
-   are main.js's; these only draw. */
-.motion .extra.is-playing .il-time.t1 { animation: shown .9s steps(1, end); }
-.motion .extra.is-playing .il-time.t2 { animation: shown .9s steps(1, end) .9s; }
-.motion .extra.is-playing .il-time.t3 { animation: unseen 1.8s steps(1, end); }
-.motion .extra.is-playing .il-arc { animation: countdown 1.8s linear backwards; }
-.motion .extra.is-playing .il-dash { animation: fade-in var(--t-show) var(--fade) backwards; }
-.motion .extra.is-playing .il-black { transform-origin: 100% 50%; animation: wipe 620ms var(--standard) 200ms backwards; }
-.motion .extra.is-playing .il-ink { stroke-dasharray: 1; animation: draw 900ms var(--standard) 700ms backwards; }
-@keyframes shown { from, to { opacity: 1; } }
-@keyframes unseen { from, to { opacity: 0; } }
-@keyframes countdown { from { stroke-dasharray: 1 1; } }
-@keyframes wipe { from { transform: scaleX(0); } }
-@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }

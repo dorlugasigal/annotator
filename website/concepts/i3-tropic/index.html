@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Annotator: show people exactly what you mean (Daylight · Tropic)</title>
-  <meta name="description" content="Annotator lets you draw right on top of your screen while you share it. It's free, for Mac and Windows.">
+  <title>Annotator: just circle it (Daylight · Tropic)</title>
+  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#120e14">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -66,8 +66,6 @@
   <!-- Ticks down the left edge: each one goes to a section, and the one you are in is marked. -->
   <nav class="folio" aria-label="Sections">
     <a href="#do" aria-label="What you can do"><i></i></a>
-    <a href="#keys" aria-label="Two keys to remember"><i></i></a>
-    <a href="#also" aria-label="There's more in the app"><i></i></a>
     <a href="#know" aria-label="Good to know"><i></i></a>
     <a href="#coffee" aria-label="Coffee"><i></i></a>
     <a href="#install" aria-label="Get Annotator"><i></i></a>
@@ -77,21 +75,24 @@
     <!-- 1. Hero -->
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero-top">
-        <h1 id="hero-title" data-rise>Show people <em class="mark-word"><span class="visually-hidden">exactly</span><b aria-hidden="true">exactly</b><svg viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9C58 4 122 3 176 5s86 3 121 1"/></svg></em> what you mean.</h1>
-        <div class="hero-side">
-          <p class="lede">Annotator lets you draw right on top of your screen while you share it. Circle the number, point at the button, blur the email you'd rather not show.</p>
-          <div class="get">
-            <a class="btn btn-accent" data-for="mac" href="/downloads/">Download for Mac <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
-            <a class="btn btn-accent" data-for="windows" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
-            <a class="btn btn-try" href="#try" data-try><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><use href="#squiggle"/></svg>Try it here</a>
-            <p class="get-more">
-              <a class="quiet" data-for="mac" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
-              <a class="quiet" data-for="windows" href="/downloads/">Download for Mac</a>
-              <span>It's free, for Mac and Windows.</span>
-            </p>
-          </div>
+        <!-- The verb is the italic word; the last word gets what the headline says, a ring drawn round it. -->
+        <h1 id="hero-title" data-rise>Just <em class="mark-word"><span class="visually-hidden">circle</span><b aria-hidden="true">circle</b></em> <span class="ringed">it.<svg viewBox="0 0 120 100" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M40 15C70 3 111 13 114 47C117 83 80 96 47 92C19 88 4 71 8 45C12 21 43 6 80 11"/></svg></span></h1>
+        <p class="lede">Draw right on your screen while you share it.</p>
+        <div class="get">
+          <a class="btn btn-accent" data-for="mac" href="/downloads/">Download for Mac <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
+          <a class="btn btn-accent" data-for="windows" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
+          <a class="btn btn-try" href="#try" data-try><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><use href="#squiggle"/></svg>Try it here</a>
+          <p class="get-more">
+            <a class="quiet" data-for="mac" href="https://apps.microsoft.com/detail/9NMZ345ZJ6JK">Get it for Windows</a>
+            <a class="quiet" data-for="windows" href="/downloads/">Download for Mac</a>
+            <span>It's free, for Mac and Windows.</span>
+          </p>
         </div>
-        <p class="try-line"><span>Or try it first. The screen below is a working demo, so go ahead and draw on it.</span> <svg viewBox="0 0 34 30" aria-hidden="true"><path pathLength="1" d="M3 4c12-2 22 5 22 20"/><path pathLength="1" d="M18.5 18.5l6.5 6 5-7.5"/></svg></p>
+      </div>
+
+      <!-- The only words that introduce the stage, and the page's invitation: a small arrow goes from them down to it. -->
+      <div class="wrap stage-head">
+        <h2 class="stage-title" id="stage-title">This screen is live. <span class="nb"><em>Draw on it.</em> <svg viewBox="0 0 34 30" aria-hidden="true"><path pathLength="1" d="M3 4c12-2 22 5 22 20"/><path pathLength="1" d="M18.5 18.5l6.5 6 5-7.5"/></svg></span></h2>
       </div>
 
       <figure class="stage" id="try" data-mode="use" aria-label="A working demo of Annotator: three small sample apps under the app's toolbar. Draw on them, or use them.">
@@ -172,29 +173,24 @@
                 </div>
               </section>
             </div>
-            <!-- What floats over the apps: the mode and the demo's own control on the sheet's top edge, the invitation and the app's toolbar. -->
+            <!-- What floats over the apps: the mode and the demo's own control on the sheet's top edge, and the app's toolbar. -->
             <div class="dock" id="dock" data-stage-frame>
               <p class="mode-chip" id="mode-chip">
-                <span data-when="draw"><i aria-hidden="true"></i><b>Drawing</b><kbd>Esc</kbd></span>
-                <span data-when="use"><i aria-hidden="true"></i><b>Using apps</b><kbd data-for="mac">⌃⇧2</kbd><kbd data-for="windows">Ctrl+Shift+2</kbd></span>
+                <span data-when="draw"><i aria-hidden="true"></i><b>Drawing</b></span>
+                <span data-when="use"><i aria-hidden="true"></i><b>Using apps</b></span>
               </p>
               <button type="button" class="chip stage-replay" id="stage-replay" data-stage-ignore><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg><b>Replay</b></button>
-              <p class="your-turn" id="your-turn" hidden>
-                <svg viewBox="0 0 96 44" aria-hidden="true"><path class="yt-line" pathLength="1" d="M5 30c9-16 20-23 28-17 9 7-9 21 2 25 10 4 15-22 27-21 8 1 6 13 18 12"/><path class="yt-pointer" d="M0 0v15.4l4.1-3.7 2.9 6.5 2.9-1.3-2.9-6.3h5.5z"/></svg>
-                <span>Your turn</span>
-              </p>
             </div>
           </div>
         </div>
         <figcaption class="wrap">
-          <p class="stage-line"><b data-when="draw">Draw</b> marks it up. <b data-when="use">Use apps</b> lets you click around underneath. Your drawings stay put.</p>
+          <p class="stage-note">It's a web demo with a few of the tools. The real app works over anything on your screen.</p>
           <button type="button" class="chip" id="stage-done" hidden>Done drawing</button>
-          <p class="stage-note">This is a web demo with a few of the tools. The real app does this over anything on your screen.</p>
         </figcaption>
       </figure>
     </section>
 
-    <!-- 2. What you can do: a book of six spreads, words on the left page and a live picture on the right. -->
+    <!-- 2. What you can do: a book of four spreads, words on the left page and a live picture on the right. -->
     <section class="do" id="do" aria-labelledby="do-title">
       <div class="do-track">
         <div class="do-pin">
@@ -202,26 +198,24 @@
             <i class="rule" aria-hidden="true"></i>
             <h2 id="do-title" data-rise>What you can <em>do</em></h2>
             <ol class="do-tabs" aria-label="Go to">
-              <li><button type="button" data-go="0"><b>1</b><span>Circle and point</span></button></li>
-              <li><button type="button" data-go="1"><b>2</b><span>Box it and label it</span></button></li>
-              <li><button type="button" data-go="2"><b>3</b><span>Hide what's private</span></button></li>
-              <li><button type="button" data-go="3"><b>4</b><span>Guide the eye</span></button></li>
-              <li><button type="button" data-go="4"><b>5</b><span>Number the steps</span></button></li>
-              <li><button type="button" data-go="5"><b>6</b><span>Sketch a system</span></button></li>
+              <li><button type="button" data-go="0"><b>1</b><span>Draw on anything</span></button></li>
+              <li><button type="button" data-go="1"><b>2</b><span>Share just one part</span></button></li>
+              <li><button type="button" data-go="2"><b>3</b><span>Take a break</span></button></li>
+              <li><button type="button" data-go="3"><b>4</b><span>Make it yours</span></button></li>
             </ol>
           </div>
           <div class="wrap book">
             <article class="card">
               <div class="page page-text">
-                <p class="page-no" aria-hidden="true"><b>1</b> / 6</p>
-                <h3>Circle and point</h3>
-                <p>Ring the number, then draw an arrow to the reason.</p>
+                <p class="page-no" aria-hidden="true"><b>1</b> / 4</p>
+                <h3>Draw on anything</h3>
+                <p>Circles, boxes, arrows and notes, right over whatever you're sharing.</p>
               </div>
-              <figure class="page page-fig" aria-label="A ring is drawn around a number, then an arrow from it to a dip in a chart.">
-                <div class="frame"><div class="shot shot-kpi" data-scene="point" aria-hidden="true">
+              <figure class="page page-fig" aria-label="A ring is drawn around a number, then an arrow from it to a dip in a chart, a box around a label and a note beside it.">
+                <div class="frame"><div class="shot shot-kpi" data-scene="draw" aria-hidden="true">
                   <div class="kpi">
-                    <p class="kpi-head"><span>Activation</span><em>6 points down</em></p>
-                    <p class="kpi-num"><b data-t="kpi">41%</b></p>
+                    <p class="kpi-head"><span>Activation</span><em><b data-t="down">6 points down</b></em></p>
+                    <p class="kpi-num"><b data-t="kpi">41%</b><i data-t="note"></i></p>
                     <div class="kpi-plot">
                       <svg viewBox="0 0 300 100" preserveAspectRatio="none"><path class="kpi-area" d="M0 34C34 18 62 16 96 30s52 56 84 56 44-52 120-62V100H0z"/><path class="kpi-curve" d="M0 34C34 18 62 16 96 30s52 56 84 56 44-52 120-62"/></svg>
                       <i data-t="dip"></i>
@@ -231,92 +225,37 @@
               </figure>
             </article>
 
+            <!-- The next three pictures are live scenes from the shared engine; each frame waits for its scene. -->
             <article class="card">
               <div class="page page-text">
-                <p class="page-no" aria-hidden="true"><b>2</b> / 6</p>
-                <h3>Box it and label it</h3>
-                <p>Sketch a rough box and Smart Draw tidies it up. Type a note next to it.</p>
+                <p class="page-no" aria-hidden="true"><b>2</b> / 4</p>
+                <h3>Share just one part</h3>
+                <p>Put one area of a wide screen in its own window, then share that window.</p>
               </div>
-              <figure class="page page-fig" aria-label="A rough box around a button turns into a neat one, then a note is typed next to it.">
-                <div class="frame"><div class="shot shot-pay" data-scene="box" aria-hidden="true">
-                  <div class="pay">
-                    <p class="pay-title">Your order</p>
-                    <p class="pay-row"><span>Standing desk</span><b>$248</b></p>
-                    <p class="pay-row"><span>Delivery</span><b>$24</b></p>
-                    <p class="pay-go"><b class="fake-btn" data-t="pay">Pay now</b></p>
-                  </div>
-                </div><button type="button" class="ctl" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
+              <figure class="page page-fig" aria-hidden="true">
+                <div class="frame"><div class="shot" data-scene="share"></div></div>
               </figure>
             </article>
 
             <article class="card">
               <div class="page page-text">
-                <p class="page-no" aria-hidden="true"><b>3</b> / 6</p>
-                <h3>Hide what's private</h3>
-                <p>Blur an email while you share. It's a cover, not real redaction, so close the truly secret stuff first.</p>
+                <p class="page-no" aria-hidden="true"><b>3</b> / 4</p>
+                <h3>Take a break</h3>
+                <p>A big countdown on the screen, so everyone knows when to come back.</p>
               </div>
-              <figure class="page page-fig" aria-label="An email address and a card number are blurred.">
-                <div class="frame"><div class="shot shot-record" data-scene="blur" aria-hidden="true">
-                  <div class="rec">
-                    <p class="rec-head"><b class="avatar">D</b><span><strong>Dana Whitfield</strong><em>Customer</em></span></p>
-                    <dl>
-                      <div><dt>Email</dt><dd><span data-t="email">dana.w@example.com</span></dd></div>
-                      <div><dt>Card</dt><dd><span data-t="card">4242 4242 4242 4242</span></dd></div>
-                      <div><dt>Plan</dt><dd>Team, yearly</dd></div>
-                    </dl>
-                  </div>
-                </div><button type="button" class="ctl" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
+              <figure class="page page-fig" aria-hidden="true">
+                <div class="frame"><div class="shot" data-scene="break"></div></div>
               </figure>
             </article>
 
             <article class="card">
               <div class="page page-text">
-                <p class="page-no" aria-hidden="true"><b>4</b> / 6</p>
-                <h3>Guide the eye</h3>
-                <p>Spotlight dims everything but your pointer. There's a laser pointer and zoom too.</p>
+                <p class="page-no" aria-hidden="true"><b>4</b> / 4</p>
+                <h3>Make it yours</h3>
+                <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it's in the way.</p>
               </div>
-              <figure class="page page-fig" aria-label="The screen dims around the pointer as it moves over six pictures.">
-                <div class="frame"><div class="shot shot-sheet" data-scene="spotlight" aria-hidden="true">
-                  <div class="sheet">
-                    <i data-t="s1"><svg viewBox="0 0 80 50" preserveAspectRatio="none"><rect width="80" height="50" fill="#f3a977"/><circle cx="57" cy="19" r="7" fill="#ffe7bd"/><path d="M0 50V32l18-13 16 12 12-8 34 22v5z" fill="#6a3f86"/><path d="M0 50V40l24-12 20 13 14-7 22 12v4z" fill="#3a2452"/></svg></i>
-                    <i data-t="s2"><svg viewBox="0 0 80 50" preserveAspectRatio="none"><rect width="80" height="50" fill="#a9d8ee"/><circle cx="22" cy="15" r="7" fill="#fff7dc"/><path d="M0 28c14-5 26 4 40 0s26-5 40 0v22H0z" fill="#2478b4"/><path d="M0 38c14-4 26 3 40 0s26-4 40 0v12H0z" fill="#15507f"/></svg></i>
-                    <i data-t="s3"><svg viewBox="0 0 80 50" preserveAspectRatio="none"><rect width="80" height="50" fill="#0c1730"/><path d="M-4 30C16 6 34 30 52 12s24 2 34-6" fill="none" stroke="#35d4a2" stroke-width="7" stroke-linecap="round" opacity=".7"/><path d="M-4 38C18 16 36 36 54 20s22 4 32-4" fill="none" stroke="#7d6cf0" stroke-width="5" stroke-linecap="round" opacity=".6"/><path d="M0 50V44l20-6 22 7 18-5 20 6v4z" fill="#070c18"/></svg></i>
-                    <i data-t="s4"><svg viewBox="0 0 80 50" preserveAspectRatio="none"><rect width="80" height="50" fill="#f6ecd9"/><path d="M12 50V28l10-18 10 18v22zM30 50V32l9-16 9 16v18zM46 50V26l11-20 11 20v24z" fill="#1c7a50"/><path d="M0 50v-6h80v6z" fill="#12583a"/></svg></i>
-                    <i data-t="s5"><svg viewBox="0 0 80 50" preserveAspectRatio="none"><rect width="80" height="50" fill="#fbe3e6"/><circle cx="20" cy="18" r="9" fill="#ee6f93"/><circle cx="46" cy="30" r="12" fill="#f39ab2"/><circle cx="66" cy="14" r="7" fill="#e85883"/><circle cx="20" cy="18" r="2.5" fill="#f7c948"/><circle cx="46" cy="30" r="3.5" fill="#f7c948"/><circle cx="66" cy="14" r="2" fill="#f7c948"/></svg></i>
-                    <i data-t="s6"><svg viewBox="0 0 80 50" preserveAspectRatio="none"><rect width="80" height="50" fill="#221a1d"/><rect x="6" y="8" width="18" height="14" rx="2" fill="#e2573d"/><rect x="27" y="8" width="20" height="14" rx="2" fill="#f2b33d"/><rect x="50" y="8" width="24" height="14" rx="2" fill="#2f9e8f"/><rect x="6" y="26" width="26" height="16" rx="2" fill="#7a4bc0"/><rect x="35" y="26" width="16" height="16" rx="2" fill="#f0e6d6"/><rect x="54" y="26" width="20" height="16" rx="2" fill="#ee6f93"/></svg></i>
-                  </div>
-                </div><button type="button" class="ctl" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
-              </figure>
-            </article>
-
-            <article class="card">
-              <div class="page page-text">
-                <p class="page-no" aria-hidden="true"><b>5</b> / 6</p>
-                <h3>Number the steps</h3>
-                <p>Click, click, click. The numbers count up on their own.</p>
-              </div>
-              <figure class="page page-fig" aria-label="Three clicks put the numbers 1, 2 and 3 beside the steps of a dialog.">
-                <div class="frame"><div class="shot shot-steps" data-scene="steps" aria-hidden="true">
-                  <div class="dlg">
-                    <p class="dlg-title">Export report</p>
-                    <p class="dlg-row"><i data-t="p1"></i><span>Format</span><b>PDF</b></p>
-                    <p class="dlg-row"><i data-t="p2"></i><span>Pages</span><b>All pages</b></p>
-                    <p class="dlg-row dlg-go"><i data-t="p3"></i><b class="fake-btn">Export</b></p>
-                  </div>
-                </div><button type="button" class="ctl" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
-              </figure>
-            </article>
-
-            <article class="card">
-              <div class="page page-text">
-                <p class="page-no" aria-hidden="true"><b>6</b> / 6</p>
-                <h3>Sketch a system</h3>
-                <p>Boxes, arrows, and ready-made icons for servers and databases.</p>
-              </div>
-              <figure class="page page-fig" aria-label="Two boxes and a circle are drawn, joined with arrows and labelled.">
-                <div class="frame"><div class="shot shot-board" data-scene="system" aria-hidden="true">
-                  <i class="node" data-t="n1"></i><i class="node" data-t="n2"></i><i class="node" data-t="n3"></i>
-                </div><button type="button" class="ctl" aria-label="Play this again"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg></button></div>
+              <figure class="page page-fig" aria-hidden="true">
+                <div class="frame"><div class="shot" data-scene="toolbar"></div></div>
               </figure>
             </article>
           </div>
@@ -324,80 +263,7 @@
       </div>
     </section>
 
-    <!-- 3. Two keys -->
-    <section class="sec keys wrap" id="keys" aria-labelledby="keys-title" data-mode="use">
-      <i class="rule" aria-hidden="true"></i>
-      <div class="sec-head">
-        <h2 id="keys-title" data-rise>Two keys to <em>remember</em></h2>
-      </div>
-      <div class="keys-body">
-        <div class="keys-rows rise-group">
-          <div class="keys-row">
-            <button type="button" class="keyset" data-set="draw" aria-label="Control Shift 2: draw on the demo">
-              <span class="key key-wide" data-key="Control"><b><span data-for="mac">Control</span><span data-for="windows">Ctrl</span></b></span>
-              <span class="key key-wide" data-key="Shift"><b>Shift</b></span>
-              <span class="key" data-key="Digit2"><b>2</b></span>
-            </button>
-            <p>to draw.</p>
-          </div>
-          <div class="keys-row">
-            <button type="button" class="keyset" data-set="use" aria-label="Escape: get back to the sample apps">
-              <span class="key key-wide" data-key="Escape"><b>Esc</b></span>
-            </button>
-            <p>to get back to your app.</p>
-          </div>
-          <div class="keys-row keys-row-last">
-            <p>Your drawings stay where they are.</p>
-          </div>
-        </div>
-        <p class="keys-note">Go on, press them. They work on this page.</p>
-        <p class="mode-line" aria-live="polite"><span data-when="draw">Right now you're <b>drawing</b>.</span><span data-when="use">Right now you're <b>using the app</b>.</span></p>
-      </div>
-    </section>
-
-    <!-- 4. More in the app -->
-    <section class="sec also wrap" id="also" aria-labelledby="also-title">
-      <i class="rule" aria-hidden="true"></i>
-      <div class="sec-head">
-        <h2 id="also-title" data-rise>There's <em>more</em> in the app</h2>
-      </div>
-      <ul class="also-grid" data-flights>
-        <li class="also-item">
-          <div class="ill" aria-hidden="true">
-            <div class="bt-screen"><span class="bt-title">Coffee break</span><span class="bt-time" data-timer>10:00</span><span class="bt-bar"><i></i></span></div>
-          </div>
-          <h3>Break timer</h3>
-          <p>A big countdown for the coffee break.</p>
-        </li>
-        <li class="also-item">
-          <div class="ill" aria-hidden="true">
-            <svg viewBox="0 0 240 150"><rect class="ill-screen" x="22" y="26" width="136" height="98" rx="5"/><path class="ill-lines" d="M38 46h60M38 60h36M38 104h52"/><rect class="sr-fill" x="46" y="68" width="68" height="26" rx="2"/><rect class="sr-region" x="40" y="62" width="80" height="38" rx="3"/><g class="sr-window"><rect class="ill-screen" x="126" y="54" width="96" height="68" rx="5"/><path class="ill-lines" d="M136 66h6M146 66h6"/><rect class="sr-fill" x="140" y="80" width="68" height="26" rx="2"/></g></svg>
-          </div>
-          <h3>Share region</h3>
-          <p>Share just one part of a wide screen.</p>
-        </li>
-        <li class="also-item">
-          <div class="ill" aria-hidden="true">
-            <svg viewBox="0 0 240 150"><rect class="ill-screen" x="40" y="24" width="160" height="102" rx="5"/><path class="ill-lines wb-lines" d="M58 46h70M58 62h44M58 102h84"/><rect class="wb-board wb-white" x="41" y="25" width="158" height="100" rx="4"/><rect class="wb-board wb-black" x="41" y="25" width="158" height="100" rx="4"/><path class="wb-mark" d="M96 76c2-14 44-16 48-2s-42 20-48 2zM150 92l22 14M172 106l-9-1M172 106l-3-9"/></svg>
-          </div>
-          <h3>Whiteboard and blackboard</h3>
-          <p>A clean board when you need room.</p>
-        </li>
-        <li class="also-item">
-          <!-- The app's own shrink: the bar turns into one button and back. main.js moves it. -->
-          <div class="ill" aria-hidden="true">
-            <div class="tb" id="tb-morph">
-              <span class="tb-full"><i></i><i></i><i class="tb-on"></i><i></i><i></i><i></i><u></u><i class="tb-wide"></i></span>
-              <span class="tb-one"><i class="tb-on"></i><u></u></span>
-            </div>
-          </div>
-          <h3>A toolbar that's yours</h3>
-          <p>Add tools, remove tools, or shrink it to one button.</p>
-        </li>
-      </ul>
-    </section>
-
-    <!-- 5. Good to know -->
+    <!-- 3. Good to know -->
     <section class="sec know wrap" id="know" aria-labelledby="know-title">
       <i class="rule" aria-hidden="true"></i>
       <div class="sec-head">
@@ -419,7 +285,7 @@
       </dl>
     </section>
 
-    <!-- 6. Coffee -->
+    <!-- 4. Coffee -->
     <section class="coffee wrap" id="coffee" aria-labelledby="coffee-title">
       <i class="rule" aria-hidden="true"></i>
       <div class="coffee-copy">
@@ -445,7 +311,7 @@
       </div>
     </section>
 
-    <!-- 7. Install -->
+    <!-- 5. Install -->
     <section class="sec install wrap" id="install" aria-labelledby="install-title">
       <i class="rule" aria-hidden="true"></i>
       <div class="sec-head">
@@ -484,7 +350,7 @@
     </section>
   </main>
 
-  <!-- 8. Footer -->
+  <!-- 6. Footer -->
   <footer class="site-footer">
     <div class="wrap">
       <i class="rule" aria-hidden="true"></i>
@@ -497,7 +363,7 @@
         <a href="https://buymeacoffee.com/dorlugasigal">Buy me a coffee</a>
       </nav>
       <p class="sign">Made by Dor.</p>
-      <p>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</p>
+      <p>Open source under Apache 2.0, with no account and nothing to pay for. Coffee's optional.</p>
     </div>
   </footer>
 

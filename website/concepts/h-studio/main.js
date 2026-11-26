@@ -1,6 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
-import { css as CURVE, toolbarMorph, poseKeyframes, clickPulse } from "/concepts/shared/app-motion.js";
+import { css as CURVE, clickPulse } from "/concepts/shared/app-motion.js";
 
 const root = document.documentElement;
 const motion = root.classList.contains("motion");
@@ -243,16 +243,12 @@ if (motion) {
 }
 const engage = (on) => { if (engaged !== on) { engaged = on; schedule(); } };
 
-// Draw or Use apps. The stage says which, the sample app only answers in Use apps, and the two keys further down
-// show the same thing.
-const modeChip = $("#mode-chip"), modeLine = $("#mode-line"), drawCombo = $('[data-combo="draw"]'), done = $("#done");
+// Draw or Use apps. The stage says which, and the sample app only answers in Use apps.
+const modeChip = $("#mode-chip"), done = $("#done");
 function showMode(mode) {
   const drawing = mode === "draw";
   modeChip.dataset.mode = mode;
   $("#mode-chip-name").textContent = drawing ? "Drawing" : "Using apps";
-  modeLine.dataset.mode = mode;
-  modeLine.lastElementChild.textContent = drawing ? "Right now you\u2019re drawing." : "Right now you\u2019re using the app.";
-  drawCombo.classList.toggle("is-on", drawing);
   report.inert = drawing;
   showDone();
 }
@@ -325,25 +321,13 @@ async function press(element) {
 // The scripted demo ---------------------------------------------------------------------------------
 // One round tells the app's idea: draw, then use the app underneath while the drawings stay, then draw again.
 // It runs while the stage is on screen and stops for good the moment the visitor does anything on the stage.
-const replay = $("#replay"), turn = $("#turn"), onStage = watcher(screen, .25);
-const demo = { run: 0, cut: 0, playing: false, rounds: 0, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, hid: false };
-let hasDrawn = false, joined = false;
+const replay = $("#replay"), onStage = watcher(screen, .25);
+const demo = { run: 0, cut: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, hid: false };
 function showControl() {
   replay.hidden = false;
   replay.classList.toggle("is-off", !demo.playing);
   replay.lastElementChild.textContent = demo.playing ? "Pause" : "Replay";
   showDone();
-}
-// "Your turn" shows once the demo has been through a round, or is not running, until the visitor has joined in.
-function showTurn() {
-  const on = !hasDrawn && !joined && (demo.rounds > 0 || !demo.playing);
-  if (on && turn.hidden) {
-    turn.hidden = false;
-    // It arrives the way things arrive in the app with the Pop style.
-    if (motion) playKeys(turn, poseKeyframes("pop", { appearing: true, annotation: false }));
-  }
-  turn.classList.toggle("is-on", on);
-  if (hasDrawn || joined) turn.hidden = true;
 }
 function forget() {
   for (const id of demo.ids) ink.remove(id);
@@ -375,7 +359,6 @@ function stopDemo() {
   stage.classList.remove("is-demo");
   tidy();
   showControl();
-  showTurn();
 }
 async function draw(steps, signal) {
   demo.picked = null;
@@ -422,8 +405,6 @@ async function round(ok, signal) {
   pointerGive();
   await ok(draw([steps.label, steps.blur], signal));
   ink.hideGhost();
-  demo.rounds += 1;
-  showTurn();
   await ok(wait(3000));
   await ok(hideAll());
   await ok(wait(700));
@@ -433,7 +414,6 @@ async function playDemo() {
   demo.playing = true;
   stage.classList.add("is-demo");
   showControl();
-  showTurn();
   await demo.busy;
   let release;
   demo.busy = new Promise((done) => { release = done; });
@@ -457,13 +437,13 @@ async function playDemo() {
   } finally { release(); }
 }
 ink.on("tool", (tool) => { if (!byScript) demo.picked = tool; });
-ink.on("mark", () => { hasDrawn = true; stopDemo(); showTurn(); });
+ink.on("mark", () => stopDemo());
 ink.on("shortcut", () => { if (!byScript) stopDemo(); });
 ink.on("mode", (mode) => {
   showMode(mode);
   if (byScript) return;
   if (mode === "draw") stopDemo();
-  // Drawing chosen from further down the page (the two keys) leaves the stage alone until it is on screen.
+  // Drawing chosen while the stage is off screen (the app's keys work anywhere) leaves it alone until it is in view.
   if (mode === "draw" ? onStage.near : !onStage.near) engage(mode === "draw");
 });
 ink.toolbar.addEventListener("pointerdown", () => { stopDemo(); engage(true); }, true);
@@ -485,15 +465,14 @@ if (window.IntersectionObserver) new IntersectionObserver(([entry]) => {
 // brings it into view and opens it up once the pointer has lifted.
 function tryIt() {
   stopDemo();
-  showTurn();
   ink.setTool("pen");
   engage(true);
   stage.classList.remove("is-cued");
   void stage.offsetWidth;
   stage.classList.add("is-cued");
 }
-// Joining in ends the script, retires "Your turn" and lays the screen flat: the frame grows only once it is.
-growing.on("join", () => { joined = true; stopDemo(); showTurn(); engage(true); });
+// Joining in ends the script and lays the screen flat: the frame grows only once it is.
+growing.on("join", () => { stopDemo(); engage(true); });
 for (const control of $$("[data-try]")) control.addEventListener("click", (e) => { e.preventDefault(); tryIt(); });
 // While the demo plays, the ink lets presses through. A press on the sample app in Use apps uses the app; a
 // press anywhere else on the stage hands it over, ready to draw. A touch that scrolls the page is left alone.
@@ -516,7 +495,6 @@ Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).
     const steps = heroSteps();
     await ink.perform([steps.ring, steps.arrow, steps.label, steps.blur], { cursor: false });
     stage.classList.remove("is-demo");
-    showTurn();
     return;
   }
   await wait(1250);
@@ -531,14 +509,13 @@ Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).
 // everything that keeps colors of its own: the toolbar and the browser's own chrome.
 const THEME_KEY = "annotator.concept-h.theme";
 const themeSwitch = $("#theme-switch"), coin = $(".coin", themeSwitch), coinLift = $(".coin-lift", themeSwitch), themeMeta = $('meta[name="theme-color"]');
-let theme = root.dataset.theme === "light" ? "light" : "dark", turns = theme === "light" ? 1 : 0, miniBar = null, miniPill = null;
+let theme = root.dataset.theme === "light" ? "light" : "dark", turns = theme === "light" ? 1 : 0;
 function showTheme(next) {
   theme = next;
   root.dataset.theme = next;
   themeSwitch.setAttribute("aria-checked", String(next === "light"));
   themeMeta.content = token("--page");
   ink.setAppearance(next);
-  for (const bar of [miniBar, miniPill]) if (bar) bar.dataset.appearance = next;
 }
 // The colors change in one step, with nothing easing, so a view transition's new picture is the new theme whole.
 function swapColors(next) {
@@ -594,9 +571,10 @@ addEventListener("click", (e) => {
 showTheme(theme);
 
 // What you can do ---------------------------------------------------------------------------------
-// Each card has a small sample screen that a pointer draws on, again and again while the card is the one in front.
+// The first card has a small sample screen that a pointer draws on, again and again while the card is in front. The
+// other three are frames for the shared engine's live scenes (data-scene in index.html).
 const what = $("#what"), deck = $("#deck"), tiles = $$(".tile", deck), deckSpace = $(".deck-space"), stepsBar = $("#deck-steps"), clipsToggle = $("#clips-toggle");
-function createScene(surface, { play, still, reset, leaves = "fade", keepsPointer = false }) {
+function createScene(surface, { play, still, leaves = "fade" }) {
   const scene = createInk({ surface, interactive: false, size: 3, gradient: "ocean" });
   const ctx = { scene, surface, at: anchorsFor(scene, surface), ok: (step) => step, signal: undefined };
   let active = false, running = false, pass = 0, controller = null;
@@ -604,9 +582,8 @@ function createScene(surface, { play, still, reset, leaves = "fade", keepsPointe
     scene.hideGhost();
     scene.marks().map((mark) => mark.id).forEach((id) => scene.remove(id));
     if (scene.state.hidden) scene.setHidden(false, { animate: false });
-    reset?.(ctx);
   }
-  // The drawings leave the way they leave in the app, each scene in one of the app's styles.
+  // The drawings leave the way they leave in the app, in one of the app's styles.
   const empty = () => (appMoves ? scene.setHidden(true, { style: leaves }) : leave(scene, scene.marks().map((mark) => mark.id)));
   async function run() {
     if (running) return;
@@ -619,7 +596,7 @@ function createScene(surface, { play, still, reset, leaves = "fade", keepsPointe
       try {
         await ctx.ok(wait(350));
         await ctx.ok(play(ctx));
-        if (!keepsPointer) scene.hideGhost();
+        scene.hideGhost();
         await ctx.ok(wait(2800));
         await ctx.ok(empty());
       } catch (error) { if (error !== STOP) throw error; }
@@ -632,115 +609,24 @@ function createScene(surface, { play, still, reset, leaves = "fade", keepsPointe
   if (!motion) (still || play)(ctx);
   return { set(on) { if (!motion || on === active) return; active = on; if (on) run(); else { pass += 1; controller?.abort(); } } };
 }
-// A box drawn by hand: a little off at every point, and not quite closed.
-function roughBox({ x, y, w, h }) {
-  const corners = [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]], out = [];
-  corners.slice(0, -1).forEach((from, side) => {
-    const to = corners[side + 1];
-    for (let i = 0; i < 7; i++) {
-      const t = i / 7, wobble = (n) => Math.sin((side * 7 + i) * 2.4 + n) * 2.6;
-      out.push([from[0] + (to[0] - from[0]) * t + wobble(1), from[1] + (to[1] - from[1]) * t + wobble(4)]);
-    }
-  });
-  out.push([x + 5, y - 4]);
-  return out;
-}
 const play = (scene, steps, signal) => scene.perform(steps, { cursor: motion, signal });
-const sceneOf = (id) => $(`#scene-${id}`);
-const scenes = new Map([
-  ["point", {
-    leaves: "pop",
-    play: ({ scene, at, surface, signal }) => {
-      const ring = $("[data-ring]", surface), peak = $("[data-peak]", surface);
-      return play(scene, [
-        { tool: "ellipse", around: at.box(ring), get padX() { return ring.offsetHeight * .5; }, get padY() { return ring.offsetHeight * .3; }, duration: 700, pause: 220 },
-        { tool: "arrow", from: () => { const r = at.rect(ring); return [r.x + r.w + r.h * .75, r.y + r.h * .6]; }, to: () => { const p = at.rect(peak); return [p.x + p.w / 2 - 2, p.y - 7]; }, bend: .3, duration: 700 },
-      ], signal);
-    },
-  }],
-  ["private", {
-    leaves: "fade",
-    play: ({ scene, at, surface, signal }) => play(scene, $$("[data-blur]", surface).map((element) => ({ tool: "blur", over: at.box(element), padX: 6, padY: 3, duration: 600, pause: 320 })), signal),
-  }],
-  ["smart", (() => {
-    const pad = (surface) => Math.max(5, surface.clientWidth * .014);
-    const neat = (surface, at) => ({ tool: "rect", around: at.box($("[data-box]", surface)), get padX() { return pad(surface); }, padY: 4, rough: 0, round: true, duration: 0 });
-    const words = (surface, at) => ({ tool: "text", text: "add tax here?", color: OCEAN, speed: 42, at: () => { const b = at.rect($("[data-box]", surface)); return [b.x + b.w + pad(surface) * 2.4, b.y + b.h / 2 - measureInk(sceneInk("smart"), "a").h / 2]; } });
-    return {
-      leaves: "focus",
-      // The pen draws a rough box; Smart Draw makes it a neat rectangle; then a few words go next to it.
-      play: async ({ scene, at, surface, ok, signal }) => {
-        const b = at.rect($("[data-box]", surface)), p = pad(surface);
-        const rough = scene.add({ type: "pen", points: roughBox({ x: b.x - p, y: b.y - 4, w: b.w + p * 2, h: b.h + 8 }), size: 3 });
-        const path = $(`[data-id="${rough.id}"] .ink-stroke`, scene.layer), length = path.getTotalLength();
-        path.style.strokeDasharray = `${length} ${length}`;
-        path.style.strokeDashoffset = length;
-        await ok(scene.moveGhost([b.x - p, b.y - 4]));
-        await ok(tween(1000, (k) => {
-          path.style.strokeDashoffset = length * (1 - k);
-          const q = path.getPointAtLength(length * k);
-          scene.placeGhost([q.x, q.y]);
-        }));
-        await ok(wait(240));
-        scene.remove(rough.id);
-        const [box] = await scene.perform([neat(surface, at)], { cursor: false });
-        $(`[data-id="${box.id}"]`, scene.layer)?.classList.add("is-snapped");
-        await ok(wait(420));
-        await ok(play(scene, [words(surface, at)], signal));
-      },
-      still: ({ scene, at, surface }) => scene.perform([neat(surface, at), words(surface, at)], { cursor: false }),
-    };
-  })()],
-  ["steps", {
-    leaves: "drop",
-    play: ({ scene, at, surface, signal }) => play(scene, $$("[data-step]", surface).map((element) => ({ tool: "counter", at: at.point(element, 0, .5, -22), color: OCEAN, pause: 300 })), signal),
-  }],
-  ["spot", (() => {
-    // Spotlight follows the pointer. Here the pointer is the scene's own, so the scene tells the light where it is.
-    const light = (scene, [x, y]) => { scene.layer.style.setProperty("--px", `${x}px`); scene.layer.style.setProperty("--py", `${y}px`); };
-    const spots = (surface, at) => $$("[data-spot]", surface).map((element) => at.point(element, .5, .5)());
-    const on = (scene, surface, where) => {
-      scene.setStyle("spotlight", { radius: Math.round(surface.clientWidth * .065) });
-      light(scene, where);
-      scene.setSpotlight(true);
-      scene.layer.classList.add("has-pointer");
-    };
-    return {
-      keepsPointer: true,
-      play: async ({ scene, at, surface, ok }) => {
-        const [first, second] = spots(surface, at);
-        scene.placeGhost([first[0] + 8, first[1] + 6]);
-        on(scene, surface, first);
-        await ok(wait(1100));
-        await ok(tween(900, (k) => {
-          const where = [first[0] + (second[0] - first[0]) * k, first[1] + (second[1] - first[1]) * k];
-          light(scene, where);
-          scene.placeGhost([where[0] + 8, where[1] + 6]);
-        }));
-      },
-      still: ({ scene, at, surface }) => {
-        const place = () => on(scene, surface, spots(surface, at)[1]);
-        place();
-        new ResizeObserver(place).observe(surface);
-      },
-      reset: ({ scene }) => scene.setSpotlight(false),
-    };
-  })()],
-  ["system", {
-    leaves: "corners",
-    play: ({ scene, at, surface, signal }) => {
-      const nodes = $$("[data-node]", surface);
-      const name = (node) => ({ tool: "text", text: node.dataset.name, color: OCEAN, speed: 34, pause: 80, at: () => { const r = at.rect(node), size = measureInk(scene, node.dataset.name); return [r.x + (r.w - size.w) / 2, r.y + (r.h - size.h) / 2]; } });
-      const join = (from, to) => ({ tool: "arrow", from: at.point(from, 1, .5, 7), to: at.point(to, 0, .5, -7), bend: .14, duration: 420, pause: 80 });
-      return play(scene, nodes.flatMap((node, i) => [
-        ...(i ? [join(nodes[i - 1], node)] : []),
-        { tool: node.dataset.node, around: at.box(node), pad: 0, duration: 520 },
-        name(node),
-      ]), signal);
-    },
-  }],
-].map(([id, definition]) => [sceneOf(id).closest(".tile"), createScene(sceneOf(id), definition)]));
-function sceneInk(id) { return { layer: $(".ink-layer", sceneOf(id)) }; }
+// Draw on anything: a ring round the number, a box round the tall bar, an arrow from one to the other, and a note.
+// The ring, the box and the arrow name no color, so they are drawn in the scene's gradient, the page's own.
+const drawScene = $("#scene-draw");
+const drawSteps = ({ at, surface }) => {
+  const ring = $("[data-ring]", surface), peak = $("[data-peak]", surface), pad = () => Math.max(4, surface.clientWidth * .011);
+  return [
+    { tool: "ellipse", around: at.box(ring), get padX() { return ring.offsetHeight * .5; }, get padY() { return ring.offsetHeight * .3; }, duration: 700, pause: 200 },
+    { tool: "rect", around: at.box(peak), get padX() { return pad(); }, get padY() { return pad(); }, duration: 560, pause: 200 },
+    { tool: "arrow", from: () => { const r = at.rect(ring); return [r.x + r.w + r.h * .75, r.y + r.h * .6]; }, to: () => { const p = at.rect(peak); return [p.x + p.w / 2 - 2, p.y - pad() - 8]; }, bend: .3, duration: 640, pause: 200 },
+    { tool: "text", text: "ask Maya", color: OCEAN, speed: 42, at: () => { const p = at.rect(peak); return [p.x + p.w + pad() * 2.6, p.y + pad()]; } },
+  ];
+};
+const scenes = new Map([[drawScene.closest(".tile"), createScene(drawScene, {
+  leaves: "pop",
+  play: (ctx) => play(ctx.scene, drawSteps(ctx), ctx.signal),
+  still: (ctx) => ctx.scene.perform(drawSteps(ctx), { cursor: false }),
+})]]);
 
 let examplesPaused = !motion, front = -1;
 const refreshTiles = () => tiles.forEach((tile, i) => scenes.get(tile)?.set(!examplesPaused && i === front));
@@ -753,7 +639,8 @@ if (motion) {
   label();
   clipsToggle.addEventListener("click", () => { examplesPaused = !examplesPaused; label(); refreshTiles(); });
 
-  // The deck. The section is five steps taller than the screen; each step brings the next card to the front.
+  // The deck. The section is one step taller than the screen for every card after the first; each step brings the
+  // next card to the front.
   const last = tiles.length - 1;
   stepsBar.hidden = false;
   const stepButtons = tiles.map((tile, i) => {
@@ -834,25 +721,9 @@ if (motion && hovers) {
   }
 }
 
-// Two keys ------------------------------------------------------------------------------------------
-const caps = Object.fromEntries($$("[data-key]").map((key) => [key.dataset.key, key]));
-const capFor = (e) => (e.key === "Control" ? caps.control : e.key === "Shift" ? caps.shift : e.code === "Digit2" ? caps[2] : e.key === "Escape" ? caps.esc : null);
-addEventListener("keydown", (e) => capFor(e)?.classList.add("is-down"));
-addEventListener("keyup", (e) => capFor(e)?.classList.remove("is-down"));
-addEventListener("blur", () => Object.values(caps).forEach((key) => key.classList.remove("is-down")));
-for (const combo of $$(".combo")) {
-  combo.addEventListener("click", () => {
-    const keys = $$(".key", combo);
-    keys.forEach((key, i) => setTimeout(() => key.classList.add("is-down"), i * 45));
-    setTimeout(() => keys.forEach((key) => key.classList.remove("is-down")), 190 + keys.length * 45);
-    stopDemo();
-    // As with the keys themselves: Control-Shift-2 only ever starts drawing, and Esc goes back to the app.
-    ink.setMode(combo.dataset.combo === "draw" ? "draw" : "use");
-  });
-}
 showMode(ink.state.mode);
 
-// Planes that follow the scroll: the keys' plates and the cup ----------------------------------------------
+// A plane that follows the scroll: the cup -------------------------------------------------------------------
 if (motion) {
   for (const element of $$("[data-scroll]")) {
     const through = follow((p) => element.style.setProperty("--p", p.toFixed(4)));
@@ -863,60 +734,6 @@ if (motion) {
     });
   }
 }
-
-// Also in the app: the real toolbar, small ------------------------------------------------------------------
-// A copy of the page's own toolbar, as it looks at its full size, shown small. It shrinks to its one button and
-// grows back, in the app's times (0.30 s to shrink, 0.34 s to grow).
-const miniBox = $("#mini-bar"), miniFit = $("#mini-bar-fit");
-function buildMini() {
-  const copy = (collapsed) => {
-    const bar = ink.toolbar.cloneNode(true);
-    bar.removeAttribute("style");
-    bar.hidden = false;
-    bar.className = collapsed ? "ink-toolbar is-collapsed" : "ink-toolbar";
-    Object.assign(bar.dataset, { size: "expanded", rows: "1", properties: "false", mode: "use", appearance: theme });
-    $(".ink-main", bar).append($(".ink-actions", bar));
-    $(".ink-pop", bar)?.remove();
-    $(".ink-rail", bar).dataset.fade = "";
-    return bar;
-  };
-  miniBar = copy(false);
-  miniPill = copy(true);
-  miniPill.style.visibility = "hidden";
-  miniFit.replaceChildren(miniBar, miniPill);
-  const fit = () => { for (const bar of [miniBar, miniPill]) bar.style.zoom = clamp((miniBox.clientWidth - 24) / 960, .1, 1).toFixed(4); };
-  fit();
-  new ResizeObserver(fit).observe(miniBox);
-}
-// The toolbar and its one button change into each other as they do in the app (ToolbarMorph): the frame closes on
-// the button while the tools fade out by half way, and the button fades in from a third of the way.
-async function morphMini(collapsing) {
-  const zoom = Number(miniBar.style.zoom) || 1, size = (bar) => { const box = bar.getBoundingClientRect(); return [box.width / zoom, box.height / zoom]; };
-  miniBar.style.visibility = miniPill.style.visibility = "";
-  const [W, H] = size(miniBar), [w, h] = size(miniPill), steps = 24, clip = [], tools = [], button = [];
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps, closed = collapsing ? toolbarMorph.shape(t) : 1 - toolbarMorph.shape(t);
-    clip.push({ clipPath: `inset(${((H - h) / 2 * closed).toFixed(2)}px ${((W - w) / 2 * closed).toFixed(2)}px round ${(15 + (h / 2 - 15) * closed).toFixed(2)}px)` });
-    tools.push({ opacity: clamp(collapsing ? toolbarMorph.outgoingOpacity(t) : toolbarMorph.incomingOpacity(t)) });
-    button.push({ opacity: clamp(collapsing ? toolbarMorph.incomingOpacity(t) : toolbarMorph.outgoingOpacity(t)) });
-  }
-  const timing = { duration: (collapsing ? toolbarMorph.collapseDuration : toolbarMorph.expandDuration) * 1000, fill: "both" };
-  const runs = [miniBar.animate(clip, timing), $(".ink-main", miniBar).animate(tools, timing), miniPill.animate(button, timing)];
-  await Promise.all(runs.map((run) => run.finished));
-  (collapsing ? miniBar : miniPill).style.visibility = "hidden";
-  runs.forEach((run) => run.cancel());
-}
-let miniBusy = false;
-async function playMini() {
-  if (!miniBar || miniBusy || !motion) return;
-  miniBusy = true;
-  await wait(500);
-  await morphMini(true);
-  await wait(1100);
-  await morphMini(false);
-  miniBusy = false;
-}
-(document.fonts?.ready || Promise.resolve()).then(buildMini);
 
 // Arriving -------------------------------------------------------------------------------------------
 if (motion) {
@@ -947,19 +764,12 @@ if (motion) {
       const element = entry.target;
       arrive.unobserve(element);
       element.classList.add("is-in");
-      if (element.classList.contains("extra")) element.classList.add("is-playing");
-      if (element.classList.contains("extra-bar")) playMini();
       if (element === coffee) element.classList.add("is-steaming");
       // Once it has landed, a card answers the pointer without the delay it arrived with.
       setTimeout(() => element.classList.add("is-settled"), 1000 + Number(element.style.getPropertyValue("--i") || 0) * 70);
     }
   }, { rootMargin: "0px 0px -10% 0px", threshold: .15 });
   $$("[data-enter], [data-words]").forEach((element) => arrive.observe(element));
-  $$(".extra").forEach((extra) => extra.addEventListener("pointerenter", () => {
-    if (!extra.classList.contains("is-settled")) return;
-    restart(extra, "is-playing");
-    if (extra.classList.contains("extra-bar")) playMini();
-  }));
   coffee.addEventListener("pointerenter", () => restart(coffee, "is-steaming"));
 }
 // A drawn underline for the header's links.

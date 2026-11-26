@@ -17,7 +17,10 @@
 //    the page's background by default), --stage-z (1100), and restyle .stage-shrink, the "Make the demo smaller"
 //    button the module adds (place it with --stage-shrink-top and --stage-shrink-right, not top and right).
 // Options: margin (16), phoneMargin (8, under 600 px), motion (() => false: no animation; Reduce Motion by default),
-//   isFlat (() => true once a tilted stage lies flat; "the surface has no transform" by default).
+//   isFlat (() => true once a tilted stage lies flat; "the surface has no transform" by default),
+//   invite ("Draw here": a pill with these words that follows a mouse or pen over the stage, and rests near the
+//   stage's middle on touch screens, until the visitor joins in. It takes no input and is aria-hidden: the page's
+//   own heading says the words. Restyle it as .stage-invite, or set --stage-invite-bg and --stage-invite-fg).
 // Events: join (at once, when the visitor joins in), grow, shrink, change ({ progress, state }, every step).
 // Calls: stage.join() (for a control the module cannot see), stage.shrink(), stage.progress, stage.state, stage.refresh(),
 //   stage.room ({ top, right, bottom, left }: px the frame reaches past the surface now; keep draggable windows inside
@@ -26,7 +29,7 @@
 //   under the header (take it off while data-stage is not "small"); `overflow: hidden` on the surface cuts the frame;
 //   sizing the surface from --stage-* moves the windows; calling join() from the scripted loop grows it for nobody.
 //   The module warns in the console when it sees the first two.
-import { ease, toolbarMorph, DURATIONS } from "./app-motion.js";
+import { ease, toolbarMorph, DURATIONS, clickPulse } from "./app-motion.js";
 
 const STYLE = `
 [data-stage]:not([data-stage="small"]) { z-index: var(--stage-z, 1100); }
@@ -40,13 +43,15 @@ const STYLE = `
 .stage-shrink { position: absolute; top: calc(var(--stage-shrink-top, 10px) - var(--stage-top, 0px)); right: calc(var(--stage-shrink-right, 10px) - var(--stage-right, 0px)); z-index: 120; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: color-mix(in srgb, CanvasText 12%, Canvas); color: CanvasText; cursor: pointer; }
 .stage-shrink svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 [data-stage="small"] .stage-shrink { display: none; }
+.stage-invite { position: absolute; left: 0; top: 0; z-index: calc(var(--stage-z, 1100) - 200); margin: 0; padding: 8px 14px; border-radius: 999px; background: var(--stage-invite-bg, CanvasText); color: var(--stage-invite-fg, Canvas); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1; letter-spacing: 0; white-space: nowrap; box-shadow: 0 8px 20px -10px rgb(0 0 0 / .55); opacity: 0; pointer-events: none; -webkit-user-select: none; user-select: none; transition: opacity 120ms cubic-bezier(0.42, 0, 1, 1); }
+.stage-invite[data-on] { opacity: 1; transition: opacity 160ms cubic-bezier(0, 0, 0.58, 1); }
 `;
 // Lucide's "minimize-2" (ISC), the icon family the demo toolbar already uses.
 const ICON = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const frame = () => new Promise((done) => requestAnimationFrame(done));
 
-export function growingStage({ ink, surface, root = surface, tries = null, margin = 16, phoneMargin = 8, motion = null, isFlat = null } = {}) {
+export function growingStage({ ink, surface, root = surface, tries = null, margin = 16, phoneMargin = 8, motion = null, isFlat = null, invite = "" } = {}) {
   if (!(surface instanceof Element)) throw new Error("growingStage needs the stage's surface element.");
   const warn = (words, ...more) => console.warn(`Annotator demo, growing stage: ${words}`, ...more);
   if (!document.querySelector("style[data-growing-stage]")) {
@@ -136,11 +141,110 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
     return s.top >= top && s.bottom <= bottom ? 0 : s.top - (v.height - s.height) / 2;
   }
   // The color behind a grown frame, when the page names none: the page's own background.
+  const pageColor = () => [document.body, document.documentElement].map((el) => getComputedStyle(el).backgroundColor).find((c) => c && c !== "transparent" && c !== "rgba(0, 0, 0, 0)");
   function tint() {
     if (getComputedStyle(scrim).getPropertyValue("--stage-scrim").trim()) { scrim.style.background = ""; return; }
-    const color = [document.body, document.documentElement].map((el) => getComputedStyle(el).backgroundColor).find((c) => c && c !== "transparent" && c !== "rgba(0, 0, 0, 0)");
+    const color = pageColor();
     if (color) scrim.style.background = color;
   }
+  // "Draw here": a small pill that asks the visitor in, until they join. With a mouse or a pen it follows the pointer
+  // over the stage, just below and to the right of it. On a touch screen, and until a pointer has been over the
+  // stage, it rests near the stage's middle and swells now and then with the app's click pulse. It takes no input,
+  // lives outside the stage (so it changes nothing in it) and steps aside while the scripted pointer draws under it.
+  function inviting(words) {
+    const pill = document.body.appendChild(Object.assign(document.createElement("div"), { className: "stage-invite", textContent: words }));
+    pill.setAttribute("aria-hidden", "true");
+    let at = null, to = null, over = false, shown = false, covered = 0, following = 0, pulsing = 0, resting = 0, back = 0, pause = 0;
+    // The page's own colors, unless it names the pill's: its text color behind, its background for the words.
+    const colors = () => {
+      const named = getComputedStyle(pill);
+      pill.style.background = named.getPropertyValue("--stage-invite-bg").trim() ? "" : getComputedStyle(document.body).color;
+      pill.style.color = named.getPropertyValue("--stage-invite-fg").trim() ? "" : pageColor() || "";
+    };
+    // Page coordinates, kept inside the window's width so the pill never makes the page scroll sideways.
+    const put = (p) => {
+      const width = pill.offsetWidth, left = window.scrollX + 8, right = window.scrollX + view().width - width - 8;
+      at = [clamp(p[0], left, Math.max(left, right)), p[1]];
+      pill.style.translate = `${at[0].toFixed(1)}px ${at[1].toFixed(1)}px`;
+    };
+    const middle = () => {
+      const r = surface.getBoundingClientRect();
+      return [r.left + r.width / 2 - pill.offsetWidth / 2 + window.scrollX, r.top + Math.min(r.height / 2, window.innerHeight * 0.45) - pill.offsetHeight / 2 + window.scrollY];
+    };
+    const show = () => {
+      const on = !covered && (over || !back) && !document.hidden;
+      if (on !== shown) { shown = on; pill.toggleAttribute("data-on", on); }
+    };
+    // With motion the pill eases after the pointer; without, it is put near the pointer once the pointer rests.
+    const follow = () => {
+      following = 0;
+      if (!over || !to || !at) return;
+      const next = [at[0] + (to[0] - at[0]) * 0.32, at[1] + (to[1] - at[1]) * 0.32];
+      put(Math.hypot(to[0] - next[0], to[1] - next[1]) < 0.4 ? to : next);
+      if (at[0] !== to[0] || at[1] !== to[1]) following = requestAnimationFrame(follow);
+    };
+    const rest = () => { if (!over) { put(middle()); show(); } };
+    const move = (e) => {
+      if (e.pointerType === "touch") return;
+      const inside = e.target instanceof Element && (surface.contains(e.target) || root.contains(e.target)) && !ink?.toolbar?.contains(e.target) && !button.contains(e.target);
+      if (inside) {
+        to = [e.pageX + 14, e.pageY + 18];
+        clearTimeout(back); back = 0;
+        if (!over) { over = true; put(to); show(); }
+        else if (moves()) { if (!following) following = requestAnimationFrame(follow); }
+        else { clearTimeout(pause); pause = setTimeout(() => { if (over) put(to); }, 220); }
+      } else if (over) leave();
+    };
+    // Off the stage the pill goes, and a moment later it waits near the middle again.
+    const leave = () => {
+      if (!over) return;
+      over = false;
+      cancelAnimationFrame(following); following = 0;
+      back = setTimeout(() => { back = 0; rest(); }, 1400);
+      show();
+    };
+    // The scripted pointer, when it is on: the pill stays out from under it, and a little longer.
+    const watch = () => {
+      const ghost = document.querySelector(".ink-reach .ink-ghost.is-on") || ink?.layer?.querySelector(".ink-ghost.is-on");
+      if (ghost && (shown || covered)) {
+        const g = ghost.getBoundingClientRect(), p = pill.getBoundingClientRect(), pad = 28;
+        if (g.left < p.right + pad && g.right > p.left - pad && g.top < p.bottom + pad && g.bottom > p.top - pad) covered = 4;
+        else if (covered) covered--;
+      } else if (covered) covered--;
+      show();
+    };
+    const pulse = () => { if (shown && !over && moves()) { const keys = clickPulse(); pill.animate(keys, { duration: keys.duration }); } };
+    addEventListener("pointermove", move, { passive: true });
+    document.documentElement.addEventListener("pointerleave", leave);
+    addEventListener("blur", leave);
+    addEventListener("scroll", rest, { passive: true });
+    addEventListener("resize", rest);
+    document.addEventListener("visibilitychange", show);
+    const sized = window.ResizeObserver ? new ResizeObserver(rest) : null;
+    sized?.observe(surface);
+    resting = setInterval(watch, 140);
+    pulsing = setInterval(pulse, 3200);
+    colors();
+    rest();
+    // The stage may still be arriving (an entrance animation, fonts): the resting place is looked up again.
+    const late = [setTimeout(rest, 700), setTimeout(rest, 2000)];
+    return {
+      pill, colors,
+      end() {
+        late.forEach(clearTimeout);
+        removeEventListener("pointermove", move);
+        document.documentElement.removeEventListener("pointerleave", leave);
+        removeEventListener("blur", leave);
+        removeEventListener("scroll", rest);
+        removeEventListener("resize", rest);
+        document.removeEventListener("visibilitychange", show);
+        sized?.disconnect();
+        clearInterval(resting); clearInterval(pulsing); clearTimeout(back); clearTimeout(pause); cancelAnimationFrame(following);
+        pill.remove();
+      },
+    };
+  }
+  let cue = typeof invite === "string" && invite.trim() ? inviting(invite.trim()) : null;
   // Waits until the page has stopped scrolling and the surface has stopped moving, at most a second and a half.
   async function still() {
     const until = performance.now() + 1500;
@@ -191,6 +295,8 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
     }
   }
   function join() {
+    // The invitation has been taken up: it goes for good.
+    if (cue) { cue.end(); cue = null; }
     if (progress >= 1 && anchor !== null && !tween) return;
     emit("join");
     wants = true;
@@ -284,12 +390,14 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
   // The keyboard leaving the stage for the page behind it makes the frame small, so the page is there to see.
   document.addEventListener("focusin", (e) => { if (progress > 0 && e.target instanceof Element && !root.contains(e.target) && !surface.contains(e.target) && !ink?.toolbar?.contains(e.target)) shrink(); });
   // The page's colors can change while the frame is grown (a theme switch).
-  new MutationObserver(() => { if (progress > 0) tint(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme", "style"] });
+  new MutationObserver(() => { if (progress > 0) tint(); cue?.colors(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme", "style"] });
   apply();
 
   return {
     on(name, fn) { (listeners[name] ||= []).push(fn); return this; },
     join, shrink, button, scrim,
+    // The "Draw here" pill while it is still asking, for a page that wants to look at it; null once the visitor joined.
+    get invite() { return cue ? cue.pill : null; },
     refresh: () => { if (progress > 0) request(); else apply(); },
     // How far the frame reaches past the surface on each side right now, in px (0 while small): for a page that keeps
     // its windows inside the frame.

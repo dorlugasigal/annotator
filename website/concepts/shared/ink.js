@@ -22,7 +22,9 @@
 //   preset ("customized" | "factory": a toolbar someone has set up, or the app as installed), gradient (which of
 //   the app's gradients is the stroke color at the start: "sunset", "lagoon", "ember", "spectrum", "dusk", "citrus",
 //   "ocean", "orchid", "aurora", "cherry", "forest", "copper", "neon", "tropic" or "steel"), toolbarItems and
-//   hiddenControls (the app's own names for the bar's arrangement, to override the preset's),
+//   hiddenControls (the app's own names for the bar's arrangement, to override the preset's; setToolbarItems(ids)
+//   changes the arrangement later, as Settings > Toolbar does, and `toolbarItems` reads it),
+//   showToolbar (false: with interactive: false, still mount the toolbar, for a scripted picture of it),
 //   visibility (how Hide drawings and tools moves: the app's "slide" by default, or "magic", "corners", "pop", "drop",
 //   "focus", "fade", "none"), shrinkAfter (seconds with the pointer away before the toolbar shrinks to its one button,
 //   the app's Shrink setting; never by default), toolbarMargin (room kept on each side of the toolbar, 8).
@@ -353,7 +355,8 @@ export function createInk(options = {}) {
     eraser: own("eraser"), blur: own("blur", { effectAmount: 18 }), spotlight: { radius: 130 },
   };
   let remembered = null;
-  try { remembered = localStorage.getItem(STORE); } catch { /* storage is off */ }
+  // A scripted-only instance is a picture: it does not take up what a visitor chose on the page's own toolbar.
+  if (options.interactive !== false) try { remembered = localStorage.getItem(STORE); } catch { /* storage is off */ }
   const state = {
     mode: "use", tool: options.tool || "pen", color: stroke, smart: options.smart !== false,
     board: "desk", spotlight: false, halo: false, hidden: false, properties: remembered ? remembered === "1" : options.properties ?? innerWidth >= 600,
@@ -1576,10 +1579,14 @@ export function createInk(options = {}) {
     if (id === "effects") effectsButton = b;
     return b;
   }
-  items.forEach((id, i) => {
-    if (i && familyOf(items[i - 1]) !== familyOf(id)) rail.append(divider());
-    rail.append(itemButton(id));
-  });
+  function fillRail() {
+    rail.replaceChildren();
+    items.forEach((id, i) => {
+      if (i && familyOf(items[i - 1]) !== familyOf(id)) rail.append(divider());
+      rail.append(itemButton(id));
+    });
+  }
+  fillRail();
   // ToolbarToolLayout.identity: the bar button that stands for a tool. Effects stands for Blur unless Blur has its
   // own button, and Rectangle for a shape that is not on the bar.
   function barIdentity(tool) {
@@ -1620,7 +1627,10 @@ export function createInk(options = {}) {
   // Inside a parent, the toolbar is placed and dragged in that parent's coordinates.
   const inParent = options.toolbarPosition === "absolute";
   if (inParent) toolbar.dataset.position = "absolute";
-  if (interactive) (options.toolbarParent || document.body).append(toolbar);
+  // `showToolbar` puts the toolbar on the page for a scripted-only instance too: a picture of the bar that a script
+  // changes (scenes.js). It hears no keys and never draws; the page keeps it out of reach (inert).
+  const mounted = interactive || Boolean(options.showToolbar);
+  if (mounted) (options.toolbarParent || document.body).append(toolbar);
   if (options.collapsed) toolbar.classList.add("is-collapsed");
   toolbar.hidden = !enabled;
   // A page's own words on the button are its accessible name too.
@@ -2100,7 +2110,7 @@ export function createInk(options = {}) {
   const chrome = h("div", { class: "ink-chrome", "aria-hidden": "true" });
   toolbar.prepend(chrome);
   let collapsed = toolbar.classList.contains("is-collapsed"), morphRun = null, shrunk = null;
-  const barShown = () => interactive && enabled && toolbar.isConnected && toolbar.getClientRects().length > 0 && !toolbar.classList.contains("is-away");
+  const barShown = () => mounted && enabled && toolbar.isConnected && toolbar.getClientRects().length > 0 && !toolbar.classList.contains("is-away");
   // Puts the toolbar in its other form at once. Gives where it was, and for a dragged toolbar where it rests now and
   // where its full frame is.
   function reface(collapsing) {
@@ -2136,13 +2146,16 @@ export function createInk(options = {}) {
     if (collapsing) { toolbar.classList.remove("is-collapsed"); place(full); }
     const look = getComputedStyle(toolbar), radius = parseFloat(look.borderTopLeftRadius) || 15;
     Object.assign(chrome.style, { background: look.background, boxShadow: look.boxShadow, backdropFilter: look.backdropFilter, webkitBackdropFilter: look.backdropFilter });
-    const box = collapsing ? was : now, small = collapsing ? now : was, round = Math.min(small.width, small.height) / 2;
-    const button = { x: small.left - box.left, y: small.top - box.top, width: small.width, height: small.height }, whole = { x: 0, y: 0, width: box.width, height: box.height };
+    // A page may show the toolbar smaller or larger than it is laid out (a transform on an ancestor): what is measured
+    // on the screen is turned back into the toolbar's own pixels.
+    const box = collapsing ? was : now, small = collapsing ? now : was, zoom = box.width / (toolbar.offsetWidth || box.width) || 1, round = Math.min(small.width, small.height) / 2 / zoom;
+    const own = (r) => ({ x: (r.left - box.left) / zoom, y: (r.top - box.top) / zoom, width: r.width / zoom, height: r.height / zoom });
+    const button = own(small), whole = { x: 0, y: 0, width: box.width / zoom, height: box.height / zoom };
     const [start, end] = collapsing ? [whole, button] : [button, whole], [fromRadius, toRadius] = collapsing ? [radius, round] : [round, radius];
     toolbar.classList.add("is-morphing");
     Object.assign(pill.style, { left: `${button.x}px`, top: `${button.y}px`, width: `${button.width}px` });
     const face = [main, second, strip, rule, props, statusLine].filter((el) => el.getClientRects().length);
-    const rects = new Map([...face, pill].map((el) => { const r = el.getBoundingClientRect(); return [el, { x: r.left - box.left, y: r.top - box.top, width: r.width, height: r.height }]; }));
+    const rects = new Map([...face, pill].map((el) => [el, own(el.getBoundingClientRect())]));
     const [outgoing, incoming] = collapsing ? [face, [pill]] : [[pill], face];
     const reduced = reduceMotion(), duration = (reduced ? DURATIONS.reduced : collapsing ? toolbarMorph.collapseDuration : toolbarMorph.expandDuration) * 1000;
     const draw = (time) => {
@@ -2849,6 +2862,18 @@ export function createInk(options = {}) {
     // The app's motion: shrink() and expand() are its Shrink; setHidden(hidden, { style }) shows and hides in one of
     // its styles ("slide", "magic", "corners", "pop", "drop", "focus", "fade", "none"); each returns a promise.
     shrink, expand, setVisibility, clickGhost, setRoom,
+    // Settings > Toolbar, from a script: the bar's tools and added buttons, in order (the app's names, as in the
+    // `toolbarItems` option). The bar is laid out again at once; the caller animates the change if it wants to.
+    setToolbarItems(next) {
+      const wanted = next.filter(known);
+      items.splice(0, items.length, ...wanted);
+      fillRail();
+      fitted = "";
+      revealed = "";
+      refreshToolbar();
+      return [...items];
+    },
+    get toolbarItems() { return [...items]; },
     get room() { return room && { ...room }; },
     // Moves a toolbar the visitor dragged by this much, so it keeps its place on the screen when the corner of its
     // parent moves (a growing stage). A toolbar that sits where the page put it is left alone.

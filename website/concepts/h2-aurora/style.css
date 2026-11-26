@@ -11,9 +11,6 @@
   --aurora-1: #21b878; --aurora-2: #408cf2; --aurora-3: #d154e0;
   --aurora: linear-gradient(115deg, var(--aurora-1), var(--aurora-2), var(--aurora-3));
   --aurora-across: linear-gradient(90deg, var(--aurora-1), var(--aurora-2), var(--aurora-3));
-  --ink-blue: #3a7fe8;
-  --board-white: #f7f8fa; --board-black: #141414; --pointer-fill: #ffffff; --pointer-line: #0c0d0f;
-  --media-bg: #08090a;
 }
 :root, html[data-theme="dark"] {
   color-scheme: dark;
@@ -21,7 +18,7 @@
   --panel: #15171acc; --cell: #121416eb; --bar: #0f1012b8;
   --text: #f2f3f5; --muted: #a4a8af; --faint: #868b93;
   --line: #ffffff14; --line-strong: #ffffff26; --hi: #ffffff17;
-  --control: #ffffff0d; --control-hover: #ffffff1a; --wash: #ffffff12;
+  --control: #ffffff0d; --control-hover: #ffffff1a;
   --on: #3ddc97;
   /* The headline's lit word, and the light that falls on things. */
   --lit: linear-gradient(100deg, #58e6a8, #86bbff 52%, #e99af5);
@@ -36,7 +33,7 @@
   --win-accent: #c3c7ce; --win-field: #1d2024; --win-down: #ff8a80;
   --win-shadow: 0 0 0 1px #ffffff1a, 0 30px 60px -26px #000000e6;
   --code-bg: #0a0b0d; --code-text: #d6d9de;
-  --key-a: #2b2f35; --key-b: #1c1f23; --key-line: #ffffff26; --key-hi: #ffffff30; --key-rest: .38;
+  --key-a: #2b2f35; --key-b: #1c1f23; --key-line: #ffffff26;
   --dial-sky: #1a1d21; --dial-land: #0c0d0f; --dial-moon: #e8eaee; --stars: .7;
   --curtain: .5;
   --ink-highlight-blend: screen;
@@ -47,7 +44,7 @@ html[data-theme="light"] {
   --panel: #ffffffd1; --cell: #ffffffeb; --bar: #f9fafbc7;
   --text: #111316; --muted: #555a63; --faint: #636872;
   --line: #11131617; --line-strong: #1113162b; --hi: #ffffff;
-  --control: #ffffffb3; --control-hover: #ffffff; --wash: #1113160f;
+  --control: #ffffffb3; --control-hover: #ffffff;
   --on: #0b7d50;
   --lit: linear-gradient(100deg, #086743, #1a4fb3 52%, #8a1d9e);
   --glow-1: #21b87857; --glow-2: #408cf257; --glow-3: #d154e04d;
@@ -61,7 +58,7 @@ html[data-theme="light"] {
   --win-accent: #3f444d; --win-field: #ffffff; --win-down: #c0281f;
   --win-shadow: 0 0 0 1px #1113161f, 0 30px 60px -30px #11131670;
   --code-bg: #eef0f3; --code-text: #111316;
-  --key-a: #ffffff; --key-b: #eef0f3; --key-line: #1113162e; --key-hi: #ffffff; --key-rest: .5;
+  --key-a: #ffffff; --key-b: #eef0f3; --key-line: #1113162e;
   --dial-sky: #dfe5ee; --dial-land: #f4f5f7; --dial-moon: #111316; --stars: 0;
   --curtain: .62;
   --ink-highlight-blend: multiply;
@@ -76,9 +73,9 @@ html[data-theme="light"] {
 
   /* The motion system. Things arrive slowly and settle; presses answer at once. The curves are the app's own
      (MotionCore.swift): "enter" for arriving, "standard" for a change that could be turned round and "fade" for
-     opacity. So are the time the toolbar takes to grow back and the time of Smart Draw's snap. */
+     opacity. So is the time of Smart Draw's snap. */
   --t-1: 200ms; --t-2: 520ms; --t-3: 880ms; --t-sweep: 1300ms; --stagger: 80ms;
-  --t-grow: 340ms; --t-snap: 220ms;
+  --t-snap: 220ms;
   --ease-out: cubic-bezier(.2, 0, 0, 1);
   --ease-soft: cubic-bezier(.3, 0, .2, 1);
   --ease-fade: cubic-bezier(.2, 0, .4, 1);
@@ -111,8 +108,6 @@ main > section + section { margin-top: var(--space); }
 h1, h2, h3 { font-family: var(--display); text-wrap: balance; }
 h2 { font-size: clamp(36px, 5.4vw, 64px); line-height: 1.02; font-weight: 760; letter-spacing: -.038em; text-align: center; }
 h3 { font-size: 22px; line-height: 1.2; font-weight: 700; letter-spacing: -.02em; }
-.head { display: grid; justify-items: center; gap: 14px; text-align: center; }
-.head p { max-width: 30em; color: var(--muted); }
 
 /* Light ---------------------------------------------------------------------------------------------
    A field is a canvas that aurora.js paints, under a fine grain that keeps its soft edges from banding. */
@@ -199,23 +194,29 @@ html[data-theme="light"] .dial { --turn: 180deg; }
 /* Hero */
 .hero { position: relative; }
 .aurora-sky { --grain-mask: linear-gradient(#000 40%, #0000 78%); left: 0; right: 0; top: calc(-1 * (var(--header-h) + 2 * var(--header-top))); height: min(860px, 104svh); z-index: -1; }
-.hero-copy { display: grid; justify-items: center; gap: 20px; padding-top: 40px; text-align: center; }
-h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; font-weight: 760; letter-spacing: -.045em; }
+.hero-copy { display: grid; justify-items: center; gap: 16px; padding-top: 34px; text-align: center; }
+h1 { font-size: clamp(46px, min(13vw, 12.5svh), 116px); line-height: .97; font-weight: 760; letter-spacing: -.05em; }
 /* One word of the headline carries the gradient. */
 .lit { background: var(--lit); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .12em; margin-bottom: -.12em; }
-.lede { max-width: 34em; font-size: 19px; line-height: 1.5; color: var(--muted); }
-.get { display: grid; justify-items: center; gap: 14px; margin-top: 6px; }
+/* And the headline does what it says: the last word has a ring round it, drawn by hand in the same light. */
+.ringed { position: relative; display: inline-block; margin-inline: .12em .18em; }
+.ring { position: absolute; left: -.21em; top: -.03em; width: calc(100% + .4em); height: 1.1em; overflow: visible; pointer-events: none; }
+.ring path { fill: none; stroke-width: clamp(3px, .05em, 5.5px); stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.lede { max-width: 34em; font-size: 20px; line-height: 1.4; color: var(--muted); text-wrap: balance; }
+.get { display: grid; justify-items: center; gap: 12px; margin-top: 10px; }
 .get-main { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .get-more { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 18px; }
-/* The line that hands over to the stage. */
-.try-line { max-width: 42em; margin-top: 16px; font-size: 18px; line-height: 1.45; font-weight: 500; color: var(--text); }
 .quiet { font-size: 16px; color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 38%, transparent); text-decoration-thickness: 1px; text-underline-offset: .25em; transition: text-decoration-color var(--t-1) ease; }
 .quiet:hover { text-decoration-color: var(--aurora-2); }
 .get-more small { font-size: 15px; color: var(--muted); }
 
 /* The stage: a screen floating in the dark, a sample window on it, and above them the planes the app adds: ink,
    then the toolbar. */
-.stage { --tilt: 0; --yaw: 0; --ax: 0; --ay: 0; --lift: 0; --scale: 1; position: relative; width: min(1160px, 100% - 2 * var(--gutter)); margin: 22px auto 0; }
+.stage { --tilt: 0; --yaw: 0; --ax: 0; --ay: 0; --lift: 0; --scale: 1; position: relative; width: min(1160px, 100% - 2 * var(--gutter)); margin: 40px auto 0; }
+/* The words that introduce the stage, and the page's main invitation. The dot beside them is lit, like the mode's. */
+.stage-title { margin-bottom: 18px; font-size: clamp(22px, 5.8vw, 34px); line-height: 1.15; font-weight: 720; letter-spacing: -.03em; }
+.stage-title i { position: relative; display: inline-block; width: .34em; height: .34em; margin-right: .46em; vertical-align: .17em; border-radius: 50%; background: var(--aurora); box-shadow: 0 0 .5em 0 var(--glow-2); }
+.stage-title i::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--aurora-2); opacity: 0; }
 .stage-space { position: relative; }
 /* The whole screen can be drawn on, so the sample window sits in it with room to spare: beside it for notes, and under
    it for the toolbar at its tallest (main.js writes that height to --tb-h). */
@@ -240,6 +241,9 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .screen .stage-shrink:active { transform: scale(.92); transition-duration: 80ms; }
 .screen .stage-shrink:focus-visible { border-radius: var(--r-chip); }
 .screen .stage-shrink svg { width: 15px; height: 15px; stroke-width: 1.8; }
+/* "Draw here", the shared cue that goes with the pointer over the stage: a tag with the gradient for its edge and
+   the same light under it. Naming its two colors keeps the module from choosing them. It passes under the header. */
+.stage-invite.stage-invite { --stage-invite-bg: var(--surface-1); --stage-invite-fg: var(--text); z-index: 40; padding: 9px 15px; border: 1.5px solid transparent; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, var(--aurora-across) border-box; color: var(--text); font: 650 14.5px/1 var(--sans); box-shadow: -10px 8px 24px -12px var(--glow-1), 0 12px 26px -12px var(--glow-2), 10px 8px 24px -12px var(--glow-3); }
 /* The switch is behind a grown frame, so it stays in the page's picture when the theme changes. */
 :root:has(.screen[data-stage]:not([data-stage="small"])) .theme-switch { view-transition-name: none; }
 .dock > .ink-toolbar { pointer-events: auto; }
@@ -254,11 +258,6 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .mode-chip[data-mode="draw"] i { background: var(--aurora); box-shadow: 0 0 8px 0 var(--aurora-2); }
 .mode-chip b { font-weight: inherit; }
 .mode-chip kbd { display: inline-grid; place-items: center; min-width: 22px; height: 18px; padding: 0 6px; border: 1px solid var(--key-line); border-radius: 6px; background: linear-gradient(var(--key-a), var(--key-b)); color: var(--muted); font: 500 11px/1 var(--sans); box-shadow: 0 1px 0 var(--key-line); }
-/* "Your turn": a tag over the toolbar, with a pointer that keeps nodding at it. It is a button: it starts the Pen. */
-.turn { position: absolute; left: 50%; bottom: calc(var(--tb-bottom) + var(--tb-h) + 10px); translate: -50% 0; display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 15px 0 11px; border: 1.5px solid transparent; border-radius: 17px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, var(--aurora-across) border-box; color: var(--text); font: 650 14.5px/1 var(--sans); white-space: nowrap; cursor: pointer; pointer-events: auto; box-shadow: -10px 8px 24px -12px var(--glow-1), 0 12px 26px -12px var(--glow-2), 10px 8px 24px -12px var(--glow-3); }
-.turn:focus-visible { border-radius: 17px; }
-.turn svg { flex: none; fill: var(--pointer-fill); stroke: var(--pointer-line); stroke-width: 1.5; stroke-linejoin: round; overflow: visible; }
-.ink-drawing .turn { pointer-events: none; }
 /* The loop's marks leave together before the next round. */
 .ink-mark.is-leaving { opacity: 0 !important; transition: opacity var(--t-2) ease; }
 
@@ -309,46 +308,36 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .dip { position: absolute; left: 50%; top: 65%; width: 0; height: 0; }
 
 .stage figcaption { display: grid; gap: 14px 28px; margin-top: 20px; }
-.stage-how { font-size: 18px; line-height: 1.4; font-weight: 550; color: var(--text); }
-.stage-note { margin-top: 5px; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.stage-note { font-size: 15.5px; line-height: 1.45; color: var(--muted); }
 .stage-controls { display: flex; flex-wrap: wrap; gap: 8px; }
 
-/* What you can do. Without motion it is a grid of six; with motion it becomes the carousel further down. */
+/* What you can do. Without motion it is a grid of four; with motion it becomes the carousel further down. */
 .arc-pin { position: relative; }
 /* The light stands behind the first cards and ends above their words. */
 .aurora-arc { left: 50%; width: 100vw; translate: -50% 0; top: -190px; height: 400px; z-index: -1; }
 .arc { display: grid; gap: 40px 22px; width: min(1160px, 100% - 2 * var(--gutter)); margin: 44px auto 0; }
 .arc-space { position: relative; isolation: isolate; min-width: 0; }
 .tile { position: relative; min-width: 0; }
-.tile-media { position: relative; overflow: hidden; border-radius: var(--r-media); background: var(--media-bg); aspect-ratio: 16 / 10; }
+/* Each card's picture stands in a frame of the same light, come at from another side each time. */
+.tile-media { --wall: radial-gradient(70% 90% at 0% 0%, var(--wall-2), #0000 66%), radial-gradient(60% 80% at 100% 0%, var(--wall-1), #0000 66%); position: relative; overflow: hidden; border-radius: var(--r-media); background: var(--wall), var(--surface-1); aspect-ratio: 16 / 10; }
+.tile:nth-child(2) .tile-media { --wall: radial-gradient(70% 90% at 100% 0%, var(--wall-1), #0000 66%), radial-gradient(60% 80% at 0% 0%, var(--wall-3), #0000 66%); }
+.tile:nth-child(3) .tile-media { --wall: radial-gradient(70% 90% at 50% 0%, var(--wall-2), #0000 66%); }
+.tile:nth-child(4) .tile-media { --wall: radial-gradient(70% 90% at 100% 0%, var(--wall-3), #0000 66%), radial-gradient(60% 80% at 0% 0%, var(--wall-1), #0000 66%); }
 /* The frame's hairline and top highlight lie over the picture. */
 .tile-media::before { content: ""; position: absolute; inset: 0; z-index: 7; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--line-strong), inset 0 1px 0 0 #ffffff2e; pointer-events: none; }
+/* Where a shared scene goes (data-scene): the whole of the frame, at whatever shape the card gives it. The shared
+   scenes have classes of their own that start with "scene", so the page's own names keep clear of them. */
+.tile-scene { position: absolute; inset: 0; border-radius: inherit; }
 .tile-text { padding: 18px 4px 0; }
-.tile-text p { margin-top: 8px; max-width: 32em; font-size: 17px; line-height: 1.5; color: var(--muted); }
-.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
-.scene-private { background: radial-gradient(70% 90% at 100% 0%, var(--wall-3), #0000 66%), radial-gradient(60% 80% at 0% 0%, var(--wall-2), #0000 66%), var(--surface-1); }
-.scene-steps { background: radial-gradient(70% 90% at 0% 0%, var(--wall-1), #0000 66%), radial-gradient(60% 80% at 100% 0%, var(--wall-2), #0000 66%), var(--surface-1); }
-.scene-point { background: radial-gradient(70% 90% at 0% 0%, var(--wall-2), #0000 66%), radial-gradient(60% 80% at 100% 0%, var(--wall-1), #0000 66%), var(--surface-1); }
-.scene-smart { background: radial-gradient(70% 90% at 100% 0%, var(--wall-1), #0000 66%), radial-gradient(60% 80% at 0% 0%, var(--wall-3), #0000 66%), var(--surface-1); }
-.scene-spot { background: radial-gradient(70% 90% at 50% 0%, var(--wall-2), #0000 66%), var(--surface-1); }
-.scene-system { padding: 0; background: radial-gradient(70% 90% at 100% 0%, var(--wall-3), #0000 66%), radial-gradient(60% 80% at 0% 0%, var(--wall-1), #0000 66%), var(--surface-1); }
-.scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 5cqi, 27px)/1.1 "Caveat", "Bradley Hand", cursive; }
+.tile-text p { margin-top: 8px; max-width: 32em; font-size: 17px; line-height: 1.5; color: var(--muted); text-wrap: balance; }
+.sample { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
+.sample .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 5cqi, 31px)/1.1 "Caveat", "Bradley Hand", cursive; }
 /* Smart Draw: the rough stroke goes as the neat shape arrives, in the app's 0.22 s. */
 .ink-mark.is-snapping { opacity: 0 !important; transition: opacity var(--t-snap) var(--ease-fade); }
 /* A small sample window, sized from the card it sits in. */
-.mini { width: min(27em, 100%); font-size: clamp(10.5px, 3.4cqi, 18.5px); line-height: 1.3; }
+.mini { width: min(29em, 100%); font-size: clamp(10.5px, 3.4cqi, 22px); line-height: 1.3; }
 .mini .window-bar { height: 2.5em; }
 .mini .window-bar span { font-size: .9em; }
-.rows { padding: .4em 1.2em .7em; }
-.rows > div { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .75em 0; border-bottom: 1px solid var(--win-line); }
-.rows > div:last-child { border-bottom: 0; }
-.rows dt { color: var(--win-muted); }
-.rows dd { font-weight: 500; }
-.form { display: grid; gap: .7em; padding: 1em 1.3em 1.2em max(3.4em, 46px); }
-.form p { display: grid; gap: .35em; }
-.form span { font-size: .88em; color: var(--win-muted); }
-.field { display: block; padding: .6em .8em; border: 1px solid color-mix(in srgb, var(--win-text) 20%, transparent); border-radius: 8px; background: var(--win-field); font-weight: 500; }
-.field.select { background: var(--win-field) linear-gradient(45deg, transparent 50%, var(--win-muted) 50%) no-repeat right 1em top 55% / 5px 5px; }
 .sales { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.5em; padding: 1.1em 1.3em 1.3em; }
 .sales-stats { display: grid; gap: .9em; align-content: center; }
 .sales-stats p { display: grid; gap: .5em; }
@@ -360,30 +349,13 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .sales-plot path { fill: none; vector-effect: non-scaling-stroke; }
 .sales-plot .grid { stroke: var(--win-line); }
 .sales-plot .line { stroke: var(--win-accent); stroke-width: 2; stroke-linecap: round; }
-.sales-plot i { position: absolute; left: 73%; top: 19%; width: 0; height: 0; }
-.checkout { display: grid; gap: .8em; padding: 1em 1.3em 1.5em; }
-.checkout p { display: grid; gap: .35em; justify-items: start; }
-.checkout .field { justify-self: stretch; }
-.checkout span { font-size: .88em; color: var(--win-muted); }
-.checkout .pay { margin-top: .5em; }
-.lines { padding: .3em 1.2em .5em; }
-.lines li { display: grid; gap: .15em; padding: .65em 0; border-bottom: 1px solid var(--win-line); }
-.lines li:last-child { border-bottom: 0; }
-.lines b { justify-self: start; font-weight: 600; }
-.lines span { font-size: .88em; color: var(--win-muted); }
-/* A board to sketch on: a grid of dots, a word to box, and two of the app's ready-made icons. */
-.sketch { position: absolute; inset: 0; font-size: clamp(10.5px, 3.4cqi, 18.5px); background: radial-gradient(circle, color-mix(in srgb, var(--text) 17%, transparent) 1px, #0000 1.6px) 0 0 / 1.7em 1.7em; }
-.node { position: absolute; left: var(--x); top: var(--y); display: grid; justify-items: center; gap: .35em; width: 6.4em; margin: -2.7em 0 0 -3.2em; color: var(--text); }
-.node svg { width: 3.3em; height: 3.3em; fill: color-mix(in srgb, var(--aurora-2) 13%, var(--surface-1)); stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.node b { font-size: .88em; font-weight: 600; }
-.node-word { width: 4.8em; margin: -1.15em 0 0 -2.4em; padding: .55em 0; }
-.node-word b { font: 720 1.3em/1 var(--display); letter-spacing: -.02em; }
-.mini-button { justify-self: start; padding: .65em 1em; border-radius: 8px; background: var(--win-accent); color: var(--win-bg); font-weight: 600; }
+/* The part of the chart that gets a box: its peak. */
+.sales-plot i { position: absolute; left: 53%; top: 2%; width: 20%; height: 46%; }
 .arc-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 24px; margin-top: 36px; }
 .arc-progress { display: flex; align-items: center; gap: 14px; }
 .arc-count { min-width: 2.6em; font: 500 14px/1 var(--sans); color: var(--faint); font-variant-numeric: tabular-nums; }
 .arc-count b { font-weight: 600; color: var(--text); }
-/* The progress line: six stops on a thread, filled as far as the card in front. */
+/* The progress line: four stops on a thread, filled as far as the card in front. */
 .arc-steps { --p: 0; position: relative; display: flex; }
 .arc-steps::before, .arc-steps::after { content: ""; position: absolute; left: 19px; right: 19px; top: 50%; height: 2px; margin-top: -1px; border-radius: 1px; background: color-mix(in srgb, var(--text) 16%, transparent); }
 .arc-steps::after { background: var(--aurora-across); transform-origin: 0 50%; transform: scaleX(var(--p)); }
@@ -393,69 +365,6 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .arc-steps button.is-past::before { background: var(--text); box-shadow: inset 0 0 0 1.5px var(--text); }
 .arc-steps button[aria-current]::before { background: var(--text); box-shadow: inset 0 0 0 1.5px var(--text), 0 0 0 4px color-mix(in srgb, var(--aurora-2) 38%, transparent); transform: scale(1.25); }
 @media (min-width: 720px) { .arc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { html:not(.motion) .arc { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-/* Two keys */
-.keys-section { display: grid; justify-items: center; gap: 40px; }
-.keys { display: grid; width: 100%; overflow: hidden; }
-.combo { position: relative; display: flex; flex-direction: column; align-items: center; gap: 40px; min-width: 0; padding: 46px 20px 36px; border: 0; background: none; color: inherit; font: inherit; text-align: center; cursor: pointer; }
-.combo + .combo { border-top: 1px solid var(--line); }
-.combo:focus-visible { outline-offset: -8px; border-radius: 14px; }
-.plate { --key: 58px; display: flex; gap: 10px; }
-.key { position: relative; display: block; font: inherit; }
-/* Under each cap is its light. It is low until the key goes down. */
-.key::before { content: ""; position: absolute; inset: 30% -2% -24%; border-radius: 16px; background: var(--aurora-across); filter: blur(14px); opacity: var(--key-rest); transform: scale(.84); transition: opacity var(--t-3) ease, transform var(--t-3) var(--ease-out); }
-.plate .key:nth-child(1):not(:only-child)::before { background: linear-gradient(90deg, var(--aurora-1), color-mix(in srgb, var(--aurora-1), var(--aurora-2))); }
-.plate .key:nth-child(2)::before { background: linear-gradient(90deg, color-mix(in srgb, var(--aurora-1), var(--aurora-2)), var(--aurora-2), color-mix(in srgb, var(--aurora-2), var(--aurora-3))); }
-.plate .key:nth-child(3)::before { background: linear-gradient(90deg, color-mix(in srgb, var(--aurora-2), var(--aurora-3)), var(--aurora-3)); }
-.key-top { position: relative; display: grid; place-items: center; min-width: var(--key); height: var(--key); padding: 0 14px; border: 1px solid var(--key-line); border-radius: 13px; background: linear-gradient(var(--key-a), var(--key-b)); color: var(--text); font: 500 13px/1 var(--mono); box-shadow: inset 0 1px 0 var(--key-hi); transition: transform var(--t-2) var(--ease-press); }
-.key.wide .key-top { min-width: calc(var(--key) * 1.5); }
-.key.is-down .key-top { transform: translateY(3px); transition-duration: 80ms; transition-timing-function: ease-out; }
-.key.is-down::before, .combo[data-combo="draw"].is-on .key::before { opacity: 1; transform: scale(1.2); transition-duration: 120ms; }
-.combo[data-combo="draw"].is-on .key::before { transition-duration: var(--t-2); transform: scale(1.06); }
-.combo-label { font: 720 24px/1.15 var(--display); letter-spacing: -.025em; }
-.keys-foot { display: grid; justify-items: center; gap: 10px; text-align: center; }
-.stay { font: 720 clamp(24px, 3vw, 32px)/1.15 var(--display); letter-spacing: -.03em; }
-.press-note { font-size: 17px; color: var(--muted); }
-.mode-line { display: inline-flex; align-items: center; gap: 9px; margin-top: 8px; padding: 7px 15px 7px 12px; border-radius: 999px; background: var(--wash); font-size: 15.5px; font-weight: 600; transition: background-color var(--t-2) ease; }
-.mode-line i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-2) ease, box-shadow var(--t-2) ease; }
-.mode-line[data-mode="draw"] { background: color-mix(in srgb, var(--on) 18%, transparent); }
-.mode-line[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
-
-/* There is more in the app */
-.extras { margin-top: 48px; }
-.extra { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 18px; align-items: center; align-content: start; padding: 20px 18px; overflow: hidden; }
-.extra p { margin-top: 6px; font-size: 16px; line-height: 1.45; color: var(--muted); }
-.il { display: block; width: 100%; height: auto; overflow: visible; }
-.il-panel { fill: var(--wash); stroke: var(--line-strong); }
-.il-faint { fill: none; stroke: color-mix(in srgb, var(--text) 22%, transparent); stroke-width: 2.5; stroke-linecap: round; }
-.il-region { fill: color-mix(in srgb, var(--aurora-2) 12%, transparent); stroke-width: 1.6; stroke-dasharray: 5 4; }
-.il-card { fill: var(--surface-2); stroke-width: 1.6; }
-.il-rule { stroke: var(--line-strong); }
-.il-dot { fill: var(--faint); }
-.il-fill { opacity: .4; }
-.il-glow.a { fill: var(--glow-1); }
-.il-glow.b { fill: var(--glow-3); }
-.il-small { fill: var(--muted); font: 500 9px var(--sans); }
-.il-time { fill: var(--text); font: 600 23px var(--mono); letter-spacing: -.04em; }
-.il-time:is(.t1, .t2) { opacity: 0; }
-.il-white { fill: var(--board-white); }
-.il-black { fill: var(--board-black); }
-.il-frame { fill: none; stroke: var(--line-strong); }
-.il-ink { fill: none; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
-.il-pop, .il-black, .il-glow { transform-box: fill-box; transform-origin: center; }
-/* A toolbar that is yours: a small bar that shrinks to one button and grows back, the way the app's does. It is two
-   shapes, a hairline and a fill, cut by the same moving edge (main.js moves it with the app's curve and times). */
-.il-toolbar { container-type: inline-size; display: grid; place-items: center; aspect-ratio: 160 / 104; }
-.tb { --h: 20cqi; position: relative; width: 86cqi; height: var(--h); }
-.tb-shell, .tb-fill { position: absolute; inset: 0; clip-path: inset(0 round 5.600cqi); }
-.tb-shell { background: color-mix(in srgb, var(--text) 30%, transparent); }
-.tb-fill { background: var(--surface-2); clip-path: inset(1px round calc(5.600cqi - 1px)); }
-.tb-full, .tb-one { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 4.200cqi; }
-.tb-full i { width: 8cqi; height: 8cqi; border-radius: 2.200cqi; background: color-mix(in srgb, var(--text) 32%, transparent); }
-.tb-full i:nth-child(2) { background: var(--aurora); }
-.tb-one { opacity: 0; }
-.tb-one i { width: 8.500cqi; height: 8.500cqi; border-radius: 50%; background: var(--text); }
 
 /* Good to know: questions in a column of ruled rows. */
 .answers { display: grid; gap: 36px; }
@@ -528,10 +437,10 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
   .arc-steps::before, .arc-steps::after { left: 15px; right: 15px; }
 }
 @media (min-width: 600px) {
-  .hero-copy { gap: 22px; padding-top: 36px; }
-  .lede { font-size: 20px; }
-  .try-line { margin-top: 20px; font-size: 19px; }
-  .stage { margin-top: 26px; }
+  .hero-copy { gap: 18px; padding-top: 30px; }
+  .lede { font-size: 22px; }
+  .stage { margin-top: 48px; }
+  .stage-title { margin-bottom: 22px; }
   .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 60px; --inset: clamp(24px, 4vw, 64px); --inset-top: 48px; --dock-inset: 14px; }
   .mode-chip { top: 10px; }
   .screen .stage-shrink { --stage-shrink-top: 10px; --stage-shrink-right: 22px; }
@@ -541,19 +450,6 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
   .report { gap: 22px; padding: 22px 26px 26px; }
   .report-head { grid-template-columns: 1fr auto; align-items: baseline; }
   .num { font-size: 32px; }
-  .keys { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
-  .combo { padding: 64px 24px 46px; }
-  .combo + .combo { border-top: 0; border-left: 1px solid var(--line); }
-  .plate { --key: 70px; gap: 12px; }
-  .key-top { font-size: 14px; }
-  .extras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .lattice.extras > * { border-radius: 0; }
-  .lattice.extras > :nth-child(1) { border-top-left-radius: calc(var(--r-panel) - 1px); }
-  .lattice.extras > :nth-child(2) { border-top-right-radius: calc(var(--r-panel) - 1px); }
-  .lattice.extras > :nth-child(3) { border-bottom-left-radius: calc(var(--r-panel) - 1px); }
-  .lattice.extras > :nth-child(4) { border-bottom-right-radius: calc(var(--r-panel) - 1px); }
-  .extra { grid-template-columns: 1fr; gap: 20px; align-items: start; padding: 24px 26px 32px; }
-  .extra .il { width: min(100%, 260px); }
   .stage figcaption { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lattice.platforms > * { border-radius: 0; }
@@ -570,14 +466,6 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
   .notes li { position: relative; padding-left: 16px; }
   .notes li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: var(--win-accent); }
   .num { font-size: 38px; }
-  .plate { --key: 88px; gap: 16px; }
-  .key-top { border-radius: 16px; font-size: 16px; }
-  .combo-label { font-size: 28px; }
-  .extras { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .lattice.extras > :nth-child(n) { border-radius: 0; }
-  .lattice.extras > :nth-child(1) { border-radius: calc(var(--r-panel) - 1px) 0 0 calc(var(--r-panel) - 1px); }
-  .lattice.extras > :nth-child(4) { border-radius: 0 calc(var(--r-panel) - 1px) calc(var(--r-panel) - 1px) 0; }
-  .extra { padding: 24px 24px 30px; }
   /* The heading stays beside the questions while they pass. */
   .answers { grid-template-columns: minmax(0, .72fr) minmax(0, 1fr); gap: 64px; align-items: start; }
   .answers h2 { position: sticky; top: calc(var(--header-h) + var(--header-top) + 40px); text-align: left; }
@@ -631,8 +519,6 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .motion .lattice > [data-enter] { opacity: 1; transform: none; }
 .motion .lattice > [data-enter]:not(.is-settled) > * { transition: opacity var(--t-2) ease calc(var(--i, 0) * var(--stagger)), transform var(--t-3) var(--ease-out) calc(var(--i, 0) * var(--stagger)); }
 .motion .lattice > [data-enter]:not(.is-in) > * { opacity: 0; transform: translate3d(0, var(--rise), 0); }
-/* The small pictures come in on the app's Magic flight instead (main.js). */
-.motion .lattice > .extra > .il { transform: none; transition: none; }
 .motion [data-sweep]::after, .motion .desk::after { content: ""; position: absolute; inset: -10% -20%; z-index: 6; background: linear-gradient(102deg, #0000 34%, var(--sweep-1) 43%, var(--sweep-2) 50%, var(--sweep-3) 57%, #0000 66%); opacity: 0; transform: translate3d(-100%, 0, 0); pointer-events: none; }
 .motion [data-sweep].is-in::after { animation: sweep var(--t-sweep) var(--ease-sweep) calc(var(--i, 0) * var(--stagger) + 160ms) both; }
 .motion .desk::after { animation: sweep 1700ms var(--ease-sweep) 1100ms both; }
@@ -640,10 +526,18 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 /* Heading words come up one after another. */
 .motion .word { display: inline-block; opacity: 0; transform: translate3d(0, .42em, 0); transition: opacity var(--t-2) ease calc(var(--w) * 60ms), transform var(--t-3) var(--ease-out) calc(var(--w) * 60ms); }
 .motion .is-in > .word { opacity: 1; transform: none; }
+/* Once the headline is up, its ring is drawn, the way a pen draws one. */
+.motion .ring path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.motion .is-in .ring path { animation: draw 820ms var(--ease-soft) 760ms both; }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 .motion .site-header { animation: drop var(--t-3) var(--ease-out) backwards; }
 .motion .lede { animation: rise var(--t-3) var(--ease-out) 420ms backwards; }
 .motion .get { animation: rise var(--t-3) var(--ease-out) 520ms backwards; }
-.motion .try-line { animation: rise var(--t-3) var(--ease-out) 640ms backwards; }
+.motion .stage-title { animation: rise var(--t-3) var(--ease-out) 660ms backwards; }
+/* The dot beside the stage's words is live: a ring leaves it, again and again, while the stage is on screen. */
+.motion .stage-title i::after { animation: live 2.4s var(--ease-out) 1.8s infinite; }
+.motion .stage.is-away .stage-title i::after { animation-play-state: paused; }
+@keyframes live { 0% { opacity: .8; transform: none; } 70%, 100% { opacity: 0; transform: scale(2.7); } }
 .motion .button.try svg { animation: nudge 2.6s var(--ease-soft) 1.6s infinite; }
 @keyframes nudge { 0%, 46%, 100% { transform: none; } 23% { transform: translateY(3px); } }
 .motion .aurora-sky { animation: dawn 2200ms ease 100ms backwards; }
@@ -684,10 +578,10 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 .motion .board, .motion .tile-media { transform: translateZ(0); }
 .motion .dock > .ink-toolbar { animation: rise var(--t-3) var(--ease-out) 800ms backwards; }
 
-/* The carousel: the section is tall, its content stays put, and six cards on a wide ring turn past as the page
+/* The carousel: the section is tall, its content stays put, and four cards on a wide ring turn past as the page
    scrolls. main.js gives the ring its radius (--R) and each card --d (how many places it is from the front),
    --ad (the same, never negative, up to 1) and --o. */
-.motion .what { --step: 56vh; --theta: 30deg; --arc-gap: 14px; --peek: 32px; --text-h: 142px; --card-w: min(100vw - 2 * var(--peek), (100svh - 366px) * 1.6, 880px); height: calc(100svh + 5 * var(--step)); margin-top: calc(var(--space) - var(--header-h) - var(--header-top) - 24px); }
+.motion .what { --step: 56vh; --theta: 30deg; --arc-gap: 14px; --peek: 32px; --text-h: 142px; --card-w: min(100vw - 2 * var(--peek), (100svh - 366px) * 1.6, 880px); height: calc(100svh + 3 * var(--step)); margin-top: calc(var(--space) - var(--header-h) - var(--header-top) - 24px); }
 .motion .arc-pin { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; grid-template-rows: auto auto auto; align-content: center; gap: clamp(14px, 2.6svh, 30px); padding: calc(var(--header-h) + var(--header-top) + 16px) 0 18px; }
 .motion .aurora-arc { height: auto; bottom: calc(var(--text-h) - 4px); }
 .motion .arc-space { display: grid; place-items: center; perspective: 1700px; perspective-origin: 50% 40%; opacity: var(--enter, 1); }
@@ -706,49 +600,10 @@ h1 { max-width: 11.5em; font-size: clamp(42px, 7.4vw, 92px); line-height: .97; f
 }
 @media (min-width: 1100px) { .motion .what { --theta: 25deg; --arc-gap: 64px; } }
 
-/* Keys that float: the caps stand above their light and travel down into it when pressed. */
-.motion .plate { transform-style: preserve-3d; transform-origin: 50% 100%; transform: perspective(800px) rotateX(calc(40deg - var(--e, 1) * 16deg)); }
-.motion .key { transform-style: preserve-3d; }
-.motion .key-top { transform: translateZ(22px); }
-.motion .key.is-down .key-top { transform: translateZ(3px); }
-
-/* The lattice of extras turns to face the page as it comes up the screen (--e, 0 to 1). */
-.motion .also { perspective: 1700px; }
-.motion .extras { transform-origin: 50% 0; transform: rotateX(calc((1 - var(--e, 1)) * 15deg)) scale(calc(.95 + var(--e, 1) * .05)); will-change: transform; }
-
-/* On the stage. The chip's key goes down when the mode changes. "Your turn" grows out of a one-button pill the
-   way the app's toolbar grows back (0.34 s on "standard", its words arriving from 35% of the way), and then its
-   pointer keeps nodding at the tools. */
+/* On the stage. The chip's key goes down when the mode changes. */
 .motion .mode-chip.is-changing kbd { animation: key-tap 480ms var(--ease-out) both; }
 @keyframes key-tap { 30% { transform: translateY(1.500px) scale(.9); box-shadow: 0 0 10px 1px var(--aurora-2); } }
-.motion .turn { animation: turn-grow var(--t-grow) var(--ease-soft) both; }
-.motion .turn span { animation: turn-words var(--t-grow) linear both; }
-@keyframes turn-grow { from { clip-path: inset(0 calc(100% - 34px) 0 0 round 17px); } to { clip-path: inset(0 round 17px); } }
-@keyframes turn-words { 0%, 35% { opacity: 0; } }
-.motion .turn svg { animation: nod 2.6s var(--ease-soft) 700ms infinite; }
-.motion .stage.is-away .turn svg { animation-play-state: paused; }
-@keyframes nod { 0%, 50%, 100% { transform: none; } 24% { transform: translate(1px, 4px); } }
 .motion .stage.is-called .desk::after { animation: sweep 1200ms var(--ease-sweep) both; }
-/* An icon lands on the sketch. */
-.motion .node { opacity: 0; transform: scale(.7); transition: opacity var(--t-1) ease, transform var(--t-2) var(--ease-press); }
-.motion .node.is-on { opacity: 1; transform: none; }
-
-/* Small pictures that play once when they arrive, and again under the pointer. */
-.motion .extra.is-playing .il-pop { animation: pop-out var(--t-3) var(--ease-out) 200ms backwards; }
-.motion .extra.is-playing .il-region { animation: fade-in var(--t-2) ease backwards; }
-.motion .extra.is-playing .il-time.t1 { animation: shown .8s steps(1, end); }
-.motion .extra.is-playing .il-time.t2 { animation: shown .8s steps(1, end) .8s; }
-.motion .extra.is-playing .il-time.t3 { animation: unseen 1.6s steps(1, end); }
-.motion .extra.is-playing .il-glow.a { animation: drift 2.8s var(--ease-soft) backwards; }
-.motion .extra.is-playing .il-black { transform-origin: 100% 50%; animation: wipe var(--t-3) var(--ease-soft) backwards; }
-.motion .extra.is-playing .il-ink { stroke-dasharray: 1; animation: draw 1.1s var(--ease-soft) 500ms backwards; }
-@keyframes pop-out { from { opacity: 0; transform: translate(-28px, -18px) scale(.8); } }
-@keyframes fade-in { from { opacity: 0; } }
-@keyframes shown { from, to { opacity: 1; } }
-@keyframes unseen { from, to { opacity: 0; } }
-@keyframes drift { from { transform: translate(30px, -22px); } }
-@keyframes wipe { from { transform: scaleX(0); } }
-@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
 /* Coffee: the cup drifts a little against its panel, and its steam rises through the gradient while it is in view. */
 .motion .cup { transform: translate3d(0, calc((.5 - var(--p, .5)) * 30px), 0); }

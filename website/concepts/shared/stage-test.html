@@ -58,7 +58,7 @@ import { growingStage } from "./stage.js";
 
 const query = new URLSearchParams(location.search), surface = document.querySelector("#surface");
 const ink = (window.ink = createInk({ surface, toolbarParent: document.querySelector("#dock"), toolbarPosition: "absolute", properties: false }));
-const stage = (window.stage = growingStage({ ink, surface, tries: "[data-try]", ...(query.get("motion") === "off" ? { motion: () => false } : {}) }));
+const stage = (window.stage = growingStage({ ink, surface, tries: "[data-try]", invite: query.has("no-invite") ? "" : "Draw here", ...(query.get("motion") === "off" ? { motion: () => false } : {}) }));
 const seen = (window.seen = { joins: 0, grows: 0, shrinks: 0, shortcuts: [], modes: [] });
 stage.on("join", () => seen.joins++).on("grow", () => seen.grows++).on("shrink", () => seen.shrinks++);
 ink.on("shortcut", (name, how) => seen.shortcuts.push(`${name}${how?.key ? "" : "?"}`));

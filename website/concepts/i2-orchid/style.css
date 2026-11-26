@@ -26,12 +26,10 @@
   --well-edge: inset 0 0 0 1.5px #ffffff0d, inset 0 2px 6px #00000052;
   --scrim: #111014; --shade: #000000; --pointer-light: #ffffff12;
   --stage: #17151b; --win: #24222b; --win-inset: #2a2832;
-  --key-top: #322f3c; --key-bed: #09080b; --key-edge: #ffffff1f;
   --blend: screen;
   /* How strong the out-of-focus lights and the grain over them are. */
   --orb: .2; --grain: .16;
-  /* A whiteboard is white and a blackboard is black in either theme. */
-  --board-white: #ffffff; --board-black: #141217; --seg-on: #3a3745;
+  --seg-on: #3a3745;
   --sheen: #ffffff73; --dip: #00000061;
 }
 html[data-theme="light"] {
@@ -48,7 +46,6 @@ html[data-theme="light"] {
   --well-edge: inset 0 0 0 1.5px #2b1a3b0d, inset 0 2px 5px #4b2f6b14;
   --scrim: #faf8fb; --shade: #4b3a5e; --pointer-light: #ffffffcc;
   --stage: #f1eef4; --win: #ffffff; --win-inset: #f7f5f9;
-  --key-top: #ffffff; --key-bed: #cfc8d8; --key-edge: #2b1a3b14;
   --blend: multiply;
   --orb: .19; --grain: .12; --seg-on: #ffffff;
   --dip: #4b2f6b2e;
@@ -100,7 +97,6 @@ main > section + section { margin-top: var(--space); }
 h1, h2, h3 { font-family: var(--display); text-wrap: balance; }
 h2 { font-size: clamp(34px, 5.2vw, 60px); line-height: 1; font-weight: 800; letter-spacing: -.03em; text-align: center; }
 h3 { font-size: 23px; line-height: 1.12; font-weight: 700; letter-spacing: -.015em; }
-kbd { display: inline-block; min-width: 26px; padding: 3px 7px; border-radius: 9px; background: var(--wash); box-shadow: inset 0 0 0 1.5px var(--line-strong), inset 0 -2px 0 var(--line-strong); color: var(--text); font: 500 12px/1.4 var(--mono); text-align: center; }
 .panel { position: relative; border-radius: var(--r-panel); background: var(--surface-1); box-shadow: var(--pebble); }
 
 /* Out-of-focus lights. Each is one soft circle of one stop of the gradient, far behind what it sits under, with a
@@ -201,14 +197,14 @@ html[data-theme="light"] .ts-cloud { opacity: 1; scale: 1; translate: 0 0; }
 .orbs-hero .orb-b { left: 34%; top: 30%; width: min(900px, 110vw); opacity: calc(var(--orb) * .8); }
 .orbs-hero .orb-c { right: -16%; top: -2%; width: min(780px, 90vw); }
 .hero-top { display: grid; justify-items: center; text-align: center; }
-h1 { font-size: clamp(44px, 11.6vw, 76px); line-height: .96; font-weight: 800; letter-spacing: -.035em; }
-/* The word that matters sits on a swipe of the gradient, as light: the word keeps the text color. */
-.mark-word { position: relative; display: inline-block; isolation: isolate; }
+/* The headline is one short line at every width. */
+h1 { font-size: clamp(44px, 15.4vw, 84px); line-height: .96; font-weight: 800; letter-spacing: -.035em; white-space: nowrap; }
+/* The headline does what it says: a ring of the gradient, drawn by hand, goes round its last word. */
+.mark-word { position: relative; display: inline-block; }
 .mark-word b { font-weight: inherit; }
-.mark-word i { position: absolute; inset: .14em -.14em .02em; z-index: -1; border-radius: .34em; background: var(--accent-grad); opacity: .42; transform-origin: 0 50%; }
-html[data-theme="light"] .mark-word i { opacity: .5; }
-.lede { max-width: 37em; margin-top: 20px; font-size: 19px; line-height: 1.5; color: var(--muted); }
-.try-line { max-width: 37em; margin-top: 22px; font-size: 17px; line-height: 1.45; font-weight: 650; }
+.mark-word svg { position: absolute; left: -.17em; top: -.03em; width: calc(100% + .39em); height: calc(100% + .1em); overflow: visible; pointer-events: none; }
+.mark-word path { fill: none; stroke: url(#orchid); stroke-width: 4px; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; }
+.lede { max-width: 37em; margin-top: 16px; font-size: 19px; line-height: 1.5; color: var(--muted); text-wrap: balance; }
 .get { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px 24px; margin-top: 26px; }
 .quiet { font-size: 16px; font-weight: 600; text-decoration-color: var(--line-strong); text-decoration-thickness: 2px; text-underline-offset: .3em; transition: text-decoration-color var(--t-1) ease; }
 .quiet:hover { text-decoration-color: var(--accent); }
@@ -216,37 +212,32 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .get-more { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 16px; }
 
 /* The stage: a desk with sample windows afloat on it, the ink layer and the app's toolbar. */
-.stage { margin-top: 40px; }
+.stage { margin-top: 44px; }
+/* The one line that introduces the stage, and the page's main invitation: it stands right over the desk, and an
+   arrow in the gradient, drawn like the app's own, points down at it. */
+.stage-title { margin-bottom: 26px; font-size: clamp(23px, 6.2vw, 28px); line-height: 1.15; font-weight: 800; letter-spacing: -.022em; }
+.stage-title span { white-space: nowrap; }
+.stage-title svg { display: inline-block; width: 1.2em; height: 1.1em; margin: 0 -.2em -.62em .22em; overflow: visible; fill: none; stroke: url(#orchid); stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
+.stage-title path { stroke-dasharray: 1; }
 .stage-scene { position: relative; width: min(1320px, 100% - 2 * var(--stage-gutter)); margin-inline: auto; }
 .stage-shadow { position: absolute; inset: 14% 7% -3%; border-radius: 60px; background: var(--shade); filter: blur(46px); opacity: .16; pointer-events: none; }
 .stage-plane { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 168px; --inset: 14px; position: relative; isolation: isolate; padding: var(--inset) var(--inset) calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap)); }
 /* The desk is one smooth pebble with a light at its top edge and another that follows the pointer. */
 .desk-panel { position: absolute; inset: 0; z-index: -1; border-radius: var(--r-panel); background: radial-gradient(520px circle at var(--px, 50%) var(--py, 0%), var(--pointer-light), transparent 70%), var(--stage); box-shadow: var(--pebble); }
-/* On the rim of the stage: which mode the demo is in, and the invitation to take over. */
-.stage-tags { position: absolute; left: 20px; right: 20px; top: var(--rim); z-index: 110; display: flex; align-items: center; justify-content: space-between; gap: 10px; pointer-events: none; }
-.stage-tags > * { pointer-events: auto; }
-.mode-chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box; box-shadow: 0 12px 20px -14px var(--shade); font: 650 13.5px/1 var(--sans); white-space: nowrap; }
+/* On the rim of the stage: which mode the demo is in. */
+.mode-chip { position: absolute; left: 20px; top: var(--rim); z-index: 110; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box; box-shadow: 0 12px 20px -14px var(--shade); font: 650 13.5px/1 var(--sans); white-space: nowrap; }
 .mode-chip > i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: scale var(--t-2) var(--jelly); }
 .mode-chip b { font-weight: inherit; }
 .mode-chip[data-mode="draw"] { background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, var(--accent-grad) border-box; }
 .mode-chip[data-mode="draw"] > i { background: var(--accent-grad); box-shadow: 0 0 0 4px var(--accent-soft); scale: 1.15; }
 .mode-chip[data-mode="draw"] b { color: var(--accent); }
-.chip-keys { display: none; gap: 3px; margin-right: -5px; }
-.chip-keys kbd { min-width: 22px; padding: 2px 6px; font-size: 11px; transition: transform var(--t-2) var(--jelly), background var(--t-1) ease; }
-.chip-keys kbd.is-down { transform: translateY(2px) scale(.92, .86); background: var(--accent-soft); transition-duration: 80ms; }
-.your-turn { display: inline-flex; align-items: center; gap: 7px; height: 36px; margin-left: auto; padding: 0 15px 0 11px; border: 0; border-radius: 999px; background: var(--text); color: var(--page); box-shadow: 0 14px 24px -12px var(--or-b), 0 8px 16px -10px var(--or-a); font: 700 13.5px/1 var(--sans); white-space: nowrap; cursor: pointer; transition: transform var(--t-2) var(--jelly); }
-.your-turn[hidden] { display: none; }
-.your-turn:hover { transform: scale(1.05); }
-.your-turn:active { transform: scale(.94, .9); transition-duration: 90ms; }
-.your-turn:focus-visible { border-radius: 999px; }
-.your-turn svg { flex: none; overflow: visible; fill: currentColor; stroke: none; }
 /* A ring of the gradient round the stage, for a moment, when the visitor asks to try it. */
 .desk-cue { position: absolute; inset: 0; pointer-events: none; }
 .desk-cue::before { content: ""; position: absolute; inset: -4px; border-radius: calc(var(--r-panel) + 4px); padding: 4px; background: var(--accent-grad); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: 0; }
 .stage-plane.is-cued .desk-cue::before { opacity: 1; }
 /* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
-   frame is the desk's own pebble. The tags stay on its rim, a little further in once the rim is at the window's
-   edge, and the button that makes it small again sits on the rim where "Your turn" was. */
+   frame is the desk's own pebble. The chip stays on its rim, a little further in once the rim is at the window's
+   edge, and the button that makes it small again sits on the rim across from it. */
 :root { --stage-scrim: var(--page); }
 .stage-plane { --stage-radius: var(--r-panel); --rim-in: 6px; --rim: calc(-18px + var(--stage-grow, 0) * var(--rim-in)); }
 .stage-shrink { --stage-shrink-top: var(--rim); --stage-shrink-right: 20px; background: var(--surface-1); color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 12px 20px -14px var(--shade); transition: background var(--t-1) ease, transform var(--t-1) var(--app-standard); }
@@ -322,9 +313,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .is-tapped::after { content: ""; position: absolute; left: 50%; top: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; border: 3px solid var(--accent); border-radius: 50%; pointer-events: none; }
 
 .stage figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; min-height: 38px; margin-top: 18px; font-size: 15px; line-height: 1.45; color: var(--muted); }
-.stage-words { display: grid; gap: 2px; }
-#stage-note { color: var(--text); font-weight: 600; }
-.stage-words small { font-size: 14px; }
+.stage-words { font-size: 14.5px; }
 .stage-controls { display: flex; gap: 8px; margin-left: auto; }
 #stage-done[hidden] { display: inline-flex; visibility: hidden; }
 #stage-replay { min-width: 100px; }
@@ -336,8 +325,8 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .card { position: relative; grid-column: 1 / -1; display: flex; flex-direction: column; gap: 18px; min-width: 0; padding: 12px; border-radius: var(--r-card); background: var(--surface-1); box-shadow: var(--pebble); }
 .card-text { padding: 0 10px 12px; }
 .card-text p { margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--muted); }
-/* Every picture is a small sample screen that the pointer draws on, live. Its text is sized from the frame's
-   width and height, so nothing in it is cut when the frame is short. */
+/* Every picture is a live scene in a frame of 16 to 10, or wider (up to 2 to 1) where the window is short. What is
+   in a frame is sized from the frame's width and height, so nothing in it is cut. */
 .frame { position: relative; overflow: hidden; aspect-ratio: 16 / 10; border-radius: var(--r-media); }
 .frame-shot { display: grid; place-items: center; container-type: size; background: var(--well); box-shadow: var(--well-edge); }
 .ctl { position: absolute; right: 12px; bottom: 12px; z-index: 70; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--surface-1) 92%, transparent); color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 6px 12px -6px var(--dip); cursor: pointer; opacity: .86; transition: opacity var(--t-1) ease, transform var(--t-2) var(--jelly); }
@@ -348,24 +337,6 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .shot { position: relative; width: 100%; height: 100%; display: grid; place-items: center; padding: 4cqh 3cqw; font-size: clamp(9px, min(2.75cqw, 4.5cqh), 18px); line-height: 1.4; }
 .shot .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-1) ease; }
 .shot.is-leaving .ink-layer { opacity: 0; }
-.rec, .dlg { width: min(100%, 24em); border-radius: 1.3em; background: var(--win); box-shadow: var(--float); }
-.rec { padding: 1.15em 1.3em; }
-.rec-head { display: flex; align-items: center; gap: .7em; font-size: 1.07em; line-height: 1.3; }
-.rec-head span { display: flex; flex-direction: column; }
-.rec-head em { font-style: normal; font-size: .87em; color: var(--muted); }
-.rec .avatar { width: 2.3em; height: 2.3em; font-size: 1em; }
-.rec dl { display: grid; gap: 0; margin-top: .85em; }
-.rec dl div { display: grid; grid-template-columns: 4.1em minmax(0, 1fr); align-items: center; padding: .65em 0; border-top: 1.5px solid var(--line); }
-.rec dt { color: var(--muted); }
-.rec dd span { display: inline-block; font: 500 .93em/1.3 var(--mono); }
-.dlg { padding: 1.15em 1.3em 1.3em 3.7em; }
-.dlg-title { font: 800 1.2em/1.2 var(--display); }
-.dlg-row { position: relative; display: flex; align-items: center; justify-content: space-between; gap: .85em; margin-top: .75em; }
-.dlg-row i { position: absolute; left: -1.75em; top: 50%; width: 0; height: 0; }
-.dlg-row span { color: var(--muted); }
-.dlg-row > b:not(.fake-btn) { min-width: 7.7em; padding: .42em .9em; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line-strong); font-weight: 500; }
-.dlg-go { justify-content: flex-end; margin-top: 1em; }
-.fake-btn { padding: .55em 1.3em; border-radius: 999px; background: var(--text); color: var(--page); font-weight: 650; }
 .dash { display: grid; gap: .7em; width: min(100%, 31em); }
 .dash-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6em; }
 .dash-tiles span { display: grid; gap: .6em; padding: .75em .9em .9em; border-radius: .95em; background: var(--win); box-shadow: var(--float); }
@@ -376,103 +347,11 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .dash-chart svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .dash-line { fill: none; stroke: var(--faint); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .dash-fill { fill: var(--wash); }
-.dash-chart i { position: absolute; left: 55.3%; top: 88%; width: 0; height: 0; }
-.shot-pay { justify-items: start; padding-left: 8cqw; }
-.pay { width: min(56cqw, 16em); padding: 1.05em 1.2em 1.25em; border-radius: 1.3em; background: var(--win); box-shadow: var(--float); }
-.pay-title { font: 800 1.2em/1.2 var(--display); }
-.pay-row { display: flex; justify-content: space-between; gap: 1em; margin-top: .55em; color: var(--muted); }
-.pay-row b { color: var(--text); }
-.pay-field { margin-top: .7em; padding: .5em .85em; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line-strong); color: var(--muted); font-size: .9em; }
-.pay-go { display: flex; justify-content: center; margin-top: 1.15em; }
-.pics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: .7em; width: 100%; height: 100%; }
-.pics i { border-radius: 1em; }
-/* Sample pictures: their colors are their own, like the drawings'. */
-.pics [data-t="s1"] { background: radial-gradient(circle at 68% 34%, #fff1c9 0 13%, #0000 14%), linear-gradient(#f3b08d, #d9798b 58%, #5b4687 58%); }
-.pics [data-t="s2"] { background: linear-gradient(#a8d8f2 52%, #3b89c9 52%, #1f5d96); }
-.pics [data-t="s3"] { background: radial-gradient(circle at 30% 30%, #fdf6c8 0 9%, #0000 10%), linear-gradient(#1b1f3d, #45357a); }
-.pics [data-t="s4"] { background: linear-gradient(90deg, #ffd166 0 34%, #ef6f8f 34% 67%, #35c9a5 67%); }
-.pics [data-t="s5"] { background: linear-gradient(#cfe9cf 46%, #3c9a66 46%, #1f6b47); }
-.pics [data-t="s6"] { background: radial-gradient(circle at 34% 58%, #f58fb2 0 24%, #0000 25%), radial-gradient(circle at 72% 40%, #f9b3cb 0 17%, #0000 18%), #fdebf1; }
-.node { position: absolute; top: 50%; width: 22%; height: 34%; translate: 0 -50%; }
-.node[data-t="n1"] { left: 7%; }
-.node[data-t="n2"] { left: 39%; }
-.node[data-t="n3"] { left: 71%; }
+.dash-chart i { position: absolute; left: 44%; top: 50%; width: 22.6%; height: 45%; }
 
-/* 3. The two keys ----------------------------------------------------------------------------- */
-.keys .panel { display: grid; justify-items: center; gap: 28px; padding: 40px 14px 34px; overflow: hidden; isolation: isolate; text-align: center; }
-.orbs-keys .orb-a { left: -22%; top: -46%; width: min(640px, 110%); }
-.orbs-keys .orb-c { right: -20%; bottom: -60%; width: min(700px, 120%); }
-.keys-copy p { max-width: 30em; margin-inline: auto; color: var(--muted); }
-.keys-copy .mode-line { display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 10px; color: var(--text); font-weight: 600; }
-.mode-line i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--faint); transition: background var(--t-1) ease, box-shadow var(--t-1) ease, scale var(--t-2) var(--jelly); }
-.keys[data-mode="draw"] .mode-line i { background: var(--accent-grad); box-shadow: 0 0 0 4px var(--accent-soft); scale: 1.15; }
-.keys-rows { display: grid; gap: 12px; width: 100%; }
-.keys-row { display: grid; justify-items: center; align-content: center; gap: 4px; padding: 26px 12px 24px; border-radius: calc(var(--r-panel) - 12px); background: color-mix(in srgb, var(--page) 62%, transparent); box-shadow: var(--well-edge); }
-.keys-row p { max-width: 16em; font: 700 19px/1.3 var(--display); letter-spacing: -.01em; }
-.keyset { display: inline-flex; gap: 10px; padding: 8px 8px 14px; border: 0; background: none; cursor: pointer; }
-.keyset:focus-visible { border-radius: 28px; outline-offset: 0; }
-/* A key is a soft cap on a darker bed. A press pushes the cap down into the bed and squashes it a little. */
-.key { position: relative; display: block; min-width: 58px; height: 64px; isolation: isolate; }
-.key-wide { min-width: 98px; }
-.key::before { content: ""; position: absolute; inset: 8px 0 0; border-radius: 19px; background: var(--key-bed); box-shadow: 0 14px 18px -12px var(--shade); }
-.key::after { content: ""; position: absolute; inset: 16px 8px -4px; z-index: -1; border-radius: 19px; background: var(--accent-grad); filter: blur(13px); opacity: 0; transition: opacity var(--t-2) ease; }
-.key b { position: absolute; inset: 0 0 8px; display: grid; place-items: center; border: 2px solid transparent; border-radius: 19px; background: linear-gradient(var(--key-top), var(--key-top)) padding-box, linear-gradient(var(--key-edge), var(--key-edge)) border-box; box-shadow: inset 0 1.5px 0 #ffffff1f, inset 0 -9px 12px -9px var(--dip); color: var(--text); font: 600 15px/1 var(--mono); transform-origin: 50% 100%; transition: transform var(--t-2) var(--jelly); }
-.key.is-down b { transform: translateY(6px) scale(1.035, .88); transition-duration: 80ms; transition-timing-function: ease-out; }
-/* The keys of the mode the demo is in sit in the gradient's light and wear it as a rim. */
-.keys[data-mode="draw"] [data-set="draw"] .key::after, .keys[data-mode="use"] [data-set="use"] .key::after { opacity: .6; }
-.keys[data-mode="draw"] [data-set="draw"] .key b, .keys[data-mode="use"] [data-set="use"] .key b { background: linear-gradient(var(--key-top), var(--key-top)) padding-box, var(--accent-grad) border-box; }
 
-/* 4. Also in the app -------------------------------------------------------------------------- */
-.also { position: relative; isolation: isolate; }
-.orbs-also { inset: -14% -12% -10%; -webkit-mask-image: radial-gradient(closest-side, #000 50%, #0000); mask-image: radial-gradient(closest-side, #000 50%, #0000); }
-.orbs-also .orb-b { left: 2%; top: 4%; width: min(560px, 60%); opacity: calc(var(--orb) * .8); }
-.orbs-also .orb-c { right: 0; bottom: 2%; width: min(620px, 64%); opacity: calc(var(--orb) * .8); }
-.also-grid { display: grid; gap: 14px; margin-top: 36px; }
-.also-item { display: grid; grid-template-columns: 118px minmax(0, 1fr); column-gap: 16px; align-items: center; align-content: center; padding: 10px 16px 10px 10px; border-radius: var(--r-card); background: var(--surface-1); box-shadow: var(--pebble); }
-.also-item .ill { grid-row: span 2; }
-.also-item h3 { align-self: end; font-size: 20px; }
-.also-item p { align-self: start; margin-top: 5px; font-size: 15.5px; line-height: 1.45; color: var(--muted); }
-.ill { position: relative; display: grid; place-items: center; overflow: hidden; container-type: inline-size; aspect-ratio: 16 / 11; border-radius: var(--r-media); background: var(--well); box-shadow: var(--well-edge); }
-.ill svg { width: 100%; height: 100%; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ill-screen { fill: var(--surface-2); stroke: var(--text); stroke-width: 3; }
-.ill-lines { stroke: var(--faint); stroke-width: 6; }
-.ill :is(svg *, div, span, i, b) { animation-play-state: paused; }
-.ill.is-live :is(svg *, div, span, i, b) { animation-play-state: running; }
-/* Smart Draw: the rough box is drawn, then becomes the neat one. Still, both show. */
-.sd-rough { stroke: var(--faint); stroke-width: 4; stroke-dasharray: 1; }
-.sd-neat { stroke: url(#orchid); stroke-width: 5; transform-box: fill-box; transform-origin: center; }
-.sd-spark { fill: url(#orchid); transform-box: fill-box; transform-origin: center; }
-/* Share region */
-.sr-region { stroke: url(#orchid); stroke-width: 3.5; stroke-dasharray: .1 8; }
-.sr-fill { fill: var(--faint); }
-.sr-window { transform-box: fill-box; transform-origin: 0% 50%; }
-/* Break timer: a pebble lit by the gradient from behind. */
-.bt-screen { position: relative; display: grid; justify-items: center; gap: .08em; width: 66%; padding: .34em .3em .4em; border-radius: .5em; background: var(--surface-1); color: var(--text); box-shadow: var(--pebble-flat); isolation: isolate; font-size: clamp(18px, 11.6cqw, 40px); }
-.bt-screen::before { content: ""; position: absolute; inset: .2em -.15em -.25em; z-index: -1; border-radius: inherit; background: linear-gradient(90deg, var(--or-a), var(--or-b), var(--or-c), var(--or-b), var(--or-a)); background-size: 300% 100%; filter: blur(.35em); opacity: .7; }
-.bt-screen::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--surface-1); box-shadow: var(--pebble-flat); }
-.bt-title { font: 600 max(8px, .3em)/1.2 var(--sans); color: var(--muted); }
-.bt-time { font: 800 1em/1 var(--display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.bt-bar { width: 72%; height: max(3px, .15em); margin-top: .18em; border-radius: 999px; background: var(--line-strong); overflow: hidden; }
-.bt-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent-grad); transform-origin: 0 50%; transform: scaleX(.86); }
-/* Whiteboard and blackboard */
-.wb-board { opacity: 0; }
-.wb-white { fill: var(--board-white); }
-.wb-black { fill: var(--board-black); opacity: 1; }
-.wb-mark { stroke: url(#orchid); stroke-width: 4.5; }
-/* Saved shapes */
-.ss-star { fill: url(#orchid); stroke: var(--text); stroke-width: 3; transform-box: fill-box; transform-origin: center; }
-/* The toolbar */
-.tb-mini, .tb-one { grid-area: 1 / 1; display: flex; align-items: center; gap: .375em; height: 2.625em; padding: .44em; border-radius: 999px; background: var(--surface-1); box-shadow: var(--pebble-flat), 0 0 0 max(1.5px, .16em) var(--text), 0 .9em 1.4em -.9em var(--shade); font-size: clamp(7px, 6.2cqw, 19px); }
-.tb-one { opacity: 0; }
-/* Where the engine can show its own toolbar shrinking, it stands here instead of the drawing of one. */
-.tb-live { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 760px; height: 130px; }
-.tb-live:empty { display: none; }
-.ill.has-live .tb-mini, .ill.has-live .tb-one { display: none; }
-.tb-mini i, .tb-one i { flex: none; width: 1.75em; height: 1.75em; border-radius: 50%; background: var(--line-strong); }
-.tb-mini .tb-move, .tb-one i { background: var(--accent-grad); }
-.tb-mini b, .tb-one b { flex: none; width: .5em; height: .5em; margin: 0 .19em; border-radius: 50%; background: var(--faint); }
 
-/* 5. Good to know ----------------------------------------------------------------------------- */
+/* 3. Good to know ----------------------------------------------------------------------------- */
 .know-grid { display: grid; gap: 14px; margin-top: 36px; }
 .know-grid > div { position: relative; padding: 26px 24px 28px; border-radius: var(--r-card); background: var(--surface-1); box-shadow: var(--pebble); }
 /* A short stroke of the gradient, with round ends, opens each answer. */
@@ -480,7 +359,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .know-grid dt { font: 700 22px/1.15 var(--display); letter-spacing: -.012em; }
 .know-grid dd { margin-top: 10px; font-size: 17px; line-height: 1.55; color: var(--muted); }
 
-/* 6. Coffee ----------------------------------------------------------------------------------- */
+/* 4. Coffee ----------------------------------------------------------------------------------- */
 .coffee .panel { display: grid; gap: 4px; align-items: center; padding: 38px 24px 10px; overflow: hidden; isolation: isolate; }
 .orbs-coffee .orb-a { right: -18%; top: -30%; width: min(560px, 110%); }
 .orbs-coffee .orb-b { right: 12%; bottom: -70%; width: min(620px, 120%); }
@@ -499,7 +378,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .cup-body { transform-box: fill-box; transform-origin: 50% 100%; transition: transform var(--t-3) var(--jelly); }
 .coffee:has(.btn-coffee:is(:hover, :focus-visible)) .cup-body { transform: rotate(-5deg) translateY(-4px); }
 
-/* 7. Install ---------------------------------------------------------------------------------- */
+/* 5. Install ---------------------------------------------------------------------------------- */
 .install { position: relative; isolation: isolate; }
 .orbs-install { inset: -26% -10% -30%; -webkit-mask-image: radial-gradient(closest-side, #000 50%, #0000); mask-image: radial-gradient(closest-side, #000 50%, #0000); }
 .orbs-install .orb-c { left: -6%; top: 6%; width: min(620px, 80%); opacity: calc(var(--orb) * .8); }
@@ -521,7 +400,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
 .command code { grid-column: 1 / -1; padding-bottom: 4px; font: 400 13px/1.5 var(--mono); overflow-wrap: anywhere; }
 .command .chip { height: 32px; min-width: 76px; font-size: 13.5px; }
 
-/* 8. Footer ----------------------------------------------------------------------------------- */
+/* 6. Footer ----------------------------------------------------------------------------------- */
 .site-footer { margin-top: var(--space); }
 .site-footer .wrap { display: grid; justify-items: center; gap: 20px; padding-block: 0 56px; text-align: center; }
 .site-footer .wordmark { font-size: 30px; }
@@ -540,10 +419,10 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
   .nav-coffee span { display: none; }
   .nav-coffee { width: 40px; padding: 0; justify-content: center; }
   .bar { padding-left: 16px; }
+  .mode-chip { left: 12px; }
   .wordmark { font-size: 22px; }
   .site-header nav { gap: 4px; }
   .site-header .btn-small { padding: 0 15px; }
-  .stage-tags { left: 12px; right: 12px; }
   .stage-plane { --rim-in: 14px; }
   .stage-shrink { --stage-shrink-right: 12px; }
   /* While the frame is grown the toolbar is at the bottom of the screen, with its own Draw button to leave drawing. */
@@ -559,15 +438,14 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
   .site-header .btn-small { display: none; }
 }
 @media (min-width: 600px) {
-  .chip-keys { display: none; }
-  .mode-chip[data-mode="use"] [data-chip="use"], .mode-chip[data-mode="draw"] [data-chip="draw"] { display: inline-flex; }
   .mail-reply input { font-size: 14.5px; }
-  .try-line { margin-top: 26px; font-size: 18px; }
-  .hero { padding-top: 44px; }
-  h1 { font-size: clamp(60px, 9.6vw, 88px); }
-  .lede { margin-top: 24px; font-size: 20px; }
+  .hero { padding-top: 48px; }
+  h1 { font-size: clamp(78px, 12.4vw, 112px); }
+  .mark-word path { stroke-width: 6px; }
+  .lede { margin-top: 20px; font-size: 21px; }
   .get { margin-top: 30px; }
-  .stage { margin-top: 52px; }
+  .stage { margin-top: 56px; }
+  .stage-title { margin-bottom: 28px; font-size: 30px; }
   .stage-plane { --tb-h: 113px; --tb-bottom: 14px; --tb-gap: 120px; --inset: 30px; }
   .bars { height: 84px; }
   .stage-plane > .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
@@ -577,16 +455,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
   .slide { padding: 18px 20px 20px; }
   .slide-title { font-size: 24px; }
   .card { grid-column: span 6; padding: 14px; }
-  .keys .panel { padding: 56px 18px 44px; gap: 34px; }
-  .keys-row { padding: 34px 20px 30px; }
-  .key { min-width: 76px; height: 84px; }
-  .key-wide { min-width: 128px; }
-  .key::before, .key b { border-radius: 24px; }
-  .key b { font-size: 17px; }
-  .also-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-  .also-item { display: block; padding: 12px 12px 24px; }
-  .also-item h3 { margin: 22px 14px 0; font-size: 23px; }
-  .also-item p { margin: 8px 14px 0; font-size: 17px; line-height: 1.5; }
+  .mode-chip { left: 20px; }
   .know-grid > div:last-child { grid-column: 1 / -1; }
   .know-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
   .know-grid > div { padding: 32px 32px 36px; }
@@ -601,15 +470,7 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
   .desk-windows { grid-template-columns: 1.2fr 1.08fr .88fr; gap: 20px; }
   .float-chart { margin-top: 26px; }
   .float-mail { grid-column: auto; justify-self: stretch; width: auto; margin-top: 62px; }
-  .card:nth-child(4n + 1), .card:nth-child(4n) { grid-column: span 7; }
-  .card:nth-child(4n + 2), .card:nth-child(4n + 3) { grid-column: span 5; }
-  .card:nth-child(n + 5) { grid-column: span 6; }
   .card .frame { flex: 1 1 auto; }
-  .keys-rows { grid-template-columns: 1.55fr 1fr; gap: 14px; }
-  .keys-row { padding: 44px 20px 38px; }
-  .also-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .also-item h3 { margin: 20px 12px 0; font-size: 21px; }
-  .also-item p { margin: 8px 12px 0; font-size: 16px; }
   .know-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .know-grid > div:last-child { grid-column: auto; }
   .know-grid > div { padding: 30px 28px 34px; }
@@ -624,23 +485,18 @@ html[data-theme="light"] .mark-word i { opacity: .5; }
   .bars { height: 70px; }
 }
 @media (min-width: 1180px) {
-  /* The headline fits one line here, so the stage and its toolbar are in the first screen. */
+  /* On a wide screen the words are kept short in height, so the whole stage and its toolbar are in the first screen. */
   .hero { padding-top: 10px; }
-  h1 { font-size: clamp(58px, 4.8vw, 78px); white-space: nowrap; }
-  .lede { margin-top: 8px; }
-  .try-line { margin-top: 14px; }
-  .get { margin-top: 14px; }
-  .stage { margin-top: 32px; }
-  .stage-plane { --tb-gap: 66px; --inset: 40px; }
+  h1 { font-size: clamp(84px, 6.6vw, 100px); }
+  .lede { margin-top: 8px; font-size: 20px; }
+  .get { margin-top: 16px; }
+  .stage { margin-top: 26px; }
+  .stage-title { margin-bottom: 26px; font-size: 28px; }
+  .stage-plane { --tb-gap: 40px; --inset: 40px; }
   .chart-kpi { margin-top: 14px; }
   .chart-delta { margin-top: 14px; }
   .bars { height: 62px; margin-top: 12px; }
   .stage figcaption { margin-top: 14px; }
-  .key { min-width: 86px; height: 94px; }
-  .key-wide { min-width: 142px; }
-  .key::before, .key b { border-radius: 27px; }
-  .key b { font-size: 18px; }
-  .keys-row p { font-size: 21px; }
 }
 
 /* Changing theme -------------------------------------------------------------------------------- */
@@ -689,12 +545,14 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 /* Headings: each word pops in, a little small, and settles. */
 .motion [data-rise] .w { display: inline-block; opacity: 0; transform: translateY(.22em) scale(.9); transform-origin: 50% 85%; transition: transform var(--t-3) var(--spring), opacity 320ms ease; transition-delay: calc(var(--i) * 48ms); }
 .motion [data-rise].is-in .w { opacity: 1; transform: none; }
-.motion .mark-word i { transform: scaleX(0); transition: transform var(--t-3) var(--spring) 520ms; }
-.motion .is-in .mark-word i { transform: none; }
+/* The ring is drawn once the headline has landed, and the arrow once the stage's line has. */
+.motion .mark-word path { stroke-dashoffset: 1; transition: stroke-dashoffset 700ms var(--app-standard) 520ms; }
+.motion .stage-title path { stroke-dashoffset: 1; transition: stroke-dashoffset 420ms var(--app-standard) 900ms; }
+.motion .stage-title path + path { transition-duration: 260ms; transition-delay: 1300ms; }
+.motion .is-in :is(.mark-word, .stage-title) path, .motion .stage-title.is-in path { stroke-dashoffset: 0; }
 
 /* First screen: headline, the words under it, the desk, then each window surfaces on its own. */
-.motion .lede, .motion .try-line, .motion .hero .get { animation: pop var(--t-3) var(--spring) 240ms backwards; }
-.motion .try-line { animation-delay: 420ms; }
+.motion .lede, .motion .hero .get { animation: pop var(--t-3) var(--spring) 240ms backwards; }
 .motion .hero .get { animation-delay: 330ms; }
 .motion .stage-scene { animation: pop-far 1000ms var(--spring) 380ms backwards; }
 .motion .stage figcaption { animation: pop var(--t-3) var(--spring) 760ms backwards; }
@@ -725,14 +583,13 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 /* A plane that blends with what is under it is painted flat on the desk, whatever its height. While the desk is
    tilted the highlighter is see-through instead, so it stays at the height of the other marks. */
 .motion .stage-plane:not(.is-flat) > .ink-layer.ink-blend.has-ink { mix-blend-mode: normal; opacity: .5; }
-.motion .stage-plane:not(.is-flat) > .stage-tags { transform: translateZ(var(--zd, 0px)); }
-.motion .stage-plane:not(.is-flat) > .dock { transform: translateZ(var(--zd, 0px)); }
+.motion .stage-plane:not(.is-flat) > :is(.dock, .mode-chip) { transform: translateZ(var(--zd, 0px)); }
 
 /* The fan. The cards are held like a hand of cards low in the screen; scrolling deals one at a time to the front,
    where it straightens, grows and plays, and then tucks back into its place. main.js writes --d on each card
    (0 in the hand, 1 dealt) and --fan-drop on the deck (how far below the dealt card the hand is held). */
 @property --up { syntax: "<number>"; inherits: false; initial-value: 0; }
-.motion .do-track { --seg: 64svh; height: calc(100svh + 5 * var(--seg)); }
+.motion .do-track { --seg: 64svh; height: calc(100svh + 3 * var(--seg)); }
 .motion .do-pin { position: sticky; top: 0; height: 100svh; padding-top: calc(var(--header-h) + 1svh); overflow: clip; }
 .motion .do + section { position: relative; z-index: 1; }
 .motion .do-tabs { display: flex; gap: 4px; padding: 5px; border-radius: 999px; background: var(--surface-1); box-shadow: var(--pebble-flat); }
@@ -743,9 +600,9 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 .do-tabs span { display: none; }
 .do-tabs [aria-current="true"] i { background: var(--accent-grad); scale: 1.3; }
 .motion .do-head { gap: 16px; }
-.motion .do-deck { --fan-r: 380px; --fan-step: 7.2deg; --fan-s: .4; --fan-drop: 420px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 18px; perspective: 1600px; perspective-origin: 50% 40%; }
+.motion .do-deck { --fan-r: 380px; --fan-step: 9deg; --fan-s: .4; --fan-drop: 420px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 18px; perspective: 1600px; perspective-origin: 50% 40%; }
 .motion .card {
-  --d: 0; --h: calc(1 - var(--d)); --a: calc((var(--i) - 2.5) * var(--fan-step));
+  --d: 0; --h: calc(1 - var(--d)); --a: calc((var(--i) - 1.5) * var(--fan-step));
   grid-area: 1 / 1; z-index: var(--i); transform-origin: 50% 50%; will-change: transform; cursor: pointer;
   transform: translate3d(0, calc(var(--h) * (var(--fan-r) + var(--fan-drop))), calc(var(--h) * -40px)) rotateZ(calc(var(--h) * var(--a))) translateY(calc(var(--h) * -1 * var(--fan-r) - var(--h) * var(--up) * 30px)) rotateY(calc(var(--h) * var(--a) * -.5)) scale(calc(var(--fan-s) + (1 - var(--fan-s)) * var(--d)));
   /* In the hand a card is drawn small, so its edge and the shadow it casts on its neighbor are drawn larger. */
@@ -756,7 +613,8 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 .motion .card:not(.is-front):hover { --up: 1; }
 /* A card in the hand is a little dimmer than the one that is dealt. */
 .motion .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--scrim); opacity: calc(var(--h) * .16); pointer-events: none; }
-.motion .card .frame { max-height: max(150px, 100svh - var(--header-h) - 470px); }
+/* A frame in a short window keeps to 2 to 1 at the widest: it gets narrower, in the middle of its place. */
+.motion .card .frame { --frame-h: max(150px, 100svh - var(--header-h) - 470px); width: min(100%, 2 * var(--frame-h)); max-height: var(--frame-h); margin-inline: auto; }
 
 /* Things that arrive: a little small and a little low, then a soft spring into place, one after another. */
 .motion .pop > * { opacity: 0; transform: translateY(18px) scale(.96); transition: transform var(--t-3) var(--spring), opacity 380ms ease; transition-delay: calc(var(--i, 0) * var(--stagger)); }
@@ -764,24 +622,16 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 
 /* Pebbles lift a little under the pointer. */
 @media (hover: hover) {
-  .motion .also-item, .motion .know-grid > div, .motion .platform { transition: translate var(--t-2) var(--spring), transform var(--t-3) var(--spring), opacity 380ms ease; }
-  .motion .also-item:hover, .motion .know-grid > div:hover, .motion .platform:hover { translate: 0 -6px; }
+  .motion .know-grid > div, .motion .platform { transition: translate var(--t-2) var(--spring), transform var(--t-3) var(--spring), opacity 380ms ease; }
+  .motion .know-grid > div:hover, .motion .platform:hover { translate: 0 -6px; }
 }
 
-/* Keys: the caps come up one after another when the section arrives. */
-.motion .keys-rows .key b { transition: transform var(--t-2) var(--jelly); }
-.motion .keys-rows:not(.is-in) .key b { transform: translateY(6px) scale(1.035, .88); }
-.motion .keys-rows .key:nth-child(2) b { transition-delay: 70ms; }
-.motion .keys-rows .key:nth-child(3) b { transition-delay: 140ms; }
-.motion .keys-rows.is-in .key.is-down b, .motion .keys-rows.is-in .key b { transition-delay: 0s; }
 
 /* Layers that move at different speeds as a section passes. main.js writes --through (-1 below, 0 middle, 1 above). */
-.motion .orbs-keys, .motion .orbs-coffee { transform: translate3d(0, calc(var(--through, 0) * 46px * var(--depth)), 0); }
+.motion .orbs-coffee { transform: translate3d(0, calc(var(--through, 0) * 46px * var(--depth)), 0); }
 .motion .cup { transform: translate3d(0, calc(var(--through, 0) * -26px * var(--depth)), 0); }
 
-/* The stage's tags and working parts. */
-.motion .your-turn svg { animation: turn-pointer 2.6s var(--app-standard) infinite; }
-@keyframes turn-pointer { 0%, 100% { transform: none; } 22% { transform: translate(3px, -3px); } 44% { transform: translate(-1px, -5px); } 66% { transform: translate(-3px, -1px); } 82% { transform: translate(1px, 1px) scale(.86); } }
+/* The stage's chip, cue and working parts. */
 .motion .stage-plane.is-cued .desk-cue::before { animation: cue 1500ms var(--app-fade) both; }
 @keyframes cue { 0% { opacity: 0; transform: scale(.992); } 18%, 55% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.012); } }
 .motion .mode-chip.is-new > i { animation: chip-dot var(--t-2) var(--jelly); }
@@ -795,43 +645,8 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 .motion .mail-sent span { animation: pop var(--t-grow) var(--app-enter) backwards; transform-origin: 100% 100%; }
 .motion .is-tapped::after { animation: tap 450ms var(--app-fade) both; }
 @keyframes tap { 0%, 40% { opacity: .95; } to { opacity: 0; } }
-/* Until their flight starts, the pebbles of "There's more in the app" are not there. */
-.motion .fly:not(.is-in) > * { opacity: 0; }
 html:not(.motion) .is-tapped::after { display: none; }
 
-/* Small illustrations: each loops gently while it is on screen. */
-.motion .sd-rough { animation: sd-rough 5.2s var(--ease-in-out) infinite; }
-.motion .sd-neat { animation: sd-neat 5.2s linear infinite; }
-.motion .sd-spark { animation: sd-spark 5.2s linear infinite; }
-@keyframes sd-rough { 0% { stroke-dashoffset: 1; opacity: 1; } 28%, 40% { stroke-dashoffset: 0; opacity: 1; } 46%, 100% { stroke-dashoffset: 0; opacity: 0; } }
-@keyframes sd-neat { 0%, 40% { opacity: 0; transform: scale(.9); animation-timing-function: var(--jelly); } 54%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-@keyframes sd-spark { 0%, 44% { opacity: 0; transform: scale(.2) rotate(-40deg); animation-timing-function: var(--jelly); } 60%, 88% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(.6); } }
-.motion .sr-region { animation: sr-region 5.4s var(--glide) infinite; }
-.motion .sr-window { animation: sr-window 5.4s linear infinite; }
-@keyframes sr-region { 0%, 6% { opacity: 0; } 18%, 90% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes sr-window { 0%, 26% { opacity: 0; transform: translate(-70px, -4px) scale(.6); animation-timing-function: var(--spring); } 44%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-.motion .bt-screen::before { animation: bt-colors 12s linear infinite; }
-.motion .bt-bar i { animation: bt-bar 10s linear infinite; }
-@keyframes bt-colors { to { background-position: 300% 0; } }
-@keyframes bt-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-.motion .wb-white { animation: wb-white 7.5s var(--ease-in-out) infinite; }
-.motion .wb-black { animation: wb-black 7.5s var(--ease-in-out) infinite; }
-@keyframes wb-white { 0%, 26% { opacity: 0; } 33%, 96% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes wb-black { 0%, 60% { opacity: 0; } 67%, 94% { opacity: 1; } 100% { opacity: 0; } }
-.motion .ss-copy { animation: ss-copy 5.6s linear infinite; }
-.motion .ss-2 { animation-name: ss-copy-2; }
-.motion .ss-3 { animation-name: ss-copy-3; }
-@keyframes ss-copy { 0%, 8% { opacity: 0; transform: translate(-64px, 12px) scale(.4); animation-timing-function: var(--jelly); } 26%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-@keyframes ss-copy-2 { 0%, 30% { opacity: 0; transform: translate(-128px, -10px) scale(.4); animation-timing-function: var(--jelly); } 48%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-@keyframes ss-copy-3 { 0%, 52% { opacity: 0; transform: translate(-80px, -40px) scale(.4); animation-timing-function: var(--jelly); } 70%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-.motion .tb-mini { animation: tb-full 6.4s linear infinite; }
-.motion .tb-one { animation: tb-one 6.4s linear infinite; }
-.motion .tb-move { animation: tb-move 6.4s linear infinite; }
-.motion .tb-a, .motion .tb-b { animation: tb-shift 6.4s linear infinite; }
-@keyframes tb-move { 0%, 8% { transform: none; animation-timing-function: var(--glide); } 13% { transform: translateY(-.4em) scale(1.12); animation-timing-function: var(--spring); } 28%, 100% { transform: translateX(4.25em); } }
-@keyframes tb-shift { 0%, 12% { transform: none; animation-timing-function: var(--spring); } 28%, 100% { transform: translateX(-2.125em); } }
-@keyframes tb-full { 0%, 46% { opacity: 1; transform: none; animation-timing-function: var(--glide); } 54%, 84% { opacity: 0; transform: scaleX(.3); animation-timing-function: var(--spring); } 96%, 100% { opacity: 1; transform: none; } }
-@keyframes tb-one { 0%, 46% { opacity: 0; transform: scale(.6); animation-timing-function: var(--jelly); } 60%, 82% { opacity: 1; transform: none; animation-timing-function: var(--glide); } 90%, 100% { opacity: 0; transform: scale(.6); } }
 
 /* The cup: steam is drawn upward from the cup, curls, and fades, one strand after another. */
 .motion .coffee.is-live .steam path { animation: steam 4.2s var(--ease-in-out) infinite backwards; }
@@ -851,7 +666,7 @@ html:not(.motion) .is-tapped::after { display: none; }
   .motion .do-tabs [aria-current="true"] i { scale: 1; }
   .motion .do-deck { --fan-r: 760px; --fan-s: .34; width: min(960px, 100% - 2 * var(--gutter)); }
   .motion .card { padding: 16px; gap: 22px; }
-  .motion .card .frame { max-height: max(220px, 100svh - var(--header-h) - 540px); }
+  .motion .card .frame { --frame-h: max(220px, 100svh - var(--header-h) - 540px); }
   .motion .card-text { padding: 0 14px 12px; }
   .motion .card-text h3 { font-size: clamp(28px, 2.9vw, 38px); font-weight: 800; letter-spacing: -.025em; }
   .motion .card-text p { margin-top: 12px; font-size: 19px; }
@@ -863,6 +678,6 @@ html:not(.motion) .is-tapped::after { display: none; }
   .motion .card { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr); align-items: center; gap: 30px; padding: 16px; }
   .motion .card:nth-child(even) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.62fr); }
   .motion .card:nth-child(even) .frame { order: 2; }
-  .motion .card .frame { max-height: max(220px, 100svh - var(--header-h) - 400px); }
+  .motion .card .frame { --frame-h: max(220px, 100svh - var(--header-h) - 400px); }
   .motion .card-text { padding: 0 20px; }
 }

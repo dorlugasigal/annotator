@@ -13,7 +13,6 @@ const clamp = (n, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, n));
 const smooth = (t) => t * t * (3 - 2 * t);
 // Ink colors are the page's own tokens, so the stylesheet stays the one place colors are written down.
 const token = (name) => getComputedStyle(root).getPropertyValue(name).trim();
-const BLUE = token("--ink-blue");
 const status = $("#status");
 
 // Frames and marks ---------------------------------------------------------------------------------
@@ -239,7 +238,7 @@ if (motion) {
       const box = cross.getBoundingClientRect(), x = e.clientX - box.left, y = e.clientY - box.top;
       cross.style.setProperty("--x", `${x.toFixed(1)}px`);
       cross.style.setProperty("--y", `${y.toFixed(1)}px`);
-      cross.classList.toggle("is-on", !e.target.closest?.(".ink-toolbar, .your-turn, .stage-shrink") && x >= 0 && y >= 0 && x <= box.width && y <= box.height);
+      cross.classList.toggle("is-on", !e.target.closest?.(".ink-toolbar, .stage-shrink") && x >= 0 && y >= 0 && x <= box.width && y <= box.height);
     };
     screen.addEventListener("pointermove", (e) => {
       if (e.pointerType === "touch") return;
@@ -254,19 +253,14 @@ if (motion) {
 const engage = (on) => { if (engaged !== on) { engaged = on; schedule(); } };
 
 // The mode, everywhere it shows ---------------------------------------------------------------------
-// The toolbar's own Draw / Apps button is the switch. The chip on the stage and the line by the two keys say what
-// it is set to, and the sample app only takes input while the stage is in Use apps.
+// The toolbar's own Draw / Apps button is the switch. The chip on the stage says what it is set to, and the sample
+// app only takes input while the stage is in Use apps.
 const chip = $("#mode-chip"), modeWord = $("#mode-word"), chipKeys = { use: $('.chip-key[data-when="use"]'), draw: $('.chip-key[data-when="draw"]') };
-const modeNote = $("#mode-note"), modeLine = $("#mode-line"), drawCombo = $('[data-combo="draw"]'), done = $("#done");
-// The keycaps of the two keys section, by key.
-const caps = Object.fromEntries($$("[data-key]").map((key) => [key.dataset.key, key]));
+const done = $("#done");
 chip.hidden = false;
 function showMode(mode) {
   chip.dataset.mode = mode;
   modeWord.textContent = mode === "draw" ? "Drawing" : "Using apps";
-  modeNote.dataset.mode = mode;
-  modeLine.textContent = mode === "draw" ? "Right now you\u2019re drawing." : "Right now you\u2019re using the app.";
-  drawCombo.classList.toggle("is-on", mode === "draw");
   sample.inert = mode === "draw";
 }
 // The loop changes the mode too. While it does, `scripting` is above zero, and the change is not the visitor's.
@@ -317,28 +311,16 @@ for (const name of ["pointerdown", "pointerup", "keydown", "keyup", "click"]) ad
 // It tells the product's story on the real stage, in the engine's own steps: draw, use the app under the
 // drawings, draw again, then hide it all the way the app does. It stops for good the moment the visitor takes
 // over, and only the Replay button starts it again.
-const replay = $("#replay"), cue = $("#your-turn"), onStage = watcher(screen);
-const demo = { run: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null, rounds: 0, ready: false, drew: false, joined: false };
+const replay = $("#replay"), onStage = watcher(screen);
+const demo = { run: 0, playing: false, ids: new Set(), busy: Promise.resolve(), controller: null, picked: null };
 function showControl() {
   replay.hidden = false;
   replay.classList.toggle("is-off", !demo.playing);
   replay.lastElementChild.textContent = demo.playing ? "Pause" : "Replay";
 }
-// "Your turn" shows once the loop has been round once and whenever the loop is idle, until the visitor joins in.
-let cueShown = false;
-function updateCue() {
-  const show = demo.ready && !demo.drew && !demo.joined && (demo.rounds > 0 || !demo.playing);
-  if (show === cueShown) return;
-  cueShown = show;
-  cue.hidden = !show;
-  stage.classList.toggle("has-turn", show);
-  if (!show || !motion) return;
-  // It grows out of a one-button square the way the app's toolbar grows back from its one button.
-  const closed = cue.offsetWidth - 46, timing = { duration: app.toolbarMorph.expandDuration * 1000, easing: app.css.standard };
-  cue.animate([{ clipPath: `inset(-2px ${closed}px -2px -2px round 4px)` }, { clipPath: "inset(-2px -2px -2px -2px round 4px)" }], timing);
-  $(".turn-edge", cue).animate([{ transform: `translateX(${-closed}px)` }, { transform: "none" }], timing);
-  cue.lastElementChild.previousElementSibling.animate([{ opacity: 0 }, { opacity: 0, offset: app.toolbarMorph.incomingStart }, { opacity: 1 }], { ...timing, easing: app.css.fade });
-}
+// Until the visitor joins in, the stage's crop marks take the accent and breathe: the screen is waiting for them.
+let waiting = true;
+const joinedIn = () => { waiting = false; stage.classList.remove("is-waiting"); };
 function forget() {
   for (const id of demo.ids) ink.remove(id);
   demo.ids.clear();
@@ -348,10 +330,9 @@ function restore() {
   if (ink.hidden) ink.setHidden(false, { animate: false });
   if (ink.collapsed) ink.setCollapsed(false, { animate: false });
 }
-// The keys that change the mode, shown pressed: on the stage's chip and on the two keys further down the page.
+// The key that changes the mode, shown pressed on the stage's chip.
 function showKeys(mode, down) {
   chipKeys[mode === "draw" ? "use" : "draw"].classList.toggle("is-down", down);
-  for (const key of mode === "draw" ? [caps.control, caps.shift, caps[2]] : [caps.esc]) key.classList.toggle("is-down", down);
 }
 // `keepMode` is for the visitor who chose to draw: they stay in it. `keepHidden` is for the visitor who has just
 // hidden or shown everything themselves: that stays as they left it.
@@ -367,7 +348,6 @@ function stopDemo(keepMode = false, keepHidden = false) {
   if (!keepHidden) restore();
   if (!keepMode && ink.state.mode === "draw") scriptMode("use");
   showControl();
-  updateCue();
 }
 // A step of the loop that was already on its way when the visitor stopped it is taken back as soon as it lands.
 // What the visitor hid themselves (the toolbar's Hide button, Control-2) stays hidden until they show it again.
@@ -381,7 +361,6 @@ async function playDemo() {
   const run = ++demo.run, live = () => run === demo.run;
   demo.playing = true;
   showControl();
-  updateCue();
   await demo.busy;
   let release;
   demo.busy = new Promise((resolve) => { release = resolve; });
@@ -445,9 +424,7 @@ async function playDemo() {
       // The round's drawings go while they are hidden. A round that ended early, because the stage went off screen,
       // leaves nothing behind either; the next one starts clean.
       forget();
-      if (demo.controller.signal.aborted) { ink.hideGhost(); restore(); if (ink.state.mode === "draw") scriptMode("use"); continue; }
-      demo.rounds += 1;
-      updateCue();
+      if (demo.controller.signal.aborted) { ink.hideGhost(); restore(); if (ink.state.mode === "draw") scriptMode("use"); }
     }
   } finally { release(); }
 }
@@ -474,9 +451,8 @@ ink.on("shortcut", (name, how) => {
 });
 ink.on("tool", (tool) => { if (acting) demo.picked = tool; });
 ink.on("mark", () => {
-  demo.drew = true;
+  joinedIn();
   takeOver(true);
-  updateCue();
 });
 ink.on("mode", (mode) => {
   showMode(mode);
@@ -490,7 +466,7 @@ ink.on("mode", (mode) => {
     return;
   }
   takeOver(mode === "draw");
-  // Drawing chosen from further down the page (the two keys) leaves the stage alone until it is on screen.
+  // Drawing chosen from further down the page (a "Try it" there) leaves the stage alone until it is on screen.
   if (mode === "draw" ? onStage.near : !onStage.near) engage(mode === "draw");
 });
 ink.toolbar.addEventListener("pointerdown", () => { takeOver(); engage(true); }, true);
@@ -534,13 +510,13 @@ showMode("use");
 // Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, a "Try it" control), the
 // screen's frame opens up to fill the window, and scrolling brings it back (shared/stage.js). The board with the
 // sample window does not move. In index.html the desk, its line drawing, the dock, the crosshair and the outline
-// that answers "Try it" carry data-stage-frame, and the chip and "Your turn" data-stage-corner.
-growing = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => tiltNow < .004 && liftNow < .004 });
-// Joining in ends the loop, retires "Your turn" and lays the stage flat: the frame grows only once it is.
+// that answers "Try it" carry data-stage-frame, and the chip data-stage-corner. The module's own pointer cue
+// ("Draw here") is what tells a visitor that the screen is theirs.
+growing = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", invite: "Draw here", motion: () => motion, isFlat: () => tiltNow < .004 && liftNow < .004 });
+// Joining in ends the loop and lays the stage flat: the frame grows only once it is.
 growing.on("join", () => {
   takeOver(ink.state.mode === "draw" && !screen.classList.contains("is-scripted"));
-  demo.joined = true;
-  updateCue();
+  joinedIn();
   held = true;
   schedule();
 });
@@ -552,24 +528,24 @@ growing.on("change", ({ state }) => {
   wasOut = state !== "small";
 });
 // The outline that answers "Try it" is drawn as the frame opens, or at once when it is open already.
-let inviting = false;
-function invite() {
-  inviting = false;
-  stage.classList.remove("is-invited");
+let outlining = false;
+function outline() {
+  outlining = false;
+  stage.classList.remove("is-outlined");
   void stage.offsetWidth;
-  stage.classList.add("is-invited");
-  clearTimeout(invite.timer);
-  invite.timer = setTimeout(() => stage.classList.remove("is-invited"), 1600);
+  stage.classList.add("is-outlined");
+  clearTimeout(outline.timer);
+  outline.timer = setTimeout(() => stage.classList.remove("is-outlined"), 1600);
 }
-growing.on("grow", () => { if (inviting) invite(); });
+growing.on("grow", () => { if (outlining) outline(); });
 
 Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).catch(() => {}).then(async () => {
   if (motion) await wait(1500);
   lifted = true;
   schedule();
   if (motion) await wait(700);
-  demo.ready = true;
-  if (motion) playDemo(); else { await showStill(); updateCue(); }
+  if (waiting) stage.classList.add("is-waiting");
+  if (motion) playDemo(); else await showStill();
 });
 
 // Try it ----------------------------------------------------------------------------------------------
@@ -582,7 +558,7 @@ function tryIt(e) {
   ink.setTool("pen");
   ink.setMode("draw");
   engage(true);
-  if (growing.state === "grown") invite(); else inviting = true;
+  if (growing.state === "grown") outline(); else outlining = true;
   status.textContent = "Drawing is on. Draw on the sample screen.";
 }
 for (const trigger of $$("[data-try]")) trigger.addEventListener("click", tryIt);
@@ -714,37 +690,15 @@ function createScene(surface, build, reset, leaving = "pop") {
   if (!motion) scene.perform(build(anchors, scene, keep, () => true), { cursor: false });
   return { set(on) { if (!motion) return; active = on; if (on) run(); } };
 }
-// Moves a scene's pointer along a line while something is done with where it is.
-function glide(scene, from, to, ms, each) {
-  if (!motion) { each?.(to, 1); return Promise.resolve(); }
-  return new Promise((resolve) => {
-    const start = performance.now();
-    const tick = (now) => {
-      const t = clamp((now - start) / ms), k = app.ease.standard(t), p = [from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k];
-      scene.placeGhost(p);
-      each?.(p, t);
-      if (t < 1) requestAnimationFrame(tick); else resolve();
-    };
-    requestAnimationFrame(tick);
-  });
-}
 const sceneOf = (id) => $(`#${id}`);
 const scenes = new Map([
-  // Ring the number, then an arrow to the reason.
-  ["scene-point", (a) => {
-    const host = sceneOf("scene-point"), target = $("[data-ring]", host), low = $("[data-dip]", host);
-    return [
-      { wait: 350 },
-      { tool: "ellipse", around: a.box(target), padX: 11, padY: 7, duration: 750, pause: 240 },
-      { tool: "arrow", duration: 750, bend: -.3, from: () => { const r = a.rect(target); return [r.x + r.w + 15, r.y + r.h / 2 + 4]; }, to: () => { const d = a.rect(low); return [d.x - 5, d.y + 3]; } },
-    ];
-  }, null, "drop"],
-  // A rough box that Smart Draw tidies up, then a note next to it.
-  ["scene-smart", (a, scene, keep, active) => {
-    const host = sceneOf("scene-smart"), target = $("[data-box]", host);
+  // Draw on anything: a ring round the price, a rough box that Smart Draw tidies up, and a note with an arrow to it.
+  ["scene-draw", (a, scene, keep, active) => {
+    const host = sceneOf("scene-draw"), price = $("[data-ring]", host), target = $("[data-box]", host);
     const frame = () => { const r = a.rect(target); return { x: r.x - 8, y: r.y - 7, w: r.w + 16, h: r.h + 14 }; };
     return [
       { wait: 350 },
+      { tool: "ellipse", around: a.box(price), padX: 11, padY: 7, duration: 750, pause: 300 },
       { run: async () => {
         const f = frame(), x = f.x, y = f.y, w = f.w, h = f.h;
         // A box as a hand draws it: once round, not quite straight, not quite closed.
@@ -779,42 +733,7 @@ const scenes = new Map([
       { tool: "arrow", duration: 600, bend: .12, pause: 160, from: () => { const f = frame(); return [f.x + f.w + f.h * 2.3, f.y + f.h / 2]; }, to: () => { const f = frame(); return [f.x + f.w + 9, f.y + f.h / 2]; } },
       { tool: "text", text: "Make it bigger", speed: 40, at: () => { const f = frame(); return [f.x + f.w + f.h * 2.3 + 8, f.y + f.h / 2 - 15]; } },
     ];
-  }],
-  ["scene-private", (a) => [{ wait: 350 }, ...$$("[data-blur]", sceneOf("scene-private")).map((el) => ({ tool: "blur", over: a.box(el), padX: 6, padY: 3, duration: 600, pause: 320 }))], null, "fade"],
-  // Spotlight: everything dims but the place the pointer is.
-  ["scene-spot", (a, scene) => {
-    const rows = $$("[data-spot]", sceneOf("scene-spot")), middle = (row) => { const r = a.rect(row); return [r.x + r.w * .42, r.y + r.h / 2]; };
-    const light = (p) => { scene.layer.style.setProperty("--px", `${p[0]}px`); scene.layer.style.setProperty("--py", `${p[1]}px`); };
-    return [
-      { wait: 350 },
-      { run: async () => {
-        const first = middle(rows[0]), second = middle(rows[1]), start = [first[0] + 70, first[1] - 50];
-        scene.setStyle("spotlight", { radius: Math.max(40, a.rect(rows[0]).h * 2) });
-        light(start);
-        scene.placeGhost(start);
-        scene.setSpotlight(true);
-        scene.layer.classList.add("has-pointer");
-        await glide(scene, start, first, 700, light);
-        await wait(motion ? 1100 : 0);
-        await glide(scene, first, second, 800, light);
-        await wait(motion ? 1100 : 0);
-      } },
-    ];
-  }, (scene) => { scene.setSpotlight(false); scene.layer.classList.remove("has-pointer"); }],
-  ["scene-steps", (a) => [{ wait: 350 }, ...$$("[data-step]", sceneOf("scene-steps")).map((el) => ({ tool: "counter", at: a.point(el, 0, .5, -22), color: BLUE, pause: 300 }))], null, "focus"],
-  // Two ready-made icons, a box between them, and arrows to join them up.
-  ["scene-system", (a) => {
-    const host = sceneOf("scene-system"), [server, database] = $$("[data-node] .icon", host), slot = $("[data-slot]", host);
-    const right = (el, dx = 8) => () => { const r = a.rect(el); return [r.x + r.w + dx, r.y + r.h / 2]; };
-    const left = (el, dx = -8) => () => { const r = a.rect(el); return [r.x + dx, r.y + r.h / 2]; };
-    return [
-      { run: async () => { for (const node of $$("[data-node]", host)) { node.classList.add("is-in"); await wait(motion ? 220 : 0); } } },
-      { tool: "rect", around: a.box(slot), pad: 0, duration: 650, pause: 120 },
-      { tool: "text", text: "Cache", speed: 50, pause: 160, at: () => { const r = a.rect(slot); return [r.x + r.w * .2, r.y + r.h / 2 - 14]; } },
-      { tool: "arrow", duration: 520, bend: -.2, pause: 120, from: right(server), to: left(slot) },
-      { tool: "arrow", duration: 520, bend: .2, from: right(slot), to: left(database) },
-    ];
-  }, () => { if (motion) $$("#scene-system [data-node]").forEach((node) => node.classList.remove("is-in")); }, "drop"],
+  }, null, "drop"],
 ].map(([id, build, reset, leaving]) => [sceneOf(id).closest(".tile"), createScene(sceneOf(id), build, reset, leaving)]));
 
 let clipsPaused = !motion, front = -1;
@@ -830,7 +749,8 @@ labelClips();
 clipsToggle.addEventListener("click", () => { clipsPaused = !clipsPaused; labelClips(); refreshTiles(); });
 
 if (motion) {
-  // The flat file. The section is five steps taller than the screen; each step turns the top sheet away.
+  // The flat file. The section is one step taller than the screen for each sheet after the first; each step turns
+  // the top sheet away.
   const last = tiles.length - 1, index = $("#deck-index"), roll = $(".roll", index), pin = $(".deck-pin"), head = $(".deck-head");
   stepsBar.hidden = false;
   index.hidden = false;
@@ -925,58 +845,6 @@ if (motion) {
   tiles.forEach((tile) => seen.observe(tile));
 }
 
-// Two keys ------------------------------------------------------------------------------------------
-const capFor = (e) => (e.key === "Control" ? caps.control : e.key === "Shift" ? caps.shift : e.code === "Digit2" ? caps[2] : e.key === "Escape" ? caps.esc : null);
-addEventListener("keydown", (e) => capFor(e)?.classList.add("is-down"));
-addEventListener("keyup", (e) => capFor(e)?.classList.remove("is-down"));
-addEventListener("blur", () => Object.values(caps).forEach((key) => key.classList.remove("is-down")));
-for (const combo of $$(".combo")) {
-  combo.addEventListener("click", () => {
-    const keys = $$(".key", combo);
-    keys.forEach((key, i) => setTimeout(() => key.classList.add("is-down"), i * 45));
-    setTimeout(() => keys.forEach((key) => key.classList.remove("is-down")), 190 + keys.length * 45);
-    // What the real keys do: Control-Shift-2 only ever starts drawing, Esc goes back, and the stage joins in.
-    ink.setMode(combo.dataset.combo === "draw" ? "draw" : "use");
-    if (combo.dataset.combo === "draw") claimDraw();
-    growing.join();
-  });
-}
-
-// A toolbar that's yours ------------------------------------------------------------------------------
-// The app's Shrink, on a drawing of the toolbar: the outline closes to one button over the app's 0.30 s and opens
-// again over its 0.34 s, on its curve, and the two faces cross over as the app's do. The outline is three pieces
-// (two ends and a middle), so only transforms move.
-const barShape = $("#bar-shape");
-if (motion && barShape && window.IntersectionObserver) {
-  const [endA, middle, endB] = $$(".edge", barShape), full = $(".bar-face.full", barShape), pill = $(".bar-face.pill", barShape);
-  const morph = app.toolbarMorph, PILL = 92, END = 14;
-  let visible = false, looping = false;
-  const shrink = (closing) => {
-    const width = barShape.offsetWidth, shift = (width - PILL) / 2, scale = (PILL - 2 * END) / (width - 2 * END);
-    const timing = { duration: (closing ? morph.collapseDuration : morph.expandDuration) * 1000, easing: app.css.standard, fill: "both" };
-    const between = (a, b) => (closing ? [a, b] : [b, a]);
-    endA.animate({ transform: between("none", `translateX(${shift}px)`) }, timing);
-    endB.animate({ transform: between("none", `translateX(${-shift}px)`) }, timing);
-    middle.animate({ transform: between("none", `scaleX(${scale})`) }, timing);
-    const leaving = [{ opacity: 1 }, { opacity: 0, offset: morph.outgoingEnd }, { opacity: 0 }], arriving = [{ opacity: 0 }, { opacity: 0, offset: morph.incomingStart }, { opacity: 1 }];
-    (closing ? full : pill).animate(leaving, { ...timing, easing: app.css.fade });
-    return (closing ? pill : full).animate(arriving, { ...timing, easing: app.css.fade }).finished.catch(() => {});
-  };
-  const loop = async () => {
-    if (looping) return;
-    looping = true;
-    await wait(1400);
-    while (visible) {
-      await shrink(true);
-      await wait(1300);
-      await shrink(false);
-      await wait(2100);
-    }
-    looping = false;
-  };
-  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) loop(); }, { threshold: .6 }).observe(barShape);
-}
-
 // Arriving -------------------------------------------------------------------------------------------
 if (motion) {
   // Each word of a heading becomes a piece that can come up on its own. An element in a heading counts as one word.
@@ -1004,16 +872,16 @@ if (motion) {
       const element = entry.target;
       arrive.unobserve(element);
       element.classList.add("is-in");
-      if (element.classList.contains("extra")) element.classList.add("is-playing");
       if (element === coffee) setTimeout(() => element.classList.add("is-steaming"), 1100);
-      // Once its words have come up, a heading's mask is taken away, so no letter can be cut by it.
-      if (element.hasAttribute("data-words")) setTimeout(() => element.classList.add("is-done"), 1500);
-      // Once it has landed, a cell answers the pointer without the delay it arrived with.
-      setTimeout(() => element.classList.add("is-settled"), 1400 + Number(element.style.getPropertyValue("--i") || 0) * 80);
+      // Once its words have come up, a heading's mask is taken away, so no letter can be cut by it (and the ring
+      // round the headline's word, which reaches past the word, can be drawn). The last word's own delay says when.
+      if (element.hasAttribute("data-words")) {
+        const lastWord = $$(".word > span", element).pop();
+        setTimeout(() => element.classList.add("is-done"), (lastWord ? parseFloat(getComputedStyle(lastWord).transitionDelay) * 1000 : 0) + 780);
+      }
     }
   }, { rootMargin: "0px 0px -8% 0px", threshold: .12 });
   $$("[data-enter], [data-words], [data-rule], .has-frame").forEach((element) => arrive.observe(element));
-  $$(".extra").forEach((extra) => extra.addEventListener("pointerenter", () => { if (extra.classList.contains("is-settled")) restart(extra, "is-playing"); }));
   coffee.addEventListener("pointerenter", () => { if (coffee.classList.contains("is-steaming")) restart(coffee, "is-steaming"); });
 }
 

@@ -13,8 +13,7 @@
   /* Under text the gradient stops at its blue, where dark text still reads (5:1 or better across the button). */
   --ocean-button: linear-gradient(115deg, var(--ocean-1), var(--ocean-2));
   --accent: var(--ocean-2); --on-accent: #051019; --glint: #ffffff73;
-  --ink-coral: #f04538; --ink-blue: #2b73e0;
-  --board-white: #f7f8fa; --board-black: #141414; --pointer-fill: #ffffff; --pointer-line: #0b101a;
+  --ink-coral: #f04538; --pointer-fill: #ffffff; --pointer-line: #0b101a;
   /* The night side of the theme switch's coin is the same in both themes: by day it is only seen mid-turn. */
   --coin-night: #232d45; --coin-night-ink: #eef1f7; --coin-night-edge: #ffffff2b;
 }
@@ -34,10 +33,7 @@
   --win-bg: #0f1420; --win-bar: #151b2a; --win-text: #e8ecf4; --win-muted: #8d97ab; --win-line: #ffffff14;
   --win-accent: #9db2d6; --win-field: #171e2e; --win-down: #ff8a80;
   --win-shadow: 0 0 0 1px #ffffff1c, 0 24px 48px -20px #000000cc;
-  --media-bg: #06080d; --code-bg: #070a10; --code-text: #d9e0ee;
-  --key-a: #313e60; --key-b: #222d49; --key-hi: #ffffff40; --key-edge: #070a12; --key-cast: #04060b;
-  --key-side-a: #18213a; --key-side-b: #0d1322; --plate-a: #171f32; --plate-b: #10151f;
-  --il-bg: #0b0f18; --il-bar: #1c2130;
+  --code-bg: #070a10; --code-text: #d9e0ee;
   --coin-shadow: 0 1px 2px #00000080, 0 4px 10px -2px #000000a6;
   --ink-highlight-blend: screen;
 }
@@ -57,10 +53,7 @@ html[data-theme="light"] {
   --win-bg: #ffffff; --win-bar: #f1f4f9; --win-text: #0e1422; --win-muted: #5c6679; --win-line: #0e14221a;
   --win-accent: #44546f; --win-field: #ffffff; --win-down: #c0281f;
   --win-shadow: 0 0 0 1px #0e14221f, 0 24px 48px -26px #0e142273;
-  --media-bg: #0e1422; --code-bg: #edf1f7; --code-text: #0e1422;
-  --key-a: #ffffff; --key-b: #edf1f7; --key-hi: #ffffff; --key-edge: #b7c1d3; --key-cast: #0e142259;
-  --key-side-a: #cdd5e3; --key-side-b: #aab5c9; --plate-a: #eef2f8; --plate-b: #dfe6f1;
-  --il-bg: #eef2f8; --il-bar: #ffffff;
+  --code-bg: #edf1f7; --code-text: #0e1422;
   --coin-shadow: 0 1px 2px #0e142233, 0 4px 10px -3px #0e142259;
   --ink-highlight-blend: multiply;
 }
@@ -145,8 +138,7 @@ h3 { font-size: 23px; line-height: 1.18; font-weight: 640; letter-spacing: -.015
 .nav-link:hover, .nav-coffee:hover { color: var(--text); }
 /* A drawn underline in the gradient: the header's one piece of ink. */
 .scribble { position: absolute; left: -3px; right: -3px; bottom: -8px; width: calc(100% + 6px); height: 8px; overflow: visible; pointer-events: none; clip-path: inset(-4px 100% -4px -4px); transition: clip-path var(--t-2) var(--ease-out); }
-.scribble path, .inked path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.scribble path { stroke-width: 2; }
+.scribble path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-width: 2; }
 .nav-link:is(:hover, :focus-visible) .scribble { clip-path: inset(-4px -4px -4px -4px); }
 .nav-coffee { display: inline-flex; align-items: center; gap: 7px; color: var(--accent-text); }
 .nav-coffee svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform var(--t-2) var(--spring); }
@@ -170,26 +162,29 @@ html[data-theme="light"] .coin { --turn: 180deg; }
 .face.sun { background: var(--ocean); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--glint), var(--coin-shadow); transform: rotateY(180deg); }
 .face svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Hero */
-.hero { padding-top: 36px; }
-.hero-copy { display: grid; gap: 24px; }
-h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; letter-spacing: -.026em; }
-/* One word of the headline is underlined, as the app would do it. */
-.inked { position: relative; display: inline-block; }
-.inked svg { position: absolute; left: -1%; bottom: -.1em; width: 102%; height: .2em; overflow: visible; pointer-events: none; }
-.inked path { stroke-width: .075em; }
-.lede { max-width: 34em; font-size: 19px; line-height: 1.5; color: var(--muted); }
-.get { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; margin-top: 24px; }
+/* Hero: a short headline with one line under it, then the buttons (beside them on a wide screen). */
+.hero { padding-top: 30px; }
+.hero-copy { display: grid; gap: 26px; }
+.hero-main { display: grid; gap: 14px; }
+h1 { font-size: clamp(48px, 15.5vw, 104px); line-height: .96; font-weight: 700; letter-spacing: -.03em; }
+/* The headline's last word is ringed, as the app would do it. The ring is a little bigger than the word. */
+.inked { position: relative; display: inline-block; margin-left: .04em; }
+.inked svg { position: absolute; left: -21%; top: -7%; width: 146%; height: 120%; overflow: visible; pointer-events: none; }
+.inked path { fill: none; stroke-width: 6.5; stroke-linecap: round; }
+.lede { font-size: clamp(20px, 2.1vw, 25px); line-height: 1.3; font-weight: 500; color: var(--muted); }
+.get { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; }
 .button.try { padding: 0 20px; }
 .button.try svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .quiet { font-size: 16px; color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 38%, transparent); text-decoration-thickness: 1px; text-underline-offset: .25em; transition: text-decoration-color var(--t-1) ease; }
 .quiet:hover { text-decoration-color: var(--accent); }
 .hero-small { margin-top: 14px; font-size: 15px; color: var(--faint); }
-/* The line that leads into the stage. */
-.try-line { font: 600 clamp(19px, 2vw, 23px)/1.35 var(--display); letter-spacing: -.01em; color: var(--text); text-wrap: balance; }
+/* The line that introduces the stage: the page's main invitation. Its small light says the screen is live. */
+.stage-title { margin-top: 40px; font-size: clamp(22px, 2.5vw, 30px); line-height: 1.2; font-weight: 650; letter-spacing: -.02em; }
+.stage-title i { position: relative; display: inline-block; width: .36em; height: .36em; margin-right: .5em; border-radius: 50%; background: var(--on); vertical-align: .14em; }
+.stage-title i::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--on); opacity: 0; }
 
 /* The stage: a desk, a sample window on it, and above them the planes the app adds: ink, then the toolbar. */
-.stage { --tilt: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; margin-top: 40px; }
+.stage { --tilt: 0; --lift: 0; --scale: 1; position: relative; isolation: isolate; margin-top: 30px; }
 .stage::before { content: ""; position: absolute; inset: 4% -4% -8%; z-index: -2; background: radial-gradient(40% 58% at 18% 66%, var(--glow-teal), transparent 70%), radial-gradient(44% 60% at 52% 40%, var(--glow-blue), transparent 70%), radial-gradient(42% 58% at 84% 34%, var(--glow-violet), transparent 70%); pointer-events: none; }
 .stage::after { content: ""; position: absolute; left: 5%; right: 5%; bottom: 14px; height: 120px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, var(--floor), transparent); opacity: calc(var(--lift) * .9); transform: translateY(calc(var(--lift) * 46px)) scaleX(calc(1 - var(--lift) * .06)); pointer-events: none; }
 /* The whole screen can be drawn on, so the sample window sits in it with room to spare: beside it for notes, and under
@@ -211,18 +206,14 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .ink-mark.is-leaving { opacity: 0 !important; transition: opacity var(--t-2) ease; }
 /* While the scripted demo plays, the ink lets presses through: a press on the stage hands it to the visitor. */
 .stage.is-demo .board > .ink-layer { pointer-events: none; touch-action: auto; }
-/* Two tags sit on the stage's top edge: the cue on the left, the mode on the right. */
-.turn, .mode-chip { position: absolute; top: calc(-17px + var(--stage-grow, 0) * 31px); z-index: 110; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 0; padding: 0 14px 0 12px; border-radius: 999px; font: 600 14.5px/1 var(--sans); white-space: nowrap; }
-.turn { left: var(--corner); border: 0; background: var(--ocean-button); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--glint), 0 10px 24px -10px color-mix(in srgb, var(--ocean-2) 80%, transparent); cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--t-1) ease, visibility 0s linear var(--t-1); }
-.turn.is-on { opacity: 1; visibility: visible; transition-delay: 0s; }
-.turn svg { flex: none; fill: currentColor; }
-.turn:focus-visible { border-radius: 999px; }
+/* The mode sits on the stage's top edge, at the right. */
+.mode-chip { position: absolute; top: calc(-17px + var(--stage-grow, 0) * 31px); z-index: 110; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 0; padding: 0 14px 0 12px; border-radius: 999px; font: 600 14.5px/1 var(--sans); white-space: nowrap; }
 .mode-chip { right: calc(var(--corner) + min(1, var(--stage-grow, 0) * 6) * (58px - var(--corner))); background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong), var(--coin-shadow); transition: background-color var(--t-1) ease, color var(--t-1) ease, box-shadow var(--t-1) ease; }
 .mode-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-1) ease, box-shadow var(--t-1) ease; }
 .mode-chip[data-mode="draw"] { color: var(--on); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on) 60%, transparent), var(--coin-shadow); }
 .mode-chip[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
 /* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
-   frame is the desk itself. Grown, the two tags move from its top edge to just inside it, and the button that makes
+   frame is the desk itself. Grown, the mode moves from its top edge to just inside it, and the button that makes
    it small again takes the corner, with the mode beside it. */
 :root { --stage-scrim: var(--page); }
 .screen { --stage-radius: 22px; }
@@ -296,16 +287,14 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .report.is-live .plot path { transition: d var(--t-2) var(--ease-in-out); }
 .report.is-live .pt { transition: transform var(--t-2) var(--ease-in-out); }
 
-.stage figcaption { display: grid; gap: 14px 32px; margin-top: 22px; }
-.stage-words { display: grid; gap: 6px; }
-.stage-line { font-size: 18px; line-height: 1.4; color: var(--text); }
+.stage figcaption { display: grid; gap: 12px 32px; margin-top: 20px; }
 .stage-note { max-width: 44em; font-size: 15px; line-height: 1.45; color: var(--faint); }
 .stage-controls { display: flex; flex-wrap: wrap; gap: 8px; order: -1; min-height: 36px; }
 
 /* Cards: one surface up from the page, with a hairline. Dark gets a light along the top edge, light a soft shadow. */
-.tile-inner, .extra, .answer, .platform, .coffee-panel { border: 1px solid var(--line); background-color: var(--surface-1); box-shadow: var(--card-shadow); }
+.tile-inner, .answer, .platform, .coffee-panel { border: 1px solid var(--line); background-color: var(--surface-1); box-shadow: var(--card-shadow); }
 
-/* What you can do. Without motion it is a grid of six; with motion it becomes the deck further down. */
+/* What you can do. Without motion it is a grid of four; with motion it becomes the deck further down. */
 .deck-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
 .deck-tools { display: flex; align-items: center; gap: 18px; }
 .deck-steps { display: flex; gap: 6px; }
@@ -317,98 +306,27 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 .deck-space { min-width: 0; }
 .tile { grid-column: span 12; min-width: 0; display: flex; }
 .tile-inner { position: relative; flex: 1; display: flex; flex-direction: column; min-width: 0; border-radius: 26px; }
-/* The picture on a card is a live scene. It keeps its shape, and grows if what is in it needs more room. */
-.tile-media { position: relative; flex: 1 1 auto; margin: 10px 10px 0; overflow: clip; border-radius: 17px; background: var(--media-bg); aspect-ratio: 16 / 10; }
+/* The picture on a card is a live scene on a desk. It keeps its shape, and grows if what is in it needs more room. */
+.tile-media { position: relative; flex: 1 1 auto; margin: 10px 10px 0; overflow: clip; border-radius: 17px; aspect-ratio: 16 / 10; box-shadow: inset 0 0 0 1px var(--line); background: radial-gradient(90% 110% at 0% 100%, var(--glow-teal), transparent 62%), linear-gradient(200deg, var(--desk-a), var(--desk-b)); }
+.tile:nth-child(even) .tile-media { background: radial-gradient(90% 110% at 100% 0%, var(--glow-violet), transparent 62%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
 .tile-text { padding: 20px 24px 26px; }
 .tile-text p { margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--muted); }
-.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; box-shadow: inset 0 0 0 1px var(--line); background: radial-gradient(90% 110% at 100% 0%, var(--glow-blue), transparent 62%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
-.scene-private, .scene-spot { background: radial-gradient(90% 110% at 100% 0%, var(--glow-violet), transparent 62%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
-.scene-steps, .scene-point { background: radial-gradient(90% 110% at 0% 100%, var(--glow-teal), transparent 62%), linear-gradient(200deg, var(--desk-a), var(--desk-b)); }
+/* A frame that one of the shared engine's scenes fills, edge to edge. */
+.scene-slot { position: absolute; inset: 0; }
+.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
 .scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 4.6cqi, 27px)/1.1 "Caveat", "Bradley Hand", cursive; }
-/* Smart Draw has just made a rough box neat: the neat one lands with a small push. */
-.ink-mark.is-snapped { transform-box: fill-box; transform-origin: center; animation: snap var(--t-1) var(--ease-out); }
-@keyframes snap { from { transform: scale(1.05); opacity: .4; } }
 /* A small sample window, sized from the card it sits in. */
-.mini { width: min(27em, 100%); font-size: clamp(10.5px, 3.4cqi, 18.5px); line-height: 1.3; }
+.mini { width: min(27em, 100%); font-size: clamp(10.5px, 3.4cqi, 21px); line-height: 1.3; }
 .mini .window-bar { height: 2.5em; }
 .mini .window-bar span { font-size: .9em; }
-.rows { padding: .4em 1.2em .7em; }
-.rows > div { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .75em 0; border-bottom: 1px solid var(--win-line); }
-.rows > div:last-child { border-bottom: 0; }
-.rows dt { color: var(--win-muted); }
-.rows dd { font-weight: 500; }
-.form { display: grid; gap: .7em; padding: 1em 1.3em 1.2em max(3.4em, 46px); }
-.form p { display: grid; gap: .35em; }
-.form span { font-size: .88em; color: var(--win-muted); }
-.field { display: block; padding: .6em .8em; border: 1px solid color-mix(in srgb, var(--win-text) 20%, transparent); border-radius: 8px; background: var(--win-field); font-weight: 500; }
-.field.select { background: var(--win-field) linear-gradient(45deg, transparent 50%, var(--win-muted) 50%) no-repeat right 1em top 55% / 5px 5px; }
-.mini-button { justify-self: start; padding: .65em 1em; border-radius: 8px; background: var(--win-accent); color: var(--win-bg); font-weight: 600; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; padding: 1.1em 1.3em .5em; }
 .stats p { display: grid; gap: .5em; justify-items: start; }
 .stats span { font-size: .88em; color: var(--win-muted); }
 .stats b { font: 680 1.7em/1 var(--display); letter-spacing: -.03em; }
-.bars { display: flex; align-items: flex-end; gap: .55em; height: 5.4em; padding: 0 1.3em 1.2em; }
+.bars { display: flex; align-items: flex-end; gap: .55em; height: 7em; margin-top: .3em; padding: 0 1.3em 1.2em; }
 .bars i { flex: 1; height: calc(var(--v) * 100%); border-radius: 3px 3px 0 0; background: color-mix(in srgb, var(--win-accent) 34%, transparent); }
 .bars [data-peak] { background: var(--win-accent); }
-.code { display: grid; justify-items: start; padding: 1em 1.3em 1.2em; font: 500 .9em/1.6 var(--mono); white-space: pre; }
-.code span { display: block; }
-.code [data-box] { margin-block: .5em; }
-/* The system sketch has no window: three empty places on the desk that the ink turns into a diagram. */
-.nodes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11%; width: 86%; }
-.nodes i { aspect-ratio: 1.4; }
 @media (min-width: 720px) { .tile { grid-column: span 6; } }
-@media (min-width: 1100px) { .tile { grid-column: span 4; } }
-
-/* Two keys */
-.keys-section { display: grid; gap: 36px; }
-.keys-copy { display: grid; gap: 10px; justify-items: start; }
-.stay { font: 600 22px/1.3 var(--display); letter-spacing: -.01em; color: var(--accent-text); }
-.press { max-width: 26em; font-size: 17px; color: var(--muted); }
-/* The line that says which mode the stage is in right now. */
-.mode-line { display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; padding: 7px 15px 7px 12px; border-radius: 999px; background: var(--wash-strong); font-size: 16px; font-weight: 600; transition: background-color var(--t-2) ease, color var(--t-2) ease; }
-.mode-line i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background-color var(--t-2) ease, box-shadow var(--t-2) ease; }
-.mode-line[data-mode="draw"] { background: color-mix(in srgb, var(--on) 16%, transparent); color: var(--on); }
-.mode-line[data-mode="draw"] i { background: var(--on); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 24%, transparent); }
-.keys { display: grid; gap: 30px; justify-items: start; }
-.combo { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.combo:focus-visible { outline-offset: 10px; border-radius: 20px; }
-.plate { --key: 58px; --h: 0px; position: relative; display: flex; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(var(--plate-a), var(--plate-b)); transition: border-color var(--t-2) ease, box-shadow var(--t-2) ease; }
-.combo[data-combo="draw"].is-on .plate { border-color: color-mix(in srgb, var(--on) 60%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--on) 14%, transparent), 0 0 50px -10px color-mix(in srgb, var(--on) 50%, transparent); }
-.key { position: relative; display: block; font: inherit; }
-.key-top { position: relative; display: grid; place-items: center; min-width: var(--key); height: var(--key); padding: 0 16px; border-radius: 13px; background: linear-gradient(var(--key-a), var(--key-b)); color: var(--text); font: 500 15px/1 var(--mono); box-shadow: inset 0 1px 0 var(--key-hi), inset 0 0 0 1px var(--line), 0 5px 0 var(--key-edge), 0 12px 18px -8px var(--key-cast); transition: transform var(--t-2) var(--spring), box-shadow var(--t-2) var(--spring); }
-.key.wide .key-top { min-width: calc(var(--key) * 1.45); }
-.key-side { display: none; }
-.key.is-down .key-top { transform: translateY(4px); box-shadow: inset 0 1px 0 var(--key-hi), inset 0 0 0 1px var(--line), 0 1px 0 var(--key-edge), 0 3px 6px -3px var(--key-cast); transition-duration: 90ms; transition-timing-function: ease-out; }
-.combo-label { font: 600 22px/1.2 var(--display); letter-spacing: -.01em; }
-
-/* There's more in the app: four cards, each a picture that moves and one line. */
-.extras { display: grid; gap: 14px; margin-top: 36px; }
-.extra { position: relative; display: grid; gap: 16px; align-content: start; padding: 12px 12px 22px; border-radius: 24px; }
-.extra > div:last-child { padding-inline: 12px; }
-.extra h3 { font-size: 22px; }
-.extra p { margin-top: 6px; font-size: 17px; line-height: 1.45; color: var(--muted); }
-.il { display: block; width: 100%; aspect-ratio: 2 / 1; overflow: visible; border-radius: 15px; background: var(--il-bg); }
-.il-panel { fill: var(--surface-2); stroke: var(--line-strong); }
-.il-faint { fill: none; stroke: color-mix(in srgb, var(--text) 20%, transparent); stroke-width: 3; stroke-linecap: round; }
-.il-region { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 1.8; stroke-dasharray: 5 4; }
-.il-card { fill: var(--surface-3); stroke: var(--accent); stroke-width: 1.8; }
-.il-rule { stroke: var(--line-strong); }
-.il-dot { fill: var(--faint); }
-.il-fill { fill: color-mix(in srgb, var(--accent) 28%, transparent); }
-.il-glow.a { fill: var(--glow-teal); }
-.il-glow.b { fill: var(--glow-violet); }
-.il-small { fill: var(--muted); font: 500 9px var(--sans); }
-.il-time { fill: var(--text); font: 600 27px var(--mono); letter-spacing: -.02em; }
-.il-time:is(.t1, .t2) { opacity: 0; }
-.il-white { fill: var(--board-white); }
-.il-black { fill: var(--board-black); }
-.il-frame { fill: none; stroke: var(--line-strong); }
-.il-ink { fill: none; stroke: var(--ink-coral); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
-.il-pop, .il-black, .il-glow { transform-box: fill-box; transform-origin: center; }
-/* The last picture is the page's real toolbar, made small by main.js. It is a picture: nothing in it can be pressed. */
-.il-toolbar { display: grid; place-items: center; overflow: clip; pointer-events: none; -webkit-user-select: none; user-select: none; }
-.mini-bar-fit { display: grid; place-items: center; }
-.mini-bar-fit .ink-toolbar { grid-area: 1 / 1; position: relative; left: auto; bottom: auto; translate: none; max-width: none; animation: none; }
 
 /* Good to know */
 .answer-grid { display: grid; gap: 14px; margin-top: 36px; }
@@ -471,16 +389,14 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
   .screen { --corner: 12px; }
 }
 @media (min-width: 600px) {
-  .hero { padding-top: 40px; }
-  .stage { margin-top: 44px; }
+  .hero { padding-top: 36px; }
+  .stage-title { margin-top: 44px; }
+  .stage { margin-top: 32px; }
   .screen { --tb-h: 112px; --tb-bottom: 18px; --tb-gap: 56px; --inset: clamp(24px, 4vw, 64px); --inset-top: 44px; --dock-inset: 14px; }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .report { gap: 22px; padding: 22px 26px 26px; }
   .report-head { grid-template-columns: 1fr auto; align-items: center; }
   .num { font-size: 32px; }
-  .plate { --key: 72px; gap: 12px; padding: 18px; }
-  .key-top { font-size: 17px; }
-  .extras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .platform { padding: 32px 32px 30px; }
   .coffee-panel { grid-template-columns: auto minmax(0, 1fr); align-items: center; padding: 40px 48px; }
@@ -498,14 +414,13 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
   .notes li { position: relative; padding-left: 16px; }
   .notes li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: var(--win-accent); }
   .num { font-size: 38px; }
-  .keys-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); grid-template-areas: "title keys" "copy keys"; column-gap: 56px; row-gap: 22px; }
-  .keys-section h2 { grid-area: title; align-self: end; }
-  .keys { grid-area: keys; align-self: center; }
-  .keys-copy { grid-area: copy; align-self: start; }
-  .plate { --key: 84px; gap: 14px; padding: 20px; border-radius: 26px; }
-  .key-top { border-radius: 15px; font-size: 19px; }
-  .combo-label { font-size: 26px; }
   .answer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+}
+@media (min-width: 1000px) {
+  /* The headline and its line on the left, the buttons on the right, level with the line. */
+  .hero-copy { grid-template-columns: minmax(0, 1fr) 400px; align-items: end; gap: 30px 44px; }
+  h1 { font-size: clamp(80px, 7.8vw, 116px); }
+  .hero-side { padding-bottom: 4px; }
 }
 @media (min-width: 1064px) {
   .screen { --tb-h: 145px; --tb-bottom: 22px; --tb-gap: 64px; --inset-top: 52px; }
@@ -513,9 +428,6 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 @media (min-width: 1200px) {
   /* On a wide screen the stage is a little wider than the text above it. */
   .stage { --stage-w: min(1360px, 100vw - 2 * var(--gutter)); width: var(--stage-w); margin-inline: calc((100% - var(--stage-w)) / 2); }
-  .hero-copy { grid-template-columns: minmax(0, 1fr) 348px; align-items: end; gap: 30px 44px; }
-  .hero-side { padding-bottom: 8px; }
-  .try-line { grid-column: 1 / -1; }
 }
 
 /* Changing the theme --------------------------------------------------------------------------------
@@ -555,12 +467,16 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 /* Heading words rise on a hinge at their baseline, one after another. */
 .motion .word { display: inline-block; opacity: 0; transform: perspective(700px) translateY(.45em) rotateX(-62deg); transform-origin: 50% 100%; transition: opacity var(--t-2) ease calc(var(--w) * 55ms), transform var(--t-3) var(--ease-out) calc(var(--w) * 55ms); }
 .motion .is-in > .word { opacity: 1; transform: perspective(700px) translateY(0) rotateX(0deg); }
-/* The underline is drawn once its word has landed. */
-.motion .inked svg { clip-path: inset(-50% 100% -50% -2%); transition: clip-path var(--t-3) var(--ease-in-out) 760ms; }
-.motion .is-in > .inked svg { clip-path: inset(-50% -2% -50% -2%); }
+/* The ring is drawn once its word has landed. */
+.motion .inked path { stroke-dasharray: 1 2; stroke-dashoffset: 1.02; transition: stroke-dashoffset 760ms var(--ease-in-out) 720ms; }
+.motion .is-in > .inked path { stroke-dashoffset: 0; }
 .motion .site-header { animation: drop var(--t-2) var(--ease-out) backwards; }
+.motion .lede { animation: rise var(--t-3) var(--ease-out) 260ms backwards; }
 .motion .hero-side { animation: rise var(--t-3) var(--ease-out) 380ms backwards; }
-.motion .try-line { animation: rise var(--t-3) var(--ease-out) 520ms backwards; }
+.motion .stage-title { animation: rise var(--t-3) var(--ease-out) 520ms backwards; }
+/* The small light beside the stage's line beats slowly, like something that is on. */
+.motion .stage-title i::after { animation: live 2.6s var(--ease-out) 1.6s infinite; }
+@keyframes live { from { opacity: .5; transform: scale(1); } 70%, to { opacity: 0; transform: scale(3.4); } }
 .motion .stage-space { animation: rise-far var(--t-3) var(--ease-out) 300ms backwards; }
 .motion .stage figcaption { animation: rise var(--t-3) var(--ease-out) 900ms backwards; }
 @keyframes drop { from { opacity: 0; transform: translateY(-14px); } }
@@ -577,7 +493,8 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 /* Perspective keeps the scene in a layer of its own, under the header. The screen is flat while its frame is grown,
    so the scene's depth goes and the frame can rise above the page. */
 .motion .stage-space:has(> [data-stage]:not([data-stage="small"])) { perspective: none; animation: none; }
-.motion .screen { transform-style: preserve-3d; transform-origin: 50% 62%; transform: rotateX(calc(var(--tilt) * 1deg)) scale(var(--scale)); }
+/* Leaning, the screen's top edge would drop away from the line above it, so it is lifted back by as much. */
+.motion .screen { transform-style: preserve-3d; transform-origin: 50% 62%; transform: translateY(calc(var(--tilt) * -2.4px)) rotateX(calc(var(--tilt) * 1deg)) scale(var(--scale)); }
 .motion .stage.is-live .screen { will-change: transform; }
 .motion .desk { transform: translateZ(calc(var(--lift) * -40px)); }
 .motion .dock-plane { transform: translateZ(calc(var(--lift) * 56px)); }
@@ -590,7 +507,7 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 /* The deck: the section is tall, its content stays put, and the cards turn past as the page scrolls.
    main.js gives each card --d (how many places it is from the front), --ad (the same, never negative, up to 1),
    --o and --z. */
-.motion .what { --deck-step: 56vh; --peek: 28px; --card-w: min(100vw - 2 * var(--peek), (100svh - 400px) * 1.6, 880px); --deck-shift: calc(var(--card-w) * .8); --deck-angle: -26deg; --deck-depth: -150px; height: calc(100svh + 5 * var(--deck-step)); margin-top: calc(var(--space) - var(--header-h) - 22px); }
+.motion .what { --deck-step: 56vh; --peek: 28px; --card-w: min(100vw - 2 * var(--peek), (100svh - 400px) * 1.6, 880px); --deck-shift: calc(var(--card-w) * .8); --deck-angle: -26deg; --deck-depth: -150px; height: calc(100svh + 3 * var(--deck-step)); margin-top: calc(var(--space) - var(--header-h) - 22px); }
 .motion .deck-pin { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; align-content: center; gap: clamp(20px, 3.5svh, 40px); padding: calc(var(--header-h) + 16px) 0 24px; }
 .motion .deck-space { display: grid; opacity: var(--enter, 1); transform: translate3d(0, calc((1 - var(--enter, 1)) * 90px), 0) scale(calc(.9 + var(--enter, 1) * .1)); }
 .motion .deck { display: grid; place-items: center; grid-template-columns: none; gap: 0; width: 100%; margin: 0; perspective: 1800px; }
@@ -610,51 +527,21 @@ h1 { font-size: clamp(42px, 7vw, 88px); line-height: .98; font-weight: 700; lett
 /* A card turns a little toward the pointer, and a soft light follows it. main.js writes --rx, --ry, --mx, --my. */
 @media (hover: hover) {
   .motion [data-tilt] { --rx: 0; --ry: 0; --mx: 50%; --my: 50%; }
-  .motion .extra.is-in, .motion .platform.is-in { transform: perspective(1100px) rotateX(calc(var(--rx) * 1deg)) rotateY(calc(var(--ry) * 1deg)); }
+  .motion .platform.is-in { transform: perspective(1100px) rotateX(calc(var(--rx) * 1deg)) rotateY(calc(var(--ry) * 1deg)); }
   .motion .tile-inner[data-tilt] { transform: rotateX(calc(var(--rx) * 1deg)) rotateY(calc(var(--ry) * 1deg)); }
   .motion .tile-inner[data-tilt], .motion [data-tilt].is-settled { transition: transform var(--t-2) var(--ease-out); }
   .motion [data-tilt]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(420px circle at var(--mx) var(--my), var(--sheen), transparent 60%); opacity: 0; transition: opacity var(--t-2) ease; pointer-events: none; }
   .motion [data-tilt].is-near::after { opacity: 1; }
   .motion [data-tilt].is-near { transition-duration: var(--t-1); }
   /* Inside a tilting card the picture sits a little above the card, so the two slide against each other. */
-  .motion .extra, .motion .platform { transform-style: preserve-3d; }
-  .motion .extra .il { transition: transform var(--t-2) var(--ease-out); }
-  .motion .extra.is-near .il { transform: translateZ(34px); }
+  .motion .platform { transform-style: preserve-3d; }
   .motion .tile-inner.is-near .tile-media { transform: translateZ(22px); }
   .motion .tile-media { transition: transform var(--t-2) var(--ease-out); }
 }
 
-/* Keys with height: each plate leans back, each cap stands above it and travels down when pressed. */
-.motion .plate { --h: 15px; transform-style: preserve-3d; transform-origin: 50% 100%; transform: perspective(900px) rotateX(calc(34deg - var(--p, .5) * 16deg)); }
-.motion .key { transform-style: preserve-3d; }
-.motion .key::before { content: ""; position: absolute; inset: 3px -1px -7px; border-radius: 15px; background: var(--key-cast); opacity: .7; filter: blur(5px); }
-.motion .key-top { box-shadow: inset 0 1px 0 var(--key-hi), inset 0 0 0 1px var(--line); transform: translateZ(var(--h)); }
-.motion .key-side { display: block; position: absolute; left: 4px; right: 4px; top: calc(100% - 7px); height: var(--h); border-radius: 0 0 5px 5px; background: linear-gradient(var(--key-side-a), var(--key-side-b)); transform-origin: 50% 0; transform: translateY(7px) rotateX(90deg); transition: transform var(--t-2) var(--spring); }
-.motion .key.is-down .key-top { box-shadow: inset 0 1px 0 var(--key-hi), inset 0 0 0 1px var(--line); transform: translateZ(calc(var(--h) * .2)); }
-.motion .key.is-down .key-side { transform: translateY(7px) rotateX(90deg) scaleY(.2); transition-duration: 90ms; transition-timing-function: ease-out; }
-
-/* Small pictures that play once when they arrive, and again under the pointer. */
-.motion .extra.is-playing .il-pop { animation: pop-out var(--t-3) var(--ease-out) 200ms backwards; }
-.motion .extra.is-playing .il-region { animation: fade-in var(--t-2) ease backwards; }
-.motion .extra.is-playing .il-time.t1 { animation: shown .8s steps(1, end); }
-.motion .extra.is-playing .il-time.t2 { animation: shown .8s steps(1, end) .8s; }
-.motion .extra.is-playing .il-time.t3 { animation: unseen 1.6s steps(1, end); }
-.motion .extra.is-playing .il-glow.a { animation: drift 2.8s var(--ease-in-out) backwards; }
-.motion .extra.is-playing .il-black { transform-origin: 100% 50%; animation: wipe var(--t-3) var(--ease-in-out) backwards; }
-.motion .extra.is-playing .il-ink { stroke-dasharray: 1; animation: draw 1.1s var(--ease-in-out) 500ms backwards; }
-@keyframes pop-out { from { opacity: 0; transform: translate(-28px, -18px) scale(.8); } }
-@keyframes fade-in { from { opacity: 0; } }
-@keyframes shown { from, to { opacity: 1; } }
-@keyframes unseen { from, to { opacity: 0; } }
-@keyframes drift { from { transform: translate(30px, -22px); } }
-@keyframes wipe { from { transform: scaleX(0); } }
-@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-
 /* The stage's own small moves. The demo's pointer sits on the window's plane or the toolbar's while the stage
-   leans; the cue arrives with a push; "Try it here" sends one ring of light round the stage's edge. */
+   leans, and "Try it here" sends one ring of light round the stage's edge. */
 .motion .stage-pointer { transform: translate3d(var(--x), calc(var(--y) + var(--lift) * (1 - var(--z)) * -6px), calc(var(--lift) * var(--z) * 60px)); }
-.motion .turn.is-on svg { animation: nudge 2.4s var(--ease-in-out) 600ms infinite; }
-@keyframes nudge { 0%, 60%, 100% { transform: none; } 30% { transform: translate(-2px, -2px); } 42% { transform: translate(1px, 1px); } }
 .motion .stage.is-cued .desk { animation: cue 1.1s var(--ease-out); }
 @keyframes cue { 0% { box-shadow: var(--top-light), var(--plane-shadow), 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); } 100% { box-shadow: var(--top-light), var(--plane-shadow), 0 0 0 26px transparent; } }
 .motion .tip { transition-duration: var(--t-1); }
