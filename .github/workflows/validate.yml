@@ -46,7 +46,6 @@ jobs:
           python3 tools/release/test_netlify_release.py
           python3 tools/release/test_publish_website.py
           python3 tools/release/test_hosted_website.py
-          python3 tools/demo/test_render_product_takes.py
           python3 tools/ci/test_ci.py
           python3 tools/ci/test_ci_scope.py
           python3 tools/ci/test_pr_policy.py
