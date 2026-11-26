@@ -4,18 +4,38 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="color-scheme" content="dark" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0e0e11" />
   <title>Annotator metrics</title>
-  <link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/admin/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/admin/fonts/instrument-sans-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/admin/admin.css" />
+  <script src="/admin/theme.js"></script>
   <script type="module" src="/admin/admin.js"></script>
 </head>
 <body data-view="loading">
+  <!-- The app's Aurora gradient, for the ink Annotator draws on its own numbers. -->
+  <svg class="defs" aria-hidden="true" focusable="false"><defs>
+    <linearGradient id="accent-ink" x1="0.05" y1="0.75" x2="0.95" y2="0.25"><stop offset="0" stop-color="#21b878"/><stop offset=".52" stop-color="#408cf2"/><stop offset="1" stop-color="#d154e0"/></linearGradient>
+    <linearGradient id="chart-ink" gradientUnits="userSpaceOnUse" x1="0%" y1="0" x2="100%" y2="0"><stop offset="0" stop-color="#21b878"/><stop offset=".52" stop-color="#408cf2"/><stop offset="1" stop-color="#d154e0"/></linearGradient>
+  </defs></svg>
   <p class="boot" id="boot" role="status">Loading metrics…</p>
 
   <main class="gate" id="gate" hidden>
+    <div class="gate-corner">
+        <button class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark theme">
+          <span class="ts-track">
+            <svg class="ts-stars" viewBox="0 0 20 18" aria-hidden="true" focusable="false"><path d="M5 2l.9 2.1L8 5l-2.1.9L5 8l-.9-2.1L2 5l2.1-.9zM13.5 9l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7zM6 12.5l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z"/></svg>
+            <span class="ts-knob"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <mask id="ts-moon-gate"><rect width="24" height="24" fill="#fff"/><circle class="ts-bite" cx="16.6" cy="7.6" r="6.6" fill="#000"/></mask>
+              <path class="ts-rays" d="M12 1.6v2.6M12 19.8v2.6M1.6 12h2.6M19.8 12h2.6M4.6 4.6l1.9 1.9M17.5 17.5l1.9 1.9M4.6 19.4l1.9-1.9M17.5 6.5l1.9-1.9"/>
+              <g mask="url(#ts-moon-gate)"><circle class="ts-disc" cx="12" cy="12" r="8.6"/></g>
+            </svg></span>
+          </span>
+        </button>
+    </div>
     <div class="gate-inner">
-      <p class="brand"><span class="brand-mark" aria-hidden="true">a<span>.</span></span>annotator</p>
+      <p class="brand">annotator<span class="brand-dot" aria-hidden="true">.</span></p>
       <h1 class="gate-title">Owner
         <span class="inked">metrics<svg class="ink-ellipse" viewBox="0 0 300 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path pathLength="1" d="M62 20C124 4 232 6 272 28C299 45 290 82 236 95C170 110 72 106 30 86C3 72 9 38 52 24C92 12 152 8 206 14" /></svg></span>
       </h1>
@@ -33,11 +53,21 @@
 
   <div class="shell" id="dashboard" hidden>
     <header class="topbar">
-      <p class="brand"><span class="brand-mark" aria-hidden="true">a<span>.</span></span>annotator<span class="crumb">metrics</span></p>
+      <p class="brand">annotator<span class="brand-dot" aria-hidden="true">.</span><span class="crumb">metrics</span></p>
       <p class="freshness" id="freshness"></p>
       <div class="actions">
         <button id="refresh" type="button" class="button"><span class="spinner" aria-hidden="true"></span><span id="refresh-label">Refresh</span></button>
         <button id="logout" type="button" class="button ghost">Sign out</button>
+        <button class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark theme">
+          <span class="ts-track">
+            <svg class="ts-stars" viewBox="0 0 20 18" aria-hidden="true" focusable="false"><path d="M5 2l.9 2.1L8 5l-2.1.9L5 8l-.9-2.1L2 5l2.1-.9zM13.5 9l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7zM6 12.5l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z"/></svg>
+            <span class="ts-knob"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <mask id="ts-moon-bar"><rect width="24" height="24" fill="#fff"/><circle class="ts-bite" cx="16.6" cy="7.6" r="6.6" fill="#000"/></mask>
+              <path class="ts-rays" d="M12 1.6v2.6M12 19.8v2.6M1.6 12h2.6M19.8 12h2.6M4.6 4.6l1.9 1.9M17.5 17.5l1.9 1.9M4.6 19.4l1.9-1.9M17.5 6.5l1.9-1.9"/>
+              <g mask="url(#ts-moon-bar)"><circle class="ts-disc" cx="12" cy="12" r="8.6"/></g>
+            </svg></span>
+          </span>
+        </button>
       </div>
     </header>
     <p id="status" class="status" role="status" hidden></p>
