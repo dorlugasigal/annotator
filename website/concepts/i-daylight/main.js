@@ -408,7 +408,7 @@ async function wipe(signal) {
 // A pause in the script, which also waits while the stage cannot be seen.
 async function hold(ms, signal) { await wait(ms, signal); await whenSeen(signal); }
 // The scripted demo ----------------------------------------------------------------------------------
-// One round is the call the page is about: Maya asks where to turn off the weekly emails, and you show her. Every
+// One round is the call the page is about: Dor asks where to turn off the weekly emails, and you show him. Every
 // mark is made the way a person makes it in the app: the pointer presses the toolbar's own buttons and draws on the
 // stage with pointer events, and the engine does the rest (Smart Draw, the arrow placed point by point, the counter,
 // the laser and its trail). The marks take the gradient chosen in the toolbar.
@@ -434,16 +434,6 @@ async function held(run) {
   try { return await run(); } finally { delete layer.setPointerCapture; delete layer.releasePointerCapture; }
 }
 let showPointer = true;
-// The app's click pulse (its pointer ring, 36 points wide, swelling by 18% and fading), left where the click was. The
-// engine's own ring travels with the pointer, which reads as a halo; this one stays put and is gone in half a second.
-function pulse(q) {
-  if (!motion) return;
-  const ring = document.createElement("i");
-  ring.className = "click-pulse";
-  ring.style.translate = `${q[0].toFixed(1)}px ${q[1].toFixed(1)}px`;
-  desk.append(ring);
-  ring.animate([{ opacity: 1, scale: 1 }, { opacity: 1, scale: 1.18, offset: 0.4 }, { opacity: 0, scale: 1.1 }], { duration: 520, easing: "ease-out" }).finished.then(() => ring.remove(), () => ring.remove());
-}
 const place = (p) => { ghostAt = p; if (showPointer) ink.placeGhost(p); };
 async function reach(q) { if (showPointer) await ink.moveGhost(q); ghostAt = q; }
 // The pointer glides to a place (or along a path) and the engine hears every step of the way.
@@ -456,7 +446,6 @@ async function glide(to, signal, { ms, buttons = 0, path = null } = {}) {
 function click(q) {
   fireLayer("pointerdown", q, 1);
   fireLayer("pointerup", q, 0);
-  if (showPointer) pulse(ghostAt);
 }
 // A drag along a list of points, at an even speed.
 async function stroke(points, signal, ms) {
@@ -487,7 +476,6 @@ async function press(el, action, signal, pause = 420) {
   await hold(120, signal);
   if (signal.aborted) return;
   el.classList.add("is-pressed");
-  if (showPointer) pulse(ghostAt);
   action();
   await hold(150, signal);
   el.classList.remove("is-pressed");
@@ -533,9 +521,9 @@ const ARROW = { roughness: 0, width: 7, headScale: 1.5, curved: true };
 ink.setStyle("arrow", ARROW);
 // The ring is clean too: the Pen draws without roughness, so what Smart Draw makes of it is a smooth ellipse, and the
 // shape tools start at Clean as well.
-for (const tool of ["pen", "ellipse", "rect"]) ink.setStyle(tool, { roughness: 0 });
+for (const tool of ["pen", "ellipse", "rect"]) ink.setStyle(tool, { roughness: 0 }); ink.setStyle("counter", { color: "#FFDD00" });
 
-// Where things go. The ring sits round the weekly email's switch; the arrow comes from Maya's question in a wide arc,
+// Where things go. The ring sits round the weekly email's switch; the arrow comes from Dor's question in a wide arc,
 // sideways when the windows sit side by side and up when they are stacked.
 function ringLoop() {
   const t = box(weekly), [cx, cy] = middle(t), rx = t.w / 2 + 17, ry = t.h / 2 + 13, points = [];
@@ -582,7 +570,7 @@ function checkPoints() {
   return [[x, y - 2], [x + 4, y + 3], [x + 9, y + 9], [x + 15, y + 1], [x + 22, y - 9], [x + 29, y - 17]];
 }
 
-// The marks that point Maya to the switch: a ring, the arrow from her question, and the two numbers.
+// The marks that point Dor to the switch: a ring, the arrow from her question, and the two numbers.
 async function showTheWay(signal) {
   let before = ids();
   await pick("pen", signal);
@@ -641,7 +629,7 @@ async function round(signal) {
   await hold(700, signal);
   if (signal.aborted) return;
 
-  // Use apps: the toolbar's own button, then the bar shrinks to one button as it does in the app. Maya's setting is
+  // Use apps: the toolbar's own button, then the bar shrinks to one button as it does in the app. Dor's setting is
   // turned off and saved, and the drawings stay where they are.
   await press(modeButton, () => modeButton.click(), signal, 320);
   if (signal.aborted) return;
@@ -729,7 +717,7 @@ async function restart() {
   ink.setMode("use");
   if (ink.state.tool !== "arrow") ink.setTool("arrow", true);
   ink.setStyle("arrow", ARROW);
-  for (const tool of ["pen", "ellipse", "rect"]) ink.setStyle(tool, { roughness: 0 });
+  for (const tool of ["pen", "ellipse", "rect"]) ink.setStyle(tool, { roughness: 0 }); ink.setStyle("counter", { color: "#FFDD00" });
   ties.clear();
   chosen = null;
   acted = false;
