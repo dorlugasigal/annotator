@@ -147,6 +147,8 @@ const engage = (on) => { if (engaged !== on) { engaged = on; schedule(); } };
 // frame opens up to fill the window, and scrolling brings it back (shared/stage.js). The apps do not move: in
 // index.html the desk and the dock carry data-stage-frame, and the mode chip's row data-stage-corner.
 const grow = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => tilt === 0 });
+apps.setRoom(() => grow.room);
+grow.on("change", () => apps.refit());
 // Joining in ends the script, retires "Your turn" and lays the stage flat (the frame grows only once it is).
 grow.on("join", () => { demo.joined = true; takeOver(); engage(true); showTurn(); });
 // Back at its own size, the toolbar's room is measured again.

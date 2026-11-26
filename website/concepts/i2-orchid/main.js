@@ -245,25 +245,30 @@ reply.addEventListener("submit", (e) => {
   reply.elements.reply.value = "";
 });
 
-// A window moves by its title bar, inside the desk. Drawings do not move with it, as in the app.
+// A window moves by its title bar, inside the desk, or inside the whole frame while the stage is grown. Drawings
+// do not move with it, as in the app.
 const floatEls = $$(".float", desk), dragged = floatEls.map(() => [0, 0]);
 let frontmost = 1;
+function keepIn(i, x, y) {
+  const el = floatEls[i], box = localBox(el, desk), edge = 8, r = stage.room;
+  dragged[i] = [
+    clamp(x, Math.min(0, edge - r.left - box.x), Math.max(0, desk.clientWidth + r.right - edge - box.x - box.w)),
+    clamp(y, Math.min(0, edge - r.top - box.y), Math.max(0, desk.clientHeight + r.bottom - edge - box.y - box.h)),
+  ];
+  el.style.translate = `${dragged[i][0]}px ${dragged[i][1]}px`;
+}
+// As the frame shrinks it gathers the windows back in.
+stage.on("change", () => dragged.forEach(([x, y], i) => { if (x || y) keepIn(i, x, y); }));
 floatEls.forEach((el, i) => {
   const bar = $("[data-drag]", el);
   bar.addEventListener("pointerdown", (e) => {
     if (e.button || !e.isTrusted) return;
     e.preventDefault();
     bar.setPointerCapture(e.pointerId);
-    const start = [e.clientX, e.clientY], from = [...dragged[i]], box = localBox(el, desk), edge = 8;
+    const start = [e.clientX, e.clientY], from = [...dragged[i]];
     el.classList.add("is-dragging");
     el.style.zIndex = ++frontmost;
-    const move = (ev) => {
-      dragged[i] = [
-        clamp(from[0] + ev.clientX - start[0], Math.min(0, edge - box.x), Math.max(0, desk.clientWidth - edge - box.x - box.w)),
-        clamp(from[1] + ev.clientY - start[1], Math.min(0, edge - box.y), Math.max(0, desk.clientHeight - edge - box.y - box.h)),
-      ];
-      el.style.translate = `${dragged[i][0]}px ${dragged[i][1]}px`;
-    };
+    const move = (ev) => keepIn(i, from[0] + ev.clientX - start[0], from[1] + ev.clientY - start[1]);
     const end = () => {
       el.classList.remove("is-dragging");
       bar.removeEventListener("pointermove", move);

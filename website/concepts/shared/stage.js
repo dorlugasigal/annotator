@@ -19,7 +19,9 @@
 // Options: margin (16), phoneMargin (8, under 600 px), motion (() => false: no animation; Reduce Motion by default),
 //   isFlat (() => true once a tilted stage lies flat; "the surface has no transform" by default).
 // Events: join (at once, when the visitor joins in), grow, shrink, change ({ progress, state }, every step).
-// Calls: stage.join() (for a control the module cannot see), stage.shrink(), stage.progress, stage.state, stage.refresh().
+// Calls: stage.join() (for a control the module cannot see), stage.shrink(), stage.progress, stage.state, stage.refresh(),
+//   stage.room ({ top, right, bottom, left }: px the frame reaches past the surface now; keep draggable windows inside
+//   the surface's box widened by it, and keep them in again on "change" as the frame shrinks).
 // Mistakes to avoid: an ancestor of `root` with perspective, transform, opacity, filter or z-index keeps the stage
 //   under the header (take it off while data-stage is not "small"); `overflow: hidden` on the surface cuts the frame;
 //   sizing the surface from --stage-* moves the windows; calling join() from the scripted loop grows it for nobody.
@@ -69,7 +71,7 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
   };
   const view = () => ({ width: document.documentElement.clientWidth, height: window.innerHeight });
   // 0 is the small frame, 1 the frame that fills the window. `anchor` is where the page was scrolled when it grew.
-  let progress = 0, anchor = null, tween = null, ticking = false, wants = false, settling = false, lastScroll = -1e9, lastOut = null, checked = false, padding = null;
+  let room = { top: 0, right: 0, bottom: 0, left: 0 }, progress = 0, anchor = null, tween = null, ticking = false, wants = false, settling = false, lastScroll = -1e9, lastOut = null, checked = false, padding = null;
   const pressed = new Set(), joining = new Set();
 
   // How much of the grown frame is left after scrolling away from where it grew: all of it at first, none after
@@ -85,6 +87,7 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
     const s = surface.getBoundingClientRect(), v = view(), m = v.width < 600 ? phoneMargin : margin, g = progress;
     const out = { top: g * (s.top - m), right: g * (v.width - m - s.right), bottom: g * (v.height - m - s.bottom), left: g * (s.left - m) };
     const state = g <= 0 ? "small" : g >= 1 ? "grown" : "between";
+    room = out;
     // A toolbar the visitor dragged keeps its place on the screen while its parent's corner moves.
     const parent = ink?.toolbar?.offsetParent, before = parent?.getBoundingClientRect();
     for (const side of ["top", "right", "bottom", "left"]) root.style.setProperty(`--stage-${side}`, `${out[side].toFixed(2)}px`);
@@ -288,6 +291,9 @@ export function growingStage({ ink, surface, root = surface, tries = null, margi
     on(name, fn) { (listeners[name] ||= []).push(fn); return this; },
     join, shrink, button, scrim,
     refresh: () => { if (progress > 0) request(); else apply(); },
+    // How far the frame reaches past the surface on each side right now, in px (0 while small): for a page that keeps
+    // its windows inside the frame.
+    get room() { return { ...room }; },
     get progress() { return progress; },
     get state() { return progress <= 0 ? "small" : progress >= 1 ? "grown" : "between"; },
   };

@@ -85,10 +85,13 @@ export function createApps({ board, onUse }) {
   const shifts = new Map();
   let top = 2;
   const shiftOf = (node) => shifts.get(node) || [0, 0];
+  // How far a grown stage's frame reaches past the board on each side (main.js hands this in once the stage exists).
+  let room = () => ({ top: 0, right: 0, bottom: 0, left: 0 });
   function limits(win) {
     let x = 0, y = 0;
     for (let node = win; node && node !== board; node = node.offsetParent) { x += node.offsetLeft; y += node.offsetTop; }
-    return { x: [8 - x, board.clientWidth - win.offsetWidth - x - 8], y: [8 - y, board.clientHeight - win.offsetHeight - y - 8] };
+    const r = room();
+    return { x: [8 - r.left - x, board.clientWidth + r.right - win.offsetWidth - x - 8], y: [8 - r.top - y, board.clientHeight + r.bottom - win.offsetHeight - y - 8] };
   }
   function moveTo(win, dx, dy) {
     const room = limits(win), x = clamp(dx, Math.min(0, room.x[0]), Math.max(0, room.x[1])), y = clamp(dy, Math.min(0, room.y[0]), Math.max(0, room.y[1]));
@@ -125,6 +128,9 @@ export function createApps({ board, onUse }) {
   showWeek(last, true);
   return {
     chat, input, shiftOf, moveTo, raise, chatShown,
+    // A grown stage gives the windows the whole frame; as it shrinks, `refit` gathers them back in.
+    setRoom(get) { room = get; },
+    refit() { for (const win of shifts.keys()) moveTo(win, ...shiftOf(win)); },
     previous: $("#week-prev", report), next: $("#week-next", report), sendButton: $("#reply-send", chat), chatBar: $("[data-drag]", chat),
     // In Draw the apps are out of reach, for the keyboard too.
     setReachable(on) { windows.inert = !on; },

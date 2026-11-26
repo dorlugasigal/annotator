@@ -234,14 +234,15 @@ function send(text) {
 }
 reply.addEventListener("submit", (e) => { e.preventDefault(); used(); send(replyInput.value); replyInput.value = ""; });
 
-// Windows move by their title bars, with the pointer or the arrow keys, and stay on the stage above the toolbar.
+// Windows move by their title bars, with the pointer or the arrow keys, and stay on the stage above the toolbar. A
+// grown stage gives them the whole frame; as it shrinks it gathers them back in.
 const windows = $$("[data-win]"), offsets = new WeakMap();
 let front = 1;
 function moveWindow(win, dx, dy) {
-  const base = localBox(win, desk), edge = 6, style = getComputedStyle(desk);
-  const floor = desk.clientHeight - parseFloat(style.getPropertyValue("--tb-h")) - parseFloat(style.getPropertyValue("--tb-bottom")) - edge;
-  const x = clamp(dx, edge - base.x, Math.max(edge - base.x, desk.clientWidth - edge - base.w - base.x));
-  const y = clamp(dy, edge - base.y, Math.max(edge - base.y, floor - base.h - base.y));
+  const base = localBox(win, desk), edge = 6, style = getComputedStyle(desk), r = stage.room;
+  const floor = desk.clientHeight + r.bottom - parseFloat(style.getPropertyValue("--tb-h")) - parseFloat(style.getPropertyValue("--tb-bottom")) - edge;
+  const x = clamp(dx, edge - r.left - base.x, Math.max(edge - r.left - base.x, desk.clientWidth + r.right - edge - base.w - base.x));
+  const y = clamp(dy, edge - r.top - base.y, Math.max(edge - r.top - base.y, floor - base.h - base.y));
   offsets.set(win, [x, y]);
   win.style.setProperty("--dx", `${x}px`);
   win.style.setProperty("--dy", `${y}px`);
@@ -273,7 +274,9 @@ for (const win of windows) {
     moveWindow(win, x + step[0], y + step[1]);
   });
 }
-addEventListener("resize", () => windows.forEach((win) => { const [x, y] = offsets.get(win) || [0, 0]; if (x || y) moveWindow(win, x, y); }));
+const refit = () => windows.forEach((win) => { const [x, y] = offsets.get(win) || [0, 0]; if (x || y) moveWindow(win, x, y); });
+addEventListener("resize", refit);
+stage.on("change", refit);
 function resetApps() {
   showWeek("this");
   showSlide(0);

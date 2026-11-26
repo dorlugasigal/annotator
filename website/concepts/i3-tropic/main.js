@@ -348,8 +348,8 @@ function raise(win) {
   win.style.zIndex = ++raised;
 }
 function place(win, x, y) {
-  const b = localBox(win, desk), edge = 6;
-  const to = [clamp(x, edge - b.x, desk.clientWidth - edge - b.x - b.w), clamp(y, edge - b.y, desk.clientHeight - edge - b.y - b.h)];
+  const b = localBox(win, desk), edge = 6, r = growth.room;
+  const to = [clamp(x, edge - r.left - b.x, desk.clientWidth + r.right - edge - b.x - b.w), clamp(y, edge - r.top - b.y, desk.clientHeight + r.bottom - edge - b.y - b.h)];
   moved.set(win, to);
   win.style.setProperty("--wx", `${to[0].toFixed(1)}px`);
   win.style.setProperty("--wy", `${to[1].toFixed(1)}px`);
@@ -401,6 +401,8 @@ addEventListener("resize", () => {
   if (!roomy.matches) { homeWindows(); return; }
   for (const [win, [x, y]] of moved) place(win, x, y);
 });
+// A grown stage gives the windows the whole frame; as it shrinks it gathers them back in.
+growth.on("change", () => { if (roomy.matches) for (const [win, [x, y]] of moved) place(win, x, y); });
 // Everything back as it was when the page opened.
 function resetApps() {
   appsUsed = false;

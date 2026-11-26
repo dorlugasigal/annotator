@@ -248,12 +248,14 @@ const deskBox = (el) => {
 };
 let topWindow = 1;
 function placeWin(win, x, y) {
-  const b = localBox(win, desk), pad = 6;
-  x = Math.round(clamp(x, Math.min(0, pad - b.x), Math.max(0, desk.clientWidth - b.w - b.x - pad)));
-  y = Math.round(clamp(y, Math.min(0, pad - b.y), Math.max(0, desk.clientHeight - b.h - b.y - pad)));
+  const b = localBox(win, desk), pad = 6, r = stage.room;
+  x = Math.round(clamp(x, Math.min(0, pad - r.left - b.x), Math.max(0, desk.clientWidth + r.right - b.w - b.x - pad)));
+  y = Math.round(clamp(y, Math.min(0, pad - r.top - b.y), Math.max(0, desk.clientHeight + r.bottom - b.h - b.y - pad)));
   offsets.set(win, [x, y]);
   win.style.translate = x || y ? `${x}px ${y}px` : "";
 }
+// A grown stage gives the windows the whole frame; as it shrinks it gathers them back in.
+stage.on("change", () => offsets.forEach(([x, y], win) => { if (x || y) placeWin(win, x, y); }));
 for (const win of wins) {
   const bar = $(".win-bar", win);
   bar.addEventListener("pointerdown", (e) => {
