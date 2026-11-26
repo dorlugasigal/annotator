@@ -105,9 +105,10 @@ test("the download buttons answer hover and keyboard focus the same way, and kee
   const hovered = await look();
   expect(hovered.position).not.toBe(rest.position);
   await page.mouse.move(0, 0);
+  // Keyboard focus: a key press first, so the browser treats the focus that follows as the keyboard's.
+  await page.keyboard.press("Shift");
   await button.focus();
-  await page.keyboard.press("Shift+Tab");
-  await page.keyboard.press("Tab");
+  expect(await button.evaluate(element => element.matches(":focus-visible"))).toBe(true);
   expect(await look()).toEqual(hovered);
   // With reduced motion the button changes color only: nothing moves.
   expect(await button.evaluate(element => getComputedStyle(element).transform)).toBe("none");
@@ -130,8 +131,8 @@ test("downloads, Help and the theme are usable with the keyboard", async ({page}
   await themeSwitch.focus();
   await themeSwitch.press("Space");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await header.getByRole("link", {name: "Help", exact: true}).click();
-  await expect(header.getByRole("link", {name: "Help", exact: true})).toHaveAttribute("aria-current", "page");
+  await page.locator(".site-footer").getByRole("link", {name: "Help", exact: true}).click();
+  await expect(page.locator(".site-footer").getByRole("link", {name: "Help", exact: true})).toHaveAttribute("aria-current", "page");
   const topics = page.getByRole("navigation", {name: "On this page"});
   for (const link of await topics.getByRole("link").all()) await expect(page.locator(await link.getAttribute("href"))).toHaveCount(1);
 });
@@ -216,7 +217,7 @@ test("without JavaScript every section, download and link is there, and the them
     await expect(page.locator(".theme-switch")).toBeHidden();
     // Content never waits for a script to be shown.
     expect(await page.locator("main h2, main p, main dt").evaluateAll(nodes => nodes.filter(node => getComputedStyle(node).opacity === "0").length)).toBe(0);
-    await page.locator(".site-header").getByRole("link", {name: "Help", exact: true}).click();
+    await page.locator(".site-footer").getByRole("link", {name: "Help", exact: true}).click();
     await expect(page).toHaveURL(/\/docs\/$/);
   } finally { await context.close(); }
 });
@@ -225,6 +226,6 @@ test("script failure leaves the page readable and its links working", async ({pa
   await page.route("**/*.js", route => route.abort());
   await page.goto(sitePath("/"));
   await expect(page.locator(".hero .download-mac")).toHaveAttribute("href", download);
-  await page.locator(".site-header").getByRole("link", {name: "Help", exact: true}).click();
+  await page.locator(".site-footer").getByRole("link", {name: "Help", exact: true}).click();
   await expect(page).toHaveURL(/\/docs\/$/);
 });

@@ -304,7 +304,8 @@ h1 { font-size: clamp(44px, 11.6vw, 84px); line-height: 1; font-weight: 720; let
 .do-tabs button:hover { color: var(--text); }
 .do-tabs button:focus-visible { border-radius: 999px; }
 .do-tabs i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
-.do-tabs span { display: none; }
+/* Narrow screens show only the dots; the names stay for screen readers. */
+.do-tabs span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 /* One accent dot marks the current tab. scripts/home.js hops it from tab to tab: the move that links one card to the next. */
 .motion .do-tabs { position: relative; }
 .do-marker { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; pointer-events: none; transition: opacity var(--t-1) ease; }
@@ -377,7 +378,7 @@ h1 { font-size: clamp(44px, 11.6vw, 84px); line-height: 1; font-weight: 720; let
 
 @media (min-width: 900px) {
   .motion .do-tabs button { gap: 7px; padding: 0 12px; }
-  .motion .do-tabs span { display: inline; }
+  .motion .do-tabs span { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
   .motion .do-tabs i { width: 7px; height: 7px; }
   .do-marker > b { left: -4.5px; top: -4.5px; width: 9px; height: 9px; }
   .motion .do-tabs [aria-current="true"] { background: var(--text); color: var(--page); }

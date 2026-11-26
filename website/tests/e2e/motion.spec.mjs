@@ -54,6 +54,8 @@ test("off screen, the demo and the cards rest: only the header's live dot keeps 
 
 test("the demo plays its story while it is seen, and Pause stops it", async ({page}) => {
   await page.goto(home);
+  // The story waits until the sample settings, where it draws first, are on screen.
+  await page.locator(".win-settings").scrollIntoViewIfNeeded();
   await expect(page.locator("#stage-replay")).toHaveText("Pause");
   await expect(desk(page)).toHaveAttribute("data-mode", "draw", {timeout: 10_000});
   await expect.poll(() => marks(page).count(), {timeout: 15_000}).toBeGreaterThan(0);
@@ -114,9 +116,9 @@ test("in Use apps the sample apps answer the visitor, and the windows move with 
   await expect(page.locator("[data-thread] .me")).toHaveText("Settings, Notifications.");
   const start = await page.locator(".win-mail").boundingBox();
   await page.locator(".win-mail [data-drag]").focus();
-  await page.keyboard.press("ArrowLeft");
-  await page.keyboard.press("ArrowLeft");
-  await expect.poll(async () => (await page.locator(".win-mail").boundingBox()).x).toBeLessThan(start.x - 20);
+  await page.keyboard.press("ArrowUp");
+  await page.keyboard.press("ArrowUp");
+  await expect.poll(async () => (await page.locator(".win-mail").boundingBox()).y).toBeLessThan(start.y - 20);
 });
 
 test("the cards' tabs, and Control-1 and Control-3 on a Mac, go to each card", async ({page, isMobile}) => {

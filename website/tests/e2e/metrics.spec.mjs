@@ -33,7 +33,7 @@ test("configured counts send one coarse event per tab and never break ordinary n
   await fixture(page, events);
   await page.goto(origin + base + "?private=query");
   await expect.poll(() => events.length).toBe(1);
-  await page.locator(".site-header").getByRole("link",{name:"Help",exact:true}).click();
+  await page.locator(".site-footer").getByRole("link",{name:"Help",exact:true}).click();
   await expect(page).toHaveURL(origin + base + "docs/");
   await page.waitForTimeout(100);
   expect(events).toHaveLength(1);
@@ -50,7 +50,7 @@ test("Global Privacy Control suppresses all website counts", async ({page}) => {
   const events = [];
   await fixture(page, events);
   await page.goto(origin + base);
-  await page.locator(".site-header").getByRole("link",{name:"Help",exact:true}).click();
+  await page.locator(".site-footer").getByRole("link",{name:"Help",exact:true}).click();
   expect(events).toEqual([]);
   expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
 });
