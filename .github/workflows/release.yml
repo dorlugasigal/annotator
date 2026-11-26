@@ -349,7 +349,7 @@ jobs:
           if (-not $env:UNSIGNED_ARTIFACT) { throw "The Windows packages job uploaded no windows-portable-unsigned artifact. Run Release again." }
       - name: Sign Annotator.exe in the portable ZIPs with SignPath
         id: signpath
-        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092
+        uses: signpath/github-action-submit-signing-request@a2c5b60d9c75f073142b653c354b632eedce097b
         env:
           SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
         with:
