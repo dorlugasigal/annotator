@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Annotator: just circle it (Daylight · Orchid)</title>
-  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#111014">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -211,9 +211,9 @@
               </div>
             </article>
 
-            <!-- The next three pictures are live scenes from the shared engine. Each frame is theirs to fill. -->
+            <!-- The next three pictures are live scenes from the shared engine (shared/scenes.js), which fill their frames. -->
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="share" aria-hidden="true"></div></div>
+              <div class="frame frame-live" data-scene="share" role="img" aria-label="A wide screen with one area outlined, and that area in a window of its own."></div>
               <div class="card-text">
                 <h3>Share just one part</h3>
                 <p>Put one area of a wide screen in its own window, then share that window.</p>
@@ -221,7 +221,7 @@
             </article>
 
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="break" aria-hidden="true"></div></div>
+              <div class="frame frame-live" data-scene="break" role="img" aria-label="A break screen with a big countdown."></div>
               <div class="card-text">
                 <h3>Take a break</h3>
                 <p>A big countdown on the screen, so everyone knows when to come back.</p>
@@ -229,7 +229,7 @@
             </article>
 
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="toolbar" aria-hidden="true"></div></div>
+              <div class="frame frame-live" data-scene="toolbar" role="img" aria-label="The toolbar: tools are picked, the color changes, and it shrinks to one button."></div>
               <div class="card-text">
                 <h3>Make it yours</h3>
                 <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it's in the way.</p>

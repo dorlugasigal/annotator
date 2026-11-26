@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Annotator: draw on your screen as you explain (Studio · Forest)</title>
-  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
+  <title>Annotator: just circle it (Studio · Forest)</title>
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0a0f0c">
   <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
@@ -180,7 +180,7 @@
                 <h3>Draw on anything</h3>
                 <p>Circles, boxes, arrows and notes, right over whatever you&rsquo;re sharing.</p>
               </div>
-              <div class="item-media scene" id="scene-draw" aria-hidden="true">
+              <div class="item-media picture" id="scene-draw" role="img" aria-label="A ring, a box, an arrow and a note drawn over a report">
                 <div class="mini wide">
                   <div class="window-bar"><i></i><i></i><i></i><span>Weekly report</span></div>
                   <div class="mini-report">
@@ -197,27 +197,27 @@
                 </div>
               </div>
             </li>
-            <!-- The next three scenes are the shared engine's (shared/scenes.js). Each slot is about 16:10 inside its frame. -->
+            <!-- The next three pictures are the shared engine's live scenes (shared/scenes.js); main.js puts one in each frame. -->
             <li class="item" data-style="corners">
               <div class="item-text">
                 <h3>Share just one part</h3>
                 <p>Put one area of a wide screen in its own window, then share that window.</p>
               </div>
-              <div class="item-media scene" aria-hidden="true"><div class="scene-slot" data-scene="share"></div></div>
+              <div class="item-media picture" data-scene="share" role="img" aria-label="One part of a screen, shared in its own window"></div>
             </li>
             <li class="item" data-style="drop">
               <div class="item-text">
                 <h3>Take a break</h3>
                 <p>A big countdown on the screen, so everyone knows when to come back.</p>
               </div>
-              <div class="item-media scene" aria-hidden="true"><div class="scene-slot" data-scene="break"></div></div>
+              <div class="item-media picture" data-scene="break" role="img" aria-label="A break timer counting down"></div>
             </li>
             <li class="item" data-style="pop">
               <div class="item-text">
                 <h3>Make it yours</h3>
                 <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it&rsquo;s in the way.</p>
               </div>
-              <div class="item-media scene" aria-hidden="true"><div class="scene-slot" data-scene="toolbar"></div></div>
+              <div class="item-media picture" data-scene="toolbar" role="img" aria-label="A toolbar with tools added, then shrunk to one button"></div>
             </li>
           </ol>
         </div>

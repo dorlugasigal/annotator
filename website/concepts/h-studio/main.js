@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 import { css as CURVE, clickPulse } from "/concepts/shared/app-motion.js";
 
 const root = document.documentElement;
@@ -199,9 +200,10 @@ const appMoves = Boolean(ink.setCollapsed(ink.collapsed)?.then);
 // Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the screen's
 // frame opens up to fill the window, and scrolling brings it back. The board does not move: in index.html the desk and
 // the toolbar's plane carry data-stage-frame and the two tags data-stage-corner. The frame grows only once the screen
-// lies flat (`lean` and `lift` are the two followers further down).
+// lies flat (`lean` and `lift` are the two followers further down). Until the visitor joins in, a "Draw here" pill
+// follows their pointer over the stage.
 let lean = null, lift = null;
-const growing = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => !lean || (lean.value === 0 && lift.value === 0) });
+const growing = growingStage({ ink, surface: board, root: screen, tries: "[data-try]", motion: () => motion, isFlat: () => !lean || (lean.value === 0 && lift.value === 0), invite: "Draw here" });
 // The screen keeps room under the window for the toolbar. It remembers the tallest the toolbar has been at this
 // size, so opening and closing the properties row moves nothing on the page. A grown frame has all the room it
 // needs, so the board keeps its size until the frame is small again.
@@ -290,6 +292,18 @@ function pointerAt(x, y, z) {
   pointer.el.style.setProperty("--x", `${x.toFixed(1)}px`);
   pointer.el.style.setProperty("--y", `${y.toFixed(1)}px`);
   pointer.el.style.setProperty("--z", z.toFixed(3));
+  cueAside();
+}
+// The "Draw here" pill steps out from under the engine's pointer by itself. This does the same for the demo's own.
+function cueAside() {
+  const cue = growing.invite;
+  if (!cue) return;
+  let under = false;
+  if (pointer.on) {
+    const p = pointer.el.getBoundingClientRect(), c = cue.getBoundingClientRect(), pad = 28;
+    under = p.left < c.right + pad && p.right > c.left - pad && p.top < c.bottom + pad && p.bottom > c.top - pad;
+  }
+  cue.classList.toggle("is-aside", under);
 }
 function pointerTake(toward) {
   const ghost = $(".ink-ghost", ink.layer);
@@ -300,7 +314,7 @@ function pointerTake(toward) {
   pointer.on = true;
 }
 function pointerGive() { ink.placeGhost([pointer.x, pointer.y]); pointerHide(); }
-function pointerHide() { pointer.el.classList.remove("is-on", "is-down"); pointer.on = false; }
+function pointerHide() { pointer.el.classList.remove("is-on", "is-down"); pointer.on = false; cueAside(); }
 // `plane` is 0 for the sample window and 1 for the toolbar, which floats above it while the stage leans.
 async function glide(to, plane = 0) {
   const from = [pointer.x, pointer.y, pointer.z];
@@ -510,12 +524,15 @@ Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).
 const THEME_KEY = "annotator.concept-h.theme";
 const themeSwitch = $("#theme-switch"), coin = $(".coin", themeSwitch), coinLift = $(".coin-lift", themeSwitch), themeMeta = $('meta[name="theme-color"]');
 let theme = root.dataset.theme === "light" ? "light" : "dark", turns = theme === "light" ? 1 : 0;
+// The shared engine's live scenes in "What you can do" keep an appearance of their own, like the toolbar.
+const liveScenes = [];
 function showTheme(next) {
   theme = next;
   root.dataset.theme = next;
   themeSwitch.setAttribute("aria-checked", String(next === "light"));
   themeMeta.content = token("--page");
   ink.setAppearance(next);
+  liveScenes.forEach((scene) => scene.setAppearance(next));
 }
 // The colors change in one step, with nothing easing, so a view transition's new picture is the new theme whole.
 function swapColors(next) {
@@ -627,6 +644,21 @@ const scenes = new Map([[drawScene.closest(".tile"), createScene(drawScene, {
   play: (ctx) => play(ctx.scene, drawSteps(ctx), ctx.signal),
   still: (ctx) => ctx.scene.perform(drawSteps(ctx), { cursor: false }),
 })]]);
+// The other three pictures are the shared engine's (shared/scenes.js), in the page's gradient and theme. Each plays
+// while its card is in front, again and again with a short pause between, and starts over when the card comes back.
+// Without motion each is asked for once, and shows its finished picture.
+const SHARED = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+for (const frame of $$("[data-scene]", deck)) {
+  const scene = SHARED[frame.dataset.scene](frame, { appearance: theme, gradient: "ocean" });
+  liveScenes.push(scene);
+  let active = false, pass = 0;
+  const loop = async () => {
+    const mine = ++pass, live = () => active && mine === pass;
+    while (live() && (await scene.play()) && live()) await wait(1100);
+  };
+  scenes.set(frame.closest(".tile"), { set(on) { if (!motion || on === active) return; active = on; if (on) loop(); else { pass += 1; scene.stop(); scene.reset(); } } });
+  if (!motion) scene.play();
+}
 
 let examplesPaused = !motion, front = -1;
 const refreshTiles = () => tiles.forEach((tile, i) => scenes.get(tile)?.set(!examplesPaused && i === front));

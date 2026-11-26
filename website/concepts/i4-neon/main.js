@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 // The app's own motion: its curves, the toolbar's change to one button and the pointer's click.
 import { css as appCurve, ease as appEase, toolbarMorph, clickPulse, visibilityDuration } from "/concepts/shared/app-motion.js";
 
@@ -98,11 +99,14 @@ const appShows = ink.setHidden(false) instanceof Promise;
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
 const themeSwitch = $(".theme-switch"), themeColor = $('meta[name="theme-color"]');
 const PAGE_COLOR = { dark: "#0a0a0a", light: "#fafafa" };
+// The shared live scenes in "What you can do" follow the theme too.
+const scenes = [];
 function showTheme(theme) {
   root.dataset.theme = theme;
   themeSwitch.setAttribute("aria-checked", String(theme === "dark"));
   themeColor.content = PAGE_COLOR[theme];
   ink.setAppearance(theme);
+  for (const scene of scenes) scene.setAppearance(theme);
 }
 // The pixel dissolve: the screen is cut into squares, and each gets a moment to turn, later the farther it is from
 // the switch, with some chance in it. Each step of the change is the outline of every square that has turned so far.
@@ -742,48 +746,76 @@ if (motion) {
 }
 
 // 2. What you can do -------------------------------------------------------------------------------
-// The first tile's picture is a small sample screen that the engine draws on: a ring, a box, an arrow and a note.
-// The other three frames are for the shared live scenes.
+// Every tile's picture is live and runs again and again while its tile is on screen. The first is a small sample
+// screen that the engine draws on: a ring, a box, an arrow and a note. The other three are the shared scenes.
 const textSize = (shot) => Math.round(clamp(shot.clientWidth * 0.06, 19, 38));
-const drawOnAnything = ({ layer, t, em, cursor }) => layer.perform([
+const drawOnAnything = ({ layer, t, em, cursor, signal }) => layer.perform([
   { tool: "ellipse", around: t("kpi"), padX: em * 0.75, padY: em * 0.5, size: 3, rough: 6, duration: 760, pause: 240 },
   { tool: "rect", around: t("box"), pad: 0, size: 3, rough: 3, duration: 620, pause: 220 },
   { tool: "arrow", from: { el: t("kpi"), at: "bottom", dx: em * 0.5, dy: em * 0.9 }, to: { el: t("box"), at: "top", dx: -em * 0.4, dy: -em * 0.5 }, bend: -0.28, size: 3, rough: 6, duration: 640, pause: 200 },
   { tool: "text", at: { el: t("note"), at: "top left" }, text: "new form?", color: BLUE, speed: 46 },
-], { cursor });
+], { cursor, signal });
 function sketch(card, shot) {
   const layer = createInk({ surface: shot, interactive: false, gradient: "neon" });
   const el = (name) => $(`[data-t="${name}"]`, shot), t = (name) => standIn(layer, () => localBox(el(name), shot));
   const fit = () => layer.layer.style.setProperty("--ink-text", `600 ${textSize(shot)}px/1.1 "Caveat", "Bradley Hand", cursive`);
-  let busy = false, shown = false, again = false;
+  let shown = false, run = null, drawing = false;
+  // One run after another: the drawing, a rest, then it fades and starts over. Playing again ends the run before.
   async function play() {
-    if (busy) { again = true; return; }
-    busy = true;
-    layer.clear();
-    shot.classList.remove("is-leaving");
-    fit();
-    await fontsReady;
-    await wait(motion ? 260 : 0);
-    await drawOnAnything({ layer, t, em: parseFloat(getComputedStyle(shot).fontSize), cursor: motion });
-    await wait(motion ? 500 : 0);
-    layer.hideGhost();
-    layer.reflow();
-    busy = false;
-    if (again) { again = false; play(); } else if (!shown && motion) leave();
+    run?.abort();
+    const { signal } = (run = new AbortController());
+    while (!signal.aborted) {
+      layer.hideGhost();
+      layer.clear();
+      shot.classList.remove("is-leaving");
+      fit();
+      await fontsReady;
+      await wait(motion ? 260 : 0, signal);
+      if (signal.aborted) return;
+      drawing = true;
+      await drawOnAnything({ layer, t, em: parseFloat(getComputedStyle(shot).fontSize), cursor: motion, signal });
+      drawing = false;
+      if (signal.aborted) return;
+      layer.hideGhost();
+      layer.reflow();
+      // Without motion the finished drawing stays.
+      if (!motion) return;
+      await wait(2800, signal);
+      if (signal.aborted) return;
+      shot.classList.add("is-leaving");
+      await wait(280, signal);
+    }
   }
   // A tile that has gone off screen loses its drawing quietly, so it starts clean the next time.
   async function leave() {
+    run?.abort();
+    run = null;
     shot.classList.add("is-leaving");
     await wait(280);
-    if (!shown && !busy) layer.clear();
+    if (!run) { layer.hideGhost(); layer.clear(); }
   }
   addEventListener("resize", () => { fit(); setTimeout(() => layer.reflow(), 260); });
   $(".ctl", card).addEventListener("click", play);
-  if (motion) $(".frame", card).addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && shown && !busy) play(); });
-  return { play, show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; if (motion && !busy) leave(); } };
+  if (motion) $(".frame", card).addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && shown && !drawing) play(); });
+  return { play, show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; if (motion) leave(); } };
 }
-const cards = $$(".do-bento .card"), QUIET = { play() {}, show() {}, hide() {} };
-const visuals = cards.map((card) => { const shot = $('[data-scene="draw"]', card); return shot ? sketch(card, shot) : QUIET; });
+// A shared scene (shared/scenes.js) fills its frame, in the page's theme and gradient. With Reduce Motion it shows
+// its finished picture.
+const SHARED = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+function staged(shot) {
+  const scene = SHARED[shot.dataset.scene](shot, { appearance: root.dataset.theme, gradient: "neon" });
+  scenes.push(scene);
+  let shown = false, turn = 0;
+  // A run, a short rest, the next run. Playing again, or stopping, ends the run before.
+  async function play() {
+    const mine = ++turn;
+    while (mine === turn && (await scene.play()) && motion) await wait(1800);
+  }
+  // A tile that has gone off screen goes back to its first picture, so it starts over when it comes back.
+  return { play, show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; turn++; if (motion) scene.reset(); } };
+}
+const cards = $$(".do-bento .card");
+const visuals = cards.map((card) => { const shot = $(".shot", card); return SHARED[shot.dataset.scene] ? staged(shot) : sketch(card, shot); });
 // A visual plays while its tile is on screen. While one tile is open, only that one plays.
 const seen = cards.map(() => !motion);
 let openCard = null;

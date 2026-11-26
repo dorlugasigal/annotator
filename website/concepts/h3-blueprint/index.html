@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Annotator: draw on your screen as you explain (Studio · Blueprint)</title>
-  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
+  <title>Annotator: just circle it (Studio · Blueprint)</title>
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#08111f">
   <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
@@ -154,11 +154,9 @@
               <div class="dock" id="dock" data-stage-frame></div>
               <span class="try-outline" data-stage-frame aria-hidden="true"><svg focusable="false"><rect pathLength="1" width="100%" height="100%" rx="8" stroke="url(#lagoon)"/></svg></span>
               <div class="crosshair" id="crosshair" data-stage-frame aria-hidden="true"><i></i><i></i></div>
-              <!-- Which mode the stage is in, and the key that changes it. -->
+              <!-- Which mode the stage is in. -->
               <p class="mode-chip" id="mode-chip" data-mode="use" data-stage-corner="top left" hidden>
                 <i aria-hidden="true"></i><b id="mode-word">Using apps</b>
-                <kbd class="chip-key" data-when="use" aria-hidden="true"><span data-for="mac">&#x2303;&#x21E7;2</span><span data-for="windows">Ctrl+Shift+2</span></kbd>
-                <kbd class="chip-key" data-when="draw" aria-hidden="true">Esc</kbd>
               </p>
             </div>
           </div>
@@ -187,7 +185,7 @@
           <div class="deck" id="deck">
             <article class="tile">
               <div class="tile-inner" data-frame="ticks">
-                <div class="tile-media" data-reg aria-hidden="true"><div class="scene" id="scene-draw">
+                <div class="tile-media" data-reg aria-hidden="true"><div class="sketch" id="scene-draw">
                   <div class="mini">
                     <div class="window-bar"><i></i><i></i><i></i><span>Checkout</span></div>
                     <div class="pay">
@@ -203,10 +201,11 @@
                 </div>
               </div>
             </article>
-            <!-- The next three pictures are live scenes from shared/scenes.js: each frame is theirs to fill. -->
+            <!-- The next three pictures are live scenes from shared/scenes.js: each frame is theirs to fill. A scene
+                 takes no input and says nothing to a screen reader, so its frame says what it shows. -->
             <article class="tile">
               <div class="tile-inner" data-frame="ticks">
-                <div class="tile-media" data-reg><div class="scene-slot" data-scene="share"></div></div>
+                <div class="tile-media" data-reg><div class="scene-slot" data-scene="share" role="img" aria-label="One area of a wide screen, shown in a window of its own."></div></div>
                 <div class="tile-text">
                   <h3>Share just one part</h3>
                   <p>Put one area of a wide screen in its own window, then share that window.</p>
@@ -215,7 +214,7 @@
             </article>
             <article class="tile">
               <div class="tile-inner" data-frame="ticks">
-                <div class="tile-media" data-reg><div class="scene-slot" data-scene="break"></div></div>
+                <div class="tile-media" data-reg><div class="scene-slot" data-scene="break" role="img" aria-label="A big countdown that covers the screen during a break."></div></div>
                 <div class="tile-text">
                   <h3>Take a break</h3>
                   <p>A big countdown on the screen, so everyone knows when to come back.</p>
@@ -224,7 +223,7 @@
             </article>
             <article class="tile">
               <div class="tile-inner" data-frame="ticks">
-                <div class="tile-media" data-reg><div class="scene-slot" data-scene="toolbar"></div></div>
+                <div class="tile-media" data-reg><div class="scene-slot" data-scene="toolbar" role="img" aria-label="The toolbar with a tool swapped and a new color. It can shrink to one button."></div></div>
                 <div class="tile-text">
                   <h3>Make it yours</h3>
                   <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it&rsquo;s in the way.</p>

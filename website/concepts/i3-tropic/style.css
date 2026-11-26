@@ -340,8 +340,10 @@ body > .stage-invite { padding: 8px 11px; border-radius: var(--r-s); font: 600 1
 .ctl:hover, .ctl:focus-visible { opacity: 1; }
 
 .shot { position: relative; width: 100%; height: 100%; display: grid; place-items: center; font-size: clamp(6px, min(3cqw, 4.8cqh), 20px); line-height: 1.4; }
-.shot .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-1) ease; }
-.shot.is-leaving .ink-layer { opacity: 0; }
+.shot > .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-1) ease; }
+.shot.is-leaving > .ink-layer { opacity: 0; }
+/* The frame of a live scene from the shared engine: the scene fills it and brings its own look. */
+.live { width: 100%; height: 100%; }
 .kpi { width: 27em; padding: 1.1em 1.4em 1.3em; border-radius: .5em; background: var(--win); box-shadow: var(--lift); }
 .kpi-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; color: var(--muted); }
 .kpi-head em { font: 500 .68em/1.3 var(--mono); }

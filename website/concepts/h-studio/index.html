@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Annotator: draw on your screen as you explain</title>
-  <meta name="description" content="Annotator lets you draw right on top of your screen while you share it. It's free, for Mac and Windows.">
+  <title>Annotator: just circle it (Studio)</title>
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0a0d14">
   <link rel="icon" type="image/svg+xml" href="/public/mark.svg">
@@ -152,7 +152,7 @@
           <div class="deck" id="deck">
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media scene" id="scene-draw" aria-hidden="true">
+                <div class="tile-media sketch" id="scene-draw" aria-hidden="true">
                   <div class="mini">
                     <div class="window-bar"><i></i><i></i><i></i><span>Support</span></div>
                     <div class="stats">
@@ -169,10 +169,10 @@
                 </div>
               </div>
             </article>
-            <!-- The next three pictures are live scenes from the shared engine. Each frame is theirs to fill. -->
+            <!-- The next three pictures are live scenes from the shared engine (shared/scenes.js). Each frame is theirs to fill. -->
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media" aria-hidden="true"><div class="scene-slot" data-scene="share"></div></div>
+                <div class="tile-media"><div class="tile-scene" data-scene="share" role="img" aria-label="One area of a screen opens in its own window."></div></div>
                 <div class="tile-text">
                   <h3>Share just one part</h3>
                   <p>Put one area of a wide screen in its own window, then share that window.</p>
@@ -181,7 +181,7 @@
             </article>
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media" aria-hidden="true"><div class="scene-slot" data-scene="break"></div></div>
+                <div class="tile-media"><div class="tile-scene" data-scene="break" role="img" aria-label="A big countdown covers the screen."></div></div>
                 <div class="tile-text">
                   <h3>Take a break</h3>
                   <p>A big countdown on the screen, so everyone knows when to come back.</p>
@@ -190,7 +190,7 @@
             </article>
             <article class="tile">
               <div class="tile-inner">
-                <div class="tile-media" aria-hidden="true"><div class="scene-slot" data-scene="toolbar"></div></div>
+                <div class="tile-media"><div class="tile-scene" data-scene="toolbar" role="img" aria-label="The toolbar gets other tools and another color, then shrinks to one button."></div></div>
                 <div class="tile-text">
                   <h3>Make it yours</h3>
                   <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it&rsquo;s in the way.</p>

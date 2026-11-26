@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 // The app's own motion: the pulse of its pointer when it clicks, as keyframes for the page's own elements.
 import { clickPulse } from "/concepts/shared/app-motion.js";
 
@@ -104,7 +105,8 @@ const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "ab
 // Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the desk's
 // frame opens up to fill the window, and scrolling brings it back. The desk itself does not move: in index.html the
 // panel, the cue's ring and the dock carry data-stage-frame, and the two tags on the rim data-stage-corner.
-const stage = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion, isFlat: () => desk.classList.contains("is-flat") });
+// Until then a small "Draw here" follows the pointer over the desk (style.css gives the pill the page's look).
+const stage = growingStage({ ink, surface: desk, tries: "[data-try]", motion: () => motion, isFlat: () => desk.classList.contains("is-flat"), invite: "Draw here" });
 // Joining in ends the script and lays the desk flat (the frame grows only once it is).
 stage.on("join", () => takeOver());
 
@@ -112,11 +114,13 @@ stage.on("join", () => takeOver());
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
 const themeSwitch = $(".theme-switch"), themeColor = $('meta[name="theme-color"]');
 const PAGE_COLOR = { dark: "#111014", light: "#faf8fb" };
+// What has the app's look in it and changes with the theme: the stage's engine, and the live scenes further down.
+const themed = [ink];
 function showTheme(theme) {
   root.dataset.theme = theme;
   themeSwitch.setAttribute("aria-checked", String(theme === "dark"));
   themeColor.content = PAGE_COLOR[theme];
-  ink.setAppearance(theme);
+  for (const part of themed) part.setAppearance(theme);
 }
 let themeTurn = 0;
 function setTheme(theme) {
@@ -762,9 +766,23 @@ function sketch(card, shot) {
   return { show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; if (motion && !busy) leave(); } };
 }
 const cards = $$(".do-deck .card");
-// The other three pictures are live scenes of the shared engine's: their frames are left for it to fill.
-const idle = { show() {}, hide() {} };
-const visuals = cards.map((card) => { const shot = $(".shot", card); return SCENES[shot.dataset.scene] ? sketch(card, shot) : idle; });
+// The other three pictures are live scenes of the shared engine's, in the page's gradient and theme. A scene plays
+// while its card is shown, over and over with a short pause, and starts from its beginning the next time. Without
+// motion it plays once: the engine shows its finished picture where the visitor has asked for less motion.
+const LIVE = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+function liveScene(frame) {
+  const scene = LIVE[frame.dataset.scene](frame, { appearance: root.dataset.theme, gradient: "orchid" });
+  themed.push(scene);
+  let turn = 0;
+  return {
+    async show() {
+      const mine = ++turn;
+      while (mine === turn && (await scene.play()) && motion) await wait(1600);
+    },
+    hide() { turn++; scene.stop(); },
+  };
+}
+const visuals = cards.map((card) => { const frame = $(".frame", card); return LIVE[frame.dataset.scene] ? liveScene(frame) : sketch(card, $(".shot", card)); });
 
 if (motion) {
   // The fan. Progress through the track turns into one number, 0 for the first card to 3 for the last. Each card

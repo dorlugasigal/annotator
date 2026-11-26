@@ -329,26 +329,29 @@ body > .stage-invite::before { content: ""; position: absolute; inset: 0; paddin
 .do-bento .t-head { justify-content: flex-end; }
 
 .card { display: flex; flex-direction: column; gap: 12px; padding: 12px; cursor: pointer; }
-.tile-open { position: absolute; top: 20px; right: 20px; z-index: 71; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--card); color: var(--fg-2); cursor: pointer; transition: color var(--t-1) ease, border-color var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
+/* The button that opens a tile sits beside its title, clear of the picture. Opened, it is in the tile's corner. */
+.tile-open { position: absolute; top: 0; right: 2px; z-index: 71; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--card); color: var(--fg-2); cursor: pointer; transition: color var(--t-1) ease, border-color var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
 .tile-open:hover, .card:hover .tile-open { color: var(--fg); border-color: var(--fg-3); }
 .tile-open:active { transform: scale(.92); }
 .tile-open[aria-expanded="true"] .i-open, .tile-open[aria-expanded="false"] .i-close { display: none; }
-.card-text { padding: 4px 8px 10px; }
+.card-text { position: relative; padding: 4px 8px 10px; }
+.card-text h3 { padding-right: 40px; }
 .card-text p { max-width: 30em; margin-top: 8px; font-size: 16px; line-height: 1.5; color: var(--fg-2); }
-/* A tile's picture is live. Its frame is 16:10 at the least (the spacer in ::before) and its picture fills it. */
+/* A tile's picture is live. Its frame is 16:10 at the least (the spacer in ::before) and its picture fills it. The
+   shared scenes bring their own inside; the frame, its corners and its hairline are the page's. */
 .frame { position: relative; flex: none; display: grid; min-width: 0; overflow: hidden; container-type: inline-size; border: 1px solid var(--rule); border-radius: calc(var(--rad) - 12px); background: var(--page); }
 .frame::before { content: ""; grid-area: 1 / 1; padding-top: 62.5%; pointer-events: none; }
 .frame > .shot { grid-area: 1 / 1; }
 .ctl { position: absolute; right: 8px; bottom: 8px; z-index: 70; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--card); color: var(--fg); cursor: pointer; opacity: .85; transition: opacity var(--t-1) ease, transform var(--t-1) var(--ease-snap); }
 .ctl:hover, .ctl:focus-visible { opacity: 1; transform: scale(1.06); }
 
-.shot { position: relative; min-width: 0; }
+.shot { position: relative; min-width: 0; min-height: 0; border-radius: inherit; }
 /* Draw on anything: a small dashboard with a dip in its chart, which the engine draws on. Sizes inside are in em
    and follow the frame's width. */
 .shot-dash { display: grid; place-items: center; padding: 1.6em 1.2em; font-size: clamp(11px, 3.2cqw, 24px); line-height: 1.4; }
-.shot .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-2) var(--ease-fade); }
-.shot.is-leaving .ink-layer { opacity: 0; }
-.shot p { text-wrap: nowrap; }
+.shot-dash > .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-2) var(--ease-fade); }
+.shot-dash.is-leaving > .ink-layer { opacity: 0; }
+.shot-dash p { text-wrap: nowrap; }
 .dash { width: min(100%, 23em); padding: .9em; border: 1px solid var(--rule-2); border-radius: .9em; background: var(--win); }
 .dash-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55em; }
 .dash-kpis p { padding: .55em .7em .7em; border: 1px solid var(--rule); border-radius: .6em; background: var(--win-inset); }
@@ -373,7 +376,8 @@ body > .stage-invite::before { content: ""; position: absolute; inset: 0; paddin
 /* Opened, the picture is as large as the screen lets it be, and no wider than 2:1. */
 .card.is-open .frame::before { padding-top: clamp(50%, 100svh - var(--header-h) - 240px, 62.5%); }
 .card.is-open .shot-dash { font-size: clamp(11px, 3.2cqw, 26px); }
-.card.is-open .card-text { padding: 4px 8px 12px; }
+.card.is-open .card-text { position: static; padding: 4px 8px 12px; }
+.card.is-open .tile-open { top: 20px; right: 20px; }
 .card.is-open .card-text h3 { font-size: clamp(24px, 2.7vw, 34px); letter-spacing: -.03em; }
 .card.is-open .card-text p { font-size: 17.5px; }
 
@@ -498,7 +502,7 @@ body > .stage-invite::before { content: ""; position: absolute; inset: 0; paddin
 
   .do-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "head head head head head head" "t1 t1 t1 t1 t1 t1" "t2 t2 t2 t3 t3 t3" "t4 t4 t4 t4 t4 t4"; }
   .card { padding: 14px; gap: 14px; }
-  .tile-open { top: 22px; right: 22px; }
+  .card.is-open .tile-open { top: 22px; right: 22px; }
   /* The widest tile is a strip: picture on the left, words on the right. */
   .card[data-area="t4"]:not(.is-open) { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); column-gap: 16px; }
   .card[data-area="t4"]:not(.is-open) .card-text { align-self: end; }
@@ -566,6 +570,7 @@ body > .stage-invite::before { content: ""; position: absolute; inset: 0; paddin
   /* The largest tile keeps its words in one band under the picture. */
   .card[data-area="t1"]:not(.is-open) .card-text { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 28px; align-items: baseline; padding-bottom: 8px; }
   .card[data-area="t1"]:not(.is-open) .card-text p { margin-top: 0; }
+  .card[data-area="t1"]:not(.is-open) .card-text h3 { padding-right: 0; }
   /* Good to know sits in one row. */
   .know-bento { grid-template-areas: "head head head q1 q1 q1 q2 q2 q2 q3 q3 q3"; }
 }

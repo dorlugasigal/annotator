@@ -33,7 +33,6 @@
   --win-accent: #c3c7ce; --win-field: #1d2024; --win-down: #ff8a80;
   --win-shadow: 0 0 0 1px #ffffff1a, 0 30px 60px -26px #000000e6;
   --code-bg: #0a0b0d; --code-text: #d6d9de;
-  --key-a: #2b2f35; --key-b: #1c1f23; --key-line: #ffffff26;
   --dial-sky: #1a1d21; --dial-land: #0c0d0f; --dial-moon: #e8eaee; --stars: .7;
   --curtain: .5;
   --ink-highlight-blend: screen;
@@ -58,7 +57,6 @@ html[data-theme="light"] {
   --win-accent: #3f444d; --win-field: #ffffff; --win-down: #c0281f;
   --win-shadow: 0 0 0 1px #1113161f, 0 30px 60px -30px #11131670;
   --code-bg: #eef0f3; --code-text: #111316;
-  --key-a: #ffffff; --key-b: #eef0f3; --key-line: #1113162e;
   --dial-sky: #dfe5ee; --dial-land: #f4f5f7; --dial-moon: #111316; --stars: 0;
   --curtain: .62;
   --ink-highlight-blend: multiply;
@@ -251,13 +249,12 @@ h1 { font-size: clamp(46px, min(13vw, 12.5svh), 116px); line-height: .97; font-w
 .screen .ink-layer { --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
 /* While the page's own script is drawing, a touch on the stage still scrolls the page. */
 @media (pointer: coarse) { .screen.is-scripted .ink-layer[data-mode="draw"] { pointer-events: none; touch-action: auto; } }
-/* The mode, on the stage: which one it is, and its key. In Draw the chip's edge and dot take the gradient. */
-.mode-chip { position: absolute; left: calc(var(--dock-inset) + 8px); top: 9px; display: inline-flex; align-items: center; gap: 7px; height: 28px; margin: 0; padding: 0 5px 0 10px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box, linear-gradient(var(--surface-1), var(--surface-1)) border-box; color: var(--text); font: 600 13px/1 var(--sans); white-space: nowrap; }
+/* The mode, on the stage. In Draw the chip's edge and dot take the gradient. */
+.mode-chip { position: absolute; left: calc(var(--dock-inset) + 8px); top: 9px; display: inline-flex; align-items: center; gap: 7px; height: 28px; margin: 0; padding: 0 12px 0 10px; border: 1.5px solid transparent; border-radius: 999px; background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, linear-gradient(var(--line-strong), var(--line-strong)) border-box, linear-gradient(var(--surface-1), var(--surface-1)) border-box; color: var(--text); font: 600 13px/1 var(--sans); white-space: nowrap; }
 .mode-chip[data-mode="draw"] { background: linear-gradient(var(--surface-1), var(--surface-1)) padding-box, var(--aurora-across) border-box; }
 .mode-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
 .mode-chip[data-mode="draw"] i { background: var(--aurora); box-shadow: 0 0 8px 0 var(--aurora-2); }
 .mode-chip b { font-weight: inherit; }
-.mode-chip kbd { display: inline-grid; place-items: center; min-width: 22px; height: 18px; padding: 0 6px; border: 1px solid var(--key-line); border-radius: 6px; background: linear-gradient(var(--key-a), var(--key-b)); color: var(--muted); font: 500 11px/1 var(--sans); box-shadow: 0 1px 0 var(--key-line); }
 /* The loop's marks leave together before the next round. */
 .ink-mark.is-leaving { opacity: 0 !important; transition: opacity var(--t-2) ease; }
 
@@ -328,6 +325,7 @@ h1 { font-size: clamp(46px, min(13vw, 12.5svh), 116px); line-height: .97; font-w
 /* Where a shared scene goes (data-scene): the whole of the frame, at whatever shape the card gives it. The shared
    scenes have classes of their own that start with "scene", so the page's own names keep clear of them. */
 .tile-scene { position: absolute; inset: 0; border-radius: inherit; }
+.tile-scene.is-arriving > * { animation: dawn 420ms ease backwards; }
 .tile-text { padding: 18px 4px 0; }
 .tile-text p { margin-top: 8px; max-width: 32em; font-size: 17px; line-height: 1.5; color: var(--muted); text-wrap: balance; }
 .sample { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
@@ -600,9 +598,9 @@ h1 { font-size: clamp(46px, min(13vw, 12.5svh), 116px); line-height: .97; font-w
 }
 @media (min-width: 1100px) { .motion .what { --theta: 25deg; --arc-gap: 64px; } }
 
-/* On the stage. The chip's key goes down when the mode changes. */
-.motion .mode-chip.is-changing kbd { animation: key-tap 480ms var(--ease-out) both; }
-@keyframes key-tap { 30% { transform: translateY(1.500px) scale(.9); box-shadow: 0 0 10px 1px var(--aurora-2); } }
+/* On the stage. The chip's dot answers when the mode changes. */
+.motion .mode-chip.is-changing i { animation: dot-tap 480ms var(--ease-out) both; }
+@keyframes dot-tap { 30% { transform: scale(1.9); } }
 .motion .stage.is-called .desk::after { animation: sweep 1200ms var(--ease-sweep) both; }
 
 /* Coffee: the cup drifts a little against its panel, and its steam rises through the gradient while it is in view. */

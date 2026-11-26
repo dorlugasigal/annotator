@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Annotator: just circle it (Daylight · Tropic)</title>
-  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#120e14">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -225,15 +225,15 @@
               </figure>
             </article>
 
-            <!-- The next three pictures are live scenes from the shared engine; each frame waits for its scene. -->
+            <!-- The next three pictures are live scenes from the shared engine (shared/scenes.js); main.js plays each one while its spread is open. -->
             <article class="card">
               <div class="page page-text">
                 <p class="page-no" aria-hidden="true"><b>2</b> / 4</p>
                 <h3>Share just one part</h3>
                 <p>Put one area of a wide screen in its own window, then share that window.</p>
               </div>
-              <figure class="page page-fig" aria-hidden="true">
-                <div class="frame"><div class="shot" data-scene="share"></div></div>
+              <figure class="page page-fig" aria-label="One area of a wide screen is outlined, then it opens in a window of its own.">
+                <div class="frame"><div class="live" data-scene="share"></div></div>
               </figure>
             </article>
 
@@ -243,8 +243,8 @@
                 <h3>Take a break</h3>
                 <p>A big countdown on the screen, so everyone knows when to come back.</p>
               </div>
-              <figure class="page page-fig" aria-hidden="true">
-                <div class="frame"><div class="shot" data-scene="break"></div></div>
+              <figure class="page page-fig" aria-label="A big countdown covers the screen and says when the break ends.">
+                <div class="frame"><div class="live" data-scene="break"></div></div>
               </figure>
             </article>
 
@@ -254,8 +254,8 @@
                 <h3>Make it yours</h3>
                 <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it's in the way.</p>
               </div>
-              <figure class="page page-fig" aria-hidden="true">
-                <div class="frame"><div class="shot" data-scene="toolbar"></div></div>
+              <figure class="page page-fig" aria-label="A tool leaves the toolbar and another is added, the color changes, and the toolbar shrinks to one button and opens again.">
+                <div class="frame"><div class="live" data-scene="toolbar"></div></div>
               </figure>
             </article>
           </div>

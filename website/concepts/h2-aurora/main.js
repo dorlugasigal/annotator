@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 import { createAurora } from "./aurora.js";
 import { createReport } from "./report.js";
 
@@ -253,8 +254,10 @@ async function round(signal) {
   };
   // While the script has the toolbar or the drawings put away, stopping it brings them back (stopDemo).
   const away = async (list) => { demo.away = true; await play(list); if (!signal.aborted) demo.away = false; };
-  // The mode changes as if its key had been pressed: the chip on the stage shows the key going down.
-  const say = (mode) => play([{ mode, via: "key", pause: 520 }]);
+  // The mode changes the way a visitor changes it, with a press on the toolbar's Draw button. Where the toolbar is
+  // below the edge of the window, the mode simply changes, and the chip in the stage's corner says so.
+  const within = () => { const box = ink.toolbar.getBoundingClientRect(); return box.top >= 0 && box.bottom <= innerHeight; };
+  const say = (mode) => play([{ mode, pause: 520, ...(within() ? {} : { via: "key" }) }]);
   // The pointer goes to one of the app's controls and presses it. The page moves the pointer itself, in the
   // plane's own layout, because the engine's click step measures on the screen and the stage may be leaning.
   const press = async (control) => {
@@ -404,12 +407,15 @@ Promise.all([document.fonts?.ready, document.fonts?.load('600 30px "Caveat"')]).
 const THEME_KEY = "annotator.concept-h2.theme";
 const themeSwitch = $("#theme-switch"), dial = $(".dial", themeSwitch), curtain = $("#curtain"), themeMeta = $('meta[name="theme-color"]');
 let theme = root.dataset.theme === "light" ? "light" : "dark", turns = theme === "light" ? 1 : 0;
+// The shared scenes of "What you can do" keep an appearance too; they are made further down.
+const appScenes = [];
 function showTheme(next) {
   theme = next;
   root.dataset.theme = next;
   themeSwitch.setAttribute("aria-checked", String(next === "light"));
   themeMeta.content = token("--page");
   ink.setAppearance(next);
+  for (const scene of appScenes) scene.setAppearance(next);
   for (const aurora of Object.values(auroras)) aurora.setTheme(next);
 }
 // The colors change in one step, with nothing easing, so a view transition's new picture is the new theme whole.
@@ -482,7 +488,7 @@ showTheme(theme);
 // What you can do ---------------------------------------------------------------------------------
 const what = $("#what"), arc = $("#arc"), tiles = $$(".tile", arc), arcSpace = $(".arc-space"), stepsBar = $("#arc-steps"), countLabel = $("#arc-count"), clipsToggle = $("#clips-toggle");
 // The first card is a small sample screen that a pointer draws on, again and again while its card is the one in
-// front. `play` draws one round. The other three cards hold empty frames (data-scene) for the shared scenes.
+// front. `play` draws one round. The other three cards play the shared scenes (below).
 function createScene(surface, play) {
   const scene = createInk({ surface, interactive: false, size: 3, gradient: "aurora" }), a = anchorsFor(scene, surface);
   let active = false, running = false, ids = [];
@@ -539,6 +545,46 @@ const scenes = new Map([
     ]);
   }],
 ].map(([surface, play]) => [surface.closest(".tile"), createScene(surface, play)]));
+// The other three cards show the app itself: the shared live scenes (shared/scenes.js), in the page's gradient and
+// theme. A scene plays while its card is the one in front, again and again with a pause between; it stops when the
+// card turns away and starts over when it is back. Without motion each shows its finished picture.
+// The scenes measure on the screen, which is wrong for a card that is turned on the ring: the share scene takes its
+// window's shape from there, the toolbar scene the place of its marks. So a scene made or resized while its card
+// was turned is made again once the card faces the page, just before it plays; and the toolbar scene, which draws
+// as soon as it is made, is first made at that moment.
+const APP_SCENES = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+for (const frame of $$("[data-scene]", arc)) {
+  const tile = frame.closest(".tile"), name = frame.dataset.scene, waits = name === "toolbar";
+  const make = () => APP_SCENES[name](frame, { appearance: theme, gradient: "aurora" });
+  let scene = motion && waits ? null : make(), stale = motion, active = false, turn = 0;
+  const facing = () => parseFloat(tile.style.getPropertyValue("--ad")) < .03;
+  // The card has stopped turning, or near enough. It does not wait for ever: a card left a little turned still plays.
+  const settled = async () => { const until = performance.now() + 1200; while (!facing() && performance.now() < until) await new Promise(requestAnimationFrame); };
+  const run = async () => {
+    const mine = ++turn, live = () => active && mine === turn;
+    while (live()) {
+      await settled();
+      if (!live()) break;
+      if (stale || !scene) {
+        // A scene that was not there before arrives softly; one that takes another's place is simply there.
+        frame.classList.toggle("is-arriving", !scene);
+        scene?.destroy();
+        scene = make();
+        stale = false;
+      }
+      if (!(await scene.play()) || !live()) break;
+      await wait(1500);
+    }
+  };
+  appScenes.push({ setAppearance: (next) => scene?.setAppearance(next) });
+  scenes.set(tile, { set(on) { if (!motion || on === active) return; active = on; if (on) run(); else { turn += 1; scene?.stop(); } } });
+  if (!motion) scene.play();
+  else addEventListener("resize", () => {
+    stale = true;
+    if (active) return;
+    if (waits) { scene?.destroy(); scene = null; } else scene.reset();
+  });
+}
 
 let clipsPaused = !motion, front = -1;
 const shown = new Set();
@@ -663,7 +709,6 @@ const modeChip = $("#mode-chip");
 function showMode(mode) {
   modeChip.dataset.mode = mode;
   $("b", modeChip).textContent = mode === "draw" ? "Drawing" : "Using apps";
-  for (const key of $$("[data-key-for]", modeChip)) key.hidden = key.dataset.keyFor !== mode;
   if (motion) restart(modeChip, "is-changing");
 }
 ink.on("mode", showMode);

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Annotator: just circle it</title>
-  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
+  <title>Annotator: just circle it (Daylight)</title>
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0e0e10">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -185,7 +185,7 @@
           </div>
           <div class="wrap do-deck">
             <article class="card">
-              <div class="frame frame-shot"><div class="shot shot-report" data-scene="draw" aria-hidden="true">
+              <div class="frame frame-shot"><div class="shot shot-report" data-scene="draw" role="img" aria-label="Draw on anything: a number on a report is circled, with an arrow, a note and a box.">
                 <div class="mini">
                   <p class="mini-kpis"><span><em>Sign-ups</em><b>12,480</b></span><span><em>Activation</em><b data-t="kpi">41%</b></span><span data-t="box"><em>Revenue</em><b>$38.2k</b></span></p>
                   <div class="mini-chart">
@@ -201,9 +201,9 @@
               </div>
             </article>
 
-            <!-- The next three scenes come from the shared engine (shared/scenes.js); until they are wired, their frames are empty. -->
+            <!-- The next three scenes are the shared engine's (shared/scenes.js); main.js fills these frames and plays them. -->
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="share" aria-hidden="true"></div></div>
+              <div class="frame frame-shot"><div class="shot shot-live" data-scene="share" role="img" aria-label="Share just one part: one area of a wide screen opens in its own window."></div></div>
               <div class="card-text">
                 <h3>Share just one part</h3>
                 <p>Put one area of a wide screen in its own window, then share that window.</p>
@@ -211,7 +211,7 @@
             </article>
 
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="break" aria-hidden="true"></div></div>
+              <div class="frame frame-shot"><div class="shot shot-live" data-scene="break" role="img" aria-label="Take a break: a big countdown fills the screen."></div></div>
               <div class="card-text">
                 <h3>Take a break</h3>
                 <p>A big countdown on the screen, so everyone knows when to come back.</p>
@@ -219,7 +219,7 @@
             </article>
 
             <article class="card">
-              <div class="frame frame-shot"><div class="shot" data-scene="toolbar" aria-hidden="true"></div></div>
+              <div class="frame frame-shot"><div class="shot shot-live" data-scene="toolbar" role="img" aria-label="Make it yours: the toolbar gets other tools and colors, then shrinks to one button."></div></div>
               <div class="card-text">
                 <h3>Make it yours</h3>
                 <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it's in the way.</p>

@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 // The app's own motion, for this page's own pieces: its curves and its timings. The engine uses the same module.
 import * as app from "/concepts/shared/app-motion.js";
 
@@ -255,7 +256,7 @@ const engage = (on) => { if (engaged !== on) { engaged = on; schedule(); } };
 // The mode, everywhere it shows ---------------------------------------------------------------------
 // The toolbar's own Draw / Apps button is the switch. The chip on the stage says what it is set to, and the sample
 // app only takes input while the stage is in Use apps.
-const chip = $("#mode-chip"), modeWord = $("#mode-word"), chipKeys = { use: $('.chip-key[data-when="use"]'), draw: $('.chip-key[data-when="draw"]') };
+const chip = $("#mode-chip"), modeWord = $("#mode-word");
 const done = $("#done");
 chip.hidden = false;
 function showMode(mode) {
@@ -330,10 +331,6 @@ function restore() {
   if (ink.hidden) ink.setHidden(false, { animate: false });
   if (ink.collapsed) ink.setCollapsed(false, { animate: false });
 }
-// The key that changes the mode, shown pressed on the stage's chip.
-function showKeys(mode, down) {
-  chipKeys[mode === "draw" ? "use" : "draw"].classList.toggle("is-down", down);
-}
 // `keepMode` is for the visitor who chose to draw: they stay in it. `keepHidden` is for the visitor who has just
 // hidden or shown everything themselves: that stays as they left it.
 function stopDemo(keepMode = false, keepHidden = false) {
@@ -342,8 +339,6 @@ function stopDemo(keepMode = false, keepHidden = false) {
   demo.run += 1;
   demo.controller?.abort();
   ink.hideGhost();
-  showKeys("draw", false);
-  showKeys("use", false);
   $$(".is-shown", sample).forEach((element) => element.classList.remove("is-shown"));
   if (!keepHidden) restore();
   if (!keepMode && ink.state.mode === "draw") scriptMode("use");
@@ -379,11 +374,8 @@ async function playDemo() {
   // layout, so the pointer lands on it while the stage leans too.
   const click = (element) => ({ click: element, local: true });
   const reach = async (element, ms) => { const b = at.rect(element); await ink.moveGhost([b.x + b.w / 2, b.y + b.h / 2], ms); };
-  // Esc, shown pressed for a moment before the engine's own step changes the mode with it.
-  const esc = () => [
-    { run: async () => { if (!on()) return; showKeys("use", true); await rest(230); showKeys("use", false); } },
-    { mode: "use", via: "key", pause: 260 },
-  ];
+  // Back to the apps the way the app's Esc goes: a beat, then the engine's own step changes the mode.
+  const esc = () => [hold(230), { mode: "use", via: "key", pause: 260 }];
   function story() {
     const [previous, next] = $$(".week-step", sample), thursday = $$(".pt", sample)[3];
     return [
@@ -565,16 +557,19 @@ for (const trigger of $$("[data-try]")) trigger.addEventListener("click", tryIt)
 
 // Theme -------------------------------------------------------------------------------------------
 // The script in the page's head has already set the theme. The switch changes it, remembers the choice and tells
-// everything that keeps colors of its own: the toolbar and the browser's own chrome.
+// everything that keeps colors of its own: the toolbar, the live scenes further down and the browser's own chrome.
 const THEME_KEY = "annotator.concept-h3.theme";
 const themeSwitch = $("#theme-switch"), themeMeta = $('meta[name="theme-color"]');
 let theme = root.dataset.theme === "light" ? "light" : "dark";
+// What else has an appearance of its own: each is told the new one.
+const themed = [];
 function showTheme(next) {
   theme = next;
   root.dataset.theme = next;
   themeSwitch.setAttribute("aria-checked", String(next === "light"));
   themeMeta.content = token("--page");
   ink.setAppearance(next);
+  themed.forEach((tell) => tell(next));
 }
 // The colors change in one step, with nothing easing, so a view transition's new picture is the new theme whole.
 function swapColors(next) {
@@ -735,6 +730,21 @@ const scenes = new Map([
     ];
   }, null, "drop"],
 ].map(([id, build, reset, leaving]) => [sceneOf(id).closest(".tile"), createScene(sceneOf(id), build, reset, leaving)]));
+// The other three sheets hold the shared live scenes of the app (shared/scenes.js), in this page's gradient and
+// theme. A sheet on top plays its scene again and again with a short pause between runs; a sheet that is turned
+// away stops where it is, and starts over when it is back. With Reduce Motion a scene shows its finished picture.
+const SHARED = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+for (const slot of $$("[data-scene]", deck)) {
+  const scene = SHARED[slot.dataset.scene](slot, { appearance: theme, gradient: "lagoon" });
+  let active = false, turn = 0;
+  const run = async () => {
+    const mine = ++turn;
+    while (active && mine === turn && (await scene.play()) && active && mine === turn) await wait(1800);
+  };
+  themed.push((next) => scene.setAppearance(next));
+  if (!motion) scene.play();
+  scenes.set(slot.closest(".tile"), { set(on) { if (!motion || on === active) return; active = on; if (on) run(); else { turn += 1; scene.stop(); } } });
+}
 
 let clipsPaused = !motion, front = -1;
 const shown = new Set();

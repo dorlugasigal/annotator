@@ -205,6 +205,10 @@ h1 { font-size: clamp(50px, 5.600vw, 78px); line-height: .94; font-weight: 760; 
 /* The header's switch is drawn apart from the page during a theme change. Under a grown stage it must not be. */
 :root:has([data-stage]:not([data-stage="small"])) .ts-slot { view-transition-name: none; }
 
+/* "Draw here", the pointer's cue until the visitor joins in (shared/stage.js): cut like the page's chips, in the
+   gradient, and under the header when the stage scrolls up behind it. */
+body > .stage-invite { --stage-invite-bg: var(--forest-button); --stage-invite-fg: var(--on-accent); z-index: 40; padding: 8px 11px; border-radius: 9px; font: 640 13px/1 var(--sans); box-shadow: 0 8px 18px -10px var(--floor); }
+
 /* What the stage says about itself: the mode it is in. */
 .hud { position: absolute; left: var(--inset); right: var(--inset); top: calc(var(--tb-top) + var(--tb-now, var(--tb-h)) + var(--gap)); z-index: 1; display: flex; align-items: center; gap: 8px; height: var(--hud-h); pointer-events: none; }
 html:not(.js) .hud { display: none; }
@@ -302,12 +306,11 @@ html:not(.js) .hud { display: none; }
 .item-text { padding: 18px 20px 22px; }
 .item-text p { margin-top: 6px; max-width: 26em; color: var(--muted); }
 .item-meta { margin: 0 0 14px !important; font: 500 12.500px/1 var(--mono); color: var(--faint); }
-/* A stage in small: the same dotted desk, with one sample window on it, or one of the shared engine's scenes. It is
-   a size container, so what is in it can be sized from both its width and its height. */
-.scene { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; padding: 12px; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; border-bottom: 1px solid var(--line); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); container-type: size; overflow: hidden; }
-/* Where a shared scene goes: the largest 16:10 box that fits in the frame. */
-.scene-slot { position: relative; width: min(100cqw, 100cqh * 1.6); aspect-ratio: 16 / 10; }
-.scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 4.4cqi, 30px)/1.1 "Caveat", "Bradley Hand", cursive; }
+/* A picture's frame: the stage's dotted desk in small, with one sample window on it, or one of the shared engine's
+   live scenes, which fills it. It is a size container, so what is in it can be sized from its width and its height. */
+.picture { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; padding: 12px; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; border-bottom: 1px solid var(--line); background: radial-gradient(circle, var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px var(--desk); container-type: size; overflow: hidden; }
+.picture[data-scene] { display: block; padding: 0; }
+#scene-draw .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(15px, 4.4cqi, 30px)/1.1 "Caveat", "Bradley Hand", cursive; }
 .mini { width: min(31em, 100%); font-size: clamp(9px, min(3.2cqi, 5.400cqb), 21px); line-height: 1.3; }
 .mini .window-bar { height: 2.4em; }
 .mini .window-bar span { font-size: .88em; }
@@ -398,7 +401,7 @@ html:not(.js) .hud { display: none; }
   .screen .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
   .sec-full { padding: 18px 24px 19px; }
   .items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .scene { aspect-ratio: 16 / 10; padding: 18px; }
+  .picture { aspect-ratio: 16 / 10; padding: 18px; }
   .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .platform { padding: 28px 28px 26px; }
   .coffee-full { grid-template-columns: auto minmax(0, 1fr); align-items: center; padding: 36px 40px 38px; }
@@ -491,7 +494,7 @@ html:not(.js) .hud { display: none; }
 /* The ink shares the apps' sheet, so it is moved the way a plane a little above them would look from here. */
 .motion .board :is(.ink-svg, .ink-over, .ink-ghost) { translate: 0 calc(var(--lift) * -4px); }
 /* A sheet inside a 3D scene needs a place of its own in it, or Blur has nothing to look through. */
-.motion .board, .motion .scene { transform: translateZ(0); }
+.motion .board { transform: translateZ(0); }
 
 /* Section headers start as the toolbar's one button. main.js measures the button (--cr and --cb are what is cut
    from the right and the bottom) and grows it into the bar with the Shrink's timing when it is scrolled to. */

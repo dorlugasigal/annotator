@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Annotator: just circle it (Daylight · Neon)</title>
-  <meta name="description" content="Draw right on your screen while you share it. It's free, for Mac and Windows.">
+  <meta name="description" content="Draw right on your screen while you share it.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0a0a0a">
   <!-- Before the first paint: the theme (dark unless the visitor chose light), the platform, and whether things move.
@@ -189,7 +189,7 @@
         </div>
 
         <article class="tile card" data-area="t1" data-flip data-tilt>
-          <div class="frame"><div class="shot shot-dash" data-scene="draw" aria-hidden="true">
+          <div class="frame"><div class="shot shot-dash" data-scene="draw" role="img" aria-label="Draw on anything: a ring, a box, an arrow and a note are drawn over a sample dashboard.">
             <div class="dash">
               <div class="dash-kpis">
                 <p><span>Visitors</span><b>12,480</b></p>
@@ -205,36 +205,36 @@
           <div class="card-text">
             <h3>Draw on anything</h3>
             <p>Circles, boxes, arrows and notes, right over whatever you're sharing.</p>
+            <button type="button" class="tile-open" aria-expanded="false" data-name="Draw on anything" aria-label="Show Draw on anything bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Draw on anything" aria-label="Show Draw on anything bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
 
-        <!-- The next three pictures are the shared live scenes; each frame keeps their shape, about 16:10. -->
+        <!-- The next three pictures are the shared live scenes (shared/scenes.js); each frame keeps their shape, about 16:10. -->
         <article class="tile card" data-area="t2" data-flip data-tilt>
-          <div class="frame"><div class="shot" data-scene="share" aria-hidden="true"></div></div>
+          <div class="frame"><div class="shot" data-scene="share" role="img" aria-label="Share just one part: one area of a wide screen is outlined and opens in its own window."></div></div>
           <div class="card-text">
             <h3>Share just one part</h3>
             <p>Put one area of a wide screen in its own window, then share that window.</p>
+            <button type="button" class="tile-open" aria-expanded="false" data-name="Share just one part" aria-label="Show Share just one part bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Share just one part" aria-label="Show Share just one part bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
 
         <article class="tile card" data-area="t3" data-flip data-tilt>
-          <div class="frame"><div class="shot" data-scene="break" aria-hidden="true"></div></div>
+          <div class="frame"><div class="shot" data-scene="break" role="img" aria-label="Take a break: a big countdown covers the screen."></div></div>
           <div class="card-text">
             <h3>Take a break</h3>
             <p>A big countdown on the screen, so everyone knows when to come back.</p>
+            <button type="button" class="tile-open" aria-expanded="false" data-name="Take a break" aria-label="Show Take a break bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Take a break" aria-label="Show Take a break bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
 
         <article class="tile card" data-area="t4" data-flip data-tilt>
-          <div class="frame"><div class="shot" data-scene="toolbar" aria-hidden="true"></div></div>
+          <div class="frame"><div class="shot" data-scene="toolbar" role="img" aria-label="Make it yours: the toolbar's tools and color change, then it shrinks to one button and opens again."></div></div>
           <div class="card-text">
             <h3>Make it yours</h3>
             <p>Pick your tools, keys and colors. Shrink the toolbar to one button when it's in the way.</p>
+            <button type="button" class="tile-open" aria-expanded="false" data-name="Make it yours" aria-label="Show Make it yours bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
           </div>
-          <button type="button" class="tile-open" aria-expanded="false" data-name="Make it yours" aria-label="Show Make it yours bigger"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-open" d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/><path class="i-close" d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </article>
       </div>
     </section>

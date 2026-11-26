@@ -1,5 +1,7 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+// The app's Break timer, Share region and toolbar as small live scenes, for "What you can do".
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 // The app's own motion: its curves and its Pop.
 import { css as curve, poseKeyframes } from "/concepts/shared/app-motion.js";
 
@@ -95,11 +97,14 @@ stage.on("join", () => takeOver());
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
 const themeSwitch = $(".theme-switch"), themeColor = $('meta[name="theme-color"]');
 const PAGE_COLOR = { dark: "#0e0e10", light: "#faf9f6" };
+// The shared scenes under "What you can do" follow the theme too.
+const liveScenes = [];
 function showTheme(theme) {
   root.dataset.theme = theme;
   themeSwitch.setAttribute("aria-checked", String(theme === "dark"));
   themeColor.content = PAGE_COLOR[theme];
   ink.setAppearance(theme);
+  for (const scene of liveScenes) scene.setAppearance(theme);
 }
 let themeTurn = 0;
 function setTheme(theme) {
@@ -596,7 +601,7 @@ $(".stage-pulse").addEventListener("animationend", () => desk.classList.remove("
 
 // 2. What you can do -------------------------------------------------------------------------------
 // The first card has a small sample screen and a scene the engine draws on it. Marks that name no color take the
-// engine's selected gradient, as on the stage. The other cards' scenes are the shared engine's (not wired yet).
+// engine's selected gradient, as on the stage.
 const measure = document.createElement("canvas").getContext("2d");
 const textSize = (shot) => Math.round(clamp(shot.clientWidth * 0.06, 19, 38));
 const SCENES = {
@@ -652,9 +657,28 @@ function sketch(card, shot) {
   if (motion) $(".frame", card).addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && shown) play(); });
   return { show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; if (motion && !busy) leave(); } };
 }
+// The other three cards hold the shared engine's scenes, in the page's gradient and theme. A scene plays while its
+// card faces front, again and again with a short rest between runs, and starts over when the card comes back.
+const SHARED = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+function shared(shot) {
+  const scene = SHARED[shot.dataset.scene](shot, { appearance: root.dataset.theme, gradient: "sunset" });
+  liveScenes.push(scene);
+  let turn = 0, shown = false;
+  async function loop() {
+    const mine = ++turn;
+    while (mine === turn) {
+      // Without motion one run is enough: it ends on the finished picture.
+      if (!(await scene.play()) || !motion) return;
+      await wait(1600);
+    }
+  }
+  return {
+    show() { if (shown) return; shown = true; loop(); },
+    hide() { if (!shown) return; shown = false; turn++; scene.reset(); },
+  };
+}
 const cards = $$(".do-deck .card");
-// A card whose scene is not on this page yet shows its empty frame.
-const visuals = cards.map((card) => { const shot = $(".shot", card); return SCENES[shot.dataset.scene] ? sketch(card, shot) : { show() {}, hide() {} }; });
+const visuals = cards.map((card) => { const shot = $(".shot", card); return SCENES[shot.dataset.scene] ? sketch(card, shot) : shared(shot); });
 
 if (motion) {
   // The pinned deck. Progress through the track turns into one number, 0 for the first card to 3 for the last; each

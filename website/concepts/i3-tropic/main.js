@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 // The app's own motion: its curves, its durations and the keyframes of its moves.
 import { ease, poseKeyframes, DURATIONS } from "/concepts/shared/app-motion.js";
 
@@ -134,11 +135,14 @@ const onDesk = (el) => ({
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
 const themeSwitch = $(".theme-switch"), themeColor = $('meta[name="theme-color"]');
 const PAGE_COLOR = { dark: "#120e14", light: "#fbf6ee" };
+// The shared engine's live scenes in "What you can do" follow the theme too.
+const liveScenes = [];
 function showTheme(theme) {
   root.dataset.theme = theme;
   themeSwitch.setAttribute("aria-checked", String(theme === "dark"));
   themeColor.content = PAGE_COLOR[theme];
   ink.setAppearance(theme);
+  liveScenes.forEach((scene) => scene.setAppearance(theme));
 }
 // The page changes like window blinds. It is cut into horizontal bands; from the top down, a slat turns in each
 // one: the new theme comes down from the band's top edge while the old one gives way below it, and between the two
@@ -799,9 +803,29 @@ function sketch(card, shot) {
   return { show() { if (shown) return; shown = true; draw(); }, hide() { if (!shown) return; shown = false; if (motion && !busy) leave(); } };
 }
 const cards = $$(".book .card");
-// The other pictures are the shared engine's live scenes; their frames wait for them.
-const waiting = { show() {}, hide() {} };
-const visuals = cards.map((card) => { const shot = $(".shot", card); return SCENES[shot.dataset.scene] ? sketch(card, shot) : waiting; });
+// The other three pictures are the shared engine's live scenes, in this page's gradient and theme. A scene plays
+// while its spread is open and its frame is on screen, again and again with a short pause between; it stops when
+// the page is turned or scrolled away, and starts over the next time. Without motion it plays once: with Reduce
+// Motion on, that is the finished picture at once.
+const LIVE = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+function liveScene(box) {
+  const scene = LIVE[box.dataset.scene](box, { appearance: root.dataset.theme, gradient: "tropic" });
+  let open = false, seen = false, playing = false, turn = 0;
+  async function loop() {
+    const mine = ++turn;
+    while (mine === turn && (await scene.play()) && motion) await wait(1600);
+  }
+  const update = () => {
+    const now = open && seen;
+    if (now === playing) return;
+    playing = now;
+    if (now) loop(); else { turn++; scene.stop(); }
+  };
+  new IntersectionObserver(([entry]) => { seen = entry.isIntersecting; update(); }, { threshold: 0.2 }).observe(box);
+  liveScenes.push(scene);
+  return { show() { open = true; update(); }, hide() { open = false; update(); } };
+}
+const visuals = cards.map((card) => { const shot = $(".shot", card); return shot ? sketch(card, shot) : liveScene($(".live", card)); });
 
 // The book is pinned and its pages turn while there is motion and the window is tall enough to hold a spread.
 const tall = matchMedia("(min-height: 560px)");

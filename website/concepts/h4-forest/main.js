@@ -1,5 +1,6 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
+import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
 import { ease, DURATIONS, workspaceTiming, distanceOrder, poseKeyframes, dissolve } from "/concepts/shared/app-motion.js";
 import * as fx from "./fx.js";
 import { createApps } from "./apps.js";
@@ -455,12 +456,15 @@ for (const element of $$("[data-try]")) element.addEventListener("click", tryIt)
 const THEME_KEY = "annotator.concept-h4.theme";
 const themeSwitch = $("#theme-switch"), themeMeta = $('meta[name="theme-color"]');
 let theme = root.dataset.theme === "light" ? "light" : "dark";
+// The shared engine's live scenes in "What you can do". Each keeps colors of its own, like the toolbar.
+const liveScenes = [];
 function showTheme(next) {
   theme = next;
   root.dataset.theme = next;
   themeSwitch.setAttribute("aria-checked", String(next === "light"));
   themeMeta.content = token("--page");
   ink.setAppearance(next);
+  for (const scene of liveScenes) scene.setAppearance(next);
 }
 // The colors change in one step, with nothing easing, so a view transition's new picture is the new theme whole.
 function swapColors(next) {
@@ -692,7 +696,28 @@ async function drawScene({ scene, a, go, perform, live }) {
     { tool: "text", text: "Thursday?", speed: 55, at: () => [frame.x + frame.w + 10, frame.y + frame.h * .5 - 10] },
   ]);
 }
-const scenes = new Map([[$("#scene-draw").closest(".item"), createScene($("#scene-draw"), drawScene)]]);
+// The other three pictures are the shared engine's live scenes: the app's Share region, Break timer and toolbar.
+// Each plays while its example is the one shown, again and again with a short pause, and starts over when it comes back.
+const SHARED = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+function sharedScene(frame) {
+  const scene = SHARED[frame.dataset.scene](frame, { appearance: theme, gradient: "forest" });
+  liveScenes.push(scene);
+  let active = false, turnId = 0;
+  async function run() {
+    const mine = ++turnId;
+    while (active && mine === turnId) {
+      if (!(await scene.play()) || !active || mine !== turnId) return;
+      await wait(2400);
+    }
+  }
+  // Without motion there is nothing to play: with Reduce Motion a scene shows its finished picture.
+  if (!motion) scene.play();
+  return {
+    set(on) { if (!motion || active === on) return; active = on; if (on) run(); else { turnId += 1; scene.stop(); } },
+    reset() { if (!active) scene.reset(); },
+  };
+}
+const scenes = new Map(items.map((item) => { const frame = $(".item-media", item); return [item, frame.dataset.scene ? sharedScene(frame) : createScene(frame, drawScene)]; }));
 
 let scenesPaused = !motion;
 if (motion) {
@@ -736,19 +761,19 @@ if (motion) {
   }
   let shown = -1, wanted = -1, busy = false, current = null;
   const playing = () => !scenesPaused && shown >= 0 && !busy;
-  const refresh = () => items.forEach((item, i) => scenes.get(item)?.set(playing() && i === shown));
+  const refresh = () => items.forEach((item, i) => scenes.get(item).set(playing() && i === shown));
   async function sync() {
     if (busy) return;
     busy = true;
     while (shown !== wanted) {
       if (shown >= 0) {
         const leaving = shown;
-        scenes.get(items[leaving])?.set(false);
+        scenes.get(items[leaving]).set(false);
         current = moveItem(leaving, false);
         await current.done();
         items[leaving].classList.remove("is-live");
         current.cancel();
-        scenes.get(items[leaving])?.reset();
+        scenes.get(items[leaving]).reset();
         shown = -1;
       }
       if (wanted >= 0) {

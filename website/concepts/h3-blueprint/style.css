@@ -308,17 +308,14 @@ h1 { font-size: clamp(46px, 7.5vw + 20px, 100px); line-height: .96; font-weight:
 .pt:first-of-type:is(:hover, :focus-visible) .tip { transform: translate(-4px, 0); }
 .pt:last-of-type:is(:hover, :focus-visible) .tip { transform: translate(4px, 0); }
 
-/* On the stage's top edge: which mode it is in, with the key that changes it. */
+/* On the stage's top edge: which mode it is in. */
 .mode-chip { position: absolute; top: 0; z-index: 101; display: inline-flex; align-items: center; height: 28px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--page); font: 600 13px/1 var(--sans); white-space: nowrap; transform: translateY(-50%); }
-.mode-chip { left: 12px; gap: 8px; padding: 0 6px 0 9px; color: var(--text); transition: border-color var(--t-2) ease; }
+.mode-chip { left: 12px; gap: 8px; padding: 0 10px 0 9px; color: var(--text); transition: border-color var(--t-2) ease; }
 .mode-chip i { width: 6px; height: 6px; background: var(--faint); transition: background-color var(--t-2) ease; }
 .mode-chip b { font-weight: inherit; transition: color var(--t-2) ease; }
 .mode-chip[data-mode="draw"] { border-color: var(--on); }
 .mode-chip[data-mode="draw"] i { background: var(--on); }
 .mode-chip[data-mode="draw"] b { color: var(--on); }
-.mode-chip[data-mode="use"] .chip-key[data-when="draw"], .mode-chip[data-mode="draw"] .chip-key[data-when="use"] { display: none; }
-.chip-key { padding: 3px 5px; border: 1px solid var(--draw-soft); border-radius: 3px; color: var(--muted); font: 500 10px/1 var(--mono); transition: transform var(--t-1) var(--ease-out), border-color var(--t-1) ease, background-color var(--t-1) ease, color var(--t-1) ease; }
-.chip-key.is-down { transform: translateY(1px); border-color: var(--accent-line); background: color-mix(in srgb, var(--lagoon-2) 26%, transparent); color: var(--text); }
 /* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js).
    The frame is the desk itself, with its hairline, its grid and its crop marks. As it opens, the chip comes in from
    the frame's edge so it stays on the screen, and the button that makes it small again is one more framed square. */
@@ -364,13 +361,14 @@ h1 { font-size: clamp(46px, 7.5vw + 20px, 100px); line-height: .96; font-weight:
 .tile { min-width: 0; display: flex; }
 .tile-inner { flex: 1; display: grid; align-content: start; min-width: 0; padding: var(--pad); background: var(--sheet); }
 /* Each sheet's picture is a small desk of its own, in a frame with registration marks. What is in the frame is a
-   live scene: this page's own (.scene) or one of the shared ones, which fill the empty .scene-slot. */
+   live scene: this page's own (.sketch) or one of the shared ones (shared/scenes.js), which fill the empty
+   .scene-slot. The shared module styles its own .scene, so nothing here is called that. */
 .tile-media { position: relative; aspect-ratio: 16 / 10; border-radius: 3px; background: linear-gradient(var(--desk-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, var(--desk-grid) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(160deg, var(--desk-a), var(--desk-b)); box-shadow: 0 0 0 1px var(--line-strong); --reg-out: calc(var(--pad) * -.5 - 6px); }
-.tile-media > :is(.scene, .scene-slot) { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: inherit; }
+.tile-media > :is(.sketch, .scene-slot) { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: inherit; }
 .tile-text { position: relative; padding: 20px 4px 10px; }
 .tile-text p { margin-top: 8px; max-width: 30em; font-size: 17px; line-height: 1.5; color: var(--muted); }
-.scene { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
-.scene .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(17px, 4.600cqi, 36px)/1.1 "Caveat", "Bradley Hand", cursive; }
+.sketch { display: grid; place-items: center; padding: 18px; container-type: inline-size; }
+.sketch .ink-layer { --ink-layer-z: 5; --ink-text: 600 clamp(17px, 4.600cqi, 36px)/1.1 "Caveat", "Bradley Hand", cursive; }
 @media (max-width: 599px) { .tile-media .reg { display: none; } }
 /* A small sample window, sized from the sheet it sits in. */
 .mini { width: min(27em, 100%); font-size: clamp(10.5px, 2.900cqi, 24px); line-height: 1.3; }

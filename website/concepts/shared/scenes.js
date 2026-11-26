@@ -254,7 +254,8 @@ export function shareRegionScene(container, options = {}) {
       <div class="scene-share-window" style="--region: 1"><div class="scene-share-title"><i></i><i></i><i></i><span>Annotator - Shared Region</span></div><div class="scene-share-view">${inside}${ink("b")}</div></div></div>`;
     const screen = stage.root.querySelector(".scene-share-screen"), outline = stage.root.querySelector(".scene-share-outline"), shared = stage.root.querySelector(".scene-share-window"), paths = [...stage.root.querySelectorAll(".scene-share-ink path")];
     // The window shows the region at the region's own shape.
-    const shape = () => { const r = screen.getBoundingClientRect(); if (r.width && r.height) shared.style.setProperty("--region", `${(r.width / 2).toFixed(2)} / ${r.height.toFixed(2)}`); };
+    // Layout sizes, not the box on screen: a page may turn the scene in 3D, which changes the box but not the shape.
+    const shape = () => { const w = screen.offsetWidth, h = screen.offsetHeight; if (w && h) shared.style.setProperty("--region", `${(w / 2).toFixed(2)} / ${h.toFixed(2)}`); };
     const sized = window.ResizeObserver ? new ResizeObserver(shape) : null;
     sized?.observe(screen);
     shape();
