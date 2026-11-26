@@ -1,7 +1,7 @@
 import { createInk } from "/concepts/shared/ink.js";
 import { growingStage } from "/concepts/shared/stage.js";
-// The app's Break timer, Share region and toolbar as small live scenes, for "What you can do".
-import { breakTimerScene, shareRegionScene, toolbarScene } from "/concepts/shared/scenes.js";
+// The app's Share region and Break timer as small live scenes, for "What you can do".
+import { breakTimerScene, shareRegionScene } from "/concepts/shared/scenes.js";
 // The app's own motion: its curves and its Pop.
 import { css as curve, poseKeyframes } from "/concepts/shared/app-motion.js";
 
@@ -33,7 +33,6 @@ function tween(ms, step, signal) {
     requestAnimationFrame(frame);
   });
 }
-const BLUE = "#2B73E0";
 const status = $("#status");
 
 // Where an element sits inside a drawing surface, from the layout and not from the screen. The engine measures
@@ -82,10 +81,11 @@ addEventListener("resize", request);
 
 // 1. The stage -------------------------------------------------------------------------------------
 const desk = $("#desk"), dock = $("#dock"), scene = $(".stage-scene"), apps = $("#apps");
-// The toolbar is the engine's own, as someone who uses it has set it up (its "customized" preset): a gradient as the
+// The toolbar is the engine's own, as someone who uses it has set it up (its "customized" preset), with the app's
+// Dusk gradient as the
 // color, curved arrows, the roughest line. It rests on the Arrow tool so its properties row shows that. The engine
 // itself starts the row closed on a phone, which keeps the bar compact there.
-const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", moreHref: "#install" });
+const ink = createInk({ surface: desk, toolbarParent: dock, toolbarPosition: "absolute", appearance: root.dataset.theme, tool: "arrow", gradient: "dusk", moreHref: "#install" });
 // Once the visitor joins in (a press on the stage or its toolbar, one of the app's keys, "Try it here"), the desk's
 // frame opens up to fill the window, and scrolling brings it back. The desk itself does not move: in index.html the
 // panel, the cue's ring and the dock carry data-stage-frame and the mode chip data-stage-corner.
@@ -96,7 +96,7 @@ stage.on("join", () => takeOver());
 // Theme --------------------------------------------------------------------------------------------
 // Dark unless the visitor chose light. The choice is kept; the page's head applies it before the first paint.
 const themeSwitch = $(".theme-switch"), themeColor = $('meta[name="theme-color"]');
-const PAGE_COLOR = { dark: "#0e0e10", light: "#faf9f6" };
+const PAGE_COLOR = { dark: "#0e0e11", light: "#f9f8fa" };
 // The shared scenes under "What you can do" follow the theme too.
 const liveScenes = [];
 function showTheme(theme) {
@@ -600,68 +600,13 @@ for (const link of $$("[data-try]")) link.addEventListener("click", (e) => { e.p
 $(".stage-pulse").addEventListener("animationend", () => desk.classList.remove("is-cued"));
 
 // 2. What you can do -------------------------------------------------------------------------------
-// The first card has a small sample screen and a scene the engine draws on it. Marks that name no color take the
-// engine's selected gradient, as on the stage.
-const measure = document.createElement("canvas").getContext("2d");
-const textSize = (shot) => Math.round(clamp(shot.clientWidth * 0.06, 19, 38));
-const SCENES = {
-  // Draw on anything: a ring, an arrow, a note, and a rough box that Smart Draw makes neat.
-  async draw({ layer, t, box }) {
-    await layer.perform([
-      { tool: "ellipse", around: t("kpi"), padX: 13, padY: 8, size: 3, rough: 6, duration: 720, pause: 220 },
-      { tool: "arrow", from: { el: t("kpi"), at: "bottom", dx: -6, dy: 12 }, to: { el: t("dip"), at: "top left", dx: -4, dy: -5 }, bend: 0.34, size: 3, rough: 6, duration: 680, pause: 200 },
-    ], { cursor: motion });
-    const size = textSize(box.shot), words = "new form?";
-    measure.font = `600 ${size}px "Caveat"`;
-    // The note ends at its pin, so it sits in the open part of the chart at any size.
-    const note = () => { const b = box("note"); return [b.x - measure.measureText(words).width - 8, b.y - size * 0.6]; };
-    await layer.perform([{ tool: "text", at: note, text: words, speed: 46, pause: 220 }], { cursor: motion });
-    const frame = { tool: "rect", around: t("box"), padX: 10, padY: 7, color: BLUE, size: 3 };
-    const [rough] = await layer.perform([{ ...frame, rough: 6, duration: 760 }], { cursor: motion });
-    await wait(motion ? 300 : 0);
-    layer.remove(rough.id);
-    await layer.perform([{ ...frame, rough: 0, round: true, duration: 0 }], { cursor: false });
-  },
-};
-function sketch(card, shot) {
-  const layer = createInk({ surface: shot, interactive: false });
-  const box = (name) => localBox($(`[data-t="${name}"]`, shot), shot);
-  box.shot = shot;
-  const context = { layer, box, t: (name) => standIn(layer, () => box(name)) };
-  const fit = () => layer.layer.style.setProperty("--ink-text", `600 ${textSize(shot)}px/1.1 "Caveat", "Bradley Hand", cursive`);
-  const empty = () => { layer.hideGhost(); layer.clear(); };
-  let busy = false, shown = false;
-  async function play() {
-    if (busy) return;
-    busy = true;
-    empty();
-    shot.classList.remove("is-leaving");
-    fit();
-    await fontsReady;
-    await wait(motion ? 260 : 0);
-    await SCENES[shot.dataset.scene](context);
-    await wait(motion ? 500 : 0);
-    layer.hideGhost();
-    layer.reflow();
-    busy = false;
-    if (!shown && motion) leave();
-  }
-  // A card that no longer faces front loses its drawing quietly, so it starts clean the next time.
-  async function leave() {
-    shot.classList.add("is-leaving");
-    await wait(280);
-    if (!shown && !busy) empty();
-  }
-  addEventListener("resize", () => { fit(); setTimeout(() => layer.reflow(), 260); });
-  $(".ctl", card).addEventListener("click", play);
-  if (motion) $(".frame", card).addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && shown) play(); });
-  return { show() { if (shown) return; shown = true; play(); }, hide() { if (!shown) return; shown = false; if (motion && !busy) leave(); } };
-}
-// The other three cards hold the shared engine's scenes, in the page's gradient and theme. A scene plays while its
-// card faces front, again and again with a short rest between runs, and starts over when the card comes back.
-const SHARED = { share: shareRegionScene, break: breakTimerScene, toolbar: toolbarScene };
+// Each card holds one of the shared engine's scenes, in the page's gradient and theme. A scene plays while its card
+// faces front, again and again with a short rest between runs, and starts over when the card comes back. A card
+// whose scene is not wired yet keeps its empty frame.
+const SHARED = { share: shareRegionScene, break: breakTimerScene };
 function shared(shot) {
-  const scene = SHARED[shot.dataset.scene](shot, { appearance: root.dataset.theme, gradient: "sunset" });
+  if (!SHARED[shot.dataset.scene]) return { show() {}, hide() {} };
+  const scene = SHARED[shot.dataset.scene](shot, { appearance: root.dataset.theme, gradient: "dusk" });
   liveScenes.push(scene);
   let turn = 0, shown = false;
   async function loop() {
@@ -678,20 +623,95 @@ function shared(shot) {
   };
 }
 const cards = $$(".do-deck .card");
-const visuals = cards.map((card) => { const shot = $(".shot", card); return SCENES[shot.dataset.scene] ? sketch(card, shot) : shared(shot); });
+const visuals = cards.map((card) => shared($(".shot", card)));
 
 if (motion) {
   // The pinned deck. Progress through the track turns into one number, 0 for the first card to 3 for the last; each
   // card rests flat for a while around its own number, and eases between.
-  const track = $(".do-track"), tabs = $$(".do-tabs button"), rest = 0.2;
-  let facing = -1, deckSeen = false;
+  const track = $(".do-track"), tabList = $(".do-tabs"), tabs = $$("button", tabList), rest = 0.2;
+  cards.forEach((card, i) => card.style.setProperty("--i", i));
+
+  // A change of card is choreographed in layers. The frame arrives with the scroll; once it has all but landed the
+  // card becomes "current" and its words follow in CSS: the title word by word, the line under it, then a drawn
+  // accent. A card that starts to leave gives them up in the reverse order, faster. Each layer is one transition on
+  // one class, so a fast scroll turns it round from wherever it is.
+  for (const card of cards) {
+    const title = $("h3", card), words = title.textContent.trim().split(/\s+/);
+    title.textContent = "";
+    words.forEach((word, i) => {
+      // Each word rises inside its own mask.
+      const mask = document.createElement("span"), inner = document.createElement("span");
+      mask.className = "tw";
+      mask.style.setProperty("--w", i);
+      inner.textContent = word;
+      mask.append(inner);
+      title.append(mask, i < words.length - 1 ? " " : "");
+    });
+    const accent = document.createElement("i");
+    accent.className = "card-accent";
+    accent.setAttribute("aria-hidden", "true");
+    accent.append(document.createElement("b"));
+    title.after(accent);
+  }
+  // What carries over from one card to the next: the accent dot in the tabs hops to the new tab, and a soft light
+  // behind the deck glides to the side the new card's picture is on.
+  // (The marker is a <b>: the tabs' own dots are styled as "i" inside the list.)
+  const marker = document.createElement("b"), light = document.createElement("i");
+  marker.className = "do-marker";
+  marker.setAttribute("aria-hidden", "true");
+  tabList.append(marker);
+  light.className = "do-light";
+  light.setAttribute("aria-hidden", "true");
+  $(".do-pin").prepend(light);
+  let hop = null, markerAt = -1;
+  const dotOf = (index) => {
+    const dot = $("i", tabs[index]).getBoundingClientRect(), list = tabList.getBoundingClientRect();
+    return [dot.left + dot.width / 2 - list.left, dot.top + dot.height / 2 - list.top];
+  };
+  function moveMarker(index, animate = true) {
+    const [x, y] = dotOf(index), to = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
+    // One animation per change: a new hop starts from wherever the last one had got to.
+    const from = getComputedStyle(marker).translate;
+    hop?.cancel();
+    hop = null;
+    marker.style.translate = to;
+    marker.classList.add("is-on");
+    if (!animate || markerAt < 0 || from === "none" || from === to) { markerAt = index; return; }
+    const [fx, fy] = from.split(" ").map(parseFloat), far = Math.abs(x - fx);
+    markerAt = index;
+    hop = marker.animate([
+      { translate: from, scale: "1 1" },
+      { translate: `${((fx + x) / 2).toFixed(1)}px ${(Math.min(fy || y, y) - clamp(far * 0.16, 6, 16)).toFixed(1)}px`, scale: "1.5 0.8" },
+      { translate: to, scale: "1 1" },
+    ], { duration: clamp(260 + far * 0.9, 300, 480), easing: curve.standard });
+  }
+  let facing = -1, deckSeen = false, lastAt = 0;
+  // The tabs, the marker and the light follow the nearest card.
   const face = (index) => {
     if (index === facing) return;
     facing = index;
-    cards.forEach((card, i) => { card.inert = i !== index; (i === index ? visuals[i].show : visuals[i].hide)(); });
+    cards.forEach((card, i) => { card.inert = i !== index; });
     tabs.forEach((tab, i) => tab.setAttribute("aria-current", String(i === index)));
+    if (index < 0) return;
+    moveMarker(index);
+    // Wide cards put the picture left, then right, in turn; the light goes to that side.
+    light.style.setProperty("--lx", index % 2 ? 1 : -1);
   };
-  cards.forEach((card, i) => card.style.setProperty("--i", i));
+  // A card is current from the moment its frame has all but landed until it starts to leave (two thresholds, so it
+  // cannot flicker between them). Its scene starts only once the frame lies flat, and stops when the card leaves.
+  const current = cards.map(() => false);
+  function settle(at) {
+    lastAt = at;
+    cards.forEach((card, i) => {
+      const x = at - i, whole = Math.floor(Math.abs(x)), part = Math.abs(x) - whole;
+      const away = whole + smooth((part - rest) / (1 - 2 * rest));
+      const now = deckSeen && away < (current[i] ? 0.1 : 0.06);
+      if (now !== current[i]) { current[i] = now; card.classList.toggle("is-current", now); }
+      // The scene starts once the frame lies flat (within a hair), and stops when the card leaves.
+      if (now && away < 0.03) visuals[i].show(); else if (!now) visuals[i].hide();
+    });
+    if (deckSeen) face(Math.round(at));
+  }
   const deck = channel(() => {
     const r = track.getBoundingClientRect();
     return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1) * (cards.length - 1);
@@ -704,12 +724,15 @@ if (motion) {
       card.style.setProperty("--v", v.toFixed(4));
       card.style.visibility = u > 2.2 || v > 2.6 ? "hidden" : "";
     });
-    if (deckSeen) face(Math.round(at));
+    settle(at);
   });
   new IntersectionObserver(([entry]) => {
     deckSeen = entry.isIntersecting;
-    if (deckSeen) face(Math.round(deck.value ?? 0)); else { face(-1); cards.forEach((card) => { card.inert = false; }); }
+    if (!deckSeen) { face(-1); cards.forEach((card) => { card.inert = false; }); }
+    settle(deck.value ?? lastAt);
   }, { threshold: 0.25 }).observe($(".do-deck"));
+  addEventListener("resize", () => { if (facing >= 0) moveMarker(facing, false); });
+  document.fonts?.ready.then(() => { if (facing >= 0) moveMarker(facing, false); });
   tabs.forEach((tab, i) => tab.addEventListener("click", () => {
     const r = track.getBoundingClientRect();
     scrollTo({ top: r.top + scrollY + (r.height - innerHeight) * (i / (cards.length - 1)) + 1, behavior: "smooth" });

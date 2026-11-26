@@ -3,40 +3,49 @@
 @font-face { font-family: "Geist Mono"; src: url("/concepts/shared/fonts/geist-mono-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
 /* Only for the text marks the drawing engine writes. */
 @font-face { font-family: "Caveat"; src: url("/concepts/shared/fonts/caveat-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+/* Only for the Buy Me a Coffee button, which is set in it. Cookie, by Ania Kruk and Piotr Łapa, under the SIL Open
+   Font License 1.1; the Latin file from Google Fonts (fonts.gstatic.com/s/cookie/v23), fetched 2026-11-26. */
+@font-face { font-family: "Cookie"; src: url("/concepts/shared/fonts/cookie.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 
 /* Color ---------------------------------------------------------------------------------------- */
 /* Two themes from one set of names. Dark is the default; the script in the page's head sets data-theme before the
    first paint. Everything in the page reads these; other colors appear only in drawings. */
 :root {
   color-scheme: dark;
-  --page: #0e0e10; --surface-1: #17171a; --surface-2: #1f1f23; --surface-3: #2a2a2f; --well: #111113;
-  --text: #f2f1ee; --muted: #f2f1ee9e; --faint: #f2f1ee4d;
+  /* Neutrals with a breath of violet, so they sit with the accent. */
+  --page: #0e0e11; --surface-1: #17171b; --surface-2: #1f1f24; --surface-3: #2a2a30; --well: #111114;
+  --text: #f2f1f4; --muted: #f2f1f49e; --faint: #f2f1f44d;
   --line: #ffffff17; --line-strong: #ffffff2b; --wash: #ffffff0f;
   /* A raised panel has a hairline and a faint light along its top edge; a floating thing adds a shadow under it. */
   --raise: inset 0 1px 0 #ffffff12, inset 0 0 0 1px #ffffff14;
   --float: inset 0 1px 0 #ffffff17, 0 0 0 1px #ffffff17, 0 26px 46px -26px #000000e6;
-  --glow: #ffffff0f; --scrim: #0e0e10; --shade: #000000; --pointer-light: #ffffff1c;
-  --stage: var(--surface-1); --win: var(--surface-2); --win-inset: #27272c;
+  --glow: #ffffff0f; --scrim: #0e0e11; --shade: #000000; --pointer-light: #ffffff1c; --deck-light: #ab4acc24;
+  --stage: var(--surface-1); --win: var(--surface-2); --win-inset: #27272d;
   --blend: screen;
-  /* The app's own first gradient, Sunset, is the only accent. Text on it is dark (5.2 to 7.4 against its three
-     stops; white would be 2.6 to 3.7). */
-  --sun-a: #f51fab; --sun-b: #ff3b63; --sun-c: #ff7a33;
-  --accent: var(--sun-b); --accent-grad: linear-gradient(25deg, var(--sun-a), var(--sun-b) 52%, var(--sun-c)); --on-accent: #1b0911;
-  --accent-soft: #ff3b6333;
+  /* The accent is one of the app's own gradients, Dusk (GRADIENT_PRESETS in shared/annotation-core.js): violet,
+     orchid, pink. Drawn things use it as it is. */
+  --dusk-a: #5e47e3; --dusk-b: #ab4acc; --dusk-c: #e052a8;
+  --accent: var(--dusk-b); --accent-grad: linear-gradient(25deg, var(--dusk-a), var(--dusk-b) 52%, var(--dusk-c));
+  /* Where words sit on it (the main button, the Drawing chip, "Draw here") its pink end is a little deeper, so white
+     text keeps 4.7 to 1 or more from end to end (on Dusk's own pink it would be 3.5). */
+  --accent-fill: linear-gradient(25deg, var(--dusk-a), #a544c8 52%, #c9388f); --on-accent: #ffffff; --accent-shadow: #8a3fd0;
+  --accent-soft: #ab4acc3d;
+  /* The Buy Me a Coffee button keeps its own colors in both themes. */
+  --bmc-yellow: #ffdd00; --bmc-ink: #000000;
   /* A light along the top of the gradient, and the dip of a pressed-in shadow. */
-  --sheen: #ffffff59; --dip: #00000059;
+  --sheen: #ffffff40; --dip: #00000059;
 }
 html[data-theme="light"] {
   color-scheme: light;
-  --page: #faf9f6; --surface-1: #ffffff; --surface-2: #f1efea; --surface-3: #e7e4dc; --well: #f1efea;
-  --text: #16171a; --muted: #16171aa6; --faint: #16171a4d;
+  --page: #f9f8fa; --surface-1: #ffffff; --surface-2: #f0eff2; --surface-3: #e5e3e9; --well: #f0eff2;
+  --text: #16161a; --muted: #16161aa6; --faint: #16161a4d;
   --line: #00000017; --line-strong: #0000002e; --wash: #0000000a;
   --raise: inset 0 0 0 1px #0000000f, 0 1px 2px #0000000a, 0 24px 44px -32px #00000040;
   --float: 0 0 0 1px #00000012, 0 2px 4px #0000000a, 0 24px 40px -24px #00000059;
-  --glow: #ffffff00; --scrim: #faf9f6; --shade: #5b5445; --pointer-light: #ffffffb3;
-  --stage: var(--surface-2); --win: var(--surface-1); --win-inset: #f5f3ee;
+  --glow: #ffffff00; --scrim: #f9f8fa; --shade: #4f4a5a; --pointer-light: #ffffffb3; --deck-light: #ab4acc1c;
+  --stage: var(--surface-2); --win: var(--surface-1); --win-inset: #f5f4f7;
   --blend: multiply;
-  --accent-soft: #ff3b6326; --dip: #00000026;
+  --accent-soft: #ab4acc29; --dip: #00000026;
 }
 
 :root {
@@ -53,6 +62,8 @@ html[data-theme="light"] {
   --spring: linear(0, .009, .035 2.1%, .141 4.4%, .723 12.9%, .938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, .991, .977 51%, .974 53.8%, .975 57.1%, .997 69.8%, 1.003 76.9%, 1.004 83.8%, 1);
   /* How far things tilt and travel in depth. Phones get less of both. */
   --tilt-deg: 9deg; --depth: .6;
+  /* A short hand-drawn line, as a mask for the gradient. */
+  --squiggle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4C14 1 26 5 40 3s28-2 59 0' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
 }
 @media (min-width: 600px) { :root { --gutter: 24px; --stage-gutter: 16px; --space: 112px; --header-h: 64px; --r-panel: 32px; --tilt-deg: 13deg; --depth: .8; } }
 @media (min-width: 1100px) { :root { --gutter: 40px; --stage-gutter: clamp(16px, 16px + (100vw - 1100px) * .165, 80px); --space: 136px; --tilt-deg: 16deg; --depth: 1; } }
@@ -90,9 +101,9 @@ h3 { font-size: 22px; line-height: 1.15; font-weight: 680; letter-spacing: -.015
 .btn:hover svg { transform: translateY(2px); }
 .btn:active { transform: translateY(1px) scale(.975); transition-duration: 80ms; }
 .btn:focus-visible { border-radius: 999px; outline-color: var(--text); }
-/* The one that gets the app: the gradient, with dark text. */
-.btn-accent { background: var(--accent-grad); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--sheen), 0 14px 30px -14px var(--sun-b); }
-.btn-accent:hover { filter: brightness(1.06) saturate(1.05); box-shadow: inset 0 1px 0 var(--sheen), 0 20px 34px -14px var(--sun-b); }
+/* The one that gets the app: the gradient, with white text. */
+.btn-accent { background: var(--accent-fill); color: var(--on-accent); box-shadow: inset 0 1px 0 var(--sheen), 0 14px 30px -14px var(--accent-shadow); }
+.btn-accent:hover { box-shadow: inset 0 1px 0 var(--sheen), 0 22px 36px -14px var(--accent-shadow); }
 .btn-solid { background: var(--text); color: var(--page); }
 .btn-line { background: none; color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
 .btn-line:hover { box-shadow: inset 0 0 0 1.5px var(--text); }
@@ -101,7 +112,7 @@ h3 { font-size: 22px; line-height: 1.15; font-weight: 680; letter-spacing: -.015
 .chip:hover { background: var(--surface-2); border-color: var(--faint); }
 .chip:active { transform: scale(.95); transition-duration: 80ms; }
 .chip:focus-visible { border-radius: 999px; }
-.chip svg, .ctl svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.chip svg { flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .chip b { font-weight: inherit; }
 [data-state="playing"] .i-replay, :not([data-state="playing"]) > svg > .i-pause { display: none; }
 
@@ -124,11 +135,16 @@ h3 { font-size: 22px; line-height: 1.15; font-weight: 680; letter-spacing: -.015
 .nav-try:hover { background: var(--accent-soft); transform: translateY(-1px); }
 .nav-try:focus-visible { border-radius: 999px; outline-color: var(--text); }
 .nav-try i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-grad); }
-.nav-coffee { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px 0 11px; border-radius: 999px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--line-strong); transition: transform var(--t-1) var(--ease-out), background var(--t-1) ease; }
-.nav-coffee:hover { transform: translateY(-1px) rotate(-1.5deg); background: var(--surface-2); }
-.nav-coffee svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.nav-coffee .sip { stroke: var(--accent); transition: transform var(--t-2) var(--ease-out), opacity var(--t-2) ease; }
-.nav-coffee:hover .sip { transform: translateY(-1.5px); opacity: .6; }
+/* The Buy Me a Coffee button, as their own button generator makes it: their yellow, black words in Cookie, their cup
+   on the left, and their rounded shape (about a fifth of its height). The same in both themes. */
+.bmc { display: inline-flex; align-items: center; gap: .26em; height: 2em; padding: 0 .68em 0 .5em; border-radius: .4em; background: var(--bmc-yellow); color: var(--bmc-ink); font: 400 28px/1 "Cookie", "Brush Script MT", cursive; letter-spacing: .02em; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px var(--dip), 0 12px 22px -14px var(--bmc-yellow); transition: transform var(--t-1) var(--ease-out), box-shadow var(--t-1) ease; -webkit-tap-highlight-color: transparent; }
+.bmc svg { flex: none; width: auto; height: 1.24em; }
+.bmc span { padding-top: .08em; }
+.bmc:hover { transform: translateY(-2px); box-shadow: 0 2px 4px var(--dip), 0 16px 26px -14px var(--bmc-yellow); }
+.bmc:active { transform: translateY(1px); transition-duration: 80ms; }
+.bmc:focus-visible { border-radius: .4em; outline-color: var(--text); }
+.bmc-small { height: 38px; font-size: 21px; padding: 0 12px 0 9px; border-radius: 8px; box-shadow: 0 1px 2px var(--dip); }
+.bmc-small:focus-visible { border-radius: 8px; }
 .nav-download svg { display: none; }
 
 /* The theme switch: a knob that slides while a sun turns into a moon. The page's data-theme drives every part. */
@@ -139,8 +155,8 @@ h3 { font-size: 22px; line-height: 1.15; font-weight: 680; letter-spacing: -.015
 .ts-stars { position: absolute; left: 8px; top: 7px; width: 20px; height: 18px; fill: var(--text); transition: opacity var(--t-1) ease, transform var(--t-2) var(--ease-out); }
 .ts-knob { position: absolute; left: 3px; top: 3px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-1); box-shadow: 0 0 0 1px var(--line-strong), 0 2px 6px var(--dip); transform: translateX(26px); transition: transform var(--t-2) var(--spring), background var(--t-2) ease; }
 .ts-knob svg { width: 20px; height: 20px; overflow: visible; }
-.ts-rays { stroke: var(--sun-c); stroke-width: 2; stroke-linecap: round; transform-origin: 12px 12px; transform: rotate(-60deg) scale(.2); opacity: 0; transition: transform var(--t-2) var(--ease-out), opacity var(--t-1) ease; }
-.ts-disc { fill: url(#sunset); transform-origin: 12px 12px; transition: transform var(--t-2) var(--ease-out); }
+.ts-rays { stroke: var(--dusk-c); stroke-width: 2; stroke-linecap: round; transform-origin: 12px 12px; transform: rotate(-60deg) scale(.2); opacity: 0; transition: transform var(--t-2) var(--ease-out), opacity var(--t-1) ease; }
+.ts-disc { fill: url(#dusk); transform-origin: 12px 12px; transition: transform var(--t-2) var(--ease-out); }
 .ts-bite { transition: transform var(--t-2) var(--ease-out); }
 html[data-theme="light"] .ts-knob { transform: none; }
 html[data-theme="light"] .ts-rays { transform: none; opacity: 1; }
@@ -152,11 +168,12 @@ html[data-theme="light"] .ts-stars { opacity: 0; transform: translateX(6px) scal
 /* A short headline, one line and the buttons: a strip that leaves the first screen to the stage. */
 .hero { padding-top: 30px; }
 .hero-top { display: grid; gap: 24px; }
-h1 { font-size: clamp(46px, 13vw, 104px); line-height: .98; font-weight: 720; letter-spacing: -.04em; white-space: nowrap; }
+/* One line where it fits, two where it does not. */
+h1 { font-size: clamp(44px, 11.6vw, 84px); line-height: 1; font-weight: 720; letter-spacing: -.04em; }
 /* The last word is circled by hand, in the accent. */
-.ring-word { position: relative; display: inline-block; margin-left: .05em; }
-.ring-word svg { position: absolute; left: -.15em; top: .04em; width: calc(100% + .36em); height: 1.02em; overflow: visible; pointer-events: none; }
-.ring-word path { fill: none; stroke: url(#sunset); stroke-width: 3.2; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; }
+.ring-word { position: relative; display: inline-block; margin-left: .1em; white-space: nowrap; }
+.ring-word svg { position: absolute; left: -.2em; top: .07em; width: calc(100% + .42em); height: 1.06em; overflow: visible; pointer-events: none; }
+.ring-word path { fill: none; stroke: url(#dusk); stroke-width: 3.2; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; }
 .hero-line { margin-top: 16px; font-size: clamp(19px, 2.5vw, 24px); line-height: 1.35; color: var(--muted); }
 .get { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 12px; }
 .get-more { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
@@ -189,7 +206,7 @@ h1 { font-size: clamp(46px, 13vw, 104px); line-height: .98; font-weight: 720; le
 .mode-chip { position: absolute; left: var(--inset); top: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 13px 0 10px; border-radius: 999px; background: var(--surface-3); color: var(--text); font: 600 13px/1 var(--sans); pointer-events: none; transition: background var(--t-1) ease, color var(--t-1) ease; }
 .mode-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background var(--t-1) ease; }
 .mode-chip b { font-weight: inherit; }
-[data-mode="draw"] > .mode-chip { background: var(--accent-grad); color: var(--on-accent); }
+[data-mode="draw"] > .mode-chip { background: var(--accent-fill); color: var(--on-accent); }
 [data-mode="draw"] > .mode-chip i { background: var(--on-accent); }
 /* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (shared/stage.js). The
    frame is the desk's own panel. The button that makes it small again sits in the top right corner. */
@@ -199,7 +216,7 @@ h1 { font-size: clamp(46px, 13vw, 104px); line-height: .98; font-weight: 720; le
 .stage-shrink:hover { background: var(--line-strong); }
 /* "Draw here", the pill that follows the pointer over the stage until the visitor joins in: the accent, as on the
    page's main button and the Drawing chip, in both themes. */
-.stage-invite { --stage-invite-bg: var(--accent-grad); --stage-invite-fg: var(--on-accent); padding: 9px 15px; font: 650 14px/1 var(--sans); box-shadow: inset 0 1px 0 var(--sheen), 0 12px 24px -10px var(--sun-b), 0 4px 10px -4px var(--dip); }
+.stage-invite { --stage-invite-bg: var(--accent-fill); --stage-invite-fg: var(--on-accent); padding: 9px 15px; font: 650 14px/1 var(--sans); box-shadow: inset 0 1px 0 var(--sheen), 0 12px 24px -10px var(--accent-shadow), 0 4px 10px -4px var(--dip); }
 /* The stage's edge lights up once when the visitor is handed the pen. */
 .stage-pulse { position: absolute; inset: 0; z-index: 1; border-radius: var(--r-panel); box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 8px var(--accent-soft); opacity: 0; pointer-events: none; }
 .stage-plane.is-cued > .stage-pulse { animation: cue 1500ms ease-out; }
@@ -280,30 +297,10 @@ h1 { font-size: clamp(46px, 13vw, 104px); line-height: .98; font-weight: 720; le
 .card { position: relative; grid-column: 1 / -1; display: flex; flex-direction: column; gap: 18px; min-width: 0; padding: 14px; border-radius: var(--r-panel); background: var(--surface-1); box-shadow: var(--raise); }
 .card-text { padding: 0 6px 8px; }
 .card-text p { max-width: 30em; margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--muted); }
-/* The first visual is a small sample screen the engine draws on. Its content is sized from the frame, so it always
-   fits. The others hold the shared engine's scenes: an empty box that fills the frame. */
+/* Every visual is one of the shared engine's scenes. It fills its frame edge to edge and takes the frame's corners;
+   its inside is the engine's own. */
 .frame { position: relative; overflow: hidden; aspect-ratio: 4 / 3; border-radius: calc(var(--r-panel) - 12px); background: var(--well); box-shadow: 0 0 0 1px var(--line); container-type: size; }
-.ctl { position: absolute; right: 10px; bottom: 10px; z-index: 70; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--surface-1) 90%, transparent); color: var(--text); box-shadow: 0 0 0 1px var(--line-strong), 0 4px 10px -4px var(--dip); cursor: pointer; opacity: .82; transition: opacity var(--t-1) ease, transform var(--t-1) var(--ease-out); }
-.ctl:hover, .ctl:focus-visible { opacity: 1; transform: scale(1.08); }
-.ctl:focus-visible { border-radius: 50%; }
-
-.shot { position: relative; width: 100%; height: 100%; display: grid; place-items: center; padding: 14px; font-size: clamp(8px, min(3.5cqw, 5cqh), 30px); line-height: 1.4; }
-.shot .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 24px/1.1 "Caveat", "Bradley Hand", cursive; transition: opacity var(--t-1) ease; }
-.shot.is-leaving .ink-layer { opacity: 0; }
-/* A shared scene fills its frame edge to edge and takes the frame's corners; its inside is the engine's own. */
-.shot-live { display: block; padding: 0; border-radius: inherit; }
-.mini { width: min(100%, 27em); padding: 1.1em 1.3em 1em; border-radius: 1em; background: var(--win); box-shadow: var(--float); }
-.mini-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; }
-.mini-kpis span { display: flex; flex-direction: column; align-items: flex-start; gap: .35em; justify-self: start; }
-.mini-kpis em { font-style: normal; font-size: .8em; line-height: 1.2; color: var(--muted); }
-.mini-kpis b { font: 700 1.45em/1 var(--display); letter-spacing: -.02em; }
-.mini-chart { position: relative; height: 5.4em; margin-top: 1.6em; }
-.mini-chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.mini-line { fill: none; stroke: var(--faint); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.mini-fill { fill: var(--wash); }
-.mini-dip { position: absolute; left: 56.700%; top: 91%; width: 0; height: 0; }
-/* Where the note ends: in the open part of the chart, under the line's first rise. */
-.mini-note { position: absolute; left: 40%; top: 72%; width: 0; height: 0; }
+.shot { position: relative; width: 100%; height: 100%; border-radius: inherit; }
 
 /* 3. Good to know ----------------------------------------------------------------------------- */
 .know-grid { display: grid; gap: 0; margin-top: 28px; border-top: 1px solid var(--line); }
@@ -317,11 +314,11 @@ h1 { font-size: clamp(46px, 13vw, 104px); line-height: .98; font-weight: 720; le
 .cup.awaits { opacity: 0; }
 .coffee .panel { display: grid; gap: 8px; align-items: center; padding: 30px 22px 22px; }
 .coffee-copy p { max-width: 30em; margin-top: 14px; color: var(--muted); }
-.coffee-copy .btn { margin-top: 24px; }
+.coffee-copy .bmc { margin-top: 24px; }
 .cup { justify-self: center; width: min(230px, 64%); }
 .cup svg { display: block; width: 100%; overflow: visible; fill: none; stroke: var(--text); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
 .cup-mug { fill: var(--surface-2); }
-.cup-dot { fill: url(#sunset); stroke: none; }
+.cup-dot { fill: url(#dusk); stroke: none; }
 .cup-shadow { fill: var(--shade); opacity: .16; stroke: none; }
 .steam path { stroke: var(--muted); stroke-width: 4; }
 .cup-ring { stroke: var(--accent); stroke-width: 4; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--t-3) var(--ease-in-out); }
@@ -357,8 +354,9 @@ h1 { font-size: clamp(46px, 13vw, 104px); line-height: .98; font-weight: 720; le
 
 /* Wider screens ------------------------------------------------------------------------------- */
 @media (max-width: 1000px) {
-  .nav-coffee span { display: none; }
-  .nav-coffee { width: 38px; padding: 0; justify-content: center; }
+  /* Narrower: the header's coffee button is the cup alone, on its yellow. */
+  .bmc-small span { display: none; }
+  .bmc-small { width: 38px; padding: 0; justify-content: center; }
   .site-header nav { gap: 16px; }
 }
 @media (max-width: 759px) {
@@ -499,14 +497,47 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
 .do-tabs button { display: inline-flex; white-space: nowrap; align-items: center; gap: 0; height: 30px; padding: 0 5px; border: 0; border-radius: 999px; background: none; font: 500 14px/1 var(--sans); color: var(--muted); cursor: pointer; transition: background var(--t-1) ease, color var(--t-1) ease; }
 .do-tabs button:hover { color: var(--text); }
 .do-tabs button:focus-visible { border-radius: 999px; }
-.do-tabs i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); transition: background var(--t-1) ease, transform var(--t-1) var(--ease-out); }
+.do-tabs i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
 .do-tabs span { display: none; }
-.do-tabs [aria-current="true"] i { background: var(--accent); transform: scale(1.35); }
+/* One accent dot marks the current tab. main.js hops it from tab to tab: the move that links one card to the next. */
+.motion .do-tabs { position: relative; }
+.do-marker { position: absolute; left: 0; top: 0; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%; background: var(--accent-grad); opacity: 0; pointer-events: none; transition: opacity var(--t-1) ease; }
+.do-marker.is-on { opacity: 1; }
 .motion .do-deck { --peek: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 20px; padding-top: calc(2 * var(--peek)); perspective: 1400px; perspective-origin: 50% 0%; }
 .motion .card { --u: 0; --v: 0; grid-area: 1 / 1; z-index: var(--i); transform-origin: 50% 0%; transform: translate3d(0, calc(var(--u) * (100% + 26px) - var(--v) * var(--peek)), calc((var(--v) * -150px - var(--u) * 60px) * var(--depth))) rotateX(calc(var(--u) * 24deg * var(--depth))); box-shadow: var(--raise), 0 34px 54px -40px var(--shade); will-change: transform; }
 .motion .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--scrim); opacity: calc(var(--v) * .46 + var(--u) * .24); pointer-events: none; }
 /* The frame gives way to a short window, so the card and its words always fit the screen it is pinned to. */
 .motion .card .frame { max-height: max(140px, 100svh - var(--header-h) - 330px); }
+
+/* A change of card, in layers. The frame comes with the scroll (above). main.js marks a card "is-current" once its
+   frame has all but landed: then the title rises word by word behind a mask, the line under it follows 100 ms
+   later, and a small accent is drawn on, all inside 750 ms. A card that starts to leave gives them up in the
+   reverse order in 400 ms. Only transforms and opacity move, and each layer is one transition, so a fast scroll
+   turns it round from wherever it is. */
+.motion .card h3 .tw { display: inline-block; clip-path: inset(-.06em -.12em -.16em); }
+.motion .card h3 .tw > span { display: inline-block; translate: 0 118%; transition: translate 280ms var(--ease-in-out) 120ms; }
+.motion .card.is-current h3 .tw > span { translate: 0 0; transition: translate 460ms var(--ease-out) calc(var(--w) * 45ms); }
+.motion .card-text p { opacity: 0; translate: 0 10px; transition: opacity 240ms ease 60ms, translate 240ms var(--ease-in-out) 60ms; }
+.motion .card.is-current .card-text p { opacity: 1; translate: 0 0; transition: opacity 460ms ease 100ms, translate 460ms var(--ease-out) 100ms; }
+/* The accent: a squiggle in the gradient, uncovered from left to right. Its window slides in from the left while
+   the squiggle inside slides the other way, so the line stays still and appears to be drawn. */
+.card-accent { display: none; }
+.motion .card-accent { display: block; width: 64px; height: 8px; margin-top: 12px; overflow: hidden; translate: -101% 0; transition: translate 200ms var(--ease-in-out); }
+.motion .card-accent b { display: block; height: 100%; background: var(--accent-grad); -webkit-mask: var(--squiggle) center / 100% 100% no-repeat; mask: var(--squiggle) center / 100% 100% no-repeat; translate: 101% 0; transition: inherit; }
+.motion .card.is-current .card-accent, .motion .card.is-current .card-accent b { translate: 0 0; transition: translate 420ms var(--ease-in-out) 300ms; }
+/* As the frame lands, a light crosses it once. */
+.motion .frame::after { content: ""; position: absolute; inset: 0 -60%; z-index: 3; background: linear-gradient(105deg, transparent 45%, var(--pointer-light) 50%, transparent 55%); translate: -62% 0; opacity: 0; pointer-events: none; }
+.motion .card.is-current .frame::after { animation: frame-sheen 760ms var(--ease-in-out) 60ms both; }
+@keyframes frame-sheen { 0% { translate: -62% 0; opacity: 0; } 22%, 78% { opacity: 1; } 100% { translate: 62% 0; opacity: 0; } }
+/* Depth: while a card is on its way, its words trail the frame by a few pixels and its picture sits a little
+   closer; both settle as it lands. */
+.motion .card-text { translate: 0 calc(var(--u) * 30px - var(--v) * 8px); }
+.motion .frame .shot { scale: calc(1 + var(--u) * .06 + var(--v) * .03); }
+/* A soft light behind the deck. It glides to the side the current card's picture is on (main.js sets --lx to -1
+   or 1), which carries the eye from one card to the next. */
+.do-light { display: none; }
+.motion .do-light { display: block; position: absolute; left: 50%; top: 52%; width: min(880px, 92vw); aspect-ratio: 1.5; translate: calc(-50% + var(--lx, 0) * min(240px, 16vw)) -50%; background: radial-gradient(closest-side, var(--deck-light), transparent); pointer-events: none; transition: translate 900ms var(--ease-in-out); }
+.motion .do-head { position: relative; z-index: 1; }
 
 /* Things that arrive with depth: they start a little back and leaning, and settle one after another. */
 .motion .depth { perspective: 1100px; }
@@ -538,8 +569,8 @@ html:not(.motion) *, html:not(.motion) *::before, html:not(.motion) *::after { t
   .motion .do-tabs button { gap: 7px; padding: 0 12px; }
   .motion .do-tabs span { display: inline; }
   .motion .do-tabs i { width: 7px; height: 7px; }
+  .do-marker { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; }
   .motion .do-tabs [aria-current="true"] { background: var(--text); color: var(--page); }
-  .motion .do-tabs [aria-current="true"] i { transform: none; }
   .motion .do-head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .motion .do-deck { --peek: 19px; width: min(1120px, 100% - 2 * var(--gutter)); }
   .motion .card { padding: 22px; gap: 22px; }
