@@ -4,6 +4,10 @@ Generated from `releases/notes.json`. Unreleased changes are not shipped.
 
 ## Unreleased
 
+### Changed
+
+- The website has a new look, in dark and light. At the top there's a small live demo: draw on two sample apps, then switch to Use apps and click around in them.
+
 ## 0.6.0 - 2026-11-25
 
 ### Added

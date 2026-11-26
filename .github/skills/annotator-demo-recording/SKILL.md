@@ -1,6 +1,6 @@
 ---
 name: annotator-demo-recording
-description: Record and refine real Annotator product demonstrations from this source repository, on macOS and Windows. Use for fresh website clips, Windows replays of the Mac's live recordings, visible toolbar interactions, point-by-point curved arrows, rough shapes, native blur, pacing changes and recording quality checks. Reuse the isolated native recorders, preserve the user's workspace and distinguish scripted footage from human or computer-use acceptance.
+description: Record and refine real Annotator product demonstrations from this source repository, on macOS and Windows. Use for fresh product clips, Windows replays of the Mac's live recordings, visible toolbar interactions, point-by-point curved arrows, rough shapes, native blur, pacing changes and recording quality checks. Reuse the isolated native recorders, preserve the user's workspace and distinguish scripted footage from human or computer-use acceptance.
 ---
 
 # Record Annotator demos
@@ -14,7 +14,7 @@ The sections below cover the Mac recorder; see
 ## Start with the existing recorder
 
 The promo and reel projects live in `dorlugasigal/annotator-media`. For reel,
-promo or website-demo work, clone it into `videos/` at the repository root
+promo or review work, clone it into `videos/` at the repository root
 (`git clone https://github.com/dorlugasigal/annotator-media videos`); that
 folder is ignored here, and the tools and recording tests read it there.
 
@@ -25,8 +25,6 @@ Read these before changing a take:
 - `apps/macos/Tests/NativeAppTests/ProductFeatureRecordingTests.swift`
 - `apps/macos/Tests/NativeAppTests/Support/DemoHandMotion.swift`
 - `apps/macos/Tests/NativeAppTests/Support/RealtimeDesktopMovie.swift`
-- `tools/demo/render-product-takes.py`
-- `website/src/data/product-takes.json`
 
 The original film and new feature takes use a real `OverlaySession` on the
 live desktop, native toolbar accessibility actions and timed canvas events.
@@ -114,31 +112,18 @@ When asked for faster clips, shorten transition/inspection pauses
 first. Preserve a short visible press and a readable final hold. Confirm a
 target pace on one take before repeating all three.
 
-The current encoder preserves recorded speed. If a later edit intentionally
+Recordings keep their recorded speed. If a later edit intentionally
 changes playback speed, record that factor, retime captions and action timestamps,
 and inspect the actual encoded result. Do not silently call sped-up footage
 real-time. Leave pacing unchanged when asked to defer it.
 
-## Encode and verify
+## Verify
 
 The recorder writes unique originals and `latest-{draw,arrow,blur}.json` under
 `build/fresh-product/`. Keep originals and failed iterations. Confirm the latest
-metadata names the files from this run, not a previous successful take. For a
-later recording date, update the encoder's `recorded` label; do not reuse the
-current campaign's date. Encode only after native assertions pass:
-
-```bash
-python3 tools/demo/render-product-takes.py
-npm --prefix website run typecheck
-npm --prefix website run build
-npm --prefix website test
-ANNOTATOR_E2E_PORT=4397 npm --prefix website run test:e2e
-```
-
-The encoder checks capture/crop bounds, dark toolbar, prohibited color actions
-and silent video output. It retains source hashes, control rectangles and
-timestamps in `product-takes.json`. It leaves native backdrop below the toolbar
-so browser playback controls do not cover the app's controls.
+metadata names the files from this run, not a previous successful take. The
+website no longer embeds recorded takes: its homepage runs a live web demo, so
+there is no website encoder. Keep finished clips in `annotator-media`.
 
 Inspect a labeled early/middle/late contact sheet and a moving clip. Confirm:
 
@@ -149,7 +134,7 @@ Inspect a labeled early/middle/late contact sheet and a moving clip. Confirm:
 - Playback is silent, finite and paused offscreen; reduced-motion/no-JavaScript
   visits retain the real poster and native controls.
 - No fake window headers, numbered demo panels or repeated captions are added
-  around the website videos. Put provenance in one recording-details disclosure.
+  around the videos. Put provenance in one recording-details disclosure.
 
 Use `no-ai-slop` for any caption or page-copy edit. Record the result in the pull request
 with actual recording results and limits, then use `annotator-release` for
@@ -158,7 +143,7 @@ publication or a hosted CI run.
 
 ## Windows captures
 
-The Windows edition has no video takes for the website yet. Its captures follow
+The Windows edition has no video takes yet. Its captures follow
 the same rules: the real app, its real overlay and toolbar, over a made-up
 window that the script owns, with input only into Annotator's own windows.
 UX reference sheets and render harness comparisons are parity evidence, not

@@ -18,14 +18,12 @@
     "test:windows": "node scripts/test-windows.mjs"
   },
   "dependencies": {
-    "astro": "7.3.8",
-    "three": "0.185.1"
+    "astro": "7.3.8"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.63.0",
     "@types/node": "26.6.1",
-    "@types/three": "0.185.4",
     "typescript": "7.0.2"
   }
 }

@@ -1,6 +1,10 @@
 {
   "schemaVersion": 1,
-  "unreleased": {},
+  "unreleased": {
+    "Changed": [
+      "The website has a new look, in dark and light. At the top there's a small live demo: draw on two sample apps, then switch to Use apps and click around in them."
+    ]
+  },
   "releases": [
     {
       "version": "0.6.0",

@@ -55,7 +55,7 @@ https://creativecommons.org/licenses/by/4.0/
 Source: https://punchdeck.bandcamp.com/track/chrome-funk
 
 The film uses an edited excerpt with level adjustment and fades. Attribution
-appears in the video and beside the website player. The original audio and
+appears in the video. The current website doesn't play the film. The original audio and
 source record are in the `dorlugasigal/annotator-media` repository, under
 `annotator-native-promo/assets/audio/`.
 No attribution-free license was purchased. This music is not bundled in the
@@ -84,15 +84,31 @@ The compact Start/End popover, four-column choices and full marker inventory
 inform the native picker. SwiftUI code and CoreGraphics geometry are original;
 no Excalidraw code, SVG assets or runtime are bundled in the app.
 
-## Website display font
+## Website fonts
 
-The website uses a locally hosted Latin subset of Bricolage Grotesque.
-Copyright 2022 The Bricolage Grotesque Project Authors
-(https://github.com/ateliertriay/bricolage), under the SIL Open Font License 1.1.
-The complete license is retained in `website/public/fonts/OFL-bricolage.txt`.
-The source is the variable font from Google Fonts' `ofl/bricolagegrotesque`
-directory; it was subset and converted to WOFF2 with fontTools. The native app
-does not bundle this font.
+The website and the owner dashboard use locally hosted fonts, all under the
+SIL Open Font License 1.1. Nothing is loaded from a font service.
+
+- Bricolage Grotesque, a Latin subset. Copyright 2022 The Bricolage Grotesque
+  Project Authors (https://github.com/ateliertriay/bricolage). The source is the
+  variable font from Google Fonts' `ofl/bricolagegrotesque` directory; it was
+  subset and converted to WOFF2 with fontTools.
+- Instrument Sans. Copyright 2022 The Instrument Sans Project Authors
+  (https://github.com/Instrument/instrument-sans).
+- Geist Mono. Copyright 2024 The Geist Project Authors
+  (https://github.com/vercel/geist-font).
+- Caveat, for the text the web demo writes. Copyright 2014 The Caveat Project
+  Authors (https://github.com/googlefonts/caveat).
+- Cookie, only for the Buy Me a Coffee button. Copyright (c) 2011 by Ania Kruk,
+  with Reserved Font Name "Cookie". The unmodified Latin file from Google Fonts.
+
+The font files are in `website/src/fonts`, with copies of Bricolage Grotesque,
+Instrument Sans and Geist Mono in `services/metrics/public/admin/fonts` for the
+dashboard. The complete licenses are retained in `website/public/fonts/OFL-*.txt`
+and published with the site. The native app does not bundle these fonts.
+
+The Buy Me a Coffee cup on the website is Buy Me a Coffee's own mark, from their
+button, used only to link to the project's Buy Me a Coffee page.
 
 ## Handwriting font
 

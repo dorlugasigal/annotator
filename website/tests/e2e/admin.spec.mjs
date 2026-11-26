@@ -3,11 +3,12 @@ import AxeBuilder from "@axe-core/playwright";
 import {readFileSync} from "node:fs";
 
 const adminRoot = new URL("../../../services/metrics/public/admin/", import.meta.url);
-const font = new URL("../../public/fonts/bricolage-grotesque-latin.woff2", import.meta.url);
 const config = readFileSync(new URL("../../../netlify.toml", import.meta.url), "utf8");
 const csp = config.match(/Content-Security-Policy = "([^"]+)"/)[1];
 const host = "https://admin.example.test";
-const files = ["index.html", "admin.css", "admin.js", "admin-model.js"];
+const files = ["index.html", "admin.css", "admin.js", "admin-model.js", "theme.js",
+  "fonts/bricolage-grotesque-latin.woff2", "fonts/instrument-sans-normal.woff2", "fonts/geist-mono-normal.woff2"];
+const types = {html: "text/html", css: "text/css", js: "text/javascript", woff2: "font/woff2"};
 const addDays = (day, amount) => new Date(Date.parse(`${day}T00:00:00Z`) + amount * 86_400_000).toISOString().slice(0, 10);
 const asset = (version, build, name) => `v${version}/${name ?? `annotator-${version}-${build}-universal.dmg`}`;
 
@@ -81,12 +82,10 @@ async function adminFixture(page, {networkFailure = false, summary = summaryFixt
         ? {...summary, ...(route.request().method() === "POST" ? {refresh} : {})} : {ok:allowed};
       return route.fulfill({status:allowed?200:401, contentType:"application/json", body:JSON.stringify(body)});
     }
-    if (path === "/fonts/bricolage-grotesque-latin.woff2") return route.fulfill({status:200, body:readFileSync(font), contentType:"font/woff2"});
-    const file = path === "/admin/" ? "index.html" : path.split("/").at(-1);
+    const file = path === "/admin/" ? "index.html" : path.startsWith("/admin/") ? path.slice("/admin/".length) : "";
     if (!files.includes(file)) return route.fulfill({status:404,body:"not found"});
     return route.fulfill({status:200, body:readFileSync(new URL(file, adminRoot)),
-      contentType:file.endsWith(".html")?"text/html":file.endsWith(".css")?"text/css":"text/javascript",
-      headers:{"Content-Security-Policy":csp}});
+      contentType:types[file.split(".").at(-1)], headers:{"Content-Security-Policy":csp}});
   });
   await page.goto(`${host}/admin/${hash}`);
   return requests;
@@ -144,7 +143,15 @@ test("owner dashboard signs in, shows each measurement apart and signs out under
   await page.waitForFunction(() => document.getAnimations().every(animation => animation.playState !== "running"));
   const result = await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze();
   expect(result.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
+  // The light theme, with the website's switch and under the website's name for the choice.
+  await page.locator(".topbar").getByRole("switch",{name:"Dark theme"}).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  expect(await page.evaluate(() => localStorage.getItem("annotator.site.theme"))).toBe("light");
+  await page.waitForFunction(() => document.getAnimations().every(animation => animation.playState !== "running"));
+  const light = await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze();
+  expect(light.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
   await page.getByRole("button",{name:"Sign out",exact:true}).click();
+  await expect(page.locator("#gate").getByRole("switch",{name:"Dark theme"})).toHaveAttribute("aria-checked","false");
   await expect(page.locator("#gate")).toBeVisible();
   expect(problems).toEqual([]);
 });

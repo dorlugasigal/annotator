@@ -7,9 +7,9 @@ import PlatformSwitch from "../components/PlatformSwitch.astro";
 const intel = runsOnIntel(release);
 ---
 <Page title="Downloads">
-  <article class="prose wrap" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
+  <article class="prose" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
     <p class="eyebrow">DOWNLOADS</p>
-    <h1>Get Annotator.</h1>
+    <h1 data-rise>Get Annotator.</h1>
     {windows
       ? <p>On a Mac, download the app from GitHub or install it with Homebrew. On Windows, get it from the Microsoft Store or install it with winget.</p>
       : <p>Download the app from GitHub, or install it with Homebrew.</p>}
@@ -25,15 +25,15 @@ const intel = runsOnIntel(release);
           <h2>Version {release.releaseVersion}</h2>
           {release.diskImage ? (
             <>
-              <p><a href={release.diskImage.url} data-download>Download {release.releaseVersion} (disk image)</a></p>
+              <p><a class="btn btn-accent" href={release.diskImage.url} data-download>Download {release.releaseVersion} (disk image) <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a></p>
               <p>Or get the <a href={release.downloadURL}>ZIP archive</a> instead.</p>
             </>
-          ) : <p><a href={release.downloadURL} data-download>Download {release.releaseVersion} from GitHub</a></p>}
+          ) : <p><a class="btn btn-accent" href={release.downloadURL} data-download>Download {release.releaseVersion} from GitHub <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a></p>}
           <p><a href={releasePageURL(release)}>Read release notes and known limits for {release.releaseVersion}</a></p>
           <p>Developer ID signed and notarized. Your Mac or organization may still apply additional restrictions.</p>
           <details><summary>SHA-256 {release.diskImage ? "checksums" : "checksum"}</summary>
-            {release.diskImage && <p>Disk image: <code style="overflow-wrap:anywhere">{release.diskImage.sha256}</code></p>}
-            <p>{release.diskImage && "ZIP archive: "}<code style="overflow-wrap:anywhere">{release.sha256}</code></p>
+            {release.diskImage && <p>Disk image: <code class="overflow-anywhere">{release.diskImage.sha256}</code></p>}
+            <p>{release.diskImage && "ZIP archive: "}<code class="overflow-anywhere">{release.sha256}</code></p>
           </details>
         </section>
         <p>Open the disk image and drag Annotator into Applications, or unzip the ZIP and move Annotator to Applications. Then open it from Applications. Annotator can update itself only from there. If macOS blocks it, report the exact message rather than bypassing security checks.</p>
@@ -54,7 +54,8 @@ const intel = runsOnIntel(release);
       <section id="windows" aria-labelledby="windows-title" data-platform-part="windows">
         <h2 id="windows-title">Annotator for Windows</h2>
         <p>Requires Windows 11, version 22H2 or later, on an x64 or ARM64 PC. To check, open Settings &gt; System &gt; About.</p>
-        <p><a href={windows.listingURL}>Get Annotator from the Microsoft Store</a>. Updates come from the Store too.</p>
+        <p><a class="btn btn-accent store-link" href={windows.listingURL}>Get it for Windows <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a></p>
+        <p>This opens Annotator in the Microsoft Store. Updates come from the Store too.</p>
         <p>Or run this in Terminal. winget installs the same app from the Microsoft Store.</p>
         <pre class="command-block" tabindex="0" role="region" aria-label="winget install command"><code>{windows.wingetCommand}</code></pre>
         <p>Without the Store, download the ZIP for your PC from the <a href="https://github.com/dorlugasigal/annotator/releases">latest GitHub release</a>, unzip it and open Annotator. The ZIPs aren't code-signed yet, so Windows may show a SmartScreen warning before it opens.</p>

@@ -6,10 +6,9 @@ point-editing, no-Done and colorful-image blur workflow in
 `ProductFeatureRecordingTests`, plus pacing and native/video validation.
 The commands below describe the earlier full film.
 
-The current feature encoder is `python3 tools/demo/render-product-takes.py`.
-It writes `fresh-{draw,arrow,blur}.mp4`, posters and captions to the website
-from new source takes, and records hashes/control bounds in `product-takes.json`.
-It preserves source timing. Use the skill before a future pacing change.
+The website no longer embeds recorded takes (its homepage runs a live web demo),
+so the old website encoders were removed. Recordings stay in `build/` and the
+`annotator-media` repository.
 
 The recorder is a test-only creator tool, not a product screen recorder.
 It uses the actual desktop overlay and native controls with a fixed-seed pointer.
@@ -35,28 +34,15 @@ The active committed source and portable metadata are
 `videos/annotator-native-promo/assets/native-quality-source.mp4` and
 `videos/annotator-native-promo/native-quality-source.json`.
 
-## Camera and edit
+## Camera
 
 ```sh
 python3 tools/demo/recording/test_cursor_camera.py
-python3 tools/demo/render-cursor-demo.py \
-  --metadata videos/annotator-native-promo/native-quality-source.json \
-  --speed 2 --output build/cursor-demo/tracked.mp4
-cp build/cursor-demo/tracked.mp4 \
-  videos/annotator-native-promo/assets/cursor-tracked.mp4
-python3 tools/demo/render-cursor-ad.py
 ```
 
-The planner anticipates the cursor and visible control. It retains toolbar
-and notes context, limits zoom to 1.10 and verifies every recorded control
-press is in frame. The final 1280x960 picture is downsampled, not enlarged.
-Camera motion receives a two-frame 7:1 temporal mix only while moving.
-Do not use it to blur private information; this is an editorial movement effect.
-
-FFmpeg evaluates the camera in six-second pieces to bound expression size.
-Metadata and filter files are retained next to the output for inspection.
-This script prepares footage; it does not publish or operate a user's desktop.
-HyperFrames then composes the ad with text and attributed music.
+`cursor_camera.py` plans a camera that anticipates the cursor and the visible
+control. Do not use it to blur private information; it is an editorial movement
+effect.
 
 Cap's local Studio mode was inspected, but its graphical target/editor could
 not be addressed because the computer-use connection returned text without

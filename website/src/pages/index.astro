@@ -1,145 +1,230 @@
 ---
 import Page from "../layouts/Page.astro";
-import ProductStage from "../components/ProductStage.astro";
-import NativeFeature from "../components/NativeFeature.astro";
-import NativeDemo from "../components/NativeDemo.astro";
-import HeroReel from "../components/HeroReel.astro";
-import InstallScene from "../components/InstallScene.astro";
-import RegionSharing from "../components/RegionSharing.astro";
-import Scribble from "../components/Scribble.astro";
-import SiteIcon from "../components/SiteIcon.astro";
+import "../engine/ink.css";
+import "../styles/home.css";
 import { preferredDownloadURL, release, releasePageURL, runsOnIntel } from "../lib/distribution";
 import { windowsListing as windows } from "../lib/windows";
-import { heroReel, phoneMedia } from "../lib/hero-reel";
+import { supportURL } from "../data/support";
 import { sitePath } from "../lib/paths";
-import PlatformSwitch from "../components/PlatformSwitch.astro";
-import HomebrewCommand from "../components/HomebrewCommand.astro";
-const download = release ? preferredDownloadURL(release) : "https://github.com/dorlugasigal/annotator/releases";
+// The Mac download is the published release's own file (counted as a download), or GitHub's release list while this
+// build has no verified release, as before. Windows appears only with a published Microsoft Store listing.
+const macURL = release ? preferredDownloadURL(release) : "https://github.com/dorlugasigal/annotator/releases";
 const intel = runsOnIntel(release);
-const reel = heroReel();
 ---
-<Page title="Draw on any app">
-  <Fragment slot="head">
-    {reel.phone && <link rel="preload" as="image" href={reel.phone.posterURL} media={phoneMedia} fetchpriority="high"/>}
-    <link rel="preload" as="image" href={reel.desktop.posterURL} media={reel.phone ? `not all and ${phoneMedia}` : undefined} fetchpriority="high"/>
-  </Fragment>
-  {/* The reel carries the slogan in its own type, so the page says what the app is for and offers the download. */}
-  <section class="home-hero wrap" aria-labelledby="product-heading">
-    <div class="hero-rail">
-      <h1 id="product-heading" class="hero-title">Draw on your screen as you explain.</h1>
-      <p class="hero-lede">For demos, reviews and lessons. Every mark stays editable.</p>
-      <div class="hero-cta">
-        <a class="button get-annotator" href="#install">
-          Get Annotator <SiteIcon name="down"/><Scribble kind="ring" class="button-ring"/>
-        </a>
-        <p class="hero-availability">Free · macOS 14+ · {intel ? "Apple Silicon and Intel" : "Apple Silicon"}{windows && <> · Windows 11</>}</p>
+<Page title="Draw on your screen" socialTitle="Annotator: draw on your screen"
+  description={`Circle it, point at it, while you share your screen. Annotator is free and open source, for macOS 14 and later${windows ? " and Windows 11" : ""}.`}>
+    {/* 1. Hero */}
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-top">
+        <div class="hero-words">
+          {/* The headline does what it says: main.js has the drawing engine mark its last word, as the app would. */}
+          <h1 id="hero-title" data-rise>Draw on your <span class="hero-word">screen.</span></h1>
+          <div class="hero-ink" aria-hidden="true"></div>
+          <p class="hero-line">Circle it, point at it, while you share your screen.</p>
+        </div>
+        <div class="hero-side">
+          <p class="get" data-for="mac">
+            <a class="btn btn-accent download-mac" href={macURL} data-download={release ? "" : undefined}>Download for Mac <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
+            <a class="btn btn-line" href="#try" data-try>Try it here</a>
+            <span class="get-more">{windows && <a class="quiet" href={windows.listingURL}>Get it for Windows</a>} <small>{windows ? "It's free, for Mac and Windows." : "It's free, for Mac."}</small></span>
+          </p>
+          {windows && (
+            <p class="get" data-for="windows">
+              <a class="btn btn-accent store-link" href={windows.listingURL}>Get it for Windows <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
+              <a class="btn btn-line" href="#try" data-try>Try it here</a>
+              <span class="get-more"><a class="quiet" href={macURL} data-download={release ? "" : undefined}>Download for Mac</a> <small>It's free, for Mac and Windows.</small></span>
+            </p>
+          )}
+        </div>
       </div>
-    </div>
-    <HeroReel />
-  </section>
-  <ProductStage>
-    <Fragment slot="intro">
-      <h2 id="workspace-title">See how each tool works.</h2>
-      <p>Each clip is a recording of the real app.</p>
-    </Fragment>
-  </ProductStage>
-  <section class="settings-story wrap" aria-labelledby="settings-title">
-    <div class="section-heading">
-      <h2 id="settings-title">Change the pointer, keys and toolbar.</h2>
-    </div>
-    <div class="settings-pair">
-      <NativeFeature take="pointer" title="Pointer." caption="Choose a shape, color and glow."/>
-      <NativeFeature take="shortcuts" title="Toolbar." caption="Drag tools in and change keys."/>
-    </div>
-    <div class="shortcut-strip">
-      <h3 id="return-title">Switch between drawing and your app.</h3>
-      <dl class="shortcut-pair">
-        {/* Draw is Control-Shift-2 on a Mac and Ctrl+Shift+2 on Windows: the same keys, so a Windows listing shows them as text. */}
-        <div><dt>Draw</dt><dd><span class="keycaps" role="img" aria-label="Control Shift 2">{windows
-          ? <><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>2</kbd></>
-          : <><kbd>⌃</kbd><kbd>⇧</kbd><kbd>2</kbd></>}</span></dd></div>
-        <div><dt>Use apps</dt><dd><span class="keycaps" role="img" aria-label="Escape"><kbd>esc</kbd></span></dd></div>
+      {/* The only words that introduce the stage: the page's main invitation. */}
+      <h2 class="wrap stage-title" id="try-title"><i aria-hidden="true"></i><span><span>This screen is live.</span> <span>Draw on it.</span></span><svg viewBox="0 0 44 40" width="38" height="34" aria-hidden="true"><path d="M5 5c16-3 30 5 28 26M24 23l9 9 7-11"/></svg></h2>
+
+      <figure class="stage" id="try" aria-label="A working demo of Annotator. Draw on the two sample apps, or switch to Use apps and click around in them.">
+        <div class="stage-scene">
+          <i class="stage-shadow" aria-hidden="true"></i>
+          <div class="stage-plane" id="desk" data-mode="use">
+            <i class="desk-panel" data-stage-frame aria-hidden="true"></i>
+            <i class="stage-pulse" data-stage-frame aria-hidden="true"></i>
+            <div class="desk-windows" id="apps">
+              <section class="win win-settings" data-win aria-label="Sample settings">
+                <div class="win-bar" data-drag tabindex="0" aria-label="Move the settings window. Use the arrow keys."><i></i><i></i><i></i><span>Settings</span></div>
+                <div class="settings">
+                  <ul class="set-side">
+                    <li><button type="button" data-pane="general" aria-pressed="false">General</button></li>
+                    <li><button type="button" data-pane="notifications" aria-pressed="true">Notifications</button></li>
+                    <li><button type="button" data-pane="privacy" aria-pressed="false">Privacy</button></li>
+                  </ul>
+                  <div class="set-main">
+                    <p class="set-title" data-pane-title>Notifications</p>
+                    <ul class="set-rows" data-pane-rows>
+                      <li><span id="s-weekly">Weekly summary email</span><button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="s-weekly" data-switch="weekly" data-first="true"><i></i></button></li>
+                      <li><span id="s-replies">Comment replies</span><button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="s-replies" data-switch="replies" data-first="true"><i></i></button></li>
+                      <li><span id="s-news">Product news</span><button type="button" class="switch" role="switch" aria-checked="false" aria-labelledby="s-news" data-switch="news" data-first="false"><i></i></button></li>
+                    </ul>
+                    {/* General and Privacy are quiet placeholders: the sample is about one setting. */}
+                    <div class="set-blank" data-pane-blank hidden aria-hidden="true"><i></i><i></i><i></i></div>
+                    <p class="set-foot"><button type="button" class="set-save" data-save><span data-when-saved="no">Save changes</span><span data-when-saved="yes">Saved</span></button></p>
+                  </div>
+                </div>
+              </section>
+              <section class="win win-mail" data-win aria-label="Sample message">
+                <div class="win-bar" data-drag tabindex="0" aria-label="Move the message window. Use the arrow keys."><i></i><i></i><i></i><span>Message</span></div>
+                <div class="mail">
+                  <p class="mail-from"><b class="avatar" aria-hidden="true">D</b><span><strong>Dor Lugasi-Gal</strong><em>dor@example.com</em></span></p>
+                  <ul class="thread" data-thread>
+                    <li class="them" id="t-ask">Where do I turn off the weekly emails?</li>
+                  </ul>
+                  <form class="reply" data-reply>
+                    <input type="text" name="reply" placeholder="Write a reply" aria-label="Reply to Dor" autocomplete="off" maxlength="60" enterkeyhint="send">
+                    <button type="submit" aria-label="Send"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9.500M8.500 4l4 4-4 4"/></svg></button>
+                  </form>
+                </div>
+              </section>
+            </div>
+            <p class="mode-chip" id="mode-chip" data-stage-corner="top left"><i aria-hidden="true"></i><b data-when="use">Using apps</b><b data-when="draw">Drawing</b></p>
+            <div class="dock" id="dock" data-stage-frame></div>
+            <button type="button" class="stage-show" id="stage-show" data-stage-corner="bottom right" aria-label="Show drawings and tools" title="Show drawings and tools" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg></button>
+          </div>
+        </div>
+        <figcaption class="wrap">
+          <small class="stage-note">It's a web demo with a few of the tools. The real app works over anything on your screen.</small>
+          <span class="stage-controls">
+            <button type="button" class="chip" id="stage-done" hidden>Done drawing</button>
+            <button type="button" class="chip" id="stage-replay"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pause" d="M5.5 3.5v9M10.5 3.5v9"/><path class="i-replay" d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.4h2.4"/></svg><b>Replay</b></button>
+          </span>
+        </figcaption>
+      </figure>
+    </section>
+
+    {/* 2. What you can do */}
+    <section class="do" id="do" aria-labelledby="do-title">
+      <div class="do-track">
+        <div class="do-pin">
+          <div class="wrap do-head">
+            <h2 id="do-title" data-rise>What you can do</h2>
+            <ol class="do-tabs" aria-label="Go to">
+              <li><button type="button" data-go="0"><i></i><span>Zoom in</span></button></li>
+              <li><button type="button" data-go="1"><i></i><span>Shapes and icons</span></button></li>
+              <li><button type="button" data-go="2"><i></i><span>Share just one part</span></button></li>
+              <li><button type="button" data-go="3"><i></i><span>Take a break</span></button></li>
+            </ol>
+          </div>
+          <div class="wrap do-deck">
+            {/* Four things the live stage cannot show. Every scene is the shared engine's (shared/scenes.js); main.js
+                 fills these frames and plays them. */}
+            <article class="card">
+              <div class="frame frame-shot"><div class="shot" data-scene="zoom" role="img" aria-label="Zoom in: the screen zooms in where the pointer is, with a small map in the corner."></div></div>
+              <div class="card-text">
+                <div class="card-title"><h3>Zoom in</h3><span class="keys" data-for="mac" role="img" aria-label="Control 1"><kbd>⌃</kbd><kbd>1</kbd></span>{windows && <><span class="keys" data-for="windows" role="img" aria-label="Control 1"><kbd>Ctrl</kbd><kbd>1</kbd></span></>}</div>
+                <p>Zoom in where your pointer is, so the small stuff is easy to read. A little map shows where you are.</p>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="frame frame-shot"><div class="shot" data-scene="shapes" role="img" aria-label="Shapes and icons: a database and a server are picked from the tools window and joined with an arrow."></div></div>
+              <div class="card-text">
+                <div class="card-title"><h3>Shapes and icons</h3><span class="keys" data-for="mac" role="img" aria-label="Command L"><kbd>⌘</kbd><kbd>L</kbd></span>{windows && <><span class="keys" data-for="windows" role="img" aria-label="Control L"><kbd>Ctrl</kbd><kbd>L</kbd></span></>}</div>
+                <p>More than 40 tools, with shapes and icons for servers, databases and the rest.</p>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="frame frame-shot"><div class="shot" data-scene="share" role="img" aria-label="Share just one part: one area of a wide screen opens in its own window."></div></div>
+              <div class="card-text">
+                <div class="card-title"><h3>Share just one part</h3></div>
+                <p>Put one area of a wide screen in its own window, then share that window.</p>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="frame frame-shot"><div class="shot" data-scene="break" role="img" aria-label="Take a break: a big countdown fills the screen."></div></div>
+              <div class="card-text">
+                <div class="card-title"><h3>Take a break</h3><span class="keys" data-for="mac" role="img" aria-label="Control 3"><kbd>⌃</kbd><kbd>3</kbd></span>{windows && <><span class="keys" data-for="windows" role="img" aria-label="Control 3"><kbd>Ctrl</kbd><kbd>3</kbd></span></>}</div>
+                <p>A big countdown on the screen, so everyone knows when to come back.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* 3. Good to know */}
+    <section class="know wrap" aria-labelledby="know-title">
+      <h2 id="know-title" data-rise>Good to know</h2>
+      <dl class="know-grid depth">
+        <div>
+          <dt>Will people on my call see my drawings?</dt>
+          <dd>Yes, if you share your whole screen. If you share a single window they might not, so ask someone what they see.</dd>
+        </div>
+        <div>
+          <dt>Does it record my screen?</dt>
+          <dd>No. Your drawings, your screen and what you type stay on your computer.</dd>
+        </div>
+        <div>
+          <dt>Is it really free?</dt>
+          <dd>Yes. All tools are free and the code is open source. If you like it, there's a coffee button.</dd>
+        </div>
       </dl>
-      <p>Default keys. Esc finishes an edit first. Drawings stay visible.</p>
-    </div>
-  </section>
-  <RegionSharing/>
-  <section class="simple-install wrap" id="install" aria-labelledby="install-title">
-    <span id="pricing" class="screen-reader-only" aria-hidden="true"></span>
-    <div class="install-copy" data-reveal="mark" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
-      <p class="eyebrow">All tools are free and open source.</p>
-      <h2 id="install-title">Make your <span class="install-mark">first mark.<Scribble kind="ellipse" class="install-ellipse"/></span></h2>
-      {/* With a published Microsoft Store listing (spec 013, WIN-DST-02 and WIN-DST-08), both systems are offered, the
-          visitor's own by default, with a switch for the other (scripts/platform.ts). */}
-      {windows && <PlatformSwitch label="Install on"/>}
-      <div class="install-choices">
-        <div class="install-choice" data-platform-part={windows ? "mac" : undefined}>
-          <a class="button download-action" href={download} data-download={release ? "" : undefined}>
-            <SiteIcon name="download"/>{release ? "Download for Mac" : "View downloads"}<Scribble kind="ring" class="button-ring"/>
-          </a>
-          <p class="install-needs">{intel
-            ? <>Needs macOS 14 or later, on an <span class="nowrap">Apple Silicon or Intel Mac.</span></>
-            : <>Needs macOS 14 or later and an <span class="nowrap">Apple M-series chip.</span></>}</p>
-          {release && <p class="install-version">Version {release.releaseVersion} · <a href={releasePageURL(release)}>Release notes</a></p>}
-          {/* Homebrew is for Macs only, so with both systems it stays with the Mac download, as winget does with Windows. */}
-          {windows && <HomebrewCommand/>}
+    </section>
+
+    {/* 4. Coffee */}
+    <section class="coffee wrap" aria-labelledby="coffee-title" data-through>
+      <div class="panel" data-tilt>
+        <div class="coffee-copy">
+          <h2 id="coffee-title" data-rise>Free, but I won't say no to a coffee.</h2>
+          <p>If Annotator saved your demo, you can buy me one. It's optional and it doesn't unlock anything.</p>
+          <a class="bmc btn-coffee" href={supportURL}><svg viewBox="0 0 35 50" aria-hidden="true"><use href="#bmc-cup"/></svg><span>Buy me a coffee</span></a>
+        </div>
+        <div class="cup" aria-hidden="true">
+          <svg viewBox="0 0 240 220">
+            <ellipse class="cup-shadow" cx="112" cy="198" rx="86" ry="10"/>
+            <g class="steam"><path d="M92 72c-9-10 9-18 0-30"/><path d="M114 66c-10-11 10-20 0-34"/><path d="M136 72c-9-10 9-18 0-30"/></g>
+            <g class="cup-body">
+              <path class="cup-handle" d="M162 112h10a22 22 0 0 1 0 44h-16"/>
+              <path class="cup-mug" d="M56 92v44a46 46 0 0 0 46 46h20a46 46 0 0 0 46-46V92"/>
+              <ellipse class="cup-rim" cx="112" cy="92" rx="56" ry="11"/>
+              <ellipse class="cup-coffee" cx="112" cy="94" rx="47" ry="7"/>
+              <path class="cup-saucer" d="M40 190h144"/>
+            </g>
+            <path class="cup-ring" pathLength="1" d="M30 150c-6-70 60-126 120-108 62 18 76 100 30 142-44 40-140 34-150-34z"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    {/* 5. Install */}
+    <section class="install wrap" id="install" aria-labelledby="install-title">
+      <h2 id="install-title" data-rise>Get Annotator</h2>
+      <div class="platforms depth" data-count={windows ? 2 : 1}>
+        <div class="platform" data-os="mac" data-tilt>
+          <h3>Mac</h3>
+          <p class="req">{intel ? "macOS 14 or later, on Apple Silicon or Intel." : "macOS 14 or later, on Apple Silicon."} It lives in your menu bar.</p>
+          <a class="btn btn-accent download-mac" href={macURL} data-download={release ? "" : undefined}>Download for Mac <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
+          {release && <p class="version">Version {release.releaseVersion} · <a href={releasePageURL(release)}>Release notes</a></p>}
+          <div class="command">
+            <p data-label="Or use Homebrew:">Or use Homebrew:</p>
+            <button type="button" class="chip" data-copy aria-label="Copy the Homebrew command">Copy</button>
+            <code>brew install --cask dorlugasigal/annotator/annotator</code>
+          </div>
         </div>
         {windows && (
-          <div class="install-choice" data-platform-part="windows">
-            {/* The availability line with its Store link counts as a release label (spec 007's reading budget). A text-only
-                Store link: no Microsoft badge artwork, and no download count (the counting service counts only Mac downloads). */}
-            <div class="windows-availability">
-              <a class="button store-action" href={windows.listingURL}>Get it for Windows<span aria-hidden="true">↗</span><Scribble kind="ring" class="button-ring"/></a>
-              <p>Microsoft Store · Windows 11, version 22H2 or later · x64 and ARM64</p>
-            </div>
-            <div class="store-command" data-command-copy data-copied-message="Copied. Paste into Terminal and press Enter.">
-              <div class="store-command-row">
-                <div class="brew-code">
-                  {/* The ">" is drawn by CSS, so it is never copied. */}
-                  <pre><code data-copy-command><span>winget install --id <span class="brew-arg">{windows.storeId}</span> <span class="brew-arg">--source msstore</span></span></code></pre>
-                  <span class="copy-swipe" data-copy-swipe aria-hidden="true"></span>
-                </div>
-                <button type="button" data-copy-button hidden><Scribble kind="check" class="copy-check"/>Copy<span class="screen-reader-only"> winget command</span></button>
-              </div>
-              <p class="brew-status" data-copy-status role="status" hidden></p>
+          <div class="platform" data-os="windows" data-tilt>
+            <h3>Windows</h3>
+            <p class="req">Windows 11, version 22H2 or later. It lives in the system tray, near the clock.</p>
+            <a class="btn btn-accent store-link" href={windows.listingURL}>Get it for Windows <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a>
+            <div class="command">
+              <p data-label="Or use winget:">Or use winget:</p>
+              <button type="button" class="chip" data-copy aria-label="Copy the winget command">Copy</button>
+              <code>{windows.wingetCommand}</code>
             </div>
           </div>
         )}
       </div>
-    </div>
-    <div class="install-guide" data-platform-scope={windows ? "" : undefined} data-platform-default={windows ? "visitor" : undefined}>
-      <div data-platform-part={windows ? "mac" : undefined} data-install-guide="mac">
-        <InstallScene/>
-        <ol class="install-steps">
-          <li><span>{release?.diskImage ? "Download and open the disk image." : "Download and unzip."}</span></li>
-          <li><span>Drag Annotator to Applications.</span></li>
-          <li><span>Open it. Pick a tool. Draw. <small>It runs from the menu bar.</small></span></li>
-        </ol>
+      <div class="install-notes">
+        <p>Not sure yet? <a href="#try" data-try>Try the demo at the top of this page.</a></p>
+        <p>It isn't at version 1.0 yet, so you might hit a rough edge. <a href={sitePath("/support/")}>Tell me</a> if you do.</p>
       </div>
-      {windows && (
-        <div data-platform-part="windows" data-install-guide="windows">
-          <ol class="install-steps">
-            <li><span>Get it from the Microsoft Store or with winget.</span></li>
-            <li><span>Open Annotator from Start.</span></li>
-            <li><span>Pick a tool. Draw. <small>It runs from the system tray.</small></span></li>
-          </ol>
-        </div>
-      )}
-    </div>
-    {!windows && <HomebrewCommand/>}
-    <details class="install-more">
-      <summary>Screen sharing and updates</summary>
-      <p>Drawing needs no permissions. Zoom and live effects ask for screen access.</p>
-      <p>App or window sharing may miss overlays, so ask someone on the call what they see. Hiding or quitting Annotator removes covers, and blur isn’t secure redaction. Remove private details before you share.</p>
-      <p>Updating? Save your board and quit Annotator first. With Homebrew, run <code>brew update</code>, then <code>brew upgrade --cask dorlugasigal/annotator/annotator</code>.</p>
-      <p>Not sure which Mac you have? Choose Apple menu &gt; About This Mac.</p>
-      {windows && <p>On Windows, updates come from the Microsoft Store. To check your version of Windows, open Settings &gt; System &gt; About.</p>}
-      <a href={sitePath("/downloads/")}>Download details &amp; compatibility</a>
-    </details>
-  </section>
-  <details class="long-demo wrap">
-    <summary>See a longer walkthrough</summary>
-    <NativeDemo />
-  </details>
+    </section>
 </Page>
-<script>import "../scripts/install";</script>
+<script>import "../scripts/home.js";</script>

@@ -1,0 +1,412 @@
+/* The homepage: the hero and its live demo, What you can do, Good to know, the coffee and Get Annotator. */
+/* Words for one mode or the other: the stage carries data-mode. */
+[data-mode="use"] [data-when="draw"], [data-mode="draw"] [data-when="use"] { display: none; }
+
+/* 1. Hero ------------------------------------------------------------------------------------- */
+/* A short headline, one line and the buttons: a strip that leaves the first screen to the stage. */
+.hero { padding-top: 30px; }
+.hero-top { display: grid; gap: 24px; }
+/* One line where it fits, two where it does not. */
+h1 { font-size: clamp(44px, 11.6vw, 84px); line-height: 1; font-weight: 720; letter-spacing: -.04em; }
+/* The last word is marked by the drawing engine, in the accent (scripts/home.js). Its layer reaches a little past the words
+   so the mark is never cut, and takes no input. */
+.hero-words { position: relative; }
+.hero-word { display: inline-block; margin-left: .22em; white-space: nowrap; }
+.hero-ink { position: absolute; inset: -36px -48px -20px -36px; pointer-events: none; }
+.hero-ink > .ink-layer { --ink-highlight-blend: var(--blend); }
+.hero-line { margin-top: 16px; font-size: clamp(19px, 2.5vw, 24px); line-height: 1.35; color: var(--muted); }
+.get { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 12px; }
+.get-more { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
+.quiet { font-size: 16px; font-weight: 500; text-decoration: none; background: var(--accent-grad) 0 100% / 0% 2px no-repeat, linear-gradient(var(--line-strong), var(--line-strong)) 0 100% / 100% 1.5px no-repeat; transition: background-size 520ms var(--ease-out); }
+/* The quiet download link draws its underline in the gradient, left to right, as a pen would. */
+.quiet:is(:hover, :focus-visible) { background-size: 100% 2px, 100% 1.5px; }
+.get small { font-size: 15px; color: var(--muted); }
+/* The stage's heading is the page's invitation: a live dot, the words, and a drawn arrow down to the stage. On a
+   narrow screen its two sentences take a line each. */
+.stage-title { display: flex; align-items: center; gap: 12px; margin-top: 34px; font: 660 clamp(24px, 3vw, 31px)/1.15 var(--display); letter-spacing: -.022em; }
+.stage-title > span > span { display: block; white-space: nowrap; }
+.stage-title i { flex: none; align-self: flex-start; width: 11px; height: 11px; margin-top: .38em; border-radius: 50%; background: var(--accent-grad); }
+.stage-title svg { flex: none; align-self: flex-end; margin-bottom: -14px; fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The stage: a desk of small working apps, the ink layer and the app's toolbar, each on a plane of its own. */
+.stage { margin-top: 18px; }
+.stage-scene { position: relative; width: min(1320px, 100% - 2 * var(--stage-gutter)); margin-inline: auto; }
+.stage-shadow { position: absolute; inset: 10% 5% -3%; border-radius: 48px; background: var(--shade); filter: blur(42px); opacity: .14; pointer-events: none; }
+/* Its top band holds the mode; under the windows there is room to draw, then the toolbar. */
+.stage-plane { --tb-h: 84px; --tb-bottom: 10px; --tb-gap: 96px; --inset: 12px; --band: 52px; --tilt: 0; --lift: 0; position: relative; isolation: isolate; padding: var(--band) var(--inset) calc(var(--tb-h) + var(--tb-bottom) + var(--tb-gap)); }
+/* The desk is a quiet dotted surface, so the room around the windows reads as room to draw. */
+.desk-panel { position: absolute; inset: 0; z-index: -1; border-radius: var(--r-panel); background: radial-gradient(var(--line-strong) 1px, transparent 1.4px) 11px 11px / 22px 22px, var(--stage); box-shadow: var(--raise); }
+.stage-plane > .ink-layer { --ink-highlight-blend: var(--blend); --ink-text: 600 25px/1.1 "Caveat", "Bradley Hand", cursive; }
+/* While the script plays, Draw is shown but the stage takes no presses, so a finger can still scroll past it. */
+.stage-plane.is-scripted > .ink-layer { pointer-events: none; }
+.dock { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
+.dock > .ink-toolbar { pointer-events: auto; }
+.dock > .ink-toolbar:not(.is-placed) { bottom: var(--tb-bottom); }
+.stage-plane.is-wiping > .ink-layer { opacity: 0; transition: opacity 320ms ease; }
+
+.mode-chip { position: absolute; left: var(--inset); top: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 13px 0 10px; border-radius: 999px; background: var(--surface-3); color: var(--text); font: 600 13px/1 var(--sans); pointer-events: none; transition: background var(--t-1) ease, color var(--t-1) ease; }
+.mode-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background var(--t-1) ease; }
+.mode-chip b { font-weight: inherit; }
+[data-mode="draw"] > .mode-chip { background: var(--accent-fill); color: var(--on-accent); }
+[data-mode="draw"] > .mode-chip i { background: var(--on-accent); }
+/* The demo grows to fill the window once the visitor joins in, and scrolling brings it back (src/engine/stage.js). The
+   frame is the desk's own panel. The button that makes it small again sits in the top right corner. */
+:root { --stage-scrim: var(--page); }
+.stage-plane { --stage-radius: var(--r-panel); }
+.stage-shrink { --stage-shrink-top: 8px; --stage-shrink-right: var(--inset); background: var(--surface-3); color: var(--text); transition: background var(--t-1) ease; }
+.stage-shrink:hover { background: var(--line-strong); }
+/* "Draw here", the pill that follows the pointer over the stage until the visitor joins in: the accent, as on the
+   page's main button and the Drawing chip, in both themes. */
+.stage-invite { --stage-invite-bg: var(--accent-fill); --stage-invite-fg: var(--on-accent); padding: 9px 15px; font: 650 14px/1 var(--sans); box-shadow: inset 0 1px 0 var(--sheen), 0 12px 24px -10px var(--accent-shadow), 0 4px 10px -4px var(--dip); }
+/* With drawings and tools hidden, nothing of them stays on the stage, as in the app. The one way back for a mouse is
+   this small button in the corner. */
+.stage-plane[data-hidden] > .dock > .ink-toolbar { visibility: hidden; pointer-events: none; }
+.stage-show { position: absolute; right: 12px; bottom: 12px; z-index: 110; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: var(--surface-3); color: var(--muted); cursor: pointer; transition: color var(--t-1) ease, background var(--t-1) ease; }
+.stage-show[hidden] { display: none; }
+.stage-show:hover { color: var(--text); }
+.stage-show:focus-visible { border-radius: 50%; }
+.stage-show svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+/* The scripted pointer's click: the app's ring, where the click was (scripts/home.js). */
+/* The stage's edge lights up once when the visitor is handed the pen. */
+.stage-pulse { position: absolute; inset: 0; z-index: 1; border-radius: var(--r-panel); box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 8px var(--accent-soft); opacity: 0; pointer-events: none; }
+.stage-plane.is-cued > .stage-pulse { animation: cue 1500ms ease-out; }
+@keyframes cue { 0% { opacity: 0; } 16%, 52% { opacity: 1; } 100% { opacity: 0; } }
+
+.desk-windows { display: grid; gap: 12px; align-items: start; width: min(100%, 1040px); margin-inline: auto; }
+.win { position: relative; overflow: hidden; border-radius: 14px; background: var(--win); box-shadow: var(--float); transform: translate(var(--dx, 0px), var(--dy, 0px)); }
+.win.is-moving { box-shadow: var(--float), 0 30px 46px -26px var(--shade); }
+.win-bar { position: relative; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-bottom: 1px solid var(--line); cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+.is-moving > .win-bar { cursor: grabbing; }
+.win-bar:focus-visible { outline-offset: -3px; border-radius: 12px 12px 4px 4px; }
+.win-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
+.win-bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.desk-windows button { -webkit-tap-highlight-color: transparent; }
+.desk-windows .is-pressed, .desk-windows button:active:not(:disabled) { transform: scale(.94); }
+
+/* The sample settings: a short sidebar, three switches and a Save button. */
+.settings { display: grid; grid-template-columns: minmax(0, 1fr); }
+.set-side { display: flex; gap: 4px; padding: 10px 12px 0; }
+.set-side button { height: 30px; padding: 0 11px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: 500 13.5px/1 var(--sans); white-space: nowrap; cursor: pointer; transition: background var(--t-1) ease, color var(--t-1) ease; }
+.set-side button:hover { color: var(--text); }
+.set-side button[aria-pressed="true"] { background: var(--surface-3); color: var(--text); font-weight: 600; }
+.set-main { min-width: 0; padding: 12px 18px 16px; }
+.set-title { font: 700 19px/1.15 var(--display); letter-spacing: -.015em; }
+.set-rows { margin-top: 8px; }
+.set-rows li { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 46px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.set-rows li:last-child { border-bottom: 0; }
+.switch { position: relative; flex: none; width: 42px; height: 24px; padding: 0; border: 0; border-radius: 999px; background: var(--line-strong); cursor: pointer; transition: background var(--t-1) ease; }
+.switch i { position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface-1); box-shadow: 0 1px 3px var(--dip); transition: transform var(--t-1) var(--ease-out); }
+.switch[aria-checked="true"] { background: var(--text); }
+.switch[aria-checked="true"] i { transform: translateX(18px); background: var(--page); }
+.switch:focus-visible { border-radius: 999px; }
+.set-blank { display: grid; gap: 14px; padding: 14px 0 12px; }
+.set-blank[hidden] { display: none; }
+.set-blank i { height: 10px; border-radius: 6px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--line); }
+.set-blank i:nth-child(1) { width: 72%; } .set-blank i:nth-child(2) { width: 54%; } .set-blank i:nth-child(3) { width: 63%; }
+.set-foot { margin-top: 12px; }
+.set-save { display: inline-flex; align-items: center; height: 34px; padding: 0 16px; border: 0; border-radius: 9px; background: var(--text); color: var(--page); font: 600 14px/1 var(--sans); white-space: nowrap; cursor: pointer; transition: background var(--t-1) ease, color var(--t-1) ease, transform var(--t-1) var(--spring); }
+.set-save:focus-visible { border-radius: 9px; }
+.set-save[data-saved="true"] { background: var(--surface-3); color: var(--text); }
+.set-save [data-when-saved="yes"], .set-save[data-saved="true"] [data-when-saved="no"] { display: none; }
+.set-save[data-saved="true"] [data-when-saved="yes"] { display: inline; }
+
+.mail { padding: 14px 16px 14px; }
+.mail-from { display: flex; align-items: center; gap: 10px; }
+.avatar { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--surface-3); color: var(--text); font: 700 15px/1 var(--display); }
+.mail-from span { display: flex; flex-direction: column; min-width: 0; font-size: 14px; line-height: 1.35; }
+.mail-from em { align-self: flex-start; font-style: normal; font-size: 13px; color: var(--muted); }
+/* The thread keeps one height and scrolls inside, so a reply never pushes the stage around. */
+.thread { display: flex; flex-direction: column; gap: 6px; height: 112px; margin-top: 12px; padding-right: 2px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.thread li { flex: none; max-width: 90%; padding: 7px 11px; border-radius: 14px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.thread .them { align-self: flex-start; border-bottom-left-radius: 5px; background: var(--wash); }
+.thread .me { align-self: flex-end; border-bottom-right-radius: 5px; background: var(--text); color: var(--page); }
+.reply { display: flex; gap: 6px; margin-top: 10px; }
+.reply input { flex: 1; min-width: 0; height: 34px; padding: 0 13px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--well); font-size: 16px; }
+.reply input::placeholder { color: var(--muted); }
+.reply input:focus-visible { border-radius: 999px; outline-offset: 1px; }
+.reply button { flex: none; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: var(--text); color: var(--page); cursor: pointer; transition: transform var(--t-1) var(--spring); }
+
+.stage figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 28px; margin-top: 14px; }
+.stage-note { flex: 1 1 320px; max-width: 46em; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.stage-controls { display: flex; gap: 8px; margin-left: auto; }
+#stage-done[hidden] { display: inline-flex; visibility: hidden; }
+#stage-replay { min-width: 96px; }
+
+/* 2. What you can do -------------------------------------------------------------------------- */
+.do-head { display: grid; gap: 18px; }
+.do-tabs { display: none; }
+.do-deck { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+.card { position: relative; grid-column: 1 / -1; display: flex; flex-direction: column; gap: 18px; min-width: 0; padding: 14px; border-radius: var(--r-panel); background: var(--surface-1); box-shadow: var(--raise); }
+.card-text { padding: 0 6px 8px; }
+.card-text p { max-width: 30em; margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--muted); }
+/* The item's key in the app, for the visitor's platform, as a pair of keycaps beside the title. */
+.card-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.keys { display: inline-flex; gap: 4px; }
+.keys kbd { min-width: 26px; height: 26px; padding: 0 7px; border-radius: 7px; background: var(--surface-2); box-shadow: inset 0 -1.5px 0 var(--line-strong), 0 0 0 1px var(--line-strong); color: var(--muted); font: 600 13px/26px var(--sans); text-align: center; }
+/* Every visual is one of the shared engine's scenes. It fills its frame edge to edge and takes the frame's corners;
+   its inside is the engine's own. */
+.frame { position: relative; overflow: hidden; aspect-ratio: 4 / 3; border-radius: calc(var(--r-panel) - 12px); background: var(--well); box-shadow: 0 0 0 1px var(--line); container-type: size; }
+.shot { position: relative; width: 100%; height: 100%; border-radius: inherit; }
+
+/* 3. Good to know ----------------------------------------------------------------------------- */
+.know-grid { display: grid; gap: 0; margin-top: 28px; border-top: 1px solid var(--line); }
+.know-grid > div { position: relative; padding: 22px 0 24px 26px; border-bottom: 1px solid var(--line); }
+.know-grid > div::before { content: ""; position: absolute; left: 2px; top: 30px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-grad); }
+.know-grid dt { font: 680 21px/1.2 var(--display); letter-spacing: -.012em; text-wrap: balance; }
+.know-grid dd { max-width: 32em; margin-top: 8px; font-size: 17px; line-height: 1.55; color: var(--muted); }
+
+/* 4. Coffee ----------------------------------------------------------------------------------- */
+/* The cup waits off stage until scripts/home.js brings it in with the app's Pop. */
+.motion .cup.awaits { opacity: 0; }
+.coffee .panel { display: grid; gap: 8px; align-items: center; padding: 30px 22px 22px; }
+.coffee-copy p { max-width: 30em; margin-top: 14px; color: var(--muted); }
+.coffee-copy .bmc { margin-top: 24px; }
+.cup { justify-self: center; width: min(230px, 64%); }
+.cup svg { display: block; width: 100%; overflow: visible; fill: none; stroke: var(--text); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.cup-mug, .cup-rim { fill: var(--surface-2); }
+/* The coffee's surface, seen from a little above, in the accent. */
+.cup-coffee { fill: url(#accent-ink); stroke: none; opacity: .9; }
+.cup-shadow { fill: var(--shade); opacity: .16; stroke: none; }
+.steam path { stroke: var(--faint); stroke-width: 4; transform-box: fill-box; transform-origin: 50% 100%; }
+.cup-ring { stroke: var(--accent); stroke-width: 4; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--t-3) var(--ease-in-out); }
+.coffee:has(.btn-coffee:is(:hover, :focus-visible)) .cup-ring { stroke-dashoffset: 0; }
+.cup-body { transform-box: fill-box; transform-origin: 50% 100%; transition: transform var(--t-2) var(--ease-out); }
+.coffee:has(.btn-coffee:is(:hover, :focus-visible)) .cup-body { transform: rotate(-4deg); }
+
+/* 5. Get Annotator ---------------------------------------------------------------------------- */
+.platforms { display: grid; gap: 16px; margin-top: 28px; }
+.platform { position: relative; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 26px 22px; border-radius: var(--r-panel); background: var(--surface-1); box-shadow: var(--raise); }
+:root[data-platform="windows"] .platform[data-os="windows"] { order: -1; }
+.platform h3 { font-size: 28px; }
+.req { max-width: 26em; margin-top: 8px; font-size: 16px; color: var(--muted); }
+.platform .btn { margin-top: 20px; }
+/* Above the card's pointer light (data-tilt), so the light never washes out the button's words. */
+.platform .btn, .platform .command { z-index: 3; }
+/* The visitor's own platform gets the gradient button; the other one an outline. */
+/* On hover the outline fills with the gradient, wiping in from the left, and the words turn dark on it. */
+:is(:root:not([data-platform="windows"]) .platform[data-os="windows"], :root[data-platform="windows"] .platform[data-os="mac"]) .btn-accent { color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+:is(:root:not([data-platform="windows"]) .platform[data-os="windows"], :root[data-platform="windows"] .platform[data-os="mac"]) .btn-accent::before { clip-path: inset(0 100% 0 0 round 999px); }
+:is(:root:not([data-platform="windows"]) .platform[data-os="windows"], :root[data-platform="windows"] .platform[data-os="mac"]) .btn-accent:is(:hover, :focus-visible) { color: var(--on-accent); box-shadow: inset 0 0 0 1.5px transparent, var(--accent-glow); transition: transform var(--t-1) var(--spring), box-shadow var(--t-1) ease, color 160ms ease 140ms; }
+:is(:root:not([data-platform="windows"]) .platform[data-os="windows"], :root[data-platform="windows"] .platform[data-os="mac"]) .btn-accent:is(:hover, :focus-visible)::before { clip-path: inset(0 0 0 0 round 999px); }
+.command { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px 12px; align-self: stretch; margin-top: 26px; }
+/* The label has room for two lines, so "Copied…" never moves the command under it. */
+.command p { display: flex; align-items: flex-end; min-height: 2.9em; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.command code { grid-column: 1 / -1; padding: 12px 14px; border-radius: 12px; background: var(--well); box-shadow: inset 0 0 0 1px var(--line); font: 400 13px/1.5 var(--mono); overflow-wrap: anywhere; }
+.command .chip { height: 30px; min-width: 70px; font-size: 13.5px; }
+.install-notes { display: grid; gap: 8px; margin-top: 26px; font-size: 16px; line-height: 1.5; color: var(--muted); }
+.install-notes a { color: var(--text); font-weight: 500; text-decoration-color: var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: .25em; }
+
+/* Wider screens ------------------------------------------------------------------------------- */
+@media (max-width: 759px) {
+  /* On a phone the stage is taller than the screen, so the way out of drawing stays in reach. */
+  #stage-done:not([hidden]) { position: fixed; left: 50%; bottom: 14px; z-index: 1200; translate: -50% 0; height: 44px; padding: 0 20px; border-color: transparent; background: var(--text); color: var(--page); box-shadow: 0 10px 24px -8px var(--dip); }
+  /* While the frame is grown the toolbar is at the bottom of the screen, with its own Draw button to leave drawing. */
+  :root:has(#desk[data-stage]:not([data-stage="small"])) #stage-done:not([hidden]) { visibility: hidden; }
+}
+@media (min-width: 600px) {
+  .hero { padding-top: 40px; }
+  .stage-plane { --tb-h: 113px; --tb-bottom: 14px; --tb-gap: 104px; --inset: 30px; --band: 56px; }
+  .mode-chip { top: 14px; }
+  .stage-shrink { --stage-shrink-top: 10px; }
+  .stage-plane > .ink-layer { --ink-text: 600 30px/1.1 "Caveat", "Bradley Hand", cursive; }
+  /* Stacked, the message sits to the right under the settings, so the arrow has room to come up to them. */
+  .win-mail { justify-self: end; width: 58%; margin-top: 26px; }
+  .settings { grid-template-columns: 150px minmax(0, 1fr); }
+  .set-side { flex-direction: column; gap: 2px; padding: 12px 10px; border-right: 1px solid var(--line); }
+  .set-side button { width: 100%; text-align: left; }
+  .set-main { padding: 14px 22px 18px; }
+  .reply input { font-size: 14px; }
+  .card { grid-column: span 6; padding: 16px; }
+  .frame { aspect-ratio: 16 / 10; }
+  .stage-title { margin-top: 44px; }
+  .stage-title > span > span { display: inline; }
+  .stage-title i { align-self: center; margin-top: 0; }
+  .coffee .panel { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; padding: 44px 40px; }
+  .cup { width: min(260px, 100%); }
+  .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .platform { padding: 32px; }
+  .command p { min-height: 0; }
+}
+@media (min-width: 900px) {
+  /* Side by side: the settings on the left, the message lower on the right. */
+  .desk-windows { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(48px, 8vw, 120px); width: min(100%, 1000px); }
+  .win-mail { justify-self: stretch; width: auto; margin-top: 96px; }
+  .card .frame { flex: 1 1 auto; }
+  .know-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 40px; border-bottom: 1px solid var(--line); }
+  .know-grid > div { border-bottom: 0; padding-bottom: 28px; }
+  .coffee .panel { padding: 56px 64px; }
+  .platform { padding: 40px; }
+  .install-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .install-notes p { padding-inline: 40px; }
+}
+@media (min-width: 1016px) {
+  .stage-plane { --tb-h: 145px; --tb-bottom: 14px; --tb-gap: 104px; --inset: 36px; }
+  .set-title { font-size: 21px; }
+  .set-rows li { min-height: 50px; }
+}
+@media (min-width: 1180px) {
+  /* Wide: the headline and its line on the left, the buttons on the right, on one base line. */
+  .hero { padding-top: 26px; }
+  .stage-plane { --tb-gap: 84px; --inset: 40px; }
+  .hero-top { grid-template-columns: minmax(0, 1fr) 392px; gap: 40px; align-items: end; }
+  .hero-side { padding-bottom: 4px; }
+  .get, .get-more { justify-content: flex-end; }
+  .stage-title { margin-top: 40px; }
+}
+
+
+/* Motion (see site.css: everything that moves is under .motion) --------------------------------- */
+/* The first screen arrives in order, inside 1.2 s: the headline's words, the ring drawn round "screen", the line and
+   the buttons, then the invitation and the stage settling with its toolbar. */
+.motion .hero h1 .w { transition: transform 620ms var(--ease-out), opacity 360ms ease; transition-delay: calc(var(--i) * 60ms); }
+.motion .hero-line { animation: rise 560ms var(--ease-out) 160ms backwards; }
+.motion .get { animation: rise 560ms var(--ease-out) 240ms backwards; }
+.motion .stage-title { animation: rise 560ms var(--ease-out) 320ms backwards; }
+.motion .stage-title path { stroke-dasharray: 90; animation: draw-in 480ms var(--ease-in-out) 700ms backwards; }
+/* The live dots breathe: a soft ring that swells and fades (transform and opacity only). The one by the stage rests
+   while the hero is off screen. */
+.stage-title i { position: relative; }
+.stage-title i::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; background: var(--accent-soft); opacity: 0; }
+.motion .stage-title i::after { animation: beat 2600ms var(--ease-in-out) infinite; }
+.motion .hero.is-away .stage-title i::after { animation-play-state: paused; }
+.motion .stage-scene { animation: stage-in 820ms var(--ease-out) 340ms backwards; }
+.motion .stage figcaption { animation: rise 560ms var(--ease-out) 520ms backwards; }
+.motion .dock > .ink-toolbar { animation: toolbar-in 600ms var(--ease-out) 580ms backwards; }
+@keyframes draw-in { from { stroke-dashoffset: 90; } }
+@keyframes stage-in { from { opacity: 0; transform: translateY(48px) scale(.985); } }
+@keyframes toolbar-in { from { opacity: 0; transform: translateY(22px) scale(.96); } }
+
+/* The stage leans back and comes flat as it is scrolled up the screen. scripts/home.js writes --tilt (1 leaning, 0 flat)
+   and --lift (0 at both ends, 1 half way), and takes the 3D away again once the plane is flat. */
+.motion .stage-scene { perspective: 1500px; perspective-origin: 50% 20%; }
+/* Perspective keeps the scene in a layer of its own, under the header. The desk is flat while its frame is grown, so
+   the perspective goes and the frame can rise above the page. */
+.motion .stage-scene:has(> [data-stage]:not([data-stage="small"])) { perspective: none; }
+.motion .stage-shadow { opacity: calc(.14 + var(--tilt, 0) * .3); transform: translateY(calc(var(--tilt, 0) * 54px)) scale(calc(1 - var(--tilt, 0) * .07)); }
+.motion .stage-plane:not(.is-flat) { isolation: auto; transform-style: preserve-3d; transform-origin: 50% 88%; transform: rotateX(calc(var(--tilt) * var(--tilt-deg))) scale(calc(1 - var(--tilt) * .045)); will-change: transform; }
+.motion .stage-plane:not(.is-flat) > .desk-panel { z-index: auto; transform: translateZ(-1px); }
+.motion .stage-plane:not(.is-flat) > .desk-windows { transform-style: preserve-3d; }
+.motion .stage-plane:not(.is-flat) .win { transform: translate3d(var(--dx, 0px), var(--dy, 0px), calc(var(--lift) * var(--z) * var(--depth))); }
+.win-settings { --z: 14px; }
+.win-mail { --z: 26px; }
+.motion .stage-plane:not(.is-flat) > .ink-layer { transform: translateZ(calc((var(--tilt) * 8px + var(--lift) * 44px) * var(--depth))); }
+.motion .stage-plane:not(.is-flat) > .mode-chip { translate: 0 0 calc(var(--lift) * 30px * var(--depth)); }
+.motion .stage-plane:not(.is-flat) > .dock { transform: translateZ(calc((var(--tilt) * 30px + var(--lift) * 70px) * var(--depth))); }
+
+/* The pinned deck: one card faces front, the next waits below leaning back, the ones you have seen go back into a
+   pile. scripts/home.js writes --u (how far a card still has to come: 0 front, 1 next) and --v (how far it has gone). */
+.motion .do-track { --seg: 56svh; height: calc(100svh + 3 * var(--seg)); }
+.motion .do-pin { position: sticky; top: 0; padding-top: calc(var(--header-h) + 2.2svh); }
+.motion .do + section { position: relative; z-index: 1; }
+.motion .do-head { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.motion .do-tabs { display: flex; gap: 4px; }
+.do-tabs button { display: inline-flex; white-space: nowrap; align-items: center; gap: 0; height: 30px; padding: 0 5px; border: 0; border-radius: 999px; background: none; font: 500 14px/1 var(--sans); color: var(--muted); cursor: pointer; transition: background var(--t-1) ease, color var(--t-1) ease; }
+.do-tabs button:hover { color: var(--text); }
+.do-tabs button:focus-visible { border-radius: 999px; }
+.do-tabs i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
+/* Narrow screens show only the dots; the names stay for screen readers. */
+.do-tabs span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* One accent dot marks the current tab. scripts/home.js hops it from tab to tab: the move that links one card to the next. */
+.motion .do-tabs { position: relative; }
+.do-marker { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; pointer-events: none; transition: opacity var(--t-1) ease; }
+.do-marker.is-on { opacity: 1; }
+.do-marker > b { position: absolute; left: -5.5px; top: -5.5px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent-grad); }
+.motion .do-deck { --peek: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 20px; padding-top: calc(2 * var(--peek)); perspective: 1400px; perspective-origin: 50% 0%; }
+.motion .card { --u: 0; --v: 0; grid-area: 1 / 1; z-index: var(--i); transform-origin: 50% 0%; transform: translate3d(0, calc(var(--u) * (100% + 26px) - var(--v) * var(--peek)), calc((var(--v) * -150px - var(--u) * 60px) * var(--depth))) rotateX(calc(var(--u) * 24deg * var(--depth))); box-shadow: var(--raise), 0 34px 54px -40px var(--shade); will-change: transform; }
+.motion .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--scrim); opacity: calc(var(--v) * .46 + var(--u) * .24); pointer-events: none; }
+/* The frame gives way to a short window, so the card and its words always fit the screen it is pinned to. */
+.motion .card .frame { max-height: max(140px, 100svh - var(--header-h) - 330px); }
+
+/* A change of card, as one short piece of motion. The frame comes with the scroll (above). scripts/home.js marks a card
+   "is-current" once its frame has all but landed, and then, inside about 850 ms:
+     0 ms    the camera pushes in: the whole card, and more slowly the picture in it, come up to full size;
+     0 ms    an ink stroke in the accent sweeps across the frame and the picture is there behind it; the stroke
+             thins and lifts away as it leaves;
+     120 ms  the title is written in, letter by letter, each rising behind its word's mask;
+     260 ms  the line under it follows;
+     420 ms  a rough underline is drawn, the way the demo's pen draws.
+   A card that starts to leave gives all of it back in the reverse order in about 400 ms, and the stroke sweeps back
+   over the picture. Only transforms and opacity move, and every layer is one transition on that one class, so a
+   fast scroll or a run of clicks turns each of them round from wherever it is. */
+.motion .card { scale: .972; transition: scale 400ms var(--ease-in-out); }
+.motion .card.is-current { scale: 1; transition: scale 640ms var(--ease-out); }
+.motion .frame .shot { scale: 1.075; transition: scale 400ms var(--ease-in-out); }
+.motion .card.is-current .frame .shot { scale: 1; transition: scale 900ms var(--ease-out); }
+/* The ink wipe: a cover the color of the empty frame, a little wider than it, with the stroke over its leading
+   edge. At rest the stroke waits just outside the frame's left side. */
+.wipe { display: none; }
+.motion .wipe { display: block; position: absolute; inset: 0 -18% 0 0; z-index: 3; background: var(--well); translate: -13% 0; transition: translate 380ms var(--ease-in-out); pointer-events: none; }
+.motion .wipe b { position: absolute; right: 93%; top: -12%; width: 26%; height: 124%; border-radius: 46% 54% 50% 50% / 7% 5% 8% 6%; background: linear-gradient(190deg, var(--accent-stops)); box-shadow: 0 0 44px -8px var(--accent-shadow); transform-origin: 100% 50%; transform: skewX(-9deg); transition: scale 140ms ease, opacity 140ms ease; }
+/* A thinner streak beside it, as a loaded pen leaves. */
+.motion .wipe b::before { content: ""; position: absolute; right: 108%; top: 6%; width: 9%; height: 84%; border-radius: 50%; background: inherit; opacity: .75; }
+.motion .card.is-current .wipe { translate: 108% 0; transition: translate 640ms var(--ease-in-out); }
+.motion .card.is-current .wipe b { scale: .12 1; opacity: 0; transition: scale 300ms var(--ease-in-out) 350ms, opacity 240ms ease 410ms; }
+.motion .card h3 .tw { display: inline-block; white-space: nowrap; clip-path: inset(-.08em -.04em -.18em); }
+.motion .card h3 .tw > span { display: inline-block; translate: 0 114%; rotate: 9deg; transition: translate 240ms var(--ease-in-out) 100ms, rotate 240ms var(--ease-in-out) 100ms; }
+.motion .card.is-current h3 .tw > span { translate: 0 0; rotate: 0deg; transition: translate 420ms var(--ease-out) calc(120ms + var(--l) * 16ms), rotate 420ms var(--ease-out) calc(120ms + var(--l) * 16ms); }
+.motion .card .keys { opacity: 0; translate: 0 6px; transition: opacity 200ms ease, translate 200ms var(--ease-in-out); }
+.motion .card.is-current .keys { opacity: 1; translate: 0 0; transition: opacity 360ms ease 300ms, translate 360ms var(--ease-out) 300ms; }
+.motion .card-text p { opacity: 0; translate: 0 10px; transition: opacity 220ms ease 50ms, translate 220ms var(--ease-in-out) 50ms; }
+.motion .card.is-current .card-text p { opacity: 1; translate: 0 0; transition: opacity 420ms ease 260ms, translate 420ms var(--ease-out) 260ms; }
+/* The underline under the title is drawn by the engine (scripts/home.js), on a layer over the words. */
+.motion .card-text { position: relative; }
+/* Depth: while a card is on its way, its words trail the frame by a few pixels; they settle as it lands. */
+.motion .card-text { translate: 0 calc(var(--u) * 30px - var(--v) * 8px); }
+/* A soft light behind the deck. It glides to the side the current card's picture is on (scripts/home.js sets --lx to -1
+   or 1), which carries the eye from one card to the next. */
+.do-light { display: none; }
+.motion .do-light { display: block; position: absolute; left: 50%; top: 52%; width: min(880px, 92vw); aspect-ratio: 1.5; translate: calc(-50% + var(--lx, 0) * min(240px, 16vw)) -50%; background: radial-gradient(closest-side, var(--deck-light), transparent); pointer-events: none; transition: translate 900ms var(--ease-in-out); }
+.motion .do-head { position: relative; z-index: 1; }
+
+.motion .coffee, .motion .platforms { perspective: 900px; }
+
+/* The cup moves a little against its panel as the section passes. scripts/home.js writes --through (-1 below, 0 middle,
+   1 above). */
+.motion .cup { transform: translate3d(0, calc(var(--through, 0) * -22px * var(--depth)), 0); }
+
+/* A reply arrives in the thread. */
+.motion .thread .me { animation: bubble-in var(--t-2) var(--ease-out); }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(.92); } }
+
+/* The cup: steam rises while the section is on screen. */
+/* The steam rises slowly and softly while the section is on screen; it holds still for reduced motion. */
+.motion .steam path { opacity: 0; }
+.motion .coffee.is-live .steam path { animation: steam 5.6s ease-in-out infinite; }
+.motion .coffee.is-live .steam path:nth-child(2) { animation-delay: -1.9s; }
+.motion .coffee.is-live .steam path:nth-child(3) { animation-delay: -3.7s; }
+@keyframes steam { 0% { opacity: 0; transform: translateY(8px) scaleY(.9); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px) scaleY(1.05); } }
+
+@media (min-width: 900px) {
+  .motion .do-tabs button { gap: 7px; padding: 0 12px; }
+  .motion .do-tabs span { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  .motion .do-tabs i { width: 7px; height: 7px; }
+  .do-marker > b { left: -4.5px; top: -4.5px; width: 9px; height: 9px; }
+  .motion .do-tabs [aria-current="true"] { background: var(--text); color: var(--page); }
+  .motion .do-head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .motion .do-deck { --peek: 19px; width: min(1120px, 100% - 2 * var(--gutter)); }
+  .motion .card { padding: 22px; gap: 22px; }
+  .motion .card .frame { max-height: max(200px, 100svh - var(--header-h) - 400px); }
+  .motion .card-text { padding: 0 8px 6px; }
+  .motion .card-text h3 { font-size: clamp(28px, 2.9vw, 38px); letter-spacing: -.025em; }
+  .motion .card-text p { margin-top: 12px; font-size: 19px; }
+}
+/* A wide screen that is not tall shows a card as picture and words side by side; a tall one stacks them, so the
+   card fills the screen it is pinned to. */
+@media (min-width: 900px) and (max-height: 1049px), (min-width: 1280px) {
+  .motion .card { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr); align-items: center; gap: 30px; padding: 26px; }
+  .motion .card:nth-child(even) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.62fr); }
+  .motion .card:nth-child(even) .frame { order: 2; }
+  .motion .card .frame { max-height: max(200px, 100svh - var(--header-h) - 300px); }
+  .motion .card-text { padding: 0 8px; }
+}
+
+/* The numbered counters are Buy Me a Coffee yellow on this page, so their number is dark to stay readable. */
+#desk .ink-counter { color: #10141c; }
+
+/* The version line under the Mac download, when a release is published. */
+.version { margin-top: 12px; font-size: 14px; color: var(--muted); }
+.version a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: .22em; }
+/* With one system to offer, its card has the row to itself. */
+@media (min-width: 600px) { .platforms[data-count="1"] { grid-template-columns: minmax(0, 1fr); } }
+/* Copying needs scripts. */
+html:not(.js) [data-copy] { visibility: hidden; }
