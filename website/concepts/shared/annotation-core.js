@@ -1,6 +1,7 @@
 // A JavaScript port of the parts of Annotator's core that the web demo uses, kept free of the DOM so Node can test it
 // against the app's conformance vectors (test-core.mjs). Each section names the Swift source it follows, under
 // apps/macos/Sources. Points are [x, y]; rectangles are { x, y, width, height }; angles are radians.
+import { SYSTEM_SHAPE_PATHS } from "./system-shapes.js";
 
 // Geometry.swift ---------------------------------------------------------------------------------
 export const P = {
@@ -425,7 +426,13 @@ function diamondPath(f, cornerRadius) {
   roundedDiamondCorners(f, cornerRadius).forEach((corner, i) => { path.push([i ? "line" : "move", [corner.entry]], ["quad", [corner.control, corner.exit]]); });
   return [...path, ["close"]];
 }
+// SystemDiagramGeometry.path: a system-design shape's outline, fitted to its symbol frame.
+function systemShapePath(el) {
+  const { bounds: [x, y, width, height], path } = SYSTEM_SHAPE_PATHS[el.tool], b = symbolFrame(el), sx = b.width / width, sy = b.height / height;
+  return path.map(([kind, points]) => (points ? [kind, points.map((p) => [b.x + (p[0] - x) * sx, b.y + (p[1] - y) * sy])] : [kind]));
+}
 export function canonicalShape(el) {
+  if (SYSTEM_SHAPE_PATHS[el.tool]) return systemShapePath(el);
   if (el.tool === "ellipse") return ellipsePath(el.frame);
   if (el.tool === "diamond") return diamondPath(el.frame, el.style.cornerRadius);
   const kind = Tool.polygonKind(el.tool);
@@ -543,6 +550,97 @@ export function pathFor(el) {
 }
 const n = (v) => Math.round(v * 1000) / 1000;
 export const pathData = (path) => path.map(([kind, points]) => (kind === "close" ? "Z" : `${{ move: "M", line: "L", quad: "Q", cubic: "C" }[kind]}${points.map((p) => `${n(p[0])} ${n(p[1])}`).join(" ")}`)).join("");
+
+// Geometry.swift: Viewport, and ZoomFollow.swift: screen zoom and its map ---------------------------
+// A viewport is { output, source }: the part `source` of the display is shown over the whole of `output`.
+const invalidGeometry = () => new Error("The drawing contains invalid coordinates or dimensions.");
+const within = (value, low, high) => Math.min(high, Math.max(low, value));
+const usable = (display) => R.isValid(display) && display.width > 0 && display.height > 0;
+export const Viewport = {
+  make(output, source) {
+    if (!(R.isValid(output) && R.isValid(source) && output.width > 0 && output.height > 0 && source.width > 0 && source.height > 0)) throw invalidGeometry();
+    return { output: { ...output }, source: { ...source } };
+  },
+  // The part around the pointer that keeps what is under the pointer under it.
+  cursorAnchored(display, factor, cursor) {
+    if (!(Number.isFinite(factor) && factor >= 1 && factor <= 16 && P.isFinite(cursor) && usable(display))) throw invalidGeometry();
+    const x = within(cursor[0], display.x, R.maxX(display)), y = within(cursor[1], display.y, R.maxY(display));
+    return Viewport.make(display, { x: display.x + (x - display.x) * (1 - 1 / factor), y: display.y + (y - display.y) * (1 - 1 / factor), width: display.width / factor, height: display.height / factor });
+  },
+  sourcePoint: ({ output, source }, p) => [source.x + (p[0] - output.x) * source.width / output.width, source.y + (p[1] - output.y) * source.height / output.height],
+  outputPoint: ({ output, source }, p) => [output.x + (p[0] - source.x) * output.width / source.width, output.y + (p[1] - source.y) * output.height / source.height],
+};
+// Screen zoom holds still while the pointer moves inside it, and slides when the pointer comes near an edge.
+export const ZoomFollow = {
+  minimumSlidingFactor: 1.001, maximumStep: 0.1,
+  edgeZone: (length) => Math.min(96, Math.max(24, length * 0.08)),
+  // The zoom of `factor` from the part shown before: the point under the pointer stays under it.
+  viewport(previous, display, factor, pointer) {
+    if (!(previous && R.isValid(previous) && previous.width > 0 && previous.height > 0)) return Viewport.cursorAnchored(display, factor, pointer);
+    if (!(Number.isFinite(factor) && factor >= 1 && factor <= 16 && P.isFinite(pointer) && usable(display))) throw invalidGeometry();
+    const width = display.width / factor, height = display.height / factor;
+    const px = within(pointer[0], display.x, R.maxX(display)), py = within(pointer[1], display.y, R.maxY(display));
+    const x = previous.x + (px - display.x) * (previous.width - width) / display.width, y = previous.y + (py - display.y) * (previous.height - height) / display.height;
+    return Viewport.make(display, { x: Math.min(Math.max(x, display.x), R.maxX(display) - width), y: Math.min(Math.max(y, display.y), R.maxY(display) - height), width, height });
+  },
+  // How fast the zoomed part slides, in display points per second on each axis.
+  velocity(display, factor, pointer) {
+    if (!(Number.isFinite(factor) && factor > ZoomFollow.minimumSlidingFactor && factor <= 16 && P.isFinite(pointer) && usable(display))) return [0, 0];
+    const axis = (start, length, position) => {
+      const zone = ZoomFollow.edgeZone(length), value = within(position, start, start + length);
+      const low = within((start + zone - value) / zone, 0, 1), high = within((value - (start + length - zone)) / zone, 0, 1);
+      return (high * high - low * low) * length * 0.75 / Math.sqrt(factor);
+    };
+    return [axis(display.x, display.width, pointer[0]), axis(display.y, display.height, pointer[1])];
+  },
+  // The zoomed part after sliding for `elapsed` seconds (at most maximumStep), kept inside the display.
+  slide(viewport, pointer, elapsed) {
+    const display = viewport.output, source = viewport.source, speed = ZoomFollow.velocity(display, display.width / source.width, pointer);
+    const step = Number.isFinite(elapsed) ? within(elapsed, 0, ZoomFollow.maximumStep) : 0;
+    if (!((speed[0] !== 0 || speed[1] !== 0) && step > 0)) return viewport;
+    return Viewport.make(display, { x: Math.min(Math.max(source.x + speed[0] * step, display.x), R.maxX(display) - source.width),
+      y: Math.min(Math.max(source.y + speed[1] * step, display.y), R.maxY(display) - source.height), width: source.width, height: source.height });
+  },
+  // The zoomed part after the pointer moved by `delta` to `pointer`: a move toward an edge inside that edge's zone
+  // pushes it along as fast as the pointer moves on screen.
+  push(viewport, pointer, delta) {
+    const display = viewport.output, source = viewport.source, factor = display.width / source.width;
+    if (!(Number.isFinite(factor) && factor > ZoomFollow.minimumSlidingFactor && P.isFinite(pointer) && P.isFinite(delta))) return viewport;
+    const axis = (start, length, position, move) => {
+      const zone = ZoomFollow.edgeZone(length), value = within(position, start, start + length);
+      if (move > 0 && value > start + length - zone) return Math.min(move, value - (start + length - zone)) / factor;
+      if (move < 0 && value < start + zone) return -Math.min(-move, start + zone - value) / factor;
+      return 0;
+    };
+    const x = axis(display.x, display.width, pointer[0], delta[0]), y = axis(display.y, display.height, pointer[1], delta[1]);
+    if (x === 0 && y === 0) return viewport;
+    return Viewport.make(display, { x: Math.min(Math.max(source.x + x, display.x), R.maxX(display) - source.width),
+      y: Math.min(Math.max(source.y + y, display.y), R.maxY(display) - source.height), width: source.width, height: source.height });
+  },
+  slides(viewport, pointer) {
+    const next = ZoomFollow.slide(viewport, pointer, ZoomFollow.maximumStep);
+    return next.source.x !== viewport.source.x || next.source.y !== viewport.source.y;
+  },
+};
+// Screen zoom's map: a small picture of the whole display in a corner, with the zoomed part outlined.
+export const ZoomMap = {
+  inset: 16, cornerRadius: 10, borderWidth: 1, borderOpacity: 0.6, outlineWidth: 2, dimOpacity: 0.4, fadeDuration: 0.15, hoverOpacity: 0.2,
+  positions: { bottomRight: "Bottom right", bottomLeft: "Bottom left", topRight: "Top right", topLeft: "Top left", off: "Off" },
+  // The map's frame on a display, or null when the map is off or the display is too small for it.
+  frame(display, position = "bottomRight") {
+    if (position === "off" || !usable(display)) return null;
+    let width = Math.min(260, Math.max(140, display.width * 0.16)), height = width * display.height / display.width;
+    if (height > display.height * 0.3) { height = display.height * 0.3; width = height * display.width / display.height; }
+    if (!(width >= 80 && width + ZoomMap.inset * 2 <= display.width && height + ZoomMap.inset * 2 <= display.height)) return null;
+    const left = position === "bottomLeft" || position === "topLeft", top = position === "topLeft" || position === "topRight";
+    return { x: left ? display.x + ZoomMap.inset : R.maxX(display) - ZoomMap.inset - width, y: top ? display.y + ZoomMap.inset : R.maxY(display) - ZoomMap.inset - height, width, height };
+  },
+  // The zoomed part of `viewport`, drawn in a map of `map`.
+  zoomedArea({ output: display, source }, map) {
+    const scaleX = map.width / display.width, scaleY = map.height / display.height;
+    return { x: map.x + (source.x - display.x) * scaleX, y: map.y + (source.y - display.y) * scaleY, width: source.width * scaleX, height: source.height * scaleY };
+  },
+};
 
 // MotionCore.swift --------------------------------------------------------------------------------
 export const Motion = {

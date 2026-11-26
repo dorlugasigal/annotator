@@ -4,7 +4,7 @@
 // zoom lens, the pointer, fonts) are not run and are listed at the end.
 // Run: node website/concepts/shared/test-core.mjs
 import { P, Tool, contains, Stacking, LaserTrail, pathFor, canonicalShape, arrowHead, DragConstraint, Connector, anchorLocations, anchorPoint, symbolFrame,
-  polygonVertices, roundedDiamondCorners, resize, translate, selectionGeometry, CanvasDocument, Motion } from "./annotation-core.js";
+  polygonVertices, roundedDiamondCorners, resize, translate, selectionGeometry, CanvasDocument, Motion, Viewport, ZoomFollow, ZoomMap } from "./annotation-core.js";
 import { lines, json, element, differs, tally } from "./conformance.mjs";
 
 const results = tally(), skipped = [];
@@ -55,13 +55,14 @@ for (const v of lines("laser/trails.jsonl")) {
 }
 
 // geometry ---------------------------------------------------------------------------------------
-const PORTED_SHAPES = new Set(["rectangle", "ellipse", "diamond", "triangle", "hexagon", "star"]);
+const PORTED_SHAPES = new Set(["rectangle", "ellipse", "diamond", "triangle", "hexagon", "star",
+  "databaseStack", "server", "messaging", "web", "mobile", "desktop", "laptop", "document", "configuration", "loadBalancer", "apiGateway", "envelope", "cart", "bell"]);
 let unported = 0;
 for (const v of lines("geometry/shapes.jsonl")) {
   if (!PORTED_SHAPES.has(v.element.tool)) { unported++; continue; }
   results.check("geometry/shapes.jsonl", `${v.element.tool}, ${v.variant}`, attempt(() => differs(pathFor(element(v.element)), v.path.elements, 1e-6)));
 }
-skipped.push(`geometry/shapes.jsonl: ${unported} vectors for diagram shapes the web demo does not have (grid, axes, database, queue, person and the 14 system icons)`);
+skipped.push(`geometry/shapes.jsonl: ${unported} vectors for diagram shapes the web demo does not have (grid, axes, database, queue and person)`);
 for (const v of lines("geometry/strokes.jsonl")) results.check("geometry/strokes.jsonl", v.variant, attempt(() => differs(pathFor(element(v.element)), v.path.elements, 1e-6)));
 for (const v of lines("geometry/arrowheads.jsonl")) {
   const el = element(v.element), view = (head) => (head ? { kind: head.kind, tip: head.tip, direction: head.direction, length: head.length, side: head.side, base: head.base, left: head.left, right: head.right, polygon: head.polygon, hollow: head.hollow } : null);
@@ -110,7 +111,40 @@ for (const v of lines("geometry/transforms.jsonl")) {
   else problem = attempt(() => { const elements = v.elements.map(element); return differs(selectionGeometry(elements, new Set(elements.map((e) => e.id))), v.result, 1e-6); });
   results.check("geometry/transforms.jsonl", `${v.call} ${v.case ?? v.tool ?? v.element.tool}`, problem);
 }
-skipped.push("geometry: axis-ticks, ink-pressure, pointer-shapes, text (macOS fonts) and viewports (zoom, sharing) are not part of the web demo");
+// Screen zoom and its map (ZoomFollow.swift). A result is the viewport, or the Mac's error.
+{
+  const rect = (r) => ({ x: r.x, y: r.y, width: r.width, height: r.height });
+  // What the Mac records of a viewport: it, where two display points land in the source, and three source points on the display.
+  const view = (v) => { const d = v.output; return { output: rect(v.output), source: rect(v.source),
+    sourcePoints: [[d.x, d.y], [d.x + d.width / 2, d.y + d.height / 2], [d.x + d.width, d.y + d.height]].map((p) => Viewport.sourcePoint(v, p)),
+    outputPoints: [[v.source.x, v.source.y], [v.source.x + v.source.width / 2, v.source.y + v.source.height / 2]].map((p) => Viewport.outputPoint(v, p)) }; };
+  const outcome = (run, want, shape = view) => {
+    let got;
+    try { got = run(); } catch (error) { return want.error ? (error.message === want.error.message ? null : `threw "${error.message}", not "${want.error.message}"`) : `threw ${error.stack}`; }
+    return want.error ? "did not throw" : differs(shape(got), want.ok, 1e-6);
+  };
+  const number = (value) => (value == null ? NaN : value), pair = (p) => [number(p[0]), number(p[1])];
+  let checkedShape = false;
+  for (const v of lines("geometry/viewports.jsonl")) {
+    const display = v.display, factor = number(v.factor), name = `${v.call} ${JSON.stringify({ factor: v.factor, pointer: v.pointer ?? v.cursor, previous: v.previous, delta: v.delta, elapsed: v.elapsed, position: v.position, width: display.width })}`;
+    let problem;
+    if (v.call === "cursorAnchored") problem = outcome(() => Viewport.cursorAnchored(display, factor, pair(v.cursor)), v.result);
+    else if (v.call === "zoomFollow") problem = outcome(() => ZoomFollow.viewport(v.previous, display, factor, pair(v.pointer)), v.result);
+    else if (v.call === "zoomFollowPush") problem = outcome(() => ZoomFollow.push(ZoomFollow.viewport(null, display, factor, [display.x + display.width / 2, display.y + display.height / 2]), pair(v.pointer), pair(v.delta)), v.result);
+    else if (v.call === "zoomFollowVelocity") problem = differs(ZoomFollow.velocity(display, factor, pair(v.pointer)), v.result, 1e-6);
+    else if (v.call === "zoomFollowSlide") problem = outcome(() => {
+      const start = ZoomFollow.viewport(null, display, factor, [display.x + display.width / 2, display.y + display.height / 2]);
+      return { viewport: ZoomFollow.slide(start, pair(v.pointer), number(v.elapsed)), slides: ZoomFollow.slides(start, pair(v.pointer)) };
+    }, v.result, (got) => ({ viewport: view(got.viewport), slides: got.slides }));
+    else if (v.call === "zoomMap") {
+      const frame = ZoomMap.frame(display, v.position), zoomed = Viewport.cursorAnchored(display, 2.5, [display.x + 300, display.y + 200]);
+      problem = differs({ label: ZoomMap.positions[v.position], frame, zoomedArea: frame && v.zoomedArea ? ZoomMap.zoomedArea(zoomed, frame) : null }, { label: v.label, frame: v.frame, zoomedArea: v.zoomedArea }, 1e-6);
+    } else continue;
+    if (!checkedShape && v.result?.ok?.sourcePoints) { checkedShape = true; if (v.result.ok.sourcePoints.length !== 3 || v.result.ok.outputPoints.length !== 2) problem = "the vectors' viewport record has changed shape"; }
+    results.check("geometry/viewports.jsonl", name, problem);
+  }
+}
+skipped.push("geometry: axis-ticks, ink-pressure, pointer-shapes, text (macOS fonts) and the viewports of the zoom lens and region sharing are not part of the web demo");
 
 // editing ----------------------------------------------------------------------------------------
 // The Mac names the IDs it makes at random in the order they first appear; both sides are renamed the same way here.

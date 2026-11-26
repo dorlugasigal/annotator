@@ -31,6 +31,9 @@
 // Motion is the app's (app-motion.js): setCollapsed, shrink, expand and setHidden(hidden, { style, pill, animate })
 //   return promises. perform(steps, { cursor, showTool, anchored, local, resting, signal }) also takes the steps
 //   { mode }, { tool } or { pick }, { click }, { drag }, { type }, { hide } and { shrink } (see `story` below).
+//   A mark step with `app: true` ({ tool, from, to, app: true }) is made as the app makes it from a drag, clean
+//   and not hand-drawn; its tool may be any shape of the app, also "databaseStack", "server" and the other
+//   system-design shapes, which the toolbar here does not have.
 // Events: mark, edit, mode, tool, change, clear, smart, shortcut, collapse, board, properties, hide, enabled,
 //   spotlight, halo, style, status, layout, and more (feature, event): event.preventDefault() keeps the page where it is.
 // A mark is the app's element ({ id, tool, frame, points, text, style, rotation, ... }) and also answers to the names
@@ -2763,6 +2766,30 @@ export function createInk(options = {}) {
     }
     return false;
   }
+  // A step with `app: true` is made the way the app makes a mark from a drag, with none of the script's hand-drawn
+  // look: a shape's frame, or a line's far end, follows the pointer from `from` to `to`. Its tool may be any shape of
+  // the app, also one the demo's toolbar does not have ("databaseStack", "server", "web" and the other system-design
+  // shapes, which keep their proportions as in the app). An arrow or line that ends by a shape is tied to it.
+  async function dragged(step, cursor) {
+    const tool = appTool(step.tool), connector = Tool.isConnector(tool), local = Boolean(step.local), ratio = Tool.aspectRatio(tool);
+    const a = resolve(step.from, local), goal = resolve(step.to, local);
+    const ink = step.color ? { color: step.color } : { color: state.color, strokeGradient: state.gradient && { colors: [...state.gradient.colors], angle: state.gradient.angle } };
+    const m = newMark(tool, { frame: { x: a[0], y: a[1], width: 0, height: 0 }, points: connector ? [a, a] : [], style: { ...defaultStyle(tool), ...ink, ...(step.size ? { width: step.size } : {}) } });
+    if (cursor) await moveGhost(a);
+    doc.add(m);
+    await tween(step.duration ?? 600, (t) => {
+      const now = current(m), k = ease(t);
+      let p = [a[0] + (goal[0] - a[0]) * k, a[1] + (goal[1] - a[1]) * k];
+      if (!now) return;
+      if (connector) { now.points = [a, p]; now.frame = R.enclosing(now.points); }
+      else { if (ratio !== null) p = DragConstraint.aspectEnd(a, p, ratio); now.frame = R.from(a, p); }
+      render(now);
+      if (cursor) placeGhost(p);
+    });
+    const now = current(m);
+    if (now && connector) { now.startAnchor = doc.nearestAnchor(now.points[0], m.id); now.endAnchor = doc.nearestAnchor(now.points[now.points.length - 1], m.id); }
+    return m;
+  }
   async function perform(steps, { cursor = true, showTool: shows = false, anchored = true, local = false, resting, signal } = {}) {
     const made = [], toolBefore = state.tool;
     let picked = null;
@@ -2774,6 +2801,7 @@ export function createInk(options = {}) {
       const acted = await story(step, cursor);
       if (acted) { if (typeof acted === "string") picked = acted; if (step.pause) await sleep(step.pause); continue; }
       if (ghost.parentNode === reach) ghostSpace("layer");
+      if (step.app) { made.push(await dragged(step, cursor)); if (step.pause) await sleep(step.pause); continue; }
       const tool = step.tool === "underline" ? "pen" : step.tool, shown = tool === "pixelate" ? "blur" : tool;
       if (shows && TOOLS[shown] && !hasActiveEdit()) { showTool(shown); barButton(tool).classList.add("is-demo"); }
       const g = geometry(step);

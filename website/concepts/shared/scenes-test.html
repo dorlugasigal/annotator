@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Annotator web demo: the three small scenes</title>
+<title>Annotator web demo: the small scenes</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="ink.css">
 <style>
@@ -24,8 +24,8 @@
 </style>
 </head>
 <body>
-<h1>The three small scenes</h1>
-<p>Each scene fills the frame the page gives it, plays once and holds its last picture; this page plays them in a loop. The switches rebuild them. With Reduce Motion each shows its finished picture.</p>
+<h1>The small scenes</h1>
+<p>Each scene fills the frame the page gives it, plays once and holds its last picture; this page plays them in a loop. Appearance and Gradient change the scenes where they are; Shape rebuilds them. With Reduce Motion each shows its finished picture. The first four are the pages' "What you can do"; no page uses toolbarScene.</p>
 <div class="switches">
   <label>Appearance <select id="appearance"><option>dark</option><option>light</option></select></label>
   <label>Gradient <select id="gradient"></select></label>
@@ -33,12 +33,14 @@
   <button type="button" id="play">Play</button><button type="button" id="stop">Stop</button><button type="button" id="reset">First frame</button>
 </div>
 <div class="scenes">
+  <figure><div class="frame" id="zoom"></div><figcaption>zoomScene</figcaption></figure>
+  <figure><div class="frame" id="shapes"></div><figcaption>shapesScene</figcaption></figure>
   <figure><div class="frame" id="share"></div><figcaption>shareRegionScene</figcaption></figure>
   <figure><div class="frame" id="break"></div><figcaption>breakTimerScene</figcaption></figure>
   <figure><div class="frame" id="bar"></div><figcaption>toolbarScene</figcaption></figure>
 </div>
 <script type="module">
-import { breakTimerScene, shareRegionScene, toolbarScene } from "./scenes.js";
+import { breakTimerScene, shareRegionScene, toolbarScene, zoomScene, shapesScene } from "./scenes.js";
 import { GRADIENT_PRESETS } from "./annotation-core.js";
 
 // ?appearance=light&gradient=ocean&shape=4/3&play=0 (play=0 leaves the first frame, play=end the finished picture)
@@ -47,7 +49,7 @@ for (const preset of GRADIENT_PRESETS) $("gradient").append(new Option(preset.id
 $("appearance").value = query.get("appearance") === "light" ? "light" : "dark";
 $("gradient").value = GRADIENT_PRESETS.some((p) => p.id === query.get("gradient")) ? query.get("gradient") : "sunset";
 if (query.get("shape")) $("shape").value = query.get("shape").replace("/", " / ");
-const makers = { share: shareRegionScene, break: breakTimerScene, bar: toolbarScene };
+const makers = { zoom: zoomScene, shapes: shapesScene, share: shareRegionScene, break: breakTimerScene, bar: toolbarScene };
 let scenes = (window.scenes = {}), looping = 0;
 function build() {
   looping++;
@@ -63,7 +65,9 @@ async function loop() {
 }
 build();
 if (query.get("play") === "end") window.ended = Promise.all(Object.values(scenes).map((scene) => scene.play())); else if (query.get("play") !== "0") loop();
-for (const id of ["gradient", "shape"]) $(id).addEventListener("change", () => { build(); loop(); });
+$("shape").addEventListener("change", () => { build(); loop(); });
+// The gradient changes on the scenes that are there, where they are, as a page's color picker does.
+$("gradient").addEventListener("change", () => Object.values(scenes).forEach((scene) => scene.setGradient($("gradient").value)));
 // The appearance changes on the scenes that are there, as a page's theme switch does.
 $("appearance").addEventListener("change", () => { document.documentElement.dataset.appearance = $("appearance").value; Object.values(scenes).forEach((scene) => scene.setAppearance($("appearance").value)); });
 $("play").addEventListener("click", loop);

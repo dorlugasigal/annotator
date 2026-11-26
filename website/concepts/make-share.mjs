@@ -1040,6 +1040,8 @@ function shellRuntime(shimSource) {
     var name = "", target = null;
     try { name = decodeURIComponent(location.hash.slice(1)); } catch (error) { name = ""; }
     for (var i = 0; i < concepts.length; i++) if (concepts[i].folder === name) target = { page: concepts[i].index, hash: "" };
+    // With one design there is no gallery to choose from: the file opens straight into it, without the bar.
+    if (!target && concepts.length === 1) { target = { page: concepts[0].index, hash: "" }; doc.documentElement.classList.add("share-single"); }
     if (!target) return;
     try { history.replaceState({ share: target }, "", location.href.split("#")[0]); } catch (error) { /* the address stays */ }
     render(target, false);
@@ -1097,6 +1099,7 @@ html.share-viewing, html.share-viewing body { height: 100%; overflow: hidden; }
 #share-gallery[hidden], #share-viewer[hidden] { display: none; }
 .share-note { width: fit-content; max-width: 100%; margin: 0 0 18px; padding: 10px 16px; border-radius: 14px; background: #ffb58c1f; box-shadow: inset 0 0 0 1px #ffb58c4d; color: #f2f3f7; font-size: 17px; }
 #share-viewer { position: fixed; inset: 0; z-index: 2147483000; display: flex; flex-direction: column; background: #0d0f14; }
+.share-single #share-bar { display: none; }
 #share-bar { flex: none; display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 8px; border-bottom: 1px solid #ffffff1f; background: #12151c; color: #dfe2ea; font: 500 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: 0; }
 #share-bar button { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 28px; min-width: 28px; padding: 0 10px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
 #share-bar button:hover { background: #ffffff1a; }
