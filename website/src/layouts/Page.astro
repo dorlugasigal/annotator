@@ -1,18 +1,23 @@
 ---
 import "../styles/site.css";
-import "../styles/editorial.css";
-import "../styles/motion.css";
+import bricolage from "../fonts/bricolage-grotesque-latin.woff2?url";
+import instrumentSans from "../fonts/instrument-sans-normal.woff2?url";
+import SiteDefs from "../components/SiteDefs.astro";
 import { sitePath } from "../lib/paths";
 import { supportURL } from "../data/support";
 import { githubURL, release, runsOnIntel } from "../lib/distribution";
 import { windowsListing } from "../lib/windows";
 import { metricsEndpoint } from "../scripts/metrics";
 import { siteConfig } from "../../site-config.mjs";
-interface Props { title: string; description?: string }
+interface Props { title: string; description?: string; socialTitle?: string }
 const macs = runsOnIntel(release) ? "Apple Silicon and Intel Macs" : "Apple Silicon";
 const desktop = windowsListing ? "Mac or Windows desktop" : "Mac desktop";
-const { title, description = `Draw on your live ${desktop} with editable arrows, shapes and highlights. All tools are free. For macOS 14 and later on ${macs}.${windowsListing ? " Also for Windows 11." : ""}` } = Astro.props;
+const { title, socialTitle = `${title} — Annotator`, description = `Draw on your live ${desktop} with editable arrows, shapes and highlights. All tools are free. For macOS 14 and later on ${macs}.${windowsListing ? " Also for Windows 11." : ""}` } = Astro.props;
 const path = Astro.url.pathname;
+const home = path === sitePath("/");
+// On the homepage the header's links stay on the page; elsewhere they lead back to it.
+const onHome = (hash: string) => home ? hash : sitePath(`/${hash}`);
+const current = (route: string) => path.startsWith(sitePath(route)) ? "page" : undefined;
 const metricsURL = import.meta.env.PUBLIC_METRICS_URL;
 const configuredSite = siteConfig().site;
 const canonical = configuredSite ? new URL(Astro.url.pathname, configuredSite).href : undefined;
@@ -22,53 +27,95 @@ if (metricsURL && (!metricsEndpoint(metricsURL) || new URL(metricsURL).origin !=
 }
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-platform="mac" data-has-windows={windowsListing ? "" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="robots" content="noindex,nofollow" />
-    <meta name="theme-color" content="#0b101a" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0e0e11" />
+    {/* Before the first paint: the theme (dark unless the visitor chose light), the visitor's system and whether
+        things move. ?theme=light|dark, ?platform=mac|windows and ?motion=off are for looking at the page. */}
+    <script is:inline>
+      (function () {
+        var root = document.documentElement, query = new URLSearchParams(location.search), theme = query.get("theme"), platform = query.get("platform");
+        if (theme !== "light" && theme !== "dark") { try { theme = localStorage.getItem("annotator.site.theme"); } catch (error) { theme = null; } }
+        root.dataset.theme = theme === "light" ? "light" : "dark";
+        if (theme === "light") document.querySelector('meta[name="theme-color"]').content = "#f9f8fa";
+        if (platform !== "mac" && platform !== "windows") { try { platform = sessionStorage.getItem("annotator-platform"); } catch (error) { platform = null; } }
+        if (platform !== "mac" && platform !== "windows") {
+          var hints = navigator.userAgentData, named = ((hints && hints.platform) || navigator.userAgent || "").toLowerCase();
+          platform = !/android|iphone|ipad|ipod|cros/.test(named) && /windows/.test(named) ? "windows" : "mac";
+        }
+        root.dataset.platform = root.hasAttribute("data-has-windows") && platform === "windows" ? "windows" : "mac";
+        root.classList.add("js");
+        if (query.get("motion") !== "off" && !matchMedia("(prefers-reduced-motion: reduce)").matches) root.classList.add("motion");
+      })();
+    </script>
     {canonical && <link rel="canonical" href={canonical}/>}
     <meta property="og:type" content="website"/>
     <meta property="og:site_name" content="Annotator"/>
-    <meta property="og:title" content={`${title} — Annotator`}/>
+    <meta property="og:title" content={socialTitle}/>
     <meta property="og:description" content={description}/>
     {canonical && <meta property="og:url" content={canonical}/>}
     {socialImage && <meta property="og:image" content={socialImage}/>}
     <meta property="og:image:width" content="1200"/>
     <meta property="og:image:height" content="630"/>
-    <meta property="og:image:alt" content="Annotator. Draw over any app. Keep the whole thing editable."/>
+    <meta property="og:image:alt" content="Annotator. Draw on your screen. Circle it, point at it, while you share your screen."/>
     <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:title" content={`${title} — Annotator`}/>
+    <meta name="twitter:title" content={socialTitle}/>
     <meta name="twitter:description" content={description}/>
     {socialImage && <meta name="twitter:image" content={socialImage}/>}
     <title>{title} — Annotator</title>
     <link rel="icon" type="image/svg+xml" href={sitePath("/mark.svg")} />
+    <link rel="preload" href={bricolage} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={instrumentSans} as="font" type="font/woff2" crossorigin />
     <slot name="head" />
   </head>
   <body data-metrics-endpoint={metricsURL || undefined} data-site-base={import.meta.env.BASE_URL}>
-    <div class="scroll-sentinel" data-scroll-sentinel aria-hidden="true"></div>
     <a class="skip" href="#main">Skip to content</a>
-    <header class="site-header wrap">
-      <a class="wordmark" href={sitePath("/")} aria-label="Annotator home"><span class="mark" aria-hidden="true">a<span>.</span></span>annotator</a>
-      <nav aria-label="Main navigation">
-        <a href={sitePath("/#workspace")}>Features</a>
-        <a href={sitePath("/docs/")} aria-current={path.startsWith(sitePath("/docs/")) ? "page" : undefined}>Help</a>
-        <a href={sitePath("/#install")}>Install</a>
-      </nav>
-      {/* GitHub's mark, from the MIT-licensed Octicons. The footer link covers phones too narrow for it. */}
-      <a class="header-github" href={githubURL} aria-label="Annotator on GitHub">
-        <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
-      </a>
+    <SiteDefs />
+    <header class="site-header">
+      <div class="wrap">
+        <a class="wordmark" href={sitePath("/")} aria-label="Annotator home">annotator<span aria-hidden="true">.</span></a>
+        <nav aria-label="Site">
+          <a class="nav-text" href={onHome("#do")}>What you can do</a>
+          <a class="nav-try" href={onHome("#try")} data-try={home ? "" : undefined}><i aria-hidden="true"></i>Try it</a>
+          <a class="nav-text" href={sitePath("/docs/")} aria-current={current("/docs/")}>Help</a>
+          <a class="nav-text" href={githubURL}>GitHub</a>
+          <button class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark theme">
+            <span class="ts-track">
+              <svg class="ts-stars" viewBox="0 0 20 18" aria-hidden="true"><path d="M5 2l.9 2.1L8 5l-2.1.9L5 8l-.9-2.1L2 5l2.1-.9zM13.5 9l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7zM6 12.5l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z"/></svg>
+              <span class="ts-knob"><svg viewBox="0 0 24 24" aria-hidden="true">
+                <mask id="ts-moon"><rect width="24" height="24" fill="#fff"/><circle class="ts-bite" cx="16.6" cy="7.6" r="6.6" fill="#000"/></mask>
+                <path class="ts-rays" d="M12 1.6v2.6M12 19.8v2.6M1.6 12h2.6M19.8 12h2.6M4.6 4.6l1.9 1.9M17.5 17.5l1.9 1.9M4.6 19.4l1.9-1.9M17.5 6.5l1.9-1.9"/>
+                <g mask="url(#ts-moon)"><circle class="ts-disc" cx="12" cy="12" r="8.6"/></g>
+              </svg></span>
+            </span>
+          </button>
+          <a class="bmc bmc-small" href={supportURL} aria-label="Buy me a coffee"><svg viewBox="0 0 35 50" aria-hidden="true"><use href="#bmc-cup"/></svg><span>Buy me a coffee</span></a>
+          <a class="btn btn-solid btn-wipe btn-small nav-download" href={onHome("#install")} aria-label="Download"><span>Download</span><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v8M4.5 7.5 8 11l3.5-3.5"/><path d="M3 14h10"/></svg></a>
+        </nav>
+      </div>
     </header>
     <main id="main" tabindex="-1"><slot /></main>
-    <footer class="wrap footer">
-      <a class="wordmark" href={sitePath("/")}>annotator<span class="coral">.</span></a>
-      <div><a href={sitePath("/privacy/")} aria-current={path.startsWith(sitePath("/privacy/")) ? "page" : undefined}>Privacy</a><a href={sitePath("/support/")} aria-current={path.startsWith(sitePath("/support/")) ? "page" : undefined}>Report a problem</a><a href={githubURL} target="_blank" rel="noopener noreferrer">Source code <span aria-hidden="true">↗</span></a><a href={supportURL} target="_blank" rel="noopener noreferrer">Buy me a coffee <span aria-hidden="true">↗</span></a></div>
-      <small>Open source under Apache 2.0. No account. No paid tiers. Coffee is optional.</small>
+    <footer class="site-footer">
+      <div class="wrap">
+        <a class="wordmark" href={sitePath("/")} aria-label="Annotator home">annotator<span aria-hidden="true">.</span></a>
+        <nav aria-label="More">
+          <a href={sitePath("/docs/")} aria-current={current("/docs/")}>Help</a>
+          <a href={sitePath("/downloads/")} aria-current={current("/downloads/")}>Downloads</a>
+          <a href={sitePath("/privacy/")} aria-current={current("/privacy/")}>Privacy</a>
+          <a href={sitePath("/support/")} aria-current={current("/support/")}>Report a problem</a>
+          <a href={githubURL}>GitHub</a>
+          <a href={supportURL}>Buy me a coffee</a>
+        </nav>
+        <p><span class="made">Made by Dor.</span> Open source under Apache 2.0, with no account and nothing to pay for. Coffee's optional.</p>
+      </div>
     </footer>
+    <p class="visually-hidden" role="status" id="status"></p>
     <script>import { start } from "../scripts/metrics"; start();</script>
-    <script>import "../scripts/site-motion";</script>
+    <script>import "../scripts/site";</script>
   </body>
 </html>

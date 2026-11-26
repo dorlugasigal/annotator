@@ -7,12 +7,12 @@ const apps = windows ? "Mac and Windows apps" : "Mac app";
 const system = windows ? "macOS or Windows" : "macOS";
 ---
 <Page title="Use Annotator with your AI assistant">
-  <article class="prose wrap skill-guide">
+  <article class="prose skill-guide">
     <p class="eyebrow">AI CONTROL</p>
-    <h1>Let your AI use Annotator.</h1>
+    <h1 data-rise>Let your AI use Annotator.</h1>
     <p>The skill tells an AI assistant how to click the tools, draw and edit in the {apps}. It also shows the assistant how to make annotated screenshots, short demo clips and diagrams you can share. Your AI app must already have computer-use tools. This download does not add those tools or grant {system} permissions.</p>
     <p>Your AI app may send screenshots and text to its model provider. Check its privacy settings before using private information. Its computer-use tools need their own {system} permissions, separate from Annotator's.</p>
-    <p><a class="button" href={sitePath("/downloads/annotator-skill.zip")} download="annotator-skill.zip">Download the AI skill</a></p>
+    <p><a class="btn btn-accent" href={sitePath("/downloads/annotator-skill.zip")} download="annotator-skill.zip">Download the AI skill <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path class="i-down" d="M8 2.5v9M4 8l4 4 4-4"/></svg></a></p>
     <p>Unzip the download. You will get an <code>annotator</code> folder with a <code>SKILL.md</code> file inside. In Annotator, open <strong>Settings &gt; Help</strong>, expand <strong>Use an AI assistant</strong>, then choose <strong>Save AI skill...</strong>.</p>
     <h2>Install in Copilot CLI</h2>
     <p>Move the <code>annotator</code> folder into <code>~/.copilot/skills/</code>. Create the skills folder if it does not exist.</p>
@@ -34,5 +34,4 @@ const system = windows ? "macOS or Windows" : "macOS";
 </Page>
 <style>
   .skill-guide code { overflow-wrap: anywhere; }
-  .skill-guide blockquote { margin: 24px 0; padding-left: 20px; border-left: 3px solid currentColor; }
 </style>

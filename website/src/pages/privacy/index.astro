@@ -7,7 +7,7 @@ const netlifySite = process.env.ANNOTATOR_SITE_PROVIDER === "netlify";
 const computer = windows ? "computer" : "Mac";
 ---
 <Page title="Privacy">
-  <article class="prose wrap"><p class="eyebrow">PRIVACY</p><h1>What stays on your {computer}.</h1>
+  <article class="prose"><p class="eyebrow">PRIVACY</p><h1 data-rise>What stays on your {computer}.</h1>
     <p>Annotator processes drawings, screen pixels and typed text on your {computer}. It does not upload them to a cloud service.</p>
     <h2>If an AI app controls Annotator</h2>
     <p>The AI app may send screenshots and text to its model provider. That app has its own permissions and privacy settings. Check them before using private information. <a href={sitePath("/ai/")}>Read the AI setup guide.</a></p>
