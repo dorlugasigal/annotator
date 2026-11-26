@@ -267,7 +267,8 @@ const CONTROLS = ["library", "board", "mode", "undo", "redo", "clearAll", "prope
 // is invented:
 //   the stroke color of shapes, lines, arrows, the pen and text is Sunset, the gradient the app gives a brand-new
 //   profile (ToolStyleDefaults.firstUseGradient); the counter, highlighter and laser keep their own colors, as there;
-//   Arrow is set to Curved, and Roughness to Wild, its strongest choice, for shapes, lines, arrows and the pen;
+//   Arrow is set to Curved, and Roughness to Wild, its strongest choice, for shapes, lines and arrows. The pen
+//   starts Clean: the owner asked for freehand strokes to follow the hand as drawn;
 //   the pen, shapes, lines and arrows remember a width of 4 points;
 //   Diamond and Line are taken off the bar, Numbered counter and the Smart draw button are added to it, and the
 //   Redo button is turned off (Settings > Toolbar; compare reference/ux-reference/macos/toolbar/added-buttons and
@@ -338,10 +339,11 @@ export function createInk(options = {}) {
   const moreHref = options.moreHref || "#install";
   // Each tool keeps its own style, as in the app (ToolStyleDefaults.swift), starting from the preset unless the page asks.
   const inked = { color: stroke, strokeGradient: gradient && { colors: [...gradient.colors], angle: gradient.angle } };
-  const drawn = { ...inked, width: options.size || preset.width, roughness: options.style?.roughness ?? options.style?.rough ?? preset.roughness, pattern: options.style?.pattern || "solid" };
+  const asked = options.style?.roughness ?? options.style?.rough;
+  const drawn = { ...inked, width: options.size || preset.width, roughness: asked ?? preset.roughness, pattern: options.style?.pattern || "solid" };
   const own = (id, extra) => ({ ...defaultStyle(appTool(id)), ...extra });
   const styles = {
-    rect: own("rect", drawn), diamond: own("diamond", drawn), ellipse: own("ellipse", drawn), line: own("line", drawn), pen: own("pen", drawn),
+    rect: own("rect", drawn), diamond: own("diamond", drawn), ellipse: own("ellipse", drawn), line: own("line", drawn), pen: own("pen", { ...drawn, roughness: asked ?? 0 }),
     arrow: own("arrow", { ...drawn, curved: options.style?.curved ?? preset.curved }),
     text: own("text", inked), counter: own("counter", { color: options.color || (options.palette ? palette[0] : INK.coral) }), highlight: own("highlight"), laser: own("laser", { fade: LaserTrail.defaultLifetime }),
     eraser: own("eraser"), blur: own("blur", { effectAmount: 18 }), spotlight: { radius: 130 },
