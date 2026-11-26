@@ -325,6 +325,8 @@ const svgCursor = (svg, side, fallback) => `url("data:image/svg+xml,${encodeURIC
 const ROTATION_CURSOR = svgCursor([["#fff", 4], ["#000", 2]].map(([ink, width]) =>
   `<path d="M23.1 8.9A10 10 0 1 0 23.1 23.1M23 23L29 22L26 28" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="${ink}" stroke-width="${width}"/>`).join(""), 32, "grab");
 
+let inkCount = 0;
+
 export function createInk(options = {}) {
   const surface = options.surface || document.body;
   // A scripted-only instance has no toolbar, listens to no keys and never draws by hand.
@@ -365,7 +367,8 @@ export function createInk(options = {}) {
     board: "desk", spotlight: false, halo: false, hidden: false, properties: remembered ? remembered === "1" : options.properties ?? innerWidth >= 600,
   };
   const els = new Map(), inks = new Map(), anchors = new Map(), listeners = {};
-  const uid = Math.random().toString(36).slice(2, 8);
+  // Each engine on the page gets its own prefix for the ids of its SVG gradients and patterns.
+  const uid = `e${(inkCount += 1).toString(36)}`;
   let seq = 1;
 
   const layer = h("div", { class: "ink-layer", "data-mode": "use", "data-tool": state.tool, "data-board": "desk" });
