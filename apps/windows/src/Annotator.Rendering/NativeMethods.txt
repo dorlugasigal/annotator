@@ -33,6 +33,9 @@ D2D1_SHADOW_PROP
 DWriteCreateFactory
 IDWriteFactory
 IDWriteFactory3
+// The bundled handwriting font: a private collection and its weight axis (Text/TextSystem.cs).
+IDWriteFactory6
+IDWriteFontSetBuilder1
 IDWriteRenderingParams3
 IDWriteTextFormat
 IDWriteTextLayout

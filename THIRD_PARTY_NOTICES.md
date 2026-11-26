@@ -110,6 +110,20 @@ and published with the site. The native app does not bundle these fonts.
 The Buy Me a Coffee cup on the website is Buy Me a Coffee's own mark, from their
 button, used only to link to the project's Buy Me a Coffee page.
 
+## Handwriting font
+
+The Text tool's Handwriting font is Caveat. Copyright 2014 The Caveat Project
+Authors (https://github.com/googlefonts/caveat), under the SIL Open Font
+License 1.1. Both apps bundle the unchanged variable font
+`fonts/variable/Caveat[wght].ttf` from that repository at commit
+`fc2a58c4d2ec864d8a2ab7e434f427b01dbe89e5`, stored as
+`apps/macos/Sources/PresentationRendering/Fonts/Caveat.ttf` (SHA-256
+`0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988`). Only the
+file name differs from the original. The complete license is retained beside
+it in `Caveat-OFL.txt`. The Mac app carries both files in its
+`Annotator_PresentationRendering.bundle` resources; the Windows app must ship
+both in its `Fonts` folder and shows the license in About.
+
 ## Rough.js native geometry port
 
 `apps/macos/Sources/PresentationRendering/RoughGeometry.swift` adapts Rough.js's seeded

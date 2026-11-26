@@ -1,0 +1,75 @@
+{
+ "accessibility": [
+  {
+   "children": [
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      8,
+      36,
+      36
+     ],
+     "help": "Solid",
+     "label": "Solid",
+     "role": "AXButton",
+     "selected": true
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      49,
+      36,
+      36
+     ],
+     "help": "Dashed",
+     "label": "Dashed",
+     "role": "AXButton"
+    },
+    {
+     "enabled": true,
+     "frame": [
+      8,
+      90,
+      36,
+      36
+     ],
+     "help": "Dotted",
+     "label": "Dotted",
+     "role": "AXButton"
+    }
+   ],
+   "enabled": true,
+   "frame": [
+    8,
+    8,
+    36,
+    118
+   ],
+   "label": "Pattern",
+   "role": "AXGroup"
+  }
+ ],
+ "appearance": "dark",
+ "background": "popover",
+ "image": "pickers/choices-pattern-dark.png",
+ "kind": "view",
+ "notes": "Pattern's menu (Menu in Your properties): every choice drawn as it looks, the current one outlined.",
+ "pixels": [
+  104,
+  268
+ ],
+ "scale": 2,
+ "size": [
+  52,
+  134
+ ],
+ "spec": [
+  "002 design.md",
+  "001 color and gradient paint",
+  "WIN-UI-02"
+ ],
+ "state": "choices-pattern",
+ "surface": "pickers"
+}

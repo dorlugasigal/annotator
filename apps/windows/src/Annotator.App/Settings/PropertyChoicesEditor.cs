@@ -17,15 +17,15 @@ namespace Annotator.App.Settings;
 
 /// <summary>
 /// Port of the Mac PropertyChoicesEditor, "Your properties": each property with a few choices shows as one button that
-/// steps through them, or as all its choices side by side. Both ways are drawn with the toolbar's own controls; click one
-/// to use it. The selected way has the accent ring and a check mark.
+/// steps through them, one button that opens a menu of them, or all its choices side by side. Each way is drawn with the
+/// toolbar's own controls; click one to use it. The selected way has the accent ring and a check mark.
 /// </summary>
 internal sealed class PropertyChoicesEditor
 {
     private const double OptionHeight = 75;
     private readonly WorkspaceModel _model;
     private readonly HyperlinkButton _reset;
-    private readonly Dictionary<(PropertyChoice Choice, bool All), (Border Ring, TextBlock Caption, FrameworkElement Check, ParityButton Button)> _options = [];
+    private readonly Dictionary<(PropertyChoice Choice, PropertyChoiceStyle Style), (Border Ring, TextBlock Caption, FrameworkElement Check, ParityButton Button)> _options = [];
     private readonly Dictionary<PropertyChoice, Grid> _cards = [];
     private readonly SolidColorBrush _ink = new(PropertiesInk.Color());
 
@@ -45,7 +45,7 @@ internal sealed class PropertyChoicesEditor
         var titles = new MacStack { Orientation = Orientation.Vertical, Spacing = 3, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 200, 0) };
         titles.Children.Add(SettingsText.Static("Your properties", 15, "AnnotatorPrimaryText", FontWeights.SemiBold));
         titles.Children.Add(SettingsText.Static(
-            "One button saves room: click it to go to the next choice. All choices puts them side by side, so each one is a click away.",
+            "One button saves room: click it to go to the next choice. Menu shows every choice when you click it. All choices puts them side by side, so each one is a click away.",
             12, "AnnotatorSecondaryText"));
         header.Children.Add(titles);
         _reset = new HyperlinkButton
@@ -76,39 +76,52 @@ internal sealed class PropertyChoicesEditor
     public void Apply(WorkspaceSnapshot snapshot)
     {
         WorkspacePreferences preferences = snapshot.Preferences;
-        _reset.IsEnabled = preferences.ExpandedPropertyChoices is not null;
-        foreach (((PropertyChoice choice, bool all), (Border ring, TextBlock caption, FrameworkElement check, ParityButton button)) in _options)
+        _reset.IsEnabled = preferences.ExpandedPropertyChoices is not null || preferences.MenuPropertyChoices is not null;
+        foreach (((PropertyChoice choice, PropertyChoiceStyle style), (Border ring, TextBlock caption, FrameworkElement check, ParityButton button)) in _options)
         {
-            bool selected = preferences.ShowsAllChoices(choice) == all;
+            bool selected = preferences.ChoiceStyle(choice) == style;
             ring.BorderBrush = selected ? SettingsColors.AccentBrush() : SettingsColors.Primary(0.1);
             ring.BorderThickness = new Thickness(selected ? 2 : 1);
             caption.FontWeight = selected ? FontWeights.SemiBold : FontWeights.Normal;
             caption.Style = AppResources.Style(selected ? "AnnotatorPrimaryText" : "AnnotatorSecondaryText");
-            check.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
+            Visibility shown = selected ? Visibility.Visible : Visibility.Collapsed;
+            if (check.Visibility != shown)
+            {
+                check.Visibility = shown;
+                // The caption row grows or shrinks with the check mark. Menu keeps its option's width when it's chosen, and
+                // then WinUI left the row's old measure: the check mark had no size and sat on the caption.
+                (VisualTreeHelper.GetParent(check) as UIElement)?.InvalidateMeasure();
+            }
             button.AccessibleSelected = selected;
             button.AccessibleValue = selected ? "Selected" : string.Empty;
             if (!SettingsText.Scaled)
             {
-                button.Width = OptionWidth(choice, all, selected);
+                button.Width = OptionWidth(choice, style, selected);
             }
         }
         if (!SettingsText.Scaled)
         {
             foreach ((PropertyChoice choice, Grid card) in _cards)
             {
-                bool all = preferences.ShowsAllChoices(choice);
-                card.Width = 10 + OptionWidth(choice, false, !all) + 8 + OptionWidth(choice, true, all) + 10;
+                PropertyChoiceStyle current = preferences.ChoiceStyle(choice);
+                double width = 10 + 10 + 8 * (choice.Styles.Count - 1);
+                foreach (PropertyChoiceStyle style in choice.Styles)
+                {
+                    width += OptionWidth(choice, style, style == current);
+                }
+                card.Width = width;
             }
         }
     }
 
     /// <summary>
     /// An option's width on the Mac, set exactly so the cards line up with the Mac's: all choices are 36-point buttons 5 apart
-    /// with 8 points of padding on each side; one button is the 52-point preview with its padding, or SF Pro's semibold
-    /// "One button" and the check mark (72.5 points, D-4) while it's chosen.
+    /// with 8 points of padding on each side; One button and Menu are the 52-point preview with its padding, or for One
+    /// button SF Pro's semibold "One button" and the check mark (72.5 points, D-4) while it's chosen.
     /// </summary>
-    private static double OptionWidth(PropertyChoice choice, bool all, bool selected) =>
-        all ? 16 + choice.ChoiceCount * 36 + (choice.ChoiceCount - 1) * 5 : selected ? 72.5 : 68;
+    private static double OptionWidth(PropertyChoice choice, PropertyChoiceStyle style, bool selected) =>
+        style == PropertyChoiceStyle.All ? 16 + choice.ChoiceCount * 36 + (choice.ChoiceCount - 1) * 5
+            : selected && style == PropertyChoiceStyle.OneButton ? 72.5 : 68;
 
     private FrameworkElement Card(PropertyChoice choice)
     {
@@ -144,8 +157,10 @@ internal sealed class PropertyChoicesEditor
         title.Children.Add(label);
         stack.Children.Add(title);
         var options = new MacStack { Orientation = Orientation.Horizontal, Spacing = 8 };
-        options.Children.Add(Option(choice, all: false));
-        options.Children.Add(Option(choice, all: true));
+        foreach (PropertyChoiceStyle style in choice.Styles)
+        {
+            options.Children.Add(Option(choice, style));
+        }
         stack.Children.Add(options);
         card.Children.Add(stack);
         _cards[choice] = card;
@@ -154,20 +169,21 @@ internal sealed class PropertyChoicesEditor
         return group;
     }
 
-    private FrameworkElement Option(PropertyChoice choice, bool all)
+    private FrameworkElement Option(PropertyChoice choice, PropertyChoiceStyle style)
     {
+        bool all = style == PropertyChoiceStyle.All;
         string names = List(choice.Choices);
         // frame(minWidth: 52, minHeight: 44), then 8 and 6 points of padding around the background and ring.
         var preview = new Grid { Padding = new Thickness(8, 6, 8, 6), IsHitTestVisible = false };
         preview.Children.Add(new Border { CornerRadius = new CornerRadius(10), Background = SettingsColors.Window, Margin = new Thickness(-8, -6, -8, -6) });
         var ring = new Border { CornerRadius = new CornerRadius(10), Margin = new Thickness(-8, -6, -8, -6) };
-        FrameworkElement face = Preview(choice, all);
+        FrameworkElement face = Preview(choice, style);
         face.HorizontalAlignment = HorizontalAlignment.Center;
         face.VerticalAlignment = VerticalAlignment.Center;
         preview.Children.Add(new Grid { MinWidth = 52, MinHeight = 44, Children = { face } });
         preview.Children.Add(ring);
         // The Mac's .caption: 10 points.
-        TextBlock caption = SettingsText.Static(all ? "All choices" : "One button", 10, "AnnotatorSecondaryText");
+        TextBlock caption = SettingsText.Static(Title(style), 10, "AnnotatorSecondaryText");
         caption.VerticalAlignment = VerticalAlignment.Center;
         FrameworkElement check = Glyphs.ForSymbol("checkmark.circle.fill", 10, "AnnotatorGlyphAccent");
         check.VerticalAlignment = VerticalAlignment.Center;
@@ -190,19 +206,41 @@ internal sealed class PropertyChoicesEditor
             // The preview (44 and 12 points of padding), 6 points, and one 13-point caption line, as on the Mac.
             button.Height = OptionHeight;
         }
-        string help = all ? $"{names}, side by side." : $"One button. Click it to go to the next choice: {names}.";
-        AutomationProperties.SetName(button, $"{choice.Label}: {(all ? "all choices" : "one button")}");
-        AutomationProperties.SetAutomationId(button, $"property-choice-{choice.RawValue}-{(all ? "all" : "one")}");
+        string help = style switch
+        {
+            PropertyChoiceStyle.All => $"{names}, side by side.",
+            PropertyChoiceStyle.Menu => $"A menu. Click it to choose from {names}.",
+            _ => $"One button. Click it to go to the next choice: {names}.",
+        };
+        AutomationProperties.SetName(button, $"{choice.Label}: {Title(style).ToLowerInvariant()}");
+        AutomationProperties.SetAutomationId(button, $"property-choice-{choice.RawValue}-{Identifier(style)}");
         AutomationProperties.SetHelpText(button, help);
         ToolTipService.SetToolTip(button, help);
-        button.Click += (_, _) => _model.SetShowsAllChoices(choice, all);
-        _options[(choice, all)] = (ring, caption, check, button);
+        button.Click += (_, _) => _model.SetPropertyChoiceStyle(choice, style);
+        _options[(choice, style)] = (ring, caption, check, button);
         return button;
     }
 
-    /// <summary>The control as the properties row draws it; one button shows the first choice.</summary>
-    private FrameworkElement Preview(PropertyChoice choice, bool all)
+    /// <summary>Mac PropertyChoicesEditor.title: "One button", "Menu" or "All choices".</summary>
+    private static string Title(PropertyChoiceStyle style) => style switch
     {
+        PropertyChoiceStyle.All => "All choices",
+        PropertyChoiceStyle.Menu => "Menu",
+        _ => "One button",
+    };
+
+    /// <summary>Mac PropertyChoicesEditor.identifier: "one", "menu" or "all".</summary>
+    private static string Identifier(PropertyChoiceStyle style) => style switch
+    {
+        PropertyChoiceStyle.All => "all",
+        PropertyChoiceStyle.Menu => "menu",
+        _ => "one",
+    };
+
+    /// <summary>The control as the properties row draws it; one button shows the first choice.</summary>
+    private FrameworkElement Preview(PropertyChoice choice, PropertyChoiceStyle style)
+    {
+        bool all = style == PropertyChoiceStyle.All;
         InspectorSample[] samples = choice switch
         {
             PropertyChoice.Pattern => [.. StrokePattern.AllCases.Select(InspectorSample.ForPattern)],
@@ -215,7 +253,7 @@ internal sealed class PropertyChoicesEditor
         };
         Func<int, UIElement> face = choice switch
         {
-            PropertyChoice.Font => index => Text("Aa", index == 0 ? "Segoe UI" : "Cascadia Mono, Consolas, Courier New", all ? 17 : 16),
+            PropertyChoice.Font => index => FontSample(InspectorPlan.FontChoices[index].Value, all ? 17 : 16),
             PropertyChoice.Alignment => index => Symbol(AlignmentSymbol(CoreTextAlignment.AllCases[index]), all ? 16 : 15),
             _ => index => PropertiesPanel.SamplePicture(samples[index], _ink),
         };
@@ -231,37 +269,59 @@ internal sealed class PropertyChoicesEditor
             }
             return row;
         }
-        if (choice is PropertyChoice.Edges or PropertyChoice.ArrowType or PropertyChoice.Pressure)
+        if (choice.IsOnOff)
         {
             // An on and off switch shows the feature's own sample (Mac InspectorToggle).
             (ParityButton toggle, Action<bool> _) = PropertiesPanel.Choice(choice.Choices[1], face(1));
             return toggle;
         }
-        var cycle = new Grid();
-        cycle.Children.Add(new Grid { Width = 36, Height = 36, Children = { face(0) } });
-        var dots = new MacStack
+        if (style == PropertyChoiceStyle.OneButton)
         {
-            Orientation = Orientation.Horizontal,
-            Spacing = 2.5,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(0, 0, 0, 3),
-        };
-        for (int index = 0; index < count; index++)
-        {
-            dots.Children.Add(new Ellipse
+            // Mac CycleOptions: the first choice with a dot for each, the first one accented.
+            var cycle = new Grid();
+            cycle.Children.Add(new Grid { Width = 36, Height = 36, Children = { face(0) } });
+            var dots = new MacStack
             {
-                Width = 3.5,
-                Height = 3.5,
-                Fill = index == 0 ? AppResources.Brush("AnnotatorAccentBrush") : AppResources.Brush("AnnotatorControlStrokeBrush"),
-            });
+                Orientation = Orientation.Horizontal,
+                Spacing = 2.5,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 0, 3),
+            };
+            for (int index = 0; index < count; index++)
+            {
+                dots.Children.Add(new Ellipse
+                {
+                    Width = 3.5,
+                    Height = 3.5,
+                    Fill = index == 0 ? AppResources.Brush("AnnotatorAccentBrush") : AppResources.Brush("AnnotatorControlStrokeBrush"),
+                });
+            }
+            cycle.Children.Add(dots);
+            (ParityButton cycleButton, Action<bool> _) = PropertiesPanel.Choice(choice.Label, cycle, choice: false);
+            return cycleButton;
         }
-        cycle.Children.Add(dots);
-        (ParityButton button, Action<bool> _) = PropertiesPanel.Choice(choice.Label, cycle, choice: false);
+        // Mac ChoiceMenu: the first choice with a small chevron under it.
+        var menu = new Grid();
+        menu.Children.Add(new Grid { Width = 36, Height = 36, Children = { face(0) } });
+        FrameworkElement chevron = ToolbarParts.GlyphBox("chevron.down", 6, 6, 8, "AnnotatorGlyphSecondary");
+        chevron.HorizontalAlignment = HorizontalAlignment.Center;
+        chevron.VerticalAlignment = VerticalAlignment.Bottom;
+        chevron.Margin = new Thickness(0, 0, 0, 2.5);
+        menu.Children.Add(chevron);
+        (ParityButton button, Action<bool> _) = PropertiesPanel.Choice(choice.Label, menu, choice: false);
         return button;
     }
 
-    private static UIElement Text(string text, string family, double size)
+    /// <summary>A font choice's "Aa" sample, as the properties row draws it: Caveat's is 6 points larger and bold.</summary>
+    private static UIElement FontSample(string fontName, double size) => Annotator.Core.Geometry.TextFont.DesignFor(fontName) switch
+    {
+        Annotator.Core.Geometry.FontDesign.Monospace => Text("Aa", "Cascadia Mono, Consolas, Courier New", size),
+        Annotator.Core.Geometry.FontDesign.Handwriting => Text("Aa", PropertiesPanel.HandwritingFontSource, size + 6, bold: true),
+        _ => Text("Aa", "Segoe UI", size),
+    };
+
+    private static UIElement Text(string text, string family, double size, bool bold = false)
     {
         var block = new TextBlock
         {
@@ -272,6 +332,10 @@ internal sealed class PropertyChoicesEditor
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
         };
+        if (bold)
+        {
+            block.FontWeight = FontWeights.SemiBold;
+        }
         return block;
     }
 

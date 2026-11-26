@@ -211,7 +211,7 @@ public sealed class TextRun : IEquatable<TextRun>
 {
     /// <summary>Text drawn from the top of <paramref name="frame"/>, with its first baseline where the Mac's is (<see cref="MacTextMetrics.FirstBaseline"/>).</summary>
     public TextRun(string text, Rect frame, TextFont font, TextAlignment alignment, Paint paint)
-        : this(text, frame, font, alignment, paint, MacTextMetrics.FirstBaseline(frame, font.Size))
+        : this(text, frame, font, alignment, paint, MacTextMetrics.FirstBaseline(frame, font.Size, font.Design))
     {
     }
 

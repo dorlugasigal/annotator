@@ -167,6 +167,9 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
     /// </summary>
     public Action<bool, RectInt32, Action>? ArrowHeads { get; init; }
 
+    /// <summary>Opens a property's menu of choices below the button (in screen pixels); the action runs when it closes.</summary>
+    public Action<ChoicesRequest, RectInt32, Action>? Choices { get; init; }
+
     /// <summary>Opens the Tools window (the Tool library button, Mac openToolLibrary). Without it the button is unavailable.</summary>
     public Action? ToolLibrary { get; init; }
 
@@ -576,6 +579,18 @@ internal sealed partial class ToolbarWindow : Window, IPropertiesHost
         if (ArrowHeads is { } open)
         {
             open(start, Anchor(anchor), closed);
+        }
+        else
+        {
+            closed();
+        }
+    }
+
+    void IPropertiesHost.OpenChoices(ChoicesRequest request, FrameworkElement anchor, Action closed)
+    {
+        if (Choices is { } open)
+        {
+            open(request, Anchor(anchor), closed);
         }
         else
         {

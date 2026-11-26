@@ -173,6 +173,13 @@ internal sealed partial class ReferenceHost
                     arrowHeads.ShowForReference(OffscreenOrigin());
                     Watch((FrameworkElement)arrowHeads.Content, arrowHeads.Hwnd);
                     break;
+                case ReferenceSurface.Choices:
+                    var choices = new ChoicePalette(_registry, PropertiesPanel.ReferenceChoices(scenario.Choice,
+                        new Microsoft.UI.Xaml.Media.SolidColorBrush(PropertiesInk.Color())));
+                    _popover = choices;
+                    choices.ShowForReference(OffscreenOrigin());
+                    Watch((FrameworkElement)choices.Content, choices.Hwnd);
+                    break;
                 case ReferenceSurface.Picker:
                     _picker = new ColorPopover(_registry, model, scenario.Picker ?? ColorPickerRequest.Stroke, ReferenceScreen());
                     _picker.ShowForReference(OffscreenOrigin());

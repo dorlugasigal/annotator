@@ -150,6 +150,14 @@ public sealed class TextEditingLayoutTests
         var element = new Element(Tool.Text, new Rect(30, 40, text.Width, text.Height), text: "Edited text", style: style) { Rotation = 0.3 };
         AssertSamePixels(builder.Build(ElementList.Create([element])), SceneSnapshot.Create([Edited(builder, TextSession(element))]), scale);
 
+        // Handwriting leans past its frame: the edited text paints the same last letter as the committed text.
+        Style handwriting = style;
+        handwriting.FontName = HandwritingFont.Name;
+        Size written = TextLayout.ContentSize("why the dip?", TextFont.Resolve(handwriting), Warp.Measurer);
+        var leaning = new Element(Tool.Text, new Rect(30, 40, written.Width, written.Height), text: "why the dip?", style: handwriting) { Rotation = 0.3 };
+        SceneBuilder leaningBuilder = Warp.Builder();
+        AssertSamePixels(leaningBuilder.Build(ElementList.Create([leaning])), SceneSnapshot.Create([Edited(leaningBuilder, TextSession(leaning))]), scale);
+
         var shapeStyle = Style.Defaults(Tool.Rectangle);
         shapeStyle.StrokeGradient = gradient;
         // A new label follows the stroke in the Text tool's style; Match outline makes a label in its own color follow it again.
@@ -157,6 +165,7 @@ public sealed class TextEditingLayoutTests
         [
             new Style { FontSize = 30, Alignment = TextAlignment.Center },
             new Style { FontSize = 30, Alignment = TextAlignment.Center, Color = new RGBA(0.2, 0.4, 0.9), Bold = true },
+            new Style { FontSize = 30, Alignment = TextAlignment.Center, FontName = HandwritingFont.Name },
         ];
         foreach (Style labelStyle in labelStyles)
         {
@@ -194,6 +203,10 @@ public sealed class TextEditingLayoutTests
             ("two lines, 28 pt", "Hello\nSecond line", new Style { FontSize = 28 }),
             ("Hebrew, 28 pt", "\u05e9\u05dc\u05d5\u05dd \u05e2\u05d5\u05dc\u05dd", new Style { FontSize = 28 }),
             ("gradient, 48 pt", "Hello 48", new Style { FontSize = 48, StrokeGradient = gradient }),
+            ("handwriting, 28 pt", "why the dip?", new Style { FontSize = 28, FontName = HandwritingFont.Name }),
+            ("handwriting bold with a gradient, 48 pt", "why the dip?",
+             new Style { FontSize = 48, Bold = true, FontName = HandwritingFont.Name, StrokeGradient = gradient }),
+            ("Hebrew and an emoji in handwriting, 28 pt", "\u05e9\u05dc\u05d5\u05dd \U0001F44B", new Style { FontSize = 28, FontName = HandwritingFont.Name }),
         ];
         var report = new List<string>();
         foreach ((string name, string content, Style style) in texts)

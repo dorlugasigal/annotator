@@ -1936,11 +1936,11 @@
          "frame": [
           61,
           890,
-          673.5,
+          923,
           15
          ],
          "role": "AXStaticText",
-         "value": "One button saves room: click it to go to the next choice. All choices puts them side by side, so each one is a click away."
+         "value": "One button saves room: click it to go to the next choice. Menu shows every choice when you click it. All choices puts them side by side, so each one is a click away."
         },
         {
          "enabled": false,
@@ -1987,6 +1987,19 @@
            "frame": [
             151.5,
             952,
+            68,
+            75
+           ],
+           "help": "A menu. Click it to choose from Solid, Dashed and Dotted.",
+           "identifier": "property-choice-pattern-menu",
+           "label": "Pattern: menu",
+           "role": "AXButton"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            227.5,
+            952,
             134,
             75
            ],
@@ -2000,7 +2013,7 @@
          "frame": [
           61,
           919,
-          234.5,
+          310.5,
           118
          ],
          "identifier": "property-choice-pattern",
@@ -2012,7 +2025,7 @@
           {
            "enabled": true,
            "frame": [
-            316.5,
+            392.5,
             929,
             87,
             15
@@ -2023,7 +2036,7 @@
           {
            "enabled": true,
            "frame": [
-            315.5,
+            391.5,
             952,
             72.5,
             75
@@ -2038,7 +2051,20 @@
           {
            "enabled": true,
            "frame": [
-            396,
+            472,
+            952,
+            68,
+            75
+           ],
+           "help": "A menu. Click it to choose from Clean, Sketchy and Wild.",
+           "identifier": "property-choice-roughness-menu",
+           "label": "Roughness: menu",
+           "role": "AXButton"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            548,
             952,
             134,
             75
@@ -2051,9 +2077,9 @@
          ],
          "enabled": true,
          "frame": [
-          305.5,
+          381.5,
           919,
-          234.5,
+          310.5,
           118
          ],
          "identifier": "property-choice-roughness",
@@ -2065,7 +2091,7 @@
           {
            "enabled": true,
            "frame": [
-            561.5,
+            713.5,
             929,
             70,
             15
@@ -2076,7 +2102,7 @@
           {
            "enabled": true,
            "frame": [
-            560,
+            712,
             952,
             72.5,
             75
@@ -2091,7 +2117,20 @@
           {
            "enabled": true,
            "frame": [
-            640.5,
+            792.5,
+            952,
+            68,
+            75
+           ],
+           "help": "A menu. Click it to choose from Solid, Hatch and Crosshatch.",
+           "identifier": "property-choice-fillStyle-menu",
+           "label": "Fill style: menu",
+           "role": "AXButton"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            868.5,
             952,
             134,
             75
@@ -2104,9 +2143,9 @@
          ],
          "enabled": true,
          "frame": [
-          550,
+          702,
           919,
-          234.5,
+          310.5,
           118
          ],
          "identifier": "property-choice-fillStyle",
@@ -2118,7 +2157,7 @@
           {
            "enabled": true,
            "frame": [
-            806,
+            1034,
             929,
             60,
             15
@@ -2129,7 +2168,7 @@
           {
            "enabled": true,
            "frame": [
-            804.5,
+            1032.5,
             952,
             72.5,
             75
@@ -2144,7 +2183,7 @@
           {
            "enabled": true,
            "frame": [
-            885,
+            1113,
             952,
             93,
             75
@@ -2157,7 +2196,7 @@
          ],
          "enabled": true,
          "frame": [
-          794.5,
+          1022.5,
           919,
           193.5,
           118
@@ -2171,8 +2210,8 @@
           {
            "enabled": true,
            "frame": [
-            1009.5,
-            929,
+            72.5,
+            1057,
             86,
             15
            ],
@@ -2182,8 +2221,8 @@
           {
            "enabled": true,
            "frame": [
-            1008,
-            952,
+            71,
+            1080,
             72.5,
             75
            ],
@@ -2197,8 +2236,8 @@
           {
            "enabled": true,
            "frame": [
-            1088.5,
-            952,
+            151.5,
+            1080,
             93,
             75
            ],
@@ -2210,8 +2249,8 @@
          ],
          "enabled": true,
          "frame": [
-          998,
-          919,
+          61,
+          1047,
           193.5,
           118
          ],
@@ -2224,7 +2263,7 @@
           {
            "enabled": true,
            "frame": [
-            72,
+            275.5,
             1057,
             69.5,
             15
@@ -2235,7 +2274,7 @@
           {
            "enabled": true,
            "frame": [
-            71,
+            274.5,
             1080,
             72.5,
             75
@@ -2250,7 +2289,7 @@
           {
            "enabled": true,
            "frame": [
-            151.5,
+            355,
             1080,
             93,
             75
@@ -2263,7 +2302,7 @@
          ],
          "enabled": true,
          "frame": [
-          61,
+          264.5,
           1047,
           193.5,
           118
@@ -2277,7 +2316,7 @@
           {
            "enabled": true,
            "frame": [
-            276,
+            479.5,
             1057,
             50.5,
             15
@@ -2288,12 +2327,12 @@
           {
            "enabled": true,
            "frame": [
-            274.5,
+            478,
             1080,
             72.5,
             75
            ],
-           "help": "One button. Click it to go to the next choice: System and Mono.",
+           "help": "One button. Click it to go to the next choice: System, Mono and Handwriting.",
            "identifier": "property-choice-font-one",
            "label": "Font: one button",
            "role": "AXButton",
@@ -2303,12 +2342,25 @@
           {
            "enabled": true,
            "frame": [
-            355,
+            558.5,
             1080,
-            93,
+            68,
             75
            ],
-           "help": "System and Mono, side by side.",
+           "help": "A menu. Click it to choose from System, Mono and Handwriting.",
+           "identifier": "property-choice-font-menu",
+           "label": "Font: menu",
+           "role": "AXButton"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            634.5,
+            1080,
+            134,
+            75
+           ],
+           "help": "System, Mono and Handwriting, side by side.",
            "identifier": "property-choice-font-all",
            "label": "Font: all choices",
            "role": "AXButton"
@@ -2316,9 +2368,9 @@
          ],
          "enabled": true,
          "frame": [
-          264.5,
+          468,
           1047,
-          193.5,
+          310.5,
           118
          ],
          "identifier": "property-choice-font",
@@ -2330,7 +2382,7 @@
           {
            "enabled": true,
            "frame": [
-            479.5,
+            800,
             1057,
             82.5,
             15
@@ -2341,7 +2393,7 @@
           {
            "enabled": true,
            "frame": [
-            478,
+            798.5,
             1080,
             72.5,
             75
@@ -2356,7 +2408,20 @@
           {
            "enabled": true,
            "frame": [
-            558.5,
+            879,
+            1080,
+            68,
+            75
+           ],
+           "help": "A menu. Click it to choose from Left, Center and Right.",
+           "identifier": "property-choice-alignment-menu",
+           "label": "Alignment: menu",
+           "role": "AXButton"
+          },
+          {
+           "enabled": true,
+           "frame": [
+            955,
             1080,
             134,
             75
@@ -2369,9 +2434,9 @@
          ],
          "enabled": true,
          "frame": [
-          468,
+          788.5,
           1047,
-          234.5,
+          310.5,
           118
          ],
          "identifier": "property-choice-alignment",

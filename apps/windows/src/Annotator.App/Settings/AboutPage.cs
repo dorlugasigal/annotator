@@ -110,7 +110,7 @@ internal static class AboutPage
         return details;
     }
 
-    /// <summary>The license notices the app ships (THIRD_PARTY_NOTICES.md): Lucide icons, Rough.js and the Unicode data.</summary>
+    /// <summary>The license notices the app ships (THIRD_PARTY_NOTICES.md): Lucide icons, Rough.js, the Unicode data and the handwriting font.</summary>
     private static FrameworkElement Notices(SettingsEnvironment environment)
     {
         (string Title, string File)[] notices =
@@ -118,6 +118,7 @@ internal static class AboutPage
             ("Lucide icons (ISC license, with Feather's MIT notice)", Path.Combine("Assets", "Lucide-LICENSE.txt")),
             ("Rough.js geometry (MIT license)", "RoughJS-LICENSE.txt"),
             ("Unicode character data (Unicode License V3)", Path.Combine("Text", "Unicode-LICENSE.txt")),
+            ("Caveat handwriting font (SIL Open Font License 1.1)", Annotator.Core.Geometry.HandwritingFont.LicenseRelativePath),
         ];
         var list = new MacStack { Spacing = 10 };
         foreach ((string title, string file) in notices)

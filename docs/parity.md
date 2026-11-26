@@ -185,7 +185,15 @@ platform that departs from the specifications, unless an ADR changes them.
   baseline is one Mac ascender (0.967 em in SF Pro and SF Mono, from the
   corpus) below the top of the frame, or, for a shape label, below the top of
   the Mac's content-sized frame centered on the shape. Frames and the Windows
-  fonts' line spacing do not change.
+  fonts' line spacing do not change. The Handwriting font is the exception to
+  the font rule: both apps ship the same Caveat file
+  (`apps/macos/Sources/PresentationRendering/Fonts/Caveat.ttf`) and draw
+  regular text in its Regular (weight 400) and Bold text in weight 600 on its
+  weight axis, so its letters and line metrics (ascender 0.96 em, descender
+  0.3 em) are the same on both platforms. Caveat leans past the box its text
+  is measured in, so wherever text is clipped or redrawn by its frame (a
+  gradient color, fades, redraw areas), both apps allow handwriting 0.35 em
+  more at the sides and 0.02 em above and below. Frames don't change.
 - **WIN-REND-04**: Colors are sRGB with premultiplied alpha. On HDR or
   wide-color displays the overlay renders as SDR content, like other SDR apps.
 - **WIN-REND-05**: Rendering tolerance against the Mac reference images, at
@@ -701,6 +709,7 @@ platform that departs from the specifications, unless an ADR changes them.
 | SwiftUI app windows | WinUI 3 | I in layout, E in control look |
 | SF Symbols | Icon set from D-6 | D-6 |
 | SF Pro and SF Mono | Font rule from D-4 | D-4 |
+| Caveat, bundled (the Handwriting font) | The same bundled Caveat file, loaded with DirectWrite | I |
 | Sparkle | Microsoft Store updates; the portable copy's feed check (DV-11) | E |
 | `SMAppService.mainApp` | MSIX startup task | E |
 | Applications move offer | None | N/A |
@@ -795,7 +804,8 @@ These need owner approval before Windows release.
   Mono, so glyph shapes and widths differ from SF Pro and SF Mono, and frames
   measured on Windows are taller (a Segoe UI Variable line is 1.33 em, an SF
   Pro line 1.18 em). The first baseline sits where the Mac's does
-  (WIN-REND-03).
+  (WIN-REND-03). Handwriting text is not part of this deviation: it uses the
+  same bundled font on both platforms.
 - **DV-8 Icons**: pending D-6.
 - **DV-9 Capture fallback**: only if S-1 rejects method A. Method B blurs with
   the system's backdrop rules (opaque when transparency effects are off).
@@ -1009,3 +1019,16 @@ The recommended defaults were adopted on 2026-10-18 (see the records below).
   release goes to the public Store listing without tester flights
   (WIN-DST-03); and copies of 0.1.0-beta.17 and earlier keep updating through
   the preview feeds, which carry the same newest release.
+- **2026-11-25, Handwriting font.** About the website demo's text labels, the
+  owner wrote: "also i really like that font you used for the demo , lets add
+  it to annotator as well because it isnt there". The demo uses Caveat (SIL
+  Open Font License 1.1). Applied on both platforms: Font has a third choice,
+  Handwriting, saved as the font name `handwriting`; both apps ship the
+  unchanged Caveat variable font from its official repository with its
+  license (`THIRD_PARTY_NOTICES.md`, `docs/provenance/components.json`). D-4
+  stays at (a): System and Mono keep each platform's system fonts, and
+  Handwriting is one more choice, not a replacement, so the Mac's existing
+  text looks the same. The agent chose the weights: Bold keeps the rule of the
+  other fonts (weight 600, the weight the demo uses), and regular text is
+  Caveat's Regular. A version without the font draws `handwriting` text in the
+  system font and keeps the name when it saves.

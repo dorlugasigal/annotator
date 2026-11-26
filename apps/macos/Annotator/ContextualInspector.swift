@@ -105,7 +105,8 @@ struct ContextualInspector: View {
                                     model.applyStyle { $0.fillPattern = value }
                                 }
                             } else {
-                                CycleOptions(name: "Fill style", values: values, selection: model.style.fillPattern) { value in
+                                ChoiceButton(style: model.propertyChoiceStyle(.fillStyle), model: model, name: "Fill style",
+                                             values: values, selection: model.style.fillPattern) { value in
                                     model.applyStyle { $0.fillPattern = value }
                                 }
                             }
@@ -227,7 +228,8 @@ struct ContextualInspector: View {
             if model.showsAllChoices(.pattern) {
                 SampleOptions(values: values, selection: model.style.pattern) { value in model.applyStyle { $0.pattern = value } }
             } else {
-                CycleOptions(name: "Pattern", values: values, selection: model.style.pattern) { value in
+                ChoiceButton(style: model.propertyChoiceStyle(.pattern), model: model, name: "Pattern", values: values,
+                             selection: model.style.pattern) { value in
                     model.applyStyle { $0.pattern = value }
                 }
             }
@@ -240,7 +242,8 @@ struct ContextualInspector: View {
             if model.showsAllChoices(.roughness) {
                 SampleOptions(values: values, selection: model.style.roughness) { value in model.applyStyle { $0.roughness = value } }
             } else {
-                CycleOptions(name: "Roughness", values: values, selection: model.style.roughness) { value in
+                ChoiceButton(style: model.propertyChoiceStyle(.roughness), model: model, name: "Roughness", values: values,
+                             selection: model.style.roughness) { value in
                     model.applyStyle { $0.roughness = value }
                 }
             }
@@ -252,15 +255,15 @@ struct ContextualInspector: View {
             PropertyBlock(name: "Font") {
                 if model.showsAllChoices(.font) {
                     HStack(spacing: 5) {
-                        fontChoice("System", name: "system", design: .default)
-                        fontChoice("Mono", name: "monospace", design: .monospaced)
+                        ForEach(TextFontChoice.allCases, id: \.self) { fontChoice($0) }
                     }
                 } else {
-                    CycleOptions(
+                    ChoiceButton(
+                        style: model.propertyChoiceStyle(.font), model: model,
                         name: "Font",
-                        choices: [("system", "System", .text("Aa", .default)), ("monospace", "Mono", .text("Aa", .monospaced))],
-                        selection: model.style.fontName == "monospace" ? "monospace" : "system"
-                    ) { name in model.applyStyle { $0.fontName = name } }
+                        choices: TextFontChoice.allCases.map { ($0, $0.title, .text("Aa", $0.sample(size: 16))) },
+                        selection: TextFontChoice.current(model.style.fontName)
+                    ) { choice in model.applyStyle { $0.fontName = choice.rawValue } }
                 }
             }.fixedSize(horizontal: true, vertical: false)
             PropertyBlock(name: "Size") {
@@ -283,7 +286,8 @@ struct ContextualInspector: View {
                         }
                     }
                 } else {
-                    CycleOptions(
+                    ChoiceButton(
+                        style: model.propertyChoiceStyle(.alignment), model: model,
                         name: "Alignment",
                         choices: AnnotationCore.TextAlignment.allCases.map { alignment in
                             (alignment, alignment.rawValue.capitalized, .symbol(Self.alignmentSymbol(alignment)))
@@ -297,11 +301,11 @@ struct ContextualInspector: View {
     static func alignmentSymbol(_ alignment: AnnotationCore.TextAlignment) -> String {
         alignment == .left ? "text.alignleft" : alignment == .center ? "text.aligncenter" : "text.alignright"
     }
-    private func fontChoice(_ title: String, name: String, design: Font.Design) -> some View {
-        InspectorControlButton(name: "\(title) font", selected: model.style.fontName == name, action: {
-            model.applyStyle { $0.fontName = name }
+    private func fontChoice(_ choice: TextFontChoice) -> some View {
+        InspectorControlButton(name: "\(choice.title) font", selected: model.style.fontName == choice.rawValue, action: {
+            model.applyStyle { $0.fontName = choice.rawValue }
         }) {
-            Text("Aa").font(.system(size: 17, design: design))
+            Text("Aa").font(choice.sample(size: 17))
         }
     }
     private func styleEditing(_ editing: Bool) {

@@ -1,5 +1,6 @@
-// Pixel ports of apps/macos/Tests/RenderingTests/RenderingTests.swift, ArrowHeadSizeTests.swift and EditableStyleRenderingTests.swift:
-// the checks the scene-geometry port deferred because they need real pixels. They render on WARP with the Mac's
+// Pixel ports of apps/macos/Tests/RenderingTests/RenderingTests.swift, ArrowHeadSizeTests.swift, EditableStyleRenderingTests.swift
+// and SystemShapeAndLabelTests.swift's handwriting ink test: the checks the scene-geometry port deferred because they need real
+// pixels. They render on WARP with the Mac's
 // tolerances; they are regression checks, not parity evidence (that needs the Mac corpus, plan task M-1).
 using Annotator.Core;
 using Annotator.Core.Geometry;
@@ -208,6 +209,41 @@ public sealed class MacRenderingTests
                 Assert.Equal(0, Pixels.Painted(result));
             }
         }
+    }
+
+    [Fact]
+    public void HandwritingInkPastItsFrameIsPainted()
+    {
+        // SystemShapeAndLabelTests.swift handwritingInkPastItsFrameIsPaintedAndRedrawn: Caveat leans, so the "?" ends about
+        // 0.16 em right of the box the text is measured in. A gradient paints the same letters, to their last pixel, and the
+        // redraw area holds them.
+        var style = new Style { FontName = HandwritingFont.Name, FontSize = 100 };
+        Size size = TextLayout.ContentSize("why the dip?", TextFont.Resolve(style), Warp.Measurer);
+        var text = new Element(Tool.Text, new Rect(20, 20, size.Width, size.Height), text: "why the dip?", style: style);
+        var canvas = new Size(Math.Floor(text.Frame.MaxX) + 80, Math.Floor(text.Frame.MaxY) + 40);
+        using var exporter = Warp.Exporter();
+        int solid = RightmostInk(exporter.Image(ElementList.Create([text]), canvas));
+        Assert.True(solid > text.Frame.MaxX + 8, $"The ink ends at {solid}, {solid - text.Frame.MaxX:F1} points past the frame.");
+        Element painted = text;
+        painted.Style.SetGradient(new ColorGradient([new RGBA(1, 0, 0), new RGBA(0, 0, 1)]), fill: false);
+        Assert.Equal(solid, RightmostInk(exporter.Image(ElementList.Create([painted]), canvas)));
+        Assert.True(Warp.Builder().DrawingBounds(text).MaxX >= solid + 1, "The redraw area holds the last letter.");
+    }
+
+    /// <summary>The last column with any ink.</summary>
+    private static int RightmostInk(RasterImage image)
+    {
+        for (int x = image.Width - 1; x >= 0; x--)
+        {
+            for (int y = 0; y < image.Height; y++)
+            {
+                if (image[x, y].Alpha > 0)
+                {
+                    return x;
+                }
+            }
+        }
+        throw new InvalidOperationException("No ink.");
     }
 
     [Fact]

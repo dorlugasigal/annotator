@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 import AnnotationCore
 import PresentationRendering
@@ -237,42 +238,88 @@ struct InspectorControlButton<Content: View>: View {
     }
 }
 
-/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice and moves to the next
-/// one on each click. The dots show where you are; the context menu and VoiceOver's adjust actions reach every choice.
-struct CycleOptions<Value: Equatable>: View {
+/// The text tool's fonts, in the order the Font property shows them. The raw value is the saved font name.
+enum TextFontChoice: String, CaseIterable {
+    case system, monospace, handwriting
+
+    /// "System", "Mono" or "Handwriting".
+    var title: String { PropertyChoice.font.choices[Self.allCases.firstIndex(of: self) ?? 0] }
+
+    /// The choice a saved font name shows as; an unknown name draws in the system font.
+    static func current(_ fontName: String) -> TextFontChoice { TextFontChoice(rawValue: fontName) ?? .system }
+
+    /// The font of the choice's "Aa" sample. Caveat's letters are small for their size, so its sample is larger and bold.
+    func sample(size: CGFloat) -> Font {
+        switch self {
+        case .system: return .system(size: size)
+        case .monospace: return .system(size: size, design: .monospaced)
+        case .handwriting:
+            var style = Style()
+            style.fontName = rawValue
+            style.fontSize = size + 6
+            style.bold = true
+            return Font(NativeTextFont.resolve(style) as CTFont)
+        }
+    }
+}
+
+/// One button for a property with a few choices, such as Solid, Dashed and Dotted: a button that goes to the next one on
+/// each click (`CycleOptions`, the default), or a menu of them (`ChoiceMenu`), as Settings > Toolbar > Your properties
+/// chooses.
+struct ChoiceButton<Value: Equatable>: View {
+    let style: PropertyChoiceStyle
+    var model: WorkspaceModel?
     let name: String
-    let values: [(value: Value, label: String, sample: CycleSample)]
+    let values: [(value: Value, label: String, sample: InspectorChoiceFace)]
     let selection: Value
     let update: (Value) -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    enum CycleSample {
-        case sample(InspectorSample)
-        case symbol(String)
-        case text(String, Font.Design)
-    }
-
-    init(name: String, values: [(Value, String, InspectorSample)], selection: Value, update: @escaping (Value) -> Void) {
-        self.init(name: name, choices: values.map { ($0.0, $0.1, CycleSample.sample($0.2)) },
+    init(style: PropertyChoiceStyle, model: WorkspaceModel? = nil, name: String, values: [(Value, String, InspectorSample)],
+         selection: Value, update: @escaping (Value) -> Void) {
+        self.init(style: style, model: model, name: name, choices: values.map { ($0.0, $0.1, .sample($0.2)) },
                   selection: selection, update: update)
     }
 
-    init(name: String, choices: [(Value, String, CycleSample)], selection: Value, update: @escaping (Value) -> Void) {
+    init(style: PropertyChoiceStyle, model: WorkspaceModel? = nil, name: String,
+         choices: [(Value, String, InspectorChoiceFace)], selection: Value, update: @escaping (Value) -> Void) {
+        self.style = style
+        self.model = model
         self.name = name
         self.values = choices.map { (value: $0.0, label: $0.1, sample: $0.2) }
         self.selection = selection
         self.update = update
     }
 
+    var body: some View {
+        if style == .menu {
+            ChoiceMenu(model: model, name: name, values: values, selection: selection, update: update)
+        } else {
+            CycleOptions(name: name, values: values, selection: selection, update: update)
+        }
+    }
+}
+
+/// The steps between a property's choices: the next one after `index`, or the one before, wrapping around.
+private func step(_ index: Int, by offset: Int, in count: Int) -> Int { ((index + offset) % count + count) % count }
+
+/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice and moves to the next
+/// one on each click. The dots show where you are; the context menu and VoiceOver's adjust actions reach every choice.
+struct CycleOptions<Value: Equatable>: View {
+    let name: String
+    let values: [(value: Value, label: String, sample: InspectorChoiceFace)]
+    let selection: Value
+    let update: (Value) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var index: Int { values.firstIndex { $0.value == selection } ?? 0 }
-    private var next: Int { (index + 1) % values.count }
+    private var next: Int { step(index, by: 1, in: values.count) }
 
     var body: some View {
         let current = values[index]
         InspectorControlButton(name: name, help: "\(name): \(current.label). Click for \(values[next].label.lowercased()).",
                                action: { choose(next) }) {
             ZStack {
-                face(current.sample)
+                current.sample
                     .id(index)
                     .transition(reduceMotion ? .opacity : .asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -295,7 +342,7 @@ struct CycleOptions<Value: Equatable>: View {
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: choose(next)
-            case .decrement: choose((index + values.count - 1) % values.count)
+            case .decrement: choose(step(index, by: -1, in: values.count))
             @unknown default: break
             }
         }
@@ -309,17 +356,112 @@ struct CycleOptions<Value: Equatable>: View {
         }
     }
 
-    @ViewBuilder private func face(_ sample: CycleSample) -> some View {
-        switch sample {
-        case .sample(let sample): InspectorSampleView(sample: sample).allowsHitTesting(false)
-        case .symbol(let name): Image(systemName: name).font(.system(size: 15))
-        case .text(let text, let design): Text(text).font(.system(size: 16, design: design))
+    private func choose(_ position: Int) {
+        guard values.indices.contains(position), position != index else { return }
+        update(values[position].value)
+    }
+}
+
+/// One button for a few choices, such as Solid, Dashed and Dotted: it shows the current choice with a small chevron,
+/// and a click opens a column of every choice, each drawn as it looks. The current one has the accent outline; choosing
+/// one closes the column, as do hiding Annotator and drawing. VoiceOver's adjust actions step through the choices.
+struct ChoiceMenu<Value: Equatable>: View {
+    var model: WorkspaceModel?
+    let name: String
+    let values: [(value: Value, label: String, sample: InspectorChoiceFace)]
+    let selection: Value
+    let update: (Value) -> Void
+    @State private var open = false
+
+    private var index: Int { values.firstIndex { $0.value == selection } ?? 0 }
+
+    /// "Pattern: Solid. Click to see all choices."
+    static func help(name: String, current: String) -> String { "\(name): \(current). Click to see all choices." }
+
+    var body: some View {
+        let current = values[index]
+        let help = Self.help(name: name, current: current.label)
+        InspectorControlButton(name: name, selected: open, help: help, action: { open.toggle() }) {
+            ZStack {
+                current.sample
+                Image(systemName: "chevron.down").font(.system(size: 6, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 2.5)
+                    .accessibilityHidden(true)
+            }
+        }
+        .accessibilityValue(current.label)
+        .accessibilityHint(help)
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: choose(step(index, by: 1, in: values.count))
+            case .decrement: choose(step(index, by: -1, in: values.count))
+            @unknown default: break
+            }
+        }
+        .onReceive(model?.$workspaceHidden.eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()) { hidden in
+            if hidden { open = false }
+        }
+        .onReceive(model?.canvasInteraction.eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()) { open = false }
+        .popover(isPresented: $open, arrowEdge: .bottom) {
+            ChoicePalette(name: name, values: values.map { ($0.label, $0.sample) }, selected: index) { position in
+                open = false
+                choose(position)
+            }
         }
     }
 
     private func choose(_ position: Int) {
         guard values.indices.contains(position), position != index else { return }
         update(values[position].value)
+    }
+}
+
+/// How a choice looks on its button: a drawn sample, a symbol or a few letters.
+enum InspectorChoiceFace: View {
+    case sample(InspectorSample)
+    case symbol(String)
+    case text(String, Font)
+
+    var body: some View {
+        switch self {
+        case .sample(let sample): InspectorSampleView(sample: sample).allowsHitTesting(false)
+        case .symbol(let name): Image(systemName: name).font(.system(size: 15))
+        case .text(let text, let font): Text(text).font(font)
+        }
+    }
+}
+
+/// ChoiceMenu's column: every choice drawn as it looks, named for VoiceOver and in its tooltip.
+struct ChoicePalette: View {
+    let name: String
+    let values: [(label: String, sample: InspectorChoiceFace)]
+    let selected: Int
+    let choose: (Int) -> Void
+    @FocusState private var focused: Int?
+
+    var body: some View {
+        VStack(spacing: 5) {
+            ForEach(values.indices, id: \.self) { position in
+                InspectorControlButton(name: values[position].label, selected: position == selected,
+                                       action: { choose(position) }) { values[position].sample }
+                .focused($focused, equals: position)
+            }
+        }
+        .padding(8)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(name)
+        .onAppear { focused = selected }
+        .onExitCommand { choose(selected) }
+        .onMoveCommand { direction in
+            let current = focused ?? selected
+            switch direction {
+            case .up: focused = (current + values.count - 1) % values.count
+            case .down: focused = (current + 1) % values.count
+            default: break
+            }
+        }
     }
 }
 

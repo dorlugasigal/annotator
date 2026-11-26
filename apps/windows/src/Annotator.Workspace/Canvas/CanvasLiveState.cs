@@ -165,8 +165,10 @@ public sealed record CanvasTextSession(Guid ElementId, bool IsLabel, string Text
     public double FirstBaseline(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        double size = TextFont.Resolve(Style).Size;
-        return IsLabel ? MacTextMetrics.CenteredFirstBaseline(Frame, text, size) : MacTextMetrics.FirstBaseline(Frame, size);
+        TextFont font = TextFont.Resolve(Style);
+        return IsLabel
+            ? MacTextMetrics.CenteredFirstBaseline(Frame, text, font.Size, font.Design)
+            : MacTextMetrics.FirstBaseline(Frame, font.Size, font.Design);
     }
 }
 
