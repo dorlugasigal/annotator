@@ -26,11 +26,6 @@ whatever you're showing. Every mark stays editable.
 
 </div>
 
-https://github.com/user-attachments/assets/b87f25bf-7f11-4e36-8000-47584de43221
-
-<p align="center"><sub>Recorded in the real Mac app, with a scripted pointer and made-up sample apps.<br>
-Music: “Product Launch Advertising Commercial Music” by lNPLUSMUSIC, from Pixabay.</sub></p>
-
 > [!NOTE]
 > Annotator hasn't reached 1.0 yet. Expect rough edges, and please
 > [tell us about them](https://github.com/dorlugasigal/annotator/issues/new/choose).
@@ -194,7 +189,7 @@ Every tool in Annotator is free, and it stays that way. If it helps you explain
 things a little faster, a coffee helps keep new releases coming.
 
 <p align="center">
-  <a href="https://buymeacoffee.com/dorlugasigal"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000" height="44" alt="Buy me a coffee"></a>
+  <a href="https://buymeacoffee.com/dorlugasigal"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60" alt="Buy me a coffee"></a>
 </p>
 
 ## License
