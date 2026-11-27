@@ -7,8 +7,9 @@
   </picture>
 </a>
 
-A free, open-source app for macOS and Windows that lets you draw right on top of
-whatever you're showing. Every mark stays editable.
+Draw on top of anything while you share your screen. Circle the number, point
+at the button, highlight the line. Annotator is free, open source and native on
+macOS and Windows, and every mark stays editable.
 
 [**Download**](https://getannotator.app/downloads/) &nbsp;·&nbsp;
 [**Try it in your browser**](https://getannotator.app/#try) &nbsp;·&nbsp;
@@ -27,12 +28,14 @@ whatever you're showing. Every mark stays editable.
 </div>
 
 > [!NOTE]
-> Annotator hasn't reached 1.0 yet. Expect rough edges, and please
-> [tell us about them](https://github.com/dorlugasigal/annotator/issues/new/choose).
+> Heads up, Annotator isn't at 1.0 yet, so you'll hit a rough edge here and
+> there. When you do, [tell me about it](https://github.com/dorlugasigal/annotator/issues/new/choose)
+> and I'll take a look.
 
 ## Keys
 
-The first three are all you need to start.
+You only need the first three to get going. The other two are there when you
+want them.
 
 | | Mac | Windows |
 | --- | :---: | :---: |
@@ -42,12 +45,13 @@ The first three are all you need to start.
 | Zoom in around the pointer | <kbd>⌃1</kbd> | <kbd>Ctrl+1</kbd> |
 | Open the tool library while drawing | <kbd>⌘L</kbd> | <kbd>Ctrl+L</kbd> |
 
-Change any of them in Settings > Toolbar & Shortcuts.
+Don't like them? Change any key in Settings > Toolbar & Shortcuts.
 
 ## What you can do
 
-Pick a tool, draw over any app, then keep clicking around in that app. You can
-move, restyle or undo every mark later.
+Pick a tool and draw over whatever you're showing. The app underneath keeps
+working, so you can click around between marks, and you can move, restyle or
+undo any mark later.
 
 <table>
 <tr>
@@ -86,14 +90,17 @@ Soften a busy picture. It isn't secure redaction.
 </tr>
 </table>
 
-That's 6 of more than 40 tools. There are also shapes, diagram icons, screen
+Those are 6 of the 40-plus tools. There are also shapes, diagram icons, screen
 zoom, a pointer lens, Pixelate, numbered counters, a pixel ruler, pasted images
-and your own saved shapes. You can share just part of a display in its own
-window, or start a break timer before you step away. An AI app with
-computer-use tools can drive Annotator through its normal interface
-([AI control](docs/ai-control.md)).
+and shapes you save yourself. You can share just one part of a display in its
+own window, or start a break timer before you go and grab a coffee.
+
+If you use an AI app with computer-use tools, it can drive Annotator through the
+normal app, the same way you would ([AI control](docs/ai-control.md)).
 
 ## Install
+
+Pick your platform and you're a minute away from drawing.
 
 | | Mac | Windows |
 | --- | --- | --- |
@@ -103,25 +110,26 @@ computer-use tools can drive Annotator through its normal interface
 | **Lives in** | The menu bar | The system tray, near the clock |
 | **Updates** | By itself, from Applications | Through the Store |
 
-With Homebrew, update with `brew upgrade --cask dorlugasigal/annotator/annotator`.
+Installed with Homebrew? Update with `brew upgrade --cask dorlugasigal/annotator/annotator`.
 On Windows, `winget install DorLugasiGal.Annotator` (without the Store) will work
-once the package is accepted into winget's catalog.
+as soon as winget accepts the package into its catalog.
 
-## Privacy
+## Privacy, in plain words
 
-- No account. Your drawings, screen and keystrokes stay on your computer.
-- Drawing needs no permissions. Zoom and live effects read the screen only while they run, and nothing is recorded.
-- Usage counts are off unless you turn them on. They never include drawings, screenshots or text.
-- Share your whole screen and others see your drawings. App or window sharing may leave them out, so ask someone on the call.
-- Blur, Pixelate and Distort can leave details readable. Hiding or quitting Annotator removes them.
+- There's no account. Your drawings, your screen and your keystrokes stay on your computer.
+- Drawing needs no permissions. Zoom and live effects read the screen only while they run, and Annotator records nothing.
+- Usage counts are off until you turn them on, and even then they never include drawings, screenshots or text.
+- If you share your whole screen, people see your drawings. App or window sharing may leave them out, so ask someone on the call what they see.
+- Blur, Pixelate and Distort can leave details readable, so don't count on them to hide secrets. Hiding or quitting Annotator removes them.
 
-More in [Privacy](https://getannotator.app/privacy/) and
+The details are in [Privacy](https://getannotator.app/privacy/) and
 [screen-sharing limits](docs/compatibility.md).
 
 ## Build it yourself
 
-One repository, two native apps. The Mac app is the reference, and the Windows
-app matches it ([parity](docs/parity.md)).
+Want to poke around the code? Both apps live in this repository. The Mac app is
+the reference, and the Windows app is checked against it so the two behave the
+same ([parity](docs/parity.md)).
 
 ```mermaid
 flowchart LR
@@ -158,7 +166,9 @@ npm --prefix website ci && npm --prefix website run build && npm --prefix websit
 ```
 </details>
 
-Development builds are called **Annotator Dev** and never replace a release.
+Your own builds are called **Annotator Dev**, so they never replace the real app.
+
+Here's where things live:
 
 | Path | What's there |
 | --- | --- |
@@ -171,24 +181,30 @@ Development builds are called **Annotator Dev** and never replace a release.
 | [`docs`](docs/README.md) | Architecture, parity, releasing and maintainer guides |
 | [`releases`](releases) | Release notes and release settings |
 
-New here? Start with [docs/architecture.md](docs/architecture.md).
+New here? [docs/architecture.md](docs/architecture.md) is the best place to start.
 
-## Contributing
+## Come build it with me
 
-Bug reports, ideas and pull requests are all welcome. Read
-[CONTRIBUTING.md](CONTRIBUTING.md) first: every visible change ships on both
-Mac and Windows, and every pull request names its issue.
+I'd love your help. A bug report, a fix for a typo, an idea for a new tool or a
+whole pull request, it all counts.
 
-- Want something small? Try a [good first issue](https://github.com/dorlugasigal/annotator/labels/good%20first%20issue)
-  or one marked [help wanted](https://github.com/dorlugasigal/annotator/labels/help%20wanted).
-- Questions and ideas go to [Discussions](https://github.com/dorlugasigal/annotator/discussions).
-- Found a security problem? Report it privately ([SECURITY.md](SECURITY.md)).
-- Need help with the app? See [SUPPORT.md](SUPPORT.md).
+Have a look at [CONTRIBUTING.md](CONTRIBUTING.md) before your first pull
+request. There's one big rule: every visible change ships on both Mac and
+Windows. Only have one of them? That's fine. Say so in your pull request, and a
+maintainer or another contributor will finish the other side before it ships.
+Every pull request also links the issue it fixes.
 
-## ☕ Keep it going
+- Looking for a first task? Try a [good first issue](https://github.com/dorlugasigal/annotator/labels/good%20first%20issue)
+  or anything marked [help wanted](https://github.com/dorlugasigal/annotator/labels/help%20wanted).
+- Got a question or a half-baked idea? Bring it to [Discussions](https://github.com/dorlugasigal/annotator/discussions).
+- Found a security problem? Please report it privately ([SECURITY.md](SECURITY.md)).
+- Stuck with the app itself? Start with [SUPPORT.md](SUPPORT.md).
 
-Every tool in Annotator is free, and it stays that way. If it helps you explain
-things a little faster, a coffee helps keep new releases coming.
+## ☕ Buy me a coffee
+
+Annotator is free, every tool, for everyone, and I'm keeping it that way. If it
+saved you from saying "no, the other button" on a call, a coffee keeps me going
+for the next release.
 
 <p align="center">
   <a href="https://buymeacoffee.com/dorlugasigal"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60" alt="Buy me a coffee"></a>
@@ -196,6 +212,6 @@ things a little faster, a coffee helps keep new releases coming.
 
 ## License
 
-Open source under the [Apache License 2.0](LICENSE). Third-party components keep
-their own licenses ([notices](THIRD_PARTY_NOTICES.md)). The name and icon are
-covered by [TRADEMARK.md](TRADEMARK.md).
+Annotator is open source under the [Apache License 2.0](LICENSE). Third-party
+parts keep their own licenses ([notices](THIRD_PARTY_NOTICES.md)), and the name
+and icon are covered by [TRADEMARK.md](TRADEMARK.md).
