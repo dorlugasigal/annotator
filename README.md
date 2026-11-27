@@ -2,8 +2,8 @@
 
 <a href="https://getannotator.app/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.png">
-    <img src=".github/readme/banner-light.png" width="880" alt="Annotator: Draw on your screen. Circle it, point at it, while you share your screen. An Aurora ring is drawn around the word screen, above Annotator's toolbar.">
+    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.gif">
+    <img src=".github/readme/banner-light.gif" width="880" alt="Annotator: Draw on your screen. Circle it, point at it, while you share your screen. A pointer picks tools in Annotator's toolbar, circles the word screen, points an arrow at it and highlights the line below.">
   </picture>
 </a>
 
@@ -30,15 +30,17 @@ whatever you're showing. Every mark stays editable.
 > Annotator hasn't reached 1.0 yet. Expect rough edges, and please
 > [tell us about them](https://github.com/dorlugasigal/annotator/issues/new/choose).
 
-## Start with three keys
+## Keys
+
+The first three are all you need to start.
 
 | | Mac | Windows |
 | --- | :---: | :---: |
-| ✏️ **Draw** on the screen | <kbd>⌃⇧2</kbd> | <kbd>Ctrl+Shift+2</kbd> |
-| 🖱️ **Use apps** again, drawings stay put | <kbd>Esc</kbd> | <kbd>Esc</kbd> |
-| 👀 **Hide or show** drawings and the toolbar | <kbd>⌃2</kbd> | <kbd>Ctrl+2</kbd> |
-| 🔍 Zoom in around the pointer | <kbd>⌃1</kbd> | <kbd>Ctrl+1</kbd> |
-| 🧰 Open the tool library while drawing | <kbd>⌘L</kbd> | <kbd>Ctrl+L</kbd> |
+| **Draw** on the screen | <kbd>⌃⇧2</kbd> | <kbd>Ctrl+Shift+2</kbd> |
+| **Use apps** again, drawings stay put | <kbd>Esc</kbd> | <kbd>Esc</kbd> |
+| **Hide or show** drawings and the toolbar | <kbd>⌃2</kbd> | <kbd>Ctrl+2</kbd> |
+| Zoom in around the pointer | <kbd>⌃1</kbd> | <kbd>Ctrl+1</kbd> |
+| Open the tool library while drawing | <kbd>⌘L</kbd> | <kbd>Ctrl+L</kbd> |
 
 Change any of them in Settings > Toolbar & Shortcuts.
 
@@ -99,18 +101,19 @@ computer-use tools can drive Annotator through its normal interface
 | **Easiest** | `brew install --cask dorlugasigal/annotator/annotator` | [Microsoft Store](https://apps.microsoft.com/detail/9NMZ345ZJ6JK), or `winget install --id 9NMZ345ZJ6JK --source msstore` |
 | **Or** | The [disk image](https://getannotator.app/downloads/): drag it into Applications | A ZIP from the [latest release](https://github.com/dorlugasigal/annotator/releases) (not code-signed yet, so SmartScreen may warn you) |
 | **Lives in** | The menu bar | The system tray, near the clock |
-| **Updates** | By itself, from Applications. With Homebrew: `brew upgrade --cask dorlugasigal/annotator/annotator` | Through the Store |
+| **Updates** | By itself, from Applications | Through the Store |
 
-`winget install DorLugasiGal.Annotator` (without the Store) will work once the
-package is accepted into winget's catalog.
+With Homebrew, update with `brew upgrade --cask dorlugasigal/annotator/annotator`.
+On Windows, `winget install DorLugasiGal.Annotator` (without the Store) will work
+once the package is accepted into winget's catalog.
 
 ## Privacy
 
-- 🔒 No account. Your drawings, screen and keystrokes stay on your computer.
-- 🎨 Drawing needs no permissions. Zoom and live effects read the screen only while they run, and nothing is recorded.
-- 📊 Usage counts are off unless you turn them on. They never include drawings, screenshots or text.
-- 🖥️ Share your whole screen and others see your drawings. App or window sharing may leave them out, so ask someone on the call.
-- 🌫️ Blur, Pixelate and Distort can leave details readable. Hiding or quitting Annotator removes them.
+- No account. Your drawings, screen and keystrokes stay on your computer.
+- Drawing needs no permissions. Zoom and live effects read the screen only while they run, and nothing is recorded.
+- Usage counts are off unless you turn them on. They never include drawings, screenshots or text.
+- Share your whole screen and others see your drawings. App or window sharing may leave them out, so ask someone on the call.
+- Blur, Pixelate and Distort can leave details readable. Hiding or quitting Annotator removes them.
 
 More in [Privacy](https://getannotator.app/privacy/) and
 [screen-sharing limits](docs/compatibility.md).
