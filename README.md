@@ -3,13 +3,13 @@
 <a href="https://getannotator.app/">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.gif">
-    <img src=".github/readme/banner-light.gif" width="880" alt="Annotator: Draw on your screen. Circle it, point at it, while you share your screen. A pointer picks tools in Annotator's toolbar, circles the word screen, points an arrow at it and highlights the line below.">
+    <img src=".github/readme/banner-light.gif" width="880" alt="Annotator: Draw on your screen. So nobody has to ask “wait, which button?” again. A pointer picks tools in Annotator's toolbar, drags an ellipse around the word screen, clicks an arrow into place and highlights the words wait, which button.">
   </picture>
 </a>
 
-Draw on top of anything while you share your screen. Circle the number, point
-at the button, highlight the line. Annotator is free, open source and native on
-macOS and Windows, and every mark stays editable.
+Draw right on top of whatever you're sharing, so people know where to look.
+Annotator is free, open source and native on macOS and Windows, and every mark
+stays editable.
 
 [**Download**](https://getannotator.app/downloads/) &nbsp;·&nbsp;
 [**Try it in your browser**](https://getannotator.app/#try) &nbsp;·&nbsp;
@@ -90,10 +90,49 @@ Soften a busy picture. It isn't secure redaction.
 </tr>
 </table>
 
-Those are 6 of the 40-plus tools. There are also shapes, diagram icons, screen
-zoom, a pointer lens, Pixelate, numbered counters, a pixel ruler, pasted images
-and shapes you save yourself. You can share just one part of a display in its
-own window, or start a break timer before you go and grab a coffee.
+### And a few more
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/zoom-dark.webp">
+  <img src=".github/readme/zoom-light.webp" width="100%" alt="The screen zooms in where the pointer is, with a small map in the corner.">
+</picture><br>
+<b>Zoom in</b> &nbsp;<kbd>⌃1</kbd> · <kbd>Ctrl+1</kbd><br>
+Zoom in where your pointer is, so the small stuff is easy to read. A little map shows where you are.
+</td>
+<td width="50%" valign="top">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/shapes-dark.webp">
+  <img src=".github/readme/shapes-light.webp" width="100%" alt="A database and a server are picked from the tools window and joined with an arrow.">
+</picture><br>
+<b>Shapes and icons</b> &nbsp;<kbd>⌘L</kbd> · <kbd>Ctrl+L</kbd><br>
+Grab a database, a server or any other icon from the tool library, then join them up with an arrow.
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/share-dark.webp">
+  <img src=".github/readme/share-light.webp" width="100%" alt="One area of a wide screen opens in its own window.">
+</picture><br>
+<b>Share just one part</b><br>
+Put one area of a wide screen in its own window, then share only that window. Handy on an ultrawide.
+</td>
+<td width="50%" valign="top">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/break-dark.webp">
+  <img src=".github/readme/break-light.webp" width="100%" alt="A big countdown fills the screen.">
+</picture><br>
+<b>Take a break</b> &nbsp;<kbd>⌃3</kbd> · <kbd>Ctrl+3</kbd><br>
+A big countdown fills the screen, so everyone knows when to come back. Go get that coffee.
+</td>
+</tr>
+</table>
+
+There's also a pointer lens, Pixelate, numbered counters, a pixel ruler, pasted
+images and shapes you save yourself, more than 40 tools in all.
 
 If you use an AI app with computer-use tools, it can drive Annotator through the
 normal app, the same way you would ([AI control](docs/ai-control.md)).
