@@ -124,7 +124,6 @@ app matches it ([parity](docs/parity.md)).
 flowchart LR
   mac["apps/macos<br>Swift, the reference"] -- generates --> ref["reference<br>conformance + UX reference"]
   ref -- checked by --> win["apps/windows<br>C#, WinUI 3, Native AOT"]
-  site["website<br>getannotator.app"]
 ```
 
 <details open>
